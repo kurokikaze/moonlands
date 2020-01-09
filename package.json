@@ -1,0 +1,17 @@
+{
+  "name": "moonlands",
+  "version": "0.0.1",
+  "description": "Magi Nation Duels engine",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "ccg"
+  ],
+  "author": "kurokikaze@yandex.ru",
+  "license": "MIT"
+}
