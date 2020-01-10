@@ -1,9 +1,4 @@
 const {
-    // REGION_ARDERIAL,
-    // REGION_CALD,
-    // REGION_NAROOM,
-    // REGION_OROTHE,
-    // REGION_UNDERNEATH,
     TYPE_CREATURE,
     TYPE_MAGI,
     TYPE_RELIC,
@@ -20,6 +15,7 @@ const {CardInGame} = require('./cards');
 
 const ACTION_PASS = 'actions/pass';
 const ACTION_PLAY = 'actions/play';
+const ACTION_POWER = 'actions/power';
 const ACTION_EFFECT = 'actions/effect';
 
 // Создаём перманент. id записывается в meta
@@ -32,6 +28,8 @@ const EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE = 'effects/paying_energy_for_creatu
 const EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE = 'effects/starting_energy_on_creature';
 // Просто добавляем энергию на существо
 const EFFECT_TYPE_ADD_ENERGY_TO_CREATURE = 'effects/add_energy_to_creature';
+const EFFECT_TYPE_ADD_ENERGY_TO_MAGI = 'effects/add_energy_to_magi';
+const EFFECT_TYPE_ENERGIZE = 'effects/energize';
 
 const NO_PRIORITY = 0;
 const PRIORITY_PRS = 1;
@@ -172,6 +170,16 @@ class State {
                     break;
                 case ACTION_EFFECT:
                     switch(action.effectType) {
+                        case EFFECT_TYPE_ENERGIZE:
+                            const amount = action.target.card.data.energize;
+                            const type = action.target.card.type;
+                            this.actions.push({
+                                type: ACTION_EFFECT,
+                                effectType: (type == TYPE_CREATURE) ? EFFECT_TYPE_ADD_ENERGY_TO_CREATURE : EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+                                target: action.target,
+                                amount,
+                            });
+                            break;
                         case EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE:
                             action.from.card.removeEnergy(action.amount);
                             break;
@@ -199,6 +207,9 @@ class State {
                         case EFFECT_TYPE_ADD_ENERGY_TO_CREATURE:
                             action.target.addEnergy(action.amount);
                             break;
+                        case EFFECT_TYPE_ADD_ENERGY_TO_MAGI:
+                            action.target.addEnergy(action.amount);
+                            break;
                     }
                     break;
             };
@@ -210,8 +221,10 @@ module.exports = {
     State,
     ACTION_PASS,
     ACTION_PLAY,
+    ACTION_EFFECT,
     NO_PRIORITY,
     PRIORITY_PRS,
     PRIORITY_ATTACK,
     PRIORITY_CREATURES,
+    EFFECT_TYPE_ENERGIZE,
 };

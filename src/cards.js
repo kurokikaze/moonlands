@@ -6,6 +6,7 @@ const {
     REGION_NAROOM,
     REGION_OROTHE,
     REGION_UNDERNEATH,
+    REGION_BOGRATH,
     TYPE_CREATURE,
     TYPE_MAGI,
     TYPE_RELIC,
@@ -59,6 +60,7 @@ const cards = [
         startingCards: ['Arbolit', 'Quor Pup', 'Fire Flow'],
     }),
     new Card('Arbolit', TYPE_CREATURE, REGION_CALD, 2),
+    new Card('Green Stuff', TYPE_CREATURE, REGION_BOGRATH, 0, {energize: 1}),
     new Card('Quor Pup', TYPE_CREATURE, REGION_CALD, 2),
     new Card('Fire Flow', TYPE_SPELL, REGION_CALD, 1),
     new Card('Yaki', TYPE_MAGI, REGION_NAROOM, null, {

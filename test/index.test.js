@@ -62,6 +62,63 @@ describe('Updating state with action', () => {
     });
 });
 
+describe('Magi stuff', () => {
+    it('Energizing', () => {
+        const activePlayer = 0;
+        const startingEnergy = 10;
+
+        const grega = new CardInGame(byName('Grega'), activePlayer);
+        grega.addEnergy(startingEnergy);
+
+        const zones = [
+            new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, activePlayer).add([grega]),
+        ];
+
+        const gameState = new moonlands.State({
+            zones,
+            step: 0,
+            getActivePlayer: 0,
+        });
+        
+        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(startingEnergy, "Grega's Energy is 10");
+
+        gameState.update({
+            type: moonlands.ACTION_EFFECT,
+            target: grega,
+            effectType: moonlands.EFFECT_TYPE_ENERGIZE,
+        });
+
+        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(15, "Grega's energy is 15 after energizing");
+    });
+
+
+    it('Energizing a creature', () => {
+        const activePlayer = 0;
+
+        const greenStuff = new CardInGame(byName('Green Stuff'), activePlayer);
+
+        const zones = [
+            new Zone('Active player current magi', ZONE_TYPE_IN_PLAY).add([greenStuff]),
+        ];
+
+        const gameState = new moonlands.State({
+            zones,
+            step: 0,
+            getActivePlayer: 0,
+        });
+        
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(0, "Green Stuff's Energy is 0");
+
+        gameState.update({
+            type: moonlands.ACTION_EFFECT,
+            target: greenStuff,
+            effectType: moonlands.EFFECT_TYPE_ENERGIZE,
+        });
+
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(1, "Green Stuff's energy is 1 after energizing");
+    });
+});
+
 describe('Casting things', () => {
     it('Creating and getting zones', () => {
         const grega = new CardInGame(byName('Grega', 0));
