@@ -13,5 +13,11 @@
     "ccg"
   ],
   "author": "kurokikaze@yandex.ru",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "jest": "^24.9.0"
+  },
+  "dependencies": {
+    "nanoid": "^2.1.9"
+  }
 }
