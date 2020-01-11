@@ -121,7 +121,7 @@ describe('Magi stuff', () => {
 
 describe('Prompts', () => {
     it('Prompt should save actions for later', () => {
-        const arbolit = new CardInGame(byName('Arbolit', 0));
+        const arbolit = new CardInGame(byName('Arbolit'), 0);
         const zones = [
             new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
         ];
@@ -152,7 +152,7 @@ describe('Prompts', () => {
     });
 
     it('Resolving prompt should resume and apply saved actions', () => {
-        const arbolit = new CardInGame(byName('Arbolit', 0));
+        const arbolit = new CardInGame(byName('Arbolit'), 0);
 
         const zones = [
             new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
@@ -205,7 +205,7 @@ describe('Prompts', () => {
     it('Resolving prompt saves number for future action', () => {
         const PROMPTED_NUMBER = 4;
 
-        const arbolit = new CardInGame(byName('Arbolit', 0));
+        const arbolit = new CardInGame(byName('Arbolit'), 0);
 
         const zones = [
             new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
@@ -305,7 +305,7 @@ describe('Prompts', () => {
 describe('Effects', () => {
     it('Discard creature from play [EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY]', () => {
         const activePlayer = 0;
-        const arbolit = new CardInGame(byName('Arbolit', activePlayer));
+        const arbolit = new CardInGame(byName('Arbolit'), activePlayer);
 
         const zones = [
             new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
@@ -335,7 +335,7 @@ describe('Effects', () => {
 
     it('Add energy to creature [EFFECT_TYPE_ADD_ENERGY_TO_CREATURE]', () => {
         const activePlayer = 0;
-        const arbolit = new CardInGame(byName('Arbolit', activePlayer));
+        const arbolit = new CardInGame(byName('Arbolit'), activePlayer);
 
         const addEnergyEffect = {
             type: moonlands.ACTION_EFFECT,
@@ -357,7 +357,7 @@ describe('Effects', () => {
 
     it('Discard energy from creature [EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE]', () => {
         const activePlayer = 0;
-        const arbolit = new CardInGame(byName('Arbolit', activePlayer));
+        const arbolit = new CardInGame(byName('Arbolit'), activePlayer);
         arbolit.addEnergy(5);
 
         const discardEnergyEffect = {
@@ -376,6 +376,36 @@ describe('Effects', () => {
         gameState.update(discardEnergyEffect);
 
         expect(arbolit.data.energy).toEqual(3, 'Arbolit has 3 energy');
+    });
+
+    it('Putting creature into play [EFFECT_TYPE_PLAY_CREATURE]', () => {
+        const activePlayer = 0;
+        const arbolit = byName('Arbolit');
+
+        const zones = [
+            new Zone('In play', ZONE_TYPE_IN_PLAY, null),
+        ];
+
+        const playCreatureEffect = {
+            type: moonlands.ACTION_EFFECT,
+            effectType: moonlands.EFFECT_TYPE_PLAY_CREATURE,
+            card: arbolit,
+            player: activePlayer,
+            generatedBy: 12345,
+        };
+
+        const gameState = new moonlands.State({
+            zones,
+            step: 3,
+            activePlayer,
+        });
+
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'Nothing in play');
+
+        gameState.update(playCreatureEffect);
+
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One card in play');
+        expect(gameState.getSpellMetaData(12345).creature_created).toEqual(gameState.getZone(ZONE_TYPE_IN_PLAY).card.id, 'Id saved in metadata');
     });
 });
 
