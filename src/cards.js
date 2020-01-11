@@ -29,9 +29,12 @@ const {
     EFFECT_TYPE_ENERGIZE,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
     EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+    EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
 
     PROMPT_TYPE_SINGLE_CREATURE,
     PROMPT_TYPE_NUMBER,
+
+    RESTRICTION_ENERGY_LESS_THAN_STARTING,
 } = require('./const');
 
 class Card {
@@ -79,6 +82,7 @@ class CardInGame {
 const power = (name, effects) => ({
     name,
     effects,
+    cost: 0,
 });
 
 const effect = (data) => ({
@@ -121,7 +125,25 @@ const cards = [
         startingCards: ['Arboll', 'Weebo', 'Furok', 'Grow'],
     }),
     new Card('Arboll', TYPE_CREATURE, REGION_NAROOM, 3),
-    new Card('Weebo', TYPE_CREATURE, REGION_NAROOM, 2),
+    new Card('Weebo', TYPE_CREATURE, REGION_NAROOM, 2, {
+        powers: [
+            {
+                name: 'Vitalize',
+                cost: 2,
+                effects: [
+                    {
+                        type: ACTION_ENTER_PROMPT,
+                        promptType: PROMPT_TYPE_SINGLE_CREATURE,
+                        targetRestriction: RESTRICTION_ENERGY_LESS_THAN_STARTING,
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
+                        target: '$target',
+                    }),
+                ],
+            },
+        ],
+    }),
     new Card('Furok', TYPE_CREATURE, REGION_NAROOM, 4),
     new Card('Grow', TYPE_SPELL, REGION_NAROOM, 3),
 ]

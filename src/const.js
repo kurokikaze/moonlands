@@ -25,6 +25,8 @@ const EFFECT_TYPE_ADD_ENERGY_TO_MAGI = 'effects/add_energy_to_magi';
 const EFFECT_TYPE_ENERGIZE = 'effects/energize';
 const EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE = 'effects/discard_energy_from_creature';
 const EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY = 'effects/discard_creature_from_play';
+const EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY = 'effects/restore_creature_to_starting_energy';
+const EFFECT_TYPE_PAYING_ENERGY_FOR_POWER = 'effects/paying_energy_for_power';
 
 const PROMPT_TYPE_SINGLE_CREATURE = 'prompt/creature';
 const PROMPT_TYPE_SINGLE_CREATURE_FILTERED = 'prompt/creature_filtered';
@@ -34,6 +36,8 @@ const PROMPT_TYPE_SINGLE_MAGI = 'prompt/magi';
 const PROMPT_TYPE_RELIC = 'prompt/relic';
 const PROMPT_TYPE_NUMBER_OF_RELICS = 'prompt/number_of_relics';
 const PROMPT_TYPE_NUMBER = 'prompt/number';
+
+const RESTRICTION_ENERGY_LESS_THAN_STARTING = 'restrictions/energy_less_than_starting';
 
 const TYPE_CREATURE = 'types/creature';
 const TYPE_MAGI = 'types/magi';
@@ -57,6 +61,10 @@ module.exports = {
     EFFECT_TYPE_ENERGIZE,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
     EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+    EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
+    EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
+
+    RESTRICTION_ENERGY_LESS_THAN_STARTING,
 
     PROMPT_TYPE_SINGLE_CREATURE,
     PROMPT_TYPE_SINGLE_CREATURE_FILTERED,

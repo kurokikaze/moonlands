@@ -23,6 +23,8 @@ const {
     EFFECT_TYPE_ENERGIZE,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
     EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+    EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
+    EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
 } = require('./const');
 
 const {
@@ -151,13 +153,22 @@ class State {
                 */
                 case ACTION_POWER:
                     const source = action.source;
-                    const effects = action.effects;
+                    const effects = action.power.effects;
                     const preparedActions = effects.map(effect => ({...effect, generatedBy: source.id}));
+
                     let currentPowerMetaData = {
                         source,
                         sourceCreature: source,
                     }; // No retrieving old metadata from old activations
 
+                    if (action.power.cost > 0) {
+                        this.addActions({
+                            type: ACTION_EFFECT,
+                            effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
+                            target: source,
+                            amount: action.power.cost,
+                        });
+                    }
                     this.addActions(...preparedActions);
                     this.setSpellMetadata(currentPowerMetaData, source.id);
                     break;
@@ -300,6 +311,34 @@ class State {
                             const discardTarget = this.getMetaValue(action.target, action.generatedBy);
                             discardTarget.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
                             break;
+                        case EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY:
+                            const restoreTarget = this.getMetaValue(action.target, action.generatedBy);
+                            const restoreAmount = restoreTarget.card.cost - restoreTarget.data.energy;
+                            if (restoreAmount > 0) {
+                                this.addActions({
+                                    type: ACTION_EFFECT,
+                                    effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+                                    target: restoreTarget,
+                                    amount: restoreAmount,
+                                    player: action.player,
+                                    generatedBy: action.generatedBy,
+                                });
+                            }
+                            break;
+                        case EFFECT_TYPE_PAYING_ENERGY_FOR_POWER:
+                            const payingTarget = this.getMetaValue(action.target, action.generatedBy);
+                            const payingAmount = this.getMetaValue(action.amount, action.generatedBy);
+                            if (payingAmount > 0) {
+                                this.addActions({
+                                    type: ACTION_EFFECT,
+                                    effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                                    target: payingTarget,
+                                    amount: payingAmount,
+                                    player: action.player,
+                                    generatedBy: action.generatedBy,
+                                });
+                            }
+                            break;
                         case EFFECT_TYPE_ADD_ENERGY_TO_CREATURE:
                             const addTarget = this.getMetaValue(action.target, action.generatedBy);
                             addTarget.addEnergy(this.getMetaValue(action.amount, action.generatedBy));
@@ -344,4 +383,5 @@ module.exports = {
     EFFECT_TYPE_ENERGIZE,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
     EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+    EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
 };

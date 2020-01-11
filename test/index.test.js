@@ -368,6 +368,29 @@ describe('Effects', () => {
         expect(arbolit.data.energy).toEqual(2, 'Arbolit has 2 energy');
     });
 
+    it('Restore energy to creature [EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY]', () => {
+        const activePlayer = 0;
+        const arbolit = new CardInGame(byName('Arbolit'), activePlayer);
+        arbolit.addEnergy(1);
+
+        const restoreEnergyEffect = {
+            type: moonlands.ACTION_EFFECT,
+            effectType: moonlands.EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
+            target: arbolit,
+            generatedBy: arbolit.id,
+        };
+
+        const gameState = new moonlands.State({
+            activePlayer,
+        });
+
+        expect(arbolit.data.energy).toEqual(1, 'Arbolit has 1 energy');
+
+        gameState.update(restoreEnergyEffect);
+
+        expect(arbolit.data.energy).toEqual(2, 'Arbolit has 2 energy');
+    });
+
     it('Discard energy from creature [EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE]', () => {
         const activePlayer = 0;
         const arbolit = new CardInGame(byName('Arbolit'), activePlayer);
@@ -423,7 +446,7 @@ describe('Effects', () => {
 });
 
 describe('Activating power', () => {
-    it('Simple power with prompting', () => {
+    it('Simple power with prompting and no cost', () => {
         const ACTIVE_PLAYER = 0;
         const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
         const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER);
@@ -440,8 +463,7 @@ describe('Activating power', () => {
         const powerAction = {
             type: moonlands.ACTION_POWER,
             source: arbolit,
-            name: arbolit.card.data.powers[0].name,
-            effects: arbolit.card.data.powers[0].effects,
+            power: arbolit.card.data.powers[0],
             player: ACTIVE_PLAYER,
         };
 
@@ -462,6 +484,48 @@ describe('Activating power', () => {
         expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
         expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Quor Pup', 'Creature is Quor Pup');
         expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(2, 'Quor Pup has 2 energy');
+    });
+
+    it('Simple power with prompting and cost', () => {
+        const ACTIVE_PLAYER = 0;
+        const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
+        weebo.addEnergy(3);
+        const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER);
+        quorPup.addEnergy(1);
+
+        const gameState = new moonlands.State({
+            zones: [
+                new Zone('Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([weebo, quorPup]),
+            ],
+            step: STEP_PRS_SECOND,
+            activePlayer: ACTIVE_PLAYER,
+        });
+
+        const powerAction = {
+            type: moonlands.ACTION_POWER,
+            source: weebo,
+            power: weebo.card.data.powers[0],
+            player: ACTIVE_PLAYER,
+        };
+
+        const targetingAction = {
+            type: moonlands.ACTION_RESOLVE_PROMPT,
+            promptType: moonlands.PROMPT_TYPE_SINGLE_CREATURE,
+            target: quorPup,
+            generatedBy: weebo.id,            
+        };
+
+        gameState.update(powerAction);
+
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two creatures in play');
+        expect(gameState.state.prompt).toEqual(true, 'Waiting for prompt');
+
+        gameState.update(targetingAction);
+
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two creatures in play');
+        expect(weebo.data.energy).toEqual(1, 'Weebo has 2 energy');
+        expect(quorPup.data.energy).toEqual(2, 'Quor Pup has 2 energy');
     });
 });
 
