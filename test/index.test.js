@@ -1,5 +1,6 @@
 const moonlands = require('../src/index');
 const {CardInGame, byName} = require('../src/cards');
+const {PROMPT_TYPE_SINGLE_CREATURE} = require('../src/const');
 const {
     Zone,
     ZONE_TYPE_ACTIVE_MAGI,
@@ -250,13 +251,18 @@ describe('Prompts', () => {
         });
 
         gameState.update(passAction);
+
         expect(arbolit.data.energy).toEqual(0, 'No energy added to creature');
+        expect(gameState.state.prompt).toEqual(true, 'Game waiting for prompt');
+        expect(gameState.state.promptType).toEqual(moonlands.PROMPT_TYPE_NUMBER, 'Game waiting for numeric prompt');
 
         gameState.update(resolvePromptAction);
 
         expect(gameState.state.actions.length).toEqual(0, 'Queue is empty');
         expect(gameState.state.savedActions.length).toEqual(0, 'No actions saved for later');
         expect(arbolit.data.energy).toEqual(PROMPTED_NUMBER, 'Energy was added to creature');
+        expect(gameState.state.prompt).toEqual(false, 'Game not waiting for prompt anymore');
+        expect(gameState.state.promptType).toEqual(null, 'Game not waiting for any prompt');
     });
 
     it('Resolving prompt saves target for future effect', () => {
@@ -418,15 +424,44 @@ describe('Effects', () => {
 
 describe('Activating power', () => {
     it('Simple power with prompting', () => {
-        const arbolit = new CardInGame(byName('Arbolit'), 0);
+        const ACTIVE_PLAYER = 0;
+        const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
+        const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER);
 
         const gameState = new moonlands.State({
-            zones: [],
+            zones: [
+                new Zone('Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit, quorPup]),
+            ],
             step: STEP_PRS_SECOND,
-            activePlayer: 0,
+            activePlayer: ACTIVE_PLAYER,
         });
 
+        const powerAction = {
+            type: moonlands.ACTION_POWER,
+            source: arbolit,
+            name: arbolit.card.data.powers[0].name,
+            effects: arbolit.card.data.powers[0].effects,
+            player: ACTIVE_PLAYER,
+        };
 
+        const targetingAction = {
+            type: moonlands.ACTION_RESOLVE_PROMPT,
+            promptType: moonlands.PROMPT_TYPE_SINGLE_CREATURE,
+            target: quorPup,
+            generatedBy: arbolit.id,            
+        };
+
+        gameState.update(powerAction);
+
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two creatures in play');
+        expect(gameState.state.prompt).toEqual(true, 'Waiting for prompt');
+
+        gameState.update(targetingAction);
+
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Quor Pup', 'Creature is Quor Pup');
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(2, 'Quor Pup has 2 energy');
     });
 });
 

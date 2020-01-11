@@ -144,18 +144,22 @@ class State {
                 /*
                     {
                         source, # save to meta
+                        name,
                         effects: [],
                         player,
                     }
                 */
                 case ACTION_POWER:
                     const source = action.source;
-                    const effects = actions.effects;
-                    let currentPowerMetaData = {}; // No retrieving old metadata from old activations
-                    const preparedActions = effects.map(effect => ({...effect, generatedBy: source}));
-                    currentPowerMetaData.source = source;
-                    this.addActions(...effects);
-                    this.setSpellMetadata(currentPowerMetaData, source);
+                    const effects = action.effects;
+                    const preparedActions = effects.map(effect => ({...effect, generatedBy: source.id}));
+                    let currentPowerMetaData = {
+                        source,
+                        sourceCreature: source,
+                    }; // No retrieving old metadata from old activations
+
+                    this.addActions(...preparedActions);
+                    this.setSpellMetadata(currentPowerMetaData, source.id);
                     break;
                 case ACTION_ENTER_PROMPT:
                     const savedActions = this.state.actions;
@@ -324,6 +328,7 @@ module.exports = {
     ACTION_EFFECT,
     ACTION_ENTER_PROMPT,
     ACTION_RESOLVE_PROMPT,
+    ACTION_POWER,
     NO_PRIORITY,
     PRIORITY_PRS,
     PRIORITY_ATTACK,
