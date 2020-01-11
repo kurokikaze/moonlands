@@ -17,6 +17,17 @@ const ACTION_PASS = 'actions/pass';
 const ACTION_PLAY = 'actions/play';
 const ACTION_POWER = 'actions/power';
 const ACTION_EFFECT = 'actions/effect';
+const ACTION_ENTER_PROMPT = 'actions/enter_prompt';
+const ACTION_RESOLVE_PROMPT = 'actions/resolve_prompt';
+
+const PROMPT_TYPE_SINGLE_CREATURE = 'prompt/creature';
+const PROMPT_TYPE_SINGLE_CREATURE_FILTERED = 'prompt/creature_filtered';
+const PROMPT_TYPE_NUMBER_OF_CREATURES = 'prompt/number_of_creatures';
+const PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED = 'prompt/number_of_creatures_filtered';
+const PROMPT_TYPE_SINGLE_MAGI = 'prompt/magi';
+const PROMPT_TYPE_RELIC = 'prompt/relic';
+const PROMPT_TYPE_NUMBER_OF_RELICS = 'prompt/number_of_relics';
+const PROMPT_TYPE_NUMBER = 'prompt/number';
 
 // Создаём перманент. id записывается в meta
 const EFFECT_TYPE_PLAY_CREATURE = 'effects/play_creature';
@@ -64,7 +75,11 @@ const steps = [
 ];
 
 const defaultState = {
+    actions: [],
+    savedActions: [],
     activePlayer: 0,
+    prompt: false,
+    promptType: null,
     step: 0,
     zones: [],
     players: [],
@@ -77,7 +92,6 @@ class State {
             ...defaultState,
             ...state,
         };
-        this.actions = [];
     }
 
     getZone(type, player = null) {
@@ -97,15 +111,32 @@ class State {
     }
 
     addActions(actions) {
-        this.actions.push(...arguments);
+        this.state.actions.push(...arguments);
     }
 
     getNextAction() {
-        return this.actions.shift();
+        return this.state.actions.shift();
     }
     
     hasActions() {
-        return this.actions.length > 0;
+        return this.state.actions.length > 0;
+    }
+
+    getSpellMetaData(spellId) {
+        return this.state.spellMetaData[spellId] ? this.state.spellMetaData[spellId] : {};
+    }
+
+    getMetaValue(value, spellId) {
+        if (
+            typeof value == 'string' &&
+            value[0] == '$'
+        ) {
+            const variableName = value.slice(1);
+            const spellMetaData = this.getSpellMetaData(spellId);
+            return spellMetaData[variableName] ? spellMetaData[variableName] : null;
+        } else {
+            return value;
+        }
     }
 
     update(initialAction) {
@@ -114,6 +145,36 @@ class State {
             const action = this.getNextAction();
 
             switch (action.type) {
+                case ACTION_ENTER_PROMPT:
+                    const savedActions = this.state.actions;
+                    this.state = {
+                        ...this.state,
+                        actions: [],
+                        savedActions,
+                        prompt: true,
+                        promptType: action.promptType,
+                    };
+                    break;
+                case ACTION_RESOLVE_PROMPT:
+                    const currentMetaData = this.state.spellMetaData[action.generatedBy] || {};
+                    switch (this.state.promptType) {
+                        case PROMPT_TYPE_NUMBER:
+                            currentMetaData.number = action.number;
+                            break;
+                    }
+                    const actions = this.state.savedActions || [];
+                    this.state = {
+                        ...this.state,
+                        actions,
+                        savedActions: [],
+                        prompt: false,
+                        promptType: null,
+                        spellMetaData: {
+                            ...this.state.spellMetaData,
+                            [action.generatedBy]: currentMetaData,
+                        },
+                    };
+                    break;
                 case ACTION_PASS:
                     const newStep = (this.state.step + 1) % steps.length;
                     let activePlayer = (newStep == 0) ? 1 - this.state.activePlayer : this.state.activePlayer;
@@ -193,7 +254,7 @@ class State {
                             });
                             break;
                         case EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE:
-                            action.from.card.removeEnergy(action.amount);
+                            action.from.card.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
                             break;
                         case EFFECT_TYPE_PLAY_CREATURE:
                             const inPlay = this.getZone(ZONE_TYPE_IN_PLAY);
@@ -212,15 +273,15 @@ class State {
                                 type: ACTION_EFFECT,
                                 effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
                                 target: this.getZone(ZONE_TYPE_IN_PLAY).byId(targetId),
-                                amount: action.amount,
+                                amount: this.getMetaValue(action.amount, action.generatedBy),
                                 generatedBy: action.generatedBy,
                             });
                             break;
                         case EFFECT_TYPE_ADD_ENERGY_TO_CREATURE:
-                            action.target.addEnergy(action.amount);
+                            action.target.addEnergy(this.getMetaValue(action.amount, action.generatedBy));
                             break;
                         case EFFECT_TYPE_ADD_ENERGY_TO_MAGI:
-                            action.target.addEnergy(action.amount);
+                            action.target.addEnergy(this.getMetaValue(action.amount, action.generatedBy));
                             break;
                     }
                     break;
@@ -234,9 +295,13 @@ module.exports = {
     ACTION_PASS,
     ACTION_PLAY,
     ACTION_EFFECT,
+    ACTION_ENTER_PROMPT,
+    ACTION_RESOLVE_PROMPT,
     NO_PRIORITY,
     PRIORITY_PRS,
     PRIORITY_ATTACK,
     PRIORITY_CREATURES,
+    PROMPT_TYPE_NUMBER,
     EFFECT_TYPE_ENERGIZE,
+    EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 };

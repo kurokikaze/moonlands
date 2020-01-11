@@ -119,6 +119,138 @@ describe('Magi stuff', () => {
     });
 });
 
+describe('Prompts', () => {
+    it('Prompt should save actions for later', () => {
+        const arbolit = new CardInGame(byName('Arbolit', 0));
+        const zones = [
+            new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
+        ];
+        const addEnergyAction = {
+            type: moonlands.ACTION_EFFECT,
+            effectType: moonlands.EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+            amount: 2,
+            target: arbolit,
+        };
+
+        const promptAction = {
+            type: moonlands.ACTION_ENTER_PROMPT,
+        };
+
+        const passAction = {type: moonlands.ACTION_PASS};
+
+        const gameState = new moonlands.State({
+            zones,
+            step: 0,
+            getActivePlayer: 0,
+            actions: [promptAction, addEnergyAction],
+        });
+        expect(gameState.state.actions.length).toEqual(2, 'Two actions in queue');
+        gameState.update(passAction);
+        expect(gameState.state.actions.length).toEqual(0, 'Queue is empty');
+        expect(gameState.state.savedActions.length).toEqual(2, 'Two actions saved for later');
+        expect(arbolit.data.energy).toEqual(0, 'No energy added to creature');
+    });
+
+    it('Resolving prompt should resume and apply saved actions', () => {
+        const arbolit = new CardInGame(byName('Arbolit', 0));
+        const zones = [
+            new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
+        ];
+        const addEnergyAction = {
+            type: moonlands.ACTION_EFFECT,
+            effectType: moonlands.EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+            amount: 2,
+            target: arbolit,
+        };
+
+        const promptAction = {
+            type: moonlands.ACTION_ENTER_PROMPT,
+            promptType: moonlands.PROMPT_TYPE_NUMBER,
+        };
+
+        const resolvePromptAction = {
+            type: moonlands.ACTION_RESOLVE_PROMPT,
+            number: 2,
+        };
+
+        const passAction = {
+            type: moonlands.ACTION_PASS,
+
+        };
+
+        const gameState = new moonlands.State({
+            zones,
+            step: 0,
+            getActivePlayer: 0,
+            actions: [promptAction, addEnergyAction],
+        });
+
+        expect(gameState.state.actions.length).toEqual(2, 'Two actions in queue');
+
+        gameState.update(passAction);
+
+        expect(gameState.state.actions.length).toEqual(0, 'Queue is empty');
+        expect(gameState.state.savedActions.length).toEqual(2, 'Two actions saved for later');
+        expect(arbolit.data.energy).toEqual(0, 'No energy added to creature');
+
+        gameState.update(resolvePromptAction);
+
+        expect(gameState.state.actions.length).toEqual(0, 'Queue is empty');
+        expect(gameState.state.savedActions.length).toEqual(0, 'No actions saved for later');
+        expect(arbolit.data.energy).toEqual(2, 'Energy was added to creature');
+    });
+
+    it('Resolving prompt saves number for future action', () => {
+        const PROMPTED_NUMBER = 4;
+
+        const arbolit = new CardInGame(byName('Arbolit', 0));
+
+        const zones = [
+            new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
+        ];
+
+        const addEnergyAction = {
+            type: moonlands.ACTION_EFFECT,
+            effectType: moonlands.EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+            amount: '$number',
+            target: arbolit,
+            generatedBy: 1,
+        };
+
+        const promptAction = {
+            type: moonlands.ACTION_ENTER_PROMPT,
+            promptType: moonlands.PROMPT_TYPE_NUMBER,
+            generatedBy: 1,
+        };
+
+        const resolvePromptAction = {
+            type: moonlands.ACTION_RESOLVE_PROMPT,
+            number: PROMPTED_NUMBER,
+            generatedBy: 1,
+        };
+
+        const passAction = {
+            type: moonlands.ACTION_PASS,
+        };
+
+        const gameState = new moonlands.State({
+            zones,
+            step: 0,
+            getActivePlayer: 0,
+            actions: [promptAction, addEnergyAction],
+        });
+
+        gameState.update(passAction);
+        expect(arbolit.data.energy).toEqual(0, 'No energy added to creature');
+
+        gameState.update(resolvePromptAction);
+
+        expect(gameState.state.actions.length).toEqual(0, 'Queue is empty');
+        expect(gameState.state.savedActions.length).toEqual(0, 'No actions saved for later');
+        expect(arbolit.data.energy).toEqual(PROMPTED_NUMBER, 'Energy was added to creature');
+    });
+});
+
 describe('Casting things', () => {
     it('Creating and getting zones', () => {
         const grega = new CardInGame(byName('Grega', 0));
