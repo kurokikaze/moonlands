@@ -1,16 +1,37 @@
 const nanoid = require('nanoid');
 
 const {
+    ACTION_PASS,
+    ACTION_PLAY,
+    ACTION_POWER,
+    ACTION_EFFECT,
+    ACTION_ENTER_PROMPT,
+    ACTION_RESOLVE_PROMPT,
+    
     REGION_ARDERIAL,
     REGION_CALD,
     REGION_NAROOM,
     REGION_OROTHE,
     REGION_UNDERNEATH,
     REGION_BOGRATH,
+
     TYPE_CREATURE,
     TYPE_MAGI,
     TYPE_RELIC,
     TYPE_SPELL,
+
+    EFFECT_TYPE_PLAY_CREATURE,
+    EFFECT_TYPE_CREATURE_ENTERS_PLAY,
+    EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
+    EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
+    EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+    EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+    EFFECT_TYPE_ENERGIZE,
+    EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+    EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+
+    PROMPT_TYPE_SINGLE_CREATURE,
+    PROMPT_TYPE_NUMBER,
 } = require('./const');
 
 class Card {
@@ -55,13 +76,42 @@ class CardInGame {
     }
 }
 
+const power = (name, effects) => ({
+    name,
+    effects,
+});
+
+const effect = (data) => ({
+    type: ACTION_EFFECT,
+    ...data,
+});
+
 const cards = [
     new Card('Grega', TYPE_MAGI, REGION_CALD, null, {
         startingEnergy: 10,
         energize: 5,
         startingCards: ['Arbolit', 'Quor Pup', 'Fire Flow'],
     }),
-    new Card('Arbolit', TYPE_CREATURE, REGION_CALD, 2),
+    new Card('Arbolit', TYPE_CREATURE, REGION_CALD, 2, {
+        powers: [power(
+            'Healing Flame',
+            [
+                {
+                    type: ACTION_ENTER_PROMPT,
+                    promptType: PROMPT_TYPE_SINGLE_CREATURE,
+                },
+                effect({
+                    effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+                    target: '$sourceCreature',
+                }),
+                effect({
+                    effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+                    target: '$target',
+                    amount: 2,
+                }),
+            ],
+        )],
+    }),
     new Card('Green Stuff', TYPE_CREATURE, REGION_BOGRATH, 0, {energize: 1}),
     new Card('Quor Pup', TYPE_CREATURE, REGION_CALD, 2),
     new Card('Fire Flow', TYPE_SPELL, REGION_CALD, 1),

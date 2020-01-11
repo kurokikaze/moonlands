@@ -11,15 +11,22 @@ const {
     ZONE_TYPE_HAND,
 } = require('../src/zone');
 
+const STEP_ENERGIZE = 0;
+const STEP_PRS_FIRST = 1;
+const STEP_ATTACK = 2;
+const STEP_CREATURES = 3;
+const STEP_PRS_SECOND = 4;
+const STEP_DRAW = 5;
+
 describe('Updating state with action', () => {
     it('Pass action', () => {
         const gameState = new moonlands.State();
 
         const passAction = {type: moonlands.ACTION_PASS};
 
-        expect(gameState.getCurrentStep()).toEqual(0, 'Intial step is Energize');
+        expect(gameState.getCurrentStep()).toEqual(STEP_ENERGIZE, 'Intial step is Energize');
         gameState.update(passAction);
-        expect(gameState.getCurrentStep()).toEqual(1, 'Final step is PRS');
+        expect(gameState.getCurrentStep()).toEqual(STEP_PRS_FIRST, 'Final step is PRS');
         gameState.update(passAction);
     });
 
@@ -27,14 +34,14 @@ describe('Updating state with action', () => {
         const gameState = new moonlands.State();
         const passAction = {type: moonlands.ACTION_PASS};
 
-        expect(gameState.getCurrentStep()).toEqual(0, 'Initial step is Energize');
+        expect(gameState.getCurrentStep()).toEqual(STEP_ENERGIZE, 'Initial step is Energize');
         gameState.update(passAction); // PRS
         gameState.update(passAction); // Attack
         gameState.update(passAction); // Creatures
         gameState.update(passAction); // PRS
         gameState.update(passAction); // Draw
         gameState.update(passAction); // Energize (player 1)
-        expect(gameState.getCurrentStep()).toEqual(0, 'Initial step is Draw');
+        expect(gameState.getCurrentStep()).toEqual(STEP_ENERGIZE, 'Initial step is Energize');
         expect(gameState.getActivePlayer()).toEqual(1, 'Active player is player 1');
     });
 
@@ -42,22 +49,22 @@ describe('Updating state with action', () => {
         const gameState = new moonlands.State();
         const passAction = {type: moonlands.ACTION_PASS};
 
-        expect(gameState.getCurrentStep()).toEqual(0, 'Initial step is Energize');
+        expect(gameState.getCurrentStep()).toEqual(STEP_ENERGIZE, 'Initial step is Energize');
         expect(gameState.getCurrentPriority()).toEqual(moonlands.NO_PRIORITY, 'There is no priority at Energize');
         gameState.update(passAction); // PRS
-        expect(gameState.getCurrentStep()).toEqual(1, 'Current step is PRS');
+        expect(gameState.getCurrentStep()).toEqual(STEP_PRS_FIRST, 'Current step is PRS');
         expect(gameState.getCurrentPriority()).toEqual(moonlands.PRIORITY_PRS, 'There is PRS priority at PRS');
         gameState.update(passAction); // Attack
-        expect(gameState.getCurrentStep()).toEqual(2, 'Current step is Attack');
+        expect(gameState.getCurrentStep()).toEqual(STEP_ATTACK, 'Current step is Attack');
         expect(gameState.getCurrentPriority()).toEqual(moonlands.PRIORITY_ATTACK, 'There is Attack priority at Attack');
         gameState.update(passAction); // Creatures
-        expect(gameState.getCurrentStep()).toEqual(3, 'Current step is Creatures');
+        expect(gameState.getCurrentStep()).toEqual(STEP_CREATURES, 'Current step is Creatures');
         expect(gameState.getCurrentPriority()).toEqual(moonlands.PRIORITY_CREATURES, 'There is Creatures priority at Creatures');
         gameState.update(passAction); // PRS
-        expect(gameState.getCurrentStep()).toEqual(4, 'Current step is PRS');
+        expect(gameState.getCurrentStep()).toEqual(STEP_PRS_SECOND, 'Current step is PRS');
         expect(gameState.getCurrentPriority()).toEqual(moonlands.PRIORITY_PRS, 'There is Creatures priority at Creatures');
         gameState.update(passAction); // Draw
-        expect(gameState.getCurrentStep()).toEqual(5, 'Current step is Draw');
+        expect(gameState.getCurrentStep()).toEqual(STEP_DRAW, 'Current step is Draw');
         expect(gameState.getCurrentPriority()).toEqual(moonlands.NO_PRIORITY, 'There is no priority at Draw');
     });
 });
@@ -76,7 +83,7 @@ describe('Magi stuff', () => {
 
         const gameState = new moonlands.State({
             zones,
-            step: 0,
+            step: STEP_ENERGIZE,
             getActivePlayer: 0,
         });
         
@@ -103,7 +110,7 @@ describe('Magi stuff', () => {
 
         const gameState = new moonlands.State({
             zones,
-            step: 0,
+            step: STEP_ENERGIZE,
             getActivePlayer: 0,
         });
         
@@ -140,7 +147,7 @@ describe('Prompts', () => {
 
         const gameState = new moonlands.State({
             zones,
-            step: 0,
+            step: STEP_ENERGIZE,
             getActivePlayer: 0,
             actions: [promptAction, addEnergyAction],
         });
@@ -182,7 +189,7 @@ describe('Prompts', () => {
 
         const gameState = new moonlands.State({
             zones,
-            step: 0,
+            step: STEP_ENERGIZE,
             getActivePlayer: 0,
             actions: [promptAction, addEnergyAction],
         });
@@ -237,7 +244,7 @@ describe('Prompts', () => {
 
         const gameState = new moonlands.State({
             zones,
-            step: 0,
+            step: STEP_ENERGIZE,
             getActivePlayer: 0,
             actions: [promptAction, addEnergyAction],
         });
@@ -286,7 +293,7 @@ describe('Prompts', () => {
 
         const gameState = new moonlands.State({
             zones,
-            step: 0,
+            step: STEP_ENERGIZE,
             getActivePlayer: 0,
             actions: [promptAction, removeEnergyAction],
         });
@@ -320,7 +327,7 @@ describe('Effects', () => {
 
         const gameState = new moonlands.State({
             zones,
-            step: 3,
+            step: STEP_PRS_SECOND,
             activePlayer: 0,
         });
 
@@ -396,7 +403,7 @@ describe('Effects', () => {
 
         const gameState = new moonlands.State({
             zones,
-            step: 3,
+            step: STEP_PRS_SECOND,
             activePlayer,
         });
 
@@ -409,12 +416,26 @@ describe('Effects', () => {
     });
 });
 
+describe('Activating power', () => {
+    it('Simple power with prompting', () => {
+        const arbolit = new CardInGame(byName('Arbolit'), 0);
+
+        const gameState = new moonlands.State({
+            zones: [],
+            step: STEP_PRS_SECOND,
+            activePlayer: 0,
+        });
+
+
+    });
+});
+
 describe('Casting things', () => {
     it('Creating and getting zones', () => {
-        const grega = new CardInGame(byName('Grega', 0));
+        const grega = new CardInGame(byName('Grega'), 0);
         grega.data.energy = 15;
 
-        const arbolit = new CardInGame(byName('Arbolit', 0));
+        const arbolit = new CardInGame(byName('Arbolit'), 0);
 
         const zones = [
             new Zone('Active player hand', ZONE_TYPE_HAND, 0).add([arbolit]),
@@ -427,7 +448,7 @@ describe('Casting things', () => {
 
         const gameState = new moonlands.State({
             zones,
-            step: 3,
+            step: STEP_PRS_SECOND,
             activePlayer: 0,
         });
 

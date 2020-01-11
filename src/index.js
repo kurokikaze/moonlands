@@ -3,6 +3,26 @@ const {
     TYPE_MAGI,
     TYPE_RELIC,
     TYPE_SPELL,
+
+    ACTION_PASS,
+    ACTION_PLAY,
+    ACTION_POWER,
+    ACTION_EFFECT,
+    ACTION_ENTER_PROMPT,
+    ACTION_RESOLVE_PROMPT,
+
+    PROMPT_TYPE_NUMBER,
+    PROMPT_TYPE_SINGLE_CREATURE,
+
+    EFFECT_TYPE_PLAY_CREATURE,
+    EFFECT_TYPE_CREATURE_ENTERS_PLAY,
+    EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
+    EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
+    EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+    EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+    EFFECT_TYPE_ENERGIZE,
+    EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+    EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
 } = require('./const');
 
 const {
@@ -13,38 +33,6 @@ const {
 } = require('./zone');
 
 const {CardInGame} = require('./cards');
-
-const ACTION_PASS = 'actions/pass';
-const ACTION_PLAY = 'actions/play';
-const ACTION_POWER = 'actions/power';
-const ACTION_EFFECT = 'actions/effect';
-const ACTION_ENTER_PROMPT = 'actions/enter_prompt';
-const ACTION_RESOLVE_PROMPT = 'actions/resolve_prompt';
-
-const PROMPT_TYPE_SINGLE_CREATURE = 'prompt/creature';
-const PROMPT_TYPE_SINGLE_CREATURE_FILTERED = 'prompt/creature_filtered';
-const PROMPT_TYPE_NUMBER_OF_CREATURES = 'prompt/number_of_creatures';
-const PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED = 'prompt/number_of_creatures_filtered';
-const PROMPT_TYPE_SINGLE_MAGI = 'prompt/magi';
-const PROMPT_TYPE_RELIC = 'prompt/relic';
-const PROMPT_TYPE_NUMBER_OF_RELICS = 'prompt/number_of_relics';
-const PROMPT_TYPE_NUMBER = 'prompt/number';
-
-// Создаём перманент. id записывается в meta
-const EFFECT_TYPE_PLAY_CREATURE = 'effects/play_creature';
-// Существо входит в игру (для триггеров)
-const EFFECT_TYPE_CREATURE_ENTERS_PLAY = 'effects/creature_enters_play';
-// Снимаем энергию с Magi
-const EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE = 'effects/paying_energy_for_creature';
-// Помещаем на существо стартовую энергию
-const EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE = 'effects/starting_energy_on_creature';
-// Просто добавляем энергию на существо
-const EFFECT_TYPE_ADD_ENERGY_TO_CREATURE = 'effects/add_energy_to_creature';
-const EFFECT_TYPE_ADD_ENERGY_TO_MAGI = 'effects/add_energy_to_magi';
-const EFFECT_TYPE_ENERGIZE = 'effects/energize';
-
-const EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE = 'effects/discard_energy_from_creature';
-const EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY = 'effects/discard_creature_from_play';
 
 const NO_PRIORITY = 0;
 const PRIORITY_PRS = 1;
@@ -126,6 +114,10 @@ class State {
         return this.state.actions.length > 0;
     }
 
+    setSpellMetadata(metadata, spellId) {
+        this.state.spellMetaData[spellId] = metadata;
+    }
+
     getSpellMetaData(spellId) {
         return this.state.spellMetaData[spellId] ? this.state.spellMetaData[spellId] : {};
     }
@@ -149,6 +141,22 @@ class State {
             const action = this.getNextAction();
 
             switch (action.type) {
+                /*
+                    {
+                        source, # save to meta
+                        effects: [],
+                        player,
+                    }
+                */
+                case ACTION_POWER:
+                    const source = action.source;
+                    const effects = actions.effects;
+                    let currentPowerMetaData = {}; // No retrieving old metadata from old activations
+                    const preparedActions = effects.map(effect => ({...effect, generatedBy: source}));
+                    currentPowerMetaData.source = source;
+                    this.addActions(...effects);
+                    this.setSpellMetadata(currentPowerMetaData, source);
+                    break;
                 case ACTION_ENTER_PROMPT:
                     const savedActions = this.state.actions;
                     this.state = {
@@ -160,13 +168,13 @@ class State {
                     };
                     break;
                 case ACTION_RESOLVE_PROMPT:
-                    const currentMetaData = this.state.spellMetaData[action.generatedBy] || {};
+                    let currentActionMetaData = this.state.spellMetaData[action.generatedBy] || {};
                     switch (this.state.promptType) {
                         case PROMPT_TYPE_NUMBER:
-                            currentMetaData.number = action.number;
+                            currentActionMetaData.number = action.number;
                             break;
                         case PROMPT_TYPE_SINGLE_CREATURE:
-                            currentMetaData.target = action.target;
+                            currentActionMetaData.target = action.target;
                             break;
                     }
                     const actions = this.state.savedActions || [];
@@ -178,7 +186,7 @@ class State {
                         promptType: null,
                         spellMetaData: {
                             ...this.state.spellMetaData,
-                            [action.generatedBy]: currentMetaData,
+                            [action.generatedBy]: currentActionMetaData,
                         },
                     };
                     break;
@@ -322,9 +330,13 @@ module.exports = {
     PRIORITY_CREATURES,
     PROMPT_TYPE_NUMBER,
     PROMPT_TYPE_SINGLE_CREATURE,
-    EFFECT_TYPE_ENERGIZE,
     EFFECT_TYPE_PLAY_CREATURE,
+    EFFECT_TYPE_CREATURE_ENTERS_PLAY,
+    EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
+    EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
     EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+    EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+    EFFECT_TYPE_ENERGIZE,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
     EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
 };
