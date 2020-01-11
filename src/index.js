@@ -96,10 +96,22 @@ class State {
         return steps[this.state.step].priority;
     }
 
+    addActions(actions) {
+        this.actions.push(...arguments);
+    }
+
+    getNextAction() {
+        return this.actions.shift();
+    }
+    
+    hasActions() {
+        return this.actions.length > 0;
+    }
+
     update(initialAction) {
-        this.actions.push(initialAction);
-        while (this.actions.length > 0) {
-            const action = this.actions.shift();
+        this.addActions(initialAction);
+        while (this.hasActions()) {
+            const action = this.getNextAction();
 
             switch (action.type) {
                 case ACTION_PASS:
@@ -129,7 +141,7 @@ class State {
                                 // Здесь должен быть полный шаг определения стоимости
                                 const activeMagi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card;
                                 const regionPenalty = (activeMagi.card.region == baseCard.region) ? 0 : 1;
-                                this.actions.push(
+                                this.addActions(
                                 {
                                     type: ACTION_EFFECT,
                                     effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
@@ -173,7 +185,7 @@ class State {
                         case EFFECT_TYPE_ENERGIZE:
                             const amount = action.target.card.data.energize;
                             const type = action.target.card.type;
-                            this.actions.push({
+                            this.addActions({
                                 type: ACTION_EFFECT,
                                 effectType: (type == TYPE_CREATURE) ? EFFECT_TYPE_ADD_ENERGY_TO_CREATURE : EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
                                 target: action.target,
@@ -196,7 +208,7 @@ class State {
                             break;
                         case EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE:
                             const targetId = this.state.spellMetaData[action.generatedBy].creature_created;
-                            this.actions.push({
+                            this.addActions({
                                 type: ACTION_EFFECT,
                                 effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
                                 target: this.getZone(ZONE_TYPE_IN_PLAY).byId(targetId),
