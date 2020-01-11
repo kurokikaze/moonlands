@@ -8,6 +8,7 @@ const {
 const {
     ZONE_TYPE_HAND,
     ZONE_TYPE_IN_PLAY,
+    ZONE_TYPE_DISCARD,
     ZONE_TYPE_ACTIVE_MAGI,
 } = require('./zone');
 
@@ -43,6 +44,7 @@ const EFFECT_TYPE_ADD_ENERGY_TO_MAGI = 'effects/add_energy_to_magi';
 const EFFECT_TYPE_ENERGIZE = 'effects/energize';
 
 const EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE = 'effects/discard_energy_from_creature';
+const EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY = 'effects/discard_creature_from_play';
 
 const NO_PRIORITY = 0;
 const PRIORITY_PRS = 1;
@@ -293,6 +295,13 @@ class State {
                         case EFFECT_TYPE_ADD_ENERGY_TO_MAGI:
                             action.target.addEnergy(this.getMetaValue(action.amount, action.generatedBy));
                             break;
+                        case EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY:
+                            const cretureDiscardTarget = this.getMetaValue(action.target, action.generatedBy);
+                            const discardPile = this.getZone(ZONE_TYPE_DISCARD, action.player);
+                            const cardInDiscard = new CardInGame(cretureDiscardTarget.card, cretureDiscardTarget.owner);
+                            discardPile.add([cardInDiscard]);
+                            this.getZone(ZONE_TYPE_IN_PLAY).removeById(cretureDiscardTarget.id);
+                            break;
                     }
                     break;
             };
@@ -316,4 +325,5 @@ module.exports = {
     EFFECT_TYPE_ENERGIZE,
     EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+    EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
 };

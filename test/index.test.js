@@ -4,10 +4,10 @@ const {
     Zone,
     ZONE_TYPE_ACTIVE_MAGI,
     ZONE_TYPE_MAGI_PILE,
+    ZONE_TYPE_DISCARD,
     ZONE_TYPE_DEFEATED_MAGI,
     ZONE_TYPE_DECK,
     ZONE_TYPE_IN_PLAY,
-    ZONE_TYPE_DISCARD,
     ZONE_TYPE_HAND,
 } = require('../src/zone');
 
@@ -302,6 +302,83 @@ describe('Prompts', () => {
     });
 });
 
+describe('Effects', () => {
+    it('Discard creature from play [EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY]', () => {
+        const activePlayer = 0;
+        const arbolit = new CardInGame(byName('Arbolit', activePlayer));
+
+        const zones = [
+            new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
+            new Zone('Discard', ZONE_TYPE_DISCARD, activePlayer),
+        ];
+
+        const discardCreatureEffect = {
+            type: moonlands.ACTION_EFFECT,
+            effectType: moonlands.EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+            target: arbolit,
+        };
+
+        const gameState = new moonlands.State({
+            zones,
+            step: 3,
+            activePlayer: 0,
+        });
+
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'Arbolit on the field');
+        expect(gameState.getZone(ZONE_TYPE_DISCARD, activePlayer).length).toEqual(0, 'Discard pile is empty');
+
+        gameState.update(discardCreatureEffect);
+
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'Field is empty');
+        expect(gameState.getZone(ZONE_TYPE_DISCARD, activePlayer).length).toEqual(1, 'Arbolit is in discard pile');
+    });
+
+    it('Add energy to creature [EFFECT_TYPE_ADD_ENERGY_TO_CREATURE]', () => {
+        const activePlayer = 0;
+        const arbolit = new CardInGame(byName('Arbolit', activePlayer));
+
+        const addEnergyEffect = {
+            type: moonlands.ACTION_EFFECT,
+            effectType: moonlands.EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+            target: arbolit,
+            amount: 2,
+        };
+
+        const gameState = new moonlands.State({
+            activePlayer,
+        });
+
+        expect(arbolit.data.energy).toEqual(0, 'Arbolit has 0 energy');
+
+        gameState.update(addEnergyEffect);
+
+        expect(arbolit.data.energy).toEqual(2, 'Arbolit has 2 energy');
+    });
+
+    it('Discard energy from creature [EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE]', () => {
+        const activePlayer = 0;
+        const arbolit = new CardInGame(byName('Arbolit', activePlayer));
+        arbolit.addEnergy(5);
+
+        const discardEnergyEffect = {
+            type: moonlands.ACTION_EFFECT,
+            effectType: moonlands.EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+            target: arbolit,
+            amount: 2,
+        };
+
+        const gameState = new moonlands.State({
+            activePlayer,
+        });
+
+        expect(arbolit.data.energy).toEqual(5, 'Arbolit has 5 energy');
+
+        gameState.update(discardEnergyEffect);
+
+        expect(arbolit.data.energy).toEqual(3, 'Arbolit has 3 energy');
+    });
+});
+
 describe('Casting things', () => {
     it('Creating and getting zones', () => {
         const grega = new CardInGame(byName('Grega', 0));
@@ -321,7 +398,7 @@ describe('Casting things', () => {
         const gameState = new moonlands.State({
             zones,
             step: 3,
-            getActivePlayer: 0,
+            activePlayer: 0,
         });
 
         expect(gameState.getZone(ZONE_TYPE_HAND, 0).length).toEqual(1);
@@ -353,7 +430,7 @@ describe('Casting things', () => {
         const gameState = new moonlands.State({
             zones,
             step: 3,
-            getActivePlayer: 0,
+            activePlayer: 0,
         });
         
         expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'In play is empty before');
@@ -392,7 +469,7 @@ describe('Casting things', () => {
         const gameState = new moonlands.State({
             zones,
             step: 3,
-            getActivePlayer: 0,
+            activePlayer: 0,
         });
         
         expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'In play is empty before');

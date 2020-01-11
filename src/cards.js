@@ -37,7 +37,9 @@ class CardInGame {
         this.id = nanoid();
         this.data = {
             energy: 0,
+            controller: owner,
         };
+        this.owner = owner;
     }
 
     get card() {
