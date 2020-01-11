@@ -477,11 +477,13 @@ describe('Activating power', () => {
         gameState.update(powerAction);
 
         expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two creatures in play');
+        expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(0, 'No creatures in discard');
         expect(gameState.state.prompt).toEqual(true, 'Waiting for prompt');
 
         gameState.update(targetingAction);
 
         expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
+        expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'One creature in discard');
         expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Quor Pup', 'Creature is Quor Pup');
         expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(2, 'Quor Pup has 2 energy');
     });
@@ -526,6 +528,50 @@ describe('Activating power', () => {
         expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two creatures in play');
         expect(weebo.data.energy).toEqual(1, 'Weebo has 2 energy');
         expect(quorPup.data.energy).toEqual(2, 'Quor Pup has 2 energy');
+    });
+
+    it('Simple power targeting a magi', () => {
+        const ACTIVE_PLAYER = 0;
+        const arboll = new CardInGame(byName('Arboll'), ACTIVE_PLAYER);
+        arboll.addEnergy(2);
+        const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+        grega.addEnergy(15);
+
+        const gameState = new moonlands.State({
+            zones: [
+                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arboll]),
+                new Zone('Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+            ],
+            step: STEP_PRS_SECOND,
+            activePlayer: ACTIVE_PLAYER,
+        });
+
+        const powerAction = {
+            type: moonlands.ACTION_POWER,
+            source: arboll,
+            power: arboll.card.data.powers[0],
+            player: ACTIVE_PLAYER,
+        };
+
+        const targetingAction = {
+            type: moonlands.ACTION_RESOLVE_PROMPT,
+            promptType: moonlands.PROMPT_TYPE_SINGLE_MAGI,
+            target: grega,
+            generatedBy: arboll.id,            
+        };
+
+        gameState.update(powerAction);
+
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
+        expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(0, 'No creatures in discard');
+        expect(gameState.state.prompt).toEqual(true, 'Waiting for prompt');
+        expect(grega.data.energy).toEqual(15, 'Grega has 15 energy');
+
+        gameState.update(targetingAction);
+
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'No creatures in play');
+        expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'One creature in discard');
+        expect(grega.data.energy).toEqual(19, 'Grega has 19 energy');
     });
 });
 

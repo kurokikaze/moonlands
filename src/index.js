@@ -13,6 +13,7 @@ const {
 
     PROMPT_TYPE_NUMBER,
     PROMPT_TYPE_SINGLE_CREATURE,
+    PROMPT_TYPE_SINGLE_MAGI,
 
     EFFECT_TYPE_PLAY_CREATURE,
     EFFECT_TYPE_CREATURE_ENTERS_PLAY,
@@ -191,6 +192,9 @@ class State {
                         case PROMPT_TYPE_SINGLE_CREATURE:
                             currentActionMetaData.target = action.target;
                             break;
+                        case PROMPT_TYPE_SINGLE_MAGI:
+                            currentActionMetaData.targetMagi = action.target;
+                            break;
                     }
                     const actions = this.state.savedActions || [];
                     this.state = {
@@ -344,7 +348,8 @@ class State {
                             addTarget.addEnergy(this.getMetaValue(action.amount, action.generatedBy));
                             break;
                         case EFFECT_TYPE_ADD_ENERGY_TO_MAGI:
-                            action.target.addEnergy(this.getMetaValue(action.amount, action.generatedBy));
+                            const magiTarget = this.getMetaValue(action.target, action.generatedBy);
+                            magiTarget.addEnergy(this.getMetaValue(action.amount, action.generatedBy));
                             break;
                         case EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY:
                             const cretureDiscardTarget = this.getMetaValue(action.target, action.generatedBy);
@@ -374,6 +379,7 @@ module.exports = {
     PRIORITY_CREATURES,
     PROMPT_TYPE_NUMBER,
     PROMPT_TYPE_SINGLE_CREATURE,
+    PROMPT_TYPE_SINGLE_MAGI,
     EFFECT_TYPE_PLAY_CREATURE,
     EFFECT_TYPE_CREATURE_ENTERS_PLAY,
     EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,

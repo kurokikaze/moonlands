@@ -32,6 +32,7 @@ const {
     EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
 
     PROMPT_TYPE_SINGLE_CREATURE,
+    PROMPT_TYPE_SINGLE_MAGI,
     PROMPT_TYPE_NUMBER,
 
     RESTRICTION_ENERGY_LESS_THAN_STARTING,
@@ -124,7 +125,25 @@ const cards = [
         energize: 5,
         startingCards: ['Arboll', 'Weebo', 'Furok', 'Grow'],
     }),
-    new Card('Arboll', TYPE_CREATURE, REGION_NAROOM, 3),
+    new Card('Arboll', TYPE_CREATURE, REGION_NAROOM, 3, {
+        powers: [
+            power('Life Channel', [
+                {
+                    type: ACTION_ENTER_PROMPT,
+                    promptType: PROMPT_TYPE_SINGLE_MAGI,
+                },
+                effect({
+                    effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+                    target: '$sourceCreature',
+                }),
+                effect({
+                    effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+                    target: '$targetMagi',
+                    amount: 4,
+                }),
+            ]),
+        ],
+    }),
     new Card('Weebo', TYPE_CREATURE, REGION_NAROOM, 2, {
         powers: [
             {
