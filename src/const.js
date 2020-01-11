@@ -2,8 +2,16 @@ const ACTION_PASS = 'actions/pass';
 const ACTION_PLAY = 'actions/play';
 const ACTION_POWER = 'actions/power';
 const ACTION_EFFECT = 'actions/effect';
+const ACTION_SELECT = 'actions/select';
 const ACTION_ENTER_PROMPT = 'actions/enter_prompt';
 const ACTION_RESOLVE_PROMPT = 'actions/resolve_prompt';
+
+const SELECTOR_OWN_MAGI = 'selectors/own_magi';
+const SELECTOR_ENEMY_MAGI = 'selectors/enemy_magi';
+const SELECTOR_CREATURES_OF_REGION = 'selectors/creatures_of_region';
+const SELECTOR_CREATURES_NOT_OF_REGION = 'selectors/creatures_not_of_region';
+const SELECTOR_OWN_CREATURES = 'selectors/own_creatures';
+const SELECTOR_ENEMY_CREATURES = 'selectors/enemy_creatures';
 
 const REGION_ARDERIAL = 'regions/arderial';
 const REGION_CALD = 'regions/cald';
@@ -44,13 +52,23 @@ const TYPE_MAGI = 'types/magi';
 const TYPE_RELIC = 'types/relic';
 const TYPE_SPELL = 'types/spell';
 
+const COST_X = 'X';
+
 module.exports = {
     ACTION_PASS,
     ACTION_PLAY,
     ACTION_POWER,
     ACTION_EFFECT,
+    ACTION_SELECT,
     ACTION_ENTER_PROMPT,
     ACTION_RESOLVE_PROMPT,
+
+    SELECTOR_OWN_MAGI,
+    SELECTOR_ENEMY_MAGI,
+    SELECTOR_CREATURES_OF_REGION,
+    SELECTOR_CREATURES_NOT_OF_REGION,
+    SELECTOR_OWN_CREATURES,
+    SELECTOR_ENEMY_CREATURES,
 
     EFFECT_TYPE_PLAY_CREATURE,
     EFFECT_TYPE_CREATURE_ENTERS_PLAY,
@@ -86,4 +104,6 @@ module.exports = {
     TYPE_MAGI,
     TYPE_RELIC,
     TYPE_SPELL,
+
+    COST_X,
 };

@@ -8,8 +8,16 @@ const {
     ACTION_PLAY,
     ACTION_POWER,
     ACTION_EFFECT,
+    ACTION_SELECT,
     ACTION_ENTER_PROMPT,
     ACTION_RESOLVE_PROMPT,
+
+    SELECTOR_OWN_MAGI,
+    SELECTOR_ENEMY_MAGI,
+    SELECTOR_CREATURES_OF_REGION,
+    SELECTOR_CREATURES_NOT_OF_REGION,
+    SELECTOR_OWN_CREATURES,
+    SELECTOR_ENEMY_CREATURES,
 
     PROMPT_TYPE_NUMBER,
     PROMPT_TYPE_SINGLE_CREATURE,
@@ -26,6 +34,8 @@ const {
     EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
     EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
     EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
+
+    COST_X,
 } = require('./const');
 
 const {
@@ -81,6 +91,16 @@ const defaultState = {
     spellMetaData: {},
 };
 
+const oneOrSeveral = (targets, callback) => {
+    if (targets.length) {
+        if (targets.length > 0) {
+            targets.forEach(target => callback(target));
+        }
+    } else {
+        callback(targets);
+    }
+};
+
 class State {
     constructor(state) {
         this.state = {
@@ -121,7 +141,7 @@ class State {
         this.state.spellMetaData[spellId] = metadata;
     }
 
-    getSpellMetaData(spellId) {
+    getSpellMetadata(spellId) {
         return this.state.spellMetaData[spellId] ? this.state.spellMetaData[spellId] : {};
     }
 
@@ -131,7 +151,7 @@ class State {
             value[0] == '$'
         ) {
             const variableName = value.slice(1);
-            const spellMetaData = this.getSpellMetaData(spellId);
+            const spellMetaData = this.getSpellMetadata(spellId);
             return spellMetaData[variableName] ? spellMetaData[variableName] : null;
         } else {
             return value;
@@ -153,25 +173,43 @@ class State {
                     }
                 */
                 case ACTION_POWER:
-                    const source = action.source;
-                    const effects = action.power.effects;
-                    const preparedActions = effects.map(effect => ({...effect, generatedBy: source.id}));
+                    if (!action.source.wasActionUsed(action.power.name)) {
+                        const source = action.source;
+                        const effects = action.power.effects;
+                        
+                        const preparedActions = effects.map(effect => ({...effect, generatedBy: source.id, player: action.player}));
 
-                    let currentPowerMetaData = {
-                        source,
-                        sourceCreature: source,
-                    }; // No retrieving old metadata from old activations
+                        let currentPowerMetaData = {
+                            source,
+                            sourceCreature: source,
+                        }; // No retrieving old metadata from old activations
 
-                    if (action.power.cost > 0) {
-                        this.addActions({
-                            type: ACTION_EFFECT,
-                            effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
-                            target: source,
-                            amount: action.power.cost,
-                        });
+                        source.setActionUsed(action.power.name);
+
+                        if (action.power.cost == COST_X) {
+                            this.addActions(
+                                {
+                                    type: ACTION_ENTER_PROMPT,
+                                    promptType: PROMPT_TYPE_NUMBER,
+                                },
+                                {
+                                    type: ACTION_EFFECT,
+                                    effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
+                                    target: source,
+                                    amount: '$number',
+                                },
+                            );
+                        } else if (action.power.cost > 0) {
+                            this.addActions({
+                                type: ACTION_EFFECT,
+                                effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
+                                target: source,
+                                amount: action.power.cost,
+                            });
+                        }
+                        this.addActions(...preparedActions);
+                        this.setSpellMetadata(currentPowerMetaData, source.id);
                     }
-                    this.addActions(...preparedActions);
-                    this.setSpellMetadata(currentPowerMetaData, source.id);
                     break;
                 case ACTION_ENTER_PROMPT:
                     const savedActions = this.state.actions;
@@ -187,13 +225,13 @@ class State {
                     let currentActionMetaData = this.state.spellMetaData[action.generatedBy] || {};
                     switch (this.state.promptType) {
                         case PROMPT_TYPE_NUMBER:
-                            currentActionMetaData.number = action.number;
+                            currentActionMetaData[action.variable || 'number'] = action.number;
                             break;
                         case PROMPT_TYPE_SINGLE_CREATURE:
-                            currentActionMetaData.target = action.target;
+                            currentActionMetaData[action.variable || 'target'] = action.target;
                             break;
                         case PROMPT_TYPE_SINGLE_MAGI:
-                            currentActionMetaData.targetMagi = action.target;
+                            currentActionMetaData[action.variable || 'targetMagi'] = action.target;
                             break;
                     }
                     const actions = this.state.savedActions || [];
@@ -208,6 +246,65 @@ class State {
                             [action.generatedBy]: currentActionMetaData,
                         },
                     };
+                    break;
+                case ACTION_SELECT:
+                    const varName = action.variable || 'selected';
+
+                    switch (action.selector) {
+                        case SELECTOR_OWN_MAGI:
+                            const selectedOwnMagi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).cards;
+
+                            this.setSpellMetadata({
+                                ...this.getSpellMetadata(action.generatedBy),
+                                [varName]: selectedOwnMagi,
+                            }, action.generatedBy);
+                            break;
+                        case SELECTOR_OWN_CREATURES:
+                            const selectedOwnCreatures =
+                                this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.data.controller == action.player);
+
+                            this.setSpellMetadata({
+                                ...this.getSpellMetadata(action.generatedBy),
+                                [varName]: selectedOwnCreatures,
+                            }, action.generatedBy);
+                            break;
+                        case SELECTOR_ENEMY_CREATURES:
+                            const selectedEnemyCreatures =
+                                this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.data.controller != action.player);
+
+                            this.setSpellMetadata({
+                                ...this.getSpellMetadata(action.generatedBy),
+                                [varName]: selectedEnemyCreatures,
+                            }, action.generatedBy);
+                            break;
+                        case SELECTOR_ENEMY_MAGI:
+                            const selectedEnemyMagi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, 1 - action.player).cards; // @TODO get enemy player
+
+                            this.setSpellMetadata({
+                                ...this.getSpellMetadata(action.generatedBy),
+                                [varName]: selectedEnemyMagi,
+                            }, action.generatedBy);
+                            break;
+                        case SELECTOR_CREATURES_OF_REGION:
+                            const selectedRegionCreatures =
+                                this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.region == action.region);
+
+                            this.setSpellMetadata({
+                                ...this.getSpellMetadata(action.generatedBy),
+                                [varName]: selectedRegionCreatures,
+                            }, action.generatedBy);
+                            break;
+                        case SELECTOR_CREATURES_NOT_OF_REGION:
+                            const selectedNonRegionCreatures =
+                                this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.region != action.region);
+
+                            this.setSpellMetadata({
+                                ...this.getSpellMetadata(action.generatedBy),
+                                [varName]: selectedNonRegionCreatures,
+                            }, action.generatedBy);
+                            break;
+                    }
+
                     break;
                 case ACTION_PASS:
                     const newStep = (this.state.step + 1) % steps.length;
@@ -313,7 +410,8 @@ class State {
                             break;
                         case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE:
                             const discardTarget = this.getMetaValue(action.target, action.generatedBy);
-                            discardTarget.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
+
+                            oneOrSeveral(discardTarget, target => target.removeEnergy(this.getMetaValue(action.amount, action.generatedBy)));                            
                             break;
                         case EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY:
                             const restoreTarget = this.getMetaValue(action.target, action.generatedBy);
@@ -332,6 +430,7 @@ class State {
                         case EFFECT_TYPE_PAYING_ENERGY_FOR_POWER:
                             const payingTarget = this.getMetaValue(action.target, action.generatedBy);
                             const payingAmount = this.getMetaValue(action.amount, action.generatedBy);
+
                             if (payingAmount > 0) {
                                 this.addActions({
                                     type: ACTION_EFFECT,
@@ -349,14 +448,17 @@ class State {
                             break;
                         case EFFECT_TYPE_ADD_ENERGY_TO_MAGI:
                             const magiTarget = this.getMetaValue(action.target, action.generatedBy);
-                            magiTarget.addEnergy(this.getMetaValue(action.amount, action.generatedBy));
+
+                            oneOrSeveral(magiTarget, target => target.addEnergy(this.getMetaValue(action.amount, action.generatedBy)));                            
                             break;
                         case EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY:
-                            const cretureDiscardTarget = this.getMetaValue(action.target, action.generatedBy);
+                            const creatureDiscardTarget = this.getMetaValue(action.target, action.generatedBy);
                             const discardPile = this.getZone(ZONE_TYPE_DISCARD, action.player);
-                            const cardInDiscard = new CardInGame(cretureDiscardTarget.card, cretureDiscardTarget.owner);
-                            discardPile.add([cardInDiscard]);
-                            this.getZone(ZONE_TYPE_IN_PLAY).removeById(cretureDiscardTarget.id);
+                            oneOrSeveral(creatureDiscardTarget, creature => {
+                                const cardInDiscard = new CardInGame(creature.card, creature.owner);
+                                discardPile.add([cardInDiscard]);
+                                this.getZone(ZONE_TYPE_IN_PLAY).removeById(creature.id);
+                            });
                             break;
                     }
                     break;

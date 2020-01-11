@@ -1,12 +1,9 @@
 const nanoid = require('nanoid');
 
 const {
-    ACTION_PASS,
-    ACTION_PLAY,
-    ACTION_POWER,
     ACTION_EFFECT,
+    ACTION_SELECT,
     ACTION_ENTER_PROMPT,
-    ACTION_RESOLVE_PROMPT,
     
     REGION_ARDERIAL,
     REGION_CALD,
@@ -19,6 +16,13 @@ const {
     TYPE_MAGI,
     TYPE_RELIC,
     TYPE_SPELL,
+
+    SELECTOR_OWN_MAGI,
+    SELECTOR_ENEMY_MAGI,
+    SELECTOR_CREATURES_OF_REGION,
+    SELECTOR_CREATURES_NOT_OF_REGION,
+    SELECTOR_OWN_CREATURES,
+    SELECTOR_OPPONENT_CREATURES,
 
     EFFECT_TYPE_PLAY_CREATURE,
     EFFECT_TYPE_CREATURE_ENTERS_PLAY,
@@ -36,6 +40,8 @@ const {
     PROMPT_TYPE_NUMBER,
 
     RESTRICTION_ENERGY_LESS_THAN_STARTING,
+
+    COST_X,
 } = require('./const');
 
 class Card {
@@ -65,6 +71,7 @@ class CardInGame {
             controller: owner,
         };
         this.owner = owner;
+        this.actionsUsed = [];
     }
 
     get card() {
@@ -77,6 +84,18 @@ class CardInGame {
 
     removeEnergy(amount = 0) {
         this.data.energy = this.data.energy - amount;
+    }
+
+    wasActionUsed(actionName) {
+        return this.actionsUsed.includes(actionName);
+    }
+
+    setActionUsed(actionName) {
+        this.actionsUsed.push(actionName);
+    }
+
+    clearActionsUsed() {
+        this.actionsUsed = [];
     }
 }
 
@@ -120,6 +139,22 @@ const cards = [
     new Card('Green Stuff', TYPE_CREATURE, REGION_BOGRATH, 0, {energize: 1}),
     new Card('Quor Pup', TYPE_CREATURE, REGION_CALD, 2),
     new Card('Fire Flow', TYPE_SPELL, REGION_CALD, 1),
+    new Card('Fire Chogo', TYPE_CREATURE, REGION_CALD, 2, {
+        powers: [
+            power('Heat Storm', [
+                {
+                    type: ACTION_SELECT,
+                    selector: SELECTOR_CREATURES_NOT_OF_REGION,
+                    region: REGION_CALD,
+                },
+                effect({
+                    effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                    target: '$selected',
+                    amount: 1,
+                }),
+            ]),
+        ]
+    }),
     new Card('Yaki', TYPE_MAGI, REGION_NAROOM, null, {
         startingEnergy: 14,
         energize: 5,
@@ -158,6 +193,43 @@ const cards = [
                     effect({
                         effectType: EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
                         target: '$target',
+                    }),
+                ],
+            },
+        ],
+    }),
+    new Card('Diobor', TYPE_CREATURE, REGION_CALD, 6, {
+        powers: [
+            {
+                name: 'Fireball',
+                effects: [
+                    {
+                        type: ACTION_ENTER_PROMPT,
+                        promptType: PROMPT_TYPE_SINGLE_CREATURE,
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+                        target: '$sourceCreature',
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                        target: '$target',
+                        amount: 2,
+                    }),
+                ],
+            },
+            {
+                name: 'Energy Transfer',
+                cost: COST_X,
+                effects: [
+                    {
+                        type: ACTION_SELECT,
+                        selector: SELECTOR_OWN_MAGI,
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+                        target: '$selected',
+                        amount: '$number',
                     }),
                 ],
             },

@@ -441,7 +441,7 @@ describe('Effects', () => {
         gameState.update(playCreatureEffect);
 
         expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One card in play');
-        expect(gameState.getSpellMetaData(12345).creature_created).toEqual(gameState.getZone(ZONE_TYPE_IN_PLAY).card.id, 'Id saved in metadata');
+        expect(gameState.getSpellMetadata(12345).creature_created).toEqual(gameState.getZone(ZONE_TYPE_IN_PLAY).card.id, 'Id saved in metadata');
     });
 });
 
@@ -528,6 +528,92 @@ describe('Activating power', () => {
         expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two creatures in play');
         expect(weebo.data.energy).toEqual(1, 'Weebo has 2 energy');
         expect(quorPup.data.energy).toEqual(2, 'Quor Pup has 2 energy');
+    });
+
+    it('Simple power with X in cost', () => {
+        const ACTIVE_PLAYER = 0;
+
+        const diobor = new CardInGame(byName('Diobor'), ACTIVE_PLAYER);
+        diobor.addEnergy(6);
+
+        const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+        grega.addEnergy(10);
+
+        const gameState = new moonlands.State({
+            zones: [
+                new Zone('Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([diobor]),
+            ],
+            step: STEP_PRS_SECOND,
+            activePlayer: ACTIVE_PLAYER,
+        });
+
+        const powerAction = {
+            type: moonlands.ACTION_POWER,
+            source: diobor,
+            power: diobor.card.data.powers[1],
+            player: ACTIVE_PLAYER,
+        };
+
+        const choosingCostAction = {
+            type: moonlands.ACTION_RESOLVE_PROMPT,
+            number: 5,
+            generatedBy: diobor.id,            
+        };
+
+        gameState.update(powerAction);
+
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
+        expect(grega.data.energy).toEqual(10, 'Grega have 10 energy');
+        expect(gameState.state.prompt).toEqual(true, 'Waiting for prompt');
+
+        gameState.update(choosingCostAction);
+
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
+        expect(grega.data.energy).toEqual(15, 'Grega now have 15 energy');
+    });
+
+    it('Simple power auto-targeting a magi', () => {
+        const ACTIVE_PLAYER = 0;
+
+        const diobor = new CardInGame(byName('Diobor'), ACTIVE_PLAYER);
+        diobor.addEnergy(6);
+
+        const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+        grega.addEnergy(10);
+
+        const gameState = new moonlands.State({
+            zones: [
+                new Zone('Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([diobor]),
+            ],
+            step: STEP_PRS_SECOND,
+            activePlayer: ACTIVE_PLAYER,
+        });
+
+        const powerAction = {
+            type: moonlands.ACTION_POWER,
+            source: diobor,
+            power: diobor.card.data.powers[1],
+            player: ACTIVE_PLAYER,
+        };
+
+        const choosingCostAction = {
+            type: moonlands.ACTION_RESOLVE_PROMPT,
+            number: 5,
+            generatedBy: diobor.id,            
+        };
+
+        gameState.update(powerAction);
+
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
+        expect(grega.data.energy).toEqual(10, 'Grega have 10 energy');
+        expect(gameState.state.prompt).toEqual(true, 'Waiting for prompt');
+
+        gameState.update(choosingCostAction);
+
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
+        expect(grega.data.energy).toEqual(15, 'Grega now have 15 energy');
     });
 
     it('Simple power targeting a magi', () => {
