@@ -42,6 +42,8 @@ const EFFECT_TYPE_ADD_ENERGY_TO_CREATURE = 'effects/add_energy_to_creature';
 const EFFECT_TYPE_ADD_ENERGY_TO_MAGI = 'effects/add_energy_to_magi';
 const EFFECT_TYPE_ENERGIZE = 'effects/energize';
 
+const EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE = 'effects/discard_energy_from_creature';
+
 const NO_PRIORITY = 0;
 const PRIORITY_PRS = 1;
 const PRIORITY_ATTACK = 2;
@@ -161,6 +163,9 @@ class State {
                         case PROMPT_TYPE_NUMBER:
                             currentMetaData.number = action.number;
                             break;
+                        case PROMPT_TYPE_SINGLE_CREATURE:
+                            currentMetaData.target = action.target;
+                            break;
                     }
                     const actions = this.state.savedActions || [];
                     this.state = {
@@ -277,8 +282,13 @@ class State {
                                 generatedBy: action.generatedBy,
                             });
                             break;
+                        case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE:
+                            const discardTarget = this.getMetaValue(action.target, action.generatedBy);
+                            discardTarget.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
+                            break;
                         case EFFECT_TYPE_ADD_ENERGY_TO_CREATURE:
-                            action.target.addEnergy(this.getMetaValue(action.amount, action.generatedBy));
+                            const addTarget = this.getMetaValue(action.target, action.generatedBy);
+                            addTarget.addEnergy(this.getMetaValue(action.amount, action.generatedBy));
                             break;
                         case EFFECT_TYPE_ADD_ENERGY_TO_MAGI:
                             action.target.addEnergy(this.getMetaValue(action.amount, action.generatedBy));
@@ -302,6 +312,8 @@ module.exports = {
     PRIORITY_ATTACK,
     PRIORITY_CREATURES,
     PROMPT_TYPE_NUMBER,
+    PROMPT_TYPE_SINGLE_CREATURE,
     EFFECT_TYPE_ENERGIZE,
     EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+    EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
 };

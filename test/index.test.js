@@ -153,9 +153,11 @@ describe('Prompts', () => {
 
     it('Resolving prompt should resume and apply saved actions', () => {
         const arbolit = new CardInGame(byName('Arbolit', 0));
+
         const zones = [
             new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
         ];
+
         const addEnergyAction = {
             type: moonlands.ACTION_EFFECT,
             effectType: moonlands.EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
@@ -248,6 +250,55 @@ describe('Prompts', () => {
         expect(gameState.state.actions.length).toEqual(0, 'Queue is empty');
         expect(gameState.state.savedActions.length).toEqual(0, 'No actions saved for later');
         expect(arbolit.data.energy).toEqual(PROMPTED_NUMBER, 'Energy was added to creature');
+    });
+
+    it('Resolving prompt saves target for future effect', () => {
+        const arbolit = new CardInGame(byName('Arbolit', 0));
+        arbolit.addEnergy(5);
+
+        const zones = [
+            new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
+        ];
+
+        const removeEnergyAction = {
+            type: moonlands.ACTION_EFFECT,
+            effectType: moonlands.EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+            amount: 2,
+            target: '$target',
+            generatedBy: 1,
+        };
+
+        const promptAction = {
+            type: moonlands.ACTION_ENTER_PROMPT,
+            promptType: moonlands.PROMPT_TYPE_SINGLE_CREATURE,
+            generatedBy: 1,
+        };
+
+        const resolvePromptAction = {
+            type: moonlands.ACTION_RESOLVE_PROMPT,
+            target: arbolit,
+            generatedBy: 1,
+        };
+
+        const passAction = {
+            type: moonlands.ACTION_PASS,
+        };
+
+        const gameState = new moonlands.State({
+            zones,
+            step: 0,
+            getActivePlayer: 0,
+            actions: [promptAction, removeEnergyAction],
+        });
+
+        gameState.update(passAction);
+        expect(arbolit.data.energy).toEqual(5, 'Arbolit has 5 energy');
+
+        gameState.update(resolvePromptAction);
+
+        expect(gameState.state.actions.length).toEqual(0, 'Queue is empty');
+        expect(gameState.state.savedActions.length).toEqual(0, 'No actions saved for later');
+        expect(arbolit.data.energy).toEqual(3, 'Energy was removed from creature');
     });
 });
 
