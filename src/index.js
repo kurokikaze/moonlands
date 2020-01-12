@@ -9,8 +9,22 @@ const {
     ACTION_POWER,
     ACTION_EFFECT,
     ACTION_SELECT,
+    ACTION_CALCULATE,
     ACTION_ENTER_PROMPT,
     ACTION_RESOLVE_PROMPT,
+    ACTION_GET_PROPERTY_VALUE,
+
+    PROPERTY_ENERGY_COUNT,
+    PROPERTY_REGION,
+    PROPERTY_COST,
+    PROPERTY_ENERGIZE,
+
+    CALCULATION_SET,
+    CALCULATION_DOUBLE,
+    CALCULATION_ADD,
+    CALCULATION_SUBTRACT,
+    CALCULATION_HALVE_ROUND_DOWN,
+    CALCULATION_HALVE_ROUND_UP,
 
     SELECTOR_OWN_MAGI,
     SELECTOR_ENEMY_MAGI,
@@ -164,14 +178,41 @@ class State {
             const action = this.getNextAction();
 
             switch (action.type) {
-                /*
-                    {
-                        source, # save to meta
-                        name,
-                        effects: [],
-                        player,
+                case ACTION_GET_PROPERTY_VALUE:
+                    const target = this.getMetaValue(action.target, action.generatedBy);
+                    const property = this.getMetaValue(action.property, action.generatedBy);
+                    break;
+                case ACTION_CALCULATE:
+                    const beforeData = this.getSpellMetadata(action.generatedBy);
+                    const operandOne = this.getMetaValue(action.operandOne, action.generatedBy);
+                    const operandTwo = this.getMetaValue(action.operandTwo, action.generatedBy);
+                    let result;
+                    switch (action.operator) {
+                        case CALCULATION_SET:
+                            result = operandOne;
+                            break;
+                        case CALCULATION_DOUBLE:
+                            result = operandOne * 2;
+                            break;
+                        case CALCULATION_ADD:
+                            result = operandOne + operandTwo;
+                            break;
+                        case CALCULATION_SUBTRACT:
+                            result = operandOne - operandTwo;
+                            break;
+                        case CALCULATION_HALVE_ROUND_DOWN:
+                            result = Math.floor(operandOne / 2);
+                            break;
+                        case CALCULATION_HALVE_ROUND_UP:
+                            result = Math.ceil(operandOne / 2);
+                            break;
                     }
-                */
+
+                    this.state.spellMetaData[action.generatedBy] = {
+                        ...beforeData,
+                        [action.variable || 'result']: result,
+                    }
+                    break;
                 case ACTION_POWER:
                     if (!action.source.wasActionUsed(action.power.name)) {
                         const source = action.source;
@@ -475,6 +516,7 @@ module.exports = {
     ACTION_ENTER_PROMPT,
     ACTION_RESOLVE_PROMPT,
     ACTION_POWER,
+    ACTION_CALCULATE,
     NO_PRIORITY,
     PRIORITY_PRS,
     PRIORITY_ATTACK,

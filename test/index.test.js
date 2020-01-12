@@ -1,6 +1,14 @@
 const moonlands = require('../src/index');
 const {CardInGame, byName} = require('../src/cards');
-const {PROMPT_TYPE_SINGLE_CREATURE} = require('../src/const');
+const {
+    PROMPT_TYPE_SINGLE_CREATURE,
+    CALCULATION_SET,
+    CALCULATION_DOUBLE,
+    CALCULATION_ADD,
+    CALCULATION_SUBTRACT,
+    CALCULATION_HALVE_ROUND_DOWN,
+    CALCULATION_HALVE_ROUND_UP,
+} = require('../src/const');
 const {
     Zone,
     ZONE_TYPE_ACTIVE_MAGI,
@@ -442,6 +450,121 @@ describe('Effects', () => {
 
         expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One card in play');
         expect(gameState.getSpellMetadata(12345).creature_created).toEqual(gameState.getZone(ZONE_TYPE_IN_PLAY).card.id, 'Id saved in metadata');
+    });
+});
+
+describe('Calculation actions', () => {
+    /**
+    CALCULATION_SET,
+    CALCULATION_DOUBLE,
+    CALCULATION_ADD,
+    CALCULATION_SUBTRACT,
+    CALCULATION_HALVE_ROUND_DOWN,
+    CALCULATION_HALVE_ROUND_UP,
+     */
+    it('Addition - variables [CALCULATION_ADD]', () => {
+        const gameState = new moonlands.State({
+            spellMetaData: {
+                'test': {
+                    'operandOne': 4,
+                    'operandTwo': 5,
+                },
+            },
+        });
+
+        gameState.update({
+            type: moonlands.ACTION_CALCULATE,
+            operator: CALCULATION_ADD,
+            operandOne: '$operandOne',
+            operandTwo: '$operandTwo',
+            variable: 'newResult',
+            generatedBy: 'test',
+        });
+
+        expect(gameState.state.spellMetaData.test.newResult).toEqual(9, 'Addition result saved in "newResult" metadata field');
+    });
+
+    it('Addition - values [CALCULATION_ADD]', () => {
+        const gameState = new moonlands.State({});
+
+        gameState.update({
+            type: moonlands.ACTION_CALCULATE,
+            operator: CALCULATION_ADD,
+            operandOne: 123,
+            operandTwo: 200,
+            generatedBy: 'test',
+        });
+
+        expect(gameState.state.spellMetaData.test.result).toEqual(323, 'Addition result saved in "result" metadata field');
+    });
+
+    it('Subtraction - variables [CALCULATION_SUBTRACT]', () => {
+        const gameState = new moonlands.State({
+            spellMetaData: {
+                'test': {
+                    'operandOne': 11,
+                    'operandTwo': 7,
+                },
+            },
+        });
+
+        gameState.update({
+            type: moonlands.ACTION_CALCULATE,
+            operator: CALCULATION_SUBTRACT,
+            operandOne: '$operandOne',
+            operandTwo: '$operandTwo',
+            variable: 'newResult',
+            generatedBy: 'test',
+        });
+
+        expect(gameState.state.spellMetaData.test.newResult).toEqual(4, 'Subtraction result saved in "newResult" metadata field');
+    });
+
+    it('Subtraction - values [CALCULATION_SUBTRACT]', () => {
+        const gameState = new moonlands.State({});
+
+        gameState.update({
+            type: moonlands.ACTION_CALCULATE,
+            operator: CALCULATION_SUBTRACT,
+            operandOne: 231,
+            operandTwo: 120,
+            generatedBy: 'test',
+        });
+
+        expect(gameState.state.spellMetaData.test.result).toEqual(111, 'Addition result saved in "result" metadata field');
+    });
+
+    it('Doubling - variables [CALCULATION_DOUBLE]', () => {
+        const gameState = new moonlands.State({
+            spellMetaData: {
+                'test': {
+                    'operandOne': 13,
+                },
+            },
+        });
+
+        gameState.update({
+            type: moonlands.ACTION_CALCULATE,
+            operator: CALCULATION_DOUBLE,
+            operandOne: '$operandOne',
+            variable: 'newResult',
+            generatedBy: 'test',
+        });
+
+        expect(gameState.state.spellMetaData.test.newResult).toEqual(26, 'Double result saved in "newResult" metadata field');
+    });
+
+    it('Doubling - values [CALCULATION_DOUBLE]', () => {
+        const gameState = new moonlands.State({});
+
+        gameState.update({
+            type: moonlands.ACTION_CALCULATE,
+            operator: CALCULATION_DOUBLE,
+            operandOne: 35,
+            generatedBy: 'test',
+        });
+
+        expect(gameState.state.spellMetaData.test.result).toEqual(70, 'Doubling result saved in "result" metadata field');
     });
 });
 

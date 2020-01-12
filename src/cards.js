@@ -4,7 +4,20 @@ const {
     ACTION_EFFECT,
     ACTION_SELECT,
     ACTION_ENTER_PROMPT,
-    
+    ACTION_CALCULATE,
+    ACTION_GET_PROPERTY_VALUE,
+
+    CALCULATION_DOUBLE,
+    CALCULATION_ADD,
+    CALCULATION_SUBTRACT,
+    CALCULATION_HALVE_ROUND_DOWN,
+    CALCULATION_HALVE_ROUND_UP,
+
+    PROPERTY_ENERGY_COUNT,
+    PROPERTY_REGION,
+    PROPERTY_COST,
+    PROPERTY_ENERGIZE,
+
     REGION_ARDERIAL,
     REGION_CALD,
     REGION_NAROOM,
@@ -135,6 +148,48 @@ const cards = [
                 }),
             ],
         )],
+    }),
+    new Card('Fire Grag', TYPE_CREATURE, REGION_CALD, 6, {
+        powers: [{
+            name: 'Metabolize',
+            cost: 3,
+            effects: [
+                {
+                    type: ACTION_ENTER_PROMPT,
+                    promptType: PROMPT_TYPE_SINGLE_CREATURE,
+                    variable: 'yourCreature',
+                },
+                {
+                    type: ACTION_ENTER_PROMPT,
+                    promptType: PROMPT_TYPE_SINGLE_CREATURE,
+                    variable: 'opponentCreature',
+                },
+                {
+                    type: ACTION_GET_PROPERTY_VALUE,
+                    target: '$yourCreature',
+                    property: PROPERTY_ENERGY_COUNT,
+                },
+                /*
+                    action, который возьмёт energy у существа $yourCreature,
+                    и поместит результат в $creaturePower
+                */
+                {
+                    type: ACTION_CALCULATE,
+                    operator: CALCULATION_DOUBLE,
+                    operandOne: '$creaturePower',
+                    variable: 'doubleEnergy', 
+                },
+                effect({
+                    effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                    target: '$opponentCreature',
+                    amount: '$doubleEnergy',
+                }),
+                effect({
+                    effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+                    target: '$yourCreature',
+                }),
+            ],
+        }],
     }),
     new Card('Green Stuff', TYPE_CREATURE, REGION_BOGRATH, 0, {energize: 1}),
     new Card('Quor Pup', TYPE_CREATURE, REGION_CALD, 2),

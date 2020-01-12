@@ -3,8 +3,15 @@ const ACTION_PLAY = 'actions/play';
 const ACTION_POWER = 'actions/power';
 const ACTION_EFFECT = 'actions/effect';
 const ACTION_SELECT = 'actions/select';
+const ACTION_CALCULATE = 'actions/calculate';
 const ACTION_ENTER_PROMPT = 'actions/enter_prompt';
 const ACTION_RESOLVE_PROMPT = 'actions/resolve_prompt';
+const ACTION_GET_PROPERTY_VALUE = 'actions/get_property_value';
+
+const PROPERTY_ENERGY_COUNT = 'properties/energy_count';
+const PROPERTY_REGION = 'properties/region';
+const PROPERTY_COST = 'properties/cost';
+const PROPERTY_ENERGIZE = 'properties/energize';
 
 const SELECTOR_OWN_MAGI = 'selectors/own_magi';
 const SELECTOR_ENEMY_MAGI = 'selectors/enemy_magi';
@@ -12,6 +19,13 @@ const SELECTOR_CREATURES_OF_REGION = 'selectors/creatures_of_region';
 const SELECTOR_CREATURES_NOT_OF_REGION = 'selectors/creatures_not_of_region';
 const SELECTOR_OWN_CREATURES = 'selectors/own_creatures';
 const SELECTOR_ENEMY_CREATURES = 'selectors/enemy_creatures';
+
+const CALCULATION_SET = 'calculations/set';
+const CALCULATION_DOUBLE = 'calculations/double';
+const CALCULATION_ADD = 'calculations/add';
+const CALCULATION_SUBTRACT = 'calculations/subtract';
+const CALCULATION_HALVE_ROUND_DOWN = 'calculations/halve_round_down';
+const CALCULATION_HALVE_ROUND_UP = 'calculations/halve_round_up';
 
 const REGION_ARDERIAL = 'regions/arderial';
 const REGION_CALD = 'regions/cald';
@@ -60,8 +74,17 @@ module.exports = {
     ACTION_POWER,
     ACTION_EFFECT,
     ACTION_SELECT,
+    ACTION_CALCULATE,
     ACTION_ENTER_PROMPT,
     ACTION_RESOLVE_PROMPT,
+    ACTION_GET_PROPERTY_VALUE,
+
+    CALCULATION_SET,
+    CALCULATION_DOUBLE,
+    CALCULATION_ADD,
+    CALCULATION_SUBTRACT,
+    CALCULATION_HALVE_ROUND_DOWN,
+    CALCULATION_HALVE_ROUND_UP,
 
     SELECTOR_OWN_MAGI,
     SELECTOR_ENEMY_MAGI,
@@ -69,6 +92,11 @@ module.exports = {
     SELECTOR_CREATURES_NOT_OF_REGION,
     SELECTOR_OWN_CREATURES,
     SELECTOR_ENEMY_CREATURES,
+
+    PROPERTY_ENERGY_COUNT,
+    PROPERTY_REGION,
+    PROPERTY_COST,
+    PROPERTY_ENERGIZE,
 
     EFFECT_TYPE_PLAY_CREATURE,
     EFFECT_TYPE_CREATURE_ENTERS_PLAY,
