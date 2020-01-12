@@ -37,6 +37,7 @@ const REGION_KYBARS_TEETH = 'regions/kybars_teeth';
 const REGION_BOGRATH = 'regions/bograth';
 const REGION_PARADWYN = 'regions/paradwyn';
 const REGION_D_RESH = 'regions/d_resh';
+const REGION_UNIVERSAL = 'regions/universal';
 
 const EFFECT_TYPE_PLAY_CREATURE = 'effects/play_creature';
 const EFFECT_TYPE_CREATURE_ENTERS_PLAY = 'effects/creature_enters_play';
@@ -127,6 +128,7 @@ module.exports = {
     REGION_OROTHE,
     REGION_UNDERNEATH,
     REGION_BOGRATH,
+    REGION_UNIVERSAL,
 
     TYPE_CREATURE,
     TYPE_MAGI,

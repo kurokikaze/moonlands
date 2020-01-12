@@ -24,6 +24,7 @@ const {
     REGION_OROTHE,
     REGION_UNDERNEATH,
     REGION_BOGRATH,
+    REGION_UNIVERSAL,
 
     TYPE_CREATURE,
     TYPE_MAGI,
@@ -124,6 +125,13 @@ const effect = (data) => ({
 });
 
 const cards = [
+    new Card('Water of Life', TYPE_RELIC, REGION_UNIVERSAL, 0, {
+        staticAbilities: [{
+            selector: SELECTOR_OWN_MAGI,
+            property: PROPERTY_ENERGIZE,
+            modifier: a => a + 1,
+        }],
+    }),
     new Card('Grega', TYPE_MAGI, REGION_CALD, null, {
         startingEnergy: 10,
         energize: 5,

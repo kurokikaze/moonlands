@@ -8,6 +8,8 @@ const {
     CALCULATION_SUBTRACT,
     CALCULATION_HALVE_ROUND_DOWN,
     CALCULATION_HALVE_ROUND_UP,
+    PROPERTY_ENERGY_COUNT,
+    PROPERTY_ENERGIZE,
 } = require('../src/const');
 const {
     Zone,
@@ -88,6 +90,7 @@ describe('Magi stuff', () => {
 
         const zones = [
             new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, activePlayer).add([grega]),
+            new Zone('In play', ZONE_TYPE_IN_PLAY),
         ];
 
         const gameState = new moonlands.State({
@@ -114,7 +117,7 @@ describe('Magi stuff', () => {
         const greenStuff = new CardInGame(byName('Green Stuff'), activePlayer);
 
         const zones = [
-            new Zone('Active player current magi', ZONE_TYPE_IN_PLAY).add([greenStuff]),
+            new Zone('In play', ZONE_TYPE_IN_PLAY).add([greenStuff]),
         ];
 
         const gameState = new moonlands.State({
@@ -781,6 +784,75 @@ describe('Activating power', () => {
         expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'No creatures in play');
         expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'One creature in discard');
         expect(grega.data.energy).toEqual(19, 'Grega has 19 energy');
+    });
+});
+
+describe('Static abilities', () => {
+    it('Simple modifier of attribute (your source)', () => {
+        const ACTIVE_PLAYER = 0;
+        const waterOfLife = new CardInGame(byName('Water of Life'), ACTIVE_PLAYER);
+        const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+        grega.data.energy = 15;
+
+        const zones = [
+            new Zone('In play', ZONE_TYPE_IN_PLAY).add([waterOfLife]),
+            new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+        ];
+
+        const gameState = new moonlands.State({
+            zones,
+            step: STEP_PRS_SECOND,
+            activePlayer: ACTIVE_PLAYER,
+        });
+
+        const result = gameState.modifyByStaticAbilities(grega, PROPERTY_ENERGIZE);
+        expect(result).toEqual(6, "Grega's energize rate is increased by one");
+    });
+
+    it('Simple modifier of attribute (two source)', () => {
+        const ACTIVE_PLAYER = 0;
+        const waterOfLife = new CardInGame(byName('Water of Life'), ACTIVE_PLAYER);
+        const waterOfLifeTwo = new CardInGame(byName('Water of Life'), ACTIVE_PLAYER);
+        const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+        grega.data.energy = 15;
+
+        const zones = [
+            new Zone('In play', ZONE_TYPE_IN_PLAY).add([waterOfLife, waterOfLifeTwo]),
+            new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+        ];
+
+        const gameState = new moonlands.State({
+            zones,
+            step: STEP_PRS_SECOND,
+            activePlayer: ACTIVE_PLAYER,
+        });
+
+        const result = gameState.modifyByStaticAbilities(grega, PROPERTY_ENERGIZE);
+        expect(result).toEqual(7, "Grega's energize rate is increased by two");
+    });
+
+    it('Simple modifier of attribute (our source, enemy source)', () => {
+        const ACTIVE_PLAYER = 0;
+        const ENEMY_PLAYER = 1;
+        const waterOfLife = new CardInGame(byName('Water of Life'), ACTIVE_PLAYER);
+        const waterOfLifeTwo = new CardInGame(byName('Water of Life'), ENEMY_PLAYER);
+        const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+        grega.data.energy = 15;
+
+        const zones = [
+            new Zone('In play', ZONE_TYPE_IN_PLAY).add([waterOfLife, waterOfLifeTwo]),
+            new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+            new Zone('Enemy player current magi', ZONE_TYPE_ACTIVE_MAGI, ENEMY_PLAYER),
+        ];
+
+        const gameState = new moonlands.State({
+            zones,
+            step: STEP_PRS_SECOND,
+            activePlayer: ACTIVE_PLAYER,
+        });
+
+        const result = gameState.modifyByStaticAbilities(grega, PROPERTY_ENERGIZE);
+        expect(result).toEqual(6, "Grega's energize rate is increased by one");
     });
 });
 

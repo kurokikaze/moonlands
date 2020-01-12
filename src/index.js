@@ -115,6 +115,7 @@ const oneOrSeveral = (targets, callback) => {
     }
 };
 
+
 class State {
     constructor(state) {
         this.state = {
@@ -172,6 +173,63 @@ class State {
         }
     }
 
+    useSelector(selector, player, argument) {
+        switch (selector) {
+            case SELECTOR_OWN_MAGI:
+                return this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).cards;
+                break;
+            case SELECTOR_ENEMY_MAGI:
+                return this.getZone(ZONE_TYPE_ACTIVE_MAGI, 1 - player).cards; // @TODO get enemy player
+                break;
+            case SELECTOR_OWN_CREATURES:
+                return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.data.controller == player);
+                break;
+            case SELECTOR_ENEMY_CREATURES:
+                return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.data.controller != player);
+                break;
+            case SELECTOR_CREATURES_OF_REGION:
+                return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.region == argument);
+                break;
+            case SELECTOR_CREATURES_NOT_OF_REGION:
+                return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.region != argument);
+                break;
+        }
+    }
+
+    getByProperty(target, property) {
+        switch(property) {
+            case PROPERTY_COST:
+                return target.card.cost;
+            case PROPERTY_ENERGIZE:
+                return target.card.data.energize;
+            case PROPERTY_REGION:
+                return target.card.region;
+        }
+    }
+
+    modifyByStaticAbilities(target, property) {
+        // gathering static abilities from the field, adding players to them
+        const zoneAbilities = this.getZone(ZONE_TYPE_IN_PLAY).cards.reduce(
+            (acc, cardInPlay) => cardInPlay.card.data.staticAbilities ? [
+                ...acc,
+                ...(cardInPlay.card.data.staticAbilities.filter(a => a.property == property).map(a => ({...a, player: cardInPlay.data.controller})))
+            ] : acc,
+            [],
+        );
+        const staticAbilities = [...zoneAbilities]; // @TODO static abilities of Magi
+
+        let initialValue = this.getByProperty(target, property);
+
+        staticAbilities.forEach(staticAbility => {
+            const selected = this.useSelector(staticAbility.selector, staticAbility.player, staticAbility.selectorParameter);
+            if (selected.includes(target)) {
+                initialValue = staticAbility.modifier(initialValue);
+            }
+        });
+
+        return initialValue;
+    }
+
     update(initialAction) {
         this.addActions(initialAction);
         while (this.hasActions()) {
@@ -181,6 +239,8 @@ class State {
                 case ACTION_GET_PROPERTY_VALUE:
                     const target = this.getMetaValue(action.target, action.generatedBy);
                     const property = this.getMetaValue(action.property, action.generatedBy);
+
+                    this.modifyByStaticAbilities(target, property);                    
                     break;
                 case ACTION_CALCULATE:
                     const beforeData = this.getSpellMetadata(action.generatedBy);
@@ -293,7 +353,7 @@ class State {
 
                     switch (action.selector) {
                         case SELECTOR_OWN_MAGI:
-                            const selectedOwnMagi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).cards;
+                            const selectedOwnMagi = this.useSelector(SELECTOR_OWN_MAGI, action.player);
 
                             this.setSpellMetadata({
                                 ...this.getSpellMetadata(action.generatedBy),
@@ -301,8 +361,7 @@ class State {
                             }, action.generatedBy);
                             break;
                         case SELECTOR_OWN_CREATURES:
-                            const selectedOwnCreatures =
-                                this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.data.controller == action.player);
+                            const selectedOwnCreatures = this.useSelector(SELECTOR_OWN_CREATURES, action.player);
 
                             this.setSpellMetadata({
                                 ...this.getSpellMetadata(action.generatedBy),
@@ -310,8 +369,7 @@ class State {
                             }, action.generatedBy);
                             break;
                         case SELECTOR_ENEMY_CREATURES:
-                            const selectedEnemyCreatures =
-                                this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.data.controller != action.player);
+                            const selectedEnemyCreatures = this.useSelector(SELECTOR_ENEMY_CREATURES, action.player);
 
                             this.setSpellMetadata({
                                 ...this.getSpellMetadata(action.generatedBy),
@@ -319,7 +377,7 @@ class State {
                             }, action.generatedBy);
                             break;
                         case SELECTOR_ENEMY_MAGI:
-                            const selectedEnemyMagi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, 1 - action.player).cards; // @TODO get enemy player
+                            const selectedEnemyMagi = this.useSelector(SELECTOR_ENEMY_MAGI, action.player);
 
                             this.setSpellMetadata({
                                 ...this.getSpellMetadata(action.generatedBy),
@@ -327,8 +385,7 @@ class State {
                             }, action.generatedBy);
                             break;
                         case SELECTOR_CREATURES_OF_REGION:
-                            const selectedRegionCreatures =
-                                this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.region == action.region);
+                            const selectedRegionCreatures = this.useSelector(SELECTOR_CREATURES_OF_REGION, action.player, action.region);
 
                             this.setSpellMetadata({
                                 ...this.getSpellMetadata(action.generatedBy),
@@ -416,7 +473,7 @@ class State {
                 case ACTION_EFFECT:
                     switch(action.effectType) {
                         case EFFECT_TYPE_ENERGIZE:
-                            const amount = action.target.card.data.energize;
+                            const amount = this.modifyByStaticAbilities(action.target, PROPERTY_ENERGIZE);
                             const type = action.target.card.type;
                             this.addActions({
                                 type: ACTION_EFFECT,
