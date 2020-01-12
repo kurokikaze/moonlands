@@ -38,6 +38,7 @@ const {
     SELECTOR_OWN_CREATURES,
     SELECTOR_OPPONENT_CREATURES,
 
+    EFFECT_TYPE_ROLL_DIE,
     EFFECT_TYPE_PLAY_CREATURE,
     EFFECT_TYPE_CREATURE_ENTERS_PLAY,
     EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
@@ -49,6 +50,7 @@ const {
     EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
     EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
 
+    PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
     PROMPT_TYPE_SINGLE_CREATURE,
     PROMPT_TYPE_SINGLE_MAGI,
     PROMPT_TYPE_NUMBER,
@@ -136,6 +138,26 @@ const cards = [
         startingEnergy: 10,
         energize: 5,
         startingCards: ['Arbolit', 'Quor Pup', 'Fire Flow'],
+        powers: [
+            {
+                name: 'Thermal Blast',
+                cost: 2,
+                effects: [
+                    effect({
+                        effectType: EFFECT_TYPE_ROLL_DIE,
+                    }),
+                    {
+                        type: ACTION_ENTER_PROMPT,
+                        promptType: PROMPT_TYPE_SINGLE_CREATURE,
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                        target: '$target',
+                        amount: '$die_roll',
+                    }),
+                ],
+            },
+        ]
     }),
     new Card('Arbolit', TYPE_CREATURE, REGION_CALD, 2, {
         powers: [power(
@@ -177,10 +199,6 @@ const cards = [
                     target: '$yourCreature',
                     property: PROPERTY_ENERGY_COUNT,
                 },
-                /*
-                    action, который возьмёт energy у существа $yourCreature,
-                    и поместит результат в $creaturePower
-                */
                 {
                     type: ACTION_CALCULATE,
                     operator: CALCULATION_DOUBLE,
@@ -202,6 +220,30 @@ const cards = [
     new Card('Green Stuff', TYPE_CREATURE, REGION_BOGRATH, 0, {energize: 1}),
     new Card('Quor Pup', TYPE_CREATURE, REGION_CALD, 2),
     new Card('Fire Flow', TYPE_SPELL, REGION_CALD, 1),
+    new Card('Pharan', TYPE_CREATURE, REGION_ARDERIAL, 3, {
+        powers: [
+            {
+                type: ACTION_ENTER_PROMPT,
+                promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+            },
+            {
+                type: ACTION_GET_PROPERTY_VALUE,
+                target: '$yourCreature',
+                property: PROPERTY_ENERGY_COUNT,
+                variable: 'energyToRestore',
+            },
+            effect({
+                effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+                target: '$sourceCreature',
+            }),
+            effect({
+                effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+                target: '$targetMagi',
+                amount: '$energyToRestore',
+            }),
+        ],
+
+    }),
     new Card('Fire Chogo', TYPE_CREATURE, REGION_CALD, 2, {
         powers: [
             power('Heat Storm', [
@@ -216,7 +258,7 @@ const cards = [
                     amount: 1,
                 }),
             ]),
-        ]
+        ],
     }),
     new Card('Yaki', TYPE_MAGI, REGION_NAROOM, null, {
         startingEnergy: 14,

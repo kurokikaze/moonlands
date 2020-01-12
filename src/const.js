@@ -39,6 +39,7 @@ const REGION_PARADWYN = 'regions/paradwyn';
 const REGION_D_RESH = 'regions/d_resh';
 const REGION_UNIVERSAL = 'regions/universal';
 
+const EFFECT_TYPE_ROLL_DIE = 'effects/roll_die'; 
 const EFFECT_TYPE_PLAY_CREATURE = 'effects/play_creature';
 const EFFECT_TYPE_CREATURE_ENTERS_PLAY = 'effects/creature_enters_play';
 const EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE = 'effects/paying_energy_for_creature';
@@ -47,10 +48,13 @@ const EFFECT_TYPE_ADD_ENERGY_TO_CREATURE = 'effects/add_energy_to_creature';
 const EFFECT_TYPE_ADD_ENERGY_TO_MAGI = 'effects/add_energy_to_magi';
 const EFFECT_TYPE_ENERGIZE = 'effects/energize';
 const EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE = 'effects/discard_energy_from_creature';
+const EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI = 'effects/discard_energy_from_magi';
 const EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY = 'effects/discard_creature_from_play';
+const EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI = 'effects/discard_energy_from_creature_or_magi';
 const EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY = 'effects/restore_creature_to_starting_energy';
 const EFFECT_TYPE_PAYING_ENERGY_FOR_POWER = 'effects/paying_energy_for_power';
 
+const PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI = 'prompt/creature_or_magi';
 const PROMPT_TYPE_SINGLE_CREATURE = 'prompt/creature';
 const PROMPT_TYPE_SINGLE_CREATURE_FILTERED = 'prompt/creature_filtered';
 const PROMPT_TYPE_NUMBER_OF_CREATURES = 'prompt/number_of_creatures';
@@ -99,6 +103,7 @@ module.exports = {
     PROPERTY_COST,
     PROPERTY_ENERGIZE,
 
+    EFFECT_TYPE_ROLL_DIE,
     EFFECT_TYPE_PLAY_CREATURE,
     EFFECT_TYPE_CREATURE_ENTERS_PLAY,
     EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
@@ -106,13 +111,16 @@ module.exports = {
     EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
     EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
     EFFECT_TYPE_ENERGIZE,
+    EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+    EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
     EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
     EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
     EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
 
     RESTRICTION_ENERGY_LESS_THAN_STARTING,
 
+    PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
     PROMPT_TYPE_SINGLE_CREATURE,
     PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
     PROMPT_TYPE_NUMBER_OF_CREATURES,

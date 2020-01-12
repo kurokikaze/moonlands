@@ -37,8 +37,10 @@ const {
     PROMPT_TYPE_SINGLE_CREATURE,
     PROMPT_TYPE_SINGLE_MAGI,
 
+    EFFECT_TYPE_ROLL_DIE,
     EFFECT_TYPE_PLAY_CREATURE,
     EFFECT_TYPE_CREATURE_ENTERS_PLAY,
+    EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
     EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
     EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
     EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
@@ -48,6 +50,7 @@ const {
     EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
     EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
     EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
+    EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
 
     COST_X,
 } = require('./const');
@@ -240,7 +243,13 @@ class State {
                     const target = this.getMetaValue(action.target, action.generatedBy);
                     const property = this.getMetaValue(action.property, action.generatedBy);
 
-                    this.modifyByStaticAbilities(target, property);                    
+                    const rawData = this.getSpellMetadata(action.generatedBy);
+
+                    const modifiedResult = this.modifyByStaticAbilities(target, property);
+                    this.state.spellMetaData[action.generatedBy] = {
+                        ...beforeData,
+                        [action.variable || 'result']: modifiedResult,
+                    };
                     break;
                 case ACTION_CALCULATE:
                     const beforeData = this.getSpellMetadata(action.generatedBy);
@@ -472,6 +481,13 @@ class State {
                     break;
                 case ACTION_EFFECT:
                     switch(action.effectType) {
+                        case EFFECT_TYPE_ROLL_DIE:
+                            const result = action.result || (Math.floor(Math.random() * 6) + 1);
+                            if (!this.state.spellMetaData[action.generatedBy]) {
+                                this.state.spellMetaData[action.generatedBy] = {};
+                            }
+                            this.state.spellMetaData[action.generatedBy].roll_result = result;
+                            break;                            
                         case EFFECT_TYPE_ENERGIZE:
                             const amount = this.modifyByStaticAbilities(action.target, PROPERTY_ENERGIZE);
                             const type = action.target.card.type;
@@ -506,10 +522,43 @@ class State {
                                 generatedBy: action.generatedBy,
                             });
                             break;
-                        case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE:
-                            const discardTarget = this.getMetaValue(action.target, action.generatedBy);
+                        case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI:
+                            const discardMiltiTarget = this.getMetaValue(action.target, action.generatedBy);
 
-                            oneOrSeveral(discardTarget, target => target.removeEnergy(this.getMetaValue(action.amount, action.generatedBy)));                            
+                            oneOrSeveral(discardMiltiTarget, target => {
+                                switch (target.card.type) {
+                                    case TYPE_CREATURE:
+                                        this.addActions({
+                                            type: ACTION_EFFECT,
+                                            effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                                            amount: action.amount,
+                                            target,
+                                            generatedBy: action.generatedBy,
+                                        });
+                                        break;
+                                    case TYPE_MAGI:
+                                        this.addActions({
+                                            type: ACTION_EFFECT,
+                                            effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+                                            amount: action.amount,
+                                            target,
+                                            generatedBy: action.generatedBy,
+                                        });
+                                        break;
+                                }
+                            });
+                            break;
+                        case EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI:
+                            oneOrSeveral(
+                                this.getMetaValue(action.target, action.generatedBy),
+                                target => target.removeEnergy(this.getMetaValue(action.amount, action.generatedBy)),
+                            );
+                            break;
+                        case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE:
+                            oneOrSeveral(
+                                this.getMetaValue(action.target, action.generatedBy),
+                                target => target.removeEnergy(this.getMetaValue(action.amount, action.generatedBy))
+                            );
                             break;
                         case EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY:
                             const restoreTarget = this.getMetaValue(action.target, action.generatedBy);
