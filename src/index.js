@@ -549,8 +549,8 @@ class State {
                             const zoneChangingCard = zoneChangingTarget.length ? zoneChangingTarget[0] : zoneChangingTarget;
                             const sourceZoneType = this.getMetaValue(action.sourceZone, action.generatedBy);
                             const destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
-                            const destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : action.player);
-                            const sourceZone = this.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : action.player);
+                            const destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
+                            const sourceZone = this.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
                             const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner);
                             if (action.bottom) {
                                 destinationZone.add([newObject]);

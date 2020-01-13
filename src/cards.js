@@ -68,6 +68,8 @@ const {
 const {
     ZONE_TYPE_ACTIVE_MAGI,
     ZONE_TYPE_MAGI_PILE,
+    ZONE_TYPE_HAND,
+    ZONE_TYPE_IN_PLAY,
 } = require('./zone');
 
 class Card {
@@ -148,6 +150,26 @@ const getPropertyValue = data => ({
 });
  
 const cards = [
+    new Card('Alaban', TYPE_CREATURE, REGION_ARDERIAL, 6, {
+        powers: [
+            {
+                name: 'Undream',
+                cost: 5,
+                effects: [
+                    {
+                        type: ACTION_ENTER_PROMPT,
+                        promptType: PROMPT_TYPE_SINGLE_CREATURE,
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+                        sourceZone: ZONE_TYPE_IN_PLAY,
+                        destinationZone: ZONE_TYPE_HAND,
+                        target: '$target',
+                    }),
+                ],
+            },
+        ],
+    }),
     new Card('Water of Life', TYPE_RELIC, REGION_UNIVERSAL, 0, {
         staticAbilities: [{
             selector: SELECTOR_OWN_MAGI,

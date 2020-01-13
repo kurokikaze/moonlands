@@ -428,6 +428,81 @@ describe('Cave Hyren', () => {
     });
 });
 
+describe('Alaban', () => {
+    it('Undream', () => {
+        const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 1;
+
+        const alaban = new CardInGame(byName('Alaban'), ACTIVE_PLAYER).addEnergy(6);
+        const caveHyren = new CardInGame(byName('Cave Hyren'), ACTIVE_PLAYER).addEnergy(2);
+        const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [caveHyren, alaban]);
+
+        const gameState = new moonlands.State({
+            zones,
+            step: STEP_PRS_SECOND,
+            activePlayer: ACTIVE_PLAYER,
+        });        
+
+        const powerAction = {
+            type: ACTION_POWER,
+            source: alaban,
+            power: alaban.card.data.powers[0],
+            player: ACTIVE_PLAYER,
+        };
+
+        const targetingAction = {
+            type: ACTION_RESOLVE_PROMPT,
+            target: caveHyren,
+            generatedBy: alaban.id,
+        };
+
+        gameState.update(powerAction);
+        gameState.update(targetingAction);
+
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Alaban', 'Alaban is in play');
+        expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(1, 'One creature in hand');
+        expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).card.card.name).toEqual('Cave Hyren', 'Cave Hyren is in hand');
+    });
+
+    it('Undream (opponents creature)', () => {
+        const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 1;
+
+        const alaban = new CardInGame(byName('Alaban'), ACTIVE_PLAYER).addEnergy(6);
+        const caveHyren = new CardInGame(byName('Cave Hyren'), NON_ACTIVE_PLAYER).addEnergy(2);
+        const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [caveHyren, alaban]);
+
+        const gameState = new moonlands.State({
+            zones,
+            step: STEP_PRS_SECOND,
+            activePlayer: ACTIVE_PLAYER,
+        });        
+
+        const powerAction = {
+            type: ACTION_POWER,
+            source: alaban,
+            power: alaban.card.data.powers[0],
+            player: ACTIVE_PLAYER,
+        };
+
+        const targetingAction = {
+            type: ACTION_RESOLVE_PROMPT,
+            target: caveHyren,
+            generatedBy: alaban.id,
+        };
+
+        gameState.update(powerAction);
+        gameState.update(targetingAction);
+
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Alaban', 'Alaban is in play');
+        expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(1, 'One creature in opponents hand');
+        expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).card.card.name).toEqual('Cave Hyren', 'Cave Hyren is in opponents hand');
+    });
+});
+
+
 describe('Drakan', () => {
     it('Thermal Blast', () => {
         const ACTIVE_PLAYER = 0;
