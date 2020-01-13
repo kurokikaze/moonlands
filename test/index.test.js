@@ -443,7 +443,7 @@ describe('Effects', () => {
         const arbolit = new CardInGame(byName('Arbolit'), activePlayer).addEnergy(5);
         const fireGrag = new CardInGame(byName('Fire Grag'), activePlayer).addEnergy(10);
 
-        const discardEnergyEffect = {
+        const moveEnergyEffect = {
             type: moonlands.ACTION_EFFECT,
             effectType: moonlands.EFFECT_TYPE_MOVE_ENERGY,
             source: fireGrag,
@@ -455,10 +455,33 @@ describe('Effects', () => {
             activePlayer,
         });
 
-        gameState.update(discardEnergyEffect);
+        gameState.update(moveEnergyEffect);
 
         expect(arbolit.data.energy).toEqual(9, 'Arbolit has 9 energy');
         expect(fireGrag.data.energy).toEqual(6, 'Fire Grag has 6 energy');
+    });
+
+    it('Moving energy from creature to magi [EFFECT_TYPE_MOVE_ENERGY]', () => {
+        const activePlayer = 0;
+        const arbolit = new CardInGame(byName('Arbolit'), activePlayer).addEnergy(5);
+        const grega = new CardInGame(byName('Grega'), activePlayer).addEnergy(10);
+
+        const moveEnergyEffect = {
+            type: moonlands.ACTION_EFFECT,
+            effectType: moonlands.EFFECT_TYPE_MOVE_ENERGY,
+            source: arbolit,
+            target: grega,
+            amount: 4,
+        };
+
+        const gameState = new moonlands.State({
+            activePlayer,
+        });
+
+        gameState.update(moveEnergyEffect);
+
+        expect(arbolit.data.energy).toEqual(1, 'Arbolit has 1 energy');
+        expect(grega.data.energy).toEqual(14, 'Grega has 14 energy');
     });
 
     it('Putting creature into play [EFFECT_TYPE_PLAY_CREATURE]', () => {
@@ -490,6 +513,41 @@ describe('Effects', () => {
         expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One card in play');
         expect(gameState.getSpellMetadata(12345).creature_created).toEqual(gameState.getZone(ZONE_TYPE_IN_PLAY).card.id, 'Id saved in metadata');
     });
+
+    it('Moving card between zones [EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES]', () => {
+        const activePlayer = 0;
+        const arbolit = new CardInGame(byName('Arbolit'), activePlayer).addEnergy(5);
+        const grega = new CardInGame(byName('Grega'), activePlayer).addEnergy(10);
+
+        const zones = [
+            new Zone('Player 1 hand', ZONE_TYPE_HAND, activePlayer),
+            new Zone('Player 1 discard', ZONE_TYPE_DISCARD, activePlayer),
+            new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, activePlayer).add([grega]),
+            new Zone('Player 1 magi pile', ZONE_TYPE_MAGI_PILE, activePlayer),
+            new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),            
+        ];
+        const moveCardEffect = {
+            type: moonlands.ACTION_EFFECT,
+            effectType: moonlands.EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+            source: arbolit,
+            target: grega,
+            sourceZone: ZONE_TYPE_ACTIVE_MAGI,
+            destinationZone: ZONE_TYPE_MAGI_PILE,
+        };
+
+        const gameState = new moonlands.State({
+            zones,
+            activePlayer,
+        });
+
+        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI).length).toEqual(1, 'Active Magi zone has 1 card');
+        expect(gameState.getZone(ZONE_TYPE_MAGI_PILE).length).toEqual(0, 'Magi pile zone has no cards');
+
+        gameState.update(moveCardEffect);
+
+        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI).length).toEqual(0, 'Active Magi zone is empty');
+        expect(gameState.getZone(ZONE_TYPE_MAGI_PILE).length).toEqual(1, 'Magi pile zone has 1 card');
+    });    
 });
 
 describe('Calculation actions', () => {

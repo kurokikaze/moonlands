@@ -44,6 +44,12 @@ class Zone {
         return this;
     }
 
+    addToTop(cards) {
+        this.cards = [...cards, ...this.cards];
+
+        return this;        
+    }
+
     byId(id) {
         return this.cards.find(card => card.id === id);
     }

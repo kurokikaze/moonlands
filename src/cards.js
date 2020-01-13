@@ -17,6 +17,7 @@ const {
     PROPERTY_REGION,
     PROPERTY_COST,
     PROPERTY_ENERGIZE,
+    PROPERTY_MAGI_STARTING_ENERGY,
 
     REGION_ARDERIAL,
     REGION_CALD,
@@ -37,6 +38,7 @@ const {
     SELECTOR_CREATURES_NOT_OF_REGION,
     SELECTOR_OWN_CREATURES,
     SELECTOR_OPPONENT_CREATURES,
+    SELECTOR_TOP_MAGI_OF_PILE,
 
     EFFECT_TYPE_ROLL_DIE,
     EFFECT_TYPE_PLAY_CREATURE,
@@ -46,6 +48,7 @@ const {
     EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
     EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
     EFFECT_TYPE_ENERGIZE,
+    EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
@@ -61,6 +64,11 @@ const {
 
     COST_X,
 } = require('./const');
+
+const {
+    ZONE_TYPE_ACTIVE_MAGI,
+    ZONE_TYPE_MAGI_PILE,
+} = require('./zone');
 
 class Card {
     constructor(name, type, region, cost, data = {}) {
@@ -97,12 +105,12 @@ class CardInGame {
     }
 
     addEnergy(amount = 0) {
-        this.data.energy = this.data.energy + amount;
+        this.data.energy += amount;
         return this;
     }
 
     removeEnergy(amount = 0) {
-        this.data.energy = this.data.energy - amount;
+        this.data.energy -= amount;
     }
 
     wasActionUsed(actionName) {
@@ -124,11 +132,21 @@ const power = (name, effects) => ({
     cost: 0,
 });
 
-const effect = (data) => ({
+const effect = data => ({
     type: ACTION_EFFECT,
     ...data,
 });
 
+const select = data => ({
+    type: ACTION_SELECT,
+    ...data,
+});
+
+const getPropertyValue = data => ({
+    type: ACTION_GET_PROPERTY_VALUE,
+    ...data,
+});
+ 
 const cards = [
     new Card('Water of Life', TYPE_RELIC, REGION_UNIVERSAL, 0, {
         staticAbilities: [{
@@ -151,6 +169,45 @@ const cards = [
                 target: '$target',
                 amount: '$roll_result',
             }),
+        ],
+    }),
+    new Card('Giant Parathin', TYPE_CREATURE, REGION_OROTHE, 10, {
+        powers: [
+            power('Intercharge', [
+                effect({
+                    effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+                    target: '$sourceCreature',
+                }),
+                select({
+                    selector: SELECTOR_OWN_MAGI,
+                }),
+                effect({
+                    effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+                    sourceZone: ZONE_TYPE_ACTIVE_MAGI,
+                    destinationZone: ZONE_TYPE_MAGI_PILE,
+                    target: '$selected',
+                    bottom: true,
+                }),
+                select({
+                    selector: SELECTOR_TOP_MAGI_OF_PILE,
+                }),
+                effect({
+                    effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+                    sourceZone: ZONE_TYPE_MAGI_PILE,
+                    destinationZone: ZONE_TYPE_ACTIVE_MAGI,
+                    target: '$selected',
+                }),
+                getPropertyValue({
+                    property: PROPERTY_MAGI_STARTING_ENERGY,
+                    target: '$new_card',
+                    variable: 'starting_energy',
+                }),
+                effect({
+                    effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+                    target: '$new_card',
+                    amount: '$starting_energy',
+                }),
+            ]),
         ],
     }),
     new Card('Grega', TYPE_MAGI, REGION_CALD, null, {
@@ -213,11 +270,10 @@ const cards = [
                     promptType: PROMPT_TYPE_SINGLE_CREATURE,
                     variable: 'opponentCreature',
                 },
-                {
-                    type: ACTION_GET_PROPERTY_VALUE,
+                getPropertyValue({
                     target: '$yourCreature',
                     property: PROPERTY_ENERGY_COUNT,
-                },
+                }),
                 {
                     type: ACTION_CALCULATE,
                     operator: CALCULATION_DOUBLE,

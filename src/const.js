@@ -12,8 +12,10 @@ const PROPERTY_ENERGY_COUNT = 'properties/energy_count';
 const PROPERTY_REGION = 'properties/region';
 const PROPERTY_COST = 'properties/cost';
 const PROPERTY_ENERGIZE = 'properties/energize';
+const PROPERTY_MAGI_STARTING_ENERGY = 'properties/magi_starting_energy';
 
 const SELECTOR_OWN_MAGI = 'selectors/own_magi';
+const SELECTOR_TOP_MAGI_OF_PILE = 'selectors/top_magi_of_pile';
 const SELECTOR_ENEMY_MAGI = 'selectors/enemy_magi';
 const SELECTOR_CREATURES_OF_REGION = 'selectors/creatures_of_region';
 const SELECTOR_CREATURES_NOT_OF_REGION = 'selectors/creatures_not_of_region';
@@ -45,6 +47,7 @@ const EFFECT_TYPE_PLAY_CREATURE = 'effects/play_creature';
 const EFFECT_TYPE_CREATURE_ENTERS_PLAY = 'effects/creature_enters_play';
 const EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE = 'effects/paying_energy_for_creature';
 const EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE = 'effects/starting_energy_on_creature';
+const EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES = 'effects/move_card_between_zones';
 const EFFECT_TYPE_ADD_ENERGY_TO_CREATURE = 'effects/add_energy_to_creature';
 const EFFECT_TYPE_ADD_ENERGY_TO_MAGI = 'effects/add_energy_to_magi';
 const EFFECT_TYPE_ENERGIZE = 'effects/energize';
@@ -98,8 +101,10 @@ module.exports = {
     SELECTOR_CREATURES_NOT_OF_REGION,
     SELECTOR_OWN_CREATURES,
     SELECTOR_ENEMY_CREATURES,
+    SELECTOR_TOP_MAGI_OF_PILE,
 
     PROPERTY_ENERGY_COUNT,
+    PROPERTY_MAGI_STARTING_ENERGY,
     PROPERTY_REGION,
     PROPERTY_COST,
     PROPERTY_ENERGIZE,
@@ -113,6 +118,7 @@ module.exports = {
     EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
     EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
     EFFECT_TYPE_ENERGIZE,
+    EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,

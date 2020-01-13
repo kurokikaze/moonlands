@@ -34,6 +34,8 @@ const createZones = (player1, player2, creatures = [], activeMagi = []) => [
     new Zone('Player 2 discard', ZONE_TYPE_DISCARD, player2),
     new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, player1).add(activeMagi),
     new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, player2),
+    new Zone('Player 1 active magi', ZONE_TYPE_MAGI_PILE, player1),
+    new Zone('Player 2 active magi', ZONE_TYPE_MAGI_PILE, player2),
     new Zone('In play', ZONE_TYPE_IN_PLAY, null).add(creatures),
 ];
 
@@ -337,6 +339,48 @@ describe('Balamant', () => {
 
         expect(balamant.data.energy).toEqual(4, 'Balamant now has 4 energy left');
         expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toEqual(6, 'Grega now has 6 energy');
+    });
+});
+
+describe('Giant Parathin', () => {
+    it('Interchange', () => {
+        const ACTIVE_PLAYER = 5;
+        const NON_ACTIVE_PLAYER = 15;
+
+        const giantParathin = new CardInGame(byName('Giant Parathin'), ACTIVE_PLAYER).addEnergy(10);
+        const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(4);
+        const yaki = new CardInGame(byName('Yaki'), ACTIVE_PLAYER);
+        const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [giantParathin], [grega]);
+
+        const gameState = new moonlands.State({
+            zones,
+            step: STEP_PRS_SECOND,
+            activePlayer: ACTIVE_PLAYER,
+        });        
+
+        gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([yaki]);
+
+        const powerAction = {
+            type: ACTION_POWER,
+            source: giantParathin,
+            power: giantParathin.card.data.powers[0],
+            player: ACTIVE_PLAYER,
+        };
+
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One card in play');
+        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).length).toEqual(1, 'One magi is active');
+        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.card.name).toEqual('Grega', 'Grega is active Magi');
+        expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(1, 'One magi in pile');
+        expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).card.card.name).toEqual('Yaki', 'Yaki is in pile');
+
+        gameState.update(powerAction);
+
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'No cards in play');
+        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).length).toEqual(1, 'One magi is active');
+        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.card.name).toEqual('Yaki', 'Yaki is active Magi');
+        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toEqual(14, 'Yaki has 14 energy');
+        expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(1, 'One magi in pile');
+        expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).card.card.name).toEqual('Grega', 'Grega is in pile');
     });
 });
 

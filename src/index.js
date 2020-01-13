@@ -18,6 +18,7 @@ const {
     PROPERTY_REGION,
     PROPERTY_COST,
     PROPERTY_ENERGIZE,
+    PROPERTY_MAGI_STARTING_ENERGY,
 
     CALCULATION_SET,
     CALCULATION_DOUBLE,
@@ -32,6 +33,7 @@ const {
     SELECTOR_CREATURES_NOT_OF_REGION,
     SELECTOR_OWN_CREATURES,
     SELECTOR_ENEMY_CREATURES,
+    SELECTOR_TOP_MAGI_OF_PILE,
 
     PROMPT_TYPE_NUMBER,
     PROMPT_TYPE_SINGLE_CREATURE,
@@ -43,6 +45,7 @@ const {
     EFFECT_TYPE_CREATURE_ENTERS_PLAY,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
     EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
+    EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
     EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
     EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
     EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
@@ -61,6 +64,7 @@ const {
     ZONE_TYPE_IN_PLAY,
     ZONE_TYPE_DISCARD,
     ZONE_TYPE_ACTIVE_MAGI,
+    ZONE_TYPE_MAGI_PILE,
 } = require('./zone');
 
 const {CardInGame} = require('./cards');
@@ -179,6 +183,10 @@ class State {
 
     useSelector(selector, player, argument) {
         switch (selector) {
+            case SELECTOR_TOP_MAGI_OF_PILE:
+                const topMagi = this.getZone(ZONE_TYPE_MAGI_PILE, player).cards[0];
+                return [topMagi]; // Selectors always have to return array
+                break;
             case SELECTOR_OWN_MAGI:
                 return this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).cards;
                 break;
@@ -208,6 +216,8 @@ class State {
                 return target.card.data.energize;
             case PROPERTY_REGION:
                 return target.card.region;
+            case PROPERTY_MAGI_STARTING_ENERGY:
+                return target.card.data.startingEnergy;
         }
     }
 
@@ -248,7 +258,7 @@ class State {
 
                     const modifiedResult = this.modifyByStaticAbilities(target, property);
                     this.state.spellMetaData[action.generatedBy] = {
-                        ...beforeData,
+                        ...rawData,
                         [action.variable || 'result']: modifiedResult,
                     };
                     break;
@@ -370,8 +380,15 @@ class State {
                     break;
                 case ACTION_SELECT:
                     const varName = action.variable || 'selected';
-
                     switch (action.selector) {
+                        case SELECTOR_TOP_MAGI_OF_PILE:
+                            const selectedTopMagi = this.useSelector(SELECTOR_TOP_MAGI_OF_PILE, action.player);
+
+                            this.setSpellMetadata({
+                                ...this.getSpellMetadata(action.generatedBy),
+                                [varName]: selectedTopMagi,
+                            }, action.generatedBy);
+                            break;
                         case SELECTOR_OWN_MAGI:
                             const selectedOwnMagi = this.useSelector(SELECTOR_OWN_MAGI, action.player);
 
@@ -521,6 +538,33 @@ class State {
                             this.state.spellMetaData[action.generatedBy].creature_created = creature.id;
                             inPlay.add([creature]);
                             break;
+                        case EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES:
+                            /*
+                            target: CardInPlay,
+                            sourceZone: ZONE_TYPE,
+                            destinationZone: ZONE_TYPE,
+                            bottom: true / false,
+                             */
+                            const zoneChangingTarget = this.getMetaValue(action.target, action.generatedBy);
+                            const zoneChangingCard = zoneChangingTarget.length ? zoneChangingTarget[0] : zoneChangingTarget;
+                            const sourceZoneType = this.getMetaValue(action.sourceZone, action.generatedBy);
+                            const destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
+                            const destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : action.player);
+                            const sourceZone = this.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : action.player);
+                            const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner);
+                            if (action.bottom) {
+                                destinationZone.add([newObject]);
+                            } else {
+                                destinationZone.addToTop([newObject]);
+                            }
+                            sourceZone.removeById(zoneChangingCard.id);
+
+                            if (!this.state.spellMetaData[action.generatedBy]) {
+                                this.state.spellMetaData[action.generatedBy] = {};
+                            }
+
+                            this.state.spellMetaData[action.generatedBy].new_card = newObject;                            
+                            break;
                         case EFFECT_TYPE_CREATURE_ENTERS_PLAY:
                             break;
                         case EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE:
@@ -657,6 +701,7 @@ module.exports = {
     EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
     EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
     EFFECT_TYPE_ENERGIZE,
+    EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
     EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
     EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
