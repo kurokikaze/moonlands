@@ -40,7 +40,7 @@ const createZones = (player1, player2, creatures = [], activeMagi = []) => [
 ];
 
 describe('Arbolit', () => {
-    it('Healing another own creature', () => {
+    it('Healing Flame (own creature)', () => {
         const ACTIVE_PLAYER = 422;
         const NON_ACTIVE_PLAYER = 1310;
 
@@ -76,7 +76,7 @@ describe('Arbolit', () => {
         expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Arbolit', 'Card in Player 1 discard is Arbolit');
     });
 
-    it('Healing opponent creature', () => {
+    it('Healing Flame (opponent creature)', () => {
         const ACTIVE_PLAYER = 0;
         const NON_ACTIVE_PLAYER = 1;
 
@@ -110,6 +110,45 @@ describe('Arbolit', () => {
         expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(pharan.id).data.energy).toEqual(7, 'Pharan now has less than 7 energy');
         expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'One card in Player 1 discard');
         expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Arbolit', 'Card in Player 1 discard is Arbolit');
+    });
+});
+
+describe('Arboll', () => {
+    it('Life channel', () => {
+        const ACTIVE_PLAYER = 422;
+        const NON_ACTIVE_PLAYER = 1310;
+
+        const arboll = new CardInGame(byName('Arboll'), ACTIVE_PLAYER).addEnergy(2);
+        const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(5);
+        const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arboll], [grega]);
+
+        const gameState = new moonlands.State({
+            zones,
+            step: STEP_PRS_SECOND,
+            activePlayer: ACTIVE_PLAYER,
+        });
+
+        const powerAction = {
+            type: ACTION_POWER,
+            source: arboll,
+            power: arboll.card.data.powers[0],
+            player: ACTIVE_PLAYER,
+        };
+
+        const targetingAction = {
+            type: ACTION_RESOLVE_PROMPT,
+            promptType: PROMPT_TYPE_SINGLE_MAGI,
+            target: grega,
+            generatedBy: arboll.id,
+        };
+
+        gameState.update(powerAction);
+        gameState.update(targetingAction);
+
+        expect(grega.data.energy).toEqual(9, 'Grega now has 9 energy');
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'Arboll removed from play');
+        expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'One card in Player 1 discard');
+        expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Arboll', 'Card in Player 1 discard is Arboll');
     });
 });
 
