@@ -135,6 +135,22 @@ const cards = [
             modifier: a => a + 1,
         }],
     }),
+    new Card('Thermal Blast', TYPE_SPELL, REGION_CALD, 3, {
+        effects: [
+            effect({
+                effectType: EFFECT_TYPE_ROLL_DIE,
+            }),
+            {
+                type: ACTION_ENTER_PROMPT,
+                promptType: PROMPT_TYPE_SINGLE_CREATURE,
+            },
+            effect({
+                effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                target: '$target',
+                amount: '$roll_result',
+            }),
+        ],
+    }),
     new Card('Grega', TYPE_MAGI, REGION_CALD, null, {
         startingEnergy: 10,
         energize: 5,
@@ -154,7 +170,7 @@ const cards = [
                     effect({
                         effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
                         target: '$target',
-                        amount: '$die_roll',
+                        amount: '$roll_result',
                     }),
                 ],
             },
@@ -335,7 +351,7 @@ const cards = [
                     effect({
                         effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
                         target: '$selected',
-                        amount: '$number',
+                        amount: '$chosen_cost',
                     }),
                 ],
             },

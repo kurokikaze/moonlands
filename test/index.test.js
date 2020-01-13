@@ -382,6 +382,7 @@ describe('Effects', () => {
     it('Restore energy to creature [EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY]', () => {
         const activePlayer = 0;
         const arbolit = new CardInGame(byName('Arbolit'), activePlayer);
+        const fireGrag = new CardInGame(byName('Fire Grag'), activePlayer).addEnergy(10);
         arbolit.addEnergy(1);
 
         const restoreEnergyEffect = {
@@ -391,15 +392,27 @@ describe('Effects', () => {
             generatedBy: arbolit.id,
         };
 
+        const restoreEnergyEffectNotApplicable = {
+            type: moonlands.ACTION_EFFECT,
+            effectType: moonlands.EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
+            target: fireGrag,
+            generatedBy: fireGrag.id,
+        };
+
         const gameState = new moonlands.State({
             activePlayer,
         });
 
         expect(arbolit.data.energy).toEqual(1, 'Arbolit has 1 energy');
+        expect(fireGrag.data.energy).toEqual(10, 'Fire Grag has 10 energy');
 
         gameState.update(restoreEnergyEffect);
 
         expect(arbolit.data.energy).toEqual(2, 'Arbolit has 2 energy');
+
+        gameState.update(restoreEnergyEffectNotApplicable);
+
+        expect(fireGrag.data.energy).toEqual(10, 'Fire Grag has 10 energy');
     });
 
     it('Discard energy from creature [EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE]', () => {

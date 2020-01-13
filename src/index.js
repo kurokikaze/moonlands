@@ -105,7 +105,6 @@ const defaultState = {
     step: 0,
     zones: [],
     players: [],
-    spellMetaData: {},
 };
 
 const oneOrSeveral = (targets, callback) => {
@@ -123,6 +122,7 @@ class State {
     constructor(state) {
         this.state = {
             ...defaultState,
+            spellMetaData: {},
             ...state,
         };
     }
@@ -301,12 +301,21 @@ class State {
                                 {
                                     type: ACTION_ENTER_PROMPT,
                                     promptType: PROMPT_TYPE_NUMBER,
+                                    generatedBy: source.id,
+                                },
+                                {
+                                    type: ACTION_CALCULATE,
+                                    operator: CALCULATION_SET,
+                                    operandOne: '$number',
+                                    variable: 'chosen_cost',
+                                    generatedBy: source.id,
                                 },
                                 {
                                     type: ACTION_EFFECT,
                                     effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
                                     target: source,
                                     amount: '$number',
+                                    generatedBy: source.id,
                                 },
                             );
                         } else if (action.power.cost > 0) {
@@ -315,6 +324,7 @@ class State {
                                 effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
                                 target: source,
                                 amount: action.power.cost,
+                                generatedBy: source.id,
                             });
                         }
                         this.addActions(...preparedActions);
