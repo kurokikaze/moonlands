@@ -96,6 +96,7 @@ class CardInGame {
 
     addEnergy(amount = 0) {
         this.data.energy = this.data.energy + amount;
+        return this;
     }
 
     removeEnergy(amount = 0) {
