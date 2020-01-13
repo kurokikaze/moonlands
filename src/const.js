@@ -39,7 +39,8 @@ const REGION_PARADWYN = 'regions/paradwyn';
 const REGION_D_RESH = 'regions/d_resh';
 const REGION_UNIVERSAL = 'regions/universal';
 
-const EFFECT_TYPE_ROLL_DIE = 'effects/roll_die'; 
+const EFFECT_TYPE_ROLL_DIE = 'effects/roll_die';
+const EFFECT_TYPE_MOVE_ENERGY = 'effects/move_energy';
 const EFFECT_TYPE_PLAY_CREATURE = 'effects/play_creature';
 const EFFECT_TYPE_CREATURE_ENTERS_PLAY = 'effects/creature_enters_play';
 const EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE = 'effects/paying_energy_for_creature';
@@ -103,6 +104,7 @@ module.exports = {
     PROPERTY_COST,
     PROPERTY_ENERGIZE,
 
+    EFFECT_TYPE_MOVE_ENERGY,
     EFFECT_TYPE_ROLL_DIE,
     EFFECT_TYPE_PLAY_CREATURE,
     EFFECT_TYPE_CREATURE_ENTERS_PLAY,

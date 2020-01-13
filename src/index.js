@@ -37,6 +37,7 @@ const {
     PROMPT_TYPE_SINGLE_CREATURE,
     PROMPT_TYPE_SINGLE_MAGI,
 
+    EFFECT_TYPE_MOVE_ENERGY,
     EFFECT_TYPE_ROLL_DIE,
     EFFECT_TYPE_PLAY_CREATURE,
     EFFECT_TYPE_CREATURE_ENTERS_PLAY,
@@ -532,6 +533,14 @@ class State {
                                 generatedBy: action.generatedBy,
                             });
                             break;
+                        case EFFECT_TYPE_MOVE_ENERGY:
+                            const moveSource = this.getMetaValue(action.source, action.generatedBy);
+                            const moveTarget = this.getMetaValue(action.target, action.generatedBy);
+                            const amountToMove = this.getMetaValue(action.amount, action.generatedBy);
+
+                            moveSource.removeEnergy(amountToMove);
+                            moveTarget.addEnergy(amountToMove);
+                            break;
                         case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI:
                             const discardMiltiTarget = this.getMetaValue(action.target, action.generatedBy);
 
@@ -610,7 +619,7 @@ class State {
                             break;
                         case EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY:
                             const creatureDiscardTarget = this.getMetaValue(action.target, action.generatedBy);
-                            const discardPile = this.getZone(ZONE_TYPE_DISCARD, action.player);
+                            const discardPile = this.getZone(ZONE_TYPE_DISCARD, creatureDiscardTarget.owner);
                             oneOrSeveral(creatureDiscardTarget, creature => {
                                 const cardInDiscard = new CardInGame(creature.card, creature.owner);
                                 discardPile.add([cardInDiscard]);
@@ -640,6 +649,7 @@ module.exports = {
     PROMPT_TYPE_NUMBER,
     PROMPT_TYPE_SINGLE_CREATURE,
     PROMPT_TYPE_SINGLE_MAGI,
+    EFFECT_TYPE_MOVE_ENERGY,
     EFFECT_TYPE_PLAY_CREATURE,
     EFFECT_TYPE_CREATURE_ENTERS_PLAY,
     EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,

@@ -15,6 +15,7 @@ const {
     ACTION_RESOLVE_PROMPT,
 
     PROMPT_TYPE_SINGLE_CREATURE,
+    PROMPT_TYPE_SINGLE_MAGI,
 
     STEP_ENERGIZE,
     STEP_PRS_FIRST,
@@ -107,6 +108,45 @@ describe('Arbolit', () => {
         expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(pharan.id).data.energy).toEqual(7, 'Pharan now has less than 7 energy');
         expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'One card in Player 1 discard');
         expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Arbolit', 'Card in Player 1 discard is Arbolit');
+    });
+});
+
+describe('Great Carillion', () => {
+    it('Stomp', () => {
+        const ACTIVE_PLAYER = 422;
+        const NON_ACTIVE_PLAYER = 1310;
+
+        const greatCarillion = new CardInGame(byName('Great Carillion'), ACTIVE_PLAYER).addEnergy(8);
+        const pharan = new CardInGame(byName('Pharan'), NON_ACTIVE_PLAYER).addEnergy(2);
+        const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [greatCarillion, pharan]);
+
+        const gameState = new moonlands.State({
+            zones,
+            step: STEP_PRS_SECOND,
+            activePlayer: ACTIVE_PLAYER,
+        });
+
+        const powerAction = {
+            type: ACTION_POWER,
+            source: greatCarillion,
+            power: greatCarillion.card.data.powers[0],
+            player: ACTIVE_PLAYER,
+        };
+
+        const targetingAction = {
+            type: ACTION_RESOLVE_PROMPT,
+            promptType: PROMPT_TYPE_SINGLE_CREATURE,
+            target: pharan,
+            generatedBy: greatCarillion.id,
+        };
+
+        gameState.update(powerAction);
+        gameState.update(targetingAction);
+
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'Only one creature in play');
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Great Carillion', 'It is Great Carillion');
+        expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1, 'One card in Player 2 discard');
+        expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Pharan', 'It is Pharan');
     });
 });
 
@@ -252,12 +292,132 @@ describe('Diobor', () => {
             type: ACTION_RESOLVE_PROMPT,
             number: 3,
             generatedBy: diobor.id,
-        }
+        };
 
         gameState.update(powerAction);
         gameState.update(costChoiceAction);
 
         expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(diobor.id).data.energy).toEqual(3, 'Diobor now has 3 energy left');
         expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toEqual(13, 'Grega now has 13 energy');
+    });
+});
+
+describe('Balamant', () => {
+    it('Hunt', () => {
+        const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 1;
+
+        const balamant = new CardInGame(byName('Balamant'), ACTIVE_PLAYER).addEnergy(6);
+        const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+
+        const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [balamant], [grega]);
+
+        const gameState = new moonlands.State({
+            zones,
+            step: STEP_PRS_SECOND,
+            activePlayer: ACTIVE_PLAYER,
+        });        
+
+        const powerAction = {
+            type: ACTION_POWER,
+            source: balamant,
+            power: balamant.card.data.powers[0],
+            player: ACTIVE_PLAYER,
+        };
+
+        const targetingAction = {
+            type: ACTION_RESOLVE_PROMPT,
+            promptType: PROMPT_TYPE_SINGLE_MAGI,
+            target: grega,
+            generatedBy: balamant.id,
+        };
+
+        gameState.update(powerAction);
+        gameState.update(targetingAction);
+
+        expect(balamant.data.energy).toEqual(4, 'Balamant now has 4 energy left');
+        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toEqual(6, 'Grega now has 6 energy');
+    });
+});
+
+describe('Cave Hyren', () => {
+    it('Energy Transfer', () => {
+        const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 1;
+
+        const caveHyren = new CardInGame(byName('Cave Hyren'), ACTIVE_PLAYER).addEnergy(5);
+        const fireGrag = new CardInGame(byName('Fire Grag'), ACTIVE_PLAYER).addEnergy(2);
+        const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [caveHyren, fireGrag]);
+
+        const gameState = new moonlands.State({
+            zones,
+            step: STEP_PRS_SECOND,
+            activePlayer: ACTIVE_PLAYER,
+        });        
+
+        const powerAction = {
+            type: ACTION_POWER,
+            source: caveHyren,
+            power: caveHyren.card.data.powers[0],
+            player: ACTIVE_PLAYER,
+        };
+
+        const costChoiceAction = {
+            type: ACTION_RESOLVE_PROMPT,
+            number: 3,
+            generatedBy: caveHyren.id,
+        };
+
+        const targetingAction = {
+            type: ACTION_RESOLVE_PROMPT,
+            promptType: PROMPT_TYPE_SINGLE_CREATURE,
+            target: fireGrag,
+            generatedBy: caveHyren.id,
+        };
+
+        gameState.update(powerAction);
+        gameState.update(costChoiceAction);
+        gameState.update(targetingAction);
+
+        expect(caveHyren.data.energy).toEqual(2, 'Cave Hyren now has 2 energy');
+        expect(fireGrag.data.energy).toEqual(5, 'Fire Grag restored to 5 energy');
+    });
+});
+
+describe('Drakan', () => {
+    it('Thermal Blast', () => {
+        const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 1;
+
+        const drakan = new CardInGame(byName('Drakan'), ACTIVE_PLAYER).addEnergy(6);
+        const caveHyren = new CardInGame(byName('Cave Hyren'), ACTIVE_PLAYER).addEnergy(7);
+        const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [drakan, caveHyren]);
+
+        const gameState = new moonlands.State({
+            zones,
+            step: STEP_PRS_SECOND,
+            activePlayer: ACTIVE_PLAYER,
+        });        
+
+        const powerAction = {
+            type: ACTION_POWER,
+            source: drakan,
+            power: drakan.card.data.powers[0],
+            player: ACTIVE_PLAYER,
+        };
+
+        const targetingAction = {
+            type: ACTION_RESOLVE_PROMPT,
+            promptType: PROMPT_TYPE_SINGLE_CREATURE,
+            target: caveHyren,
+            generatedBy: drakan.id,
+        };
+
+        gameState.update(powerAction);
+        gameState.update(targetingAction);
+
+        expect(caveHyren.data.energy).toBeLessThan(7, 'Cave Hyren now has <7 energy');
+        expect(caveHyren.data.energy).toBeGreaterThan(0, 'Cave Hyren now has >0 energy');
+        expect(drakan.data.energy).toEqual(3, 'Drakan has now 3 energy');
     });
 });

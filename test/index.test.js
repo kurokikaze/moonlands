@@ -438,6 +438,29 @@ describe('Effects', () => {
         expect(arbolit.data.energy).toEqual(3, 'Arbolit has 3 energy');
     });
 
+    it('Moving energy from creature to creature [EFFECT_TYPE_MOVE_ENERGY]', () => {
+        const activePlayer = 0;
+        const arbolit = new CardInGame(byName('Arbolit'), activePlayer).addEnergy(5);
+        const fireGrag = new CardInGame(byName('Fire Grag'), activePlayer).addEnergy(10);
+
+        const discardEnergyEffect = {
+            type: moonlands.ACTION_EFFECT,
+            effectType: moonlands.EFFECT_TYPE_MOVE_ENERGY,
+            source: fireGrag,
+            target: arbolit,
+            amount: 4,
+        };
+
+        const gameState = new moonlands.State({
+            activePlayer,
+        });
+
+        gameState.update(discardEnergyEffect);
+
+        expect(arbolit.data.energy).toEqual(9, 'Arbolit has 9 energy');
+        expect(fireGrag.data.energy).toEqual(6, 'Fire Grag has 6 energy');
+    });
+
     it('Putting creature into play [EFFECT_TYPE_PLAY_CREATURE]', () => {
         const activePlayer = 0;
         const arbolit = byName('Arbolit');

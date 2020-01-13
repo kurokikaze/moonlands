@@ -47,6 +47,8 @@ const {
     EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
     EFFECT_TYPE_ENERGIZE,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+    EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+    EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
     EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
     EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
 
@@ -235,31 +237,73 @@ const cards = [
         }],
     }),
     new Card('Green Stuff', TYPE_CREATURE, REGION_BOGRATH, 0, {energize: 1}),
-    new Card('Quor Pup', TYPE_CREATURE, REGION_CALD, 2),
-    new Card('Fire Flow', TYPE_SPELL, REGION_CALD, 1),
-    new Card('Pharan', TYPE_CREATURE, REGION_ARDERIAL, 3, {
+    new Card('Great Carillion', TYPE_CREATURE, REGION_NAROOM, 8, {
         powers: [
+            {
+                name: 'Stomp',
+                cost: 6,
+                effects: [
+                    {
+                        type: ACTION_ENTER_PROMPT,
+                        promptType: PROMPT_TYPE_SINGLE_CREATURE,
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+                        target: '$target',
+                    }),                    
+                ],
+            },
+        ],
+    }),
+    new Card('Quor Pup', TYPE_CREATURE, REGION_CALD, 2),
+    new Card('Fire Flow', TYPE_SPELL, REGION_CALD, 1, {
+        effects: [
+            {
+                type: ACTION_ENTER_PROMPT,
+                promptType: PROMPT_TYPE_SINGLE_CREATURE,
+            },
+        ],
+    }),
+    new Card('Fire Ball', TYPE_SPELL, REGION_CALD, 2, {
+       effects: [
             {
                 type: ACTION_ENTER_PROMPT,
                 promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
             },
+            effect({
+                effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
+                target: '$target',
+                amount: '2',
+            }),
+       ],
+    }),
+    new Card('Pharan', TYPE_CREATURE, REGION_ARDERIAL, 3, {
+        powers: [
             {
-                type: ACTION_GET_PROPERTY_VALUE,
-                target: '$yourCreature',
-                property: PROPERTY_ENERGY_COUNT,
-                variable: 'energyToRestore',
+                name: 'Healing Rain',
+                effects: [
+                    {
+                        type: ACTION_ENTER_PROMPT,
+                        promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+                    },
+                    {
+                        type: ACTION_GET_PROPERTY_VALUE,
+                        target: '$yourCreature',
+                        property: PROPERTY_ENERGY_COUNT,
+                        variable: 'energyToRestore',
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+                        target: '$sourceCreature',
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+                        target: '$targetMagi',
+                        amount: '$energyToRestore',
+                    }),
+                ],
             },
-            effect({
-                effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-                target: '$sourceCreature',
-            }),
-            effect({
-                effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
-                target: '$targetMagi',
-                amount: '$energyToRestore',
-            }),
         ],
-
     }),
     new Card('Fire Chogo', TYPE_CREATURE, REGION_CALD, 2, {
         powers: [
@@ -269,6 +313,11 @@ const cards = [
                     selector: SELECTOR_CREATURES_NOT_OF_REGION,
                     region: REGION_CALD,
                 },
+                effect({
+                    effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+                    target: '$sourceCreature',
+                    amount: 1,
+                }),
                 effect({
                     effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
                     target: '$selected',
@@ -320,6 +369,25 @@ const cards = [
             },
         ],
     }),
+    new Card('Balamant', TYPE_CREATURE, REGION_NAROOM, 6, {
+        powers: [
+            {
+                name: 'Hunt',
+                cost: 2,
+                effects: [
+                    {
+                        type: ACTION_ENTER_PROMPT,
+                        promptType: PROMPT_TYPE_SINGLE_MAGI,
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+                        target: '$targetMagi',
+                        amount: 4,
+                    }),
+                ],
+            },
+        ],
+    }),
     new Card('Diobor', TYPE_CREATURE, REGION_CALD, 6, {
         powers: [
             {
@@ -351,6 +419,47 @@ const cards = [
                     effect({
                         effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
                         target: '$selected',
+                        amount: '$chosen_cost',
+                    }),
+                ],
+            },
+        ],
+    }),
+    new Card('Drakan', TYPE_CREATURE, REGION_CALD, 6, {
+        powers: [
+            {
+                name: 'Thermal Blast',
+                cost: 3,
+                effects: [
+                    effect({
+                        effectType: EFFECT_TYPE_ROLL_DIE,
+                    }),
+                    {
+                        type: ACTION_ENTER_PROMPT,
+                        promptType: PROMPT_TYPE_SINGLE_CREATURE,
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                        target: '$target',
+                        amount: '$roll_result',
+                    }),
+                ],
+            },
+        ],
+    }),
+    new Card('Cave Hyren', TYPE_CREATURE, REGION_UNDERNEATH, 5, {
+        powers: [
+            {
+                name: 'Energy Transfer',
+                cost: COST_X,
+                effects: [
+                    {
+                        type: ACTION_ENTER_PROMPT,
+                        promptType: PROMPT_TYPE_SINGLE_CREATURE,
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+                        target: '$target',
                         amount: '$chosen_cost',
                     }),
                 ],
