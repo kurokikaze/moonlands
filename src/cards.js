@@ -19,6 +19,7 @@ const {
     PROPERTY_COST,
     PROPERTY_ENERGIZE,
     PROPERTY_MAGI_STARTING_ENERGY,
+    PROPERTY_ATTACKS_PER_TURN,
 
     REGION_ARDERIAL,
     REGION_CALD,
@@ -87,7 +88,7 @@ class Card {
         this.region = region;
         this.cost = cost;
         this.data = {
-            attacksInTurn: 1,
+            attacksPerTurn: 1,
             ...data,
         };
     }
@@ -134,10 +135,6 @@ class CardInGame {
 
     markAttackReceived() {
         this.data.wasAttacked = true;
-    }
-
-    canAttack() {
-        return this.data.attacked < this.card.data.attacksInTurn;
     }
 
     // In future, refer to actions by ID, not name
@@ -222,6 +219,9 @@ const cards = [
                 amount: '$roll_result',
             }),
         ],
+    }),
+    new Card('Ayebaw', TYPE_CREATURE, REGION_ARDERIAL, 5, {
+        attacksPerTurn: 2,
     }),
     new Card('Paralit', TYPE_CREATURE, REGION_OROTHE, 3, {
         powers: [
@@ -724,6 +724,13 @@ const cards = [
         startingEnergy: 14,
         energize: 5,
         startingCards: ['Arboll', 'Weebo', 'Furok', 'Grow'],
+        staticAbilities: [
+            {
+                selector: SELECTOR_OWN_CREATURES,
+                property: PROPERTY_ATTACKS_PER_TURN,
+                modifier: a => 2,
+            },
+        ],
     }),
     new Card('Arboll', TYPE_CREATURE, REGION_NAROOM, 3, {
         powers: [

@@ -1331,4 +1331,40 @@ describe('Attacking', () => {
         expect(leafHyren.data.energy).toEqual(5, 'Leaf Hyren still has 5 energy');
         expect(grega.data.energy).toEqual(5, 'Grega has 5 energy left');
     });
+
+    it('Most creatures can attack only once', () => {
+        const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 1;
+        const leafHyren = new CardInGame(byName('Leaf Hyren'), ACTIVE_PLAYER);
+        leafHyren.addEnergy(5);
+        const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER);
+        grega.addEnergy(10);
+
+        const gameState = new moonlands.State({
+            zones: [
+                new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+                new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+                new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([leafHyren]),
+            ],
+            step: STEP_ATTACK,
+            activePlayer: ACTIVE_PLAYER,
+        });
+
+        const attackAction = {
+            type: moonlands.ACTION_ATTACK,
+            source: leafHyren,
+            target: grega,
+        };
+
+        gameState.update(attackAction);
+
+        expect(leafHyren.data.energy).toEqual(5, 'Leaf Hyren still has 5 energy');
+        expect(grega.data.energy).toEqual(5, 'Grega has 5 energy left');
+
+        gameState.update(attackAction);
+
+        expect(leafHyren.data.energy).toEqual(5, 'Leaf Hyren still has 5 energy');
+        expect(grega.data.energy).toEqual(5, 'Grega has 5 energy left (second attack wasnt made)');
+    });
 });

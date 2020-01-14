@@ -16,14 +16,14 @@ const {
 
     PROMPT_TYPE_SINGLE_CREATURE,
     PROMPT_TYPE_SINGLE_MAGI,
-
-    STEP_ENERGIZE,
-    STEP_PRS_FIRST,
-    STEP_ATTACK,
-    STEP_CREATURES,
-    STEP_PRS_SECOND,
-    STEP_DRAW,
 } = require('../src/const');
+
+const STEP_ENERGIZE = 0;
+const STEP_PRS_FIRST = 1;
+const STEP_ATTACK = 2;
+const STEP_CREATURES = 3;
+const STEP_PRS_SECOND = 4;
+const STEP_DRAW = 5;
 
 const createZones = (player1, player2, creatures = [], activeMagi = []) => [
     new Zone('Player 1 hand', ZONE_TYPE_HAND, player1),
@@ -419,6 +419,49 @@ describe('Drakan', () => {
         expect(caveHyren.data.energy).toBeLessThan(7, 'Cave Hyren now has <7 energy');
         expect(caveHyren.data.energy).toBeGreaterThan(0, 'Cave Hyren now has >0 energy');
         expect(drakan.data.energy).toEqual(3, 'Drakan has now 3 energy');
+    });
+});
+
+describe('Ayebaw', () => {
+    it('can attack twice per turn', () => {
+        const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 1;
+        const ayebaw = new CardInGame(byName('Ayebaw'), ACTIVE_PLAYER);
+        ayebaw.addEnergy(2);
+        const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER);
+        grega.addEnergy(10);
+
+        const gameState = new moonlands.State({
+            zones: [
+                new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+                new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+                new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([ayebaw]),
+            ],
+            step: STEP_ATTACK,
+            activePlayer: ACTIVE_PLAYER,
+        });
+
+        const attackAction = {
+            type: moonlands.ACTION_ATTACK,
+            source: ayebaw,
+            target: grega,
+        };
+
+        gameState.update(attackAction);
+
+        expect(ayebaw.data.energy).toEqual(2, 'Ayebaw still has 2 energy');
+        expect(grega.data.energy).toEqual(8, 'Grega has 8 energy left');
+
+        gameState.update(attackAction);
+
+        expect(ayebaw.data.energy).toEqual(2, 'Ayebaw still has 2 energy');
+        expect(grega.data.energy).toEqual(6, 'Grega has 6 energy left (second attack connected)');
+
+        gameState.update(attackAction);
+
+        expect(ayebaw.data.energy).toEqual(2, 'Ayebaw still has 2 energy');
+        expect(grega.data.energy).toEqual(6, 'Grega has 6 energy left (third attack did not happen)');
     });
 });
 

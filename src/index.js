@@ -20,6 +20,7 @@ const {
     PROPERTY_COST,
     PROPERTY_ENERGIZE,
     PROPERTY_MAGI_STARTING_ENERGY,
+    PROPERTY_ATTACKS_PER_TURN,
 
     CALCULATION_SET,
     CALCULATION_DOUBLE,
@@ -229,6 +230,8 @@ class State {
 
     getByProperty(target, property) {
         switch(property) {
+            case PROPERTY_ATTACKS_PER_TURN:
+                return target.card.data.attacksPerTurn;
             case PROPERTY_COST:
                 return target.card.cost;
             case PROPERTY_ENERGIZE:
@@ -283,35 +286,42 @@ class State {
                     */
                     const attackSource = this.getMetaValue(action.source, action.generatedBy);
                     const attackTarget = this.getMetaValue(action.target, action.generatedBy);
-                    const attackSequence = [
-                    {
-                        type: ACTION_EFFECT,
-                        effectType: EFFECT_TYPE_BEFORE_DAMAGE,
-                        source: attackSource,
-                        target: attackTarget,
-                    },
-                    {  // from source to target
-                        type: ACTION_EFFECT,
-                        effectType: EFFECT_TYPE_DEAL_DAMAGE,
-                        source: attackSource,
-                        target: attackTarget,
-                        amount: attackSource.data.energy,
-                    }, // from target to source (if attacking a creature)
-                    (attackTarget.card.type === TYPE_CREATURE) ? {
-                        type: ACTION_EFFECT,
-                        effectType: EFFECT_TYPE_DEAL_DAMAGE,
-                        source: attackTarget,
-                        target: attackSource,
-                        amount: attackTarget.data.energy,
-                    } : null,
-                    {
-                        type: ACTION_EFFECT,
-                        effectType: EFFECT_TYPE_AFTER_DAMAGE,
-                        source: attackSource,
-                        target: attackTarget,
-                    },
-                    ].filter(Boolean);
-                    this.transformIntoActions(...attackSequence);
+
+                    const sourceAttacksPerTurn = this.modifyByStaticAbilities(attackSource, PROPERTY_ATTACKS_PER_TURN);
+                    const sourceCanAttack = attackSource.data.attacked < sourceAttacksPerTurn;
+
+                    if (sourceCanAttack && this.getCurrentPriority() == PRIORITY_ATTACK) {
+                        const attackSequence = [
+                        {
+                            type: ACTION_EFFECT,
+                            effectType: EFFECT_TYPE_BEFORE_DAMAGE,
+                            source: attackSource,
+                            target: attackTarget,
+                        },
+                        {  // from source to target
+                            type: ACTION_EFFECT,
+                            effectType: EFFECT_TYPE_DEAL_DAMAGE,
+                            source: attackSource,
+                            target: attackTarget,
+                            amount: attackSource.data.energy,
+                        }, // from target to source (if attacking a creature)
+                        (attackTarget.card.type === TYPE_CREATURE) ? {
+                            type: ACTION_EFFECT,
+                            effectType: EFFECT_TYPE_DEAL_DAMAGE,
+                            source: attackTarget,
+                            target: attackSource,
+                            amount: attackTarget.data.energy,
+                        } : null,
+                        {
+                            type: ACTION_EFFECT,
+                            effectType: EFFECT_TYPE_AFTER_DAMAGE,
+                            source: attackSource,
+                            target: attackTarget,
+                        },
+                        ].filter(Boolean);
+
+                        this.transformIntoActions(...attackSequence);
+                    }
                     break;
                 case ACTION_GET_PROPERTY_VALUE:
                     const target = this.getMetaValue(action.target, action.generatedBy);

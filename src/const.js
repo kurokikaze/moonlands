@@ -14,6 +14,7 @@ const PROPERTY_REGION = 'properties/region';
 const PROPERTY_COST = 'properties/cost';
 const PROPERTY_ENERGIZE = 'properties/energize';
 const PROPERTY_MAGI_STARTING_ENERGY = 'properties/magi_starting_energy';
+const PROPERTY_ATTACKS_PER_TURN = 'properties/attacks_per_turn';
 
 const SELECTOR_CREATURES = 'selectors/creatures';
 const SELECTOR_CREATURES_AND_MAGI = 'selectors/creatures_and_magi';
@@ -129,6 +130,7 @@ module.exports = {
     PROPERTY_REGION,
     PROPERTY_COST,
     PROPERTY_ENERGIZE,
+    PROPERTY_ATTACKS_PER_TURN,
 
     EFFECT_TYPE_MOVE_ENERGY,
     EFFECT_TYPE_ROLL_DIE,
