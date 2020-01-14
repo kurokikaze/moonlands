@@ -1,4 +1,4 @@
-Done: **26** cards out of **190**
+Done: **31** cards out of **190**
 
 # Done, tested
 
@@ -15,6 +15,7 @@ Done: **26** cards out of **190**
 - Weebo
 - Ayebaw
 - Yaki
+
 # Done, not tested
 
 - Fire Chogo
