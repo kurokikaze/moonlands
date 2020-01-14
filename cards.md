@@ -1,4 +1,4 @@
-Done: 22 cards out of 190
+Done: 26 cards out of 190
 
 # Done, tested
 
