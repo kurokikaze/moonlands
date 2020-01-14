@@ -1,4 +1,4 @@
-Done: 26 cards out of 190
+Done: **26** cards out of **190**
 
 # Done, tested
 
@@ -19,12 +19,10 @@ Done: 26 cards out of 190
 - Fire Chogo
 - Fire Flow
 - Fire Grag
-- Green Stuff [~]
 - Pharan
 - Thermal Blast
 - Water of Life
 - Leaf Hyren
-- Thermal Blast
 - Deep Hyren
 - Kelthet
 - Lava Aq
@@ -32,15 +30,58 @@ Done: 26 cards out of 190
 - Magam
 - Pruitt
 - Poad
+- Timber Hyren
+- Grow
+- Flame Geyser
+- Syphon Stone
+
+# Possible sample decks:
+
+## Cald (+ Underneath splash)
+Grega
+Magam
+? (Sinder)
+3 Fire Chogo
+3 Fire Grag
+3 Arbolit
+3 ? (Magma Hyren)
+3 Kelthet
+3 Lava Aq
+3 Lava Arboll
+3 Diobor
+3 Drakan
+3 Thermal Blast
+3 Flame Geyser
+3 Cave Hyren
+3 Fire Flow
+1 ?
+
+## Naroom (+ Orothe splash)
+
+Pruitt
+Poad
+? (Tryn)
+3 Leaf Hyren
+3 Weebo
+3 Arboll
+3 Great Carillion
+3 Timber Hyren
+3 Balamant
+3 Grow
+3 Giant Parathin
+3 Syphon Stone
+3 ?
+3 ?
+3 ?
+3 ?
+1 ?
 
 # Not done yet
 
 - Cyclone Vashp
-- Flame Geyser
 - Flood of Energy
 - Greater Vaal (maybe action of rolling N dice?)
 - Ground Breaker
-- Grow
 - Gruk
 - Lightning Hyren
 - Magma Hyren
@@ -54,9 +95,7 @@ Done: 26 cards out of 190
 - Sinder
 - Storm Cloud
 - Submerge
-- Syphon Stone
 - Tap Roots (will benefit from prompt texts)
-- Timber Hyren
 - Trug
 - Tryn
 - Typhoon

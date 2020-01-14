@@ -12,6 +12,7 @@ const {
     CALCULATION_SUBTRACT,
     CALCULATION_HALVE_ROUND_DOWN,
     CALCULATION_HALVE_ROUND_UP,
+    CALCULATION_MIN,
 
     PROPERTY_ENERGY_COUNT,
     PROPERTY_REGION,
@@ -34,6 +35,7 @@ const {
 
     SELECTOR_OWN_MAGI,
     SELECTOR_ENEMY_MAGI,
+    SELECTOR_CREATURES_AND_MAGI,
     SELECTOR_CREATURES_OF_REGION,
     SELECTOR_CREATURES_NOT_OF_REGION,
     SELECTOR_OWN_CREATURES,
@@ -43,6 +45,7 @@ const {
 
     EFFECT_TYPE_ROLL_DIE,
     EFFECT_TYPE_PLAY_CREATURE,
+    EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
     EFFECT_TYPE_CREATURE_ENTERS_PLAY,
     EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
     EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
@@ -198,6 +201,35 @@ const cards = [
             }),
         ],
     }),
+    new Card('Paralit', TYPE_CREATURE, REGION_OROTHE, 3, {
+        powers: [
+            {
+                name: 'Life Channel', 
+                effects: [
+                    effect({
+                        effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+                        target: '$sourceCreature',
+                    }),
+                    select({
+                        selector: SELECTOR_OWN_MAGI,
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+                        target: '$selected',
+                        amount: 5,
+                    }),
+                    select({
+                        selector: SELECTOR_OWN_CREATURES,
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                        target: '$selected',
+                        amount: 1,
+                    }),
+                ],
+            },
+        ],
+    }),
     new Card('Giant Parathin', TYPE_CREATURE, REGION_OROTHE, 10, {
         powers: [
             power('Intercharge', [
@@ -277,21 +309,19 @@ const cards = [
                         effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
                         target: '$target',
                     }),
-                    {
-                        type: ACTION_SELECT,
+                    select({
                         selector: SELECTOR_CREATURES_NOT_OF_REGION,
                         region: REGION_OROTHE,
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
                         target: '$selected',
                         amount: 3,
                     }),
-                    {
-                        type: ACTION_SELECT,
+                    select({
                         selector: SELECTOR_MAGI_NOT_OF_REGION,
                         region: REGION_OROTHE,
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
                         target: '$selected',
@@ -410,9 +440,27 @@ const cards = [
                 promptType: PROMPT_TYPE_SINGLE_CREATURE,
             },
             {
+                type: ACTION_SELECT,
+                selector: SELECTOR_OWN_MAGI,
+            },
+            {
+                type: ACTION_GET_PROPERTY_VALUE,
+                target: '$selected',
+                property: PROPERTY_ENERGY_COUNT,
+                variable: 'magi_energy',
+            },
+            {
+                type: ACTION_CALCULATE,
+                operator: CALCULATION_MIN,
+                operandOne: '$magi_energy',
+                operandTwo: 4,
+                variable: 'max_amount',
+            },
+            {
                 type: ACTION_ENTER_PROMPT,
                 promptType: PROMPT_TYPE_NUMBER,
-                // Here we need min and max values
+                min: 1,
+                max: '$max_amount',
             },
             select({
                 selector: SELECTOR_OWN_MAGI,
@@ -559,13 +607,33 @@ const cards = [
                 cost: 2,
                 effects: [
                     {
+                        type: ACTION_SELECT,
+                        selector: SELECTOR_OWN_MAGI,
+                    },
+                    {
+                        type: ACTION_GET_PROPERTY_VALUE,
+                        target: '$selected',
+                        property: PROPERTY_ENERGY_COUNT,
+                        variable: 'magi_energy',
+                    },
+                    {
+                        type: ACTION_CALCULATE,
+                        operator: CALCULATION_MIN,
+                        operandOne: '$magi_energy',
+                        operandTwo: 7,
+                        variable: 'max_tribute',
+                    },
+                    {
                         type: ACTION_ENTER_PROMPT,
-                        promptType: PROMPT_TYPE_SINGLE_CREATURE,
+                        promptType: PROMPT_TYPE_NUMBER,
+                        min: 1,
+                        max: '$max_tribute',
                     },
                     effect({
-                        effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
-                        target: '$target',
-                        amount: 3,
+                        effectType: EFFECT_TYPE_MOVE_ENERGY,
+                        source: '$selected',
+                        target: '$sourceCreature',
+                        amount: '$number',
                     }),
                 ],
             },
@@ -591,6 +659,22 @@ const cards = [
                     }),
                 ],
             },
+        ],
+    }),
+    new Card('Timber Hyren', TYPE_CREATURE, REGION_NAROOM, 7, {
+        powers: [
+            power('Tribute', [
+                    {
+                        type: ACTION_SELECT,
+                        selector: SELECTOR_OWN_CREATURES,
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+                        target: '$selected',
+                        amount: 1,
+                    }),
+
+            ]),
         ],
     }),
     new Card('Fire Chogo', TYPE_CREATURE, REGION_CALD, 2, {
@@ -773,8 +857,52 @@ const cards = [
             },
         ],
     }),
-    new Card('Furok', TYPE_CREATURE, REGION_NAROOM, 4),
-    new Card('Grow', TYPE_SPELL, REGION_NAROOM, 3),
+    new Card('Flame Geyser', TYPE_SPELL, REGION_CALD, 7, {
+        effects: [
+            {
+                type: ACTION_SELECT,
+                selector: SELECTOR_CREATURES_AND_MAGI,
+            },
+            effect({
+                effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
+                target: '$selected',
+            }),
+        ],
+    }),
+    new Card('Syphon Stone', TYPE_RELIC, REGION_UNIVERSAL, 0, {
+        powers: [
+            power('Syphon', [
+                {
+                    type: ACTION_ENTER_PROMPT,
+                    promptType: PROMPT_TYPE_SINGLE_CREATURE,
+                },
+                effect({
+                    effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
+                    target: '$source',
+                }),
+                effect({
+                    effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                    target: '$target',
+                }),
+            ]),
+        ],
+    }),
+    new Card('Grow', TYPE_SPELL, REGION_NAROOM, 3, {
+        effects: [
+            effect({
+                effectType: EFFECT_TYPE_ROLL_DIE,
+            }),
+            {
+                type: ACTION_ENTER_PROMPT,
+                promptType: PROMPT_TYPE_SINGLE_CREATURE,
+            },
+            effect({
+                effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+                target: '$target',
+                amount: '$roll_result',
+            }),
+        ],
+    }),
 ]
 
 const byName = name => cards.find(card => card.name === name);

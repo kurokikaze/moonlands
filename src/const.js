@@ -14,6 +14,8 @@ const PROPERTY_COST = 'properties/cost';
 const PROPERTY_ENERGIZE = 'properties/energize';
 const PROPERTY_MAGI_STARTING_ENERGY = 'properties/magi_starting_energy';
 
+const SELECTOR_CREATURES = 'selectors/creatures';
+const SELECTOR_CREATURES_AND_MAGI = 'selectors/creatures_and_magi';
 const SELECTOR_OWN_MAGI = 'selectors/own_magi';
 const SELECTOR_TOP_MAGI_OF_PILE = 'selectors/top_magi_of_pile';
 const SELECTOR_ENEMY_MAGI = 'selectors/enemy_magi';
@@ -30,6 +32,8 @@ const CALCULATION_ADD = 'calculations/add';
 const CALCULATION_SUBTRACT = 'calculations/subtract';
 const CALCULATION_HALVE_ROUND_DOWN = 'calculations/halve_round_down';
 const CALCULATION_HALVE_ROUND_UP = 'calculations/halve_round_up';
+const CALCULATION_MIN = 'calculations/min';
+const CALCULATION_MAX = 'calculations/max';
 
 const REGION_ARDERIAL = 'regions/arderial';
 const REGION_CALD = 'regions/cald';
@@ -60,6 +64,7 @@ const EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY = 'effects/discard_creature_from_pl
 const EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI = 'effects/discard_energy_from_creature_or_magi';
 const EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY = 'effects/restore_creature_to_starting_energy';
 const EFFECT_TYPE_PAYING_ENERGY_FOR_POWER = 'effects/paying_energy_for_power';
+const EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY = 'effects/discard_relic_from_play';
 
 const PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI = 'prompt/creature_or_magi';
 const PROMPT_TYPE_SINGLE_CREATURE = 'prompt/creature';
@@ -98,11 +103,15 @@ module.exports = {
     CALCULATION_SUBTRACT,
     CALCULATION_HALVE_ROUND_DOWN,
     CALCULATION_HALVE_ROUND_UP,
+    CALCULATION_MIN,
+    CALCULATION_MAX,
 
+    SELECTOR_CREATURES,
     SELECTOR_OWN_MAGI,
     SELECTOR_ENEMY_MAGI,
     SELECTOR_CREATURES_OF_REGION,
     SELECTOR_CREATURES_NOT_OF_REGION,
+    SELECTOR_CREATURES_AND_MAGI,
     SELECTOR_MAGI_OF_REGION,
     SELECTOR_MAGI_NOT_OF_REGION,
     SELECTOR_OWN_CREATURES,
@@ -132,6 +141,7 @@ module.exports = {
     EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
     EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
     EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
+    EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
 
     RESTRICTION_ENERGY_LESS_THAN_STARTING,
 

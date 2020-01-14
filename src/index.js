@@ -26,7 +26,11 @@ const {
     CALCULATION_SUBTRACT,
     CALCULATION_HALVE_ROUND_DOWN,
     CALCULATION_HALVE_ROUND_UP,
+    CALCULATION_MIN,
+    CALCULATION_MAX,
 
+    SELECTOR_CREATURES,
+    SELECTOR_CREATURES_AND_MAGI,
     SELECTOR_OWN_MAGI,
     SELECTOR_ENEMY_MAGI,
     SELECTOR_CREATURES_OF_REGION,
@@ -190,6 +194,8 @@ class State {
 
     useSelector(selector, player, argument) {
         switch (selector) {
+            case SELECTOR_CREATURES:
+                return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.type == TYPE_CREATURE);
             case SELECTOR_TOP_MAGI_OF_PILE:
                 const topMagi = this.getZone(ZONE_TYPE_MAGI_PILE, player).cards[0];
                 return [topMagi]; // Selectors always have to return array
@@ -201,16 +207,16 @@ class State {
                 return this.getZone(ZONE_TYPE_ACTIVE_MAGI, 1 - player).cards; // @TODO get enemy player
                 break;
             case SELECTOR_OWN_CREATURES:
-                return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.data.controller == player);
+                return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.data.controller == player && card.card.type == TYPE_CREATURE);
                 break;
             case SELECTOR_ENEMY_CREATURES:
-                return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.data.controller != player);
+                return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.data.controller != player && card.card.type == TYPE_CREATURE);
                 break;
             case SELECTOR_CREATURES_OF_REGION:
-                return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.region == argument);
+                return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.region == argument && card.card.type == TYPE_CREATURE);
                 break;
             case SELECTOR_CREATURES_NOT_OF_REGION:
-                return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.region != argument);
+                return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.region != argument && card.card.type == TYPE_CREATURE);
                 break;
         }
     }
@@ -292,6 +298,12 @@ class State {
                             break;
                         case CALCULATION_HALVE_ROUND_UP:
                             result = Math.ceil(operandOne / 2);
+                            break;
+                        case CALCULATION_MIN:
+                            result = Math.min(operandOne, operandTwo);
+                            break;
+                        case CALCULATION_MAX:
+                            result = Math.max(operandOne, operandTwo);
                             break;
                     }
 
@@ -388,6 +400,17 @@ class State {
                 case ACTION_SELECT:
                     const varName = action.variable || 'selected';
                     switch (action.selector) {
+                        case SELECTOR_CREATURES_AND_MAGI:
+                            const allOfTheAbove = [
+                                ...this.useSelector(SELECTOR_OWN_MAGI, action.player),
+                                ...this.useSelector(SELECTOR_ENEMY_MAGI, action.player),
+                                ...this.useSelector(SELECTOR_CREATURES),
+                            ];
+
+                            this.setSpellMetadata({
+                                ...this.getSpellMetadata(action.generatedBy),
+                                [varName]: allOfTheAbove,
+                            }, action.generatedBy);
                         case SELECTOR_TOP_MAGI_OF_PILE:
                             const selectedTopMagi = this.useSelector(SELECTOR_TOP_MAGI_OF_PILE, action.player);
 

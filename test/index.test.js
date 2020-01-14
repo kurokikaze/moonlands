@@ -14,6 +14,8 @@ const {
     CALCULATION_SUBTRACT,
     CALCULATION_HALVE_ROUND_DOWN,
     CALCULATION_HALVE_ROUND_UP,
+    CALCULATION_MIN,
+    CALCULATION_MAX,
     PROPERTY_ENERGY_COUNT,
     PROPERTY_ENERGIZE,
 } = require('../src/const');
@@ -788,6 +790,60 @@ describe('Calculation actions', () => {
         });
 
         expect(gameState.state.spellMetaData.test.result).toEqual(70, 'Doubling result saved in "result" metadata field');
+    });
+
+    it('Halve round up [CALCULATION_HALVE_ROUND_UP]', () => {
+        const gameState = new moonlands.State({});
+
+        gameState.update({
+            type: moonlands.ACTION_CALCULATE,
+            operator: CALCULATION_HALVE_ROUND_UP,
+            operandOne: 11,
+            generatedBy: 'test',
+        });
+
+        expect(gameState.state.spellMetaData.test.result).toEqual(6, 'Halving 11 rounding up yields 6');
+    });
+
+    it('Halve round down [CALCULATION_HALVE_ROUND_DOWN]', () => {
+        const gameState = new moonlands.State({});
+
+        gameState.update({
+            type: moonlands.ACTION_CALCULATE,
+            operator: CALCULATION_HALVE_ROUND_DOWN,
+            operandOne: 11,
+            generatedBy: 'test',
+        });
+
+        expect(gameState.state.spellMetaData.test.result).toEqual(5, 'Halving 11 rounding up yields 5');
+    });
+
+    it('Maximum [CALCULATION_MAX]', () => {
+        const gameState = new moonlands.State({});
+
+        gameState.update({
+            type: moonlands.ACTION_CALCULATE,
+            operator: CALCULATION_MAX,
+            operandOne: 102,
+            operandTwo: 7,
+            generatedBy: 'test',
+        });
+
+        expect(gameState.state.spellMetaData.test.result).toEqual(102, 'Max operator works');
+    });
+
+    it('Minimum [CALCULATION_MIN]', () => {
+        const gameState = new moonlands.State({});
+
+        gameState.update({
+            type: moonlands.ACTION_CALCULATE,
+            operator: CALCULATION_MIN,
+            operandOne: 49,
+            operandTwo: 51,
+            generatedBy: 'test',
+        });
+
+        expect(gameState.state.spellMetaData.test.result).toEqual(49, 'Min operator works');
     });
 });
 
