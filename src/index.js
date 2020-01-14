@@ -34,6 +34,8 @@ const {
     SELECTOR_OWN_CREATURES,
     SELECTOR_ENEMY_CREATURES,
     SELECTOR_TOP_MAGI_OF_PILE,
+    SELECTOR_MAGI_OF_REGION,
+    SELECTOR_MAGI_NOT_OF_REGION,
 
     PROMPT_TYPE_NUMBER,
     PROMPT_TYPE_SINGLE_CREATURE,
@@ -437,6 +439,28 @@ class State {
                                 ...this.getSpellMetadata(action.generatedBy),
                                 [varName]: selectedNonRegionCreatures,
                             }, action.generatedBy);
+                            break;
+                        case SELECTOR_MAGI_OF_REGION:
+                            const selectedMagiOfRegion = [
+                                ...this.useSelector(SELECTOR_OWN_MAGI, action.player),
+                                ...this.useSelector(SELECTOR_ENEMY_MAGI, action.player),
+                            ].filter(magi => magi.card.region === action.region); // @TODO Layers here
+
+                            this.setSpellMetadata({
+                                ...this.getSpellMetadata(action.generatedBy),
+                                [varName]: selectedMagiOfRegion,
+                            }, action.generatedBy);                            
+                            break;
+                        case SELECTOR_MAGI_NOT_OF_REGION:
+                            const selectedMagiNotOfRegion = [
+                                ...this.useSelector(SELECTOR_OWN_MAGI, action.player),
+                                ...this.useSelector(SELECTOR_ENEMY_MAGI, action.player),
+                            ].filter(magi => magi.card.region != action.region); // @TODO Layers here
+
+                            this.setSpellMetadata({
+                                ...this.getSpellMetadata(action.generatedBy),
+                                [varName]: selectedMagiNotOfRegion,
+                            }, action.generatedBy);                            
                             break;
                     }
 

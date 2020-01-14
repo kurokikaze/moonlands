@@ -38,6 +38,7 @@ const {
     SELECTOR_CREATURES_NOT_OF_REGION,
     SELECTOR_OWN_CREATURES,
     SELECTOR_OPPONENT_CREATURES,
+    SELECTOR_MAGI_NOT_OF_REGION,
     SELECTOR_TOP_MAGI_OF_PILE,
 
     EFFECT_TYPE_ROLL_DIE,
@@ -54,9 +55,11 @@ const {
     EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
     EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
     EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
+    EFFECT_TYPE_MOVE_ENERGY,
 
     PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
     PROMPT_TYPE_SINGLE_CREATURE,
+    PROMPT_TYPE_OWN_SINGLE_CREATURE,
     PROMPT_TYPE_SINGLE_MAGI,
     PROMPT_TYPE_NUMBER,
 
@@ -232,6 +235,44 @@ const cards = [
             ]),
         ],
     }),
+    new Card('Deep Hyren', TYPE_CREATURE, REGION_OROTHE, 6, {
+        powers: [
+            {
+                name: 'Hurricane',
+                cost: 6,
+                effects: [
+                    {
+                        type: ACTION_ENTER_PROMPT,
+                        promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+                        target: '$target',
+                    }),
+                    {
+                        type: ACTION_SELECT,
+                        selector: SELECTOR_CREATURES_NOT_OF_REGION,
+                        region: REGION_OROTHE,
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                        target: '$selected',
+                        amount: 3,
+                    }),
+                    {
+                        type: ACTION_SELECT,
+                        selector: SELECTOR_MAGI_NOT_OF_REGION,
+                        region: REGION_OROTHE,
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+                        target: '$selected',
+                        amount: 3,
+                    }),
+                ],
+            },
+        ],
+    }),
     new Card('Grega', TYPE_MAGI, REGION_CALD, null, {
         startingEnergy: 10,
         energize: 5,
@@ -340,6 +381,20 @@ const cards = [
                 type: ACTION_ENTER_PROMPT,
                 promptType: PROMPT_TYPE_SINGLE_CREATURE,
             },
+            {
+                type: ACTION_ENTER_PROMPT,
+                promptType: PROMPT_TYPE_NUMBER,
+                // Here we need min and max values
+            },
+            select({
+                selector: SELECTOR_OWN_MAGI,
+            }),
+            effect({
+                effectType: EFFECT_TYPE_MOVE_ENERGY,
+                source: '$selected',
+                target: '$target',
+                amount: '$number',
+            }),
         ],
     }),
     new Card('Fire Ball', TYPE_SPELL, REGION_CALD, 2, {
@@ -526,6 +581,25 @@ const cards = [
         ],
     }),
     new Card('Cave Hyren', TYPE_CREATURE, REGION_UNDERNEATH, 5, {
+        powers: [
+            {
+                name: 'Energy Transfer',
+                cost: COST_X,
+                effects: [
+                    {
+                        type: ACTION_ENTER_PROMPT,
+                        promptType: PROMPT_TYPE_SINGLE_CREATURE,
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+                        target: '$target',
+                        amount: '$chosen_cost',
+                    }),
+                ],
+            },
+        ],
+    }),
+    new Card('Leaf Hyren', TYPE_CREATURE, REGION_NAROOM, 4, {
         powers: [
             {
                 name: 'Energy Transfer',

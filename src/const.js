@@ -19,6 +19,8 @@ const SELECTOR_TOP_MAGI_OF_PILE = 'selectors/top_magi_of_pile';
 const SELECTOR_ENEMY_MAGI = 'selectors/enemy_magi';
 const SELECTOR_CREATURES_OF_REGION = 'selectors/creatures_of_region';
 const SELECTOR_CREATURES_NOT_OF_REGION = 'selectors/creatures_not_of_region';
+const SELECTOR_MAGI_OF_REGION = 'selectors/magi_of_region';
+const SELECTOR_MAGI_NOT_OF_REGION = 'selectors/magi_not_of_region';
 const SELECTOR_OWN_CREATURES = 'selectors/own_creatures';
 const SELECTOR_ENEMY_CREATURES = 'selectors/enemy_creatures';
 
@@ -60,6 +62,7 @@ const EFFECT_TYPE_PAYING_ENERGY_FOR_POWER = 'effects/paying_energy_for_power';
 
 const PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI = 'prompt/creature_or_magi';
 const PROMPT_TYPE_SINGLE_CREATURE = 'prompt/creature';
+const PROMPT_TYPE_OWN_SINGLE_CREATURE = 'prompt/own_creature';
 const PROMPT_TYPE_SINGLE_CREATURE_FILTERED = 'prompt/creature_filtered';
 const PROMPT_TYPE_NUMBER_OF_CREATURES = 'prompt/number_of_creatures';
 const PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED = 'prompt/number_of_creatures_filtered';
@@ -99,6 +102,8 @@ module.exports = {
     SELECTOR_ENEMY_MAGI,
     SELECTOR_CREATURES_OF_REGION,
     SELECTOR_CREATURES_NOT_OF_REGION,
+    SELECTOR_MAGI_OF_REGION,
+    SELECTOR_MAGI_NOT_OF_REGION,
     SELECTOR_OWN_CREATURES,
     SELECTOR_ENEMY_CREATURES,
     SELECTOR_TOP_MAGI_OF_PILE,
@@ -130,6 +135,7 @@ module.exports = {
 
     PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
     PROMPT_TYPE_SINGLE_CREATURE,
+    PROMPT_TYPE_OWN_SINGLE_CREATURE,
     PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
     PROMPT_TYPE_NUMBER_OF_CREATURES,
     PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED,

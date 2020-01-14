@@ -1,6 +1,12 @@
 const moonlands = require('../src/index');
 const {CardInGame, byName} = require('../src/cards');
 const {
+    ACTION_SELECT,
+    SELECTOR_MAGI_NOT_OF_REGION,
+    SELECTOR_MAGI_OF_REGION,
+    REGION_NAROOM,
+    REGION_CALD,
+    REGION_OROTHE,
     PROMPT_TYPE_SINGLE_CREATURE,
     CALCULATION_SET,
     CALCULATION_DOUBLE,
@@ -548,6 +554,126 @@ describe('Effects', () => {
         expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI).length).toEqual(0, 'Active Magi zone is empty');
         expect(gameState.getZone(ZONE_TYPE_MAGI_PILE).length).toEqual(1, 'Magi pile zone has 1 card');
     });    
+});
+
+describe('Selector actions', () => {
+    it('Selecting Magi by region [SELECTOR_MAGI_OF_REGION]', () => {
+        const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 1;
+        const GENERATED_BY = 123;
+        const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+        const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+
+        const zones = [
+            new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+            new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+        ];
+
+        const selectOfNaroomAction = {
+            type: ACTION_SELECT,
+            selector: SELECTOR_MAGI_OF_REGION,
+            region: REGION_NAROOM,
+            player: ACTIVE_PLAYER,
+            generatedBy: GENERATED_BY,
+        };
+
+        const selectOfCaldAction = {
+            type: ACTION_SELECT,
+            selector: SELECTOR_MAGI_OF_REGION,
+            region: REGION_CALD,
+            player: ACTIVE_PLAYER,
+            generatedBy: GENERATED_BY,            
+        };
+
+        const selectOfOrotheAction = {
+            type: ACTION_SELECT,
+            selector: SELECTOR_MAGI_OF_REGION,
+            region: REGION_OROTHE,
+            player: ACTIVE_PLAYER,
+            generatedBy: GENERATED_BY,
+        };
+
+        const gameState = new moonlands.State({
+            zones,
+            ACTIVE_PLAYER,
+        });
+
+        gameState.update(selectOfNaroomAction);
+
+        const selectedOfNaroom = gameState.state.spellMetaData[GENERATED_BY].selected;
+        expect(selectedOfNaroom).toHaveLength(1, '"Of Naroom" selector returns one magi');
+        expect(selectedOfNaroom[0].card.name).toEqual('Yaki', '"Of Naroom" selector returns Yaki');
+
+        gameState.update(selectOfCaldAction);
+
+        const selectedOfCald = gameState.state.spellMetaData[GENERATED_BY].selected;
+        expect(selectedOfCald).toHaveLength(1, '"Of Cald" selector returns one magi');
+        expect(selectedOfCald[0].card.name).toEqual('Grega', '"Of Cald" selector returns Grega');
+
+        gameState.update(selectOfOrotheAction);
+
+        const selectedOfOrothe = gameState.state.spellMetaData[GENERATED_BY].selected;
+        expect(selectedOfOrothe).toHaveLength(0, '"Of Orothe" selector returns no magi');
+    });
+
+    it('Selecting Magi not by region [SELECTOR_MAGI_NOT_OF_REGION]', () => {
+        const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 1;
+        const GENERATED_BY = 123;
+        const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+        const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+
+        const zones = [
+            new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+            new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+        ];
+
+        const selectNotOfNaroomAction = {
+            type: ACTION_SELECT,
+            selector: SELECTOR_MAGI_NOT_OF_REGION,
+            region: REGION_NAROOM,
+            player: ACTIVE_PLAYER,
+            generatedBy: GENERATED_BY,
+        };
+
+        const selectNotOfCaldAction = {
+            type: ACTION_SELECT,
+            selector: SELECTOR_MAGI_NOT_OF_REGION,
+            region: REGION_CALD,
+            player: ACTIVE_PLAYER,
+            generatedBy: GENERATED_BY,            
+        };
+
+        const selectNotOfOrotheAction = {
+            type: ACTION_SELECT,
+            selector: SELECTOR_MAGI_NOT_OF_REGION,
+            region: REGION_OROTHE,
+            player: ACTIVE_PLAYER,
+            generatedBy: GENERATED_BY,
+        };
+
+        const gameState = new moonlands.State({
+            zones,
+            ACTIVE_PLAYER,
+        });
+
+        gameState.update(selectNotOfNaroomAction);
+
+        const selectedNotOfNaroom = gameState.state.spellMetaData[GENERATED_BY].selected;
+        expect(selectedNotOfNaroom).toHaveLength(1, '"Not Of Naroom" selector returns one magi');
+        expect(selectedNotOfNaroom[0].card.name).toEqual('Grega', '"Not Of Naroom" selector returns Grega');
+
+        gameState.update(selectNotOfCaldAction);
+
+        const selectedNotOfCald = gameState.state.spellMetaData[GENERATED_BY].selected;
+        expect(selectedNotOfCald).toHaveLength(1, '"Not Of Cald" selector returns one magi');
+        expect(selectedNotOfCald[0].card.name).toEqual('Yaki', '"Not Of Cald" selector returns Yaki');
+
+        gameState.update(selectNotOfOrotheAction);
+
+        const selectedNotOfOrothe = gameState.state.spellMetaData[GENERATED_BY].selected;
+        expect(selectedNotOfOrothe).toHaveLength(2, '"Not Of Orothe" selector returns two magi');
+    });
 });
 
 describe('Calculation actions', () => {
