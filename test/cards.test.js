@@ -654,6 +654,44 @@ describe('Grega', () => {
     });
 });
 
+describe('Sinder', () => {
+    it('Refresh', () => {
+        const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 1;
+
+        const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER).addEnergy(3);
+        const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER).addEnergy(4);
+        const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arbolit], [sinder]);
+
+        const gameState = new moonlands.State({
+            zones,
+            step: STEP_PRS_SECOND,
+            activePlayer: ACTIVE_PLAYER,
+        });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+        const powerAction = {
+            type: ACTION_POWER,
+            source: sinder,
+            power: sinder.card.data.powers[0],
+            player: ACTIVE_PLAYER,
+        };
+
+        const targetingAction = {
+            type: ACTION_RESOLVE_PROMPT,
+            promptType: PROMPT_TYPE_SINGLE_CREATURE,
+            target: arbolit,
+            generatedBy: sinder.id,
+        };
+
+        gameState.update(powerAction);
+        gameState.update(targetingAction);
+
+        expect(arbolit.data.energy).toEqual(5, 'Arbolit refreshed to 5 energy');
+        expect(sinder.data.energy).toEqual(3, 'Sinder paid 1 energy for power');
+    });
+});
+
 describe('Weebo', () => {
     it('Vitalize', () => {
         const ACTIVE_PLAYER = 0;

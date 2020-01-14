@@ -391,6 +391,27 @@ const cards = [
             },
         ]
     }),
+    new Card('Sinder', TYPE_MAGI, REGION_CALD, null, {
+        startingEnergy: 12,
+        energize: 5,
+        startingCards: ['Fire Grag', 'Arbolit', 'Flame Control'],
+        powers: [
+            {
+                name: 'Refresh',
+                cost: 1,
+                effects: [
+                    prompt({
+                        promptType: PROMPT_TYPE_SINGLE_CREATURE,
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+                        target: '$target',
+                        amount: 2,
+                    }),
+                ],
+            },
+        ]
+    }),
     new Card('Arbolit', TYPE_CREATURE, REGION_CALD, 2, {
         powers: [power(
             'Healing Flame',

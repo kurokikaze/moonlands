@@ -1,4 +1,4 @@
-Done: **31** cards out of **190**
+Done: **33** cards out of **190**
 
 # Done, tested
 
@@ -16,6 +16,7 @@ Done: **31** cards out of **190**
 - Ayebaw
 - Yaki
 - Carillion
+- Sinder
 
 # Done, not tested
 
@@ -43,7 +44,7 @@ Done: **31** cards out of **190**
 ## Cald (+ Underneath splash)
 Grega
 Magam
-? (Sinder)
+Sinder
 3 Fire Chogo
 3 Fire Grag
 3 Arbolit
