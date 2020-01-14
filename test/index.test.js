@@ -54,6 +54,7 @@ describe('Updating state with action', () => {
         const passAction = {type: moonlands.ACTION_PASS};
 
         expect(gameState.getCurrentStep()).toEqual(STEP_ENERGIZE, 'Initial step is Energize');
+        expect(gameState.getActivePlayer()).toEqual(0, 'Active player is player 0');
         gameState.update(passAction); // PRS
         gameState.update(passAction); // Attack
         gameState.update(passAction); // Creatures
@@ -90,24 +91,27 @@ describe('Updating state with action', () => {
 
 describe('Magi stuff', () => {
     it('Energizing', () => {
-        const activePlayer = 0;
+        const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 2;
         const startingEnergy = 10;
 
-        const grega = new CardInGame(byName('Grega'), activePlayer);
+        const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
         grega.addEnergy(startingEnergy);
 
         const zones = [
-            new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, activePlayer).add([grega]),
+            new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+            new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
             new Zone('In play', ZONE_TYPE_IN_PLAY),
         ];
 
         const gameState = new moonlands.State({
             zones,
             step: STEP_ENERGIZE,
-            getActivePlayer: 0,
+            activePlayer: ACTIVE_PLAYER,
         });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
         
-        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(startingEnergy, "Grega's Energy is 10");
+        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toEqual(startingEnergy, "Grega's Energy is 10");
 
         gameState.update({
             type: moonlands.ACTION_EFFECT,
@@ -115,24 +119,28 @@ describe('Magi stuff', () => {
             effectType: moonlands.EFFECT_TYPE_ENERGIZE,
         });
 
-        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(15, "Grega's energy is 15 after energizing");
+        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toEqual(15, "Grega's energy is 15 after energizing");
     });
 
 
     it('Energizing a creature', () => {
-        const activePlayer = 0;
+        const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 3;
 
-        const greenStuff = new CardInGame(byName('Green Stuff'), activePlayer);
+        const greenStuff = new CardInGame(byName('Green Stuff'), ACTIVE_PLAYER);
 
         const zones = [
             new Zone('In play', ZONE_TYPE_IN_PLAY).add([greenStuff]),
+            new Zone('AP current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+            new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
         ];
 
         const gameState = new moonlands.State({
             zones,
             step: STEP_ENERGIZE,
-            getActivePlayer: 0,
+            activePlayer: ACTIVE_PLAYER,
         });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
         
         expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(0, "Green Stuff's Energy is 0");
 
@@ -168,9 +176,10 @@ describe('Prompts', () => {
         const gameState = new moonlands.State({
             zones,
             step: STEP_ENERGIZE,
-            getActivePlayer: 0,
+            activePlayer: 0,
             actions: [promptAction, addEnergyAction],
         });
+
         expect(gameState.state.actions.length).toEqual(2, 'Two actions in queue');
         gameState.update(passAction);
         expect(gameState.state.actions.length).toEqual(0, 'Queue is empty');
@@ -210,7 +219,7 @@ describe('Prompts', () => {
         const gameState = new moonlands.State({
             zones,
             step: STEP_ENERGIZE,
-            getActivePlayer: 0,
+            activePlayer: 0,
             actions: [promptAction, addEnergyAction],
         });
 
@@ -265,7 +274,7 @@ describe('Prompts', () => {
         const gameState = new moonlands.State({
             zones,
             step: STEP_ENERGIZE,
-            getActivePlayer: 0,
+            activePlayer: 0,
             actions: [promptAction, addEnergyAction],
         });
 
@@ -319,7 +328,7 @@ describe('Prompts', () => {
         const gameState = new moonlands.State({
             zones,
             step: STEP_ENERGIZE,
-            getActivePlayer: 0,
+            activePlayer: 0,
             actions: [promptAction, removeEnergyAction],
         });
 
@@ -1066,6 +1075,8 @@ describe('Activating power', () => {
 describe('Static abilities', () => {
     it('Simple modifier of attribute (your source)', () => {
         const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 6;
+
         const waterOfLife = new CardInGame(byName('Water of Life'), ACTIVE_PLAYER);
         const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
         grega.data.energy = 15;
@@ -1073,6 +1084,7 @@ describe('Static abilities', () => {
         const zones = [
             new Zone('In play', ZONE_TYPE_IN_PLAY).add([waterOfLife]),
             new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+            new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
         ];
 
         const gameState = new moonlands.State({
@@ -1080,6 +1092,7 @@ describe('Static abilities', () => {
             step: STEP_PRS_SECOND,
             activePlayer: ACTIVE_PLAYER,
         });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
         const result = gameState.modifyByStaticAbilities(grega, PROPERTY_ENERGIZE);
         expect(result).toEqual(6, "Grega's energize rate is increased by one");
@@ -1087,6 +1100,8 @@ describe('Static abilities', () => {
 
     it('Simple modifier of attribute (two source)', () => {
         const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 1;
+
         const waterOfLife = new CardInGame(byName('Water of Life'), ACTIVE_PLAYER);
         const waterOfLifeTwo = new CardInGame(byName('Water of Life'), ACTIVE_PLAYER);
         const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
@@ -1095,6 +1110,7 @@ describe('Static abilities', () => {
         const zones = [
             new Zone('In play', ZONE_TYPE_IN_PLAY).add([waterOfLife, waterOfLifeTwo]),
             new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+            new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
         ];
 
         const gameState = new moonlands.State({
@@ -1102,6 +1118,8 @@ describe('Static abilities', () => {
             step: STEP_PRS_SECOND,
             activePlayer: ACTIVE_PLAYER,
         });
+
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
         const result = gameState.modifyByStaticAbilities(grega, PROPERTY_ENERGIZE);
         expect(result).toEqual(7, "Grega's energize rate is increased by two");
@@ -1126,6 +1144,8 @@ describe('Static abilities', () => {
             step: STEP_PRS_SECOND,
             activePlayer: ACTIVE_PLAYER,
         });
+
+        gameState.setPlayers(ACTIVE_PLAYER, ENEMY_PLAYER);
 
         const result = gameState.modifyByStaticAbilities(grega, PROPERTY_ENERGIZE);
         expect(result).toEqual(6, "Grega's energize rate is increased by one");
@@ -1254,10 +1274,13 @@ describe('Attacking', () => {
                 new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
                 new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
                 new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([weebo, quorPup]),
+                new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+                new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
             ],
             step: STEP_ATTACK,
             activePlayer: ACTIVE_PLAYER,
         });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
         const attackAction = {
             type: moonlands.ACTION_ATTACK,
@@ -1284,10 +1307,13 @@ describe('Attacking', () => {
                 new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
                 new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
                 new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([leafHyren, arbolit]),
+                new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+                new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
             ],
             step: STEP_ATTACK,
             activePlayer: ACTIVE_PLAYER,
         });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
         const attackAction = {
             type: moonlands.ACTION_ATTACK,
@@ -1313,12 +1339,15 @@ describe('Attacking', () => {
             zones: [
                 new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
                 new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+                new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
                 new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
                 new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([leafHyren]),
             ],
             step: STEP_ATTACK,
             activePlayer: ACTIVE_PLAYER,
         });
+
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
         const attackAction = {
             type: moonlands.ACTION_ATTACK,
@@ -1344,12 +1373,15 @@ describe('Attacking', () => {
             zones: [
                 new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
                 new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+                new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
                 new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
                 new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([leafHyren]),
             ],
             step: STEP_ATTACK,
             activePlayer: ACTIVE_PLAYER,
         });
+
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
         const attackAction = {
             type: moonlands.ACTION_ATTACK,

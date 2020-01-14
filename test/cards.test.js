@@ -52,7 +52,8 @@ describe('Alaban', () => {
             zones,
             step: STEP_PRS_SECOND,
             activePlayer: ACTIVE_PLAYER,
-        });        
+        });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
         const powerAction = {
             type: ACTION_POWER,
@@ -88,7 +89,9 @@ describe('Alaban', () => {
             zones,
             step: STEP_PRS_SECOND,
             activePlayer: ACTIVE_PLAYER,
-        });        
+        });
+
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
         const powerAction = {
             type: ACTION_POWER,
@@ -127,6 +130,7 @@ describe('Arbolit', () => {
             step: STEP_PRS_SECOND,
             activePlayer: ACTIVE_PLAYER,
         });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
         const powerAction = {
             type: ACTION_POWER,
@@ -163,6 +167,7 @@ describe('Arbolit', () => {
             step: STEP_PRS_SECOND,
             activePlayer: ACTIVE_PLAYER,
         });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
         const powerAction = {
             type: ACTION_POWER,
@@ -201,6 +206,7 @@ describe('Arboll', () => {
             step: STEP_PRS_SECOND,
             activePlayer: ACTIVE_PLAYER,
         });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
         const powerAction = {
             type: ACTION_POWER,
@@ -240,7 +246,8 @@ describe('Balamant', () => {
             zones,
             step: STEP_PRS_SECOND,
             activePlayer: ACTIVE_PLAYER,
-        });        
+        });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
         const powerAction = {
             type: ACTION_POWER,
@@ -277,7 +284,8 @@ describe('Cave Hyren', () => {
             zones,
             step: STEP_PRS_SECOND,
             activePlayer: ACTIVE_PLAYER,
-        });        
+        });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
         const powerAction = {
             type: ACTION_POWER,
@@ -322,7 +330,8 @@ describe('Diobor', () => {
             zones,
             step: STEP_PRS_SECOND,
             activePlayer: ACTIVE_PLAYER,
-        });        
+        });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
         const powerAction = {
             type: ACTION_POWER,
@@ -361,7 +370,8 @@ describe('Diobor', () => {
             zones,
             step: STEP_PRS_SECOND,
             activePlayer: ACTIVE_PLAYER,
-        });        
+        });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
         const powerAction = {
             type: ACTION_POWER,
@@ -397,7 +407,8 @@ describe('Drakan', () => {
             zones,
             step: STEP_PRS_SECOND,
             activePlayer: ACTIVE_PLAYER,
-        });        
+        });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
         const powerAction = {
             type: ACTION_POWER,
@@ -435,12 +446,14 @@ describe('Ayebaw', () => {
             zones: [
                 new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
                 new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+                new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
                 new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
                 new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([ayebaw]),
             ],
             step: STEP_ATTACK,
             activePlayer: ACTIVE_PLAYER,
         });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
         const attackAction = {
             type: moonlands.ACTION_ATTACK,
@@ -479,7 +492,8 @@ describe('Giant Parathin', () => {
             zones,
             step: STEP_PRS_SECOND,
             activePlayer: ACTIVE_PLAYER,
-        });        
+        });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
         gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([yaki]);
 
@@ -521,6 +535,7 @@ describe('Great Carillion', () => {
             step: STEP_PRS_SECOND,
             activePlayer: ACTIVE_PLAYER,
         });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
         const powerAction = {
             type: ACTION_POWER,
@@ -560,6 +575,7 @@ describe('Grega', () => {
             step: STEP_PRS_SECOND,
             activePlayer: ACTIVE_PLAYER,
         });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
         const powerAction = {
             type: ACTION_POWER,
@@ -598,7 +614,8 @@ describe('Weebo', () => {
             zones,
             step: STEP_PRS_SECOND,
             activePlayer: ACTIVE_PLAYER,
-        });        
+        });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
         const powerAction = {
             type: ACTION_POWER,
@@ -619,5 +636,52 @@ describe('Weebo', () => {
 
         expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(weebo.id).data.energy).toEqual(1, 'Weebo now has 1 energy');
         expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireGrag.id).data.energy).toEqual(6, 'Fire Grag restored to 6 energy');
+    });
+});
+
+describe('Yaki', () => {
+    it('Double Strike', () => {
+        const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 1;
+        const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
+        weebo.addEnergy(2);
+        const yaki = new CardInGame(byName('Yaki'), ACTIVE_PLAYER);
+        yaki.addEnergy(10);
+        const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER);
+        grega.addEnergy(10);
+
+        const gameState = new moonlands.State({
+            zones: [
+                new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+                new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+                new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([yaki]),
+                new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([weebo]),
+            ],
+            step: STEP_ATTACK,
+            activePlayer: ACTIVE_PLAYER,
+        });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+        const attackAction = {
+            type: moonlands.ACTION_ATTACK,
+            source: weebo,
+            target: grega,
+        };
+
+        gameState.update(attackAction);
+
+        expect(weebo.data.energy).toEqual(2, 'Weebo still has 2 energy');
+        expect(grega.data.energy).toEqual(8, 'Grega has 8 energy left');
+
+        gameState.update(attackAction);
+
+        expect(weebo.data.energy).toEqual(2, 'Weebo still has 2 energy');
+        expect(grega.data.energy).toEqual(6, 'Grega has 6 energy left (second attack successful)');
+
+        gameState.update(attackAction);
+
+        expect(weebo.data.energy).toEqual(2, 'Weebo still has 2 energy');
+        expect(grega.data.energy).toEqual(6, 'Grega has 6 energy left (third attack did not happen)');
     });
 });

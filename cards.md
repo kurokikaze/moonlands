@@ -13,7 +13,8 @@ Done: **26** cards out of **190**
 - Great Carillion
 - Grega
 - Weebo
-
+- Ayebaw
+- Yaki
 # Done, not tested
 
 - Fire Chogo
@@ -53,14 +54,14 @@ Magam
 3 Thermal Blast
 3 Flame Geyser
 3 Cave Hyren
-3 Fire Flow
-1 ?
+3 ?
+1 ? (Fire Flow)
 
 ## Naroom (+ Orothe splash)
 
 Pruitt
 Poad
-? (Tryn)
+Yaki
 3 Leaf Hyren
 3 Weebo
 3 Arboll
@@ -70,10 +71,10 @@ Poad
 3 Grow
 3 Giant Parathin
 3 Syphon Stone
-3 ?
-3 ?
-3 ?
-3 ?
+3 ? (Flood of Energy)
+3 ? (Sap of Life)
+3 ? (Stagadan)
+3 ? (Orwin's Gaze)
 1 ?
 
 # Not done yet
@@ -114,7 +115,6 @@ Poad
 
 # Attack
 
-- Ayebaw
 - Corf (status "was attacked")
 
 # Custom prompts
@@ -307,10 +307,6 @@ Poad
 ### Ability to attack Magi directly
 
 - Stagadan
-
-## Number of attacks
-
-- Yaki
 
 ## Ability to be attacked
 

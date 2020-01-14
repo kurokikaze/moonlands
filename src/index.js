@@ -144,6 +144,18 @@ class State {
             spellMetaData: {},
             ...state,
         };
+
+        this.players = [0, 1]; // For simple testing
+    }
+
+    setPlayers(player1, player2) {
+        this.players = [player1, player2];
+
+        return this;
+    }
+
+    getOpponent(player) {
+        return this.players.find(pl => pl != player);
     }
 
     getZone(type, player = null) {
@@ -211,7 +223,7 @@ class State {
                 return this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).cards;
                 break;
             case SELECTOR_ENEMY_MAGI:
-                return this.getZone(ZONE_TYPE_ACTIVE_MAGI, 1 - player).cards; // @TODO get enemy player
+                return this.getZone(ZONE_TYPE_ACTIVE_MAGI, this.getOpponent(player)).cards;
                 break;
             case SELECTOR_OWN_CREATURES:
                 return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.data.controller == player && card.card.type == TYPE_CREATURE);
@@ -245,7 +257,12 @@ class State {
 
     modifyByStaticAbilities(target, property) {
         // gathering static abilities from the field, adding players to them
-        const zoneAbilities = this.getZone(ZONE_TYPE_IN_PLAY).cards.reduce(
+        const allZonesCards = [
+            ...this.getZone(ZONE_TYPE_IN_PLAY).cards,
+            ...this.getZone(ZONE_TYPE_ACTIVE_MAGI, target.owner).cards,
+            ...this.getZone(ZONE_TYPE_ACTIVE_MAGI, this.getOpponent(target.owner)).cards,
+        ];
+        const zoneAbilities = allZonesCards.reduce(
             (acc, cardInPlay) => cardInPlay.card.data.staticAbilities ? [
                 ...acc,
                 ...(cardInPlay.card.data.staticAbilities.filter(a => a.property == property).map(a => ({...a, player: cardInPlay.data.controller})))
@@ -555,7 +572,7 @@ class State {
                     break;
                 case ACTION_PASS:
                     const newStep = (this.state.step + 1) % steps.length;
-                    let activePlayer = (newStep == 0) ? 1 - this.state.activePlayer : this.state.activePlayer;
+                    let activePlayer = (newStep == 0) ? this.getOpponent(this.state.activePlayer) : this.state.activePlayer;
                     this.state = {
                         ...this.state,
                         step: newStep,
