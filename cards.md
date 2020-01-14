@@ -15,6 +15,7 @@ Done: **31** cards out of **190**
 - Weebo
 - Ayebaw
 - Yaki
+- Carillion
 
 # Done, not tested
 
@@ -72,11 +73,11 @@ Yaki
 3 Grow
 3 Giant Parathin
 3 Syphon Stone
-3 ? (Flood of Energy)
+3 Carillion
 3 ? (Sap of Life)
 3 ? (Stagadan)
 3 ? (Orwin's Gaze)
-1 ?
+1 Flood of Energy
 
 # Not done yet
 
@@ -122,6 +123,7 @@ Yaki
 
 - Giant Vulbor
 - Lightning
+- Implosion (discarding specific cards)
 - Mirror Pendant (choosing power on Magi)
 - Orwin's Gaze (choosing card in Discard)
 - Thunderquake (choosing any number of creatures)
@@ -172,7 +174,6 @@ Yaki
 # Choosing cards in zones (discard)
 
 - Book of Life
-- Implosion
 
 # Drawing Cards
 
@@ -255,7 +256,6 @@ Yaki
 
 # Replacement effect
 
-- Carillion
 - Eebit
 - Fossik (also "may" effects)
 - Motash's Staff

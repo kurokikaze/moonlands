@@ -8,7 +8,9 @@ const ACTION_ENTER_PROMPT = 'actions/enter_prompt';
 const ACTION_RESOLVE_PROMPT = 'actions/resolve_prompt';
 const ACTION_GET_PROPERTY_VALUE = 'actions/get_property_value';
 const ACTION_ATTACK = 'actions/attack';
+const ACTION_NOOP = 'actions/noop'; // Empty actions for replacement
 
+const PROPERTY_ID = 'properties/id';
 const PROPERTY_ENERGY_COUNT = 'properties/energy_count';
 const PROPERTY_REGION = 'properties/region';
 const PROPERTY_COST = 'properties/cost';
@@ -49,6 +51,7 @@ const REGION_PARADWYN = 'regions/paradwyn';
 const REGION_D_RESH = 'regions/d_resh';
 const REGION_UNIVERSAL = 'regions/universal';
 
+const EFFECT_TYPE_NONE = 'effects/none';
 const EFFECT_TYPE_BEFORE_DAMAGE = 'effects/before_damage';
 const EFFECT_TYPE_DEAL_DAMAGE = 'effects/deal_damage';
 const EFFECT_TYPE_AFTER_DAMAGE = 'effects/after_damage';
@@ -125,6 +128,7 @@ module.exports = {
     SELECTOR_ENEMY_CREATURES,
     SELECTOR_TOP_MAGI_OF_PILE,
 
+    PROPERTY_ID,
     PROPERTY_ENERGY_COUNT,
     PROPERTY_MAGI_STARTING_ENERGY,
     PROPERTY_REGION,
@@ -132,6 +136,7 @@ module.exports = {
     PROPERTY_ENERGIZE,
     PROPERTY_ATTACKS_PER_TURN,
 
+    EFFECT_TYPE_NONE,
     EFFECT_TYPE_MOVE_ENERGY,
     EFFECT_TYPE_ROLL_DIE,
     EFFECT_TYPE_PLAY_CREATURE,

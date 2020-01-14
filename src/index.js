@@ -15,6 +15,7 @@ const {
     ACTION_GET_PROPERTY_VALUE,
     ACTION_ATTACK,
 
+    PROPERTY_ID,
     PROPERTY_ENERGY_COUNT,
     PROPERTY_REGION,
     PROPERTY_COST,
@@ -242,6 +243,10 @@ class State {
 
     getByProperty(target, property) {
         switch(property) {
+            case PROPERTY_ID:
+                return target.id;
+            case PROPERTY_ENERGY_COUNT:
+                return target.data.energy;
             case PROPERTY_ATTACKS_PER_TURN:
                 return target.card.data.attacksPerTurn;
             case PROPERTY_COST:
@@ -283,11 +288,96 @@ class State {
         return initialValue;
     }
 
+    getObjectOrSelf(action, self, object, property) {
+        if (object == 'self') {
+            return self;
+        }
+
+        return property ? action[object] : object;
+    }
+
+    replaceByReplacementEffect(action) {
+        const PLAYER_ONE = this.players[0];
+        const PLAYER_TWO = this.players[1];
+        const allZonesCards = [
+            ...(this.getZone(ZONE_TYPE_IN_PLAY) || {cards: []}).cards,
+            ...(this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE) || {cards: []}).cards,
+            ...(this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO) || {cards: []}).cards,
+        ];
+
+        const zoneReplacements = allZonesCards.reduce(
+            (acc, cardInPlay) => cardInPlay.card.data.replacementEffects ? [
+                ...acc,
+                ...cardInPlay.card.data.replacementEffects.map(effect => ({...effect, self: cardInPlay})),
+            ] : acc,
+            [],
+        );
+
+        let replacementFound = false;
+        let appliedReplacerId = null;
+        let replaceWith = null;
+        zoneReplacements.forEach(replacer => {
+            const replacerId = replacer.self.id; // Not really, but will work for now
+            
+            if (action.replacedBy && action.replacedBy.includes(replacerId)) {
+                return false;
+            }
+
+            if (action.effectType !== replacer.find.effectType) return false;
+
+            const conditions = replacer.find.conditions.map(condition => {
+                const objectOne = this.getObjectOrSelf(action, replacer.self, condition.objectOne, condition.propertyOne);
+                const objectTwo = this.getObjectOrSelf(action, replacer.self, condition.objectTwo, condition.propertyTwo);
+
+                const operandOne = condition.propertyOne ? this.modifyByStaticAbilities(objectOne, condition.propertyOne) : objectOne;
+
+                const operandTwo = condition.propertyTwo ? this.modifyByStaticAbilities(objectTwo, condition.propertyTwo) : objectTwo;
+
+                switch (condition.comparator) {
+                    case '=':
+                        return operandOne == operandTwo;
+                    case '>':
+                        return operandOne > operandTwo;
+                    case '<':
+                        return operandOne < operandTwo;
+                    case '>=':
+                        return operandOne >= operandTwo;
+                    case '<=':
+                        return operandOne <= operandTwo;
+                }
+
+                return false;
+            });
+
+            if (conditions.every(result => result === true)) {
+                replacementFound = true;
+                appliedReplacerId = replacerId;
+                replaceWith = replacer.replaceWith;
+            }
+        });
+
+        const previouslyReplacedBy = action.replacedBy || [];
+
+        if (replacementFound) {
+            return {
+                type: ACTION_EFFECT,
+                ...replaceWith,
+                replacedBy: [
+                    ...previouslyReplacedBy,
+                    appliedReplacerId,
+                ],
+            };
+        }
+
+        return action;
+    }
+
     update(initialAction) {
         this.addActions(initialAction);
         while (this.hasActions()) {
-            const action = this.getNextAction();
-
+            const rawAction = this.getNextAction();
+            const action = this.replaceByReplacementEffect(rawAction);
+            
             switch (action.type) {
                 case ACTION_ATTACK:
                     /*
@@ -319,14 +409,18 @@ class State {
                             type: ACTION_EFFECT,
                             effectType: EFFECT_TYPE_DEAL_DAMAGE,
                             source: attackSource,
+                            sourceAtStart: attackSource.copy(),
                             target: attackTarget,
+                            targetAtStart: attackTarget.copy(),
                             amount: attackSource.data.energy,
                         }, // from target to source (if attacking a creature)
                         (attackTarget.card.type === TYPE_CREATURE) ? {
                             type: ACTION_EFFECT,
                             effectType: EFFECT_TYPE_DEAL_DAMAGE,
                             source: attackTarget,
+                            sourceAtStart: attackTarget.copy(),
                             target: attackSource,
+                            targetAtStart: attackSource.copy(),
                             amount: attackTarget.data.energy,
                         } : null,
                         {

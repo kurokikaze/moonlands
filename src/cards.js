@@ -17,6 +17,7 @@ const {
     PROPERTY_ENERGY_COUNT,
     PROPERTY_REGION,
     PROPERTY_COST,
+    PROPERTY_ID,
     PROPERTY_ENERGIZE,
     PROPERTY_MAGI_STARTING_ENERGY,
     PROPERTY_ATTACKS_PER_TURN,
@@ -44,6 +45,7 @@ const {
     SELECTOR_MAGI_NOT_OF_REGION,
     SELECTOR_TOP_MAGI_OF_PILE,
 
+    EFFECT_TYPE_NONE,
     EFFECT_TYPE_ROLL_DIE,
     EFFECT_TYPE_PLAY_CREATURE,
     EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
@@ -59,6 +61,7 @@ const {
     EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
     EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+    EFFECT_TYPE_DEAL_DAMAGE,
     EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
     EFFECT_TYPE_MOVE_ENERGY,
 
@@ -151,7 +154,18 @@ class CardInGame {
     }
 
     clearAttackMarkers() {
+        this.data.wasAttacked = false;
+        this.data.hasAttacked = false;
+        this.data.attacked = false;
+    }
 
+    copy() {
+        const newCard = new CardInGame(this._card, this.owner);
+        newCard.data = {...this.data};
+        newCard.actionsUsed = [...this.actionsUsed];
+        newCard.id = this.id;
+
+        return newCard;
     }
 }
 
@@ -175,7 +189,12 @@ const getPropertyValue = data => ({
     type: ACTION_GET_PROPERTY_VALUE,
     ...data,
 });
- 
+
+const prompt = data => ({
+    type: ACTION_ENTER_PROMPT,
+    ...data,
+});
+
 const cards = [
     new Card('Alaban', TYPE_CREATURE, REGION_ARDERIAL, 6, {
         powers: [
@@ -183,10 +202,9 @@ const cards = [
                 name: 'Undream',
                 cost: 5,
                 effects: [
-                    {
-                        type: ACTION_ENTER_PROMPT,
+                    prompt({
                         promptType: PROMPT_TYPE_SINGLE_CREATURE,
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
                         sourceZone: ZONE_TYPE_IN_PLAY,
@@ -209,10 +227,9 @@ const cards = [
             effect({
                 effectType: EFFECT_TYPE_ROLL_DIE,
             }),
-            {
-                type: ACTION_ENTER_PROMPT,
+            prompt({
                 promptType: PROMPT_TYPE_SINGLE_CREATURE,
-            },
+            }),
             effect({
                 effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
                 target: '$target',
@@ -297,16 +314,14 @@ const cards = [
                 name: 'Consume',
                 cost: 1,
                 effects: [
-                    {
-                        type: ACTION_ENTER_PROMPT,
+                    prompt({
                         promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
-                    },
-                    {
-                        type: ACTION_GET_PROPERTY_VALUE,
+                    }),
+                    getPropertyValue({
                         target: '$target',
                         property: PROPERTY_ENERGY_COUNT,
                         variable: 'creature_energy',
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_MOVE_ENERGY,
                         source: '$target',
@@ -323,10 +338,9 @@ const cards = [
                 name: 'Hurricane',
                 cost: 6,
                 effects: [
-                    {
-                        type: ACTION_ENTER_PROMPT,
+                    prompt({
                         promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
                         target: '$target',
@@ -365,10 +379,9 @@ const cards = [
                     effect({
                         effectType: EFFECT_TYPE_ROLL_DIE,
                     }),
-                    {
-                        type: ACTION_ENTER_PROMPT,
+                    prompt({
                         promptType: PROMPT_TYPE_SINGLE_CREATURE,
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
                         target: '$target',
@@ -382,10 +395,9 @@ const cards = [
         powers: [power(
             'Healing Flame',
             [
-                {
-                    type: ACTION_ENTER_PROMPT,
+                prompt({
                     promptType: PROMPT_TYPE_SINGLE_CREATURE,
-                },
+                }),
                 effect({
                     effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
                     target: '$sourceCreature',
@@ -403,16 +415,14 @@ const cards = [
             name: 'Metabolize',
             cost: 3,
             effects: [
-                {
-                    type: ACTION_ENTER_PROMPT,
+                prompt({
                     promptType: PROMPT_TYPE_SINGLE_CREATURE,
                     variable: 'yourCreature',
-                },
-                {
-                    type: ACTION_ENTER_PROMPT,
+                }),
+                prompt({
                     promptType: PROMPT_TYPE_SINGLE_CREATURE,
                     variable: 'opponentCreature',
-                },
+                }),
                 getPropertyValue({
                     target: '$yourCreature',
                     property: PROPERTY_ENERGY_COUNT,
@@ -442,10 +452,9 @@ const cards = [
                 name: 'Stomp',
                 cost: 6,
                 effects: [
-                    {
-                        type: ACTION_ENTER_PROMPT,
+                    prompt({
                         promptType: PROMPT_TYPE_SINGLE_CREATURE,
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
                         target: '$target',
@@ -457,20 +466,17 @@ const cards = [
     new Card('Quor Pup', TYPE_CREATURE, REGION_CALD, 2),
     new Card('Fire Flow', TYPE_SPELL, REGION_CALD, 1, {
         effects: [
-            {
-                type: ACTION_ENTER_PROMPT,
+            prompt({
                 promptType: PROMPT_TYPE_SINGLE_CREATURE,
-            },
-            {
-                type: ACTION_SELECT,
+            }),
+            select({
                 selector: SELECTOR_OWN_MAGI,
-            },
-            {
-                type: ACTION_GET_PROPERTY_VALUE,
+            }),
+            getPropertyValue({
                 target: '$selected',
                 property: PROPERTY_ENERGY_COUNT,
                 variable: 'magi_energy',
-            },
+            }),
             {
                 type: ACTION_CALCULATE,
                 operator: CALCULATION_MIN,
@@ -478,12 +484,11 @@ const cards = [
                 operandTwo: 4,
                 variable: 'max_amount',
             },
-            {
-                type: ACTION_ENTER_PROMPT,
+            prompt({
                 promptType: PROMPT_TYPE_NUMBER,
                 min: 1,
                 max: '$max_amount',
-            },
+            }),
             select({
                 selector: SELECTOR_OWN_MAGI,
             }),
@@ -497,10 +502,9 @@ const cards = [
     }),
     new Card('Fire Ball', TYPE_SPELL, REGION_CALD, 2, {
        effects: [
-            {
-                type: ACTION_ENTER_PROMPT,
+            prompt({
                 promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
-            },
+            }),
             effect({
                 effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
                 target: '$target',
@@ -513,16 +517,14 @@ const cards = [
             {
                 name: 'Healing Rain',
                 effects: [
-                    {
-                        type: ACTION_ENTER_PROMPT,
+                    prompt({
                         promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
-                    },
-                    {
-                        type: ACTION_GET_PROPERTY_VALUE,
+                    }),
+                    getPropertyValue({
                         target: '$yourCreature',
                         property: PROPERTY_ENERGY_COUNT,
                         variable: 'energyToRestore',
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
                         target: '$sourceCreature',
@@ -542,29 +544,27 @@ const cards = [
                 name: 'Firestorm',
                 cost: 2,
                 effects: [
-                    {
-                        type: ACTION_ENTER_PROMPT,
+                    prompt({
                         promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
                         target: '$target',
                     }),
-                    {
+                    select({
                         type: ACTION_SELECT,
                         selector: SELECTOR_CREATURES_NOT_OF_REGION,
                         region: REGION_CALD,
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
                         target: '$selected',
                         amount: 1,
                     }),
-                    {
-                        type: ACTION_SELECT,
+                    select({
                         selector: SELECTOR_MAGI_NOT_OF_REGION,
                         region: REGION_CALD,
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
                         target: '$selected',
@@ -580,10 +580,9 @@ const cards = [
                 name: 'Healing Flame',
                 cost: 2,
                 effects: [
-                    {
-                        type: ACTION_ENTER_PROMPT,
+                    prompt({
                         promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
                         target: '$sourceCreature',
@@ -592,7 +591,7 @@ const cards = [
                         effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI,
                         target: '$target',
                         amount: 3,
-                    })
+                    }),
                 ],
             },
         ],
@@ -606,11 +605,10 @@ const cards = [
                 name: 'Vitalize',
                 cost: 4,
                 effects: [
-                    {
-                        type: ACTION_ENTER_PROMPT,
+                    prompt({
                         promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
                         targetRestriction: RESTRICTION_ENERGY_LESS_THAN_STARTING,
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
                         target: '$target',
@@ -628,16 +626,14 @@ const cards = [
                 name: 'Refresh',
                 cost: 2,
                 effects: [
-                    {
-                        type: ACTION_SELECT,
+                    select({
                         selector: SELECTOR_OWN_MAGI,
-                    },
-                    {
-                        type: ACTION_GET_PROPERTY_VALUE,
+                    }),
+                    getPropertyValue({
                         target: '$selected',
                         property: PROPERTY_ENERGY_COUNT,
                         variable: 'magi_energy',
-                    },
+                    }),
                     {
                         type: ACTION_CALCULATE,
                         operator: CALCULATION_MIN,
@@ -645,12 +641,11 @@ const cards = [
                         operandTwo: 7,
                         variable: 'max_tribute',
                     },
-                    {
-                        type: ACTION_ENTER_PROMPT,
+                    prompt({
                         promptType: PROMPT_TYPE_NUMBER,
                         min: 1,
                         max: '$max_tribute',
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_MOVE_ENERGY,
                         source: '$selected',
@@ -670,10 +665,9 @@ const cards = [
                 name: "Heroes' Feast",
                 cost: 2,
                 effects: [
-                    {
-                        type: ACTION_SELECT,
+                    select({
                         selector: SELECTOR_OWN_CREATURES,
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
                         target: '$selected',
@@ -686,10 +680,9 @@ const cards = [
     new Card('Timber Hyren', TYPE_CREATURE, REGION_NAROOM, 7, {
         powers: [
             power('Tribute', [
-                    {
-                        type: ACTION_SELECT,
+                    select({
                         selector: SELECTOR_OWN_CREATURES,
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
                         target: '$selected',
@@ -702,11 +695,10 @@ const cards = [
     new Card('Fire Chogo', TYPE_CREATURE, REGION_CALD, 2, {
         powers: [
             power('Heat Storm', [
-                {
-                    type: ACTION_SELECT,
+                select({
                     selector: SELECTOR_CREATURES_NOT_OF_REGION,
                     region: REGION_CALD,
-                },
+                }),
                 effect({
                     effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
                     target: '$sourceCreature',
@@ -718,6 +710,34 @@ const cards = [
                     amount: 1,
                 }),
             ]),
+        ],
+    }),
+    new Card('Carillion', TYPE_CREATURE, REGION_NAROOM, 4, {
+        replacementEffects: [
+            {
+                find: {
+                    effectType: EFFECT_TYPE_DEAL_DAMAGE,
+                    conditions: [
+                        {
+                            objectOne: 'target',
+                            propertyOne: PROPERTY_ID,
+                            comparator: '=',
+                            objectTwo: 'self',
+                            propertyTwo: PROPERTY_ID,
+                        },
+                        {
+                            objectOne: 'sourceAtStart',
+                            propertyOne: PROPERTY_ENERGY_COUNT,
+                            comparator: '<=',
+                            objectTwo: 3,
+                            propertyTwo: null,
+                        }
+                    ],
+                },
+                replaceWith: {
+                    effectType: EFFECT_TYPE_NONE,
+                },
+            }
         ],
     }),
     new Card('Yaki', TYPE_MAGI, REGION_NAROOM, null, {
@@ -735,10 +755,9 @@ const cards = [
     new Card('Arboll', TYPE_CREATURE, REGION_NAROOM, 3, {
         powers: [
             power('Life Channel', [
-                {
-                    type: ACTION_ENTER_PROMPT,
+                prompt({
                     promptType: PROMPT_TYPE_SINGLE_MAGI,
-                },
+                }),
                 effect({
                     effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
                     target: '$sourceCreature',
@@ -757,11 +776,10 @@ const cards = [
                 name: 'Vitalize',
                 cost: 2,
                 effects: [
-                    {
-                        type: ACTION_ENTER_PROMPT,
+                    prompt({
                         promptType: PROMPT_TYPE_SINGLE_CREATURE,
                         targetRestriction: RESTRICTION_ENERGY_LESS_THAN_STARTING,
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
                         target: '$target',
@@ -776,10 +794,9 @@ const cards = [
                 name: 'Hunt',
                 cost: 2,
                 effects: [
-                    {
-                        type: ACTION_ENTER_PROMPT,
+                    prompt({
                         promptType: PROMPT_TYPE_SINGLE_MAGI,
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
                         target: '$targetMagi',
@@ -794,10 +811,9 @@ const cards = [
             {
                 name: 'Fireball',
                 effects: [
-                    {
-                        type: ACTION_ENTER_PROMPT,
+                    prompt({
                         promptType: PROMPT_TYPE_SINGLE_CREATURE,
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
                         target: '$sourceCreature',
@@ -813,10 +829,9 @@ const cards = [
                 name: 'Energy Transfer',
                 cost: COST_X,
                 effects: [
-                    {
-                        type: ACTION_SELECT,
+                    select({
                         selector: SELECTOR_OWN_MAGI,
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
                         target: '$selected',
@@ -835,10 +850,9 @@ const cards = [
                     effect({
                         effectType: EFFECT_TYPE_ROLL_DIE,
                     }),
-                    {
-                        type: ACTION_ENTER_PROMPT,
+                    prompt({
                         promptType: PROMPT_TYPE_SINGLE_CREATURE,
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
                         target: '$target',
@@ -854,10 +868,9 @@ const cards = [
                 name: 'Energy Transfer',
                 cost: COST_X,
                 effects: [
-                    {
-                        type: ACTION_ENTER_PROMPT,
+                    prompt({
                         promptType: PROMPT_TYPE_SINGLE_CREATURE,
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
                         target: '$target',
@@ -873,10 +886,9 @@ const cards = [
                 name: 'Energy Transfer',
                 cost: COST_X,
                 effects: [
-                    {
-                        type: ACTION_ENTER_PROMPT,
+                    prompt({
                         promptType: PROMPT_TYPE_SINGLE_CREATURE,
-                    },
+                    }),
                     effect({
                         effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
                         target: '$target',
@@ -888,10 +900,9 @@ const cards = [
     }),
     new Card('Flame Geyser', TYPE_SPELL, REGION_CALD, 7, {
         effects: [
-            {
-                type: ACTION_SELECT,
+            select({
                 selector: SELECTOR_CREATURES_AND_MAGI,
-            },
+            }),
             effect({
                 effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
                 target: '$selected',
@@ -901,10 +912,9 @@ const cards = [
     new Card('Syphon Stone', TYPE_RELIC, REGION_UNIVERSAL, 0, {
         powers: [
             power('Syphon', [
-                {
-                    type: ACTION_ENTER_PROMPT,
+                prompt({
                     promptType: PROMPT_TYPE_SINGLE_CREATURE,
-                },
+                }),
                 effect({
                     effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
                     target: '$source',
@@ -921,10 +931,9 @@ const cards = [
             effect({
                 effectType: EFFECT_TYPE_ROLL_DIE,
             }),
-            {
-                type: ACTION_ENTER_PROMPT,
+            prompt({
                 promptType: PROMPT_TYPE_SINGLE_CREATURE,
-            },
+            }),
             effect({
                 effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
                 target: '$target',
