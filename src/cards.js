@@ -86,7 +86,10 @@ class Card {
         this.type = type;
         this.region = region;
         this.cost = cost;
-        this.data = data;
+        this.data = {
+            attacksInTurn: 1,
+            ...data,
+        };
     }
 
     getName() {
@@ -105,6 +108,7 @@ class CardInGame {
         this.data = {
             energy: 0,
             controller: owner,
+            attacked: 0,
         };
         this.owner = owner;
         this.actionsUsed = [];
@@ -120,9 +124,23 @@ class CardInGame {
     }
 
     removeEnergy(amount = 0) {
-        this.data.energy -= amount;
+        this.data.energy = Math.max(this.data.energy - amount, 0);
     }
 
+    markAttackDone() {
+        this.data.hasAttacked = true;
+        this.data.attacked += 1;
+    }
+
+    markAttackReceived() {
+        this.data.wasAttacked = true;
+    }
+
+    canAttack() {
+        return this.data.attacked < this.card.data.attacksInTurn;
+    }
+
+    // In future, refer to actions by ID, not name
     wasActionUsed(actionName) {
         return this.actionsUsed.includes(actionName);
     }
@@ -133,6 +151,10 @@ class CardInGame {
 
     clearActionsUsed() {
         this.actionsUsed = [];
+    }
+
+    clearAttackMarkers() {
+
     }
 }
 

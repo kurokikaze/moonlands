@@ -1239,3 +1239,96 @@ describe('Casting things', () => {
         expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].data.energy).toEqual(2, "Arbolit's energy is 2");
     });
 });
+
+describe('Attacking', () => {
+    it('Simple attack from creature to creature (small to large)', () => {
+        const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 1;
+        const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
+        weebo.addEnergy(2);
+        const quorPup = new CardInGame(byName('Quor Pup'), NON_ACTIVE_PLAYER);
+        quorPup.addEnergy(3);
+
+        const gameState = new moonlands.State({
+            zones: [
+                new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+                new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([weebo, quorPup]),
+            ],
+            step: STEP_ATTACK,
+            activePlayer: ACTIVE_PLAYER,
+        });
+
+        const attackAction = {
+            type: moonlands.ACTION_ATTACK,
+            source: weebo,
+            target: quorPup,
+        };
+
+        gameState.update(attackAction);
+
+        expect(weebo.data.energy).toEqual(0, 'Weebo has 0 energy');
+        expect(quorPup.data.energy).toEqual(1, 'Quor Pup has 1 energy');
+    });
+
+    it('Simple attack from creature to creature (large to small)', () => {
+        const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 1;
+        const leafHyren = new CardInGame(byName('Leaf Hyren'), ACTIVE_PLAYER);
+        leafHyren.addEnergy(5);
+        const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER);
+        arbolit.addEnergy(2);
+
+        const gameState = new moonlands.State({
+            zones: [
+                new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+                new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([leafHyren, arbolit]),
+            ],
+            step: STEP_ATTACK,
+            activePlayer: ACTIVE_PLAYER,
+        });
+
+        const attackAction = {
+            type: moonlands.ACTION_ATTACK,
+            source: leafHyren,
+            target: arbolit,
+        };
+
+        gameState.update(attackAction);
+
+        expect(leafHyren.data.energy).toEqual(3, 'Leaf Hyren has 3 energy');
+        expect(arbolit.data.energy).toEqual(0, 'Arbolit has 0 energy');
+    });
+
+    it('Simple attack from creature to magi', () => {
+        const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 1;
+        const leafHyren = new CardInGame(byName('Leaf Hyren'), ACTIVE_PLAYER);
+        leafHyren.addEnergy(5);
+        const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER);
+        grega.addEnergy(10);
+
+        const gameState = new moonlands.State({
+            zones: [
+                new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+                new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+                new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([leafHyren]),
+            ],
+            step: STEP_ATTACK,
+            activePlayer: ACTIVE_PLAYER,
+        });
+
+        const attackAction = {
+            type: moonlands.ACTION_ATTACK,
+            source: leafHyren,
+            target: grega,
+        };
+
+        gameState.update(attackAction);
+
+        expect(leafHyren.data.energy).toEqual(5, 'Leaf Hyren still has 5 energy');
+        expect(grega.data.energy).toEqual(5, 'Grega has 5 energy left');
+    });
+});

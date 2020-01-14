@@ -13,6 +13,7 @@ const {
     ACTION_ENTER_PROMPT,
     ACTION_RESOLVE_PROMPT,
     ACTION_GET_PROPERTY_VALUE,
+    ACTION_ATTACK,
 
     PROPERTY_ENERGY_COUNT,
     PROPERTY_REGION,
@@ -62,6 +63,11 @@ const {
     EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
     EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
+    EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
+    EFFECT_TYPE_CREATURE_IS_DEFEATED, // Possibly redundant
+    EFFECT_TYPE_BEFORE_DAMAGE,
+    EFFECT_TYPE_DEAL_DAMAGE,
+    EFFECT_TYPE_AFTER_DAMAGE,
 
     COST_X,
 } = require('./const');
@@ -263,6 +269,50 @@ class State {
             const action = this.getNextAction();
 
             switch (action.type) {
+                case ACTION_ATTACK:
+                    /*
+                        source
+                        target
+
+                        ---
+
+                        BEFORE_DAMAGE,
+                        DEAL_DAMAGE,
+                        DEAL_DAMAGE,
+                        AFTER_DAMAGE,
+                    */
+                    const attackSource = this.getMetaValue(action.source, action.generatedBy);
+                    const attackTarget = this.getMetaValue(action.target, action.generatedBy);
+                    const attackSequence = [
+                    {
+                        type: ACTION_EFFECT,
+                        effectType: EFFECT_TYPE_BEFORE_DAMAGE,
+                        source: attackSource,
+                        target: attackTarget,
+                    },
+                    {  // from source to target
+                        type: ACTION_EFFECT,
+                        effectType: EFFECT_TYPE_DEAL_DAMAGE,
+                        source: attackSource,
+                        target: attackTarget,
+                        amount: attackSource.data.energy,
+                    }, // from target to source (if attacking a creature)
+                    (attackTarget.card.type === TYPE_CREATURE) ? {
+                        type: ACTION_EFFECT,
+                        effectType: EFFECT_TYPE_DEAL_DAMAGE,
+                        source: attackTarget,
+                        target: attackSource,
+                        amount: attackTarget.data.energy,
+                    } : null,
+                    {
+                        type: ACTION_EFFECT,
+                        effectType: EFFECT_TYPE_AFTER_DAMAGE,
+                        source: attackSource,
+                        target: attackTarget,
+                    },
+                    ].filter(Boolean);
+                    this.transformIntoActions(...attackSequence);
+                    break;
                 case ACTION_GET_PROPERTY_VALUE:
                     const target = this.getMetaValue(action.target, action.generatedBy);
                     const property = this.getMetaValue(action.property, action.generatedBy);
@@ -520,7 +570,7 @@ class State {
                                 // Здесь должен быть полный шаг определения стоимости
                                 const activeMagi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card;
                                 const regionPenalty = (activeMagi.card.region == baseCard.region) ? 0 : 1;
-                                this.addActions(
+                                this.transformIntoActions(
                                 {
                                     type: ACTION_EFFECT,
                                     effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
@@ -561,17 +611,48 @@ class State {
                     break;
                 case ACTION_EFFECT:
                     switch(action.effectType) {
+                        /** Attack sequence actions */
+                        case EFFECT_TYPE_BEFORE_DAMAGE:
+                            action.source.markAttackDone();
+                            action.target.markAttackReceived();
+                            break;
+                        case EFFECT_TYPE_DEAL_DAMAGE:
+                            this.transformIntoActions({
+                                type: ACTION_EFFECT,
+                                effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
+                                target: action.target,
+                                amount: action.amount,
+                                attack: true,
+                            });
+                            break;
+                        case EFFECT_TYPE_AFTER_DAMAGE:
+                            if (action.target.data.energy === 0) {
+                                this.transformIntoActions({
+                                    type: ACTION_EFFECT,
+                                    effectType: EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
+                                    source: action.source,
+                                    target: action.target,
+                                    attack: true,
+                                });
+                                this.transformIntoActions({
+                                    type: ACTION_EFFECT,
+                                    effectType: EFFECT_TYPE_CREATURE_IS_DEFEATED,
+                                    target: action.target,
+                                    attack: true,
+                                });
+                            }
+                            break;
                         case EFFECT_TYPE_ROLL_DIE:
                             const result = action.result || (Math.floor(Math.random() * 6) + 1);
                             if (!this.state.spellMetaData[action.generatedBy]) {
                                 this.state.spellMetaData[action.generatedBy] = {};
                             }
                             this.state.spellMetaData[action.generatedBy].roll_result = result;
-                            break;                            
+                            break;
                         case EFFECT_TYPE_ENERGIZE:
                             const amount = this.modifyByStaticAbilities(action.target, PROPERTY_ENERGIZE);
                             const type = action.target.card.type;
-                            this.addActions({
+                            this.transformIntoActions({
                                 type: ACTION_EFFECT,
                                 effectType: (type == TYPE_CREATURE) ? EFFECT_TYPE_ADD_ENERGY_TO_CREATURE : EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
                                 target: action.target,
@@ -621,7 +702,7 @@ class State {
                             break;
                         case EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE:
                             const targetId = this.state.spellMetaData[action.generatedBy].creature_created;
-                            this.addActions({
+                            this.transformIntoActions({
                                 type: ACTION_EFFECT,
                                 effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
                                 target: this.getZone(ZONE_TYPE_IN_PLAY).byId(targetId),
@@ -704,7 +785,7 @@ class State {
                             const restoreTarget = this.getMetaValue(action.target, action.generatedBy);
                             const restoreAmount = restoreTarget.card.cost - restoreTarget.data.energy;
                             if (restoreAmount > 0) {
-                                this.addActions({
+                                this.transformIntoActions({
                                     type: ACTION_EFFECT,
                                     effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
                                     target: restoreTarget,
@@ -719,7 +800,7 @@ class State {
                             const payingAmount = this.getMetaValue(action.amount, action.generatedBy);
 
                             if (payingAmount > 0) {
-                                this.addActions({
+                                this.transformIntoActions({
                                     type: ACTION_EFFECT,
                                     effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
                                     target: payingTarget,
@@ -763,6 +844,7 @@ module.exports = {
     ACTION_RESOLVE_PROMPT,
     ACTION_POWER,
     ACTION_CALCULATE,
+    ACTION_ATTACK,
     NO_PRIORITY,
     PRIORITY_PRS,
     PRIORITY_ATTACK,

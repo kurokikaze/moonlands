@@ -7,6 +7,7 @@ const ACTION_CALCULATE = 'actions/calculate';
 const ACTION_ENTER_PROMPT = 'actions/enter_prompt';
 const ACTION_RESOLVE_PROMPT = 'actions/resolve_prompt';
 const ACTION_GET_PROPERTY_VALUE = 'actions/get_property_value';
+const ACTION_ATTACK = 'actions/attack';
 
 const PROPERTY_ENERGY_COUNT = 'properties/energy_count';
 const PROPERTY_REGION = 'properties/region';
@@ -47,6 +48,11 @@ const REGION_PARADWYN = 'regions/paradwyn';
 const REGION_D_RESH = 'regions/d_resh';
 const REGION_UNIVERSAL = 'regions/universal';
 
+const EFFECT_TYPE_BEFORE_DAMAGE = 'effects/before_damage';
+const EFFECT_TYPE_DEAL_DAMAGE = 'effects/deal_damage';
+const EFFECT_TYPE_AFTER_DAMAGE = 'effects/after_damage';
+const EFFECT_TYPE_CREATURE_DEFEATS_CREATURE = 'effects/creature_defeats_creature';
+const EFFECT_TYPE_CREATURE_IS_DEFEATED = 'effects/creature_is_defeated';
 const EFFECT_TYPE_ROLL_DIE = 'effects/roll_die';
 const EFFECT_TYPE_MOVE_ENERGY = 'effects/move_energy';
 const EFFECT_TYPE_PLAY_CREATURE = 'effects/play_creature';
@@ -135,6 +141,7 @@ module.exports = {
     EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
     EFFECT_TYPE_ENERGIZE,
     EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+    EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
@@ -142,6 +149,10 @@ module.exports = {
     EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
     EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
     EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
+    EFFECT_TYPE_BEFORE_DAMAGE,
+    EFFECT_TYPE_DEAL_DAMAGE,
+    EFFECT_TYPE_CREATURE_IS_DEFEATED,
+    EFFECT_TYPE_AFTER_DAMAGE,
 
     RESTRICTION_ENERGY_LESS_THAN_STARTING,
 
