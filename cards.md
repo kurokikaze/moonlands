@@ -1,4 +1,4 @@
-Done: **33** cards out of **190**
+Done: **34** cards out of **190**
 
 # Done, tested
 
@@ -17,6 +17,7 @@ Done: **33** cards out of **190**
 - Yaki
 - Carillion
 - Sinder
+- Stagadan
 
 # Done, not tested
 
@@ -76,7 +77,7 @@ Yaki
 3 Syphon Stone
 3 Carillion
 3 ? (Sap of Life)
-3 ? (Stagadan)
+3 Stagadan
 3 ? (Orwin's Gaze)
 1 Flood of Energy
 
@@ -305,10 +306,6 @@ Yaki
 - Energy Band
 - Platheus
 - Whall (the rest of the Power should work)
-
-### Ability to attack Magi directly
-
-- Stagadan
 
 ## Ability to be attacked
 
