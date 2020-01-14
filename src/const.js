@@ -17,6 +17,7 @@ const PROPERTY_COST = 'properties/cost';
 const PROPERTY_ENERGIZE = 'properties/energize';
 const PROPERTY_MAGI_STARTING_ENERGY = 'properties/magi_starting_energy';
 const PROPERTY_ATTACKS_PER_TURN = 'properties/attacks_per_turn';
+const PROPERTY_CAN_ATTACK_MAGI_DIRECTLY = 'properties/can_attack_magi_directly';
 
 const SELECTOR_CREATURES = 'selectors/creatures';
 const SELECTOR_CREATURES_AND_MAGI = 'selectors/creatures_and_magi';
@@ -135,6 +136,7 @@ module.exports = {
     PROPERTY_COST,
     PROPERTY_ENERGIZE,
     PROPERTY_ATTACKS_PER_TURN,
+    PROPERTY_CAN_ATTACK_MAGI_DIRECTLY,
 
     EFFECT_TYPE_NONE,
     EFFECT_TYPE_MOVE_ENERGY,

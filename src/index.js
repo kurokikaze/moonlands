@@ -22,6 +22,7 @@ const {
     PROPERTY_ENERGIZE,
     PROPERTY_MAGI_STARTING_ENERGY,
     PROPERTY_ATTACKS_PER_TURN,
+    PROPERTY_CAN_ATTACK_MAGI_DIRECTLY,
 
     CALCULATION_SET,
     CALCULATION_DOUBLE,
@@ -255,6 +256,8 @@ class State {
                 return target.card.data.energize;
             case PROPERTY_REGION:
                 return target.card.region;
+            case PROPERTY_CAN_ATTACK_MAGI_DIRECTLY:
+                return target.card.data.canAttackMagiDirectly;
             case PROPERTY_MAGI_STARTING_ENERGY:
                 return target.card.data.startingEnergy;
         }
@@ -395,9 +398,18 @@ class State {
                     const attackTarget = this.getMetaValue(action.target, action.generatedBy);
 
                     const sourceAttacksPerTurn = this.modifyByStaticAbilities(attackSource, PROPERTY_ATTACKS_PER_TURN);
-                    const sourceCanAttack = attackSource.data.attacked < sourceAttacksPerTurn;
+                    const sourceHasAttacksLeft = attackSource.data.attacked < sourceAttacksPerTurn;
+                    const targetIsMagi = attackTarget.card.type == TYPE_MAGI;
+                    const magiHasCreatures = this.useSelector(SELECTOR_OWN_CREATURES, attackTarget.owner).length > 0;
 
-                    if (sourceCanAttack && this.getCurrentPriority() == PRIORITY_ATTACK) {
+                    const attackApproved = !targetIsMagi || ( // Either we attack a creature
+                        targetIsMagi && ( // Or we are attacking a magi, but then...
+                            !magiHasCreatures || // ...he either shouldn't have creatures
+                            this.modifyByStaticAbilities(attackSource, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY) // ...or we can just trample through
+                        )
+                    );
+
+                    if (sourceHasAttacksLeft && attackApproved && this.getCurrentPriority() == PRIORITY_ATTACK) {
                         const attackSequence = [
                         {
                             type: ACTION_EFFECT,

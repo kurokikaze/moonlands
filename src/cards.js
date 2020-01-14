@@ -92,6 +92,7 @@ class Card {
         this.cost = cost;
         this.data = {
             attacksPerTurn: 1,
+            canAttackMagiDirectly: false,
             ...data,
         };
     }
@@ -520,6 +521,9 @@ const cards = [
                 amount: '$number',
             }),
         ],
+    }),
+    new Card('Stagadan', TYPE_CREATURE, REGION_NAROOM, 3, {
+        canAttackMagiDirectly: true,
     }),
     new Card('Fire Ball', TYPE_SPELL, REGION_CALD, 2, {
        effects: [

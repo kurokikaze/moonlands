@@ -730,6 +730,57 @@ describe('Weebo', () => {
     });
 });
 
+describe('Stagadan', () => {
+    it('Agility', () => {
+        const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 1;
+
+        const stagadan = new CardInGame(byName('Stagadan'), ACTIVE_PLAYER);
+        stagadan.addEnergy(3);
+
+        const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
+        arbolit.addEnergy(3);
+
+        const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER);
+        weebo.addEnergy(2);
+        const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER);
+        yaki.addEnergy(10);
+
+        const gameState = new moonlands.State({
+            zones: [
+                new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+                new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+                new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+                new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+                new Zone('In play', ZONE_TYPE_IN_PLAY).add([stagadan, arbolit, weebo]),
+            ],
+            step: STEP_ATTACK,
+            activePlayer: ACTIVE_PLAYER,
+        });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+        const attackByArbolitAction = {
+            type: moonlands.ACTION_ATTACK,
+            source: arbolit,
+            target: yaki,
+        };
+
+        const attackByStagadanAction = {
+            type: moonlands.ACTION_ATTACK,
+            source: stagadan,
+            target: yaki,
+        };
+
+        gameState.update(attackByArbolitAction);
+
+        expect(yaki.data.energy).toEqual(10, 'Yaki still has 10 energy left');
+
+        gameState.update(attackByStagadanAction);
+
+        expect(yaki.data.energy).toEqual(7, 'Yaki now has 7 energy left');
+    });
+});
+
 describe('Yaki', () => {
     it('Double Strike', () => {
         const ACTIVE_PLAYER = 0;
