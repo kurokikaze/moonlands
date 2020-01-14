@@ -235,6 +235,32 @@ const cards = [
             ]),
         ],
     }),
+    new Card('Kelthet', TYPE_CREATURE, REGION_CALD, 4, {
+        powers: [
+            {
+                name: 'Consume',
+                cost: 1,
+                effects: [
+                    {
+                        type: ACTION_ENTER_PROMPT,
+                        promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
+                    },
+                    {
+                        type: ACTION_GET_PROPERTY_VALUE,
+                        target: '$target',
+                        property: PROPERTY_ENERGY_COUNT,
+                        variable: 'creature_energy',
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_MOVE_ENERGY,
+                        source: '$target',
+                        target: '$sourceCreature',
+                        amount: '$creature_energy',
+                    }),
+                ],
+            },
+        ],
+    }),
     new Card('Deep Hyren', TYPE_CREATURE, REGION_OROTHE, 6, {
         powers: [
             {
