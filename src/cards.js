@@ -46,6 +46,7 @@ const {
     EFFECT_TYPE_CREATURE_ENTERS_PLAY,
     EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
     EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
+    EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI,
     EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
     EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
     EFFECT_TYPE_ENERGIZE,
@@ -57,6 +58,7 @@ const {
     EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
     EFFECT_TYPE_MOVE_ENERGY,
 
+    PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
     PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
     PROMPT_TYPE_SINGLE_CREATURE,
     PROMPT_TYPE_OWN_SINGLE_CREATURE,
@@ -459,6 +461,133 @@ const cards = [
                         effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
                         target: '$targetMagi',
                         amount: '$energyToRestore',
+                    }),
+                ],
+            },
+        ],
+    }),
+    new Card ('Lava Aq', TYPE_CREATURE, REGION_CALD, 4, {
+        powers: [
+            {
+                name: 'Firestorm',
+                cost: 2,
+                effects: [
+                    {
+                        type: ACTION_ENTER_PROMPT,
+                        promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+                        target: '$target',
+                    }),
+                    {
+                        type: ACTION_SELECT,
+                        selector: SELECTOR_CREATURES_NOT_OF_REGION,
+                        region: REGION_CALD,
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                        target: '$selected',
+                        amount: 1,
+                    }),
+                    {
+                        type: ACTION_SELECT,
+                        selector: SELECTOR_MAGI_NOT_OF_REGION,
+                        region: REGION_CALD,
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+                        target: '$selected',
+                        amount: 1,
+                    }),                    
+                ],
+            },
+        ],
+    }),
+    new Card('Lava Arboll', TYPE_CREATURE, REGION_CALD, 2, {
+        powers: [
+            {
+                name: 'Healing Flame',
+                cost: 2,
+                effects: [
+                    {
+                        type: ACTION_ENTER_PROMPT,
+                        promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+                        target: '$sourceCreature',
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI,
+                        target: '$target',
+                        amount: 3,
+                    })
+                ],
+            },
+        ],
+    }),
+    new Card('Magam', TYPE_MAGI, REGION_CALD, null, {
+        startingEnergy: 13,
+        energize: 5,
+        startingCards: ['Flame Control', 'Lava Balamant', 'Arbolit'],
+        powers: [
+            {
+                name: 'Vitalize',
+                cost: 4,
+                effects: [
+                    {
+                        type: ACTION_ENTER_PROMPT,
+                        promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+                        targetRestriction: RESTRICTION_ENERGY_LESS_THAN_STARTING,
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
+                        target: '$target',
+                    }),
+                ],
+            },
+        ],
+    }),
+    new Card('Pruitt', TYPE_MAGI, REGION_NAROOM, null, {
+        startingEnergy: 15,
+        energize: 5,
+        startingCards: ['Vinoc', 'Carillion', 'Grow'],
+        powers: [
+            {
+                name: 'Refresh',
+                cost: 2,
+                effects: [
+                    {
+                        type: ACTION_ENTER_PROMPT,
+                        promptType: PROMPT_TYPE_SINGLE_CREATURE,
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+                        target: '$target',
+                        amount: 3,
+                    }),
+                ],
+            },
+        ],
+    }),
+    new Card('Poad', TYPE_MAGI, REGION_NAROOM, null, {
+        startingEnergy: 13,
+        energize: 5,
+        startingCards: ['Leaf Hyren', 'Balamant Pup', 'Vortex of Knowledge'],
+        powers: [
+            {
+                name: "Heroes' Feast",
+                cost: 2,
+                effects: [
+                    {
+                        type: ACTION_SELECT,
+                        selector: SELECTOR_OWN_CREATURES,
+                    },
+                    effect({
+                        effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+                        target: '$selected',
+                        amount: 1,
                     }),
                 ],
             },

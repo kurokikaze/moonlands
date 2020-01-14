@@ -50,6 +50,7 @@ const EFFECT_TYPE_CREATURE_ENTERS_PLAY = 'effects/creature_enters_play';
 const EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE = 'effects/paying_energy_for_creature';
 const EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE = 'effects/starting_energy_on_creature';
 const EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES = 'effects/move_card_between_zones';
+const EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI = 'effects/add_energy_to_creature_or_magi';
 const EFFECT_TYPE_ADD_ENERGY_TO_CREATURE = 'effects/add_energy_to_creature';
 const EFFECT_TYPE_ADD_ENERGY_TO_MAGI = 'effects/add_energy_to_magi';
 const EFFECT_TYPE_ENERGIZE = 'effects/energize';
@@ -120,6 +121,7 @@ module.exports = {
     EFFECT_TYPE_CREATURE_ENTERS_PLAY,
     EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
     EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
+    EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI,
     EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
     EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
     EFFECT_TYPE_ENERGIZE,

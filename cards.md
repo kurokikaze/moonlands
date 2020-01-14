@@ -27,6 +27,11 @@ Done: 22 cards out of 190
 - Thermal Blast
 - Deep Hyren
 - Kelthet
+- Lava Aq
+- Lava Arboll
+- Magam
+- Pruitt
+- Poad
 
 # Not done yet
 
@@ -37,17 +42,12 @@ Done: 22 cards out of 190
 - Ground Breaker
 - Grow
 - Gruk
-- Lava Aq
-- Lava Arboll
 - Lightning Hyren
-- Magam
 - Magma Hyren
 - Mushroom Hyren
-- Numbulo
+- Nimbulo
 - Ormagon
 - Paralit
-- Poad
-- Pruitt
 - Sap of Life
 - Shockwave
 - Shooting Star

@@ -49,6 +49,7 @@ const {
     EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
     EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
     EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
+    EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI,
     EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
     EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
     EFFECT_TYPE_ENERGIZE,
@@ -152,6 +153,10 @@ class State {
 
     addActions(actions) {
         this.state.actions.push(...arguments);
+    }
+
+    transformIntoActions(actions) {
+        this.state.actions.unshift(...arguments);
     }
 
     getNextAction() {
@@ -609,13 +614,38 @@ class State {
                             moveSource.removeEnergy(amountToMove);
                             moveTarget.addEnergy(amountToMove);
                             break;
+                        case EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI:
+                            const addMiltiTarget = this.getMetaValue(action.target, action.generatedBy);
+
+                            oneOrSeveral(discardMiltiTarget, target => {
+                                switch (target.card.type) {
+                                    case TYPE_CREATURE:
+                                        this.transformIntoActions({
+                                            type: ACTION_EFFECT,
+                                            effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+                                            amount: action.amount,
+                                            target,
+                                            generatedBy: action.generatedBy,
+                                        });
+                                        break;
+                                    case TYPE_MAGI:
+                                        this.transformIntoActions({
+                                            type: ACTION_EFFECT,
+                                            effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+                                            amount: action.amount,
+                                            target,
+                                            generatedBy: action.generatedBy,
+                                        });
+                                        break;
+                                }
+                            });
                         case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI:
                             const discardMiltiTarget = this.getMetaValue(action.target, action.generatedBy);
 
                             oneOrSeveral(discardMiltiTarget, target => {
                                 switch (target.card.type) {
                                     case TYPE_CREATURE:
-                                        this.addActions({
+                                        this.transformIntoActions({
                                             type: ACTION_EFFECT,
                                             effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
                                             amount: action.amount,
@@ -624,7 +654,7 @@ class State {
                                         });
                                         break;
                                     case TYPE_MAGI:
-                                        this.addActions({
+                                        this.transformIntoActions({
                                             type: ACTION_EFFECT,
                                             effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
                                             amount: action.amount,
