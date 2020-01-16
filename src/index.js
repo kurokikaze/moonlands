@@ -443,14 +443,14 @@ class State {
             const replacerId = replacer.self.id; // Not really, but will work for now
 
             if (this.matchAction(action, replacer.find, replacer.self)) {
-                // prepare %-values on createdAction
+                // Turn effect-templates into actual effect actions by preparing meta-values
                 const preparedEffects = replacer.effects.map(effect => {
                     let resultEffect =  {
                         type: ACTION_EFFECT,
                         effectType: effect.effectType, // Do we need to replace this? Maybe later
                     };
 
-                    // Turn effect-template into actual effect by preparing meta-values
+                    // prepare %-values on created action
                     Object.keys(effect)
                         .filter(key => !['type', 'effectType'].includes(key))
                         .forEach(key => {
