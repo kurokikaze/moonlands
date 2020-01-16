@@ -69,6 +69,7 @@ const {
     EFFECT_TYPE_CREATURE_ATTACKS,
     EFFECT_TYPE_BEFORE_DAMAGE,
 
+    PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
     PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
     PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
     PROMPT_TYPE_SINGLE_CREATURE,
@@ -400,6 +401,39 @@ const cards = [
                         effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
                         target: '$selected',
                         amount: 3,
+                    }),
+                ],
+            },
+        ],
+    }),
+    new Card('Magma Hyren', TYPE_MAGI, REGION_CALD, 3, {
+        powers: [
+            {
+                name: 'Fireball',
+                cost: 1,
+                effects: [
+                    prompt({
+                        promptType: PROMPT_TYPE_SINGLE_CREATURE,
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                        target: '$target',
+                        amount: 1,
+                    }),
+                ],
+            },
+            {
+                name: 'Healing Flame',
+                cost: 1,
+                effects: [
+                    prompt({
+                        promptType: PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
+                        source: '$sourceCreature',
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+                        target: '$target',
+                        amount: 2,
                     }),
                 ],
             },

@@ -50,6 +50,7 @@ const {
     PROMPT_TYPE_NUMBER,
     PROMPT_TYPE_SINGLE_CREATURE,
     PROMPT_TYPE_SINGLE_MAGI,
+    PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 
     EFFECT_TYPE_MOVE_ENERGY,
     EFFECT_TYPE_ROLL_DIE,
@@ -129,6 +130,7 @@ const defaultState = {
     activePlayer: 0,
     prompt: false,
     promptType: null,
+    promptParams: {},
     step: 0,
     zones: [],
     players: [],
@@ -649,19 +651,36 @@ class State {
                     break;
                 case ACTION_ENTER_PROMPT:
                     const savedActions = this.state.actions;
+                    let promptParams = {};
+
+                    switch (action.promptType) {
+                        case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE:
+                            promptParams = {
+                                source: this.getMetaValue(action.source, action.generatedBy),
+                            };
+                            break;
+                    }
                     this.state = {
                         ...this.state,
                         actions: [],
                         savedActions,
                         prompt: true,
                         promptType: action.promptType,
+                        promptParams,
                     };
                     break;
                 case ACTION_RESOLVE_PROMPT:
                     let currentActionMetaData = this.state.spellMetaData[action.generatedBy] || {};
+
                     switch (this.state.promptType) {
                         case PROMPT_TYPE_NUMBER:
                             currentActionMetaData[action.variable || 'number'] = action.number;
+                            break;
+                        case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE:
+                            if (this.state.promptParams.source.id === action.target.id) {
+                                throw new Error('Got forbidden target on prompt');
+                            }
+                            currentActionMetaData[action.variable || 'target'] = action.target;
                             break;
                         case PROMPT_TYPE_SINGLE_CREATURE:
                             currentActionMetaData[action.variable || 'target'] = action.target;
@@ -677,6 +696,7 @@ class State {
                         savedActions: [],
                         prompt: false,
                         promptType: null,
+                        promptParams: {},
                         spellMetaData: {
                             ...this.state.spellMetaData,
                             [action.generatedBy]: currentActionMetaData,

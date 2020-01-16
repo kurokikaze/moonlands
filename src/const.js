@@ -83,6 +83,7 @@ const EFFECT_TYPE_CREATURE_IS_ATTACKED = 'effects/creature_is_attacked';
 const EFFECT_TYPE_START_OF_TURN = 'effects/start_of_turn';
 const EFFECT_TYPE_END_OF_TURN = 'effects/end_of_turn';
 
+const PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE = 'prompt/any_creature_except_source';
 const PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI = 'prompt/creature_or_magi';
 const PROMPT_TYPE_SINGLE_CREATURE = 'prompt/creature';
 const PROMPT_TYPE_OWN_SINGLE_CREATURE = 'prompt/own_creature';
@@ -178,6 +179,7 @@ module.exports = {
 
     RESTRICTION_ENERGY_LESS_THAN_STARTING,
 
+    PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
     PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
     PROMPT_TYPE_SINGLE_CREATURE,
     PROMPT_TYPE_OWN_SINGLE_CREATURE,

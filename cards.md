@@ -20,6 +20,7 @@ Done: **36** cards out of **190**
 - Stagadan
 - Rudwot
 - Magma Armor
+- Magma Hyren
 
 # Done, not tested
 
@@ -51,7 +52,7 @@ Sinder
 3 Fire Chogo
 3 Fire Grag
 3 Arbolit
-3 ? (Magma Hyren)
+3 Magma Hyren
 3 Kelthet
 3 Lava Aq
 3 Lava Arboll

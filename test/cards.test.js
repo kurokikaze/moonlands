@@ -14,6 +14,7 @@ const {
     ACTION_POWER,
     ACTION_RESOLVE_PROMPT,
 
+    PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
     PROMPT_TYPE_SINGLE_CREATURE,
     PROMPT_TYPE_SINGLE_MAGI,
 } = require('../src/const');
@@ -532,7 +533,7 @@ describe('Carillion', () => {
 });
 
 describe('Magma Armor', () => {
-    it.only('Defense', () => {
+    it('Defense', () => {
         const ACTIVE_PLAYER = 0;
         const NON_ACTIVE_PLAYER = 1;
 
@@ -567,7 +568,7 @@ describe('Magma Armor', () => {
         expect(grega.data.energy).toEqual(9, 'Grega loses 1 energy in attack but gains 2 from Magma Armor');
     });
 
-    it.only('Defense, but attacker controls the Armor', () => {
+    it('Defense, but attacker controls the Armor', () => {
         const ACTIVE_PLAYER = 0;
         const NON_ACTIVE_PLAYER = 1;
 
@@ -602,6 +603,99 @@ describe('Magma Armor', () => {
         expect(grega.data.energy).toEqual(7, 'Grega loses 1 energy in attack and gains none from opponents Magma Armor');
     });
 });
+
+describe('Magma Hyren', () => {
+    it('Fireball', () => {
+        const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 1;
+
+        const magmaHyren = new CardInGame(byName('Magma Hyren'), ACTIVE_PLAYER);
+        magmaHyren.addEnergy(3);
+
+        const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER);
+        weebo.addEnergy(1);
+
+        const gameState = new moonlands.State({
+            zones: [
+                new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+                new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+                new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+                new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([weebo, magmaHyren]),
+            ],
+            step: STEP_PRS_FIRST,
+            activePlayer: ACTIVE_PLAYER,
+        });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+        const fireballWeeboAction = {
+            type: ACTION_POWER,
+            source: magmaHyren,
+            power: magmaHyren.card.data.powers[0],
+            player: ACTIVE_PLAYER,
+        };
+
+        const targetWeeboAction = {
+            type: ACTION_RESOLVE_PROMPT,
+            target: weebo,
+            generatedBy: magmaHyren.id,
+        };
+        
+        gameState.update(fireballWeeboAction);
+        gameState.update(targetWeeboAction);
+
+        expect(magmaHyren.data.energy).toEqual(2, 'Magma Hyren has 2 energy left');        
+        expect(weebo.data.energy).toEqual(0, 'Weebo is toast');
+    });
+
+    it('Healing Flame', () => {
+        const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 1;
+
+        const magmaHyren = new CardInGame(byName('Magma Hyren'), ACTIVE_PLAYER);
+        magmaHyren.addEnergy(3);
+
+        const fireGrag = new CardInGame(byName('Fire Grag'), ACTIVE_PLAYER);
+        fireGrag.addEnergy(2);
+
+        const gameState = new moonlands.State({
+            zones: [
+                new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+                new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+                new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+                new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([magmaHyren, fireGrag]),
+            ],
+            step: STEP_PRS_FIRST,
+            activePlayer: ACTIVE_PLAYER,
+        });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+        const healingFlameAction = {
+            type: ACTION_POWER,
+            source: magmaHyren,
+            power: magmaHyren.card.data.powers[1],
+            player: ACTIVE_PLAYER,
+        };
+
+        const targetFireGragAction = {
+            type: ACTION_RESOLVE_PROMPT,
+            target: fireGrag,
+            generatedBy: magmaHyren.id,
+        };
+        
+        gameState.update(healingFlameAction);
+
+        expect(gameState.state.promptType).toEqual(PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, 'Prompt type is correct');
+        expect(gameState.state.promptParams.source.id).toEqual(magmaHyren.id, 'Exclusion for prompt is passed correctly');
+
+        gameState.update(targetFireGragAction);
+
+        expect(magmaHyren.data.energy).toEqual(2, 'Magma Hyren has 2 energy left');        
+        expect(fireGrag.data.energy).toEqual(4, 'Fire Grag has 4 energy');
+    });
+});
+
 
 describe('Rudwot', () => {
     it('Trample', () => {
