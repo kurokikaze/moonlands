@@ -71,6 +71,8 @@ const {
     EFFECT_TYPE_BEFORE_DAMAGE,
     EFFECT_TYPE_DEAL_DAMAGE,
     EFFECT_TYPE_AFTER_DAMAGE,
+    EFFECT_TYPE_CREATURE_ATTACKS,
+    EFFECT_TYPE_CREATURE_IS_ATTACKED,
 
     COST_X,
 } = require('./const');
@@ -213,6 +215,31 @@ class State {
         }
     }
 
+    /**
+     * Same as getMetaValue, but instead of $-variables it uses %-variables
+     * $-variables are kept intact, we probably need them
+     * %-variables include usual "self": link to trigger source
+     */
+    prepareMetaValue(value, action, self, spellId) {
+        if (value === '%self') return self;
+
+        if (
+            typeof value == 'string' &&
+            value[0] == '%'
+        ) {
+            const variableName = value.slice(1);
+
+            // %-variables first refer to action's properties
+            if (action[variableName]) return action[variableName];
+
+            // if not, we use spellMetaData
+            const spellMetaData = this.getSpellMetadata(spellId);
+            return spellMetaData[variableName] ? spellMetaData[variableName] : null;
+        } else {
+            return value;
+        }
+    }
+
     useSelector(selector, player, argument) {
         switch (selector) {
             case SELECTOR_CREATURES:
@@ -264,12 +291,16 @@ class State {
     }
 
     modifyByStaticAbilities(target, property) {
+        const PLAYER_ONE = this.players[0];
+        const PLAYER_TWO = this.players[1];
+
         // gathering static abilities from the field, adding players to them
         const allZonesCards = [
             ...this.getZone(ZONE_TYPE_IN_PLAY).cards,
-            ...this.getZone(ZONE_TYPE_ACTIVE_MAGI, target.owner).cards,
-            ...this.getZone(ZONE_TYPE_ACTIVE_MAGI, this.getOpponent(target.owner)).cards,
+            ...this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE).cards,
+            ...this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO).cards,
         ];
+
         const zoneAbilities = allZonesCards.reduce(
             (acc, cardInPlay) => cardInPlay.card.data.staticAbilities ? [
                 ...acc,
@@ -326,33 +357,7 @@ class State {
                 return false;
             }
 
-            if (action.effectType !== replacer.find.effectType) return false;
-
-            const conditions = replacer.find.conditions.map(condition => {
-                const objectOne = this.getObjectOrSelf(action, replacer.self, condition.objectOne, condition.propertyOne);
-                const objectTwo = this.getObjectOrSelf(action, replacer.self, condition.objectTwo, condition.propertyTwo);
-
-                const operandOne = condition.propertyOne ? this.modifyByStaticAbilities(objectOne, condition.propertyOne) : objectOne;
-
-                const operandTwo = condition.propertyTwo ? this.modifyByStaticAbilities(objectTwo, condition.propertyTwo) : objectTwo;
-
-                switch (condition.comparator) {
-                    case '=':
-                        return operandOne == operandTwo;
-                    case '>':
-                        return operandOne > operandTwo;
-                    case '<':
-                        return operandOne < operandTwo;
-                    case '>=':
-                        return operandOne >= operandTwo;
-                    case '<=':
-                        return operandOne <= operandTwo;
-                }
-
-                return false;
-            });
-
-            if (conditions.every(result => result === true)) {
+            if (this.matchAction(action, replacer.find, replacer.self)) {
                 replacementFound = true;
                 appliedReplacerId = replacerId;
                 replaceWith = replacer.replaceWith;
@@ -375,12 +380,92 @@ class State {
         return action;
     }
 
+    matchAction(action, find, self) {
+        if (action.effectType !== find.effectType) {
+            return false;
+        }
+
+        const conditions = find.conditions.map(condition => {
+            const objectOne = this.getObjectOrSelf(action, self, condition.objectOne, condition.propertyOne);
+            const objectTwo = this.getObjectOrSelf(action, self, condition.objectTwo, condition.propertyTwo);
+
+            const operandOne = condition.propertyOne ? this.modifyByStaticAbilities(objectOne, condition.propertyOne) : objectOne;
+
+            const operandTwo = condition.propertyTwo ? this.modifyByStaticAbilities(objectTwo, condition.propertyTwo) : objectTwo;
+
+            switch (condition.comparator) {
+                case '=':
+                    return operandOne == operandTwo;
+                case '>':
+                    return operandOne > operandTwo;
+                case '<':
+                    return operandOne < operandTwo;
+                case '>=':
+                    return operandOne >= operandTwo;
+                case '<=':
+                    return operandOne <= operandTwo;
+            }
+
+            return false;
+        });
+
+        return conditions.every(result => result === true);
+    }
+
+    triggerAbilities(action) {
+        const PLAYER_ONE = this.players[0];
+        const PLAYER_TWO = this.players[1];
+        const allZonesCards = [
+            ...(this.getZone(ZONE_TYPE_IN_PLAY) || {cards: []}).cards,
+            ...(this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE) || {cards: []}).cards,
+            ...(this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO) || {cards: []}).cards,
+        ];
+
+        const triggerEffects = allZonesCards.reduce(
+            (acc, cardInPlay) => cardInPlay.card.data.triggerEffects ? [
+                ...acc,
+                ...cardInPlay.card.data.triggerEffects.map(effect => ({...effect, self: cardInPlay})),
+            ] : acc,
+            [],
+        );
+
+        const sourceId = action.generatedBy; // For accessing caught action's metaData
+
+        triggerEffects.forEach(replacer => {
+            const replacerId = replacer.self.id; // Not really, but will work for now
+
+            if (this.matchAction(action, replacer.find, replacer.self)) {
+                // prepare %-values on createdAction
+                const preparedEffects = replacer.effects.map(effect => {
+                    let resultEffect =  {
+                        type: ACTION_EFFECT,
+                        effectType: effect.effectType, // Do we need to replace this? Maybe later
+                    };
+
+                    // Turn effect-template into actual effect by preparing meta-values
+                    Object.keys(effect)
+                        .filter(key => !['type', 'effectType'].includes(key))
+                        .forEach(key => {
+                            const value = this.prepareMetaValue(effect[key], action, replacer.self, action.generatedBy);
+                            resultEffect[key] = value;
+                        });
+                    
+                    return resultEffect;
+                });
+
+                this.transformIntoActions(...preparedEffects);
+            }
+        });
+    }
+
     update(initialAction) {
         this.addActions(initialAction);
         while (this.hasActions()) {
             const rawAction = this.getNextAction();
             const action = this.replaceByReplacementEffect(rawAction);
-            
+
+            this.triggerAbilities(action);
+
             switch (action.type) {
                 case ACTION_ATTACK:
                     /*
@@ -413,9 +498,19 @@ class State {
                         const attackSequence = [
                         {
                             type: ACTION_EFFECT,
+                            effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+                            source: attackSource,
+                            sourceAtStart: attackSource.copy(),
+                            target: attackTarget,
+                            targetAtStart: attackTarget.copy(),
+                        },
+                        {
+                            type: ACTION_EFFECT,
                             effectType: EFFECT_TYPE_BEFORE_DAMAGE,
                             source: attackSource,
+                            sourceAtStart: attackSource.copy(),
                             target: attackTarget,
+                            targetAtStart: attackTarget.copy(),
                         },
                         {  // from source to target
                             type: ACTION_EFFECT,

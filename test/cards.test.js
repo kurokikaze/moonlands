@@ -496,7 +496,7 @@ describe('Carillion', () => {
                 new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
                 new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
                 new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
-                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([carillion, weebo]),
+                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([carillion, weebo, leafHyren]),
             ],
             step: STEP_ATTACK,
             activePlayer: ACTIVE_PLAYER,
@@ -530,6 +530,58 @@ describe('Carillion', () => {
 
     });
 });
+
+describe('Rudwot', () => {
+    it('Trample', () => {
+        const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 1;
+
+        const rudwot = new CardInGame(byName('Rudwot'), ACTIVE_PLAYER);
+        rudwot.addEnergy(5);
+        const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER);
+        weebo.addEnergy(2);
+        const leafHyren = new CardInGame(byName('Leaf Hyren'), NON_ACTIVE_PLAYER);
+        leafHyren.addEnergy(4);
+
+        const gameState = new moonlands.State({
+            zones: [
+                new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+                new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+                new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+                new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([rudwot, weebo, leafHyren]),
+            ],
+            step: STEP_ATTACK,
+            activePlayer: ACTIVE_PLAYER,
+        });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+        const attackAction = {
+            type: moonlands.ACTION_ATTACK,
+            source: rudwot,
+            target: weebo,
+        };
+        
+        const attackHyrenAction = {
+            type: moonlands.ACTION_ATTACK,
+            source: rudwot,
+            target: leafHyren,
+        };
+        
+        gameState.update(attackAction);
+
+        expect(rudwot.data.energy).toEqual(5, 'Rudwot loses 2 energy but gains 2 energy in the attack');
+        expect(weebo.data.energy).toEqual(0, 'Weebo is toast');
+
+        rudwot.clearAttackMarkers();
+
+        gameState.update(attackHyrenAction);
+
+        expect(rudwot.data.energy).toEqual(1, 'Rudwot loses 4 energy in the attack, gaining none');
+        expect(leafHyren.data.energy).toEqual(0, 'Hyren is toast');
+    });
+});
+
 
 describe('Giant Parathin', () => {
     it('Interchange', () => {

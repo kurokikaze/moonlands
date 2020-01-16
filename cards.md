@@ -18,6 +18,7 @@ Done: **34** cards out of **190**
 - Carillion
 - Sinder
 - Stagadan
+- Rudwot
 
 # Done, not tested
 
@@ -76,7 +77,7 @@ Yaki
 3 Giant Parathin
 3 Syphon Stone
 3 Carillion
-3 ? (Sap of Life)
+3 Rudwot
 3 Stagadan
 3 ? (Orwin's Gaze)
 1 Flood of Energy
@@ -230,7 +231,6 @@ Yaki
 - Quor Pup
 - Ring of Secrets
 - Robe of Vines
-- Rudwot
 - Scroll of Fire
 - Shimmer
 - Sphor

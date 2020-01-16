@@ -64,6 +64,7 @@ const {
     EFFECT_TYPE_DEAL_DAMAGE,
     EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
     EFFECT_TYPE_MOVE_ENERGY,
+    EFFECT_TYPE_CREATURE_ATTACKS,
 
     PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
     PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
@@ -753,7 +754,7 @@ const cards = [
                         {
                             objectOne: 'sourceAtStart',
                             propertyOne: PROPERTY_ENERGY_COUNT,
-                            comparator: '<=',
+                            comparator: '<',
                             objectTwo: 3,
                             propertyTwo: null,
                         }
@@ -762,6 +763,39 @@ const cards = [
                 replaceWith: {
                     effectType: EFFECT_TYPE_NONE,
                 },
+            }
+        ],
+    }),
+    new Card('Rudwot', TYPE_CREATURE, REGION_NAROOM, 3, {
+        triggerEffects: [
+            {
+                find: {
+                    effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+                    conditions: [
+                        {
+                            objectOne: 'source',
+                            propertyOne: PROPERTY_ID,
+                            comparator: '=',
+                            objectTwo: 'self',
+                            propertyTwo: PROPERTY_ID,
+                        },
+                        {
+                            objectOne: 'targetAtStart',
+                            propertyOne: PROPERTY_ENERGY_COUNT,
+                            comparator: '<',
+                            objectTwo: 3,
+                            propertyTwo: null,
+                        }
+                    ],
+                },
+                effects: [
+                    {
+                        type: ACTION_EFFECT,
+                        effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+                        target: '%self',
+                        amount: 2,
+                    },
+                ],
             }
         ],
     }),

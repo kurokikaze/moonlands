@@ -76,6 +76,8 @@ const EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI = 'effects/discard_energy
 const EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY = 'effects/restore_creature_to_starting_energy';
 const EFFECT_TYPE_PAYING_ENERGY_FOR_POWER = 'effects/paying_energy_for_power';
 const EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY = 'effects/discard_relic_from_play';
+const EFFECT_TYPE_CREATURE_ATTACKS = 'effects/creature_attacks';
+const EFFECT_TYPE_CREATURE_IS_ATTACKED = 'effects/creature_is_attacked';
 
 const PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI = 'prompt/creature_or_magi';
 const PROMPT_TYPE_SINGLE_CREATURE = 'prompt/creature';
@@ -98,6 +100,7 @@ const TYPE_SPELL = 'types/spell';
 const COST_X = 'X';
 
 module.exports = {
+    ACTION_ATTACK,
     ACTION_PASS,
     ACTION_PLAY,
     ACTION_POWER,
@@ -162,6 +165,8 @@ module.exports = {
     EFFECT_TYPE_DEAL_DAMAGE,
     EFFECT_TYPE_CREATURE_IS_DEFEATED,
     EFFECT_TYPE_AFTER_DAMAGE,
+    EFFECT_TYPE_CREATURE_ATTACKS,
+    EFFECT_TYPE_CREATURE_IS_ATTACKED,
 
     RESTRICTION_ENERGY_LESS_THAN_STARTING,
 
