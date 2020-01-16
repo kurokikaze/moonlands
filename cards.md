@@ -1,4 +1,4 @@
-Done: **34** cards out of **190**
+Done: **36** cards out of **190**
 
 # Done, tested
 
@@ -19,6 +19,7 @@ Done: **34** cards out of **190**
 - Sinder
 - Stagadan
 - Rudwot
+- Magma Armor
 
 # Done, not tested
 
@@ -59,8 +60,8 @@ Sinder
 3 Thermal Blast
 3 Flame Geyser
 3 Cave Hyren
-3 ?
-1 ? (Fire Flow)
+2 Magma Armor
+2 ? (Fire Flow)
 
 ## Naroom (+ Orothe splash)
 
