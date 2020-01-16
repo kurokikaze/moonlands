@@ -11,7 +11,9 @@ const ACTION_ATTACK = 'actions/attack';
 const ACTION_NOOP = 'actions/noop'; // Empty actions for replacement
 
 const PROPERTY_ID = 'properties/id';
+const PROPERTY_TYPE = 'properties/type';
 const PROPERTY_ENERGY_COUNT = 'properties/energy_count';
+const PROPERTY_CONTROLLER = 'properties/controller';
 const PROPERTY_REGION = 'properties/region';
 const PROPERTY_COST = 'properties/cost';
 const PROPERTY_ENERGIZE = 'properties/energize';
@@ -78,6 +80,8 @@ const EFFECT_TYPE_PAYING_ENERGY_FOR_POWER = 'effects/paying_energy_for_power';
 const EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY = 'effects/discard_relic_from_play';
 const EFFECT_TYPE_CREATURE_ATTACKS = 'effects/creature_attacks';
 const EFFECT_TYPE_CREATURE_IS_ATTACKED = 'effects/creature_is_attacked';
+const EFFECT_TYPE_START_OF_TURN = 'effects/start_of_turn';
+const EFFECT_TYPE_END_OF_TURN = 'effects/end_of_turn';
 
 const PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI = 'prompt/creature_or_magi';
 const PROMPT_TYPE_SINGLE_CREATURE = 'prompt/creature';
@@ -137,9 +141,11 @@ module.exports = {
     PROPERTY_MAGI_STARTING_ENERGY,
     PROPERTY_REGION,
     PROPERTY_COST,
+    PROPERTY_CONTROLLER,
     PROPERTY_ENERGIZE,
     PROPERTY_ATTACKS_PER_TURN,
     PROPERTY_CAN_ATTACK_MAGI_DIRECTLY,
+    PROPERTY_TYPE,
 
     EFFECT_TYPE_NONE,
     EFFECT_TYPE_MOVE_ENERGY,
@@ -167,6 +173,8 @@ module.exports = {
     EFFECT_TYPE_AFTER_DAMAGE,
     EFFECT_TYPE_CREATURE_ATTACKS,
     EFFECT_TYPE_CREATURE_IS_ATTACKED,
+    EFFECT_TYPE_START_OF_TURN,
+    EFFECT_TYPE_END_OF_TURN,
 
     RESTRICTION_ENERGY_LESS_THAN_STARTING,
 

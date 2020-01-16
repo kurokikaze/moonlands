@@ -15,6 +15,8 @@ const {
     CALCULATION_MIN,
 
     PROPERTY_ENERGY_COUNT,
+    PROPERTY_CONTROLLER,
+    PROPERTY_TYPE,
     PROPERTY_REGION,
     PROPERTY_COST,
     PROPERTY_ID,
@@ -65,6 +67,7 @@ const {
     EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
     EFFECT_TYPE_MOVE_ENERGY,
     EFFECT_TYPE_CREATURE_ATTACKS,
+    EFFECT_TYPE_BEFORE_DAMAGE,
 
     PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
     PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
@@ -269,6 +272,39 @@ const cards = [
                     }),
                 ],
             },
+        ],
+    }),
+    new Card('Magma Armor', TYPE_RELIC, REGION_CALD, 0, {
+        triggerEffects: [
+            {
+                find: {
+                    effectType: EFFECT_TYPE_BEFORE_DAMAGE,
+                    conditions: [
+                        {
+                            objectOne: 'target',
+                            propertyOne: PROPERTY_TYPE,
+                            comparator: '=',
+                            objectTwo: TYPE_MAGI,
+                            propertyTwo: null,
+                        },
+                        {
+                            objectOne: 'target',
+                            propertyOne: PROPERTY_CONTROLLER,
+                            comparator: '=',
+                            objectTwo: 'self',
+                            propertyTwo: PROPERTY_CONTROLLER,
+                        }
+                    ],
+                },
+                effects: [
+                    {
+                        type: ACTION_EFFECT,
+                        effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+                        target: '%target',
+                        amount: 2,
+                    },
+                ],
+            }
         ],
     }),
     new Card('Giant Parathin', TYPE_CREATURE, REGION_OROTHE, 10, {

@@ -16,6 +16,8 @@ const {
     ACTION_ATTACK,
 
     PROPERTY_ID,
+    PROPERTY_TYPE,
+    PROPERTY_CONTROLLER,
     PROPERTY_ENERGY_COUNT,
     PROPERTY_REGION,
     PROPERTY_COST,
@@ -73,6 +75,8 @@ const {
     EFFECT_TYPE_AFTER_DAMAGE,
     EFFECT_TYPE_CREATURE_ATTACKS,
     EFFECT_TYPE_CREATURE_IS_ATTACKED,
+    EFFECT_TYPE_START_OF_TURN,
+    EFFECT_TYPE_END_OF_TURN,
 
     COST_X,
 } = require('./const');
@@ -273,6 +277,10 @@ class State {
         switch(property) {
             case PROPERTY_ID:
                 return target.id;
+            case PROPERTY_TYPE:
+                return target.card.type;
+            case PROPERTY_CONTROLLER:
+                return target.data.controller;
             case PROPERTY_ENERGY_COUNT:
                 return target.data.energy;
             case PROPERTY_ATTACKS_PER_TURN:
@@ -773,7 +781,21 @@ class State {
                     break;
                 case ACTION_PASS:
                     const newStep = (this.state.step + 1) % steps.length;
-                    let activePlayer = (newStep == 0) ? this.getOpponent(this.state.activePlayer) : this.state.activePlayer;
+                    let activePlayer = (newStep === 0) ? this.getOpponent(this.state.activePlayer) : this.state.activePlayer;
+                    if (newStep === 0) {
+                        this.transformIntoActions(
+                            {
+                                type: ACTION_EFFECT,
+                                effectType: EFFECT_TYPE_END_OF_TURN,
+                                player: this.state.activePlayer,
+                            },
+                            {
+                                type: ACTION_EFFECT,
+                                effectType: EFFECT_TYPE_START_OF_TURN,
+                                player: activePlayer,
+                            }
+                        );
+                    }
                     this.state = {
                         ...this.state,
                         step: newStep,

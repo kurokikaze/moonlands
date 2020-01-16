@@ -531,6 +531,78 @@ describe('Carillion', () => {
     });
 });
 
+describe('Magma Armor', () => {
+    it.only('Defense', () => {
+        const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 1;
+
+        const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER);
+        grega.addEnergy(8);
+        const magmaArmor = new CardInGame(byName('Magma Armor'), NON_ACTIVE_PLAYER);
+        const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
+        weebo.addEnergy(1);
+
+        const gameState = new moonlands.State({
+            zones: [
+                new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+                new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+                new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+                new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([weebo, magmaArmor]),
+            ],
+            step: STEP_ATTACK,
+            activePlayer: ACTIVE_PLAYER,
+        });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+        const attackMagiAction = {
+            type: moonlands.ACTION_ATTACK,
+            source: weebo,
+            target: grega,
+        };
+        
+        gameState.update(attackMagiAction);
+
+        expect(weebo.data.energy).toEqual(1, 'Weebo loses no energy in the attack');
+        expect(grega.data.energy).toEqual(9, 'Grega loses 1 energy in attack but gains 2 from Magma Armor');
+    });
+
+    it.only('Defense, but attacker controls the Armor', () => {
+        const ACTIVE_PLAYER = 0;
+        const NON_ACTIVE_PLAYER = 1;
+
+        const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER);
+        grega.addEnergy(8);
+        const magmaArmor = new CardInGame(byName('Magma Armor'), ACTIVE_PLAYER);
+        const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
+        weebo.addEnergy(1);
+
+        const gameState = new moonlands.State({
+            zones: [
+                new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+                new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+                new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+                new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([weebo, magmaArmor]),
+            ],
+            step: STEP_ATTACK,
+            activePlayer: ACTIVE_PLAYER,
+        });
+        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+        const attackMagiAction = {
+            type: moonlands.ACTION_ATTACK,
+            source: weebo,
+            target: grega,
+        };
+        
+        gameState.update(attackMagiAction);
+
+        expect(weebo.data.energy).toEqual(1, 'Weebo loses no energy in the attack');
+        expect(grega.data.energy).toEqual(7, 'Grega loses 1 energy in attack and gains none from opponents Magma Armor');
+    });
+});
+
 describe('Rudwot', () => {
     it('Trample', () => {
         const ACTIVE_PLAYER = 0;
