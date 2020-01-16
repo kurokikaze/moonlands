@@ -1,4 +1,4 @@
-Done: **36** cards out of **190**
+Done: **37** cards out of **190**
 
 # Done, tested
 
@@ -92,7 +92,6 @@ Yaki
 - Ground Breaker
 - Gruk
 - Lightning Hyren
-- Magma Hyren
 - Mushroom Hyren
 - Nimbulo
 - Ormagon
