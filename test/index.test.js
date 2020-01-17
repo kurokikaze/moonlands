@@ -1150,6 +1150,173 @@ describe('Static abilities', () => {
 	});
 });
 
+describe('Deck drawing', () => {
+	it('Simple draw', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const zones = [
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Non-active player hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER).add([
+				new CardInGame(byName('Arbolit'), ACTIVE_PLAYER),
+				new CardInGame(byName('Flame Geyser'), ACTIVE_PLAYER),
+				new CardInGame(byName('Water of Life'), ACTIVE_PLAYER)
+			]),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('Non-active player discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('Non-active player deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		const drawAction = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_DRAW,
+			player: ACTIVE_PLAYER,
+		};
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(0, 'We have no cards in hand');
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).length).toEqual(3, 'We have 3 cards in deck');
+
+		gameState.update(drawAction);
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(1, 'We now have 1 card in hand');
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).length).toEqual(2, 'We now have 2 cards in deck');
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).card.card.name).toEqual('Arbolit', 'We have drawn first card of the deck');
+	});
+
+	it('Draw with discard reshuffle', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const zones = [
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Non-active player hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+			new Zone('Non-active player deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER).add([
+				new CardInGame(byName('Arbolit'), ACTIVE_PLAYER),
+				new CardInGame(byName('Flame Geyser'), ACTIVE_PLAYER),
+				new CardInGame(byName('Water of Life'), ACTIVE_PLAYER)
+			]),
+			new Zone('Non-active player discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		const drawAction = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_DRAW,
+			player: ACTIVE_PLAYER,
+		};
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(0, 'We have no cards in hand');
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).length).toEqual(0, 'We have no cards in deck');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(3, 'We have 3 cards in discard');
+
+		gameState.update(drawAction);
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(1, 'We now have 1 card in hand');
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).length).toEqual(2, 'We now have 2 cards in deck');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(0, 'We now have no cards in deck');
+		expect(['Arbolit', 'Flame Geyser', 'Water of Life']).toContain(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).card.card.name, 'We have drawn one of the discard cards');
+	});
+
+	it('Simple draw (non-active player)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const zones = [
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Non-active player hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('Non-active player deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER).add([
+				new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER),
+				new CardInGame(byName('Flame Geyser'), NON_ACTIVE_PLAYER),
+				new CardInGame(byName('Water of Life'), NON_ACTIVE_PLAYER)
+			]),
+			new Zone('Non-active player discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		const drawAction = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_DRAW,
+			player: NON_ACTIVE_PLAYER,
+		};
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(0, 'We have no cards in hand');
+		expect(gameState.getZone(ZONE_TYPE_DECK, NON_ACTIVE_PLAYER).length).toEqual(3, 'We have 3 cards in deck');
+
+		gameState.update(drawAction);
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(1, 'We now have 1 card in hand');
+		expect(gameState.getZone(ZONE_TYPE_DECK, NON_ACTIVE_PLAYER).length).toEqual(2, 'We now have 2 cards in deck');
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).card.card.name).toEqual('Arbolit', 'We have drawn first card of the deck');
+	});
+
+	it('Draw with discard reshuffle (non-active player)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const zones = [
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Non-active player hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+			new Zone('Non-active player deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('Non-active player discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).add([
+				new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER),
+				new CardInGame(byName('Flame Geyser'), NON_ACTIVE_PLAYER),
+				new CardInGame(byName('Water of Life'), NON_ACTIVE_PLAYER)
+			]),
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		const drawAction = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_DRAW,
+			player: NON_ACTIVE_PLAYER,
+		};
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(0, 'We have no cards in hand');
+		expect(gameState.getZone(ZONE_TYPE_DECK, NON_ACTIVE_PLAYER).length).toEqual(0, 'We have no cards in deck');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(3, 'We have 3 cards in discard');
+
+		gameState.update(drawAction);
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(1, 'We now have 1 card in hand');
+		expect(gameState.getZone(ZONE_TYPE_DECK, NON_ACTIVE_PLAYER).length).toEqual(2, 'We now have 2 cards in deck');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(0, 'We now have no cards in deck');
+		expect(['Arbolit', 'Flame Geyser', 'Water of Life'])
+			.toContain(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).card.card.name, 'We have drawn one of the discard cards');
+	});
+});
+
 describe('Casting things', () => {
 	it('Creating and getting zones', () => {
 		const grega = new CardInGame(byName('Grega'), 0);
@@ -1206,10 +1373,13 @@ describe('Casting things', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'In play is empty before');
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(15, 'Grega\'s Energy is 15');
 
-		gameState.update({type:moonlands.ACTION_PLAY, payload: {
-			player: 0,
-			card: arbolit,
-		}});
+		gameState.update({
+			type: moonlands.ACTION_PLAY, 
+			payload: {
+				player: 0,
+				card: arbolit,
+			},
+		});
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'In play has one card');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].card.name).toEqual('Arbolit', 'It is Arbolit');

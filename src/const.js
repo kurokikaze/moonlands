@@ -55,6 +55,8 @@ const REGION_BOGRATH = 'regions/bograth';
 const REGION_UNIVERSAL = 'regions/universal';
 
 const EFFECT_TYPE_NONE = 'effects/none';
+const EFFECT_TYPE_DRAW = 'effects/draw';
+const EFFECT_TYPE_RESHUFFLE_DISCARD = 'effects/reshuffle_discard';
 const EFFECT_TYPE_BEFORE_DAMAGE = 'effects/before_damage';
 const EFFECT_TYPE_DEAL_DAMAGE = 'effects/deal_damage';
 const EFFECT_TYPE_AFTER_DAMAGE = 'effects/after_damage';
@@ -149,6 +151,8 @@ module.exports = {
 	PROPERTY_TYPE,
 
 	EFFECT_TYPE_NONE,
+	EFFECT_TYPE_DRAW,
+	EFFECT_TYPE_RESHUFFLE_DISCARD,
 	EFFECT_TYPE_MOVE_ENERGY,
 	EFFECT_TYPE_ROLL_DIE,
 	EFFECT_TYPE_PLAY_CREATURE,

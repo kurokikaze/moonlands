@@ -5,6 +5,7 @@ const {
 	TYPE_RELIC,
 	TYPE_SPELL,
 
+	ACTION_DRAW,
 	ACTION_PASS,
 	ACTION_PLAY,
 	ACTION_POWER,
@@ -15,6 +16,7 @@ const {
 	ACTION_RESOLVE_PROMPT,
 	ACTION_GET_PROPERTY_VALUE,
 	ACTION_ATTACK,
+	ACTION_RESHUFFLE_DISCARD,
 
 	PROPERTY_ID,
 	PROPERTY_TYPE,
@@ -53,6 +55,8 @@ const {
 	PROMPT_TYPE_SINGLE_MAGI,
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 
+	EFFECT_TYPE_DRAW,
+	EFFECT_TYPE_RESHUFFLE_DISCARD,
 	EFFECT_TYPE_MOVE_ENERGY,
 	EFFECT_TYPE_ROLL_DIE,
 	EFFECT_TYPE_PLAY_CREATURE,
@@ -90,6 +94,7 @@ const {
 	ZONE_TYPE_DISCARD,
 	ZONE_TYPE_ACTIVE_MAGI,
 	ZONE_TYPE_MAGI_PILE,
+	ZONE_TYPE_DECK,
 } = require('./zone');
 
 const {CardInGame} = require('./cards');
@@ -470,6 +475,8 @@ class State {
 		while (this.hasActions()) {
 			const rawAction = this.getNextAction();
 			const action = this.replaceByReplacementEffect(rawAction);
+
+			// showAction(action);
 
 			this.triggerAbilities(action);
 
@@ -898,6 +905,42 @@ class State {
 				}
 				case ACTION_EFFECT: {
 					switch(action.effectType) {
+						case EFFECT_TYPE_DRAW: {
+							const deck = this.getZone(ZONE_TYPE_DECK, action.player);
+							const discard = this.getZone(ZONE_TYPE_DISCARD, action.player);
+
+							if (deck.length === 0 && discard.length > 0) {
+								this.addActions({
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_RESHUFFLE_DISCARD,
+									player: action.player,
+								},
+								action);
+							} else {
+								const card = deck.cards[0];
+
+								this.addActions({
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+									target: card,
+									sourceZone: ZONE_TYPE_DECK,
+									destinationZone: ZONE_TYPE_HAND,
+									player: action.player,
+									generatedBy: action.generatedBy,
+								});
+							}
+							break;
+						}
+						case EFFECT_TYPE_RESHUFFLE_DISCARD: {
+							const deck = this.getZone(ZONE_TYPE_DECK, action.player);
+							const discard = this.getZone(ZONE_TYPE_DISCARD, action.player);
+
+							const newCards = discard.cards.map(card => new CardInGame(card.card, card.owner));
+							deck.add(newCards);
+							deck.shuffle();
+							discard.empty();
+							break;
+						}						
 						// Attack sequence
 						case EFFECT_TYPE_BEFORE_DAMAGE: {
 							action.source.markAttackDone();
@@ -1154,6 +1197,7 @@ module.exports = {
 	PROMPT_TYPE_NUMBER,
 	PROMPT_TYPE_SINGLE_CREATURE,
 	PROMPT_TYPE_SINGLE_MAGI,
+	EFFECT_TYPE_DRAW,
 	EFFECT_TYPE_MOVE_ENERGY,
 	EFFECT_TYPE_PLAY_CREATURE,
 	EFFECT_TYPE_CREATURE_ENTERS_PLAY,
