@@ -65,6 +65,7 @@ const {
 	EFFECT_TYPE_PLAY_RELIC,
 	EFFECT_TYPE_PLAY_SPELL,
 	EFFECT_TYPE_CREATURE_ENTERS_PLAY,
+	EFFECT_TYPE_RELIC_ENTERS_PLAY,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
 	EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
 	EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC,
@@ -89,6 +90,8 @@ const {
 	EFFECT_TYPE_CREATURE_IS_ATTACKED,
 	EFFECT_TYPE_START_OF_TURN,
 	EFFECT_TYPE_END_OF_TURN,
+
+	REGION_UNIVERSAL,
 
 	COST_X,
 	/* eslint-enable no-unused-vars */	
@@ -365,8 +368,8 @@ class State {
 		const PLAYER_TWO = this.players[1];
 		const allZonesCards = [
 			...(this.getZone(ZONE_TYPE_IN_PLAY) || {cards: []}).cards,
-			...(this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE) || {cards: []}).cards,
-			...(this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO) || {cards: []}).cards,
+			...(this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE)).cards,
+			...(this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO)).cards,
 		];
 
 		const zoneReplacements = allZonesCards.reduce(
@@ -907,7 +910,7 @@ class State {
 						) {
 							// Здесь должен быть полный шаг определения стоимости
 							const activeMagi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card;
-							const regionPenalty = (activeMagi.card.region == baseCard.region) ? 0 : 1;
+							const regionPenalty = (activeMagi.card.region == baseCard.region || baseCard.region == REGION_UNIVERSAL) ? 0 : 1;
 							switch (cardType) {
 								case TYPE_CREATURE: {
 									this.transformIntoActions(
@@ -922,7 +925,7 @@ class State {
 										{
 											type: ACTION_EFFECT,
 											effectType: EFFECT_TYPE_PLAY_CREATURE,
-											card: baseCard,
+											card: action.payload.card,
 											player: action.payload.player,
 											generatedBy: action.payload.card.id,
 										},
@@ -945,30 +948,38 @@ class State {
 									break;
 								}
 								case TYPE_RELIC: {
-									this.transformIntoActions(
-										{
-											type: ACTION_EFFECT,
-											effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC,
-											from: this.getZone(ZONE_TYPE_ACTIVE_MAGI, player),
-											amount: baseCard.cost,
-											player: action.payload.player,
-											generatedBy: action.payload.card.id,
-										},
-										{
-											type: ACTION_EFFECT,
-											effectType: EFFECT_TYPE_PLAY_RELIC,
-											card: baseCard,
-											player: action.payload.player,
-											generatedBy: action.payload.card.id,
-										},
-										{
-											type: ACTION_EFFECT,
-											effectType: EFFECT_TYPE_CREATURE_ENTERS_PLAY,
-											card: baseCard,
-											player: action.payload.player,
-											generatedBy: action.payload.card.id,
-										}
-									);
+									const alreadyHasOne = this.getZone(ZONE_TYPE_IN_PLAY, action.player).cards
+										.some(card => card.card.name === action.payload.card.card.name);
+									const relicRegion = action.payload.card.card.region;
+									const magiRegion = this.useSelector(SELECTOR_OWN_MAGI, action.player)[0].card.region;
+									const regionAllows = relicRegion === magiRegion || relicRegion === REGION_UNIVERSAL;
+
+									if (!alreadyHasOne && regionAllows) {
+										this.transformIntoActions(
+											{
+												type: ACTION_EFFECT,
+												effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC,
+												from: this.getZone(ZONE_TYPE_ACTIVE_MAGI, player),
+												amount: baseCard.cost,
+												player: action.payload.player,
+												generatedBy: action.payload.card.id,
+											},
+											{
+												type: ACTION_EFFECT,
+												effectType: EFFECT_TYPE_PLAY_RELIC,
+												card: action.payload.card,
+												player: action.payload.player,
+												generatedBy: action.payload.card.id,
+											},
+											{
+												type: ACTION_EFFECT,
+												effectType: EFFECT_TYPE_RELIC_ENTERS_PLAY,
+												card: '$relic_created',
+												player: action.payload.player,
+												generatedBy: action.payload.card.id,
+											}
+										);
+									}
 									break;
 								}
 								case TYPE_SPELL: {
@@ -1120,23 +1131,39 @@ class State {
 							break;
 						}
 						case EFFECT_TYPE_PLAY_RELIC: {
-							const inPlay = this.getZone(ZONE_TYPE_IN_PLAY);
-							const relic = new CardInGame(action.card, action.player);
-							if (!this.state.spellMetaData[action.generatedBy]) {
-								this.state.spellMetaData[action.generatedBy] = {};
-							}
-							this.state.spellMetaData[action.generatedBy].relic_created = relic.id;
-							inPlay.add([relic]);
+							this.transformIntoActions({
+								type: ACTION_EFFECT,
+								effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+								sourceZone: ZONE_TYPE_HAND,
+								destinationZone: ZONE_TYPE_IN_PLAY,
+								target: action.card,
+								player: action.player,
+								generatedBy: action.generatedBy,
+							}, {
+								type: ACTION_GET_PROPERTY_VALUE,
+								property: PROPERTY_ID,
+								target: '$new_card',
+								variable: 'relic_created',
+								generatedBy: action.generatedBy,
+							});
 							break;
 						}
 						case EFFECT_TYPE_PLAY_CREATURE: {
-							const inPlay = this.getZone(ZONE_TYPE_IN_PLAY);
-							const creature = new CardInGame(action.card, action.player);
-							if (!this.state.spellMetaData[action.generatedBy]) {
-								this.state.spellMetaData[action.generatedBy] = {};
-							}
-							this.state.spellMetaData[action.generatedBy].creature_created = creature.id;
-							inPlay.add([creature]);
+							this.transformIntoActions({
+								type: ACTION_EFFECT,
+								effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+								sourceZone: ZONE_TYPE_HAND,
+								destinationZone: ZONE_TYPE_IN_PLAY,
+								target: action.card,
+								player: action.player,
+								generatedBy: action.generatedBy,
+							}, {
+								type: ACTION_GET_PROPERTY_VALUE,
+								property: PROPERTY_ID,
+								target: '$new_card',
+								variable: 'creature_created',
+								generatedBy: action.generatedBy,
+							});
 							break;
 						}
 						case EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES: {

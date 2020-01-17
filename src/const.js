@@ -70,6 +70,7 @@ const EFFECT_TYPE_PLAY_CREATURE = 'effects/play_creature';
 const EFFECT_TYPE_PLAY_RELIC = 'effects/play_relic';
 const EFFECT_TYPE_PLAY_SPELL = 'effects/play_spell';
 const EFFECT_TYPE_CREATURE_ENTERS_PLAY = 'effects/creature_enters_play';
+const EFFECT_TYPE_RELIC_ENTERS_PLAY = 'effects/relic_enters_play';
 const EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC = 'effects/paying_energy_for_relic';
 const EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL = 'effects/paying_energy_for_spell';
 const EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE = 'effects/paying_energy_for_creature';
@@ -175,6 +176,7 @@ module.exports = {
 	EFFECT_TYPE_ENERGIZE,
 	EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
 	EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
+	EFFECT_TYPE_RELIC_ENTERS_PLAY,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,

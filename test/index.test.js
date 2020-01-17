@@ -501,9 +501,10 @@ describe('Effects', () => {
 
 	it('Putting creature into play [EFFECT_TYPE_PLAY_CREATURE]', () => {
 		const activePlayer = 0;
-		const arbolit = byName('Arbolit');
+		const arbolit = new CardInGame(byName('Arbolit'), activePlayer);
 
 		const zones = [
+			new Zone('Hand', ZONE_TYPE_HAND, activePlayer).add([arbolit]),
 			new Zone('In play', ZONE_TYPE_IN_PLAY, null),
 		];
 
@@ -1346,7 +1347,7 @@ describe('Casting things', () => {
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, 0).length).toEqual(1);
 	});
 
-	it('Cast from hand', () => {
+	it('Cast creature from hand', () => {
 		const activePlayer = 0;
 		const notActivePlayer = 1;
 
@@ -1385,6 +1386,92 @@ describe('Casting things', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].card.name).toEqual('Arbolit', 'It is Arbolit');
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(13, 'Grega\'s energy is 13');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].data.energy).toEqual(2, 'Arbolit\'s energy is 2');
+		expect(gameState.getZone(ZONE_TYPE_HAND, activePlayer).length).toEqual(0, 'No cards in hand now');
+	});
+
+	it('Cast relic from hand', () => {
+		const activePlayer = 0;
+		const notActivePlayer = 1;
+
+		const grega = new CardInGame(byName('Grega'), activePlayer);
+		grega.addEnergy(15);
+
+		const waterOfLife = new CardInGame(byName('Water of Life'), activePlayer);
+
+		const zones = [
+			new Zone('Active player hand', ZONE_TYPE_HAND, activePlayer).add([waterOfLife]),
+			new Zone('Non-active player hand', ZONE_TYPE_HAND, notActivePlayer),
+			new Zone('Active player deck', ZONE_TYPE_DECK, activePlayer),
+			new Zone('Non-active player deck', ZONE_TYPE_DECK, notActivePlayer),
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, activePlayer).add([grega]),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: 0,
+		});
+        
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'In play is empty before');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(15, 'Grega\'s Energy is 15');
+
+		gameState.update({
+			type: moonlands.ACTION_PLAY, 
+			payload: {
+				player: 0,
+				card: waterOfLife,
+			},
+		});
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'In play has one card');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].card.name).toEqual('Water of Life', 'It is Water of Life');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(15, 'Grega\'s energy is 15');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].data.energy).toEqual(0, 'Water of Life\'s energy is 2');
+		expect(gameState.getZone(ZONE_TYPE_HAND, activePlayer).length).toEqual(0, 'No cards in hand now');
+	});
+
+	it('Cast relic from hand (another one in play)', () => {
+		const activePlayer = 0;
+		const notActivePlayer = 1;
+
+		const grega = new CardInGame(byName('Grega'), activePlayer);
+		grega.addEnergy(15);
+
+		const waterOfLife = new CardInGame(byName('Water of Life'), activePlayer);
+		const anotherWaterOfLife = new CardInGame(byName('Water of Life'), activePlayer);
+
+		const zones = [
+			new Zone('Active player hand', ZONE_TYPE_HAND, activePlayer).add([waterOfLife]),
+			new Zone('Non-active player hand', ZONE_TYPE_HAND, notActivePlayer),
+			new Zone('Active player deck', ZONE_TYPE_DECK, activePlayer),
+			new Zone('Non-active player deck', ZONE_TYPE_DECK, notActivePlayer),
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, activePlayer).add([grega]),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([anotherWaterOfLife]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer,
+		});
+        
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One card in play');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(15, 'Grega\'s Energy is 15');
+
+		gameState.update({
+			type: moonlands.ACTION_PLAY, 
+			payload: {
+				player: activePlayer,
+				card: waterOfLife,
+			},
+		});
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'In play has one card');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].card.name).toEqual('Water of Life', 'It is Water of Life');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(15, 'Grega\'s energy is 15');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].data.energy).toEqual(0, 'Water of Life\'s energy is 0');
+		expect(gameState.getZone(ZONE_TYPE_HAND, activePlayer).length).toEqual(1, 'Water of Life is still in hand');
 	});
 
 	it('Cast from hand (region penalty)', () => {
