@@ -386,8 +386,9 @@ class State {
 
 		staticAbilities.forEach(staticAbility => {
 			const selected = this.useSelector(staticAbility.selector, staticAbility.player, staticAbility.selectorParameter);
-			if (selected.includes(target)) {
-				initialValue = staticAbility.modifier(initialValue);
+			if (selected.includes(target) && staticAbility.modifier) {
+				const {operator, operandOne} = staticAbility.modifier;
+				initialValue = this.performCalculation(operator, operandOne, initialValue);
 			}
 		});
 
@@ -531,6 +532,46 @@ class State {
 		});
 	}
 
+	performCalculation(operator, operandOne, operandTwo) {
+		let result;
+		switch (operator) {
+			case CALCULATION_SET: {
+				result = operandOne;
+				break;
+			}
+			case CALCULATION_DOUBLE: {
+				result = operandOne * 2;
+				break;
+			}
+			case CALCULATION_ADD: {
+				result = operandOne + operandTwo;
+				break;
+			}
+			case CALCULATION_SUBTRACT: {
+				result = operandOne - operandTwo;
+				break;
+			}
+			case CALCULATION_HALVE_ROUND_DOWN: {
+				result = Math.floor(operandOne / 2);
+				break;
+			}
+			case CALCULATION_HALVE_ROUND_UP: {
+				result = Math.ceil(operandOne / 2);
+				break;
+			}
+			case CALCULATION_MIN: {
+				result = Math.min(operandOne, operandTwo);
+				break;
+			}
+			case CALCULATION_MAX: {
+				result = Math.max(operandOne, operandTwo);
+				break;
+			}
+		}
+
+		return result;
+	}
+
 	update(initialAction) {
 		this.addActions(initialAction);
 		while (this.hasActions()) {
@@ -634,41 +675,8 @@ class State {
 					const beforeData = this.getSpellMetadata(action.generatedBy);
 					const operandOne = this.getMetaValue(action.operandOne, action.generatedBy);
 					const operandTwo = this.getMetaValue(action.operandTwo, action.generatedBy);
-					let result;
-					switch (action.operator) {
-						case CALCULATION_SET: {
-							result = operandOne;
-							break;
-						}
-						case CALCULATION_DOUBLE: {
-							result = operandOne * 2;
-							break;
-						}
-						case CALCULATION_ADD: {
-							result = operandOne + operandTwo;
-							break;
-						}
-						case CALCULATION_SUBTRACT: {
-							result = operandOne - operandTwo;
-							break;
-						}
-						case CALCULATION_HALVE_ROUND_DOWN: {
-							result = Math.floor(operandOne / 2);
-							break;
-						}
-						case CALCULATION_HALVE_ROUND_UP: {
-							result = Math.ceil(operandOne / 2);
-							break;
-						}
-						case CALCULATION_MIN: {
-							result = Math.min(operandOne, operandTwo);
-							break;
-						}
-						case CALCULATION_MAX: {
-							result = Math.max(operandOne, operandTwo);
-							break;
-						}
-					}
+					const result = this.performCalculation(action.operator, operandOne, operandTwo);
+					// }
 					this.state.spellMetaData[action.generatedBy] = {
 						...beforeData,
 						[action.variable || 'result']: result,

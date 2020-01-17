@@ -14,6 +14,7 @@ const {
 	CALCULATION_HALVE_ROUND_DOWN,
 	CALCULATION_HALVE_ROUND_UP,
 	CALCULATION_MIN,
+	CALCULATION_SET,
 
 	PROPERTY_ENERGY_COUNT,
 	PROPERTY_CONTROLLER,
@@ -230,7 +231,10 @@ const cards = [
 		staticAbilities: [{
 			selector: SELECTOR_OWN_MAGI,
 			property: PROPERTY_ENERGIZE,
-			modifier: a => a + 1,
+			modifier: {
+				operator: CALCULATION_ADD,
+				operandOne: 1,
+			},
 		}],
 	}),
 	new Card('Thermal Blast', TYPE_SPELL, REGION_CALD, 3, {
@@ -974,7 +978,10 @@ const cards = [
 			{
 				selector: SELECTOR_OWN_CREATURES,
 				property: PROPERTY_ATTACKS_PER_TURN,
-				modifier: () => 2,
+				modifier: {
+					operator: CALCULATION_SET,
+					operandOne: 2,
+				},
 			},
 		],
 	}),
