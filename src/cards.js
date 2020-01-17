@@ -797,6 +797,48 @@ const cards = [
 			},
 		],
 	}),
+	new Card('Agovo', TYPE_CREATURE, REGION_UNDERNEATH, 4, {
+		powers: [
+			{
+				name: 'Lore',
+				cost: 2,
+				effects: [
+					{
+						type: ACTION_GET_PROPERTY_VALUE,
+						target: '$sourceCreature',
+						property: PROPERTY_CONTROLLER,
+						variable: 'controller',
+					},
+					{
+						type: ACTION_EFFECT,
+						effectType: EFFECT_TYPE_DRAW,
+						player: '$controller',
+					}
+				],
+			},
+		],
+	}),
+	new Card('Sea Barl', TYPE_CREATURE, REGION_OROTHE, 4, {
+		powers: [
+			{
+				name: 'Lore',
+				cost: 3,
+				effects: [
+					{
+						type: ACTION_GET_PROPERTY_VALUE,
+						target: '$sourceCreature',
+						property: PROPERTY_CONTROLLER,
+						variable: 'controller',
+					},
+					{
+						type: ACTION_EFFECT,
+						effectType: EFFECT_TYPE_DRAW,
+						player: '$controller',
+					}
+				],
+			},
+		],
+	}),	
 	new Card('Vortex of Knowledge', TYPE_SPELL, REGION_NAROOM, 1, {
 		effects: [
 			{

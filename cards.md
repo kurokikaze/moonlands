@@ -1,4 +1,4 @@
-Done: **37** cards out of **190**
+Done: **41** card out of **190**
 
 # Done, tested
 
@@ -44,6 +44,8 @@ Done: **37** cards out of **190**
 - Flame Geyser
 - Syphon Stone
 - Book of Ages
+- Agovo
+- Sea Barl
 
 # Possible sample decks:
 
@@ -180,11 +182,6 @@ Yaki
 # Choosing cards in zones (discard)
 
 - Book of Life
-
-# Drawing Cards
-
-- Agovo
-- Sea Barl
 
 # Discarding from hand
 
