@@ -119,7 +119,6 @@ describe('Magi stuff', () => {
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toEqual(15, 'Grega\'s energy is 15 after energizing');
 	});
 
-
 	it('Energizing a creature', () => {
 		const ACTIVE_PLAYER = 0;
 		const NON_ACTIVE_PLAYER = 3;
@@ -148,6 +147,42 @@ describe('Magi stuff', () => {
 		});
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(1, 'Green Stuff\'s energy is 1 after energizing');
+	});
+
+	it('Flipping Magi on beginning of Energize step', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+		const startingEnergy = grega.card.data.startingEnergy;
+		const energizeRate = grega.card.data.energize;
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([grega, sinder]),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_DRAW,
+			activePlayer: NON_ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).length).toEqual(0, 'No active magi');
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(2, 'Two magi in pile');
+
+		gameState.update({
+			type: moonlands.ACTION_PASS,
+		});
+
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).length).toEqual(1, 'Magi is flipped');
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(1, 'One magi in pile');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy)
+			.toEqual(startingEnergy + energizeRate, 'Grega\'s starting energy is 15 after flipping and energizing');
 	});
 });
 

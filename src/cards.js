@@ -411,7 +411,7 @@ const cards = [
 			},
 		],
 	}),
-	new Card('Magma Hyren', TYPE_MAGI, REGION_CALD, 3, {
+	new Card('Magma Hyren', TYPE_CREATURE, REGION_CALD, 3, {
 		powers: [
 			{
 				name: 'Fireball',

@@ -1,3 +1,5 @@
+const nanoid = require('nanoid');
+
 const {
 	/* eslint-disable no-unused-vars */
 	TYPE_CREATURE,
@@ -25,6 +27,7 @@ const {
 	PROPERTY_REGION,
 	PROPERTY_COST,
 	PROPERTY_ENERGIZE,
+	PROPERTY_STARTING_ENERGY,
 	PROPERTY_MAGI_STARTING_ENERGY,
 	PROPERTY_ATTACKS_PER_TURN,
 	PROPERTY_CAN_ATTACK_MAGI_DIRECTLY,
@@ -91,6 +94,7 @@ const {
 	EFFECT_TYPE_CREATURE_IS_ATTACKED,
 	EFFECT_TYPE_START_OF_TURN,
 	EFFECT_TYPE_END_OF_TURN,
+	EFFECT_TYPE_MAGI_FLIPPED,
 
 	REGION_UNIVERSAL,
 
@@ -914,22 +918,25 @@ class State {
 				case ACTION_PASS: {
 					const newStep = (this.state.step + 1) % steps.length;
 					let activePlayer = (newStep === 0) ? this.getOpponent(this.state.activePlayer) : this.state.activePlayer;
+					const generatedBy = nanoid();
 					if (newStep === 0) {
 						this.transformIntoActions(
 							{
 								type: ACTION_EFFECT,
 								effectType: EFFECT_TYPE_END_OF_TURN,
 								player: this.state.activePlayer,
+								generatedBy,
 							},
 							{
 								type: ACTION_EFFECT,
 								effectType: EFFECT_TYPE_START_OF_TURN,
 								player: activePlayer,
+								generatedBy,
 							}
 						);
 					}
 					if (steps[newStep].effects) {
-						const transformedActions = steps[newStep].effects.map(action => ({...action, player: activePlayer}));
+						const transformedActions = steps[newStep].effects.map(action => ({...action, player: activePlayer, generatedBy}));
 						this.addActions(...transformedActions);
 					}
 					if (steps[newStep].automatic) {
@@ -1077,6 +1084,48 @@ class State {
 				}
 				case ACTION_EFFECT: {
 					switch(action.effectType) {
+						case EFFECT_TYPE_START_OF_TURN: {
+							if (
+								this.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).length == 0 &&
+								this.getZone(ZONE_TYPE_MAGI_PILE, action.player).length > 0
+							) {
+								const topMagi = this.getZone(ZONE_TYPE_MAGI_PILE, action.player).cards[0];
+								const startingEnergy = this.modifyByStaticAbilities(topMagi, PROPERTY_MAGI_STARTING_ENERGY);
+
+								this.transformIntoActions({
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_MAGI_FLIPPED,
+									target: topMagi,
+									generatedBy: action.generatedBy,
+								}, {
+									type: ACTION_SELECT,
+									selector: SELECTOR_OWN_MAGI,
+									player: action.player,
+									variable: 'ownMagi',
+									generatedBy: action.generatedBy,
+								}, 
+								{
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+									target: '$ownMagi',
+									amount: startingEnergy,
+									player: action.player,
+									generatedBy: action.generatedBy,
+								});
+							}
+							break;
+						}
+						case EFFECT_TYPE_MAGI_FLIPPED: {
+							this.transformIntoActions({
+								type: ACTION_EFFECT,
+								effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+								sourceZone: ZONE_TYPE_MAGI_PILE,
+								destinationZone: ZONE_TYPE_ACTIVE_MAGI,
+								target: action.target,
+								generatedBy: action.generatedBy,
+							});
+							break;
+						}
 						case EFFECT_TYPE_DRAW: {
 							const player = this.getMetaValue(action.player, action.generatedBy);
 
