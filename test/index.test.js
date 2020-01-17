@@ -57,9 +57,8 @@ describe('Updating state with action', () => {
 		gameState.update(passAction); // Attack
 		gameState.update(passAction); // Creatures
 		gameState.update(passAction); // PRS
-		gameState.update(passAction); // Draw
-		gameState.update(passAction); // Energize (player 1)
-		expect(gameState.getCurrentStep()).toEqual(STEP_ENERGIZE, 'Initial step is Energize');
+		gameState.update(passAction); // Draw -> Energize -> PRS
+		expect(gameState.getCurrentStep()).toEqual(STEP_PRS_FIRST, 'Initial step is Energize');
 		expect(gameState.getActivePlayer()).toEqual(1, 'Active player is player 1');
 	});
 
@@ -69,21 +68,21 @@ describe('Updating state with action', () => {
 
 		expect(gameState.getCurrentStep()).toEqual(STEP_ENERGIZE, 'Initial step is Energize');
 		expect(gameState.getCurrentPriority()).toEqual(moonlands.NO_PRIORITY, 'There is no priority at Energize');
-		gameState.update(passAction); // PRS
+		gameState.update(passAction); // to PRS
 		expect(gameState.getCurrentStep()).toEqual(STEP_PRS_FIRST, 'Current step is PRS');
 		expect(gameState.getCurrentPriority()).toEqual(moonlands.PRIORITY_PRS, 'There is PRS priority at PRS');
-		gameState.update(passAction); // Attack
+		gameState.update(passAction); // to Attack
 		expect(gameState.getCurrentStep()).toEqual(STEP_ATTACK, 'Current step is Attack');
 		expect(gameState.getCurrentPriority()).toEqual(moonlands.PRIORITY_ATTACK, 'There is Attack priority at Attack');
-		gameState.update(passAction); // Creatures
+		gameState.update(passAction); // to Creatures
 		expect(gameState.getCurrentStep()).toEqual(STEP_CREATURES, 'Current step is Creatures');
 		expect(gameState.getCurrentPriority()).toEqual(moonlands.PRIORITY_CREATURES, 'There is Creatures priority at Creatures');
-		gameState.update(passAction); // PRS
+		gameState.update(passAction); // to PRS
 		expect(gameState.getCurrentStep()).toEqual(STEP_PRS_SECOND, 'Current step is PRS');
 		expect(gameState.getCurrentPriority()).toEqual(moonlands.PRIORITY_PRS, 'There is Creatures priority at Creatures');
-		gameState.update(passAction); // Draw
-		expect(gameState.getCurrentStep()).toEqual(STEP_DRAW, 'Current step is Draw');
-		expect(gameState.getCurrentPriority()).toEqual(moonlands.NO_PRIORITY, 'There is no priority at Draw');
+		gameState.update(passAction); // to Draw, and then to Energize, and to PRS
+		expect(gameState.getCurrentStep()).toEqual(STEP_PRS_FIRST, 'Current step is PRS again');
+		expect(gameState.getCurrentPriority()).toEqual(moonlands.PRIORITY_PRS, 'There is no priority at Draw');
 	});
 });
 

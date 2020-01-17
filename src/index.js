@@ -50,6 +50,7 @@ const {
 	SELECTOR_MAGI_OF_REGION,
 	SELECTOR_OPPONENT_ID,
 	SELECTOR_MAGI_NOT_OF_REGION,
+	SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE,
 	SELECTOR_CARDS_WITH_ENERGIZE_RATE,
 
 	PROMPT_TYPE_NUMBER,
@@ -119,6 +120,19 @@ const steps = [
 	{
 		name: 'Energize',
 		priority: NO_PRIORITY,
+		automatic: true,
+		effects: [
+			{
+				type: ACTION_SELECT,
+				selector: SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE,
+				variable: 'energize', 
+			},
+			{
+				type: ACTION_EFFECT,
+				effectType: EFFECT_TYPE_ENERGIZE,
+				target: '$energize',
+			},
+		],
 	},
 	{
 		name: 'Powers/Relics/Spells',
@@ -139,6 +153,17 @@ const steps = [
 	{
 		name: 'Draw',
 		priority: NO_PRIORITY,
+		automatic: true,
+		effects: [
+			{
+				type: ACTION_EFFECT,
+				effectType: EFFECT_TYPE_DRAW,
+			},
+			{
+				type: ACTION_EFFECT,
+				effectType: EFFECT_TYPE_DRAW,
+			},
+		],
 	},
 ];
 
@@ -155,7 +180,7 @@ const defaultState = {
 };
 
 const oneOrSeveral = (targets, callback) => {
-	if (targets.length) {
+	if (targets instanceof Array) {
 		if (targets.length > 0) {
 			targets.forEach(target => callback(target));
 		}
@@ -266,6 +291,16 @@ class State {
 
 	useSelector(selector, player, argument) {
 		switch (selector) {
+			case SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE: {
+				const cards = [
+					...this.getZone(ZONE_TYPE_IN_PLAY).cards
+						.filter(card => this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player && this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0),
+					...this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).cards
+						.filter(card => this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0),
+				];
+
+				return cards;
+			}
 			case SELECTOR_CARDS_WITH_ENERGIZE_RATE: {
 				const cards = [
 					...this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0),
@@ -764,6 +799,13 @@ class State {
 							}, action.generatedBy);
 							break;
 						}
+						case SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE:
+							this.setSpellMetadata({
+								...this.getSpellMetadata(action.generatedBy),
+								[varName]: this.useSelector(SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, action.player),
+							}, action.generatedBy);
+							break;
+
 						case SELECTOR_CREATURES_AND_MAGI: {
 							const allOfTheAbove = [
 								...this.useSelector(SELECTOR_OWN_MAGI, action.player),
@@ -885,6 +927,15 @@ class State {
 								player: activePlayer,
 							}
 						);
+					}
+					if (steps[newStep].effects) {
+						const transformedActions = steps[newStep].effects.map(action => ({...action, player: activePlayer}));
+						this.addActions(...transformedActions);
+					}
+					if (steps[newStep].automatic) {
+						this.addActions({
+							type: ACTION_PASS,
+						});
 					}
 					this.state = {
 						...this.state,
@@ -1032,14 +1083,7 @@ class State {
 							const deck = this.getZone(ZONE_TYPE_DECK, player);
 							const discard = this.getZone(ZONE_TYPE_DISCARD, player);
 
-							if (deck.length === 0 && discard.length > 0) {
-								this.transformIntoActions({
-									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_RESHUFFLE_DISCARD,
-									player: player,
-								},
-								action);
-							} else {
+							if (deck.length > 0) {
 								const card = deck.cards[0];
 
 								this.transformIntoActions({
@@ -1051,6 +1095,13 @@ class State {
 									player: player,
 									generatedBy: action.generatedBy,
 								});
+							} else if (discard.length > 0) {
+								this.transformIntoActions({
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_RESHUFFLE_DISCARD,
+									player: player,
+								},
+								action);
 							}
 							break;
 						}
@@ -1108,13 +1159,17 @@ class State {
 							break;
 						}
 						case EFFECT_TYPE_ENERGIZE: {
-							const amount = this.modifyByStaticAbilities(action.target, PROPERTY_ENERGIZE);
-							const type = action.target.card.type;
-							this.transformIntoActions({
-								type: ACTION_EFFECT,
-								effectType: (type == TYPE_CREATURE) ? EFFECT_TYPE_ADD_ENERGY_TO_CREATURE : EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
-								target: action.target,
-								amount,
+							const targets = this.getMetaValue(action.target, action.generatedBy);
+
+							oneOrSeveral(targets, target => {
+								const amount = this.modifyByStaticAbilities(target, PROPERTY_ENERGIZE);
+								const type = target.card.type;
+								this.transformIntoActions({
+									type: ACTION_EFFECT,
+									effectType: (type == TYPE_CREATURE) ? EFFECT_TYPE_ADD_ENERGY_TO_CREATURE : EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+									target,
+									amount,
+								});
 							});
 							break;
 						}

@@ -33,6 +33,7 @@ const SELECTOR_MAGI_OF_REGION = 'selectors/magi_of_region';
 const SELECTOR_MAGI_NOT_OF_REGION = 'selectors/magi_not_of_region';
 const SELECTOR_OWN_CREATURES = 'selectors/own_creatures';
 const SELECTOR_ENEMY_CREATURES = 'selectors/enemy_creatures';
+const SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE = 'selectors/own_cards_with_energize_rate';
 const SELECTOR_CARDS_WITH_ENERGIZE_RATE = 'selectors/cards_with_energize_rate';
 
 const CALCULATION_SET = 'calculations/set';
@@ -140,6 +141,7 @@ module.exports = {
 	SELECTOR_ENEMY_MAGI,
 	SELECTOR_CREATURES_OF_REGION,
 	SELECTOR_CREATURES_NOT_OF_REGION,
+	SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE,
 	SELECTOR_CARDS_WITH_ENERGIZE_RATE,
 	SELECTOR_CREATURES_AND_MAGI,
 	SELECTOR_MAGI_OF_REGION,
