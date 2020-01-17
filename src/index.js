@@ -50,6 +50,7 @@ const {
 	SELECTOR_MAGI_OF_REGION,
 	SELECTOR_OPPONENT_ID,
 	SELECTOR_MAGI_NOT_OF_REGION,
+	SELECTOR_CARDS_WITH_ENERGIZE_RATE,
 
 	PROMPT_TYPE_NUMBER,
 	PROMPT_TYPE_SINGLE_CREATURE,
@@ -183,7 +184,7 @@ class State {
 	}
 
 	getZone(type, player = null) {
-		return this.state.zones.find(zone => zone.type === type && (zone.player == player || player == null));
+		return this.state.zones.find(zone => zone.type === type && (zone.player == player || player == null)) || {cards: []};
 	}
 
 	getCurrentStep() {
@@ -262,6 +263,15 @@ class State {
 
 	useSelector(selector, player, argument) {
 		switch (selector) {
+			case SELECTOR_CARDS_WITH_ENERGIZE_RATE: {
+				const cards = [
+					...this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0),
+					...this.getZone(ZONE_TYPE_ACTIVE_MAGI, this.players[0]).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0),
+					...this.getZone(ZONE_TYPE_ACTIVE_MAGI, this.players[1]).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0),
+				];
+
+				return cards;
+			}
 			case SELECTOR_OPPONENT_ID:
 				return this.players.find(id => id != argument);
 			case SELECTOR_CREATURES:
@@ -279,9 +289,9 @@ class State {
 			case SELECTOR_ENEMY_CREATURES:
 				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.data.controller != player && card.card.type == TYPE_CREATURE);
 			case SELECTOR_CREATURES_OF_REGION:
-				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.region == argument && card.card.type == TYPE_CREATURE);
+				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_REGION) == argument && card.card.type == TYPE_CREATURE);
 			case SELECTOR_CREATURES_NOT_OF_REGION:
-				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.region != argument && card.card.type == TYPE_CREATURE);
+				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_REGION) != argument && card.card.type == TYPE_CREATURE);
 		}
 	}
 
@@ -732,6 +742,14 @@ class State {
 				case ACTION_SELECT: {
 					const varName = action.variable || 'selected';
 					switch (action.selector) {
+						case SELECTOR_CARDS_WITH_ENERGIZE_RATE: {
+							this.setSpellMetadata({
+								...this.getSpellMetadata(action.generatedBy),
+								[varName]: this.useSelector(SELECTOR_CARDS_WITH_ENERGIZE_RATE, action.player),
+							}, action.generatedBy);
+
+							break;
+						}
 						case SELECTOR_OPPONENT_ID: {
 							this.setSpellMetadata({
 								...this.getSpellMetadata(action.generatedBy),
@@ -812,7 +830,7 @@ class State {
 						}
 						case SELECTOR_CREATURES_NOT_OF_REGION: {
 							const selectedNonRegionCreatures =
-									this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.region != action.region);
+									this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_REGION) != action.region);
 
 							this.setSpellMetadata({
 								...this.getSpellMetadata(action.generatedBy),
@@ -824,7 +842,7 @@ class State {
 							const selectedMagiOfRegion = [
 								...this.useSelector(SELECTOR_OWN_MAGI, action.player),
 								...this.useSelector(SELECTOR_ENEMY_MAGI, action.player),
-							].filter(magi => magi.card.region === action.region); // @TODO Layers here
+							].filter(magi => this.modifyByStaticAbilities(magi, PROPERTY_REGION) === action.region);
 
 							this.setSpellMetadata({
 								...this.getSpellMetadata(action.generatedBy),
@@ -836,7 +854,7 @@ class State {
 							const selectedMagiNotOfRegion = [
 								...this.useSelector(SELECTOR_OWN_MAGI, action.player),
 								...this.useSelector(SELECTOR_ENEMY_MAGI, action.player),
-							].filter(magi => magi.card.region != action.region); // @TODO Layers here
+							].filter(magi => this.modifyByStaticAbilities(magi, PROPERTY_REGION) != action.region);
 
 							this.setSpellMetadata({
 								...this.getSpellMetadata(action.generatedBy),

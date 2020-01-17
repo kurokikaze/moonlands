@@ -66,7 +66,7 @@ Sinder
 3 Flame Geyser
 3 Cave Hyren
 2 Magma Armor
-2 ? (Fire Flow)
+2 Fire Flow
 
 ## Naroom (+ Orothe splash)
 
@@ -86,7 +86,7 @@ Yaki
 3 Rudwot
 3 Stagadan
 3 ? (Orwin's Gaze)
-1 Flood of Energy
+1 ? (Flood of Energy)
 
 # Not done yet
 
