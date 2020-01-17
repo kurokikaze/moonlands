@@ -23,13 +23,13 @@ const color = {
 const showCard = card =>  (card instanceof CardInGame) ? `<${color.blue(card.card.name)} [${card.id}]>` : card;
 
 const showAction = action => {
+	const fields = Object.keys(action).filter(f => f != 'type').map(field => {
+		return `\t${field}: ${showCard(action[field])}`;
+	});
 	console.log(`
 {
 	${color.yellow(action.type)}
-	${action.effectType ? 'effectType: ' + action.effectType : ''}
-	${action.source ? 'source: ' + showCard(action.source) : null}
-	${action.target ? 'target: ' + showCard(action.target) : null}
-	${action.player ? 'player: ' + action.player : null}
+${fields.join('\n')}
 }`);
 };
 

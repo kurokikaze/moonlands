@@ -12,6 +12,7 @@ const {
 	ZONE_TYPE_HAND,
 } = require('../src/zone');
 const {
+	ACTION_PLAY,
 	ACTION_POWER,
 	ACTION_RESOLVE_PROMPT,
 
@@ -42,6 +43,64 @@ const createZones = (player1, player2, creatures = [], activeMagi = []) => [
 	new Zone('Player 2 active magi', ZONE_TYPE_MAGI_PILE, player2),
 	new Zone('In play', ZONE_TYPE_IN_PLAY, null).add(creatures),
 ];
+
+describe('Vortex of Knowledge', () => {
+	it('Casting Vortex of Knowledge (no region penalty)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const yaki = new CardInGame(byName('Yaki'), ACTIVE_PLAYER).addEnergy(6);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [], [yaki]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).add([
+			new CardInGame(byName('Weebo'), ACTIVE_PLAYER),
+			new CardInGame(byName('Water of Life'), ACTIVE_PLAYER),
+			new CardInGame(byName('Book of Ages'), ACTIVE_PLAYER),
+		]);
+
+		gameState.getZone(ZONE_TYPE_DECK, NON_ACTIVE_PLAYER).add([
+			new CardInGame(byName('Fire Grag'), NON_ACTIVE_PLAYER),
+			new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER),
+			new CardInGame(byName('Flame Geyser'), NON_ACTIVE_PLAYER),
+		]);
+
+		const vortexOfKnowledge = new CardInGame(byName('Vortex of Knowledge'), ACTIVE_PLAYER);
+
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([vortexOfKnowledge]);
+
+		const playSpellAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: vortexOfKnowledge,
+				player: ACTIVE_PLAYER,
+			},
+		};
+
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).length).toEqual(3, 'Active player has 3 cards in deck');
+		expect(gameState.getZone(ZONE_TYPE_DECK, NON_ACTIVE_PLAYER).length).toEqual(3, 'Non-active player has 3 cards in deck');
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(1, 'Active player has only Vortex of Knowledge in hand');
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(0, 'Non-active player has no cards in hand');
+		expect(yaki.data.energy).toEqual(6, 'Yaki has 6 energy');
+
+		gameState.update(playSpellAction);
+
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).length).toEqual(1, 'Active player has 1 card left in deck');
+		expect(gameState.getZone(ZONE_TYPE_DECK, NON_ACTIVE_PLAYER).length).toEqual(1, 'Non-active player has 1 card left in deck');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'Active player has 1 card in discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Vortex of Knowledge', 'It\'s Vortex of Knowledge');
+		expect(yaki.data.energy).toEqual(5, 'Yaki has 5 energy');
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(2, 'Active player has 2 cards in hand');
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(2, 'Non-active player has 2 cards in hand');
+	});
+});
 
 describe('Alaban', () => {
 	it('Undream', () => {

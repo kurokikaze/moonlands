@@ -21,6 +21,7 @@ Done: **37** cards out of **190**
 - Rudwot
 - Magma Armor
 - Magma Hyren
+- Vortex of Knowledge
 
 # Done, not tested
 
@@ -42,6 +43,7 @@ Done: **37** cards out of **190**
 - Grow
 - Flame Geyser
 - Syphon Stone
+- Book of Ages
 
 # Possible sample decks:
 
@@ -161,7 +163,7 @@ Yaki
 
 # Shuffling into deck
 
-- Undertow
+- Undertow (DISCARD_CREATURE_FROM_PLAY does not use MOVE_CARD_BETWEEN_ZONES, so the track of the card in Discard is lost)
 
 # More selectors
 
@@ -182,9 +184,7 @@ Yaki
 # Drawing Cards
 
 - Agovo
-- Book of Ages
 - Sea Barl
-- Vortex of Knowledge
 
 # Discarding from hand
 

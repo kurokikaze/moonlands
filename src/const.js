@@ -21,6 +21,7 @@ const PROPERTY_MAGI_STARTING_ENERGY = 'properties/magi_starting_energy';
 const PROPERTY_ATTACKS_PER_TURN = 'properties/attacks_per_turn';
 const PROPERTY_CAN_ATTACK_MAGI_DIRECTLY = 'properties/can_attack_magi_directly';
 
+const SELECTOR_OPPONENT_ID = 'selectors/opponent_id'; // THIS WILL RETURN ID OF PLAYER'S OPPONENT
 const SELECTOR_CREATURES = 'selectors/creatures';
 const SELECTOR_CREATURES_AND_MAGI = 'selectors/creatures_and_magi';
 const SELECTOR_OWN_MAGI = 'selectors/own_magi';
@@ -65,7 +66,11 @@ const EFFECT_TYPE_CREATURE_IS_DEFEATED = 'effects/creature_is_defeated';
 const EFFECT_TYPE_ROLL_DIE = 'effects/roll_die';
 const EFFECT_TYPE_MOVE_ENERGY = 'effects/move_energy';
 const EFFECT_TYPE_PLAY_CREATURE = 'effects/play_creature';
+const EFFECT_TYPE_PLAY_RELIC = 'effects/play_relic';
+const EFFECT_TYPE_PLAY_SPELL = 'effects/play_spell';
 const EFFECT_TYPE_CREATURE_ENTERS_PLAY = 'effects/creature_enters_play';
+const EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC = 'effects/paying_energy_for_relic';
+const EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL = 'effects/paying_energy_for_spell';
 const EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE = 'effects/paying_energy_for_creature';
 const EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE = 'effects/starting_energy_on_creature';
 const EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES = 'effects/move_card_between_zones';
@@ -127,6 +132,7 @@ module.exports = {
 	CALCULATION_MIN,
 	CALCULATION_MAX,
 
+	SELECTOR_OPPONENT_ID,
 	SELECTOR_CREATURES,
 	SELECTOR_OWN_MAGI,
 	SELECTOR_ENEMY_MAGI,
@@ -156,6 +162,8 @@ module.exports = {
 	EFFECT_TYPE_MOVE_ENERGY,
 	EFFECT_TYPE_ROLL_DIE,
 	EFFECT_TYPE_PLAY_CREATURE,
+	EFFECT_TYPE_PLAY_RELIC,
+	EFFECT_TYPE_PLAY_SPELL,
 	EFFECT_TYPE_CREATURE_ENTERS_PLAY,
 	EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
 	EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
@@ -170,6 +178,8 @@ module.exports = {
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
 	EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
 	EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
+	EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC,
+	EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
 	EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
 	EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
 	EFFECT_TYPE_BEFORE_DAMAGE,

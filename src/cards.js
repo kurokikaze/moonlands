@@ -38,6 +38,7 @@ const {
 	TYPE_RELIC,
 	TYPE_SPELL,
 
+	SELECTOR_OPPONENT_ID,
 	SELECTOR_OWN_MAGI,
 	SELECTOR_ENEMY_MAGI,
 	SELECTOR_CREATURES_AND_MAGI,
@@ -49,6 +50,7 @@ const {
 	SELECTOR_TOP_MAGI_OF_PILE,
 
 	EFFECT_TYPE_NONE,
+	EFFECT_TYPE_DRAW,
 	EFFECT_TYPE_ROLL_DIE,
 	EFFECT_TYPE_PLAY_CREATURE,
 	EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
@@ -465,6 +467,26 @@ const cards = [
 			},
 		]
 	}),
+	new Card('Book of Ages', TYPE_RELIC, REGION_UNIVERSAL, 0, {
+		powers: [
+			{
+				name: 'Lore',
+				cost: 2,
+				effects: [
+					{
+						type: ACTION_GET_PROPERTY_VALUE,
+						property: PROPERTY_CONTROLLER,
+						variable: 'controller',
+					},
+					{
+						type: ACTION_EFFECT,
+						effect: EFFECT_TYPE_DRAW,
+						player: '$controller',
+					}
+				],
+			}
+		],
+	}),
 	new Card('Sinder', TYPE_MAGI, REGION_CALD, null, {
 		startingEnergy: 12,
 		energize: 5,
@@ -773,6 +795,36 @@ const cards = [
 					}),
 				],
 			},
+		],
+	}),
+	new Card('Vortex of Knowledge', TYPE_SPELL, REGION_NAROOM, 1, {
+		effects: [
+			{
+				type: ACTION_EFFECT,
+				effectType: EFFECT_TYPE_DRAW,
+				player: '$player',
+			},
+			{
+				type: ACTION_EFFECT,
+				effectType: EFFECT_TYPE_DRAW,
+				player: '$player',
+			},
+			{
+				type: ACTION_SELECT,
+				selector: SELECTOR_OPPONENT_ID,
+				opponentOf: '$player',
+				variable: 'opponent',
+			},
+			{
+				type: ACTION_EFFECT,
+				effectType: EFFECT_TYPE_DRAW,
+				player: '$opponent',
+			},
+			{
+				type: ACTION_EFFECT,
+				effectType: EFFECT_TYPE_DRAW,
+				player: '$opponent',
+			},			
 		],
 	}),
 	new Card('Timber Hyren', TYPE_CREATURE, REGION_NAROOM, 7, {

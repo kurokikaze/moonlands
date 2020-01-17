@@ -48,6 +48,7 @@ const {
 	SELECTOR_ENEMY_CREATURES,
 	SELECTOR_TOP_MAGI_OF_PILE,
 	SELECTOR_MAGI_OF_REGION,
+	SELECTOR_OPPONENT_ID,
 	SELECTOR_MAGI_NOT_OF_REGION,
 
 	PROMPT_TYPE_NUMBER,
@@ -60,9 +61,13 @@ const {
 	EFFECT_TYPE_MOVE_ENERGY,
 	EFFECT_TYPE_ROLL_DIE,
 	EFFECT_TYPE_PLAY_CREATURE,
+	EFFECT_TYPE_PLAY_RELIC,
+	EFFECT_TYPE_PLAY_SPELL,
 	EFFECT_TYPE_CREATURE_ENTERS_PLAY,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
 	EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
+	EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC,
+	EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
 	EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
 	EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
 	EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI,
@@ -97,6 +102,8 @@ const {
 	ZONE_TYPE_DECK,
 } = require('./zone');
 
+/* eslint-disable-next-line no-unused-vars */
+const {showAction} = require('./logAction');
 const {CardInGame} = require('./cards');
 
 const NO_PRIORITY = 0;
@@ -222,7 +229,7 @@ class State {
 		) {
 			const variableName = value.slice(1);
 			const spellMetaData = this.getSpellMetadata(spellId);
-			return spellMetaData[variableName] ? spellMetaData[variableName] : null;
+			return Object.prototype.hasOwnProperty.call(spellMetaData,variableName) ? spellMetaData[variableName] : null;
 		} else {
 			return value;
 		}
@@ -247,7 +254,7 @@ class State {
 
 			// if not, we use spellMetaData
 			const spellMetaData = this.getSpellMetadata(spellId);
-			return spellMetaData[variableName] ? spellMetaData[variableName] : null;
+			return Object.prototype.hasOwnProperty.call(spellMetaData,variableName) ? spellMetaData[variableName] : null;
 		} else {
 			return value;
 		}
@@ -255,6 +262,8 @@ class State {
 
 	useSelector(selector, player, argument) {
 		switch (selector) {
+			case SELECTOR_OPPONENT_ID:
+				return this.players.find(id => id != argument);
 			case SELECTOR_CREATURES:
 				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.type == TYPE_CREATURE);
 			case SELECTOR_TOP_MAGI_OF_PILE: {
@@ -575,32 +584,39 @@ class State {
 					const operandTwo = this.getMetaValue(action.operandTwo, action.generatedBy);
 					let result;
 					switch (action.operator) {
-						case CALCULATION_SET:
+						case CALCULATION_SET: {
 							result = operandOne;
 							break;
-						case CALCULATION_DOUBLE:
+						}
+						case CALCULATION_DOUBLE: {
 							result = operandOne * 2;
 							break;
-						case CALCULATION_ADD:
+						}
+						case CALCULATION_ADD: {
 							result = operandOne + operandTwo;
 							break;
-						case CALCULATION_SUBTRACT:
+						}
+						case CALCULATION_SUBTRACT: {
 							result = operandOne - operandTwo;
 							break;
-						case CALCULATION_HALVE_ROUND_DOWN:
+						}
+						case CALCULATION_HALVE_ROUND_DOWN: {
 							result = Math.floor(operandOne / 2);
 							break;
-						case CALCULATION_HALVE_ROUND_UP:
+						}
+						case CALCULATION_HALVE_ROUND_UP: {
 							result = Math.ceil(operandOne / 2);
 							break;
-						case CALCULATION_MIN:
+						}
+						case CALCULATION_MIN: {
 							result = Math.min(operandOne, operandTwo);
 							break;
-						case CALCULATION_MAX:
+						}
+						case CALCULATION_MAX: {
 							result = Math.max(operandOne, operandTwo);
 							break;
+						}
 					}
-
 					this.state.spellMetaData[action.generatedBy] = {
 						...beforeData,
 						[action.variable || 'result']: result,
@@ -716,6 +732,17 @@ class State {
 				case ACTION_SELECT: {
 					const varName = action.variable || 'selected';
 					switch (action.selector) {
+						case SELECTOR_OPPONENT_ID: {
+							this.setSpellMetadata({
+								...this.getSpellMetadata(action.generatedBy),
+								[varName]: this.useSelector(
+									SELECTOR_OPPONENT_ID,
+									action.player,
+									this.getMetaValue(action.opponentOf, action.generatedBy)
+								),
+							}, action.generatedBy);
+							break;
+						}
 						case SELECTOR_CREATURES_AND_MAGI: {
 							const allOfTheAbove = [
 								...this.useSelector(SELECTOR_OWN_MAGI, action.player),
@@ -857,46 +884,111 @@ class State {
 						const cardType = baseCard.type;
 						if (
 							(cardType == TYPE_CREATURE && currentPriority == PRIORITY_CREATURES) ||
-								(cardType == TYPE_RELIC && currentPriority == PRIORITY_PRS) ||
-								(cardType == TYPE_SPELL && currentPriority == PRIORITY_PRS)
+							(cardType == TYPE_RELIC && currentPriority == PRIORITY_PRS) ||
+							(cardType == TYPE_SPELL && currentPriority == PRIORITY_PRS)
 						) {
 							// Здесь должен быть полный шаг определения стоимости
 							const activeMagi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card;
 							const regionPenalty = (activeMagi.card.region == baseCard.region) ? 0 : 1;
-							this.transformIntoActions(
-								{
-									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
-									from: this.getZone(ZONE_TYPE_ACTIVE_MAGI, player),
-									amount: baseCard.cost + regionPenalty,
-									player: action.payload.player,
-									generatedBy: action.payload.card.id,
-								},
-								{
-									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_PLAY_CREATURE,
-									card: baseCard,
-									player: action.payload.player,
-									generatedBy: action.payload.card.id,
-								},
-								{
-									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_CREATURE_ENTERS_PLAY,
-									card: baseCard,
-									player: action.payload.player,
-									generatedBy: action.payload.card.id,
-								},
-								{
-									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
-									card: baseCard,
-									player: action.payload.player,
-									amount: baseCard.cost,
-									generatedBy: action.payload.card.id,
+							switch (cardType) {
+								case TYPE_CREATURE: {
+									this.transformIntoActions(
+										{
+											type: ACTION_EFFECT,
+											effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
+											from: this.getZone(ZONE_TYPE_ACTIVE_MAGI, player),
+											amount: baseCard.cost + regionPenalty,
+											player: action.payload.player,
+											generatedBy: action.payload.card.id,
+										},
+										{
+											type: ACTION_EFFECT,
+											effectType: EFFECT_TYPE_PLAY_CREATURE,
+											card: baseCard,
+											player: action.payload.player,
+											generatedBy: action.payload.card.id,
+										},
+										{
+											type: ACTION_EFFECT,
+											effectType: EFFECT_TYPE_CREATURE_ENTERS_PLAY,
+											card: baseCard,
+											player: action.payload.player,
+											generatedBy: action.payload.card.id,
+										},
+										{
+											type: ACTION_EFFECT,
+											effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
+											card: baseCard,
+											player: action.payload.player,
+											amount: baseCard.cost,
+											generatedBy: action.payload.card.id,
+										}
+									);
+									break;
 								}
-							);
+								case TYPE_RELIC: {
+									this.transformIntoActions(
+										{
+											type: ACTION_EFFECT,
+											effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC,
+											from: this.getZone(ZONE_TYPE_ACTIVE_MAGI, player),
+											amount: baseCard.cost,
+											player: action.payload.player,
+											generatedBy: action.payload.card.id,
+										},
+										{
+											type: ACTION_EFFECT,
+											effectType: EFFECT_TYPE_PLAY_RELIC,
+											card: baseCard,
+											player: action.payload.player,
+											generatedBy: action.payload.card.id,
+										},
+										{
+											type: ACTION_EFFECT,
+											effectType: EFFECT_TYPE_CREATURE_ENTERS_PLAY,
+											card: baseCard,
+											player: action.payload.player,
+											generatedBy: action.payload.card.id,
+										}
+									);
+									break;
+								}
+								case TYPE_SPELL: {
+									const preparedEffects = action.payload.card.card.data.effects
+										.map(effect => ({...effect, generatedBy: action.payload.card.id}));
+
+									this.transformIntoActions(
+										{
+											type: ACTION_EFFECT,
+											effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
+											from: this.getZone(ZONE_TYPE_ACTIVE_MAGI, player),
+											amount: baseCard.cost + regionPenalty,
+											player: action.payload.player,
+											generatedBy: action.payload.card.id,
+										},
+										{
+											type: ACTION_CALCULATE,
+											operator: CALCULATION_SET,
+											operandOne: action.payload.player,
+											variable: 'player',
+											generatedBy: action.payload.card.id,
+										},
+										{
+											type: ACTION_EFFECT,
+											effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+											target: action.payload.card,
+											sourceZone: ZONE_TYPE_HAND,
+											destinationZone: ZONE_TYPE_DISCARD,
+											player: player,
+											generatedBy: action.payload.card.id,											
+										},
+										...preparedEffects,
+									);
+									break;
+								}								
+							}
 						} else {
-							console.log(`Wrong Priority: current is ${currentPriority} (step ${this.getCurrentStep()})`);
+							console.log(`Wrong Priority: current is ${currentPriority} (step ${this.getCurrentStep()}, type is ${cardType})`);
 						}
 					} else {
 						console.log('No card to play');
@@ -906,41 +998,44 @@ class State {
 				case ACTION_EFFECT: {
 					switch(action.effectType) {
 						case EFFECT_TYPE_DRAW: {
-							const deck = this.getZone(ZONE_TYPE_DECK, action.player);
-							const discard = this.getZone(ZONE_TYPE_DISCARD, action.player);
+							const player = this.getMetaValue(action.player, action.generatedBy);
+
+							const deck = this.getZone(ZONE_TYPE_DECK, player);
+							const discard = this.getZone(ZONE_TYPE_DISCARD, player);
 
 							if (deck.length === 0 && discard.length > 0) {
-								this.addActions({
+								this.transformIntoActions({
 									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_RESHUFFLE_DISCARD,
-									player: action.player,
+									player: player,
 								},
 								action);
 							} else {
 								const card = deck.cards[0];
 
-								this.addActions({
+								this.transformIntoActions({
 									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
 									target: card,
 									sourceZone: ZONE_TYPE_DECK,
 									destinationZone: ZONE_TYPE_HAND,
-									player: action.player,
+									player: player,
 									generatedBy: action.generatedBy,
 								});
 							}
 							break;
 						}
 						case EFFECT_TYPE_RESHUFFLE_DISCARD: {
-							const deck = this.getZone(ZONE_TYPE_DECK, action.player);
-							const discard = this.getZone(ZONE_TYPE_DISCARD, action.player);
+							const player = this.getMetaValue(action.player, action.generatedBy);
+							const deck = this.getZone(ZONE_TYPE_DECK, player);
+							const discard = this.getZone(ZONE_TYPE_DISCARD, player);
 
 							const newCards = discard.cards.map(card => new CardInGame(card.card, card.owner));
 							deck.add(newCards);
 							deck.shuffle();
 							discard.empty();
 							break;
-						}						
+						}
 						// Attack sequence
 						case EFFECT_TYPE_BEFORE_DAMAGE: {
 							action.source.markAttackDone();
@@ -994,8 +1089,26 @@ class State {
 							});
 							break;
 						}
+						case EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC: {
+							action.from.card.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
+							break;
+						}
+						case EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL: {
+							action.from.card.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
+							break;
+						}
 						case EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE: {
 							action.from.card.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
+							break;
+						}
+						case EFFECT_TYPE_PLAY_RELIC: {
+							const inPlay = this.getZone(ZONE_TYPE_IN_PLAY);
+							const relic = new CardInGame(action.card, action.player);
+							if (!this.state.spellMetaData[action.generatedBy]) {
+								this.state.spellMetaData[action.generatedBy] = {};
+							}
+							this.state.spellMetaData[action.generatedBy].relic_created = relic.id;
+							inPlay.add([relic]);
 							break;
 						}
 						case EFFECT_TYPE_PLAY_CREATURE: {
