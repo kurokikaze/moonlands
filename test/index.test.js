@@ -1,33 +1,31 @@
+/* global expect, describe, it */
 const moonlands = require('../src/index');
 const {CardInGame, byName} = require('../src/cards');
 const {
-    ACTION_SELECT,
-    SELECTOR_MAGI_NOT_OF_REGION,
-    SELECTOR_MAGI_OF_REGION,
-    REGION_NAROOM,
-    REGION_CALD,
-    REGION_OROTHE,
-    PROMPT_TYPE_SINGLE_CREATURE,
-    CALCULATION_SET,
-    CALCULATION_DOUBLE,
-    CALCULATION_ADD,
-    CALCULATION_SUBTRACT,
-    CALCULATION_HALVE_ROUND_DOWN,
-    CALCULATION_HALVE_ROUND_UP,
-    CALCULATION_MIN,
-    CALCULATION_MAX,
-    PROPERTY_ENERGY_COUNT,
-    PROPERTY_ENERGIZE,
+	ACTION_SELECT,
+	SELECTOR_MAGI_NOT_OF_REGION,
+	SELECTOR_MAGI_OF_REGION,
+	REGION_NAROOM,
+	REGION_CALD,
+	REGION_OROTHE,
+	CALCULATION_DOUBLE,
+	CALCULATION_ADD,
+	CALCULATION_SUBTRACT,
+	CALCULATION_HALVE_ROUND_DOWN,
+	CALCULATION_HALVE_ROUND_UP,
+	CALCULATION_MIN,
+	CALCULATION_MAX,
+	PROPERTY_ENERGIZE,
 } = require('../src/const');
 const {
-    Zone,
-    ZONE_TYPE_ACTIVE_MAGI,
-    ZONE_TYPE_MAGI_PILE,
-    ZONE_TYPE_DISCARD,
-    ZONE_TYPE_DEFEATED_MAGI,
-    ZONE_TYPE_DECK,
-    ZONE_TYPE_IN_PLAY,
-    ZONE_TYPE_HAND,
+	Zone,
+	ZONE_TYPE_ACTIVE_MAGI,
+	ZONE_TYPE_MAGI_PILE,
+	ZONE_TYPE_DISCARD,
+	ZONE_TYPE_DEFEATED_MAGI,
+	ZONE_TYPE_DECK,
+	ZONE_TYPE_IN_PLAY,
+	ZONE_TYPE_HAND,
 } = require('../src/zone');
 
 const STEP_ENERGIZE = 0;
@@ -38,657 +36,657 @@ const STEP_PRS_SECOND = 4;
 const STEP_DRAW = 5;
 
 describe('Updating state with action', () => {
-    it('Pass action', () => {
-        const gameState = new moonlands.State();
+	it('Pass action', () => {
+		const gameState = new moonlands.State();
 
-        const passAction = {type: moonlands.ACTION_PASS};
+		const passAction = {type: moonlands.ACTION_PASS};
 
-        expect(gameState.getCurrentStep()).toEqual(STEP_ENERGIZE, 'Intial step is Energize');
-        gameState.update(passAction);
-        expect(gameState.getCurrentStep()).toEqual(STEP_PRS_FIRST, 'Final step is PRS');
-        gameState.update(passAction);
-    });
+		expect(gameState.getCurrentStep()).toEqual(STEP_ENERGIZE, 'Intial step is Energize');
+		gameState.update(passAction);
+		expect(gameState.getCurrentStep()).toEqual(STEP_PRS_FIRST, 'Final step is PRS');
+		gameState.update(passAction);
+	});
 
-    it('Pass till second player gets priority', () => {
-        const gameState = new moonlands.State();
-        const passAction = {type: moonlands.ACTION_PASS};
+	it('Pass till second player gets priority', () => {
+		const gameState = new moonlands.State();
+		const passAction = {type: moonlands.ACTION_PASS};
 
-        expect(gameState.getCurrentStep()).toEqual(STEP_ENERGIZE, 'Initial step is Energize');
-        expect(gameState.getActivePlayer()).toEqual(0, 'Active player is player 0');
-        gameState.update(passAction); // PRS
-        gameState.update(passAction); // Attack
-        gameState.update(passAction); // Creatures
-        gameState.update(passAction); // PRS
-        gameState.update(passAction); // Draw
-        gameState.update(passAction); // Energize (player 1)
-        expect(gameState.getCurrentStep()).toEqual(STEP_ENERGIZE, 'Initial step is Energize');
-        expect(gameState.getActivePlayer()).toEqual(1, 'Active player is player 1');
-    });
+		expect(gameState.getCurrentStep()).toEqual(STEP_ENERGIZE, 'Initial step is Energize');
+		expect(gameState.getActivePlayer()).toEqual(0, 'Active player is player 0');
+		gameState.update(passAction); // PRS
+		gameState.update(passAction); // Attack
+		gameState.update(passAction); // Creatures
+		gameState.update(passAction); // PRS
+		gameState.update(passAction); // Draw
+		gameState.update(passAction); // Energize (player 1)
+		expect(gameState.getCurrentStep()).toEqual(STEP_ENERGIZE, 'Initial step is Energize');
+		expect(gameState.getActivePlayer()).toEqual(1, 'Active player is player 1');
+	});
 
-    it('Correct playing priority on each step', () => {
-        const gameState = new moonlands.State();
-        const passAction = {type: moonlands.ACTION_PASS};
+	it('Correct playing priority on each step', () => {
+		const gameState = new moonlands.State();
+		const passAction = {type: moonlands.ACTION_PASS};
 
-        expect(gameState.getCurrentStep()).toEqual(STEP_ENERGIZE, 'Initial step is Energize');
-        expect(gameState.getCurrentPriority()).toEqual(moonlands.NO_PRIORITY, 'There is no priority at Energize');
-        gameState.update(passAction); // PRS
-        expect(gameState.getCurrentStep()).toEqual(STEP_PRS_FIRST, 'Current step is PRS');
-        expect(gameState.getCurrentPriority()).toEqual(moonlands.PRIORITY_PRS, 'There is PRS priority at PRS');
-        gameState.update(passAction); // Attack
-        expect(gameState.getCurrentStep()).toEqual(STEP_ATTACK, 'Current step is Attack');
-        expect(gameState.getCurrentPriority()).toEqual(moonlands.PRIORITY_ATTACK, 'There is Attack priority at Attack');
-        gameState.update(passAction); // Creatures
-        expect(gameState.getCurrentStep()).toEqual(STEP_CREATURES, 'Current step is Creatures');
-        expect(gameState.getCurrentPriority()).toEqual(moonlands.PRIORITY_CREATURES, 'There is Creatures priority at Creatures');
-        gameState.update(passAction); // PRS
-        expect(gameState.getCurrentStep()).toEqual(STEP_PRS_SECOND, 'Current step is PRS');
-        expect(gameState.getCurrentPriority()).toEqual(moonlands.PRIORITY_PRS, 'There is Creatures priority at Creatures');
-        gameState.update(passAction); // Draw
-        expect(gameState.getCurrentStep()).toEqual(STEP_DRAW, 'Current step is Draw');
-        expect(gameState.getCurrentPriority()).toEqual(moonlands.NO_PRIORITY, 'There is no priority at Draw');
-    });
+		expect(gameState.getCurrentStep()).toEqual(STEP_ENERGIZE, 'Initial step is Energize');
+		expect(gameState.getCurrentPriority()).toEqual(moonlands.NO_PRIORITY, 'There is no priority at Energize');
+		gameState.update(passAction); // PRS
+		expect(gameState.getCurrentStep()).toEqual(STEP_PRS_FIRST, 'Current step is PRS');
+		expect(gameState.getCurrentPriority()).toEqual(moonlands.PRIORITY_PRS, 'There is PRS priority at PRS');
+		gameState.update(passAction); // Attack
+		expect(gameState.getCurrentStep()).toEqual(STEP_ATTACK, 'Current step is Attack');
+		expect(gameState.getCurrentPriority()).toEqual(moonlands.PRIORITY_ATTACK, 'There is Attack priority at Attack');
+		gameState.update(passAction); // Creatures
+		expect(gameState.getCurrentStep()).toEqual(STEP_CREATURES, 'Current step is Creatures');
+		expect(gameState.getCurrentPriority()).toEqual(moonlands.PRIORITY_CREATURES, 'There is Creatures priority at Creatures');
+		gameState.update(passAction); // PRS
+		expect(gameState.getCurrentStep()).toEqual(STEP_PRS_SECOND, 'Current step is PRS');
+		expect(gameState.getCurrentPriority()).toEqual(moonlands.PRIORITY_PRS, 'There is Creatures priority at Creatures');
+		gameState.update(passAction); // Draw
+		expect(gameState.getCurrentStep()).toEqual(STEP_DRAW, 'Current step is Draw');
+		expect(gameState.getCurrentPriority()).toEqual(moonlands.NO_PRIORITY, 'There is no priority at Draw');
+	});
 });
 
 describe('Magi stuff', () => {
-    it('Energizing', () => {
-        const ACTIVE_PLAYER = 0;
-        const NON_ACTIVE_PLAYER = 2;
-        const startingEnergy = 10;
+	it('Energizing', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+		const startingEnergy = 10;
 
-        const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
-        grega.addEnergy(startingEnergy);
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+		grega.addEnergy(startingEnergy);
 
-        const zones = [
-            new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
-            new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
-            new Zone('In play', ZONE_TYPE_IN_PLAY),
-        ];
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY),
+		];
 
-        const gameState = new moonlands.State({
-            zones,
-            step: STEP_ENERGIZE,
-            activePlayer: ACTIVE_PLAYER,
-        });
-        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_ENERGIZE,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
         
-        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toEqual(startingEnergy, "Grega's Energy is 10");
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toEqual(startingEnergy, 'Grega\'s Energy is 10');
 
-        gameState.update({
-            type: moonlands.ACTION_EFFECT,
-            target: grega,
-            effectType: moonlands.EFFECT_TYPE_ENERGIZE,
-        });
+		gameState.update({
+			type: moonlands.ACTION_EFFECT,
+			target: grega,
+			effectType: moonlands.EFFECT_TYPE_ENERGIZE,
+		});
 
-        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toEqual(15, "Grega's energy is 15 after energizing");
-    });
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toEqual(15, 'Grega\'s energy is 15 after energizing');
+	});
 
 
-    it('Energizing a creature', () => {
-        const ACTIVE_PLAYER = 0;
-        const NON_ACTIVE_PLAYER = 3;
+	it('Energizing a creature', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 3;
 
-        const greenStuff = new CardInGame(byName('Green Stuff'), ACTIVE_PLAYER);
+		const greenStuff = new CardInGame(byName('Green Stuff'), ACTIVE_PLAYER);
 
-        const zones = [
-            new Zone('In play', ZONE_TYPE_IN_PLAY).add([greenStuff]),
-            new Zone('AP current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
-            new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
-        ];
+		const zones = [
+			new Zone('In play', ZONE_TYPE_IN_PLAY).add([greenStuff]),
+			new Zone('AP current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+		];
 
-        const gameState = new moonlands.State({
-            zones,
-            step: STEP_ENERGIZE,
-            activePlayer: ACTIVE_PLAYER,
-        });
-        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_ENERGIZE,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
         
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(0, "Green Stuff's Energy is 0");
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(0, 'Green Stuff\'s Energy is 0');
 
-        gameState.update({
-            type: moonlands.ACTION_EFFECT,
-            target: greenStuff,
-            effectType: moonlands.EFFECT_TYPE_ENERGIZE,
-        });
+		gameState.update({
+			type: moonlands.ACTION_EFFECT,
+			target: greenStuff,
+			effectType: moonlands.EFFECT_TYPE_ENERGIZE,
+		});
 
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(1, "Green Stuff's energy is 1 after energizing");
-    });
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(1, 'Green Stuff\'s energy is 1 after energizing');
+	});
 });
 
 describe('Prompts', () => {
-    it('Prompt should save actions for later', () => {
-        const arbolit = new CardInGame(byName('Arbolit'), 0);
-        const zones = [
-            new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
-        ];
-        const addEnergyAction = {
-            type: moonlands.ACTION_EFFECT,
-            effectType: moonlands.EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
-            amount: 2,
-            target: arbolit,
-        };
+	it('Prompt should save actions for later', () => {
+		const arbolit = new CardInGame(byName('Arbolit'), 0);
+		const zones = [
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
+		];
+		const addEnergyAction = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+			amount: 2,
+			target: arbolit,
+		};
 
-        const promptAction = {
-            type: moonlands.ACTION_ENTER_PROMPT,
-        };
+		const promptAction = {
+			type: moonlands.ACTION_ENTER_PROMPT,
+		};
 
-        const passAction = {type: moonlands.ACTION_PASS};
+		const passAction = {type: moonlands.ACTION_PASS};
 
-        const gameState = new moonlands.State({
-            zones,
-            step: STEP_ENERGIZE,
-            activePlayer: 0,
-            actions: [promptAction, addEnergyAction],
-        });
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_ENERGIZE,
+			activePlayer: 0,
+			actions: [promptAction, addEnergyAction],
+		});
 
-        expect(gameState.state.actions.length).toEqual(2, 'Two actions in queue');
-        gameState.update(passAction);
-        expect(gameState.state.actions.length).toEqual(0, 'Queue is empty');
-        expect(gameState.state.savedActions.length).toEqual(2, 'Two actions saved for later');
-        expect(arbolit.data.energy).toEqual(0, 'No energy added to creature');
-    });
+		expect(gameState.state.actions.length).toEqual(2, 'Two actions in queue');
+		gameState.update(passAction);
+		expect(gameState.state.actions.length).toEqual(0, 'Queue is empty');
+		expect(gameState.state.savedActions.length).toEqual(2, 'Two actions saved for later');
+		expect(arbolit.data.energy).toEqual(0, 'No energy added to creature');
+	});
 
-    it('Resolving prompt should resume and apply saved actions', () => {
-        const arbolit = new CardInGame(byName('Arbolit'), 0);
+	it('Resolving prompt should resume and apply saved actions', () => {
+		const arbolit = new CardInGame(byName('Arbolit'), 0);
 
-        const zones = [
-            new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
-        ];
+		const zones = [
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
+		];
 
-        const addEnergyAction = {
-            type: moonlands.ACTION_EFFECT,
-            effectType: moonlands.EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
-            amount: 2,
-            target: arbolit,
-        };
+		const addEnergyAction = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+			amount: 2,
+			target: arbolit,
+		};
 
-        const promptAction = {
-            type: moonlands.ACTION_ENTER_PROMPT,
-            promptType: moonlands.PROMPT_TYPE_NUMBER,
-        };
+		const promptAction = {
+			type: moonlands.ACTION_ENTER_PROMPT,
+			promptType: moonlands.PROMPT_TYPE_NUMBER,
+		};
 
-        const resolvePromptAction = {
-            type: moonlands.ACTION_RESOLVE_PROMPT,
-            number: 2,
-        };
+		const resolvePromptAction = {
+			type: moonlands.ACTION_RESOLVE_PROMPT,
+			number: 2,
+		};
 
-        const passAction = {
-            type: moonlands.ACTION_PASS,
+		const passAction = {
+			type: moonlands.ACTION_PASS,
 
-        };
+		};
 
-        const gameState = new moonlands.State({
-            zones,
-            step: STEP_ENERGIZE,
-            activePlayer: 0,
-            actions: [promptAction, addEnergyAction],
-        });
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_ENERGIZE,
+			activePlayer: 0,
+			actions: [promptAction, addEnergyAction],
+		});
 
-        expect(gameState.state.actions.length).toEqual(2, 'Two actions in queue');
+		expect(gameState.state.actions.length).toEqual(2, 'Two actions in queue');
 
-        gameState.update(passAction);
+		gameState.update(passAction);
 
-        expect(gameState.state.actions.length).toEqual(0, 'Queue is empty');
-        expect(gameState.state.savedActions.length).toEqual(2, 'Two actions saved for later');
-        expect(arbolit.data.energy).toEqual(0, 'No energy added to creature');
+		expect(gameState.state.actions.length).toEqual(0, 'Queue is empty');
+		expect(gameState.state.savedActions.length).toEqual(2, 'Two actions saved for later');
+		expect(arbolit.data.energy).toEqual(0, 'No energy added to creature');
 
-        gameState.update(resolvePromptAction);
+		gameState.update(resolvePromptAction);
 
-        expect(gameState.state.actions.length).toEqual(0, 'Queue is empty');
-        expect(gameState.state.savedActions.length).toEqual(0, 'No actions saved for later');
-        expect(arbolit.data.energy).toEqual(2, 'Energy was added to creature');
-    });
+		expect(gameState.state.actions.length).toEqual(0, 'Queue is empty');
+		expect(gameState.state.savedActions.length).toEqual(0, 'No actions saved for later');
+		expect(arbolit.data.energy).toEqual(2, 'Energy was added to creature');
+	});
 
-    it('Resolving prompt saves number for future action', () => {
-        const PROMPTED_NUMBER = 4;
+	it('Resolving prompt saves number for future action', () => {
+		const PROMPTED_NUMBER = 4;
 
-        const arbolit = new CardInGame(byName('Arbolit'), 0);
+		const arbolit = new CardInGame(byName('Arbolit'), 0);
 
-        const zones = [
-            new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
-        ];
+		const zones = [
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
+		];
 
-        const addEnergyAction = {
-            type: moonlands.ACTION_EFFECT,
-            effectType: moonlands.EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
-            amount: '$number',
-            target: arbolit,
-            generatedBy: 1,
-        };
+		const addEnergyAction = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+			amount: '$number',
+			target: arbolit,
+			generatedBy: 1,
+		};
 
-        const promptAction = {
-            type: moonlands.ACTION_ENTER_PROMPT,
-            promptType: moonlands.PROMPT_TYPE_NUMBER,
-            generatedBy: 1,
-        };
+		const promptAction = {
+			type: moonlands.ACTION_ENTER_PROMPT,
+			promptType: moonlands.PROMPT_TYPE_NUMBER,
+			generatedBy: 1,
+		};
 
-        const resolvePromptAction = {
-            type: moonlands.ACTION_RESOLVE_PROMPT,
-            number: PROMPTED_NUMBER,
-            generatedBy: 1,
-        };
+		const resolvePromptAction = {
+			type: moonlands.ACTION_RESOLVE_PROMPT,
+			number: PROMPTED_NUMBER,
+			generatedBy: 1,
+		};
 
-        const passAction = {
-            type: moonlands.ACTION_PASS,
-        };
+		const passAction = {
+			type: moonlands.ACTION_PASS,
+		};
 
-        const gameState = new moonlands.State({
-            zones,
-            step: STEP_ENERGIZE,
-            activePlayer: 0,
-            actions: [promptAction, addEnergyAction],
-        });
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_ENERGIZE,
+			activePlayer: 0,
+			actions: [promptAction, addEnergyAction],
+		});
 
-        gameState.update(passAction);
+		gameState.update(passAction);
 
-        expect(arbolit.data.energy).toEqual(0, 'No energy added to creature');
-        expect(gameState.state.prompt).toEqual(true, 'Game waiting for prompt');
-        expect(gameState.state.promptType).toEqual(moonlands.PROMPT_TYPE_NUMBER, 'Game waiting for numeric prompt');
+		expect(arbolit.data.energy).toEqual(0, 'No energy added to creature');
+		expect(gameState.state.prompt).toEqual(true, 'Game waiting for prompt');
+		expect(gameState.state.promptType).toEqual(moonlands.PROMPT_TYPE_NUMBER, 'Game waiting for numeric prompt');
 
-        gameState.update(resolvePromptAction);
+		gameState.update(resolvePromptAction);
 
-        expect(gameState.state.actions.length).toEqual(0, 'Queue is empty');
-        expect(gameState.state.savedActions.length).toEqual(0, 'No actions saved for later');
-        expect(arbolit.data.energy).toEqual(PROMPTED_NUMBER, 'Energy was added to creature');
-        expect(gameState.state.prompt).toEqual(false, 'Game not waiting for prompt anymore');
-        expect(gameState.state.promptType).toEqual(null, 'Game not waiting for any prompt');
-    });
+		expect(gameState.state.actions.length).toEqual(0, 'Queue is empty');
+		expect(gameState.state.savedActions.length).toEqual(0, 'No actions saved for later');
+		expect(arbolit.data.energy).toEqual(PROMPTED_NUMBER, 'Energy was added to creature');
+		expect(gameState.state.prompt).toEqual(false, 'Game not waiting for prompt anymore');
+		expect(gameState.state.promptType).toEqual(null, 'Game not waiting for any prompt');
+	});
 
-    it('Resolving prompt saves target for future effect', () => {
-        const arbolit = new CardInGame(byName('Arbolit', 0));
-        arbolit.addEnergy(5);
+	it('Resolving prompt saves target for future effect', () => {
+		const arbolit = new CardInGame(byName('Arbolit', 0));
+		arbolit.addEnergy(5);
 
-        const zones = [
-            new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
-        ];
+		const zones = [
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
+		];
 
-        const removeEnergyAction = {
-            type: moonlands.ACTION_EFFECT,
-            effectType: moonlands.EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
-            amount: 2,
-            target: '$target',
-            generatedBy: 1,
-        };
+		const removeEnergyAction = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+			amount: 2,
+			target: '$target',
+			generatedBy: 1,
+		};
 
-        const promptAction = {
-            type: moonlands.ACTION_ENTER_PROMPT,
-            promptType: moonlands.PROMPT_TYPE_SINGLE_CREATURE,
-            generatedBy: 1,
-        };
+		const promptAction = {
+			type: moonlands.ACTION_ENTER_PROMPT,
+			promptType: moonlands.PROMPT_TYPE_SINGLE_CREATURE,
+			generatedBy: 1,
+		};
 
-        const resolvePromptAction = {
-            type: moonlands.ACTION_RESOLVE_PROMPT,
-            target: arbolit,
-            generatedBy: 1,
-        };
+		const resolvePromptAction = {
+			type: moonlands.ACTION_RESOLVE_PROMPT,
+			target: arbolit,
+			generatedBy: 1,
+		};
 
-        const passAction = {
-            type: moonlands.ACTION_PASS,
-        };
+		const passAction = {
+			type: moonlands.ACTION_PASS,
+		};
 
-        const gameState = new moonlands.State({
-            zones,
-            step: STEP_ENERGIZE,
-            activePlayer: 0,
-            actions: [promptAction, removeEnergyAction],
-        });
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_ENERGIZE,
+			activePlayer: 0,
+			actions: [promptAction, removeEnergyAction],
+		});
 
-        gameState.update(passAction);
-        expect(arbolit.data.energy).toEqual(5, 'Arbolit has 5 energy');
+		gameState.update(passAction);
+		expect(arbolit.data.energy).toEqual(5, 'Arbolit has 5 energy');
 
-        gameState.update(resolvePromptAction);
+		gameState.update(resolvePromptAction);
 
-        expect(gameState.state.actions.length).toEqual(0, 'Queue is empty');
-        expect(gameState.state.savedActions.length).toEqual(0, 'No actions saved for later');
-        expect(arbolit.data.energy).toEqual(3, 'Energy was removed from creature');
-    });
+		expect(gameState.state.actions.length).toEqual(0, 'Queue is empty');
+		expect(gameState.state.savedActions.length).toEqual(0, 'No actions saved for later');
+		expect(arbolit.data.energy).toEqual(3, 'Energy was removed from creature');
+	});
 });
 
 describe('Effects', () => {
-    it('Discard creature from play [EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY]', () => {
-        const activePlayer = 0;
-        const arbolit = new CardInGame(byName('Arbolit'), activePlayer);
+	it('Discard creature from play [EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY]', () => {
+		const activePlayer = 0;
+		const arbolit = new CardInGame(byName('Arbolit'), activePlayer);
 
-        const zones = [
-            new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
-            new Zone('Discard', ZONE_TYPE_DISCARD, activePlayer),
-        ];
+		const zones = [
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
+			new Zone('Discard', ZONE_TYPE_DISCARD, activePlayer),
+		];
 
-        const discardCreatureEffect = {
-            type: moonlands.ACTION_EFFECT,
-            effectType: moonlands.EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-            target: arbolit,
-        };
+		const discardCreatureEffect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+			target: arbolit,
+		};
 
-        const gameState = new moonlands.State({
-            zones,
-            step: STEP_PRS_SECOND,
-            activePlayer: 0,
-        });
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: 0,
+		});
 
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'Arbolit on the field');
-        expect(gameState.getZone(ZONE_TYPE_DISCARD, activePlayer).length).toEqual(0, 'Discard pile is empty');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'Arbolit on the field');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, activePlayer).length).toEqual(0, 'Discard pile is empty');
 
-        gameState.update(discardCreatureEffect);
+		gameState.update(discardCreatureEffect);
 
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'Field is empty');
-        expect(gameState.getZone(ZONE_TYPE_DISCARD, activePlayer).length).toEqual(1, 'Arbolit is in discard pile');
-    });
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'Field is empty');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, activePlayer).length).toEqual(1, 'Arbolit is in discard pile');
+	});
 
-    it('Add energy to creature [EFFECT_TYPE_ADD_ENERGY_TO_CREATURE]', () => {
-        const activePlayer = 0;
-        const arbolit = new CardInGame(byName('Arbolit'), activePlayer);
+	it('Add energy to creature [EFFECT_TYPE_ADD_ENERGY_TO_CREATURE]', () => {
+		const activePlayer = 0;
+		const arbolit = new CardInGame(byName('Arbolit'), activePlayer);
 
-        const addEnergyEffect = {
-            type: moonlands.ACTION_EFFECT,
-            effectType: moonlands.EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
-            target: arbolit,
-            amount: 2,
-        };
+		const addEnergyEffect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+			target: arbolit,
+			amount: 2,
+		};
 
-        const gameState = new moonlands.State({
-            activePlayer,
-        });
+		const gameState = new moonlands.State({
+			activePlayer,
+		});
 
-        expect(arbolit.data.energy).toEqual(0, 'Arbolit has 0 energy');
+		expect(arbolit.data.energy).toEqual(0, 'Arbolit has 0 energy');
 
-        gameState.update(addEnergyEffect);
+		gameState.update(addEnergyEffect);
 
-        expect(arbolit.data.energy).toEqual(2, 'Arbolit has 2 energy');
-    });
+		expect(arbolit.data.energy).toEqual(2, 'Arbolit has 2 energy');
+	});
 
-    it('Restore energy to creature [EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY]', () => {
-        const activePlayer = 0;
-        const arbolit = new CardInGame(byName('Arbolit'), activePlayer);
-        const fireGrag = new CardInGame(byName('Fire Grag'), activePlayer).addEnergy(10);
-        arbolit.addEnergy(1);
+	it('Restore energy to creature [EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY]', () => {
+		const activePlayer = 0;
+		const arbolit = new CardInGame(byName('Arbolit'), activePlayer);
+		const fireGrag = new CardInGame(byName('Fire Grag'), activePlayer).addEnergy(10);
+		arbolit.addEnergy(1);
 
-        const restoreEnergyEffect = {
-            type: moonlands.ACTION_EFFECT,
-            effectType: moonlands.EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
-            target: arbolit,
-            generatedBy: arbolit.id,
-        };
+		const restoreEnergyEffect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
+			target: arbolit,
+			generatedBy: arbolit.id,
+		};
 
-        const restoreEnergyEffectNotApplicable = {
-            type: moonlands.ACTION_EFFECT,
-            effectType: moonlands.EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
-            target: fireGrag,
-            generatedBy: fireGrag.id,
-        };
+		const restoreEnergyEffectNotApplicable = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
+			target: fireGrag,
+			generatedBy: fireGrag.id,
+		};
 
-        const gameState = new moonlands.State({
-            activePlayer,
-        });
+		const gameState = new moonlands.State({
+			activePlayer,
+		});
 
-        expect(arbolit.data.energy).toEqual(1, 'Arbolit has 1 energy');
-        expect(fireGrag.data.energy).toEqual(10, 'Fire Grag has 10 energy');
+		expect(arbolit.data.energy).toEqual(1, 'Arbolit has 1 energy');
+		expect(fireGrag.data.energy).toEqual(10, 'Fire Grag has 10 energy');
 
-        gameState.update(restoreEnergyEffect);
+		gameState.update(restoreEnergyEffect);
 
-        expect(arbolit.data.energy).toEqual(2, 'Arbolit has 2 energy');
+		expect(arbolit.data.energy).toEqual(2, 'Arbolit has 2 energy');
 
-        gameState.update(restoreEnergyEffectNotApplicable);
+		gameState.update(restoreEnergyEffectNotApplicable);
 
-        expect(fireGrag.data.energy).toEqual(10, 'Fire Grag has 10 energy');
-    });
+		expect(fireGrag.data.energy).toEqual(10, 'Fire Grag has 10 energy');
+	});
 
-    it('Discard energy from creature [EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE]', () => {
-        const activePlayer = 0;
-        const arbolit = new CardInGame(byName('Arbolit'), activePlayer);
-        arbolit.addEnergy(5);
+	it('Discard energy from creature [EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE]', () => {
+		const activePlayer = 0;
+		const arbolit = new CardInGame(byName('Arbolit'), activePlayer);
+		arbolit.addEnergy(5);
 
-        const discardEnergyEffect = {
-            type: moonlands.ACTION_EFFECT,
-            effectType: moonlands.EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
-            target: arbolit,
-            amount: 2,
-        };
+		const discardEnergyEffect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+			target: arbolit,
+			amount: 2,
+		};
 
-        const gameState = new moonlands.State({
-            activePlayer,
-        });
+		const gameState = new moonlands.State({
+			activePlayer,
+		});
 
-        expect(arbolit.data.energy).toEqual(5, 'Arbolit has 5 energy');
+		expect(arbolit.data.energy).toEqual(5, 'Arbolit has 5 energy');
 
-        gameState.update(discardEnergyEffect);
+		gameState.update(discardEnergyEffect);
 
-        expect(arbolit.data.energy).toEqual(3, 'Arbolit has 3 energy');
-    });
+		expect(arbolit.data.energy).toEqual(3, 'Arbolit has 3 energy');
+	});
 
-    it('Moving energy from creature to creature [EFFECT_TYPE_MOVE_ENERGY]', () => {
-        const activePlayer = 0;
-        const arbolit = new CardInGame(byName('Arbolit'), activePlayer).addEnergy(5);
-        const fireGrag = new CardInGame(byName('Fire Grag'), activePlayer).addEnergy(10);
+	it('Moving energy from creature to creature [EFFECT_TYPE_MOVE_ENERGY]', () => {
+		const activePlayer = 0;
+		const arbolit = new CardInGame(byName('Arbolit'), activePlayer).addEnergy(5);
+		const fireGrag = new CardInGame(byName('Fire Grag'), activePlayer).addEnergy(10);
 
-        const moveEnergyEffect = {
-            type: moonlands.ACTION_EFFECT,
-            effectType: moonlands.EFFECT_TYPE_MOVE_ENERGY,
-            source: fireGrag,
-            target: arbolit,
-            amount: 4,
-        };
+		const moveEnergyEffect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_MOVE_ENERGY,
+			source: fireGrag,
+			target: arbolit,
+			amount: 4,
+		};
 
-        const gameState = new moonlands.State({
-            activePlayer,
-        });
+		const gameState = new moonlands.State({
+			activePlayer,
+		});
 
-        gameState.update(moveEnergyEffect);
+		gameState.update(moveEnergyEffect);
 
-        expect(arbolit.data.energy).toEqual(9, 'Arbolit has 9 energy');
-        expect(fireGrag.data.energy).toEqual(6, 'Fire Grag has 6 energy');
-    });
+		expect(arbolit.data.energy).toEqual(9, 'Arbolit has 9 energy');
+		expect(fireGrag.data.energy).toEqual(6, 'Fire Grag has 6 energy');
+	});
 
-    it('Moving energy from creature to magi [EFFECT_TYPE_MOVE_ENERGY]', () => {
-        const activePlayer = 0;
-        const arbolit = new CardInGame(byName('Arbolit'), activePlayer).addEnergy(5);
-        const grega = new CardInGame(byName('Grega'), activePlayer).addEnergy(10);
+	it('Moving energy from creature to magi [EFFECT_TYPE_MOVE_ENERGY]', () => {
+		const activePlayer = 0;
+		const arbolit = new CardInGame(byName('Arbolit'), activePlayer).addEnergy(5);
+		const grega = new CardInGame(byName('Grega'), activePlayer).addEnergy(10);
 
-        const moveEnergyEffect = {
-            type: moonlands.ACTION_EFFECT,
-            effectType: moonlands.EFFECT_TYPE_MOVE_ENERGY,
-            source: arbolit,
-            target: grega,
-            amount: 4,
-        };
+		const moveEnergyEffect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_MOVE_ENERGY,
+			source: arbolit,
+			target: grega,
+			amount: 4,
+		};
 
-        const gameState = new moonlands.State({
-            activePlayer,
-        });
+		const gameState = new moonlands.State({
+			activePlayer,
+		});
 
-        gameState.update(moveEnergyEffect);
+		gameState.update(moveEnergyEffect);
 
-        expect(arbolit.data.energy).toEqual(1, 'Arbolit has 1 energy');
-        expect(grega.data.energy).toEqual(14, 'Grega has 14 energy');
-    });
+		expect(arbolit.data.energy).toEqual(1, 'Arbolit has 1 energy');
+		expect(grega.data.energy).toEqual(14, 'Grega has 14 energy');
+	});
 
-    it('Putting creature into play [EFFECT_TYPE_PLAY_CREATURE]', () => {
-        const activePlayer = 0;
-        const arbolit = byName('Arbolit');
+	it('Putting creature into play [EFFECT_TYPE_PLAY_CREATURE]', () => {
+		const activePlayer = 0;
+		const arbolit = byName('Arbolit');
 
-        const zones = [
-            new Zone('In play', ZONE_TYPE_IN_PLAY, null),
-        ];
+		const zones = [
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null),
+		];
 
-        const playCreatureEffect = {
-            type: moonlands.ACTION_EFFECT,
-            effectType: moonlands.EFFECT_TYPE_PLAY_CREATURE,
-            card: arbolit,
-            player: activePlayer,
-            generatedBy: 12345,
-        };
+		const playCreatureEffect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_PLAY_CREATURE,
+			card: arbolit,
+			player: activePlayer,
+			generatedBy: 12345,
+		};
 
-        const gameState = new moonlands.State({
-            zones,
-            step: STEP_PRS_SECOND,
-            activePlayer,
-        });
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer,
+		});
 
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'Nothing in play');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'Nothing in play');
 
-        gameState.update(playCreatureEffect);
+		gameState.update(playCreatureEffect);
 
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One card in play');
-        expect(gameState.getSpellMetadata(12345).creature_created).toEqual(gameState.getZone(ZONE_TYPE_IN_PLAY).card.id, 'Id saved in metadata');
-    });
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One card in play');
+		expect(gameState.getSpellMetadata(12345).creature_created).toEqual(gameState.getZone(ZONE_TYPE_IN_PLAY).card.id, 'Id saved in metadata');
+	});
 
-    it('Moving card between zones [EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES]', () => {
-        const activePlayer = 0;
-        const arbolit = new CardInGame(byName('Arbolit'), activePlayer).addEnergy(5);
-        const grega = new CardInGame(byName('Grega'), activePlayer).addEnergy(10);
+	it('Moving card between zones [EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES]', () => {
+		const activePlayer = 0;
+		const arbolit = new CardInGame(byName('Arbolit'), activePlayer).addEnergy(5);
+		const grega = new CardInGame(byName('Grega'), activePlayer).addEnergy(10);
 
-        const zones = [
-            new Zone('Player 1 hand', ZONE_TYPE_HAND, activePlayer),
-            new Zone('Player 1 discard', ZONE_TYPE_DISCARD, activePlayer),
-            new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, activePlayer).add([grega]),
-            new Zone('Player 1 magi pile', ZONE_TYPE_MAGI_PILE, activePlayer),
-            new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),            
-        ];
-        const moveCardEffect = {
-            type: moonlands.ACTION_EFFECT,
-            effectType: moonlands.EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-            source: arbolit,
-            target: grega,
-            sourceZone: ZONE_TYPE_ACTIVE_MAGI,
-            destinationZone: ZONE_TYPE_MAGI_PILE,
-        };
+		const zones = [
+			new Zone('Player 1 hand', ZONE_TYPE_HAND, activePlayer),
+			new Zone('Player 1 discard', ZONE_TYPE_DISCARD, activePlayer),
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, activePlayer).add([grega]),
+			new Zone('Player 1 magi pile', ZONE_TYPE_MAGI_PILE, activePlayer),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),            
+		];
+		const moveCardEffect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+			source: arbolit,
+			target: grega,
+			sourceZone: ZONE_TYPE_ACTIVE_MAGI,
+			destinationZone: ZONE_TYPE_MAGI_PILE,
+		};
 
-        const gameState = new moonlands.State({
-            zones,
-            activePlayer,
-        });
+		const gameState = new moonlands.State({
+			zones,
+			activePlayer,
+		});
 
-        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI).length).toEqual(1, 'Active Magi zone has 1 card');
-        expect(gameState.getZone(ZONE_TYPE_MAGI_PILE).length).toEqual(0, 'Magi pile zone has no cards');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI).length).toEqual(1, 'Active Magi zone has 1 card');
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE).length).toEqual(0, 'Magi pile zone has no cards');
 
-        gameState.update(moveCardEffect);
+		gameState.update(moveCardEffect);
 
-        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI).length).toEqual(0, 'Active Magi zone is empty');
-        expect(gameState.getZone(ZONE_TYPE_MAGI_PILE).length).toEqual(1, 'Magi pile zone has 1 card');
-    });    
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI).length).toEqual(0, 'Active Magi zone is empty');
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE).length).toEqual(1, 'Magi pile zone has 1 card');
+	});    
 });
 
 describe('Selector actions', () => {
-    it('Selecting Magi by region [SELECTOR_MAGI_OF_REGION]', () => {
-        const ACTIVE_PLAYER = 0;
-        const NON_ACTIVE_PLAYER = 1;
-        const GENERATED_BY = 123;
-        const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
-        const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+	it('Selecting Magi by region [SELECTOR_MAGI_OF_REGION]', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+		const GENERATED_BY = 123;
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
 
-        const zones = [
-            new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
-            new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
-        ];
+		const zones = [
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+		];
 
-        const selectOfNaroomAction = {
-            type: ACTION_SELECT,
-            selector: SELECTOR_MAGI_OF_REGION,
-            region: REGION_NAROOM,
-            player: ACTIVE_PLAYER,
-            generatedBy: GENERATED_BY,
-        };
+		const selectOfNaroomAction = {
+			type: ACTION_SELECT,
+			selector: SELECTOR_MAGI_OF_REGION,
+			region: REGION_NAROOM,
+			player: ACTIVE_PLAYER,
+			generatedBy: GENERATED_BY,
+		};
 
-        const selectOfCaldAction = {
-            type: ACTION_SELECT,
-            selector: SELECTOR_MAGI_OF_REGION,
-            region: REGION_CALD,
-            player: ACTIVE_PLAYER,
-            generatedBy: GENERATED_BY,            
-        };
+		const selectOfCaldAction = {
+			type: ACTION_SELECT,
+			selector: SELECTOR_MAGI_OF_REGION,
+			region: REGION_CALD,
+			player: ACTIVE_PLAYER,
+			generatedBy: GENERATED_BY,            
+		};
 
-        const selectOfOrotheAction = {
-            type: ACTION_SELECT,
-            selector: SELECTOR_MAGI_OF_REGION,
-            region: REGION_OROTHE,
-            player: ACTIVE_PLAYER,
-            generatedBy: GENERATED_BY,
-        };
+		const selectOfOrotheAction = {
+			type: ACTION_SELECT,
+			selector: SELECTOR_MAGI_OF_REGION,
+			region: REGION_OROTHE,
+			player: ACTIVE_PLAYER,
+			generatedBy: GENERATED_BY,
+		};
 
-        const gameState = new moonlands.State({
-            zones,
-            ACTIVE_PLAYER,
-        });
+		const gameState = new moonlands.State({
+			zones,
+			ACTIVE_PLAYER,
+		});
 
-        gameState.update(selectOfNaroomAction);
+		gameState.update(selectOfNaroomAction);
 
-        const selectedOfNaroom = gameState.state.spellMetaData[GENERATED_BY].selected;
-        expect(selectedOfNaroom).toHaveLength(1, '"Of Naroom" selector returns one magi');
-        expect(selectedOfNaroom[0].card.name).toEqual('Yaki', '"Of Naroom" selector returns Yaki');
+		const selectedOfNaroom = gameState.state.spellMetaData[GENERATED_BY].selected;
+		expect(selectedOfNaroom).toHaveLength(1, '"Of Naroom" selector returns one magi');
+		expect(selectedOfNaroom[0].card.name).toEqual('Yaki', '"Of Naroom" selector returns Yaki');
 
-        gameState.update(selectOfCaldAction);
+		gameState.update(selectOfCaldAction);
 
-        const selectedOfCald = gameState.state.spellMetaData[GENERATED_BY].selected;
-        expect(selectedOfCald).toHaveLength(1, '"Of Cald" selector returns one magi');
-        expect(selectedOfCald[0].card.name).toEqual('Grega', '"Of Cald" selector returns Grega');
+		const selectedOfCald = gameState.state.spellMetaData[GENERATED_BY].selected;
+		expect(selectedOfCald).toHaveLength(1, '"Of Cald" selector returns one magi');
+		expect(selectedOfCald[0].card.name).toEqual('Grega', '"Of Cald" selector returns Grega');
 
-        gameState.update(selectOfOrotheAction);
+		gameState.update(selectOfOrotheAction);
 
-        const selectedOfOrothe = gameState.state.spellMetaData[GENERATED_BY].selected;
-        expect(selectedOfOrothe).toHaveLength(0, '"Of Orothe" selector returns no magi');
-    });
+		const selectedOfOrothe = gameState.state.spellMetaData[GENERATED_BY].selected;
+		expect(selectedOfOrothe).toHaveLength(0, '"Of Orothe" selector returns no magi');
+	});
 
-    it('Selecting Magi not by region [SELECTOR_MAGI_NOT_OF_REGION]', () => {
-        const ACTIVE_PLAYER = 0;
-        const NON_ACTIVE_PLAYER = 1;
-        const GENERATED_BY = 123;
-        const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
-        const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+	it('Selecting Magi not by region [SELECTOR_MAGI_NOT_OF_REGION]', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+		const GENERATED_BY = 123;
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
 
-        const zones = [
-            new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
-            new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
-        ];
+		const zones = [
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+		];
 
-        const selectNotOfNaroomAction = {
-            type: ACTION_SELECT,
-            selector: SELECTOR_MAGI_NOT_OF_REGION,
-            region: REGION_NAROOM,
-            player: ACTIVE_PLAYER,
-            generatedBy: GENERATED_BY,
-        };
+		const selectNotOfNaroomAction = {
+			type: ACTION_SELECT,
+			selector: SELECTOR_MAGI_NOT_OF_REGION,
+			region: REGION_NAROOM,
+			player: ACTIVE_PLAYER,
+			generatedBy: GENERATED_BY,
+		};
 
-        const selectNotOfCaldAction = {
-            type: ACTION_SELECT,
-            selector: SELECTOR_MAGI_NOT_OF_REGION,
-            region: REGION_CALD,
-            player: ACTIVE_PLAYER,
-            generatedBy: GENERATED_BY,            
-        };
+		const selectNotOfCaldAction = {
+			type: ACTION_SELECT,
+			selector: SELECTOR_MAGI_NOT_OF_REGION,
+			region: REGION_CALD,
+			player: ACTIVE_PLAYER,
+			generatedBy: GENERATED_BY,            
+		};
 
-        const selectNotOfOrotheAction = {
-            type: ACTION_SELECT,
-            selector: SELECTOR_MAGI_NOT_OF_REGION,
-            region: REGION_OROTHE,
-            player: ACTIVE_PLAYER,
-            generatedBy: GENERATED_BY,
-        };
+		const selectNotOfOrotheAction = {
+			type: ACTION_SELECT,
+			selector: SELECTOR_MAGI_NOT_OF_REGION,
+			region: REGION_OROTHE,
+			player: ACTIVE_PLAYER,
+			generatedBy: GENERATED_BY,
+		};
 
-        const gameState = new moonlands.State({
-            zones,
-            ACTIVE_PLAYER,
-        });
+		const gameState = new moonlands.State({
+			zones,
+			ACTIVE_PLAYER,
+		});
 
-        gameState.update(selectNotOfNaroomAction);
+		gameState.update(selectNotOfNaroomAction);
 
-        const selectedNotOfNaroom = gameState.state.spellMetaData[GENERATED_BY].selected;
-        expect(selectedNotOfNaroom).toHaveLength(1, '"Not Of Naroom" selector returns one magi');
-        expect(selectedNotOfNaroom[0].card.name).toEqual('Grega', '"Not Of Naroom" selector returns Grega');
+		const selectedNotOfNaroom = gameState.state.spellMetaData[GENERATED_BY].selected;
+		expect(selectedNotOfNaroom).toHaveLength(1, '"Not Of Naroom" selector returns one magi');
+		expect(selectedNotOfNaroom[0].card.name).toEqual('Grega', '"Not Of Naroom" selector returns Grega');
 
-        gameState.update(selectNotOfCaldAction);
+		gameState.update(selectNotOfCaldAction);
 
-        const selectedNotOfCald = gameState.state.spellMetaData[GENERATED_BY].selected;
-        expect(selectedNotOfCald).toHaveLength(1, '"Not Of Cald" selector returns one magi');
-        expect(selectedNotOfCald[0].card.name).toEqual('Yaki', '"Not Of Cald" selector returns Yaki');
+		const selectedNotOfCald = gameState.state.spellMetaData[GENERATED_BY].selected;
+		expect(selectedNotOfCald).toHaveLength(1, '"Not Of Cald" selector returns one magi');
+		expect(selectedNotOfCald[0].card.name).toEqual('Yaki', '"Not Of Cald" selector returns Yaki');
 
-        gameState.update(selectNotOfOrotheAction);
+		gameState.update(selectNotOfOrotheAction);
 
-        const selectedNotOfOrothe = gameState.state.spellMetaData[GENERATED_BY].selected;
-        expect(selectedNotOfOrothe).toHaveLength(2, '"Not Of Orothe" selector returns two magi');
-    });
+		const selectedNotOfOrothe = gameState.state.spellMetaData[GENERATED_BY].selected;
+		expect(selectedNotOfOrothe).toHaveLength(2, '"Not Of Orothe" selector returns two magi');
+	});
 });
 
 describe('Calculation actions', () => {
-    /**
+	/**
     CALCULATION_SET,
     CALCULATION_DOUBLE,
     CALCULATION_ADD,
@@ -696,707 +694,705 @@ describe('Calculation actions', () => {
     CALCULATION_HALVE_ROUND_DOWN,
     CALCULATION_HALVE_ROUND_UP,
      */
-    it('Addition - variables [CALCULATION_ADD]', () => {
-        const gameState = new moonlands.State({
-            spellMetaData: {
-                'test': {
-                    'operandOne': 4,
-                    'operandTwo': 5,
-                },
-            },
-        });
+	it('Addition - variables [CALCULATION_ADD]', () => {
+		const gameState = new moonlands.State({
+			spellMetaData: {
+				'test': {
+					'operandOne': 4,
+					'operandTwo': 5,
+				},
+			},
+		});
 
-        gameState.update({
-            type: moonlands.ACTION_CALCULATE,
-            operator: CALCULATION_ADD,
-            operandOne: '$operandOne',
-            operandTwo: '$operandTwo',
-            variable: 'newResult',
-            generatedBy: 'test',
-        });
+		gameState.update({
+			type: moonlands.ACTION_CALCULATE,
+			operator: CALCULATION_ADD,
+			operandOne: '$operandOne',
+			operandTwo: '$operandTwo',
+			variable: 'newResult',
+			generatedBy: 'test',
+		});
 
-        expect(gameState.state.spellMetaData.test.newResult).toEqual(9, 'Addition result saved in "newResult" metadata field');
-    });
+		expect(gameState.state.spellMetaData.test.newResult).toEqual(9, 'Addition result saved in "newResult" metadata field');
+	});
 
-    it('Addition - values [CALCULATION_ADD]', () => {
-        const gameState = new moonlands.State({});
+	it('Addition - values [CALCULATION_ADD]', () => {
+		const gameState = new moonlands.State({});
 
-        gameState.update({
-            type: moonlands.ACTION_CALCULATE,
-            operator: CALCULATION_ADD,
-            operandOne: 123,
-            operandTwo: 200,
-            generatedBy: 'test',
-        });
+		gameState.update({
+			type: moonlands.ACTION_CALCULATE,
+			operator: CALCULATION_ADD,
+			operandOne: 123,
+			operandTwo: 200,
+			generatedBy: 'test',
+		});
 
-        expect(gameState.state.spellMetaData.test.result).toEqual(323, 'Addition result saved in "result" metadata field');
-    });
+		expect(gameState.state.spellMetaData.test.result).toEqual(323, 'Addition result saved in "result" metadata field');
+	});
 
-    it('Subtraction - variables [CALCULATION_SUBTRACT]', () => {
-        const gameState = new moonlands.State({
-            spellMetaData: {
-                'test': {
-                    'operandOne': 11,
-                    'operandTwo': 7,
-                },
-            },
-        });
+	it('Subtraction - variables [CALCULATION_SUBTRACT]', () => {
+		const gameState = new moonlands.State({
+			spellMetaData: {
+				'test': {
+					'operandOne': 11,
+					'operandTwo': 7,
+				},
+			},
+		});
 
-        gameState.update({
-            type: moonlands.ACTION_CALCULATE,
-            operator: CALCULATION_SUBTRACT,
-            operandOne: '$operandOne',
-            operandTwo: '$operandTwo',
-            variable: 'newResult',
-            generatedBy: 'test',
-        });
+		gameState.update({
+			type: moonlands.ACTION_CALCULATE,
+			operator: CALCULATION_SUBTRACT,
+			operandOne: '$operandOne',
+			operandTwo: '$operandTwo',
+			variable: 'newResult',
+			generatedBy: 'test',
+		});
 
-        expect(gameState.state.spellMetaData.test.newResult).toEqual(4, 'Subtraction result saved in "newResult" metadata field');
-    });
+		expect(gameState.state.spellMetaData.test.newResult).toEqual(4, 'Subtraction result saved in "newResult" metadata field');
+	});
 
-    it('Subtraction - values [CALCULATION_SUBTRACT]', () => {
-        const gameState = new moonlands.State({});
+	it('Subtraction - values [CALCULATION_SUBTRACT]', () => {
+		const gameState = new moonlands.State({});
 
-        gameState.update({
-            type: moonlands.ACTION_CALCULATE,
-            operator: CALCULATION_SUBTRACT,
-            operandOne: 231,
-            operandTwo: 120,
-            generatedBy: 'test',
-        });
+		gameState.update({
+			type: moonlands.ACTION_CALCULATE,
+			operator: CALCULATION_SUBTRACT,
+			operandOne: 231,
+			operandTwo: 120,
+			generatedBy: 'test',
+		});
 
-        expect(gameState.state.spellMetaData.test.result).toEqual(111, 'Addition result saved in "result" metadata field');
-    });
+		expect(gameState.state.spellMetaData.test.result).toEqual(111, 'Addition result saved in "result" metadata field');
+	});
 
-    it('Doubling - variables [CALCULATION_DOUBLE]', () => {
-        const gameState = new moonlands.State({
-            spellMetaData: {
-                'test': {
-                    'operandOne': 13,
-                },
-            },
-        });
+	it('Doubling - variables [CALCULATION_DOUBLE]', () => {
+		const gameState = new moonlands.State({
+			spellMetaData: {
+				'test': {
+					'operandOne': 13,
+				},
+			},
+		});
 
-        gameState.update({
-            type: moonlands.ACTION_CALCULATE,
-            operator: CALCULATION_DOUBLE,
-            operandOne: '$operandOne',
-            variable: 'newResult',
-            generatedBy: 'test',
-        });
+		gameState.update({
+			type: moonlands.ACTION_CALCULATE,
+			operator: CALCULATION_DOUBLE,
+			operandOne: '$operandOne',
+			variable: 'newResult',
+			generatedBy: 'test',
+		});
 
-        expect(gameState.state.spellMetaData.test.newResult).toEqual(26, 'Double result saved in "newResult" metadata field');
-    });
+		expect(gameState.state.spellMetaData.test.newResult).toEqual(26, 'Double result saved in "newResult" metadata field');
+	});
 
-    it('Doubling - values [CALCULATION_DOUBLE]', () => {
-        const gameState = new moonlands.State({});
+	it('Doubling - values [CALCULATION_DOUBLE]', () => {
+		const gameState = new moonlands.State({});
 
-        gameState.update({
-            type: moonlands.ACTION_CALCULATE,
-            operator: CALCULATION_DOUBLE,
-            operandOne: 35,
-            generatedBy: 'test',
-        });
+		gameState.update({
+			type: moonlands.ACTION_CALCULATE,
+			operator: CALCULATION_DOUBLE,
+			operandOne: 35,
+			generatedBy: 'test',
+		});
 
-        expect(gameState.state.spellMetaData.test.result).toEqual(70, 'Doubling result saved in "result" metadata field');
-    });
+		expect(gameState.state.spellMetaData.test.result).toEqual(70, 'Doubling result saved in "result" metadata field');
+	});
 
-    it('Halve round up [CALCULATION_HALVE_ROUND_UP]', () => {
-        const gameState = new moonlands.State({});
+	it('Halve round up [CALCULATION_HALVE_ROUND_UP]', () => {
+		const gameState = new moonlands.State({});
 
-        gameState.update({
-            type: moonlands.ACTION_CALCULATE,
-            operator: CALCULATION_HALVE_ROUND_UP,
-            operandOne: 11,
-            generatedBy: 'test',
-        });
+		gameState.update({
+			type: moonlands.ACTION_CALCULATE,
+			operator: CALCULATION_HALVE_ROUND_UP,
+			operandOne: 11,
+			generatedBy: 'test',
+		});
 
-        expect(gameState.state.spellMetaData.test.result).toEqual(6, 'Halving 11 rounding up yields 6');
-    });
+		expect(gameState.state.spellMetaData.test.result).toEqual(6, 'Halving 11 rounding up yields 6');
+	});
 
-    it('Halve round down [CALCULATION_HALVE_ROUND_DOWN]', () => {
-        const gameState = new moonlands.State({});
+	it('Halve round down [CALCULATION_HALVE_ROUND_DOWN]', () => {
+		const gameState = new moonlands.State({});
 
-        gameState.update({
-            type: moonlands.ACTION_CALCULATE,
-            operator: CALCULATION_HALVE_ROUND_DOWN,
-            operandOne: 11,
-            generatedBy: 'test',
-        });
+		gameState.update({
+			type: moonlands.ACTION_CALCULATE,
+			operator: CALCULATION_HALVE_ROUND_DOWN,
+			operandOne: 11,
+			generatedBy: 'test',
+		});
 
-        expect(gameState.state.spellMetaData.test.result).toEqual(5, 'Halving 11 rounding up yields 5');
-    });
+		expect(gameState.state.spellMetaData.test.result).toEqual(5, 'Halving 11 rounding up yields 5');
+	});
 
-    it('Maximum [CALCULATION_MAX]', () => {
-        const gameState = new moonlands.State({});
+	it('Maximum [CALCULATION_MAX]', () => {
+		const gameState = new moonlands.State({});
 
-        gameState.update({
-            type: moonlands.ACTION_CALCULATE,
-            operator: CALCULATION_MAX,
-            operandOne: 102,
-            operandTwo: 7,
-            generatedBy: 'test',
-        });
+		gameState.update({
+			type: moonlands.ACTION_CALCULATE,
+			operator: CALCULATION_MAX,
+			operandOne: 102,
+			operandTwo: 7,
+			generatedBy: 'test',
+		});
 
-        expect(gameState.state.spellMetaData.test.result).toEqual(102, 'Max operator works');
-    });
+		expect(gameState.state.spellMetaData.test.result).toEqual(102, 'Max operator works');
+	});
 
-    it('Minimum [CALCULATION_MIN]', () => {
-        const gameState = new moonlands.State({});
+	it('Minimum [CALCULATION_MIN]', () => {
+		const gameState = new moonlands.State({});
 
-        gameState.update({
-            type: moonlands.ACTION_CALCULATE,
-            operator: CALCULATION_MIN,
-            operandOne: 49,
-            operandTwo: 51,
-            generatedBy: 'test',
-        });
+		gameState.update({
+			type: moonlands.ACTION_CALCULATE,
+			operator: CALCULATION_MIN,
+			operandOne: 49,
+			operandTwo: 51,
+			generatedBy: 'test',
+		});
 
-        expect(gameState.state.spellMetaData.test.result).toEqual(49, 'Min operator works');
-    });
+		expect(gameState.state.spellMetaData.test.result).toEqual(49, 'Min operator works');
+	});
 });
 
 describe('Activating power', () => {
-    it('Simple power with prompting and no cost', () => {
-        const ACTIVE_PLAYER = 0;
-        const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
-        const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER);
+	it('Simple power with prompting and no cost', () => {
+		const ACTIVE_PLAYER = 0;
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
+		const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER);
 
-        const gameState = new moonlands.State({
-            zones: [
-                new Zone('Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
-                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit, quorPup]),
-            ],
-            step: STEP_PRS_SECOND,
-            activePlayer: ACTIVE_PLAYER,
-        });
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit, quorPup]),
+			],
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
 
-        const powerAction = {
-            type: moonlands.ACTION_POWER,
-            source: arbolit,
-            power: arbolit.card.data.powers[0],
-            player: ACTIVE_PLAYER,
-        };
+		const powerAction = {
+			type: moonlands.ACTION_POWER,
+			source: arbolit,
+			power: arbolit.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
 
-        const targetingAction = {
-            type: moonlands.ACTION_RESOLVE_PROMPT,
-            promptType: moonlands.PROMPT_TYPE_SINGLE_CREATURE,
-            target: quorPup,
-            generatedBy: arbolit.id,            
-        };
+		const targetingAction = {
+			type: moonlands.ACTION_RESOLVE_PROMPT,
+			promptType: moonlands.PROMPT_TYPE_SINGLE_CREATURE,
+			target: quorPup,
+			generatedBy: arbolit.id,            
+		};
 
-        gameState.update(powerAction);
+		gameState.update(powerAction);
 
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two creatures in play');
-        expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(0, 'No creatures in discard');
-        expect(gameState.state.prompt).toEqual(true, 'Waiting for prompt');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two creatures in play');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(0, 'No creatures in discard');
+		expect(gameState.state.prompt).toEqual(true, 'Waiting for prompt');
 
-        gameState.update(targetingAction);
+		gameState.update(targetingAction);
 
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
-        expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'One creature in discard');
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Quor Pup', 'Creature is Quor Pup');
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(2, 'Quor Pup has 2 energy');
-    });
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'One creature in discard');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Quor Pup', 'Creature is Quor Pup');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(2, 'Quor Pup has 2 energy');
+	});
 
-    it('Simple power with prompting and cost', () => {
-        const ACTIVE_PLAYER = 0;
-        const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
-        weebo.addEnergy(3);
-        const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER);
-        quorPup.addEnergy(1);
+	it('Simple power with prompting and cost', () => {
+		const ACTIVE_PLAYER = 0;
+		const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
+		weebo.addEnergy(3);
+		const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER);
+		quorPup.addEnergy(1);
 
-        const gameState = new moonlands.State({
-            zones: [
-                new Zone('Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
-                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([weebo, quorPup]),
-            ],
-            step: STEP_PRS_SECOND,
-            activePlayer: ACTIVE_PLAYER,
-        });
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([weebo, quorPup]),
+			],
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
 
-        const powerAction = {
-            type: moonlands.ACTION_POWER,
-            source: weebo,
-            power: weebo.card.data.powers[0],
-            player: ACTIVE_PLAYER,
-        };
+		const powerAction = {
+			type: moonlands.ACTION_POWER,
+			source: weebo,
+			power: weebo.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
 
-        const targetingAction = {
-            type: moonlands.ACTION_RESOLVE_PROMPT,
-            promptType: moonlands.PROMPT_TYPE_SINGLE_CREATURE,
-            target: quorPup,
-            generatedBy: weebo.id,            
-        };
+		const targetingAction = {
+			type: moonlands.ACTION_RESOLVE_PROMPT,
+			promptType: moonlands.PROMPT_TYPE_SINGLE_CREATURE,
+			target: quorPup,
+			generatedBy: weebo.id,            
+		};
 
-        gameState.update(powerAction);
+		gameState.update(powerAction);
 
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two creatures in play');
-        expect(gameState.state.prompt).toEqual(true, 'Waiting for prompt');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two creatures in play');
+		expect(gameState.state.prompt).toEqual(true, 'Waiting for prompt');
 
-        gameState.update(targetingAction);
+		gameState.update(targetingAction);
 
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two creatures in play');
-        expect(weebo.data.energy).toEqual(1, 'Weebo has 2 energy');
-        expect(quorPup.data.energy).toEqual(2, 'Quor Pup has 2 energy');
-    });
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two creatures in play');
+		expect(weebo.data.energy).toEqual(1, 'Weebo has 2 energy');
+		expect(quorPup.data.energy).toEqual(2, 'Quor Pup has 2 energy');
+	});
 
-    it('Simple power with X in cost', () => {
-        const ACTIVE_PLAYER = 0;
+	it('Simple power with X in cost', () => {
+		const ACTIVE_PLAYER = 0;
 
-        const diobor = new CardInGame(byName('Diobor'), ACTIVE_PLAYER);
-        diobor.addEnergy(6);
+		const diobor = new CardInGame(byName('Diobor'), ACTIVE_PLAYER);
+		diobor.addEnergy(6);
 
-        const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
-        grega.addEnergy(10);
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+		grega.addEnergy(10);
 
-        const gameState = new moonlands.State({
-            zones: [
-                new Zone('Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
-                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([diobor]),
-            ],
-            step: STEP_PRS_SECOND,
-            activePlayer: ACTIVE_PLAYER,
-        });
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([diobor]),
+			],
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
 
-        const powerAction = {
-            type: moonlands.ACTION_POWER,
-            source: diobor,
-            power: diobor.card.data.powers[1],
-            player: ACTIVE_PLAYER,
-        };
+		const powerAction = {
+			type: moonlands.ACTION_POWER,
+			source: diobor,
+			power: diobor.card.data.powers[1],
+			player: ACTIVE_PLAYER,
+		};
 
-        const choosingCostAction = {
-            type: moonlands.ACTION_RESOLVE_PROMPT,
-            number: 5,
-            generatedBy: diobor.id,            
-        };
+		const choosingCostAction = {
+			type: moonlands.ACTION_RESOLVE_PROMPT,
+			number: 5,
+			generatedBy: diobor.id,            
+		};
 
-        gameState.update(powerAction);
+		gameState.update(powerAction);
 
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
-        expect(grega.data.energy).toEqual(10, 'Grega have 10 energy');
-        expect(gameState.state.prompt).toEqual(true, 'Waiting for prompt');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
+		expect(grega.data.energy).toEqual(10, 'Grega have 10 energy');
+		expect(gameState.state.prompt).toEqual(true, 'Waiting for prompt');
 
-        gameState.update(choosingCostAction);
+		gameState.update(choosingCostAction);
 
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
-        expect(grega.data.energy).toEqual(15, 'Grega now have 15 energy');
-    });
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
+		expect(grega.data.energy).toEqual(15, 'Grega now have 15 energy');
+	});
 
-    it('Simple power auto-targeting a magi', () => {
-        const ACTIVE_PLAYER = 0;
+	it('Simple power auto-targeting a magi', () => {
+		const ACTIVE_PLAYER = 0;
 
-        const diobor = new CardInGame(byName('Diobor'), ACTIVE_PLAYER);
-        diobor.addEnergy(6);
+		const diobor = new CardInGame(byName('Diobor'), ACTIVE_PLAYER);
+		diobor.addEnergy(6);
 
-        const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
-        grega.addEnergy(10);
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+		grega.addEnergy(10);
 
-        const gameState = new moonlands.State({
-            zones: [
-                new Zone('Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
-                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([diobor]),
-            ],
-            step: STEP_PRS_SECOND,
-            activePlayer: ACTIVE_PLAYER,
-        });
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([diobor]),
+			],
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
 
-        const powerAction = {
-            type: moonlands.ACTION_POWER,
-            source: diobor,
-            power: diobor.card.data.powers[1],
-            player: ACTIVE_PLAYER,
-        };
+		const powerAction = {
+			type: moonlands.ACTION_POWER,
+			source: diobor,
+			power: diobor.card.data.powers[1],
+			player: ACTIVE_PLAYER,
+		};
 
-        const choosingCostAction = {
-            type: moonlands.ACTION_RESOLVE_PROMPT,
-            number: 5,
-            generatedBy: diobor.id,            
-        };
+		const choosingCostAction = {
+			type: moonlands.ACTION_RESOLVE_PROMPT,
+			number: 5,
+			generatedBy: diobor.id,            
+		};
 
-        gameState.update(powerAction);
+		gameState.update(powerAction);
 
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
-        expect(grega.data.energy).toEqual(10, 'Grega have 10 energy');
-        expect(gameState.state.prompt).toEqual(true, 'Waiting for prompt');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
+		expect(grega.data.energy).toEqual(10, 'Grega have 10 energy');
+		expect(gameState.state.prompt).toEqual(true, 'Waiting for prompt');
 
-        gameState.update(choosingCostAction);
+		gameState.update(choosingCostAction);
 
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
-        expect(grega.data.energy).toEqual(15, 'Grega now have 15 energy');
-    });
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
+		expect(grega.data.energy).toEqual(15, 'Grega now have 15 energy');
+	});
 
-    it('Simple power targeting a magi', () => {
-        const ACTIVE_PLAYER = 0;
-        const arboll = new CardInGame(byName('Arboll'), ACTIVE_PLAYER);
-        arboll.addEnergy(2);
-        const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
-        grega.addEnergy(15);
+	it('Simple power targeting a magi', () => {
+		const ACTIVE_PLAYER = 0;
+		const arboll = new CardInGame(byName('Arboll'), ACTIVE_PLAYER);
+		arboll.addEnergy(2);
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+		grega.addEnergy(15);
 
-        const gameState = new moonlands.State({
-            zones: [
-                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arboll]),
-                new Zone('Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
-            ],
-            step: STEP_PRS_SECOND,
-            activePlayer: ACTIVE_PLAYER,
-        });
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arboll]),
+				new Zone('Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			],
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
 
-        const powerAction = {
-            type: moonlands.ACTION_POWER,
-            source: arboll,
-            power: arboll.card.data.powers[0],
-            player: ACTIVE_PLAYER,
-        };
+		const powerAction = {
+			type: moonlands.ACTION_POWER,
+			source: arboll,
+			power: arboll.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
 
-        const targetingAction = {
-            type: moonlands.ACTION_RESOLVE_PROMPT,
-            promptType: moonlands.PROMPT_TYPE_SINGLE_MAGI,
-            target: grega,
-            generatedBy: arboll.id,            
-        };
+		const targetingAction = {
+			type: moonlands.ACTION_RESOLVE_PROMPT,
+			promptType: moonlands.PROMPT_TYPE_SINGLE_MAGI,
+			target: grega,
+			generatedBy: arboll.id,            
+		};
 
-        gameState.update(powerAction);
+		gameState.update(powerAction);
 
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
-        expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(0, 'No creatures in discard');
-        expect(gameState.state.prompt).toEqual(true, 'Waiting for prompt');
-        expect(grega.data.energy).toEqual(15, 'Grega has 15 energy');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(0, 'No creatures in discard');
+		expect(gameState.state.prompt).toEqual(true, 'Waiting for prompt');
+		expect(grega.data.energy).toEqual(15, 'Grega has 15 energy');
 
-        gameState.update(targetingAction);
+		gameState.update(targetingAction);
 
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'No creatures in play');
-        expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'One creature in discard');
-        expect(grega.data.energy).toEqual(19, 'Grega has 19 energy');
-    });
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'No creatures in play');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'One creature in discard');
+		expect(grega.data.energy).toEqual(19, 'Grega has 19 energy');
+	});
 });
 
 describe('Static abilities', () => {
-    it('Simple modifier of attribute (your source)', () => {
-        const ACTIVE_PLAYER = 0;
-        const NON_ACTIVE_PLAYER = 6;
+	it('Simple modifier of attribute (your source)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 6;
 
-        const waterOfLife = new CardInGame(byName('Water of Life'), ACTIVE_PLAYER);
-        const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
-        grega.data.energy = 15;
+		const waterOfLife = new CardInGame(byName('Water of Life'), ACTIVE_PLAYER);
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+		grega.data.energy = 15;
 
-        const zones = [
-            new Zone('In play', ZONE_TYPE_IN_PLAY).add([waterOfLife]),
-            new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
-            new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
-        ];
+		const zones = [
+			new Zone('In play', ZONE_TYPE_IN_PLAY).add([waterOfLife]),
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+		];
 
-        const gameState = new moonlands.State({
-            zones,
-            step: STEP_PRS_SECOND,
-            activePlayer: ACTIVE_PLAYER,
-        });
-        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
-        const result = gameState.modifyByStaticAbilities(grega, PROPERTY_ENERGIZE);
-        expect(result).toEqual(6, "Grega's energize rate is increased by one");
-    });
+		const result = gameState.modifyByStaticAbilities(grega, PROPERTY_ENERGIZE);
+		expect(result).toEqual(6, 'Grega\'s energize rate is increased by one');
+	});
 
-    it('Simple modifier of attribute (two source)', () => {
-        const ACTIVE_PLAYER = 0;
-        const NON_ACTIVE_PLAYER = 1;
+	it('Simple modifier of attribute (two source)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
 
-        const waterOfLife = new CardInGame(byName('Water of Life'), ACTIVE_PLAYER);
-        const waterOfLifeTwo = new CardInGame(byName('Water of Life'), ACTIVE_PLAYER);
-        const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
-        grega.data.energy = 15;
+		const waterOfLife = new CardInGame(byName('Water of Life'), ACTIVE_PLAYER);
+		const waterOfLifeTwo = new CardInGame(byName('Water of Life'), ACTIVE_PLAYER);
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+		grega.data.energy = 15;
 
-        const zones = [
-            new Zone('In play', ZONE_TYPE_IN_PLAY).add([waterOfLife, waterOfLifeTwo]),
-            new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
-            new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
-        ];
+		const zones = [
+			new Zone('In play', ZONE_TYPE_IN_PLAY).add([waterOfLife, waterOfLifeTwo]),
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+		];
 
-        const gameState = new moonlands.State({
-            zones,
-            step: STEP_PRS_SECOND,
-            activePlayer: ACTIVE_PLAYER,
-        });
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
 
-        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
-        const result = gameState.modifyByStaticAbilities(grega, PROPERTY_ENERGIZE);
-        expect(result).toEqual(7, "Grega's energize rate is increased by two");
-    });
+		const result = gameState.modifyByStaticAbilities(grega, PROPERTY_ENERGIZE);
+		expect(result).toEqual(7, 'Grega\'s energize rate is increased by two');
+	});
 
-    it('Simple modifier of attribute (our source, enemy source)', () => {
-        const ACTIVE_PLAYER = 0;
-        const ENEMY_PLAYER = 1;
-        const waterOfLife = new CardInGame(byName('Water of Life'), ACTIVE_PLAYER);
-        const waterOfLifeTwo = new CardInGame(byName('Water of Life'), ENEMY_PLAYER);
-        const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
-        grega.data.energy = 15;
+	it('Simple modifier of attribute (our source, enemy source)', () => {
+		const ACTIVE_PLAYER = 0;
+		const ENEMY_PLAYER = 1;
+		const waterOfLife = new CardInGame(byName('Water of Life'), ACTIVE_PLAYER);
+		const waterOfLifeTwo = new CardInGame(byName('Water of Life'), ENEMY_PLAYER);
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+		grega.data.energy = 15;
 
-        const zones = [
-            new Zone('In play', ZONE_TYPE_IN_PLAY).add([waterOfLife, waterOfLifeTwo]),
-            new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
-            new Zone('Enemy player current magi', ZONE_TYPE_ACTIVE_MAGI, ENEMY_PLAYER),
-        ];
+		const zones = [
+			new Zone('In play', ZONE_TYPE_IN_PLAY).add([waterOfLife, waterOfLifeTwo]),
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Enemy player current magi', ZONE_TYPE_ACTIVE_MAGI, ENEMY_PLAYER),
+		];
 
-        const gameState = new moonlands.State({
-            zones,
-            step: STEP_PRS_SECOND,
-            activePlayer: ACTIVE_PLAYER,
-        });
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
 
-        gameState.setPlayers(ACTIVE_PLAYER, ENEMY_PLAYER);
+		gameState.setPlayers(ACTIVE_PLAYER, ENEMY_PLAYER);
 
-        const result = gameState.modifyByStaticAbilities(grega, PROPERTY_ENERGIZE);
-        expect(result).toEqual(6, "Grega's energize rate is increased by one");
-    });
+		const result = gameState.modifyByStaticAbilities(grega, PROPERTY_ENERGIZE);
+		expect(result).toEqual(6, 'Grega\'s energize rate is increased by one');
+	});
 });
 
 describe('Casting things', () => {
-    it('Creating and getting zones', () => {
-        const grega = new CardInGame(byName('Grega'), 0);
-        grega.data.energy = 15;
+	it('Creating and getting zones', () => {
+		const grega = new CardInGame(byName('Grega'), 0);
+		grega.data.energy = 15;
 
-        const arbolit = new CardInGame(byName('Arbolit'), 0);
+		const arbolit = new CardInGame(byName('Arbolit'), 0);
 
-        const zones = [
-            new Zone('Active player hand', ZONE_TYPE_HAND, 0).add([arbolit]),
-            new Zone('Non-active player hand', ZONE_TYPE_HAND, 1),
-            new Zone('Active player deck', ZONE_TYPE_DECK, 0),
-            new Zone('Non-active player deck', ZONE_TYPE_DECK, 1),
-            new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, 0).add([grega]),
-            new Zone('In play', ZONE_TYPE_IN_PLAY, null),
-        ];
+		const zones = [
+			new Zone('Active player hand', ZONE_TYPE_HAND, 0).add([arbolit]),
+			new Zone('Non-active player hand', ZONE_TYPE_HAND, 1),
+			new Zone('Active player deck', ZONE_TYPE_DECK, 0),
+			new Zone('Non-active player deck', ZONE_TYPE_DECK, 1),
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, 0).add([grega]),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null),
+		];
 
-        const gameState = new moonlands.State({
-            zones,
-            step: STEP_PRS_SECOND,
-            activePlayer: 0,
-        });
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: 0,
+		});
 
-        expect(gameState.getZone(ZONE_TYPE_HAND, 0).length).toEqual(1);
-        expect(gameState.getZone(ZONE_TYPE_HAND, 1).length).toEqual(0);
-        expect(gameState.getZone(ZONE_TYPE_DECK, 0).length).toEqual(0);
-        expect(gameState.getZone(ZONE_TYPE_DECK, 0).length).toEqual(0);
-        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, 0).length).toEqual(1);
-    });
+		expect(gameState.getZone(ZONE_TYPE_HAND, 0).length).toEqual(1);
+		expect(gameState.getZone(ZONE_TYPE_HAND, 1).length).toEqual(0);
+		expect(gameState.getZone(ZONE_TYPE_DECK, 0).length).toEqual(0);
+		expect(gameState.getZone(ZONE_TYPE_DECK, 0).length).toEqual(0);
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, 0).length).toEqual(1);
+	});
 
-    it('Cast from hand', () => {
-        const activePlayer = 0;
-        const notActivePlayer = 1;
+	it('Cast from hand', () => {
+		const activePlayer = 0;
+		const notActivePlayer = 1;
 
-        const grega = new CardInGame(byName('Grega'), activePlayer);
-        grega.addEnergy(15);
-        const passAction = {type: moonlands.ACTION_PASS};
+		const grega = new CardInGame(byName('Grega'), activePlayer);
+		grega.addEnergy(15);
 
-        const arbolit = new CardInGame(byName('Arbolit'), activePlayer);
+		const arbolit = new CardInGame(byName('Arbolit'), activePlayer);
 
-        const zones = [
-            new Zone('Active player hand', ZONE_TYPE_HAND, activePlayer).add([arbolit]),
-            new Zone('Non-active player hand', ZONE_TYPE_HAND, notActivePlayer),
-            new Zone('Active player deck', ZONE_TYPE_DECK, activePlayer),
-            new Zone('Non-active player deck', ZONE_TYPE_DECK, notActivePlayer),
-            new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, activePlayer).add([grega]),
-            new Zone('In play', ZONE_TYPE_IN_PLAY, null),
-        ];
+		const zones = [
+			new Zone('Active player hand', ZONE_TYPE_HAND, activePlayer).add([arbolit]),
+			new Zone('Non-active player hand', ZONE_TYPE_HAND, notActivePlayer),
+			new Zone('Active player deck', ZONE_TYPE_DECK, activePlayer),
+			new Zone('Non-active player deck', ZONE_TYPE_DECK, notActivePlayer),
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, activePlayer).add([grega]),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null),
+		];
 
-        const gameState = new moonlands.State({
-            zones,
-            step: 3,
-            activePlayer: 0,
-        });
+		const gameState = new moonlands.State({
+			zones,
+			step: 3,
+			activePlayer: 0,
+		});
         
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'In play is empty before');
-        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(15, "Grega's Energy is 15");
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'In play is empty before');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(15, 'Grega\'s Energy is 15');
 
-        gameState.update({type:moonlands.ACTION_PLAY, payload: {
-            player: 0,
-            card: arbolit,
-        }});
+		gameState.update({type:moonlands.ACTION_PLAY, payload: {
+			player: 0,
+			card: arbolit,
+		}});
 
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'In play has one card');
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].card.name).toEqual('Arbolit', 'It is Arbolit');
-        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(13, "Grega's energy is 13");
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].data.energy).toEqual(2, "Arbolit's energy is 2");
-    });
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'In play has one card');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].card.name).toEqual('Arbolit', 'It is Arbolit');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(13, 'Grega\'s energy is 13');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].data.energy).toEqual(2, 'Arbolit\'s energy is 2');
+	});
 
-    it('Cast from hand (region penalty)', () => {
-        const activePlayer = 0;
-        const notActivePlayer = 1;
+	it('Cast from hand (region penalty)', () => {
+		const activePlayer = 0;
+		const notActivePlayer = 1;
 
-        const yaki = new CardInGame(byName('Yaki'), activePlayer);
-        yaki.addEnergy(15);
-        const passAction = {type: moonlands.ACTION_PASS};
+		const yaki = new CardInGame(byName('Yaki'), activePlayer);
+		yaki.addEnergy(15);
 
-        const arbolit = new CardInGame(byName('Arbolit'), activePlayer);
+		const arbolit = new CardInGame(byName('Arbolit'), activePlayer);
 
-        const zones = [
-            new Zone('Active player hand', ZONE_TYPE_HAND, activePlayer).add([arbolit]),
-            new Zone('Non-active player hand', ZONE_TYPE_HAND, notActivePlayer),
-            new Zone('Active player deck', ZONE_TYPE_DECK, activePlayer),
-            new Zone('Non-active player deck', ZONE_TYPE_DECK, notActivePlayer),
-            new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, activePlayer).add([yaki]),
-            new Zone('In play', ZONE_TYPE_IN_PLAY, null),
-        ];
+		const zones = [
+			new Zone('Active player hand', ZONE_TYPE_HAND, activePlayer).add([arbolit]),
+			new Zone('Non-active player hand', ZONE_TYPE_HAND, notActivePlayer),
+			new Zone('Active player deck', ZONE_TYPE_DECK, activePlayer),
+			new Zone('Non-active player deck', ZONE_TYPE_DECK, notActivePlayer),
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, activePlayer).add([yaki]),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null),
+		];
 
-        const gameState = new moonlands.State({
-            zones,
-            step: 3,
-            activePlayer: 0,
-        });
+		const gameState = new moonlands.State({
+			zones,
+			step: 3,
+			activePlayer: 0,
+		});
         
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'In play is empty before');
-        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(15, "Yaki's Energy is 15");
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'In play is empty before');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(15, 'Yaki\'s Energy is 15');
 
-        gameState.update({type:moonlands.ACTION_PLAY, payload: {
-            player: 0,
-            card: arbolit,
-        }});
+		gameState.update({type:moonlands.ACTION_PLAY, payload: {
+			player: 0,
+			card: arbolit,
+		}});
 
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'In play has one card');
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].card.name).toEqual('Arbolit', 'It is Arbolit');
-        expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(12, "Yaki's energy is 12");
-        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].data.energy).toEqual(2, "Arbolit's energy is 2");
-    });
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'In play has one card');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].card.name).toEqual('Arbolit', 'It is Arbolit');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(12, 'Yaki\'s energy is 12');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].data.energy).toEqual(2, 'Arbolit\'s energy is 2');
+	});
 });
 
 describe('Attacking', () => {
-    it('Simple attack from creature to creature (small to large)', () => {
-        const ACTIVE_PLAYER = 0;
-        const NON_ACTIVE_PLAYER = 1;
-        const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
-        weebo.addEnergy(2);
-        const quorPup = new CardInGame(byName('Quor Pup'), NON_ACTIVE_PLAYER);
-        quorPup.addEnergy(3);
+	it('Simple attack from creature to creature (small to large)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+		const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
+		weebo.addEnergy(2);
+		const quorPup = new CardInGame(byName('Quor Pup'), NON_ACTIVE_PLAYER);
+		quorPup.addEnergy(3);
 
-        const gameState = new moonlands.State({
-            zones: [
-                new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
-                new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
-                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([weebo, quorPup]),
-                new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
-                new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
-            ],
-            step: STEP_ATTACK,
-            activePlayer: ACTIVE_PLAYER,
-        });
-        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([weebo, quorPup]),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
-        const attackAction = {
-            type: moonlands.ACTION_ATTACK,
-            source: weebo,
-            target: quorPup,
-        };
+		const attackAction = {
+			type: moonlands.ACTION_ATTACK,
+			source: weebo,
+			target: quorPup,
+		};
 
-        gameState.update(attackAction);
+		gameState.update(attackAction);
 
-        expect(weebo.data.energy).toEqual(0, 'Weebo has 0 energy');
-        expect(quorPup.data.energy).toEqual(1, 'Quor Pup has 1 energy');
-    });
+		expect(weebo.data.energy).toEqual(0, 'Weebo has 0 energy');
+		expect(quorPup.data.energy).toEqual(1, 'Quor Pup has 1 energy');
+	});
 
-    it('Simple attack from creature to creature (large to small)', () => {
-        const ACTIVE_PLAYER = 0;
-        const NON_ACTIVE_PLAYER = 1;
-        const leafHyren = new CardInGame(byName('Leaf Hyren'), ACTIVE_PLAYER);
-        leafHyren.addEnergy(5);
-        const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER);
-        arbolit.addEnergy(2);
+	it('Simple attack from creature to creature (large to small)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+		const leafHyren = new CardInGame(byName('Leaf Hyren'), ACTIVE_PLAYER);
+		leafHyren.addEnergy(5);
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER);
+		arbolit.addEnergy(2);
 
-        const gameState = new moonlands.State({
-            zones: [
-                new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
-                new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
-                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([leafHyren, arbolit]),
-                new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
-                new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
-            ],
-            step: STEP_ATTACK,
-            activePlayer: ACTIVE_PLAYER,
-        });
-        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([leafHyren, arbolit]),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
-        const attackAction = {
-            type: moonlands.ACTION_ATTACK,
-            source: leafHyren,
-            target: arbolit,
-        };
+		const attackAction = {
+			type: moonlands.ACTION_ATTACK,
+			source: leafHyren,
+			target: arbolit,
+		};
 
-        gameState.update(attackAction);
+		gameState.update(attackAction);
 
-        expect(leafHyren.data.energy).toEqual(3, 'Leaf Hyren has 3 energy');
-        expect(arbolit.data.energy).toEqual(0, 'Arbolit has 0 energy');
-    });
+		expect(leafHyren.data.energy).toEqual(3, 'Leaf Hyren has 3 energy');
+		expect(arbolit.data.energy).toEqual(0, 'Arbolit has 0 energy');
+	});
 
-    it('Simple attack from creature to magi', () => {
-        const ACTIVE_PLAYER = 0;
-        const NON_ACTIVE_PLAYER = 1;
-        const leafHyren = new CardInGame(byName('Leaf Hyren'), ACTIVE_PLAYER);
-        leafHyren.addEnergy(5);
-        const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER);
-        grega.addEnergy(10);
+	it('Simple attack from creature to magi', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+		const leafHyren = new CardInGame(byName('Leaf Hyren'), ACTIVE_PLAYER);
+		leafHyren.addEnergy(5);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER);
+		grega.addEnergy(10);
 
-        const gameState = new moonlands.State({
-            zones: [
-                new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
-                new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
-                new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
-                new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
-                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([leafHyren]),
-            ],
-            step: STEP_ATTACK,
-            activePlayer: ACTIVE_PLAYER,
-        });
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([leafHyren]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
 
-        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
-        const attackAction = {
-            type: moonlands.ACTION_ATTACK,
-            source: leafHyren,
-            target: grega,
-        };
+		const attackAction = {
+			type: moonlands.ACTION_ATTACK,
+			source: leafHyren,
+			target: grega,
+		};
 
-        gameState.update(attackAction);
+		gameState.update(attackAction);
 
-        expect(leafHyren.data.energy).toEqual(5, 'Leaf Hyren still has 5 energy');
-        expect(grega.data.energy).toEqual(5, 'Grega has 5 energy left');
-    });
+		expect(leafHyren.data.energy).toEqual(5, 'Leaf Hyren still has 5 energy');
+		expect(grega.data.energy).toEqual(5, 'Grega has 5 energy left');
+	});
 
-    it('Most creatures can attack only once', () => {
-        const ACTIVE_PLAYER = 0;
-        const NON_ACTIVE_PLAYER = 1;
-        const leafHyren = new CardInGame(byName('Leaf Hyren'), ACTIVE_PLAYER);
-        leafHyren.addEnergy(5);
-        const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER);
-        grega.addEnergy(10);
+	it('Most creatures can attack only once', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+		const leafHyren = new CardInGame(byName('Leaf Hyren'), ACTIVE_PLAYER);
+		leafHyren.addEnergy(5);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER);
+		grega.addEnergy(10);
 
-        const gameState = new moonlands.State({
-            zones: [
-                new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
-                new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
-                new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
-                new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
-                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([leafHyren]),
-            ],
-            step: STEP_ATTACK,
-            activePlayer: ACTIVE_PLAYER,
-        });
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([leafHyren]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
 
-        gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
-        const attackAction = {
-            type: moonlands.ACTION_ATTACK,
-            source: leafHyren,
-            target: grega,
-        };
+		const attackAction = {
+			type: moonlands.ACTION_ATTACK,
+			source: leafHyren,
+			target: grega,
+		};
 
-        gameState.update(attackAction);
+		gameState.update(attackAction);
 
-        expect(leafHyren.data.energy).toEqual(5, 'Leaf Hyren still has 5 energy');
-        expect(grega.data.energy).toEqual(5, 'Grega has 5 energy left');
+		expect(leafHyren.data.energy).toEqual(5, 'Leaf Hyren still has 5 energy');
+		expect(grega.data.energy).toEqual(5, 'Grega has 5 energy left');
 
-        gameState.update(attackAction);
+		gameState.update(attackAction);
 
-        expect(leafHyren.data.energy).toEqual(5, 'Leaf Hyren still has 5 energy');
-        expect(grega.data.energy).toEqual(5, 'Grega has 5 energy left (second attack wasnt made)');
-    });
+		expect(leafHyren.data.energy).toEqual(5, 'Leaf Hyren still has 5 energy');
+		expect(grega.data.energy).toEqual(5, 'Grega has 5 energy left (second attack wasnt made)');
+	});
 });
