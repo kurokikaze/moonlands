@@ -50,43 +50,44 @@ Done: **41** card out of **190**
 # Possible sample decks:
 
 ## Cald (+ Underneath splash)
-Grega
-Magam
-Sinder
-3 Fire Chogo
-3 Fire Grag
-3 Arbolit
-3 Magma Hyren
-3 Kelthet
-3 Lava Aq
-3 Lava Arboll
-3 Diobor
-3 Drakan
-3 Thermal Blast
-3 Flame Geyser
-3 Cave Hyren
-2 Magma Armor
-2 Fire Flow
+
+- Grega
+- Magam
+- Sinder
+- 3 Fire Chogo
+- 3 Fire Grag
+- 3 Arbolit
+- 3 Magma Hyren
+- 3 Kelthet
+- 3 Lava Aq
+- 3 Lava Arboll
+- 3 Diobor
+- 3 Drakan
+- 3 Thermal Blast
+- 3 Flame Geyser
+- 3 Cave Hyren
+- 2 Magma Armor
+- 2 Fire Flow
 
 ## Naroom (+ Orothe splash)
 
-Pruitt
-Poad
-Yaki
-3 Leaf Hyren
-3 Weebo
-3 Arboll
-3 Great Carillion
-3 Timber Hyren
-3 Balamant
-3 Grow
-3 Giant Parathin
-3 Syphon Stone
-3 Carillion
-3 Rudwot
-3 Stagadan
-3 ? (Orwin's Gaze)
-1 ? (Flood of Energy)
+- Pruitt
+- Poad
+- Yaki
+- 3 Leaf Hyren
+- 3 Weebo
+- 3 Arboll
+- 3 Great Carillion
+- 3 Timber Hyren
+- 3 Balamant
+- 3 Grow
+- 3 Giant Parathin
+- 3 Syphon Stone
+- 3 Carillion
+- 3 Rudwot
+- 3 Stagadan
+- 3 ? (Orwin's Gaze)
+- 1 ? (Flood of Energy)
 
 # Not done yet
 
