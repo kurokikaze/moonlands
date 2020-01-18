@@ -56,6 +56,7 @@ const {
 	SELECTOR_MAGI_NOT_OF_REGION,
 	SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE,
 	SELECTOR_CARDS_WITH_ENERGIZE_RATE,
+	SELECTOR_OWN_CARDS_IN_PLAY,
 
 	PROMPT_TYPE_NUMBER,
 	PROMPT_TYPE_SINGLE_CREATURE,
@@ -71,6 +72,7 @@ const {
 	EFFECT_TYPE_PLAY_SPELL,
 	EFFECT_TYPE_CREATURE_ENTERS_PLAY,
 	EFFECT_TYPE_RELIC_ENTERS_PLAY,
+	EFFECT_TYPE_MAGI_IS_DEFEATED,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
 	EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
 	EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC,
@@ -82,7 +84,9 @@ const {
 	EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
 	EFFECT_TYPE_ENERGIZE,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+	EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC,
 	EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+	EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
 	EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
 	EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
@@ -110,6 +114,7 @@ const {
 	ZONE_TYPE_ACTIVE_MAGI,
 	ZONE_TYPE_MAGI_PILE,
 	ZONE_TYPE_DECK,
+	ZONE_TYPE_DEFEATED_MAGI,
 } = require('./zone');
 
 /* eslint-disable-next-line no-unused-vars */
@@ -296,31 +301,31 @@ class State {
 
 	useSelector(selector, player, argument) {
 		switch (selector) {
+			case SELECTOR_OWN_CARDS_IN_PLAY: {
+				return this.getZone(ZONE_TYPE_IN_PLAY).cards
+					.filter(card => this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player);
+			}
 			case SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE: {
-				const cards = [
+				return [
 					...this.getZone(ZONE_TYPE_IN_PLAY).cards
 						.filter(card => this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player && this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0),
 					...this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).cards
 						.filter(card => this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0),
 				];
-
-				return cards;
 			}
 			case SELECTOR_CARDS_WITH_ENERGIZE_RATE: {
-				const cards = [
+				return [
 					...this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0),
 					...this.getZone(ZONE_TYPE_ACTIVE_MAGI, this.players[0]).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0),
 					...this.getZone(ZONE_TYPE_ACTIVE_MAGI, this.players[1]).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0),
 				];
-
-				return cards;
 			}
 			case SELECTOR_OPPONENT_ID:
 				return this.players.find(id => id != argument);
 			case SELECTOR_CREATURES:
 				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.type == TYPE_CREATURE);
 			case SELECTOR_TOP_MAGI_OF_PILE: {
-				let topMagi = this.getZone(ZONE_TYPE_MAGI_PILE, player).cards[0];
+				const topMagi = this.getZone(ZONE_TYPE_MAGI_PILE, player).cards[0];
 				return [topMagi]; // Selectors always have to return array
 			}
 			case SELECTOR_OWN_MAGI:
@@ -328,9 +333,9 @@ class State {
 			case SELECTOR_ENEMY_MAGI:
 				return this.getZone(ZONE_TYPE_ACTIVE_MAGI, this.getOpponent(player)).cards;
 			case SELECTOR_OWN_CREATURES:
-				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.data.controller == player && card.card.type == TYPE_CREATURE);
+				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player && card.card.type == TYPE_CREATURE);
 			case SELECTOR_ENEMY_CREATURES:
-				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.data.controller != player && card.card.type == TYPE_CREATURE);
+				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) != player && card.card.type == TYPE_CREATURE);
 			case SELECTOR_CREATURES_OF_REGION:
 				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_REGION) == argument && card.card.type == TYPE_CREATURE);
 			case SELECTOR_CREATURES_NOT_OF_REGION:
@@ -793,136 +798,84 @@ class State {
 					break;
 				}
 				case ACTION_SELECT: {
-					const varName = action.variable || 'selected';
+					let result;
 					switch (action.selector) {
+						case SELECTOR_OWN_CARDS_IN_PLAY: {
+							result = this.useSelector(SELECTOR_OWN_CARDS_IN_PLAY, action.player);
+							break;
+						}
 						case SELECTOR_CARDS_WITH_ENERGIZE_RATE: {
-							this.setSpellMetadata({
-								...this.getSpellMetadata(action.generatedBy),
-								[varName]: this.useSelector(SELECTOR_CARDS_WITH_ENERGIZE_RATE, action.player),
-							}, action.generatedBy);
-
+							result = this.useSelector(SELECTOR_CARDS_WITH_ENERGIZE_RATE, action.player);
 							break;
 						}
 						case SELECTOR_OPPONENT_ID: {
-							this.setSpellMetadata({
-								...this.getSpellMetadata(action.generatedBy),
-								[varName]: this.useSelector(
-									SELECTOR_OPPONENT_ID,
-									action.player,
-									this.getMetaValue(action.opponentOf, action.generatedBy)
-								),
-							}, action.generatedBy);
+							result = this.useSelector(
+								SELECTOR_OPPONENT_ID,
+								action.player,
+								this.getMetaValue(action.opponentOf, action.generatedBy)
+							);
 							break;
 						}
-						case SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE:
-							this.setSpellMetadata({
-								...this.getSpellMetadata(action.generatedBy),
-								[varName]: this.useSelector(SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, action.player),
-							}, action.generatedBy);
+						case SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE: {
+							result = this.useSelector(SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, action.player);
 							break;
-
+						}
 						case SELECTOR_CREATURES_AND_MAGI: {
-							const allOfTheAbove = [
+							result = [
 								...this.useSelector(SELECTOR_OWN_MAGI, action.player),
 								...this.useSelector(SELECTOR_ENEMY_MAGI, action.player),
 								...this.useSelector(SELECTOR_CREATURES),
 							];
-
-							this.setSpellMetadata({
-								...this.getSpellMetadata(action.generatedBy),
-								[varName]: allOfTheAbove,
-							}, action.generatedBy);
 							break;
 						}
 						case SELECTOR_TOP_MAGI_OF_PILE: {
-							const selectedTopMagi = this.useSelector(SELECTOR_TOP_MAGI_OF_PILE, action.player);
-
-							this.setSpellMetadata({
-								...this.getSpellMetadata(action.generatedBy),
-								[varName]: selectedTopMagi,
-							}, action.generatedBy);
+							result = this.useSelector(SELECTOR_TOP_MAGI_OF_PILE, action.player);
 							break;
 						}
 						case SELECTOR_OWN_MAGI: {
-							const selectedOwnMagi = this.useSelector(SELECTOR_OWN_MAGI, action.player);
-
-							this.setSpellMetadata({
-								...this.getSpellMetadata(action.generatedBy),
-								[varName]: selectedOwnMagi,
-							}, action.generatedBy);
+							result = this.useSelector(SELECTOR_OWN_MAGI, action.player);
 							break;
 						}
 						case SELECTOR_OWN_CREATURES: {
-							const selectedOwnCreatures = this.useSelector(SELECTOR_OWN_CREATURES, action.player);
-
-							this.setSpellMetadata({
-								...this.getSpellMetadata(action.generatedBy),
-								[varName]: selectedOwnCreatures,
-							}, action.generatedBy);
+							result = this.useSelector(SELECTOR_OWN_CREATURES, action.player);
 							break;
 						}
 						case SELECTOR_ENEMY_CREATURES: {
-							const selectedEnemyCreatures = this.useSelector(SELECTOR_ENEMY_CREATURES, action.player);
-
-							this.setSpellMetadata({
-								...this.getSpellMetadata(action.generatedBy),
-								[varName]: selectedEnemyCreatures,
-							}, action.generatedBy);
+							result = this.useSelector(SELECTOR_ENEMY_CREATURES, action.player);
 							break;
 						}
 						case SELECTOR_ENEMY_MAGI: {
-							const selectedEnemyMagi = this.useSelector(SELECTOR_ENEMY_MAGI, action.player);
-
-							this.setSpellMetadata({
-								...this.getSpellMetadata(action.generatedBy),
-								[varName]: selectedEnemyMagi,
-							}, action.generatedBy);
+							result = this.useSelector(SELECTOR_ENEMY_MAGI, action.player);
 							break;
 						}
 						case SELECTOR_CREATURES_OF_REGION: {
-							const selectedRegionCreatures = this.useSelector(SELECTOR_CREATURES_OF_REGION, action.player, action.region);
-
-							this.setSpellMetadata({
-								...this.getSpellMetadata(action.generatedBy),
-								[varName]: selectedRegionCreatures,
-							}, action.generatedBy);
+							result = this.useSelector(SELECTOR_CREATURES_OF_REGION, action.player, action.region);
 							break;
 						}
 						case SELECTOR_CREATURES_NOT_OF_REGION: {
-							const selectedNonRegionCreatures =
-									this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_REGION) != action.region);
-
-							this.setSpellMetadata({
-								...this.getSpellMetadata(action.generatedBy),
-								[varName]: selectedNonRegionCreatures,
-							}, action.generatedBy);
+							result = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_REGION) != action.region);
 							break;
 						}
 						case SELECTOR_MAGI_OF_REGION: {
-							const selectedMagiOfRegion = [
+							result = [
 								...this.useSelector(SELECTOR_OWN_MAGI, action.player),
 								...this.useSelector(SELECTOR_ENEMY_MAGI, action.player),
 							].filter(magi => this.modifyByStaticAbilities(magi, PROPERTY_REGION) === action.region);
-
-							this.setSpellMetadata({
-								...this.getSpellMetadata(action.generatedBy),
-								[varName]: selectedMagiOfRegion,
-							}, action.generatedBy);                            
 							break;
 						}
 						case SELECTOR_MAGI_NOT_OF_REGION: {
-							const selectedMagiNotOfRegion = [
+							result = [
 								...this.useSelector(SELECTOR_OWN_MAGI, action.player),
 								...this.useSelector(SELECTOR_ENEMY_MAGI, action.player),
 							].filter(magi => this.modifyByStaticAbilities(magi, PROPERTY_REGION) != action.region);
-
-							this.setSpellMetadata({
-								...this.getSpellMetadata(action.generatedBy),
-								[varName]: selectedMagiNotOfRegion,
-							}, action.generatedBy);                            
 							break;
 						}
 					}
+					const varName = action.variable || 'selected';
+					this.setSpellMetadata({
+						...this.getSpellMetadata(action.generatedBy),
+						[varName]: result,
+					}, action.generatedBy);
 
 					break;
 				}
@@ -1210,6 +1163,19 @@ class State {
 							}
 							break;
 						}
+						case EFFECT_TYPE_CREATURE_DEFEATS_CREATURE: {
+							if (action.target.data.energy === 0) {
+								this.transformIntoActions({
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+									target: action.target,
+									sourceZone: ZONE_TYPE_IN_PLAY,
+									destinationZone: ZONE_TYPE_DISCARD,
+									attack: true,
+								});
+							}
+							break;
+						}
 						case EFFECT_TYPE_ROLL_DIE: {
 							const result = action.result || (Math.floor(Math.random() * 6) + 1);
 							if (!this.state.spellMetaData[action.generatedBy]) {
@@ -1282,6 +1248,10 @@ class State {
 							break;
 						}
 						case EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES: {
+							if (!action.sourceZone || !action.destinationZone) {
+								console.log('Source zone or destination zone invalid');
+								throw new Error('Invalid params for EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
+							}
 							const zoneChangingTarget = this.getMetaValue(action.target, action.generatedBy);
 							const zoneChangingCard = zoneChangingTarget.length ? zoneChangingTarget[0] : zoneChangingTarget;
 							const sourceZoneType = this.getMetaValue(action.sourceZone, action.generatedBy);
@@ -1382,8 +1352,30 @@ class State {
 						case EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI: {
 							oneOrSeveral(
 								this.getMetaValue(action.target, action.generatedBy),
-								target => target.removeEnergy(this.getMetaValue(action.amount, action.generatedBy))
+								target => {
+									target.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
+
+									const hisCreatures = this.useSelector(SELECTOR_OWN_CREATURES, target.data.controller);
+									if (target.data.energy === 0 && hisCreatures.length === 0) {
+										this.transformIntoActions({
+											type: ACTION_EFFECT,
+											effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
+											target,
+										});
+									}
+								},
 							);
+							break;
+						}
+						case EFFECT_TYPE_MAGI_IS_DEFEATED: {
+							this.transformIntoActions({
+								type: ACTION_EFFECT,
+								effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+								target: action.target,
+								sourceZone: ZONE_TYPE_ACTIVE_MAGI,
+								destinationZone: ZONE_TYPE_DEFEATED_MAGI,
+							});
+							// Also discard all his creatures/relics
 							break;
 						}
 						case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
@@ -1433,6 +1425,38 @@ class State {
 							const magiTarget = this.getMetaValue(action.target, action.generatedBy);
 
 							oneOrSeveral(magiTarget, target => target.addEnergy(this.getMetaValue(action.amount, action.generatedBy)));                            
+							break;
+						}
+						case EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC: {
+							const discardTargets = this.getMetaValue(action.target, action.generatedBy);
+							oneOrSeveral(discardTargets, target => {
+								const targetType = target.card.type;
+								if (targetType === TYPE_CREATURE) {
+									this.transformIntoActions({
+										type: ACTION_EFFECT,
+										effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+										target,
+										generatedBy: action.generatedBy,
+									});
+								} else if (targetType === TYPE_RELIC) {
+									this.transformIntoActions({
+										type: ACTION_EFFECT,
+										effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
+										target,
+										generatedBy: action.generatedBy,
+									});
+								}
+							});
+							break;
+						}
+						case EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY: {
+							const relicDiscardTarget = this.getMetaValue(action.target, action.generatedBy);
+							const discardPile = this.getZone(ZONE_TYPE_DISCARD, relicDiscardTarget.owner);
+							oneOrSeveral(relicDiscardTarget, relic => {
+								const cardInDiscard = new CardInGame(relic.card, relic.owner);
+								discardPile.add([cardInDiscard]);
+								this.getZone(ZONE_TYPE_IN_PLAY).removeById(relic.id);
+							});
 							break;
 						}
 						case EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY: {

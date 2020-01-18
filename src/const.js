@@ -35,6 +35,7 @@ const SELECTOR_OWN_CREATURES = 'selectors/own_creatures';
 const SELECTOR_ENEMY_CREATURES = 'selectors/enemy_creatures';
 const SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE = 'selectors/own_cards_with_energize_rate';
 const SELECTOR_CARDS_WITH_ENERGIZE_RATE = 'selectors/cards_with_energize_rate';
+const SELECTOR_OWN_CARDS_IN_PLAY = 'selectors/own_cards_in_play';
 
 const CALCULATION_SET = 'calculations/set';
 const CALCULATION_DOUBLE = 'calculations/double';
@@ -65,6 +66,7 @@ const EFFECT_TYPE_DEAL_DAMAGE = 'effects/deal_damage';
 const EFFECT_TYPE_AFTER_DAMAGE = 'effects/after_damage';
 const EFFECT_TYPE_CREATURE_DEFEATS_CREATURE = 'effects/creature_defeats_creature';
 const EFFECT_TYPE_CREATURE_IS_DEFEATED = 'effects/creature_is_defeated';
+const EFFECT_TYPE_MAGI_IS_DEFEATED = 'effects/magi_is_defeated';
 const EFFECT_TYPE_ROLL_DIE = 'effects/roll_die';
 const EFFECT_TYPE_MOVE_ENERGY = 'effects/move_energy';
 const EFFECT_TYPE_PLAY_CREATURE = 'effects/play_creature';
@@ -84,6 +86,7 @@ const EFFECT_TYPE_ENERGIZE = 'effects/energize';
 const EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE = 'effects/discard_energy_from_creature';
 const EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI = 'effects/discard_energy_from_magi';
 const EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY = 'effects/discard_creature_from_play';
+const EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC = 'effects/discard_creature_or_relic';
 const EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI = 'effects/discard_energy_from_creature_or_magi';
 const EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY = 'effects/restore_creature_to_starting_energy';
 const EFFECT_TYPE_PAYING_ENERGY_FOR_POWER = 'effects/paying_energy_for_power';
@@ -150,6 +153,7 @@ module.exports = {
 	SELECTOR_OWN_CREATURES,
 	SELECTOR_ENEMY_CREATURES,
 	SELECTOR_TOP_MAGI_OF_PILE,
+	SELECTOR_OWN_CARDS_IN_PLAY,
 
 	PROPERTY_ID,
 	PROPERTY_ENERGY_COUNT,
@@ -196,6 +200,8 @@ module.exports = {
 	EFFECT_TYPE_AFTER_DAMAGE,
 	EFFECT_TYPE_CREATURE_ATTACKS,
 	EFFECT_TYPE_CREATURE_IS_ATTACKED,
+	EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC,
+	EFFECT_TYPE_MAGI_IS_DEFEATED,
 	EFFECT_TYPE_START_OF_TURN,
 	EFFECT_TYPE_END_OF_TURN,
 	

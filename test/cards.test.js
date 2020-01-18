@@ -5,7 +5,7 @@ const {
 	Zone,
 	ZONE_TYPE_ACTIVE_MAGI,
 	ZONE_TYPE_MAGI_PILE,
-	ZONE_TYPE_DEFEATED_MAGI,
+	// ZONE_TYPE_DEFEATED_MAGI,
 	ZONE_TYPE_DECK,
 	ZONE_TYPE_IN_PLAY,
 	ZONE_TYPE_DISCARD,
@@ -509,7 +509,7 @@ describe('Ayebaw', () => {
 		const gameState = new moonlands.State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
-				new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
 				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
 				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
 				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([ayebaw]),
@@ -557,7 +557,7 @@ describe('Carillion', () => {
 		const gameState = new moonlands.State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
-				new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
 				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
 				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
 				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([carillion, weebo, leafHyren]),
@@ -609,7 +609,7 @@ describe('Magma Armor', () => {
 		const gameState = new moonlands.State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
-				new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
 				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
 				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
 				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([weebo, magmaArmor]),
@@ -644,7 +644,7 @@ describe('Magma Armor', () => {
 		const gameState = new moonlands.State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
-				new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
 				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
 				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
 				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([weebo, magmaArmor]),
@@ -681,7 +681,7 @@ describe('Magma Hyren', () => {
 		const gameState = new moonlands.State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
-				new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
 				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
 				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
 				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([weebo, magmaHyren]),
@@ -724,7 +724,7 @@ describe('Magma Hyren', () => {
 		const gameState = new moonlands.State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
-				new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
 				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
 				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
 				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([magmaHyren, fireGrag]),
@@ -871,7 +871,7 @@ describe('Rudwot', () => {
 		const gameState = new moonlands.State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
-				new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
 				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
 				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
 				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([rudwot, weebo, leafHyren]),
@@ -1125,7 +1125,7 @@ describe('Stagadan', () => {
 		const gameState = new moonlands.State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
-				new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
 				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
 				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
 				new Zone('In play', ZONE_TYPE_IN_PLAY).add([stagadan, arbolit, weebo]),
@@ -1171,7 +1171,7 @@ describe('Yaki', () => {
 		const gameState = new moonlands.State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
-				new Zone('NAP Discard', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
 				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([yaki]),
 				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
 				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([weebo]),
