@@ -1,6 +1,8 @@
 /* global expect, describe, it */
 const moonlands = require('../src/index');
-const {CardInGame, byName} = require('../src/cards');
+const {byName} = require('../src/cards');
+const CardInGame = require('../src/classes/CardInGame');
+
 const {
 	ACTION_SELECT,
 	SELECTOR_MAGI_NOT_OF_REGION,

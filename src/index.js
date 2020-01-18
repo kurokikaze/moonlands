@@ -120,7 +120,7 @@ const {
 
 /* eslint-disable-next-line no-unused-vars */
 const {showAction} = require('./logAction');
-const {CardInGame} = require('./cards');
+const CardInGame = require('./classes/CardInGame');
 
 const NO_PRIORITY = 0;
 const PRIORITY_PRS = 1;

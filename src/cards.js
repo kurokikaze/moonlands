@@ -1,4 +1,4 @@
-const nanoid = require('nanoid');
+const Card = require('./classes/Card');
 
 const {
 	/* eslint-disable no-unused-vars */
@@ -94,92 +94,6 @@ const {
 	ZONE_TYPE_HAND,
 	ZONE_TYPE_IN_PLAY,
 } = require('./zone');
-
-class Card {
-	constructor(name, type, region, cost, data = {}) {
-		this.name = name;
-		this.type = type;
-		this.region = region;
-		this.cost = cost;
-		this.data = {
-			attacksPerTurn: 1,
-			canAttackMagiDirectly: false,
-			...data,
-		};
-	}
-
-	getName() {
-		return this.name;
-	}
-
-	getCost() {
-		return this.cost;
-	}
-}
-
-class CardInGame {
-	constructor(card, owner) {
-		this._card = card;
-		this.id = nanoid();
-		this.data = {
-			energy: 0,
-			controller: owner,
-			attacked: 0,
-		};
-		this.owner = owner;
-		this.actionsUsed = [];
-	}
-
-	get card() {
-		return this._card;
-	}
-
-	addEnergy(amount = 0) {
-		this.data.energy += amount;
-		return this;
-	}
-
-	removeEnergy(amount = 0) {
-		this.data.energy = Math.max(this.data.energy - amount, 0);
-	}
-
-	markAttackDone() {
-		this.data.hasAttacked = true;
-		this.data.attacked += 1;
-	}
-
-	markAttackReceived() {
-		this.data.wasAttacked = true;
-	}
-
-	// In future, refer to actions by ID, not name
-	wasActionUsed(actionName) {
-		return this.actionsUsed.includes(actionName);
-	}
-
-	setActionUsed(actionName) {
-		this.actionsUsed.push(actionName);
-	}
-
-	clearActionsUsed() {
-		this.actionsUsed = [];
-	}
-
-	clearAttackMarkers() {
-		this.data.wasAttacked = false;
-		this.data.hasAttacked = false;
-		this.data.attacked = false;
-	}
-
-	copy() {
-		const newCard = new CardInGame(this._card, this.owner);
-		newCard.data = {...this.data};
-		newCard.actionsUsed = [...this.actionsUsed];
-		newCard.id = this.id;
-
-		return newCard;
-	}
-}
 
 const power = (name, effects) => ({
 	name,
@@ -1291,8 +1205,6 @@ const cards = [
 const byName = name => cards.find(card => card.name === name);
 
 module.exports = {
-	Card,
-	CardInGame,
 	cards,
 	byName,
 };
