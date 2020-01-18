@@ -13,6 +13,7 @@ const {
 } = require('../src/zone');
 const {
 	ACTION_PLAY,
+	ACTION_ATTACK,
 	ACTION_POWER,
 	ACTION_RESOLVE_PROMPT,
 
@@ -758,6 +759,102 @@ describe('Magma Hyren', () => {
 	});
 });
 
+describe('Ashgar', () => {
+	it('Nerve', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const ashgar = new CardInGame(byName('Ashgar'), NON_ACTIVE_PLAYER);
+		ashgar.addEnergy(6);
+
+		const flameGeyser = new CardInGame(byName('Flame Geyser'), NON_ACTIVE_PLAYER);
+
+		const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
+		weebo.addEnergy(2);
+
+		const yaki = new CardInGame(byName('Yaki'), ACTIVE_PLAYER);
+		yaki.addEnergy(7);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+				new Zone('NAP Hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([yaki]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([ashgar]),
+				new Zone('AP Deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+				new Zone('NAP Deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER).add([flameGeyser]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([weebo]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: ACTION_ATTACK,
+			source: weebo,
+			target: ashgar,
+		};
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(0, 'Non-active player has no cards in hand');
+
+		gameState.update(attackAction);
+
+		expect(ashgar.data.energy).toEqual(4, 'Ashgar has 4 energy left');        
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(1, 'Non-active player has drawn a card');        
+		expect(weebo.data.energy).toEqual(2, 'Weebo still has 2 energy');
+	});
+});
+
+describe('Quor', () => {
+	it('Battering Ram', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const ashgar = new CardInGame(byName('Ashgar'), ACTIVE_PLAYER);
+		ashgar.addEnergy(6);
+
+		const quor = new CardInGame(byName('Quor'), ACTIVE_PLAYER);
+		quor.addEnergy(3);
+
+		const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER);
+		weebo.addEnergy(2);
+
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER);
+		yaki.addEnergy(7);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+				new Zone('NAP Hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([ashgar]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+				new Zone('AP Deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+				new Zone('NAP Deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([quor, weebo]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: ACTION_ATTACK,
+			source: quor,
+			target: weebo,
+		};
+
+		gameState.update(attackAction);
+
+		expect(quor.data.energy).toEqual(1, 'Quor has 1 energy left');        
+		expect(weebo.data.energy).toEqual(0, 'Weebo is toast');
+		expect(yaki.data.energy).toEqual(5, 'Yaki lost 2 energy to Quor ability');
+	});
+});
 
 describe('Rudwot', () => {
 	it('Trample', () => {
@@ -809,7 +906,6 @@ describe('Rudwot', () => {
 		expect(leafHyren.data.energy).toEqual(0, 'Hyren is toast');
 	});
 });
-
 
 describe('Giant Parathin', () => {
 	it('Interchange', () => {

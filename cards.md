@@ -22,6 +22,8 @@ Done: **41** card out of **190**
 - Magma Armor
 - Magma Hyren
 - Vortex of Knowledge
+- Ashgar
+- Quor
 
 # Done, not tested
 
@@ -148,6 +150,7 @@ Done: **41** card out of **190**
 - Crystal Arboll
 - Eye of the Storm
 - Gorgle's Ring
+- Plith
 
 # Rearranging Energy
 
@@ -207,7 +210,6 @@ Done: **41** card out of **190**
 
 - Adis
 - Arderial's Crown
-- Ashgar
 - Bhatar
 - Blu
 - Bwill
@@ -225,8 +227,6 @@ Done: **41** card out of **190**
 - Motash
 - Ora
 - Orathan
-- Plith
-- Quor
 - Quor Pup
 - Ring of Secrets
 - Robe of Vines

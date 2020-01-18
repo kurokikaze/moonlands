@@ -448,6 +448,85 @@ const cards = [
 			},
 		],
 	}),
+	new Card('Quor', TYPE_CREATURE, REGION_CALD, 4, {
+		triggerEffects: [
+			{
+				find: {
+					effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+					conditions: [
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_TYPE,
+							comparator: '=',
+							objectTwo: TYPE_CREATURE,
+							propertyTwo: null,
+						},
+						{
+							objectOne: 'source',
+							propertyOne: PROPERTY_ID,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_ID,
+						}
+					],
+				},
+				effects: [
+					{
+						type: ACTION_SELECT,
+						selector: SELECTOR_ENEMY_MAGI,
+						variable: 'enemyMagi',
+					},
+					{
+						type: ACTION_EFFECT,
+						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+						target: '$enemyMagi',
+						amount: 2,
+					},
+				],
+			}
+		],
+	}),
+	new Card('Ashgar', TYPE_MAGI, REGION_CALD, null, {
+		startingEnergy: 10,
+		energize: 6,
+		startingCards: ['Arbolit', 'Quor', 'Flame Geyser'],
+		triggerEffects: [
+			{
+				find: {
+					effectType: EFFECT_TYPE_BEFORE_DAMAGE,
+					conditions: [
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_TYPE,
+							comparator: '=',
+							objectTwo: TYPE_MAGI,
+							propertyTwo: null,
+						},
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_CONTROLLER,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						}
+					],
+				},
+				effects: [
+					{
+						type: ACTION_GET_PROPERTY_VALUE,
+						property: PROPERTY_CONTROLLER,
+						target: '%self',
+						variable: 'controller',
+					},
+					{
+						type: ACTION_EFFECT,
+						effectType: EFFECT_TYPE_DRAW,
+						player: '$controller',
+					},
+				],
+			}
+		],
+	}),
 	new Card('Grega', TYPE_MAGI, REGION_CALD, null, {
 		startingEnergy: 10,
 		energize: 5,

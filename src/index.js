@@ -45,6 +45,7 @@ const {
 	SELECTOR_CREATURES_AND_MAGI,
 	SELECTOR_OWN_MAGI,
 	SELECTOR_ENEMY_MAGI,
+	SELECTOR_ACTIVE_MAGI_OF_PLAYER,
 	SELECTOR_CREATURES_OF_REGION,
 	SELECTOR_CREATURES_NOT_OF_REGION,
 	SELECTOR_OWN_CREATURES,
@@ -511,9 +512,11 @@ class State {
 				// Turn effect-templates into actual effect actions by preparing meta-values
 				const preparedEffects = replacer.effects.map(effect => {
 					let resultEffect =  {
-						type: ACTION_EFFECT,
+						type: effect.type || ACTION_EFFECT,
 						effectType: effect.effectType, // Do we need to replace this? Maybe later
+						generatedBy: triggeredId,
 						triggeredId: [triggeredId],
+						player: replacer.self.data.controller,
 					};
 
 					// prepare %-values on created action
@@ -1379,7 +1382,7 @@ class State {
 						case EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI: {
 							oneOrSeveral(
 								this.getMetaValue(action.target, action.generatedBy),
-								target => target.removeEnergy(this.getMetaValue(action.amount, action.generatedBy)),
+								target => target.removeEnergy(this.getMetaValue(action.amount, action.generatedBy))
 							);
 							break;
 						}
