@@ -1,4 +1,4 @@
-Done: **41** card out of **190**
+Done: **46** cards out of **190**
 
 # Done, tested
 
@@ -24,6 +24,7 @@ Done: **41** card out of **190**
 - Vortex of Knowledge
 - Ashgar
 - Quor
+- Robe of Vines
 
 # Done, not tested
 
@@ -88,8 +89,8 @@ Done: **41** card out of **190**
 - 3 Carillion
 - 3 Rudwot
 - 3 Stagadan
-- 3 ? (Orwin's Gaze)
-- 1 ? (Flood of Energy)
+- 3 Robe of Vines
+- 1 Sea Barl
 
 # Not done yet
 
@@ -229,7 +230,6 @@ Done: **41** card out of **190**
 - Orathan
 - Quor Pup
 - Ring of Secrets
-- Robe of Vines
 - Scroll of Fire
 - Shimmer
 - Sphor

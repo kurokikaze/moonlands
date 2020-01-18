@@ -667,6 +667,94 @@ describe('Magma Armor', () => {
 	});
 });
 
+describe('Robe of Vines', () => {
+	it('Strengthen', () => {
+		const activePlayer = 0;
+		const notActivePlayer = 1;
+
+		const yaki = new CardInGame(byName('Yaki'), activePlayer);
+		yaki.addEnergy(15);
+
+		const weebo = new CardInGame(byName('Weebo'), activePlayer);
+		const robeOfVines = new CardInGame(byName('Robe of Vines'), activePlayer);
+
+		const zones = [
+			new Zone('Active player hand', ZONE_TYPE_HAND, activePlayer).add([weebo]),
+			new Zone('Non-active player hand', ZONE_TYPE_HAND, notActivePlayer),
+			new Zone('Active player deck', ZONE_TYPE_DECK, activePlayer),
+			new Zone('Non-active player deck', ZONE_TYPE_DECK, notActivePlayer),
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, activePlayer).add([yaki]),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([robeOfVines]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_CREATURES,
+			activePlayer,
+		});
+        
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'In play is empty before');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(15, 'Yaki\'s Energy is 15');
+
+		gameState.update({
+			type: ACTION_PLAY, 
+			payload: {
+				player: activePlayer,
+				card: weebo,
+			},
+		});
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'In play has two cards');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards.some(card => card.card.name == 'Weebo')).toEqual(true, 'One of them is Weebo');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(13, 'Yaki\'s energy is 13');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards.find(card => card.card.name == 'Weebo').data.energy).toEqual(3, 'Weebo\'s energy is 3');
+		expect(gameState.getZone(ZONE_TYPE_HAND, activePlayer).length).toEqual(0, 'No cards in hand now');
+	});
+
+	it('Strenghten (opponent controls it)', () => {
+		const activePlayer = 0;
+		const notActivePlayer = 1;
+
+		const grega = new CardInGame(byName('Grega'), activePlayer);
+		grega.addEnergy(15);
+
+		const arbolit = new CardInGame(byName('Arbolit'), activePlayer);
+		const robeOfVines = new CardInGame(byName('Robe of Vines'), notActivePlayer);
+
+		const zones = [
+			new Zone('Active player hand', ZONE_TYPE_HAND, activePlayer).add([arbolit]),
+			new Zone('Non-active player hand', ZONE_TYPE_HAND, notActivePlayer),
+			new Zone('Active player deck', ZONE_TYPE_DECK, activePlayer),
+			new Zone('Non-active player deck', ZONE_TYPE_DECK, notActivePlayer),
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, activePlayer).add([grega]),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([robeOfVines]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: 3,
+			activePlayer: 0,
+		});
+        
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'In play is empty before');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(15, 'Grega\'s Energy is 15');
+
+		gameState.update({
+			type: ACTION_PLAY, 
+			payload: {
+				player: activePlayer,
+				card: arbolit,
+			},
+		});
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'In play has two cards');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards.some(card => card.card.name == 'Arbolit')).toEqual(true, 'One of them is Arbolit');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(13, 'Grega\'s energy is 13');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].data.energy).toEqual(2, 'Arbolit\'s energy is 2');
+		expect(gameState.getZone(ZONE_TYPE_HAND, activePlayer).length).toEqual(0, 'No cards in hand now');
+	});
+});
+
 describe('Magma Hyren', () => {
 	it('Fireball', () => {
 		const ACTIVE_PLAYER = 0;

@@ -486,6 +486,39 @@ const cards = [
 			}
 		],
 	}),
+	new Card('Robe of Vines', TYPE_RELIC, REGION_NAROOM, 0, {
+		triggerEffects: [
+			{
+				find: {
+					effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
+					conditions: [
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_REGION,
+							comparator: '=',
+							objectTwo: REGION_NAROOM,
+							propertyTwo: null,
+						},
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_CONTROLLER,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						}
+					],
+				},
+				effects: [
+					{
+						type: ACTION_EFFECT,
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '$creature_created',
+						amount: 1,
+					}
+				],
+			},
+		],
+	}),
 	new Card('Ashgar', TYPE_MAGI, REGION_CALD, null, {
 		startingEnergy: 10,
 		energize: 6,

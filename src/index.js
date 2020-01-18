@@ -416,7 +416,7 @@ class State {
 			return self;
 		}
 
-		return property ? action[object] : object;
+		return property ? this.getMetaValue(action[object], action.generatedBy) : object;
 	}
 
 	replaceByReplacementEffect(action) {
@@ -529,7 +529,7 @@ class State {
 					let resultEffect =  {
 						type: effect.type || ACTION_EFFECT,
 						effectType: effect.effectType, // Do we need to replace this? Maybe later
-						generatedBy: triggeredId,
+						generatedBy: action.generatedBy,
 						triggeredId: [triggeredId],
 						player: replacer.self.data.controller,
 					};
@@ -972,14 +972,14 @@ class State {
 										{
 											type: ACTION_EFFECT,
 											effectType: EFFECT_TYPE_CREATURE_ENTERS_PLAY,
-											card: baseCard,
+											target: '$creature_created',
 											player: action.payload.player,
 											generatedBy: action.payload.card.id,
 										},
 										{
 											type: ACTION_EFFECT,
 											effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
-											card: baseCard,
+											target: '$creature_created',
 											player: action.payload.player,
 											amount: baseCard.cost,
 											generatedBy: action.payload.card.id,
@@ -1257,9 +1257,9 @@ class State {
 								player: action.player,
 								generatedBy: action.generatedBy,
 							}, {
-								type: ACTION_GET_PROPERTY_VALUE,
-								property: PROPERTY_ID,
-								target: '$new_card',
+								type: ACTION_CALCULATE,
+								operator: CALCULATION_SET,
+								operandOne: '$new_card',
 								variable: 'creature_created',
 								generatedBy: action.generatedBy,
 							});
@@ -1294,11 +1294,11 @@ class State {
 						case EFFECT_TYPE_CREATURE_ENTERS_PLAY:
 							break;
 						case EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE: {
-							const targetId = this.state.spellMetaData[action.generatedBy].creature_created;
+							const target = this.getMetaValue(action.target, action.generatedBy);
 							this.transformIntoActions({
 								type: ACTION_EFFECT,
 								effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
-								target: this.getZone(ZONE_TYPE_IN_PLAY).byId(targetId),
+								target,
 								amount: this.getMetaValue(action.amount, action.generatedBy),
 								generatedBy: action.generatedBy,
 							});
@@ -1455,6 +1455,7 @@ class State {
 						}
 						case EFFECT_TYPE_ADD_ENERGY_TO_CREATURE: {
 							const addTarget = this.getMetaValue(action.target, action.generatedBy);
+
 							addTarget.addEnergy(this.getMetaValue(action.amount, action.generatedBy));
 							break;
 						}

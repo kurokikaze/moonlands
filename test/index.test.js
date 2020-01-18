@@ -561,7 +561,7 @@ describe('Effects', () => {
 		gameState.update(playCreatureEffect);
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One card in play');
-		expect(gameState.getSpellMetadata(12345).creature_created).toEqual(gameState.getZone(ZONE_TYPE_IN_PLAY).card.id, 'Id saved in metadata');
+		expect(gameState.getSpellMetadata(12345).creature_created.id).toEqual(gameState.getZone(ZONE_TYPE_IN_PLAY).card.id, 'Id saved in metadata');
 	});
 
 	it('Moving card between zones [EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES]', () => {
