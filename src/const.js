@@ -8,6 +8,7 @@ const ACTION_ENTER_PROMPT = 'actions/enter_prompt';
 const ACTION_RESOLVE_PROMPT = 'actions/resolve_prompt';
 const ACTION_GET_PROPERTY_VALUE = 'actions/get_property_value';
 const ACTION_ATTACK = 'actions/attack';
+const ACTION_PLAYER_WINS ='actions/player_wins';
 // const ACTION_NOOP = 'actions/noop'; // Empty actions for replacement
 
 const PROPERTY_ID = 'properties/id';
@@ -129,6 +130,7 @@ module.exports = {
 	ACTION_ENTER_PROMPT,
 	ACTION_RESOLVE_PROMPT,
 	ACTION_GET_PROPERTY_VALUE,
+	ACTION_PLAYER_WINS,
 
 	CALCULATION_SET,
 	CALCULATION_DOUBLE,

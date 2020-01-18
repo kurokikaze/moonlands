@@ -19,6 +19,7 @@ const {
 	ACTION_GET_PROPERTY_VALUE,
 	ACTION_ATTACK,
 	ACTION_RESHUFFLE_DISCARD,
+	ACTION_PLAYER_WINS,
 
 	PROPERTY_ID,
 	PROPERTY_TYPE,
@@ -209,6 +210,15 @@ class State {
 		};
 
 		this.players = [0, 1]; // For simple testing
+		this.winner = false;
+	}
+
+	setWinner(player) {
+		this.winner = player;
+	}
+
+	hasWinner() {
+		return this.winner === null;
 	}
 
 	setPlayers(player1, player2) {
@@ -581,6 +591,9 @@ class State {
 	}
 
 	update(initialAction) {
+		if (this.hasWinner()) {
+			return false;
+		}
 		this.addActions(initialAction);
 		while (this.hasActions()) {
 			const rawAction = this.getNextAction();
@@ -591,6 +604,11 @@ class State {
 			this.triggerAbilities(action);
 
 			switch (action.type) {
+				case ACTION_PLAYER_WINS: {
+					this.setWinner(action.player);
+					this.state.actions = [];
+					break;
+				}
 				case ACTION_ATTACK: {
 					/*
 							source
@@ -1368,14 +1386,33 @@ class State {
 							break;
 						}
 						case EFFECT_TYPE_MAGI_IS_DEFEATED: {
-							this.transformIntoActions({
-								type: ACTION_EFFECT,
-								effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-								target: action.target,
-								sourceZone: ZONE_TYPE_ACTIVE_MAGI,
-								destinationZone: ZONE_TYPE_DEFEATED_MAGI,
-							});
-							// Also discard all his creatures/relics
+							const stillHasMagi = this.getZone(ZONE_TYPE_MAGI_PILE, action.target.owner).length > 0;
+							if (stillHasMagi) {
+								this.transformIntoActions({
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+									target: action.target,
+									sourceZone: ZONE_TYPE_ACTIVE_MAGI,
+									destinationZone: ZONE_TYPE_DEFEATED_MAGI,
+								}, {
+									type: ACTION_SELECT,
+									selector: SELECTOR_OWN_CARDS_IN_PLAY,
+									action: action.target.owner,
+									variable: 'cardsInPlay',
+								}, {
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC,
+									target: '$cardsInPlay',
+								});
+								// Also discard all his creatures/relics
+							} else {
+								const winner = this.getOpponent(action.target.owner);
+
+								this.transformIntoActions({
+									action: ACTION_PLAYER_WINS,
+									player: winner,
+								});
+							}
 							break;
 						}
 						case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
