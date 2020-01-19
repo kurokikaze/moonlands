@@ -2,6 +2,7 @@
 const moonlands = require('../src/index');
 const {byName} = require('../src/cards');
 const CardInGame = require('../src/classes/CardInGame');
+const {caldDeck, naroomDeck} = require('./testData');
 
 const {
 	ACTION_SELECT,
@@ -1945,97 +1946,6 @@ describe('Initializing game from set of decks', () => {
 		const PLAYER_ONE = 10;
 		const PLAYER_TWO = 12;
 
-		const caldDeck = [
-			'Grega',
-			'Magam',
-			'Sinder',
-			'Fire Chogo',
-			'Fire Chogo',
-			'Fire Chogo',
-			'Fire Grag',
-			'Fire Grag',
-			'Fire Grag',
-			'Arbolit',
-			'Arbolit',
-			'Arbolit',
-			'Magma Hyren',
-			'Magma Hyren',
-			'Magma Hyren',
-			'Quor',
-			'Quor',
-			'Quor',
-			'Lava Aq',
-			'Lava Aq',
-			'Lava Aq',
-			'Lava Arboll',
-			'Lava Arboll',
-			'Lava Arboll',
-			'Diobor',
-			'Diobor',
-			'Diobor',
-			'Drakan',
-			'Drakan',
-			'Drakan',
-			'Thermal Blast',
-			'Thermal Blast',
-			'Thermal Blast',
-			'Flame Geyser',
-			'Flame Geyser',
-			'Flame Geyser',
-			'Cave Hyren',
-			'Cave Hyren',
-			'Cave Hyren',
-			'Magma Armor',
-			'Magma Armor',
-			'Fire Flow',
-			'Fire Flow',
-		];
-
-		const naroomDeck =[
-			'Pruitt',
-			'Poad',
-			'Yaki',
-			'Leaf Hyren',
-			'Leaf Hyren',
-			'Leaf Hyren',
-			'Weebo',
-			'Weebo',
-			'Weebo',
-			'Arboll',
-			'Arboll',
-			'Arboll',
-			'Great Carillion',
-			'Great Carillion',
-			'Great Carillion',
-			'Timber Hyren',
-			'Timber Hyren',
-			'Timber Hyren',
-			'Balamant',
-			'Balamant',
-			'Balamant',
-			'Grow',
-			'Grow',
-			'Grow',
-			'Giant Parathin',
-			'Giant Parathin',
-			'Giant Parathin',
-			'Syphon Stone',
-			'Syphon Stone',
-			'Syphon Stone',
-			'Carillion',
-			'Carillion',
-			'Carillion',
-			'Rudwot',
-			'Rudwot',
-			'Rudwot',
-			'Stagadan',
-			'Stagadan',
-			'Stagadan',
-			'Robe of Vines',
-			'Robe of Vines',
-			'Robe of Vines',
-			'Sea Barl',
-		];
 
 		const zones = [
 			new Zone('Player One hand', ZONE_TYPE_HAND, PLAYER_ONE),
@@ -2078,5 +1988,23 @@ describe('Initializing game from set of decks', () => {
 			gameState.state.goesFirst == PLAYER_ONE || gameState.state.goesFirst == PLAYER_TWO,
 		).toEqual(true, 'One of the players goes first');
 		expect(gameState.state.activePlayer).toEqual(gameState.state.goesFirst, 'First turn, player who goes first is active');
+	});
+});
+
+describe('Zones', () => {
+	it('Serialization', () => {
+		const ACTIVE_PLAYER = 2;
+		const testZone = new Zone(ZONE_TYPE_DECK, ACTIVE_PLAYER).add(caldDeck.map(card => new CardInGame(byName(card), ACTIVE_PLAYER)));
+
+		const serialized = testZone.serialize();
+
+		serialized.forEach(card => {
+			expect(card).toHaveProperty('card');
+			expect(card).toHaveProperty('id');
+			expect(card).toHaveProperty('data.actionsUsed');
+			expect(card).toHaveProperty('data.attacked');
+			expect(card).toHaveProperty('data.controller', ACTIVE_PLAYER);
+			expect(card).toHaveProperty('data.energy');
+		});
 	});
 });

@@ -88,6 +88,10 @@ class Zone {
 	empty() {
 		this.cards = [];
 	}
+
+	serialize() {
+		return this.cards.map(card => card.serialize());
+	}
 }
 
 module.exports = {
