@@ -281,6 +281,154 @@ describe('Magi stuff', () => {
 			'Starting cards are Arbolit and Quor Pup',
 		);
 	});
+
+	it('Flipping Magi on beginning of Energize step (not your first Magi)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+		const ashgar = new CardInGame(byName('Ashgar'), ACTIVE_PLAYER);
+
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
+		const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER);
+
+		const quorOne = new CardInGame(byName('Quor'), ACTIVE_PLAYER);
+		const quorTwo = new CardInGame(byName('Quor'), ACTIVE_PLAYER);
+		const fireChogoOne = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER);
+		const fireChogoTwo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER);
+		const startingEnergy = grega.card.data.startingEnergy;
+		const energizeRate = grega.card.data.energize;
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([grega, sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER).add([ashgar]),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER).add([
+				arbolit,
+				quorOne,
+				quorTwo,
+				fireChogoOne,
+				fireChogoTwo,
+			]),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER).add([quorPup]),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_DRAW,
+			activePlayer: NON_ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.state.turn = 1;
+
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).length).toEqual(0, 'No active magi');
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(2, 'Two magi in pile');
+
+		gameState.update({
+			type: moonlands.ACTION_PASS,
+		});
+
+		expect(gameState.state.prompt).toEqual(true, 'Game waiting for prompt');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_CARDS, 'Game waiting for you to choose starting cards');
+
+		gameState.update({
+			type: moonlands.ACTION_RESOLVE_PROMPT,
+			cards: ['Arbolit', 'Quor Pup'],
+			generatedBy: gameState.state.promptGeneratedBy,
+		});
+
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).length).toEqual(1, 'Magi is flipped');
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(1, 'One magi in pile');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy)
+			.toEqual(startingEnergy + energizeRate, 'Grega\'s starting energy is 15 after flipping and energizing');
+		expect(
+			gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length,
+		).toEqual(2, 'Two starting cards are in hand');
+		expect(
+			gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).cards.map(card => card.card.name).sort(),
+		).toEqual(
+			['Arbolit', 'Quor Pup'].sort(),
+			'Starting cards are Arbolit and Quor Pup',
+		);
+	});
+
+	it('Flipping Magi on beginning of Energize step (not your first Magi, has cards in hand)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+		const ashgar = new CardInGame(byName('Ashgar'), ACTIVE_PLAYER);
+
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
+		const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER);
+
+		const quorOne = new CardInGame(byName('Quor'), ACTIVE_PLAYER);
+		const quorTwo = new CardInGame(byName('Quor'), ACTIVE_PLAYER);
+		const fireChogoOne = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER);
+		const fireChogoTwo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER);
+		const startingEnergy = grega.card.data.startingEnergy;
+		const energizeRate = grega.card.data.energize;
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([grega, sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER).add([ashgar]),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([quorOne, fireChogoOne]),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER).add([
+				arbolit,
+				quorTwo,
+				fireChogoTwo,
+			]),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER).add([quorPup]),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_DRAW,
+			activePlayer: NON_ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.state.turn = 1;
+
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).length).toEqual(0, 'No active magi');
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(2, 'Two magi in pile');
+
+		gameState.update({
+			type: moonlands.ACTION_PASS,
+		});
+
+		expect(gameState.state.prompt).toEqual(true, 'Game waiting for prompt');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_CARDS, 'Game waiting for you to choose starting cards');
+
+		gameState.update({
+			type: moonlands.ACTION_RESOLVE_PROMPT,
+			cards: ['Arbolit', 'Quor Pup'],
+			generatedBy: gameState.state.promptGeneratedBy,
+		});
+
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).length).toEqual(1, 'Magi is flipped');
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(1, 'One magi in pile');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy)
+			.toEqual(startingEnergy + energizeRate, 'Grega\'s starting energy is 15 after flipping and energizing');
+		expect(
+			gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length,
+		).toEqual(4, 'Two starting cards are in hand plus two initial cards');
+		expect(
+			gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).cards.map(card => card.card.name).sort(),
+		).toEqual(
+			['Arbolit', 'Quor Pup','Quor', 'Fire Chogo'].sort(),
+			'Starting cards are Arbolit and Quor Pup',
+		);
+	});
 });
 
 describe('Prompts', () => {
