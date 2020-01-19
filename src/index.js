@@ -781,6 +781,7 @@ class State {
 								{
 									type: ACTION_ENTER_PROMPT,
 									promptType: PROMPT_TYPE_NUMBER,
+									player: action.player,
 									generatedBy: source.id,
 								},
 								{
@@ -813,6 +814,9 @@ class State {
 					break;
 				}
 				case ACTION_ENTER_PROMPT: {
+					if (!Object.prototype.hasOwnProperty.call(action, 'player')) {
+						throw new Error('Prompt without player!');
+					}
 					const savedActions = this.state.actions;
 					let promptParams = {};
 

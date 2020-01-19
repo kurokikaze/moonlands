@@ -433,7 +433,8 @@ describe('Magi stuff', () => {
 
 describe('Prompts', () => {
 	it('Prompt should save actions for later', () => {
-		const arbolit = new CardInGame(byName('Arbolit'), 0);
+		const ACTIVE_PLAYER = 0;
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
 		const zones = [
 			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
 		];
@@ -446,6 +447,7 @@ describe('Prompts', () => {
 
 		const promptAction = {
 			type: moonlands.ACTION_ENTER_PROMPT,
+			player: ACTIVE_PLAYER,
 		};
 
 		const passAction = {type: moonlands.ACTION_PASS};
@@ -453,7 +455,7 @@ describe('Prompts', () => {
 		const gameState = new moonlands.State({
 			zones,
 			step: STEP_ENERGIZE,
-			activePlayer: 0,
+			activePlayer: ACTIVE_PLAYER,
 			actions: [promptAction, addEnergyAction],
 		});
 
@@ -465,7 +467,8 @@ describe('Prompts', () => {
 	});
 
 	it('Resolving prompt should resume and apply saved actions', () => {
-		const arbolit = new CardInGame(byName('Arbolit'), 0);
+		const ACTIVE_PLAYER = 0;
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
 
 		const zones = [
 			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
@@ -480,6 +483,7 @@ describe('Prompts', () => {
 
 		const promptAction = {
 			type: moonlands.ACTION_ENTER_PROMPT,
+			player: ACTIVE_PLAYER,
 			promptType: moonlands.PROMPT_TYPE_NUMBER,
 		};
 
@@ -496,7 +500,7 @@ describe('Prompts', () => {
 		const gameState = new moonlands.State({
 			zones,
 			step: STEP_ENERGIZE,
-			activePlayer: 0,
+			activePlayer: ACTIVE_PLAYER,
 			actions: [promptAction, addEnergyAction],
 		});
 
@@ -516,9 +520,10 @@ describe('Prompts', () => {
 	});
 
 	it('Resolving prompt saves number for future action', () => {
+		const ACTIVE_PLAYER = 0;
 		const PROMPTED_NUMBER = 4;
 
-		const arbolit = new CardInGame(byName('Arbolit'), 0);
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
 
 		const zones = [
 			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
@@ -535,6 +540,7 @@ describe('Prompts', () => {
 		const promptAction = {
 			type: moonlands.ACTION_ENTER_PROMPT,
 			promptType: moonlands.PROMPT_TYPE_NUMBER,
+			player: ACTIVE_PLAYER,
 			generatedBy: 1,
 		};
 
@@ -589,6 +595,7 @@ describe('Prompts', () => {
 		const promptAction = {
 			type: moonlands.ACTION_ENTER_PROMPT,
 			promptType: moonlands.PROMPT_TYPE_SINGLE_CREATURE,
+			player: 0,
 			generatedBy: 1,
 		};
 
