@@ -18,6 +18,7 @@ const {
 	CALCULATION_MIN,
 	CALCULATION_MAX,
 	PROPERTY_ENERGIZE,
+	PROMPT_TYPE_CHOOSE_CARDS,
 } = require('../src/const');
 const {
 	Zone,
@@ -157,12 +158,86 @@ describe('Magi stuff', () => {
 
 		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
 		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
+		const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER);
+
 		const startingEnergy = grega.card.data.startingEnergy;
 		const energizeRate = grega.card.data.energize;
 
 		const zones = [
 			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
 			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([grega, sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER).add([arbolit]),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER).add([quorPup]),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_DRAW,
+			activePlayer: NON_ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.state.turn = 1;
+
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).length).toEqual(0, 'No active magi');
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(2, 'Two magi in pile');
+
+		gameState.update({
+			type: moonlands.ACTION_PASS,
+		});
+
+		expect(gameState.state.prompt).toEqual(true, 'Game waiting for prompt');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_CARDS, 'Game waiting for you to choose starting cards');
+
+		gameState.update({
+			type: moonlands.ACTION_RESOLVE_PROMPT,
+			cards: ['Arbolit', 'Quor Pup'],
+			generatedBy: gameState.state.promptGeneratedBy,
+		});
+
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).length).toEqual(1, 'Magi is flipped');
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(1, 'One magi in pile');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy)
+			.toEqual(startingEnergy + energizeRate, 'Grega\'s starting energy is 15 after flipping and energizing');
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(2, 'Two starting cards in hand');
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).cards.map(card => card.card.name)).toEqual(['Arbolit', 'Quor Pup'], 'Starting cards are Arbolit and Quor Pup');
+	});
+
+	it('Flipping Magi on beginning of Energize step (drawing to 5)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
+		const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER);
+
+		const quorOne = new CardInGame(byName('Quor'), ACTIVE_PLAYER);
+		const quorTwo = new CardInGame(byName('Quor'), ACTIVE_PLAYER);
+		const fireChogoOne = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER);
+		const fireChogoTwo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER);
+		const startingEnergy = grega.card.data.startingEnergy;
+		const energizeRate = grega.card.data.energize;
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([grega, sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER).add([
+				arbolit,
+				quorOne,
+				quorTwo,
+				fireChogoOne,
+				fireChogoTwo,
+			]),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER).add([quorPup]),
 			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
 			new Zone('In play', ZONE_TYPE_IN_PLAY),
 		];
@@ -174,6 +249,8 @@ describe('Magi stuff', () => {
 		});
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
+		gameState.state.turn = 1;
+
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).length).toEqual(0, 'No active magi');
 		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(2, 'Two magi in pile');
 
@@ -181,10 +258,28 @@ describe('Magi stuff', () => {
 			type: moonlands.ACTION_PASS,
 		});
 
+		expect(gameState.state.prompt).toEqual(true, 'Game waiting for prompt');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_CARDS, 'Game waiting for you to choose starting cards');
+
+		gameState.update({
+			type: moonlands.ACTION_RESOLVE_PROMPT,
+			cards: ['Arbolit', 'Quor Pup'],
+			generatedBy: gameState.state.promptGeneratedBy,
+		});
+
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).length).toEqual(1, 'Magi is flipped');
 		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(1, 'One magi in pile');
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy)
 			.toEqual(startingEnergy + energizeRate, 'Grega\'s starting energy is 15 after flipping and energizing');
+		expect(
+			gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length,
+		).toEqual(5, 'Two starting cards plus 3 other are in hand');
+		expect(
+			gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).cards.map(card => card.card.name).sort(),
+		).toEqual(
+			['Arbolit', 'Quor Pup', 'Quor', 'Quor', 'Fire Chogo'].sort(),
+			'Starting cards are Arbolit and Quor Pup',
+		);
 	});
 });
 
@@ -1687,5 +1782,146 @@ describe('Attacking', () => {
 
 		expect(leafHyren.data.energy).toEqual(5, 'Leaf Hyren still has 5 energy');
 		expect(grega.data.energy).toEqual(5, 'Grega has 5 energy left (second attack wasnt made)');
+	});
+});
+
+describe('Initializing game from set of decks', () => {
+	it('Initialization', () => {
+		const PLAYER_ONE = 10;
+		const PLAYER_TWO = 12;
+
+		const caldDeck = [
+			'Grega',
+			'Magam',
+			'Sinder',
+			'Fire Chogo',
+			'Fire Chogo',
+			'Fire Chogo',
+			'Fire Grag',
+			'Fire Grag',
+			'Fire Grag',
+			'Arbolit',
+			'Arbolit',
+			'Arbolit',
+			'Magma Hyren',
+			'Magma Hyren',
+			'Magma Hyren',
+			'Quor',
+			'Quor',
+			'Quor',
+			'Lava Aq',
+			'Lava Aq',
+			'Lava Aq',
+			'Lava Arboll',
+			'Lava Arboll',
+			'Lava Arboll',
+			'Diobor',
+			'Diobor',
+			'Diobor',
+			'Drakan',
+			'Drakan',
+			'Drakan',
+			'Thermal Blast',
+			'Thermal Blast',
+			'Thermal Blast',
+			'Flame Geyser',
+			'Flame Geyser',
+			'Flame Geyser',
+			'Cave Hyren',
+			'Cave Hyren',
+			'Cave Hyren',
+			'Magma Armor',
+			'Magma Armor',
+			'Fire Flow',
+			'Fire Flow',
+		];
+
+		const naroomDeck =[
+			'Pruitt',
+			'Poad',
+			'Yaki',
+			'Leaf Hyren',
+			'Leaf Hyren',
+			'Leaf Hyren',
+			'Weebo',
+			'Weebo',
+			'Weebo',
+			'Arboll',
+			'Arboll',
+			'Arboll',
+			'Great Carillion',
+			'Great Carillion',
+			'Great Carillion',
+			'Timber Hyren',
+			'Timber Hyren',
+			'Timber Hyren',
+			'Balamant',
+			'Balamant',
+			'Balamant',
+			'Grow',
+			'Grow',
+			'Grow',
+			'Giant Parathin',
+			'Giant Parathin',
+			'Giant Parathin',
+			'Syphon Stone',
+			'Syphon Stone',
+			'Syphon Stone',
+			'Carillion',
+			'Carillion',
+			'Carillion',
+			'Rudwot',
+			'Rudwot',
+			'Rudwot',
+			'Stagadan',
+			'Stagadan',
+			'Stagadan',
+			'Robe of Vines',
+			'Robe of Vines',
+			'Robe of Vines',
+			'Sea Barl',
+		];
+
+		const zones = [
+			new Zone('Player One hand', ZONE_TYPE_HAND, PLAYER_ONE),
+			new Zone('Player 2 hand', ZONE_TYPE_HAND, PLAYER_TWO),
+			new Zone('Player 1 deck', ZONE_TYPE_DECK, PLAYER_ONE),
+			new Zone('Player 2 deck', ZONE_TYPE_DECK, PLAYER_TWO),
+			new Zone('Player 1 discard', ZONE_TYPE_DISCARD, PLAYER_ONE),
+			new Zone('Player 2 discard', ZONE_TYPE_DISCARD, PLAYER_TWO),
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE),
+			new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO),
+			new Zone('Player 1 magi pile', ZONE_TYPE_MAGI_PILE, PLAYER_ONE),
+			new Zone('Player 2 magi pile', ZONE_TYPE_MAGI_PILE, PLAYER_TWO),
+			new Zone('Player 1 magi pile', ZONE_TYPE_DEFEATED_MAGI, PLAYER_ONE),
+			new Zone('Player 2 magi pile', ZONE_TYPE_DEFEATED_MAGI, PLAYER_TWO),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: null,
+			activePlayer: PLAYER_ONE,
+		});
+
+		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
+
+		gameState.setDeck(PLAYER_ONE, caldDeck.map(card => new CardInGame(byName(card), PLAYER_ONE)));
+		gameState.setDeck(PLAYER_TWO, naroomDeck.map(card => new CardInGame(byName(card), PLAYER_TWO)));
+
+		gameState.setup();
+
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, PLAYER_ONE).length).toEqual(3, 'Player one magi transferred into pile zone');
+		expect(gameState.getZone(ZONE_TYPE_DECK, PLAYER_ONE).length).toEqual(40, 'Player one deck transferred into zone');
+
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, PLAYER_TWO).length).toEqual(3, 'Player two magi transferred into pile zone');
+		expect(gameState.getZone(ZONE_TYPE_DECK, PLAYER_TWO).length).toEqual(40, 'Player two deck transferred into zone');
+
+		expect(gameState.state.step).toEqual(0, 'Step is 0 (STEP_ENERGIZE)');
+		expect(gameState.state.turn).toEqual(1, 'Turn is 1');
+		expect(
+			gameState.state.goesFirst == PLAYER_ONE || gameState.state.goesFirst == PLAYER_TWO,
+		).toEqual(true, 'One of the players goes first');
+		expect(gameState.state.activePlayer).toEqual(gameState.state.goesFirst, 'First turn, player who goes first is active');
 	});
 });

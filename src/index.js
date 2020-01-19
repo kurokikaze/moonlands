@@ -7,6 +7,9 @@ const {
 	TYPE_RELIC,
 	TYPE_SPELL,
 
+	PREPARATION_ACTION_CHOOSE_MAGI,
+	PREPARATION_ACTION_CHOOSE_STARTING_CARDS,
+
 	ACTION_DRAW,
 	ACTION_PASS,
 	ACTION_PLAY,
@@ -63,6 +66,7 @@ const {
 	PROMPT_TYPE_SINGLE_CREATURE,
 	PROMPT_TYPE_SINGLE_MAGI,
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
+	PROMPT_TYPE_CHOOSE_CARDS,
 
 	EFFECT_TYPE_DRAW,
 	EFFECT_TYPE_RESHUFFLE_DISCARD,
@@ -101,6 +105,8 @@ const {
 	EFFECT_TYPE_START_OF_TURN,
 	EFFECT_TYPE_END_OF_TURN,
 	EFFECT_TYPE_MAGI_FLIPPED,
+	EFFECT_TYPE_FIND_STARTING_CARDS,
+	EFFECT_TYPE_DRAW_REST_OF_CARDS,
 
 	REGION_UNIVERSAL,
 
@@ -120,6 +126,7 @@ const {
 
 /* eslint-disable-next-line no-unused-vars */
 const {showAction} = require('./logAction');
+const {byName} = require('./cards');
 const CardInGame = require('./classes/CardInGame');
 
 const NO_PRIORITY = 0;
@@ -210,7 +217,13 @@ class State {
 		};
 
 		this.players = [0, 1]; // For simple testing
+		this.decks = [];
 		this.winner = false;
+		this.debug = false;
+	}
+
+	enableDebug() {
+		this.debug = true;
 	}
 
 	setWinner(player) {
@@ -225,6 +238,44 @@ class State {
 		this.players = [player1, player2];
 
 		return this;
+	}
+
+	setDeck(player, deck) {
+		if (this.players.includes(player)) {
+			this.decks.push({
+				player,
+				deck,
+			});
+		} else {
+			throw new Error(`Non-existing player: ${player}`);
+		}
+	}
+
+	setup() {
+		if (this.players.length < 2) {
+			throw new Error('Not enough players');
+		}
+		if (this.decks.length < 2) {
+			throw new Error('Not enough decks for players');
+		}
+
+		this.decks.forEach(({player, deck}) => {
+			const magi = deck.filter(card => card.card.type === TYPE_MAGI);
+			const rest = deck.filter(card => card.card.type != TYPE_MAGI);
+
+			this.getZone(ZONE_TYPE_MAGI_PILE, player).add(magi);
+			this.getZone(ZONE_TYPE_DECK, player).add(rest).shuffle();
+		});
+
+		const goesFirst = this.players[(Math.random() > 0.5 ? 0: 1)];
+
+		this.state = {
+			...this.state,
+			step: 0,
+			turn: 1,
+			goesFirst,
+			activePlayer: goesFirst,
+		};
 	}
 
 	getOpponent(player) {
@@ -599,7 +650,9 @@ class State {
 			const rawAction = this.getNextAction();
 			const action = this.replaceByReplacementEffect(rawAction);
 
-			// showAction(action);
+			if (this.debug) {
+				showAction(action);
+			}
 
 			this.triggerAbilities(action);
 
@@ -776,28 +829,35 @@ class State {
 						savedActions,
 						prompt: true,
 						promptType: action.promptType,
+						promptVariable: action.variable,
+						promptGeneratedBy: action.generatedBy,
 						promptParams,
 					};
 					break;
 				}
 				case ACTION_RESOLVE_PROMPT: {
-					let currentActionMetaData = this.state.spellMetaData[action.generatedBy] || {};
+					const generatedBy = action.generatedBy || this.state.promptGeneratedBy;
+					const variable = action.variable || this.state.promptVariable;
+					let currentActionMetaData = this.state.spellMetaData[generatedBy] || {};
 
 					switch (this.state.promptType) {
 						case PROMPT_TYPE_NUMBER:
-							currentActionMetaData[action.variable || 'number'] = action.number;
+							currentActionMetaData[variable || 'number'] = action.number;
 							break;
 						case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE:
 							if (this.state.promptParams.source.id === action.target.id) {
 								throw new Error('Got forbidden target on prompt');
 							}
-							currentActionMetaData[action.variable || 'target'] = action.target;
+							currentActionMetaData[variable || 'target'] = action.target;
 							break;
 						case PROMPT_TYPE_SINGLE_CREATURE:
-							currentActionMetaData[action.variable || 'target'] = action.target;
+							currentActionMetaData[variable || 'target'] = action.target;
 							break;
 						case PROMPT_TYPE_SINGLE_MAGI:
-							currentActionMetaData[action.variable || 'targetMagi'] = action.target;
+							currentActionMetaData[variable || 'targetMagi'] = action.target;
+							break;
+						case PROMPT_TYPE_CHOOSE_CARDS:
+							currentActionMetaData[variable || 'selectedCards'] = action.cards || [];
 							break;
 					}
 					const actions = this.state.savedActions || [];
@@ -807,10 +867,12 @@ class State {
 						savedActions: [],
 						prompt: false,
 						promptType: null,
+						promptGeneratedBy: null,
+						promptVariable: null,
 						promptParams: {},
 						spellMetaData: {
 							...this.state.spellMetaData,
-							[action.generatedBy]: currentActionMetaData,
+							[generatedBy]: currentActionMetaData,
 						},
 					};
 					break;
@@ -1073,27 +1135,93 @@ class State {
 							) {
 								const topMagi = this.getZone(ZONE_TYPE_MAGI_PILE, action.player).cards[0];
 								const startingEnergy = this.modifyByStaticAbilities(topMagi, PROPERTY_MAGI_STARTING_ENERGY);
+								const firstMagi = this.getZone(ZONE_TYPE_DEFEATED_MAGI, action.player).length == 0;
 
-								this.transformIntoActions({
-									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_MAGI_FLIPPED,
-									target: topMagi,
-									generatedBy: action.generatedBy,
-								}, {
-									type: ACTION_SELECT,
-									selector: SELECTOR_OWN_MAGI,
+								const actionsToTake = [
+									{
+										type: ACTION_EFFECT,
+										effectType: EFFECT_TYPE_MAGI_FLIPPED,
+										target: topMagi,
+									}, 
+									{
+										type: ACTION_SELECT,
+										selector: SELECTOR_OWN_MAGI,
+										variable: 'ownMagi',
+									}, 
+									{
+										type: ACTION_EFFECT,
+										effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+										target: '$ownMagi',
+										amount: startingEnergy,
+									},
+									{
+										type: ACTION_ENTER_PROMPT,
+										promptType: PROMPT_TYPE_CHOOSE_CARDS,
+										promptParams: topMagi.card.data.startingCards,
+										variable: 'startingCards',
+									},
+									{
+										type: ACTION_EFFECT,
+										effectType: EFFECT_TYPE_FIND_STARTING_CARDS,
+										cards: '$startingCards',
+									}
+								];
+
+								if (firstMagi) {
+									actionsToTake.push({
+										type: ACTION_EFFECT,
+										effectType: EFFECT_TYPE_DRAW_REST_OF_CARDS,
+										drawnCards: '$foundCards',
+									});
+								}
+
+								const actions = actionsToTake.map(preAction => ({
+									...preAction,
 									player: action.player,
-									variable: 'ownMagi',
 									generatedBy: action.generatedBy,
-								}, 
-								{
-									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
-									target: '$ownMagi',
-									amount: startingEnergy,
-									player: action.player,
-									generatedBy: action.generatedBy,
+								}));
+
+								this.transformIntoActions(...actions);
+							}
+							break;
+						}
+						case EFFECT_TYPE_FIND_STARTING_CARDS: {
+							const cardsToFind = this.getMetaValue(action.cards, action.generatedBy);
+							const deck = this.getZone(ZONE_TYPE_DECK, action.player);
+							const discard = this.getZone(ZONE_TYPE_DISCARD, action.player);
+							const hand = this.getZone(ZONE_TYPE_HAND, action.player);
+							let foundCards = [];
+							if (cardsToFind.length) {
+								cardsToFind.forEach(cardName => {
+									if (discard.cards.some(({card}) => card.name == cardName)) {
+										const card = discard.cards.find(({card}) => card.name == cardName);
+										hand.add([new CardInGame(card.card, action.player)]);
+										discard.removeById(card.id);
+										foundCards.push(cardName);
+									} else if (deck.cards.some(({card}) => card.name == cardName)) {
+										const card = deck.cards.find(({card}) => card.name == cardName);
+										hand.add([new CardInGame(card.card, action.player)]);
+										deck.removeById(card.id);
+										foundCards.push(cardName);
+									}
 								});
+							}
+
+							this.state.spellMetaData[action.generatedBy].foundCards = foundCards;
+							break;
+						}
+						case EFFECT_TYPE_DRAW_REST_OF_CARDS: {
+							const foundCards = this.getMetaValue(action.drawnCards, action.generatedBy) || [];
+							const number = 5 - foundCards.length;
+							if (number > 0) { // who knows
+								for (let i = 0; i < number; i++) { 
+									this.transformIntoActions({
+										type: ACTION_EFFECT,
+										effectType: EFFECT_TYPE_DRAW,
+										player: action.player,
+										generatedBy: action.generatedBy,
+									});
+								}
 							}
 							break;
 						}

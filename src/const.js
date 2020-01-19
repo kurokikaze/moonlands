@@ -9,7 +9,6 @@ const ACTION_RESOLVE_PROMPT = 'actions/resolve_prompt';
 const ACTION_GET_PROPERTY_VALUE = 'actions/get_property_value';
 const ACTION_ATTACK = 'actions/attack';
 const ACTION_PLAYER_WINS ='actions/player_wins';
-// const ACTION_NOOP = 'actions/noop'; // Empty actions for replacement
 
 const PROPERTY_ID = 'properties/id';
 const PROPERTY_TYPE = 'properties/type';
@@ -97,7 +96,10 @@ const EFFECT_TYPE_CREATURE_IS_ATTACKED = 'effects/creature_is_attacked';
 const EFFECT_TYPE_START_OF_TURN = 'effects/start_of_turn';
 const EFFECT_TYPE_END_OF_TURN = 'effects/end_of_turn';
 const EFFECT_TYPE_MAGI_FLIPPED = 'effects/magi_flipped';
+const EFFECT_TYPE_FIND_STARTING_CARDS = 'effects/find_starting_cards';
+const EFFECT_TYPE_DRAW_REST_OF_CARDS = 'effects/draw_rest_of_cards';
 
+const PROMPT_TYPE_CHOOSE_CARDS = 'prompt/choose_cards';
 const PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE = 'prompt/any_creature_except_source';
 const PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI = 'prompt/creature_or_magi';
 const PROMPT_TYPE_SINGLE_CREATURE = 'prompt/creature';
@@ -206,9 +208,12 @@ module.exports = {
 	EFFECT_TYPE_MAGI_IS_DEFEATED,
 	EFFECT_TYPE_START_OF_TURN,
 	EFFECT_TYPE_END_OF_TURN,
+	EFFECT_TYPE_FIND_STARTING_CARDS,
+	EFFECT_TYPE_DRAW_REST_OF_CARDS,
 	
 	RESTRICTION_ENERGY_LESS_THAN_STARTING,
 
+	PROMPT_TYPE_CHOOSE_CARDS,
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 	PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
 	PROMPT_TYPE_SINGLE_CREATURE,

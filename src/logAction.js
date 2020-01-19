@@ -1,4 +1,4 @@
-const {CardInGame} = require('./cards');
+const CardInGame = require('./classes/CardInGame');
 
 const FgRed = '\x1b[31m';
 const FgGreen = '\x1b[32m';
@@ -20,7 +20,7 @@ const color = {
 	white: word => `${FgWhite}${word}${Reset}`,
 };
 
-const showCard = card =>  (card instanceof CardInGame) ? `<${color.blue(card.card.name)} [${card.id}]>` : card;
+const showCard = card => (card instanceof CardInGame) ? `<${color.blue(card.card.name)} [${card.id}]>` : card;
 
 const showAction = action => {
 	const fields = Object.keys(action).filter(f => f != 'type').map(field => {
