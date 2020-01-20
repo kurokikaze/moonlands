@@ -579,7 +579,6 @@ describe('Carillion', () => {
 			source: carillion,
 			target: leafHyren,
 		};
-
         
 		gameState.update(attackAction);
 
@@ -592,7 +591,6 @@ describe('Carillion', () => {
 
 		expect(carillion.data.energy).toEqual(1, 'Carillion loses 4 energy in the attack');
 		expect(leafHyren.data.energy).toEqual(0, 'Hyren is toast');
-
 	});
 });
 

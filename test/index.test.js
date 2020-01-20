@@ -829,6 +829,7 @@ describe('Effects', () => {
 			new Zone('Player 1 magi pile', ZONE_TYPE_MAGI_PILE, activePlayer),
 			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),            
 		];
+
 		const moveCardEffect = {
 			type: moonlands.ACTION_EFFECT,
 			effectType: moonlands.EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
@@ -836,6 +837,7 @@ describe('Effects', () => {
 			target: grega,
 			sourceZone: ZONE_TYPE_ACTIVE_MAGI,
 			destinationZone: ZONE_TYPE_MAGI_PILE,
+			generatedBy: 'testMoveEffect',
 		};
 
 		const gameState = new moonlands.State({
@@ -850,6 +852,12 @@ describe('Effects', () => {
 
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI).length).toEqual(0, 'Active Magi zone is empty');
 		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE).length).toEqual(1, 'Magi pile zone has 1 card');
+		expect(
+			gameState.state.spellMetaData.testMoveEffect.new_card.id,
+		).toEqual(
+			gameState.getZone(ZONE_TYPE_MAGI_PILE).card.id,
+			'New card meta data points no new card',
+		);
 	});    
 });
 
@@ -1467,6 +1475,7 @@ describe('Deck drawing', () => {
 			type: moonlands.ACTION_EFFECT,
 			effectType: moonlands.EFFECT_TYPE_DRAW,
 			player: ACTIVE_PLAYER,
+			generatedBy: 'testId',
 		};
 
 		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(0, 'We have no cards in hand');
@@ -1507,6 +1516,7 @@ describe('Deck drawing', () => {
 			type: moonlands.ACTION_EFFECT,
 			effectType: moonlands.EFFECT_TYPE_DRAW,
 			player: ACTIVE_PLAYER,
+			generatedBy: 'testId',
 		};
 
 		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(0, 'We have no cards in hand');
@@ -1549,6 +1559,7 @@ describe('Deck drawing', () => {
 			type: moonlands.ACTION_EFFECT,
 			effectType: moonlands.EFFECT_TYPE_DRAW,
 			player: NON_ACTIVE_PLAYER,
+			generatedBy: 'testId',
 		};
 
 		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(0, 'We have no cards in hand');
@@ -1589,6 +1600,7 @@ describe('Deck drawing', () => {
 			type: moonlands.ACTION_EFFECT,
 			effectType: moonlands.EFFECT_TYPE_DRAW,
 			player: NON_ACTIVE_PLAYER,
+			generatedBy: 'testId',
 		};
 
 		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(0, 'We have no cards in hand');
