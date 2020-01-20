@@ -2,17 +2,8 @@
 const moonlands = require('../src/index');
 const {byName} = require('../src/cards');
 const CardInGame = require('../src/classes/CardInGame');
+const Zone = require('../src/classes/Zone');
 
-const {
-	Zone,
-	ZONE_TYPE_ACTIVE_MAGI,
-	ZONE_TYPE_MAGI_PILE,
-	// ZONE_TYPE_DEFEATED_MAGI,
-	ZONE_TYPE_DECK,
-	ZONE_TYPE_IN_PLAY,
-	ZONE_TYPE_DISCARD,
-	ZONE_TYPE_HAND,
-} = require('../src/zone');
 const {
 	ACTION_PLAY,
 	ACTION_ATTACK,
@@ -22,6 +13,14 @@ const {
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 	PROMPT_TYPE_SINGLE_CREATURE,
 	PROMPT_TYPE_SINGLE_MAGI,
+
+	ZONE_TYPE_ACTIVE_MAGI,
+	ZONE_TYPE_MAGI_PILE,
+	// ZONE_TYPE_DEFEATED_MAGI,
+	ZONE_TYPE_DECK,
+	ZONE_TYPE_IN_PLAY,
+	ZONE_TYPE_DISCARD,
+	ZONE_TYPE_HAND,
 } = require('../src/const');
 
 /* eslint-disable no-unused-vars */

@@ -1,11 +1,3 @@
-const ZONE_TYPE_ACTIVE_MAGI = 'zones/active_magi';
-const ZONE_TYPE_MAGI_PILE = 'zones/magi_pile';
-const ZONE_TYPE_DEFEATED_MAGI = 'zones/defeated_magi';
-const ZONE_TYPE_DECK = 'zones/deck';
-const ZONE_TYPE_IN_PLAY = 'zones/in_play';
-const ZONE_TYPE_DISCARD = 'zones/discard';
-const ZONE_TYPE_HAND = 'zones/hand';
-
 function shuffle(array) {
 	var currentIndex = array.length, temporaryValue, randomIndex;
 
@@ -94,13 +86,4 @@ class Zone {
 	}
 }
 
-module.exports = {
-	Zone,
-	ZONE_TYPE_ACTIVE_MAGI,
-	ZONE_TYPE_MAGI_PILE,
-	ZONE_TYPE_DEFEATED_MAGI,
-	ZONE_TYPE_DECK,
-	ZONE_TYPE_IN_PLAY,
-	ZONE_TYPE_DISCARD,
-	ZONE_TYPE_HAND,
-};
+module.exports = Zone;

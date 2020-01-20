@@ -121,6 +121,14 @@ const TYPE_SPELL = 'types/spell';
 
 const COST_X = 'X';
 
+const ZONE_TYPE_ACTIVE_MAGI = 'zones/active_magi';
+const ZONE_TYPE_MAGI_PILE = 'zones/magi_pile';
+const ZONE_TYPE_DEFEATED_MAGI = 'zones/defeated_magi';
+const ZONE_TYPE_DECK = 'zones/deck';
+const ZONE_TYPE_IN_PLAY = 'zones/in_play';
+const ZONE_TYPE_DISCARD = 'zones/discard';
+const ZONE_TYPE_HAND = 'zones/hand';
+
 module.exports = {
 	ACTION_ATTACK,
 	ACTION_PASS,
@@ -240,4 +248,12 @@ module.exports = {
 	TYPE_SPELL,
 
 	COST_X,
+
+	ZONE_TYPE_ACTIVE_MAGI,
+	ZONE_TYPE_MAGI_PILE,
+	ZONE_TYPE_DEFEATED_MAGI,
+	ZONE_TYPE_DECK,
+	ZONE_TYPE_IN_PLAY,
+	ZONE_TYPE_DISCARD,
+	ZONE_TYPE_HAND,
 };

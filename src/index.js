@@ -111,10 +111,7 @@ const {
 	REGION_UNIVERSAL,
 
 	COST_X,
-	/* eslint-enable no-unused-vars */	
-} = require('./const');
-
-const {
+	
 	ZONE_TYPE_HAND,
 	ZONE_TYPE_IN_PLAY,
 	ZONE_TYPE_DISCARD,
@@ -122,11 +119,11 @@ const {
 	ZONE_TYPE_MAGI_PILE,
 	ZONE_TYPE_DECK,
 	ZONE_TYPE_DEFEATED_MAGI,
-} = require('./zone');
+	/* eslint-enable no-unused-vars */
+} = require('./const');
 
-/* eslint-disable-next-line no-unused-vars */
 const {showAction} = require('./logAction');
-const {byName} = require('./cards');
+// const {byName} = require('./cards');
 const CardInGame = require('./classes/CardInGame');
 
 const NO_PRIORITY = 0;

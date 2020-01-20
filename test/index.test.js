@@ -20,9 +20,7 @@ const {
 	CALCULATION_MAX,
 	PROPERTY_ENERGIZE,
 	PROMPT_TYPE_CHOOSE_CARDS,
-} = require('../src/const');
-const {
-	Zone,
+
 	ZONE_TYPE_ACTIVE_MAGI,
 	ZONE_TYPE_MAGI_PILE,
 	ZONE_TYPE_DISCARD,
@@ -30,7 +28,9 @@ const {
 	ZONE_TYPE_DECK,
 	ZONE_TYPE_IN_PLAY,
 	ZONE_TYPE_HAND,
-} = require('../src/zone');
+} = require('../src/const');
+
+const Zone = require('../src/classes/Zone');
 
 const STEP_ENERGIZE = 0;
 const STEP_PRS_FIRST = 1;

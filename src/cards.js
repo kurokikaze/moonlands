@@ -85,15 +85,13 @@ const {
 	RESTRICTION_ENERGY_LESS_THAN_STARTING,
 
 	COST_X,
-	/* eslint-enable no-unused-vars */
-} = require('./const');
 
-const {
 	ZONE_TYPE_ACTIVE_MAGI,
 	ZONE_TYPE_MAGI_PILE,
 	ZONE_TYPE_HAND,
 	ZONE_TYPE_IN_PLAY,
-} = require('./zone');
+	/* eslint-enable no-unused-vars */
+} = require('./const');
 
 const power = (name, effects) => ({
 	name,
