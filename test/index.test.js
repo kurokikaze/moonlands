@@ -1983,8 +1983,41 @@ describe('Initializing game from set of decks', () => {
 
 		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
 
-		gameState.setDeck(PLAYER_ONE, caldDeck.map(card => new CardInGame(byName(card), PLAYER_ONE)));
-		gameState.setDeck(PLAYER_TWO, naroomDeck.map(card => new CardInGame(byName(card), PLAYER_TWO)));
+		gameState.setDeck(PLAYER_ONE, caldDeck);
+		gameState.setDeck(PLAYER_TWO, naroomDeck);
+
+		gameState.setup();
+
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, PLAYER_ONE).length).toEqual(3, 'Player one magi transferred into pile zone');
+		expect(gameState.getZone(ZONE_TYPE_DECK, PLAYER_ONE).length).toEqual(40, 'Player one deck transferred into zone');
+
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, PLAYER_TWO).length).toEqual(3, 'Player two magi transferred into pile zone');
+		expect(gameState.getZone(ZONE_TYPE_DECK, PLAYER_TWO).length).toEqual(40, 'Player two deck transferred into zone');
+
+		expect(gameState.state.step).toEqual(0, 'Step is 0 (STEP_ENERGIZE)');
+		expect(gameState.state.turn).toEqual(1, 'Turn is 1');
+		expect(
+			gameState.state.goesFirst == PLAYER_ONE || gameState.state.goesFirst == PLAYER_TWO,
+		).toEqual(true, 'One of the players goes first');
+		expect(gameState.state.activePlayer).toEqual(gameState.state.goesFirst, 'First turn, player who goes first is active');
+	});
+
+	it('Initialization (internal zones creation)', () => {
+		const PLAYER_ONE = 10;
+		const PLAYER_TWO = 12;
+
+		const zones = [];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: null,
+			activePlayer: PLAYER_ONE,
+		});
+
+		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
+
+		gameState.setDeck(PLAYER_ONE, caldDeck);
+		gameState.setDeck(PLAYER_TWO, naroomDeck);
 
 		gameState.setup();
 

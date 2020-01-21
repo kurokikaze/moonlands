@@ -99,6 +99,11 @@ const EFFECT_TYPE_MAGI_FLIPPED = 'effects/magi_flipped';
 const EFFECT_TYPE_FIND_STARTING_CARDS = 'effects/find_starting_cards';
 const EFFECT_TYPE_DRAW_REST_OF_CARDS = 'effects/draw_rest_of_cards';
 
+const NO_PRIORITY = 0;
+const PRIORITY_PRS = 1;
+const PRIORITY_ATTACK = 2;
+const PRIORITY_CREATURES = 3;
+
 const PROMPT_TYPE_CHOOSE_CARDS = 'prompt/choose_cards';
 const PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE = 'prompt/any_creature_except_source';
 const PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI = 'prompt/creature_or_magi';
@@ -220,6 +225,11 @@ module.exports = {
 	EFFECT_TYPE_DRAW_REST_OF_CARDS,
 	
 	RESTRICTION_ENERGY_LESS_THAN_STARTING,
+
+	NO_PRIORITY,
+	PRIORITY_PRS,
+	PRIORITY_ATTACK,
+	PRIORITY_CREATURES,
 
 	PROMPT_TYPE_CHOOSE_CARDS,
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,

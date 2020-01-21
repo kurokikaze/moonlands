@@ -68,6 +68,11 @@ const {
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 	PROMPT_TYPE_CHOOSE_CARDS,
 
+	NO_PRIORITY,
+	PRIORITY_PRS,
+	PRIORITY_ATTACK,
+	PRIORITY_CREATURES,
+
 	EFFECT_TYPE_DRAW,
 	EFFECT_TYPE_RESHUFFLE_DISCARD,
 	EFFECT_TYPE_MOVE_ENERGY,
@@ -123,13 +128,9 @@ const {
 } = require('./const');
 
 const {showAction} = require('./logAction');
-// const {byName} = require('./cards');
+const {byName} = require('./cards');
 const CardInGame = require('./classes/CardInGame');
-
-const NO_PRIORITY = 0;
-const PRIORITY_PRS = 1;
-const PRIORITY_ATTACK = 2;
-const PRIORITY_CREATURES = 3;
+const Zone = require('./classes/Zone');
 
 const steps = [
 	{
@@ -237,8 +238,9 @@ class State {
 		return this;
 	}
 
-	setDeck(player, deck) {
+	setDeck(player, cardNames) {
 		if (this.players.includes(player)) {
+			const deck = cardNames.map(card => new CardInGame(byName(card), player));
 			this.decks.push({
 				player,
 				deck,
@@ -246,6 +248,26 @@ class State {
 		} else {
 			throw new Error(`Non-existing player: ${player}`);
 		}
+	}
+
+	createZones() {
+		const [playerOne, playerTwo] = this.players;
+
+		return [
+			new Zone('Player 1 hand', ZONE_TYPE_HAND, playerOne),
+			new Zone('Player 2 hand', ZONE_TYPE_HAND, playerTwo),
+			new Zone('Player 1 deck', ZONE_TYPE_DECK, playerOne),
+			new Zone('Player 2 deck', ZONE_TYPE_DECK, playerTwo),
+			new Zone('Player 1 discard', ZONE_TYPE_DISCARD, playerOne),
+			new Zone('Player 2 discard', ZONE_TYPE_DISCARD, playerTwo),
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, playerOne),
+			new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, playerTwo),
+			new Zone('Player 1 magi pile', ZONE_TYPE_MAGI_PILE, playerOne),
+			new Zone('Player 2 magi pile', ZONE_TYPE_MAGI_PILE, playerTwo),
+			new Zone('Player 1 magi pile', ZONE_TYPE_DEFEATED_MAGI, playerOne),
+			new Zone('Player 2 magi pile', ZONE_TYPE_DEFEATED_MAGI, playerTwo),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null),
+		];		
 	}
 
 	setup() {
@@ -256,6 +278,10 @@ class State {
 			throw new Error('Not enough decks for players');
 		}
 
+		const zones = this.state.zones.length == 0 ? this.createZones() : this.state.zones;
+
+		this.state.zones = zones;
+
 		this.decks.forEach(({player, deck}) => {
 			const magi = deck.filter(card => card.card.type === TYPE_MAGI);
 			const rest = deck.filter(card => card.card.type != TYPE_MAGI);
@@ -263,11 +289,12 @@ class State {
 			this.getZone(ZONE_TYPE_MAGI_PILE, player).add(magi);
 			this.getZone(ZONE_TYPE_DECK, player).add(rest).shuffle();
 		});
-
+		
 		const goesFirst = this.players[(Math.random() > 0.5 ? 0: 1)];
 
 		this.state = {
 			...this.state,
+			zones,
 			step: 0,
 			turn: 1,
 			goesFirst,
@@ -1717,6 +1744,11 @@ module.exports = {
 	SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE,
 	SELECTOR_CARDS_WITH_ENERGIZE_RATE,
 	SELECTOR_OWN_CARDS_IN_PLAY,
+
+	NO_PRIORITY,
+	PRIORITY_PRS,
+	PRIORITY_ATTACK,
+	PRIORITY_CREATURES,
 
 	PROMPT_TYPE_NUMBER,
 	PROMPT_TYPE_SINGLE_CREATURE,
