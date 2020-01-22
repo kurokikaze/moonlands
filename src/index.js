@@ -84,6 +84,7 @@ const {
 	EFFECT_TYPE_PLAY_CREATURE,
 	EFFECT_TYPE_PLAY_RELIC,
 	EFFECT_TYPE_PLAY_SPELL,
+	EFFECT_TYPE_DAMAGE_STEP,
 	EFFECT_TYPE_CREATURE_ENTERS_PLAY,
 	EFFECT_TYPE_RELIC_ENTERS_PLAY,
 	EFFECT_TYPE_MAGI_IS_DEFEATED,
@@ -788,26 +789,15 @@ class State {
 								targetAtStart: attackTarget.copy(),
 								generatedBy: attackSource.id,
 							},
-							{  // from source to target
+							{
 								type: ACTION_EFFECT,
-								effectType: EFFECT_TYPE_DEAL_DAMAGE,
+								effectType: EFFECT_TYPE_DAMAGE_STEP,
 								source: attackSource,
 								sourceAtStart: attackSource.copy(),
 								target: attackTarget,
 								targetAtStart: attackTarget.copy(),
-								amount: attackSource.data.energy,
 								generatedBy: attackSource.id,
-							}, // from target to source (if attacking a creature)
-							(attackTarget.card.type === TYPE_CREATURE) ? {
-								type: ACTION_EFFECT,
-								effectType: EFFECT_TYPE_DEAL_DAMAGE,
-								source: attackTarget,
-								sourceAtStart: attackTarget.copy(),
-								target: attackSource,
-								targetAtStart: attackSource.copy(),
-								amount: attackTarget.data.energy,
-								generatedBy: attackSource.id,
-							} : null,
+							},
 							{
 								type: ACTION_EFFECT,
 								effectType: EFFECT_TYPE_AFTER_DAMAGE,
@@ -1370,6 +1360,42 @@ class State {
 						case EFFECT_TYPE_BEFORE_DAMAGE: {
 							action.source.markAttackDone();
 							action.target.markAttackReceived();
+							break;
+						}
+						case EFFECT_TYPE_DAMAGE_STEP: {
+							// Here we finalize damage amount from both creatures' energy
+							const attackSource = action.source;
+							const attackTarget = action.target;
+
+							const damageByAttacker = attackSource.data.energy;
+							const damageByDefender = (attackTarget.card.type === TYPE_CREATURE) ?
+								attackTarget.data.energy :
+								0
+							;
+							const damageActions = [
+								{  // from source to target
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_DEAL_DAMAGE,
+									source: attackSource,
+									sourceAtStart: action.sourceAtStart,
+									target: attackTarget,
+									targetAtStart: action.targetAtStart,
+									amount: damageByAttacker,
+									generatedBy: attackSource.id,
+								}, // from target to source (if attacking a creature)
+								(attackTarget.card.type === TYPE_CREATURE) ? {
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_DEAL_DAMAGE,
+									source: attackTarget,
+									sourceAtStart: attackTarget.copy(),
+									target: attackSource,
+									amount: damageByDefender,
+									targetAtStart: attackSource.copy(),
+									generatedBy: attackSource.id,
+								} : null,
+							].filter(Boolean);
+
+							this.transformIntoActions(...damageActions);
 							break;
 						}
 						case EFFECT_TYPE_DEAL_DAMAGE: {

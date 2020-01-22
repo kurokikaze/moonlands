@@ -14,6 +14,7 @@ const {
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 	PROMPT_TYPE_SINGLE_CREATURE,
 	PROMPT_TYPE_SINGLE_MAGI,
+	PROMPT_TYPE_NUMBER,
 
 	ZONE_TYPE_ACTIVE_MAGI,
 	ZONE_TYPE_MAGI_PILE,
@@ -1418,5 +1419,101 @@ describe('Timber Hyren', () => {
 
 		expect(timberHyren.data.energy).toEqual(4, 'Timber Hyren got 3 energy and now has 4');
 		expect(yaki.data.energy).toEqual(0, 'Yaki lost 3 energy and now has 0');
+	});
+});
+
+describe('Quor Pup', () => {
+	it('Charge', () => {
+		const ACTIVE_PLAYER = 100;
+		const NON_ACTIVE_PLAYER = 1;
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+		sinder.addEnergy(10);
+		const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER);
+		quorPup.addEnergy(2);
+		const weebo = new CardInGame(byName('Weebo', NON_ACTIVE_PLAYER));
+		weebo.addEnergy(2);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [quorPup, weebo], [sinder]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: ACTION_ATTACK,
+			source: quorPup,
+			target: weebo,
+			player: ACTIVE_PLAYER,
+		};
+
+		const numberPromptAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			number: 2,
+			player: ACTIVE_PLAYER,
+			generatedBy: quorPup.id,
+		};
+
+		gameState.update(attackAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Engine stops the attack and prompts us for Charge amount');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_NUMBER, 'Engine waits specifically for Number');
+		expect(gameState.state.promptParams).toEqual({min: 0, max: 2}, 'Engine specifies min and max for expected number');
+
+		gameState.update(numberPromptAction);
+
+		expect(quorPup.data.energy).toEqual(2, 'Quor Pup lost 2 energy in attack but was Charged by 2 and now has 2 left');
+		expect(sinder.data.energy).toEqual(8, 'Sinder gave 2 energy to Quor Pup in attack, and now has 8');
+		expect(weebo.data.energy).toEqual(0, 'Weebo is toast');
+	});
+
+	it('Charge (attack target is Magi)', () => {
+		const ACTIVE_PLAYER = 100;
+		const NON_ACTIVE_PLAYER = 1;
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+		sinder.addEnergy(10);
+		const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER);
+		quorPup.addEnergy(2);
+		const yaki = new CardInGame(byName('Yaki', NON_ACTIVE_PLAYER));
+		yaki.addEnergy(12);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [quorPup], [sinder]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
+	
+
+		const attackAction = {
+			type: ACTION_ATTACK,
+			source: quorPup,
+			target: yaki,
+			player: ACTIVE_PLAYER,
+		};
+
+		const numberPromptAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			number: 2,
+			player: ACTIVE_PLAYER,
+			generatedBy: quorPup.id,
+		};
+
+		gameState.update(attackAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Engine stops the attack and prompts us for Charge amount');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_NUMBER, 'Engine waits specifically for Number');
+		expect(gameState.state.promptParams).toEqual({min: 0, max: 2}, 'Engine specifies min and max for expected number');
+
+		gameState.update(numberPromptAction);
+
+		expect(quorPup.data.energy).toEqual(4, 'Quor Pup lost no energy in attack on Magi and was Charged by 2 and now has 4');
+		expect(sinder.data.energy).toEqual(8, 'Sinder gave 2 energy to Quor Pup in attack, and now has 8');
+		expect(yaki.data.energy).toEqual(8, 'Yaki lost 4 because Quor Pup was charged before damage, so she is at 8');
 	});
 });

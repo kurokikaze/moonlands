@@ -83,6 +83,7 @@ const EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI = 'effects/add_energy_to_creatu
 const EFFECT_TYPE_ADD_ENERGY_TO_CREATURE = 'effects/add_energy_to_creature';
 const EFFECT_TYPE_ADD_ENERGY_TO_MAGI = 'effects/add_energy_to_magi';
 const EFFECT_TYPE_ENERGIZE = 'effects/energize';
+const EFFECT_TYPE_DAMAGE_STEP = 'effects/damage_step';
 const EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE = 'effects/discard_energy_from_creature';
 const EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI = 'effects/discard_energy_from_magi';
 const EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY = 'effects/discard_creature_from_play';
@@ -213,6 +214,7 @@ module.exports = {
 	EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
 	EFFECT_TYPE_BEFORE_DAMAGE,
 	EFFECT_TYPE_DEAL_DAMAGE,
+	EFFECT_TYPE_DAMAGE_STEP,
 	EFFECT_TYPE_CREATURE_IS_DEFEATED,
 	EFFECT_TYPE_AFTER_DAMAGE,
 	EFFECT_TYPE_CREATURE_ATTACKS,

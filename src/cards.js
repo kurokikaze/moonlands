@@ -610,7 +610,52 @@ const cards = [
 			},
 		],
 	}),
-	new Card('Quor Pup', TYPE_CREATURE, REGION_CALD, 2),
+	new Card('Quor Pup', TYPE_CREATURE, REGION_CALD, 2, {
+		triggerEffects: [
+			{
+				find: {
+					effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+					conditions: [
+						{
+							objectOne: 'source',
+							propertyOne: PROPERTY_ID,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_ID,
+						},
+					],
+				},
+				effects: [
+					select({
+						selector: SELECTOR_OWN_MAGI,
+					}),
+					getPropertyValue({
+						target: '$selected',
+						property: PROPERTY_ENERGY_COUNT,
+						variable: 'magi_energy',
+					}),
+					{
+						type: ACTION_CALCULATE,
+						operator: CALCULATION_MIN,
+						operandOne: '$magi_energy',
+						operandTwo: 2,
+						variable: 'max_tribute',
+					},
+					prompt({
+						promptType: PROMPT_TYPE_NUMBER,
+						min: 0,
+						max: '$max_tribute',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_MOVE_ENERGY,
+						source: '$selected',
+						target: '%self',
+						amount: '$number',
+					}),
+				],
+			},
+		],
+	}),
 	new Card('Fire Flow', TYPE_SPELL, REGION_CALD, 1, {
 		effects: [
 			prompt({
