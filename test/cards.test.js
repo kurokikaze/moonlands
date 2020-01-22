@@ -1577,10 +1577,11 @@ describe('Coral Hyren', () => {
 	it('Spelltap (not activating on non-orothe spell)', () => {
 		const ACTIVE_PLAYER = 100;
 		const NON_ACTIVE_PLAYER = 1;
+		const HYREN_STARTING_ENERGY = 2;
 		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
 		sinder.addEnergy(10);
 		const coralHyren = new CardInGame(byName('Coral Hyren'), ACTIVE_PLAYER);
-		coralHyren.addEnergy(2);
+		coralHyren.addEnergy(HYREN_STARTING_ENERGY);
 		const deepHyren = new CardInGame(byName('Deep Hyren'), ACTIVE_PLAYER);
 		deepHyren.addEnergy(3);
 		const fireball = new CardInGame(byName('Fire Ball'), ACTIVE_PLAYER);
@@ -1621,6 +1622,9 @@ describe('Coral Hyren', () => {
 
 		expect(deepHyren.data.energy).toEqual(1, 'Deep Hyren got hit by 2 from Fireball. Poor thing.');
 		expect(sinder.data.energy).toEqual(8, 'Sinder paid 2 for Fire Ball');
-		expect(coralHyren.data.energy).toEqual(2, 'Coral Hyren did not got 1 energy from Fire Ball as it is not an Orothe spell');
+		expect(coralHyren.data.energy).toEqual(
+			HYREN_STARTING_ENERGY,
+			'Coral Hyren did not got 1 energy from Fire Ball as it is not an Orothe spell',
+		);
 	});
 });
