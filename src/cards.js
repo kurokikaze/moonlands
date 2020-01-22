@@ -55,6 +55,8 @@ const {
 	EFFECT_TYPE_DRAW,
 	EFFECT_TYPE_ROLL_DIE,
 	EFFECT_TYPE_PLAY_CREATURE,
+	EFFECT_TYPE_PLAY_RELIC,
+	EFFECT_TYPE_PLAY_SPELL,
 	EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
 	EFFECT_TYPE_CREATURE_ENTERS_PLAY,
 	EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
@@ -83,6 +85,7 @@ const {
 	PROMPT_TYPE_NUMBER,
 
 	RESTRICTION_ENERGY_LESS_THAN_STARTING,
+	RESTRICTION_REGION,
 
 	COST_X,
 
@@ -1259,6 +1262,53 @@ const cards = [
 				target: '$target',
 				amount: '$roll_result',
 			}),
+		],
+	}),
+	new Card('Submerge', TYPE_SPELL, REGION_OROTHE, 2, {
+		effects: [
+			prompt({
+				promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+				restriction: RESTRICTION_REGION,
+				restrictionValue: REGION_OROTHE,
+			}),
+			effect({
+				effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+				target: '$target',
+				amount: 3,
+			}),
+		],
+	}),
+	new Card('Coral Hyren', TYPE_CREATURE, REGION_OROTHE, 4, {
+		triggerEffects: [
+			{
+				find: {
+					effectType: EFFECT_TYPE_PLAY_SPELL,
+					conditions: [
+						{
+							objectOne: 'card',
+							propertyOne: PROPERTY_REGION,
+							comparator: '=',
+							objectTwo: REGION_OROTHE,
+							propertyTwo: null,
+						},
+						{
+							objectOne: 'card',
+							propertyOne: PROPERTY_CONTROLLER,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						}
+					],
+				},
+				effects: [
+					{
+						type: ACTION_EFFECT,
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '%self',
+						amount: 1,
+					},
+				],
+			},
 		],
 	}),
 ];

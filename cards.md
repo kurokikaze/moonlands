@@ -1,4 +1,4 @@
-Done: **46** cards out of **190**
+Done: **47** cards out of **190**
 
 # Done, tested
 
@@ -24,7 +24,11 @@ Done: **46** cards out of **190**
 - Vortex of Knowledge
 - Ashgar
 - Quor
+- Quor Pup
+- Timber Hyren
 - Robe of Vines
+- Coral Hyren
+- Submerge (tested with Coral Hyren)
 
 # Done, not tested
 
@@ -42,7 +46,6 @@ Done: **46** cards out of **190**
 - Magam
 - Pruitt
 - Poad
-- Timber Hyren
 - Grow
 - Flame Geyser
 - Syphon Stone
@@ -109,7 +112,6 @@ Done: **46** cards out of **190**
 - Shooting Star
 - Sinder
 - Storm Cloud
-- Submerge
 - Tap Roots (will benefit from prompt texts)
 - Trug
 - Tryn
@@ -215,7 +217,6 @@ Done: **46** cards out of **190**
 - Blu
 - Bwill
 - Cave Rudwot
-- Coral Hyren
 - Evu
 - Furok
 - Gar
@@ -228,7 +229,6 @@ Done: **46** cards out of **190**
 - Motash
 - Ora
 - Orathan
-- Quor Pup
 - Ring of Secrets
 - Scroll of Fire
 - Shimmer

@@ -69,6 +69,7 @@ const {
 	PROMPT_TYPE_SINGLE_CREATURE,
 	PROMPT_TYPE_SINGLE_MAGI,
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
+	PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
 	PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
 	PROMPT_TYPE_CHOOSE_CARDS,
 
@@ -897,6 +898,12 @@ class State {
 								source: this.getMetaValue(action.source, action.generatedBy),
 							};
 							break;
+						case PROMPT_TYPE_SINGLE_CREATURE_FILTERED:
+							promptParams = {
+								restriction: action.restriction,
+								restrictionValue: action.restrictionValue,
+							};
+							break;
 						case PROMPT_TYPE_NUMBER:
 							promptParams = {
 								min: this.getMetaValue(action.min, action.generatedBy),
@@ -931,6 +938,10 @@ class State {
 							}
 							currentActionMetaData[variable || 'target'] = action.target;
 							break;
+						case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
+							currentActionMetaData[variable || 'target'] = action.target;
+							break;
+						}
 						case PROMPT_TYPE_SINGLE_CREATURE:
 							currentActionMetaData[variable || 'target'] = action.target;
 							break;
@@ -1167,9 +1178,20 @@ class State {
 								}
 								case TYPE_SPELL: {
 									const preparedEffects = action.payload.card.card.data.effects
-										.map(effect => ({...effect, generatedBy: action.payload.card.id}));
+										.map(effect => ({
+											player: action.payload.player, // Spell can rewrite this to make opponent do something - draw a card, for example
+											...effect,
+											generatedBy: action.payload.card.id,
+										}));
 
 									this.transformIntoActions(
+										{
+											type: ACTION_EFFECT,
+											effectType: EFFECT_TYPE_PLAY_SPELL,
+											card: action.payload.card,
+											player: action.payload.player,
+											generatedBy: action.payload.card.id,
+										},
 										{
 											type: ACTION_EFFECT,
 											effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,

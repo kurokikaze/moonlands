@@ -12,13 +12,16 @@ const {
 
 	PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
+	PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
 	PROMPT_TYPE_SINGLE_CREATURE,
 	PROMPT_TYPE_SINGLE_MAGI,
 	PROMPT_TYPE_NUMBER,
 
+	RESTRICTION_REGION,
+	REGION_OROTHE,
+
 	ZONE_TYPE_ACTIVE_MAGI,
 	ZONE_TYPE_MAGI_PILE,
-	// ZONE_TYPE_DEFEATED_MAGI,
 	ZONE_TYPE_DECK,
 	ZONE_TYPE_IN_PLAY,
 	ZONE_TYPE_DISCARD,
@@ -1515,5 +1518,109 @@ describe('Quor Pup', () => {
 		expect(quorPup.data.energy).toEqual(4, 'Quor Pup lost no energy in attack on Magi and was Charged by 2 and now has 4');
 		expect(sinder.data.energy).toEqual(8, 'Sinder gave 2 energy to Quor Pup in attack, and now has 8');
 		expect(yaki.data.energy).toEqual(8, 'Yaki lost 4 because Quor Pup was charged before damage, so she is at 8');
+	});
+});
+
+describe('Coral Hyren', () => {
+	it('Spelltap', () => {
+		const ACTIVE_PLAYER = 100;
+		const NON_ACTIVE_PLAYER = 1;
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+		sinder.addEnergy(10);
+		const coralHyren = new CardInGame(byName('Coral Hyren'), ACTIVE_PLAYER);
+		coralHyren.addEnergy(2);
+		const deepHyren = new CardInGame(byName('Deep Hyren'), ACTIVE_PLAYER);
+		deepHyren.addEnergy(2);
+		const submerge = new CardInGame(byName('Submerge'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [coralHyren, deepHyren], [sinder]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([submerge]);
+
+		const playSpellAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: submerge,
+				player: ACTIVE_PLAYER,
+			},
+		};
+
+		const targetPromptAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: deepHyren,
+			player: ACTIVE_PLAYER,
+			generatedBy: submerge.id,
+		};
+
+		gameState.update(playSpellAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Engine stops the attack and prompts us for Charge amount');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_SINGLE_CREATURE_FILTERED, 'Engine waits for Creature with specified parameters');
+		expect(gameState.state.promptParams).toEqual(
+			{restriction: RESTRICTION_REGION, restrictionValue: REGION_OROTHE},
+			'Engine wants us to choose specifically Orothe creature',
+		);
+
+		gameState.update(targetPromptAction);
+
+		expect(deepHyren.data.energy).toEqual(5, 'Deep Hyren got 3 energy from Submerge, now at 5');
+		expect(sinder.data.energy).toEqual(7, 'Sinder paid 3 for Submerge (2 + region penalty)');
+		expect(coralHyren.data.energy).toEqual(3, 'Coral Hyren got 1 energy from Spelltap and now at 3');		
+	});
+
+	it('Spelltap (not activating on non-orothe spell)', () => {
+		const ACTIVE_PLAYER = 100;
+		const NON_ACTIVE_PLAYER = 1;
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+		sinder.addEnergy(10);
+		const coralHyren = new CardInGame(byName('Coral Hyren'), ACTIVE_PLAYER);
+		coralHyren.addEnergy(2);
+		const deepHyren = new CardInGame(byName('Deep Hyren'), ACTIVE_PLAYER);
+		deepHyren.addEnergy(3);
+		const fireball = new CardInGame(byName('Fire Ball'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [coralHyren, deepHyren], [sinder]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([fireball]);
+
+		const playSpellAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: fireball,
+				player: ACTIVE_PLAYER,
+			},
+		};
+
+		const targetPromptAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: deepHyren,
+			player: ACTIVE_PLAYER,
+			generatedBy: fireball.id,
+		};
+
+		gameState.update(playSpellAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Engine stops the attack and prompts us for Charge amount');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, 'Engine waits for any Creature or Magi');
+		expect(gameState.state.promptParams).toEqual({}, 'Engine gives us no restrictions on target');
+
+		// We'll Fireball our own Deep Hyren, for simplicity's sake
+		gameState.update(targetPromptAction);
+
+		expect(deepHyren.data.energy).toEqual(1, 'Deep Hyren got hit by 2 from Fireball. Poor thing.');
+		expect(sinder.data.energy).toEqual(8, 'Sinder paid 2 for Fire Ball');
+		expect(coralHyren.data.energy).toEqual(2, 'Coral Hyren did not got 1 energy from Fire Ball as it is not an Orothe spell');
 	});
 });

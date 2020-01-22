@@ -119,6 +119,7 @@ const PROMPT_TYPE_NUMBER_OF_RELICS = 'prompt/number_of_relics';
 const PROMPT_TYPE_NUMBER = 'prompt/number';
 
 const RESTRICTION_ENERGY_LESS_THAN_STARTING = 'restrictions/energy_less_than_starting';
+const RESTRICTION_REGION = 'restrictions/region';
 
 const TYPE_CREATURE = 'types/creature';
 const TYPE_MAGI = 'types/magi';
@@ -227,6 +228,7 @@ module.exports = {
 	EFFECT_TYPE_DRAW_REST_OF_CARDS,
 	
 	RESTRICTION_ENERGY_LESS_THAN_STARTING,
+	RESTRICTION_REGION,
 
 	NO_PRIORITY,
 	PRIORITY_PRS,
