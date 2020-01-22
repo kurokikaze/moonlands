@@ -252,7 +252,7 @@ class State {
 		this.actionsTwo.unshift(action);
 
 		// Do not send outside CALCULATE, SELECT and so on
-		if (![ACTION_CALCULATE, ACTION_ATTACK, ACTION_GET_PROPERTY_VALUE].includes(action.type)) {
+		if (![ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE].includes(action.type)) {
 			this.actionStreamOne.emit('action', action);
 			this.actionStreamTwo.emit('action', action);
 		}
