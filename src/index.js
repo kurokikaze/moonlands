@@ -1,4 +1,7 @@
+const {Writable} = require('stream');
+const EventEmitter = require('events');
 const nanoid = require('nanoid');
+
 
 const {
 	/* eslint-disable no-unused-vars */
@@ -66,6 +69,7 @@ const {
 	PROMPT_TYPE_SINGLE_CREATURE,
 	PROMPT_TYPE_SINGLE_MAGI,
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
+	PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
 	PROMPT_TYPE_CHOOSE_CARDS,
 
 	NO_PRIORITY,
@@ -218,6 +222,38 @@ class State {
 		this.decks = [];
 		this.winner = false;
 		this.debug = false;
+		this.actionsOne = [];
+		this.actionsTwo = [];
+
+		this.actionStreamOne = new EventEmitter();
+		this.actionStreamTwo = new EventEmitter();
+
+		this.commandStream = new Writable({
+			encoding: 'utf-8',
+			objectMode: true,
+			write: command => {
+				if (Object.prototype.hasOwnProperty.call(command, 'type')) {
+					this.update(command);
+				}
+			},
+		});
+	}
+
+	closeStreams() {
+		this.actionStreamOne.destroy();
+		this.commandStream.destroy();
+	}
+
+	addActionToStream(action) {
+
+		this.actionsOne.unshift(action);
+		this.actionsTwo.unshift(action);
+
+		// Do not send outside CALCULATE, SELECT and so on
+		if (![ACTION_CALCULATE, ACTION_ATTACK, ACTION_GET_PROPERTY_VALUE].includes(action.type)) {
+			this.actionStreamOne.emit('action', action);
+			this.actionStreamTwo.emit('action', action);
+		}
 	}
 
 	enableDebug() {
@@ -695,6 +731,8 @@ class State {
 				showAction(action);
 			}
 
+			this.addActionToStream(action);
+
 			this.triggerAbilities(action);
 
 			switch (action.type) {
@@ -895,6 +933,9 @@ class State {
 							currentActionMetaData[variable || 'target'] = action.target;
 							break;
 						case PROMPT_TYPE_SINGLE_CREATURE:
+							currentActionMetaData[variable || 'target'] = action.target;
+							break;
+						case PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI:
 							currentActionMetaData[variable || 'target'] = action.target;
 							break;
 						case PROMPT_TYPE_SINGLE_MAGI:

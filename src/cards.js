@@ -485,10 +485,10 @@ const cards = [
 						effectType: EFFECT_TYPE_ROLL_DIE,
 					}),
 					prompt({
-						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+						promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
 					}),
 					effect({
-						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
 						target: '$target',
 						amount: '$roll_result',
 					}),
@@ -505,6 +505,7 @@ const cards = [
 					{
 						type: ACTION_GET_PROPERTY_VALUE,
 						property: PROPERTY_CONTROLLER,
+						target: '$source',
 						variable: 'controller',
 					},
 					{
