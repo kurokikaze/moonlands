@@ -822,7 +822,10 @@ class State {
 					break;
 				}
 				case ACTION_GET_PROPERTY_VALUE: {
-					const target = this.getMetaValue(action.target, action.generatedBy);
+					const multiTarget = this.getMetaValue(action.target, action.generatedBy);
+					// Sometimes we can only pass here results of a selector. 
+					// If so, work on first element of result.
+					const target = (multiTarget instanceof Array) ? multiTarget[0] : multiTarget;
 					const property = this.getMetaValue(action.property, action.generatedBy);
 
 					const modifiedResult = this.modifyByStaticAbilities(target, property);
@@ -902,6 +905,12 @@ class State {
 						case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE:
 							promptParams = {
 								source: this.getMetaValue(action.source, action.generatedBy),
+							};
+							break;
+						case PROMPT_TYPE_NUMBER:
+							promptParams = {
+								min: this.getMetaValue(action.min, action.generatedBy),
+								max: this.getMetaValue(action.max, action.generatedBy),
 							};
 							break;
 					}
@@ -1483,7 +1492,7 @@ class State {
 								throw new Error('Invalid params for EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
 							}
 							const zoneChangingTarget = this.getMetaValue(action.target, action.generatedBy);
-							const zoneChangingCard = zoneChangingTarget.length ? zoneChangingTarget[0] : zoneChangingTarget;
+							const zoneChangingCard = (zoneChangingTarget instanceof Array) ? zoneChangingTarget[0] : zoneChangingTarget;
 							const sourceZoneType = this.getMetaValue(action.sourceZone, action.generatedBy);
 							const destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
 							const destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
@@ -1513,8 +1522,10 @@ class State {
 							break;
 						}
 						case EFFECT_TYPE_MOVE_ENERGY: {
-							const moveSource = this.getMetaValue(action.source, action.generatedBy);
-							const moveTarget = this.getMetaValue(action.target, action.generatedBy);
+							const moveMultiSource = this.getMetaValue(action.source, action.generatedBy);
+							const moveSource = (moveMultiSource instanceof Array) ? moveMultiSource[0] : moveMultiSource;
+							const moveMultiTarget = this.getMetaValue(action.target, action.generatedBy);
+							const moveTarget = (moveMultiTarget instanceof Array) ? moveMultiTarget[0] : moveMultiTarget;
 							const amountToMove = this.getMetaValue(action.amount, action.generatedBy);
 
 							moveSource.removeEnergy(amountToMove);

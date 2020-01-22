@@ -903,14 +903,31 @@ const cards = [
 		powers: [
 			power('Tribute', [
 				select({
-					selector: SELECTOR_OWN_CREATURES,
+					selector: SELECTOR_OWN_MAGI,
 				}),
-				effect({
-					effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+				getPropertyValue({
 					target: '$selected',
-					amount: 1,
+					property: PROPERTY_ENERGY_COUNT,
+					variable: 'magi_energy',
 				}),
-
+				{
+					type: ACTION_CALCULATE,
+					operator: CALCULATION_MIN,
+					operandOne: '$magi_energy',
+					operandTwo: 5,
+					variable: 'max_tribute',
+				},
+				prompt({
+					promptType: PROMPT_TYPE_NUMBER,
+					min: 1,
+					max: '$max_tribute',
+				}),				
+				effect({
+					effectType: EFFECT_TYPE_MOVE_ENERGY,
+					source: '$selected',
+					target: '$sourceCreature',
+					amount: '$number',
+				}),
 			]),
 		],
 	}),

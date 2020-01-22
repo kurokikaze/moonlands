@@ -1336,3 +1336,87 @@ describe('Yaki', () => {
 		expect(grega.data.energy).toEqual(6, 'Grega has 6 energy left (third attack did not happen)');
 	});
 });
+
+describe('Timber Hyren', () => {
+	it('Tribute', () => {
+		const ACTIVE_PLAYER = 100;
+		const NON_ACTIVE_PLAYER = 1;
+		const yaki = new CardInGame(byName('Yaki'), ACTIVE_PLAYER);
+		yaki.addEnergy(10);
+		const timberHyren = new CardInGame(byName('Timber Hyren'), ACTIVE_PLAYER);
+		timberHyren.addEnergy(1);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [timberHyren], [yaki]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: timberHyren,
+			power: timberHyren.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		const numberPromptAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			number: 4,
+			player: ACTIVE_PLAYER,
+			generatedBy: timberHyren.id,
+		};
+
+		gameState.update(powerAction);
+		// After this, engine will ask us how much energy do we want to Tribute
+		// Let's say 4
+		gameState.update(numberPromptAction);
+
+		expect(timberHyren.data.energy).toEqual(5, 'Timber Hyren got 4 energy and now has 5');
+		expect(yaki.data.energy).toEqual(6, 'Yaki lost 4 energy and now has 6');
+	});
+
+	it('Tribute (draining Magi to 0)', () => {
+		const ACTIVE_PLAYER = 100;
+		const NON_ACTIVE_PLAYER = 1;
+		const yaki = new CardInGame(byName('Yaki'), ACTIVE_PLAYER);
+		yaki.addEnergy(3);
+		const timberHyren = new CardInGame(byName('Timber Hyren'), ACTIVE_PLAYER);
+		timberHyren.addEnergy(1);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [timberHyren], [yaki]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: timberHyren,
+			power: timberHyren.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		const numberPromptAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			number: 3,
+			player: ACTIVE_PLAYER,
+			generatedBy: timberHyren.id,
+		};
+
+		gameState.update(powerAction);
+		// After this, engine will ask us how much energy do we want to Tribute
+		// Max will be set to 3 (our Magi energy)
+		// Let's say we need all of it
+		expect(gameState.state.promptParams.max).toEqual(3, 'Prompt params signal that we may Tribute up to 3 energy');
+		gameState.update(numberPromptAction);
+
+		expect(timberHyren.data.energy).toEqual(4, 'Timber Hyren got 3 energy and now has 4');
+		expect(yaki.data.energy).toEqual(0, 'Yaki lost 3 energy and now has 0');
+	});
+});
