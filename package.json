@@ -1,6 +1,6 @@
 {
   "name": "moonlands",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "description": "Magi-Nation Duel engine",
   "main": "src/index.js",
   "directories": {
@@ -19,6 +19,7 @@
     "jest": "^24.9.0"
   },
   "dependencies": {
-    "nanoid": "^2.1.9"
+    "nanoid": "^2.1.9",
+    "socket.io": "^2.3.0"
   }
 }

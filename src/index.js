@@ -308,6 +308,25 @@ class State {
 		];		
 	}
 
+	serializeData() {
+		return {
+			zones: this.serializeZones(),
+			step: this.state.step,
+			turn: this.state.turn,
+			goesFirst: this.state.goesFirst,
+			activePlayer: this.state.activePlayer,
+		};
+	}
+
+	serializeZones() {
+		return this.state.zones.map(zone => ({
+			name: zone.name,
+			type: zone.type,
+			player: zone.player,
+			content: zone.serialize,
+		}));
+	}
+
 	setup() {
 		if (this.players.length < 2) {
 			throw new Error('Not enough players');
