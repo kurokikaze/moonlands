@@ -1131,7 +1131,7 @@ class State {
 										{
 											type: ACTION_EFFECT,
 											effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
-											from: this.getZone(ZONE_TYPE_ACTIVE_MAGI, player),
+											from: activeMagi,
 											amount: baseCard.cost + regionPenalty,
 											player: action.payload.player,
 											generatedBy: action.payload.card.id,
@@ -1173,7 +1173,7 @@ class State {
 											{
 												type: ACTION_EFFECT,
 												effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC,
-												from: this.getZone(ZONE_TYPE_ACTIVE_MAGI, player),
+												from: activeMagi,
 												amount: baseCard.cost,
 												player,
 												generatedBy: action.payload.card.id,
@@ -1215,7 +1215,7 @@ class State {
 										{
 											type: ACTION_EFFECT,
 											effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
-											from: this.getZone(ZONE_TYPE_ACTIVE_MAGI, player),
+											from: activeMagi,
 											amount: baseCard.cost + regionPenalty,
 											player: action.payload.player,
 											generatedBy: action.payload.card.id,
@@ -1507,15 +1507,15 @@ class State {
 							break;
 						}
 						case EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC: {
-							action.from.card.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
+							action.from.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
 							break;
 						}
 						case EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL: {
-							action.from.card.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
+							action.from.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
 							break;
 						}
 						case EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE: {
-							action.from.card.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
+							action.from.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
 							break;
 						}
 						case EFFECT_TYPE_PLAY_RELIC: {
