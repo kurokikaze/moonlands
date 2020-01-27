@@ -683,15 +683,15 @@ describe('Effects', () => {
 
 	it('Restore energy to creature [EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY]', () => {
 		const activePlayer = 0;
-		const arbolit = new CardInGame(byName('Arbolit'), activePlayer);
+		const quorPup = new CardInGame(byName('Quor Pup'), activePlayer);
 		const fireGrag = new CardInGame(byName('Fire Grag'), activePlayer).addEnergy(10);
-		arbolit.addEnergy(1);
+		quorPup.addEnergy(1);
 
 		const restoreEnergyEffect = {
 			type: moonlands.ACTION_EFFECT,
 			effectType: moonlands.EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
-			target: arbolit,
-			generatedBy: arbolit.id,
+			target: quorPup,
+			generatedBy: quorPup.id,
 		};
 
 		const restoreEnergyEffectNotApplicable = {
@@ -705,12 +705,12 @@ describe('Effects', () => {
 			activePlayer,
 		});
 
-		expect(arbolit.data.energy).toEqual(1, 'Arbolit has 1 energy');
+		expect(quorPup.data.energy).toEqual(1, 'Quor Pup has 1 energy');
 		expect(fireGrag.data.energy).toEqual(10, 'Fire Grag has 10 energy');
 
 		gameState.update(restoreEnergyEffect);
 
-		expect(arbolit.data.energy).toEqual(2, 'Arbolit has 2 energy');
+		expect(quorPup.data.energy).toEqual(2, 'Quor Pup has 2 energy');
 
 		gameState.update(restoreEnergyEffectNotApplicable);
 
@@ -1683,8 +1683,8 @@ describe('Casting things', () => {
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'In play has one card');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].card.name).toEqual('Arbolit', 'It is Arbolit');
-		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(13, 'Grega\'s energy is 13');
-		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].data.energy).toEqual(2, 'Arbolit\'s energy is 2');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(14, 'Grega\'s energy is 14');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].data.energy).toEqual(1, 'Arbolit\'s energy is 1');
 		expect(gameState.getZone(ZONE_TYPE_HAND, activePlayer).length).toEqual(0, 'No cards in hand now');
 	});
 
@@ -1809,8 +1809,8 @@ describe('Casting things', () => {
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'In play has one card');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].card.name).toEqual('Arbolit', 'It is Arbolit');
-		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(12, 'Yaki\'s energy is 12');
-		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].data.energy).toEqual(2, 'Arbolit\'s energy is 2');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(13, 'Yaki\'s energy is 13');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].data.energy).toEqual(1, 'Arbolit\'s energy is 1');
 	});
 });
 

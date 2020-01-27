@@ -541,7 +541,7 @@ const cards = [
 			},
 		]
 	}),
-	new Card('Arbolit', TYPE_CREATURE, REGION_CALD, 2, {
+	new Card('Arbolit', TYPE_CREATURE, REGION_CALD, 1, {
 		powers: [power(
 			'Healing Flame',
 			[
