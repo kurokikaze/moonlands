@@ -1042,12 +1042,12 @@ describe('Giant Parathin', () => {
 	});
 });
 
-describe('Great Carillion', () => {
+describe('Giant Carillion', () => {
 	it('Stomp', () => {
 		const ACTIVE_PLAYER = 422;
 		const NON_ACTIVE_PLAYER = 1310;
 
-		const greatCarillion = new CardInGame(byName('Great Carillion'), ACTIVE_PLAYER).addEnergy(8);
+		const greatCarillion = new CardInGame(byName('Giant Carillion'), ACTIVE_PLAYER).addEnergy(8);
 		const pharan = new CardInGame(byName('Pharan'), NON_ACTIVE_PLAYER).addEnergy(2);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [greatCarillion, pharan]);
 
@@ -1076,7 +1076,7 @@ describe('Great Carillion', () => {
 		gameState.update(targetingAction);
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'Only one creature in play');
-		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Great Carillion', 'It is Great Carillion');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Giant Carillion', 'It is Giant Carillion');
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1, 'One card in Player 2 discard');
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Pharan', 'It is Pharan');
 	});

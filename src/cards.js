@@ -596,7 +596,7 @@ const cards = [
 		}],
 	}),
 	new Card('Green Stuff', TYPE_CREATURE, REGION_BOGRATH, 0, {energize: 1}),
-	new Card('Great Carillion', TYPE_CREATURE, REGION_NAROOM, 8, {
+	new Card('Giant Carillion', TYPE_CREATURE, REGION_NAROOM, 8, {
 		powers: [
 			{
 				name: 'Stomp',
