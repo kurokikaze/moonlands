@@ -79,6 +79,8 @@ const EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL = 'effects/paying_energy_for_spell';
 const EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE = 'effects/paying_energy_for_creature';
 const EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE = 'effects/starting_energy_on_creature';
 const EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES = 'effects/move_card_between_zones';
+const EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES = 'effects/card_moved_between_zones';
+
 const EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI = 'effects/add_energy_to_creature_or_magi';
 const EFFECT_TYPE_ADD_ENERGY_TO_CREATURE = 'effects/add_energy_to_creature';
 const EFFECT_TYPE_ADD_ENERGY_TO_MAGI = 'effects/add_energy_to_magi';
@@ -213,6 +215,7 @@ module.exports = {
 	EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
 	EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
 	EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
+	EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
 	EFFECT_TYPE_BEFORE_DAMAGE,
 	EFFECT_TYPE_DEAL_DAMAGE,
 	EFFECT_TYPE_DAMAGE_STEP,

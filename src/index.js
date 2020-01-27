@@ -94,6 +94,7 @@ const {
 	EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC,
 	EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
 	EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+	EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
 	EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
 	EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI,
 	EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
@@ -1161,10 +1162,10 @@ class State {
 									break;
 								}
 								case TYPE_RELIC: {
-									const alreadyHasOne = this.getZone(ZONE_TYPE_IN_PLAY, action.player).cards
-										.some(card => card.card.name === action.payload.card.card.name);
-									const relicRegion = action.payload.card.card.region;
-									const magiRegion = this.useSelector(SELECTOR_OWN_MAGI, action.player)[0].card.region;
+									const alreadyHasOne = this.getZone(ZONE_TYPE_IN_PLAY, null).cards
+										.some(card => card.data.controller === player && card.card.name === baseCard.name);
+									const relicRegion = baseCard.region;
+									const magiRegion = this.useSelector(SELECTOR_OWN_MAGI, player)[0].card.region;
 									const regionAllows = relicRegion === magiRegion || relicRegion === REGION_UNIVERSAL;
 
 									if (!alreadyHasOne && regionAllows) {
@@ -1174,21 +1175,21 @@ class State {
 												effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC,
 												from: this.getZone(ZONE_TYPE_ACTIVE_MAGI, player),
 												amount: baseCard.cost,
-												player: action.payload.player,
+												player,
 												generatedBy: action.payload.card.id,
 											},
 											{
 												type: ACTION_EFFECT,
 												effectType: EFFECT_TYPE_PLAY_RELIC,
 												card: action.payload.card,
-												player: action.payload.player,
+												player,
 												generatedBy: action.payload.card.id,
 											},
 											{
 												type: ACTION_EFFECT,
 												effectType: EFFECT_TYPE_RELIC_ENTERS_PLAY,
 												card: '$relic_created',
-												player: action.payload.player,
+												player,
 												generatedBy: action.payload.card.id,
 											}
 										);
@@ -1196,7 +1197,7 @@ class State {
 									break;
 								}
 								case TYPE_SPELL: {
-									const preparedEffects = action.payload.card.card.data.effects
+									const preparedEffects = baseCard.data.effects
 										.map(effect => ({
 											player: action.payload.player, // Spell can rewrite this to make opponent do something - draw a card, for example
 											...effect,
@@ -1573,6 +1574,15 @@ class State {
 							sourceZone.removeById(zoneChangingCard.id);
 
 							this.setSpellMetaDataField('new_card', newObject, action.generatedBy);
+							this.transformIntoActions({
+								type: ACTION_EFFECT,
+								effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
+								sourceCard: zoneChangingTarget,
+								sourceZone: sourceZoneType,
+								destinationCard: newObject,
+								destinationZone: destinationZoneType,
+								generatedBy: action.generatedBy,
+							});
 							break;
 						}
 						case EFFECT_TYPE_CREATURE_ENTERS_PLAY:

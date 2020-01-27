@@ -1711,6 +1711,7 @@ describe('Casting things', () => {
 			step: STEP_PRS_FIRST,
 			activePlayer: 0,
 		});
+		gameState.setPlayers(0, 1);
         
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'In play is empty before');
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(15, 'Grega\'s Energy is 15');
@@ -1796,6 +1797,7 @@ describe('Casting things', () => {
 			step: 3,
 			activePlayer: 0,
 		});
+		gameState.setPlayers(activePlayer, notActivePlayer);
         
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'In play is empty before');
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(15, 'Yaki\'s Energy is 15');
