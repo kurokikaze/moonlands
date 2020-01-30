@@ -1646,6 +1646,46 @@ describe('Casting things', () => {
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, 0).length).toEqual(1);
 	});
 
+	it('Cast creature from hand (not enough energy)', () => {
+		const activePlayer = 0;
+		const notActivePlayer = 1;
+
+		const grega = new CardInGame(byName('Grega'), activePlayer);
+		grega.addEnergy(2);
+
+		const kelthet = new CardInGame(byName('Kelthet'), activePlayer);
+
+		const zones = [
+			new Zone('Active player hand', ZONE_TYPE_HAND, activePlayer).add([kelthet]),
+			new Zone('Non-active player hand', ZONE_TYPE_HAND, notActivePlayer),
+			new Zone('Active player deck', ZONE_TYPE_DECK, activePlayer),
+			new Zone('Non-active player deck', ZONE_TYPE_DECK, notActivePlayer),
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, activePlayer).add([grega]),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: 3,
+			activePlayer: 0,
+		});
+        
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'In play is empty before');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(2, 'Grega\'s Energy is 2');
+
+		gameState.update({
+			type: moonlands.ACTION_PLAY, 
+			payload: {
+				player: 0,
+				card: kelthet,
+			},
+		});
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'In play is empty after');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(2, 'Grega\'s Energy is still 2');
+		expect(gameState.getZone(ZONE_TYPE_HAND, activePlayer).length).toEqual(1, 'One card in hand');
+	});
+
 	it('Cast creature from hand', () => {
 		const activePlayer = 0;
 		const notActivePlayer = 1;

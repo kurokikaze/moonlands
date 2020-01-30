@@ -1127,48 +1127,50 @@ class State {
 							const regionPenalty = (activeMagi.card.region == baseCard.region || baseCard.region == REGION_UNIVERSAL) ? 0 : 1;
 							switch (cardType) {
 								case TYPE_CREATURE: {
-									this.transformIntoActions(
-										{
-											type: ACTION_EFFECT,
-											effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
-											from: activeMagi,
-											amount: baseCard.cost + regionPenalty,
-											player: action.payload.player,
-											generatedBy: action.payload.card.id,
-										},
-										{
-											type: ACTION_EFFECT,
-											effectType: EFFECT_TYPE_PLAY_CREATURE,
-											card: action.payload.card,
-											player: action.payload.player,
-											generatedBy: action.payload.card.id,
-										},
-										{
-											type: ACTION_EFFECT,
-											effectType: EFFECT_TYPE_CREATURE_ENTERS_PLAY,
-											target: '$creature_created',
-											player: action.payload.player,
-											generatedBy: action.payload.card.id,
-										},
-										{
-											type: ACTION_EFFECT,
-											effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
-											target: '$creature_created',
-											player: action.payload.player,
-											amount: baseCard.cost,
-											generatedBy: action.payload.card.id,
-										}
-									);
+									if (activeMagi.data.energy >= baseCard.cost + regionPenalty) {
+										this.transformIntoActions(
+											{
+												type: ACTION_EFFECT,
+												effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
+												from: activeMagi,
+												amount: baseCard.cost + regionPenalty,
+												player: action.payload.player,
+												generatedBy: action.payload.card.id,
+											},
+											{
+												type: ACTION_EFFECT,
+												effectType: EFFECT_TYPE_PLAY_CREATURE,
+												card: action.payload.card,
+												player: action.payload.player,
+												generatedBy: action.payload.card.id,
+											},
+											{
+												type: ACTION_EFFECT,
+												effectType: EFFECT_TYPE_CREATURE_ENTERS_PLAY,
+												target: '$creature_created',
+												player: action.payload.player,
+												generatedBy: action.payload.card.id,
+											},
+											{
+												type: ACTION_EFFECT,
+												effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
+												target: '$creature_created',
+												player: action.payload.player,
+												amount: baseCard.cost,
+												generatedBy: action.payload.card.id,
+											}
+										);
+									}
 									break;
 								}
 								case TYPE_RELIC: {
 									const alreadyHasOne = this.getZone(ZONE_TYPE_IN_PLAY, null).cards
 										.some(card => card.data.controller === player && card.card.name === baseCard.name);
 									const relicRegion = baseCard.region;
-									const magiRegion = this.useSelector(SELECTOR_OWN_MAGI, player)[0].card.region;
+									const magiRegion = activeMagi.card.region;
 									const regionAllows = relicRegion === magiRegion || relicRegion === REGION_UNIVERSAL;
 
-									if (!alreadyHasOne && regionAllows) {
+									if (!alreadyHasOne && regionAllows && activeMagi.data.energy > baseCard.cost) {
 										this.transformIntoActions(
 											{
 												type: ACTION_EFFECT,
@@ -1197,49 +1199,51 @@ class State {
 									break;
 								}
 								case TYPE_SPELL: {
-									const preparedEffects = baseCard.data.effects
-										.map(effect => ({
-											player: action.payload.player, // Spell can rewrite this to make opponent do something - draw a card, for example
-											...effect,
-											generatedBy: action.payload.card.id,
-										}));
+									if (activeMagi.data.energy >= baseCard.cost + regionPenalty) {
+										const preparedEffects = baseCard.data.effects
+											.map(effect => ({
+												player: action.payload.player, // Spell can rewrite this to make opponent do something - draw a card, for example
+												...effect,
+												generatedBy: action.payload.card.id,
+											}));
 
-									this.transformIntoActions(
-										{
-											type: ACTION_EFFECT,
-											effectType: EFFECT_TYPE_PLAY_SPELL,
-											card: action.payload.card,
-											player: action.payload.player,
-											generatedBy: action.payload.card.id,
-										},
-										{
-											type: ACTION_EFFECT,
-											effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
-											from: activeMagi,
-											amount: baseCard.cost + regionPenalty,
-											player: action.payload.player,
-											generatedBy: action.payload.card.id,
-										},
-										{
-											type: ACTION_CALCULATE,
-											operator: CALCULATION_SET,
-											operandOne: action.payload.player,
-											variable: 'player',
-											generatedBy: action.payload.card.id,
-										},
-										{
-											type: ACTION_EFFECT,
-											effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-											target: action.payload.card,
-											sourceZone: ZONE_TYPE_HAND,
-											destinationZone: ZONE_TYPE_DISCARD,
-											player: player,
-											generatedBy: action.payload.card.id,											
-										},
-										...preparedEffects,
-									);
+										this.transformIntoActions(
+											{
+												type: ACTION_EFFECT,
+												effectType: EFFECT_TYPE_PLAY_SPELL,
+												card: action.payload.card,
+												player: action.payload.player,
+												generatedBy: action.payload.card.id,
+											},
+											{
+												type: ACTION_EFFECT,
+												effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
+												from: activeMagi,
+												amount: baseCard.cost + regionPenalty,
+												player: action.payload.player,
+												generatedBy: action.payload.card.id,
+											},
+											{
+												type: ACTION_CALCULATE,
+												operator: CALCULATION_SET,
+												operandOne: action.payload.player,
+												variable: 'player',
+												generatedBy: action.payload.card.id,
+											},
+											{
+												type: ACTION_EFFECT,
+												effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+												target: action.payload.card,
+												sourceZone: ZONE_TYPE_HAND,
+												destinationZone: ZONE_TYPE_DISCARD,
+												player: player,
+												generatedBy: action.payload.card.id,											
+											},
+											...preparedEffects,
+										);
+									}
 									break;
-								}								
+								}
 							}
 						} else {
 							console.log(`Wrong Priority: current is ${currentPriority} (step ${this.getCurrentStep()}, type is ${cardType})`);
@@ -1451,6 +1455,17 @@ class State {
 							break;
 						}
 						case EFFECT_TYPE_AFTER_DAMAGE: {
+							if (action.source.data.energy === 0) {
+								this.transformIntoActions({
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+									target: action.source,
+									sourceZone: ZONE_TYPE_IN_PLAY,
+									destinationZone: ZONE_TYPE_DISCARD,
+									attack: true,
+									generatedBy: action.generatedBy,
+								});
+							}
 							if (action.target.data.energy === 0) {
 								this.transformIntoActions({
 									type: ACTION_EFFECT,
