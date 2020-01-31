@@ -264,11 +264,11 @@ const oneOrSeveral = (targets, callback) => {
 
 class State {
 	constructor(state) {
-		this.state = clone({
-			...defaultState,
+		this.state = {
+			...clone(defaultState),
 			spellMetaData: {},
 			...state,
-		});
+		};
 
 		this.players = [0, 1]; // For simple testing
 		this.decks = [];
@@ -1219,7 +1219,7 @@ class State {
 									break;
 								}
 								case TYPE_RELIC: {
-									const alreadyHasOne = this.getZone(ZONE_TYPE_IN_PLAY, null).cards
+									const alreadyHasOne = this.getZone(ZONE_TYPE_IN_PLAY).cards
 										.some(card => card.data.controller === player && card.card.name === baseCard.name);
 									const relicRegion = baseCard.region;
 									const magiRegion = activeMagi.card.region;
@@ -1365,7 +1365,8 @@ class State {
 
 								this.transformIntoActions(...actions);
 							}
-							const creatures = this.getZone(ZONE_TYPE_IN_PLAY, action.player).cards.filter(card => card.card.type === TYPE_CREATURE && card.data.controller === action.player);
+							const creatures = this.getZone(ZONE_TYPE_IN_PLAY).cards
+								.filter(card => card.card.type === TYPE_CREATURE && card.data.controller === action.player);
 							if (creatures.length > 0) {
 								creatures.forEach(creature => creature.clearAttackMarkers());
 							}
@@ -1526,7 +1527,7 @@ class State {
 									generatedBy: action.generatedBy,
 								});
 							}
-							if (action.target.data.energy === 0) {
+							if (action.target.data.energy === 0 && action.target.card.type === TYPE_CREATURE) {
 								this.transformIntoActions({
 									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
@@ -1785,7 +1786,7 @@ class State {
 								const winner = this.getOpponent(action.target.owner);
 
 								this.transformIntoActions({
-									action: ACTION_PLAYER_WINS,
+									type: ACTION_PLAYER_WINS,
 									player: winner,
 								});
 							}
