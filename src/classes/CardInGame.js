@@ -51,7 +51,7 @@ class CardInGame {
 	clearAttackMarkers() {
 		this.data.wasAttacked = false;
 		this.data.hasAttacked = false;
-		this.data.attacked = false;
+		this.data.attacked = 0;
 	}
 
 	copy() {

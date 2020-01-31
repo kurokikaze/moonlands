@@ -44,7 +44,7 @@ describe('Stream of actions', () => {
 		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, PLAYER_TWO).length).toEqual(3, 'Player two magi transferred into pile zone');
 		expect(gameState.getZone(ZONE_TYPE_DECK, PLAYER_TWO).length).toEqual(40, 'Player two deck transferred into zone');
 
-		expect(gameState.state.step).toEqual(0, 'Step is 0 (STEP_ENERGIZE)');
+		expect(gameState.state.step).toEqual(null, 'Step is null (Nullstart)');
 		expect(gameState.state.turn).toEqual(1, 'Turn is 1');
 		expect(
 			gameState.state.goesFirst == PLAYER_ONE || gameState.state.goesFirst == PLAYER_TWO,
@@ -57,11 +57,12 @@ describe('Stream of actions', () => {
 			seenActions.push(action);
 		});
 
+		// This initial action will change step to 0 while keeping current active player
 		gameState.commandStream.write({
 			type: ACTION_PASS,
 		});
 
-		expect(gameState.state.step).toEqual(1, 'Step is 1 (STEP_PRS_FIRST)');
+		expect(gameState.state.step).toEqual(0, 'Step is 0 (STEP_ENERGIZE)');
 		expect(seenActions.length).toBeGreaterThan(0, 'Actions are coming via events');
 		expect(seenActions[0]).toEqual({type: ACTION_PASS}, 'Pass actions are sent as is');
 	});

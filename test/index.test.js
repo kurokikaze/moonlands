@@ -2036,7 +2036,7 @@ describe('Initializing game from set of decks', () => {
 		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, PLAYER_TWO).length).toEqual(3, 'Player two magi transferred into pile zone');
 		expect(gameState.getZone(ZONE_TYPE_DECK, PLAYER_TWO).length).toEqual(40, 'Player two deck transferred into zone');
 
-		expect(gameState.state.step).toEqual(0, 'Step is 0 (STEP_ENERGIZE)');
+		expect(gameState.state.step).toEqual(null, 'Step is null (Nullstart)');
 		expect(gameState.state.turn).toEqual(1, 'Turn is 1');
 		expect(
 			gameState.state.goesFirst == PLAYER_ONE || gameState.state.goesFirst == PLAYER_TWO,
@@ -2069,7 +2069,7 @@ describe('Initializing game from set of decks', () => {
 		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, PLAYER_TWO).length).toEqual(3, 'Player two magi transferred into pile zone');
 		expect(gameState.getZone(ZONE_TYPE_DECK, PLAYER_TWO).length).toEqual(40, 'Player two deck transferred into zone');
 
-		expect(gameState.state.step).toEqual(0, 'Step is 0 (STEP_ENERGIZE)');
+		expect(gameState.state.step).toEqual(null, 'Step is null (nullstart)');
 		expect(gameState.state.turn).toEqual(1, 'Turn is 1');
 		expect(
 			gameState.state.goesFirst == PLAYER_ONE || gameState.state.goesFirst == PLAYER_TWO,
