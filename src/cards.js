@@ -96,12 +96,6 @@ const {
 	/* eslint-enable no-unused-vars */
 } = require('./const');
 
-const power = (name, effects) => ({
-	name,
-	effects,
-	cost: 0,
-});
-
 const effect = data => ({
 	type: ACTION_EFFECT,
 	...data,
@@ -127,6 +121,7 @@ const cards = [
 		powers: [
 			{
 				name: 'Undream',
+				text: 'Choose a creature in play. Return the chosen Creature to its owner\'s hand. Discard the chosen Creature\'s energy.',
 				cost: 5,
 				effects: [
 					prompt({
@@ -144,6 +139,8 @@ const cards = [
 	}),
 	new Card('Water of Life', TYPE_RELIC, REGION_UNIVERSAL, 0, {
 		staticAbilities: [{
+			name: 'Invigorate',
+			text: 'Your Magi\'s energize rate is increased by one',
 			selector: SELECTOR_OWN_MAGI,
 			property: PROPERTY_ENERGIZE,
 			modifier: {
@@ -173,7 +170,9 @@ const cards = [
 	new Card('Paralit', TYPE_CREATURE, REGION_OROTHE, 3, {
 		powers: [
 			{
-				name: 'Life Channel', 
+				name: 'Life Channel',
+				cost: 0,
+				text: 'Discard Paralit from play. Add 5 energy to your Magi. Discard one energy from each of your Creatures.',
 				effects: [
 					effect({
 						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
@@ -202,6 +201,8 @@ const cards = [
 	new Card('Magma Armor', TYPE_RELIC, REGION_CALD, 0, {
 		triggerEffects: [
 			{
+				name: 'Defense',
+				text: 'When a Creature attacks your Magi directly, add two Energy to your Magi before energy is removed',
 				find: {
 					effectType: EFFECT_TYPE_BEFORE_DAMAGE,
 					conditions: [
@@ -234,47 +235,52 @@ const cards = [
 	}),
 	new Card('Giant Parathin', TYPE_CREATURE, REGION_OROTHE, 10, {
 		powers: [
-			power('Intercharge', [
-				effect({
-					effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-					target: '$sourceCreature',
-				}),
-				select({
-					selector: SELECTOR_OWN_MAGI,
-				}),
-				effect({
-					effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-					sourceZone: ZONE_TYPE_ACTIVE_MAGI,
-					destinationZone: ZONE_TYPE_MAGI_PILE,
-					target: '$selected',
-					bottom: true,
-				}),
-				select({
-					selector: SELECTOR_TOP_MAGI_OF_PILE,
-				}),
-				effect({
-					effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-					sourceZone: ZONE_TYPE_MAGI_PILE,
-					destinationZone: ZONE_TYPE_ACTIVE_MAGI,
-					target: '$selected',
-				}),
-				getPropertyValue({
-					property: PROPERTY_MAGI_STARTING_ENERGY,
-					target: '$new_card',
-					variable: 'starting_energy',
-				}),
-				effect({
-					effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
-					target: '$new_card',
-					amount: '$starting_energy',
-				}),
-			]),
+			{
+				name: 'Intercharge',
+				cost: 0,
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+						target: '$sourceCreature',
+					}),
+					select({
+						selector: SELECTOR_OWN_MAGI,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+						sourceZone: ZONE_TYPE_ACTIVE_MAGI,
+						destinationZone: ZONE_TYPE_MAGI_PILE,
+						target: '$selected',
+						bottom: true,
+					}),
+					select({
+						selector: SELECTOR_TOP_MAGI_OF_PILE,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+						sourceZone: ZONE_TYPE_MAGI_PILE,
+						destinationZone: ZONE_TYPE_ACTIVE_MAGI,
+						target: '$selected',
+					}),
+					getPropertyValue({
+						property: PROPERTY_MAGI_STARTING_ENERGY,
+						target: '$new_card',
+						variable: 'starting_energy',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+						target: '$new_card',
+						amount: '$starting_energy',
+					}),
+				],
+			},
 		],
 	}),
 	new Card('Kelthet', TYPE_CREATURE, REGION_CALD, 4, {
 		powers: [
 			{
 				name: 'Consume',
+				text: 'Choose your Creature. Move all of the chosen Creature\'s energy to Kelthet.',
 				cost: 1,
 				effects: [
 					prompt({
@@ -300,6 +306,7 @@ const cards = [
 			{
 				name: 'Hurricane',
 				cost: 6,
+				text: 'Choose your Creature. Discard chosen Creature from play. Discard 3 energy from each non-Orothe Creature in play.',
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
@@ -335,6 +342,7 @@ const cards = [
 			{
 				name: 'Fireball',
 				cost: 1,
+				text: 'Choose a Creature. Discard one energy from the chosen Creature.',
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE,
@@ -349,6 +357,7 @@ const cards = [
 			{
 				name: 'Healing Flame',
 				cost: 1,
+				text: 'Choose another Creature. Add 2 energy to the chosen Creature.',
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
@@ -366,6 +375,8 @@ const cards = [
 	new Card('Quor', TYPE_CREATURE, REGION_CALD, 4, {
 		triggerEffects: [
 			{
+				name: 'Battering ram',
+				text: 'When Quor attacks an opposing Creature, discard two energy from that Creature\'s Magi',
 				find: {
 					effectType: EFFECT_TYPE_CREATURE_ATTACKS,
 					conditions: [
@@ -404,6 +415,8 @@ const cards = [
 	new Card('Robe of Vines', TYPE_RELIC, REGION_NAROOM, 0, {
 		triggerEffects: [
 			{
+				name: 'Strenghten',
+				text: 'Whenever you play a Naroom creature, add one additional energy to it.',
 				find: {
 					effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
 					conditions: [
@@ -483,6 +496,7 @@ const cards = [
 			{
 				name: 'Thermal Blast',
 				cost: 2,
+				text: 'Roll one die. Choose a Creature or Magi in play. Discard energy equal to the die roll from the chosen Creature or Magi',
 				effects: [
 					effect({
 						effectType: EFFECT_TYPE_ROLL_DIE,
@@ -504,6 +518,7 @@ const cards = [
 			{
 				name: 'Lore',
 				cost: 2,
+				text: 'Draw a card',
 				effects: [
 					{
 						type: ACTION_GET_PROPERTY_VALUE,
@@ -528,6 +543,7 @@ const cards = [
 			{
 				name: 'Refresh',
 				cost: 1,
+				text: 'Choose a Creature. Add 2 energy to the chosen Creature.',
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE,
@@ -542,28 +558,33 @@ const cards = [
 		]
 	}),
 	new Card('Arbolit', TYPE_CREATURE, REGION_CALD, 1, {
-		powers: [power(
-			'Healing Flame',
-			[
-				prompt({
-					promptType: PROMPT_TYPE_SINGLE_CREATURE,
-				}),
-				effect({
-					effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-					target: '$sourceCreature',
-				}),
-				effect({
-					effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
-					target: '$target',
-					amount: 2,
-				}),
-			],
-		)],
+		powers: [
+			{
+				name: 'Healing Flame',
+				cost: 0,
+				text: 'Choose a Creature in play. Discard Arbolit from play. Add 2 energy to the chosen Creature.',
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+						target: '$sourceCreature',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '$target',
+						amount: 2,
+					}),
+				],
+			},
+		],
 	}),
 	new Card('Fire Grag', TYPE_CREATURE, REGION_CALD, 6, {
 		powers: [{
 			name: 'Metabolize',
 			cost: 3,
+			text: 'Choose your Creature and opponent\'s Creature. Discard twice your Creature\'s energy from opponent\'s Creature. Discard your Creature from play.',
 			effects: [
 				prompt({
 					promptType: PROMPT_TYPE_SINGLE_CREATURE,
@@ -601,6 +622,7 @@ const cards = [
 			{
 				name: 'Stomp',
 				cost: 6,
+				text: 'Choose a Creature. Discard chosen Creature from play.',
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE,
@@ -616,6 +638,8 @@ const cards = [
 	new Card('Quor Pup', TYPE_CREATURE, REGION_CALD, 2, {
 		triggerEffects: [
 			{
+				name: 'Charge',
+				text: 'When Quor Pup attacks, move up to two energy from it to your Magi',
 				find: {
 					effectType: EFFECT_TYPE_CREATURE_ATTACKS,
 					conditions: [
@@ -660,6 +684,7 @@ const cards = [
 		],
 	}),
 	new Card('Fire Flow', TYPE_SPELL, REGION_CALD, 1, {
+		text: 'Choose a Creature. Move up to 4 energy from your Magi to chosen Creature.',
 		effects: [
 			prompt({
 				promptType: PROMPT_TYPE_SINGLE_CREATURE,
@@ -699,6 +724,7 @@ const cards = [
 		canAttackMagiDirectly: true,
 	}),
 	new Card('Fire Ball', TYPE_SPELL, REGION_CALD, 2, {
+		text: 'Choose a Creature or Magi. Discard 2 energy from chosen Creature or Magi.',
 		effects: [
 			prompt({
 				promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
@@ -714,6 +740,8 @@ const cards = [
 		powers: [
 			{
 				name: 'Healing Rain',
+				cost: 0,
+				text: 'Choose a Creature or Magi. Discard Pharan from play and move its energy to chosen Creature or Magi.',
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
@@ -741,6 +769,7 @@ const cards = [
 			{
 				name: 'Firestorm',
 				cost: 2,
+				text: 'Choose your Creature. Discard the chosen Creature from play. Discard 1 energy from each non-Cald Creature and Magi in play.',
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
@@ -777,6 +806,7 @@ const cards = [
 			{
 				name: 'Healing Flame',
 				cost: 2,
+				text: 'Choose a Creature or Magi in play. Add 3 energy to the chosen Creature or Magi.',
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
@@ -802,6 +832,7 @@ const cards = [
 			{
 				name: 'Vitalize',
 				cost: 4,
+				text: 'Choose a Creature in play with less than its starting energy. Restore that Creature to its starting energy.',
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
@@ -823,6 +854,7 @@ const cards = [
 			{
 				name: 'Refresh',
 				cost: 2,
+				text: 'Choose a creature in play. Add 3 energy to the chosen Creature.',
 				effects: [
 					select({
 						selector: SELECTOR_OWN_MAGI,
@@ -862,6 +894,7 @@ const cards = [
 			{
 				name: 'Heroes\' Feast',
 				cost: 2,
+				text: 'Add one energy to each of your Creatures',
 				effects: [
 					select({
 						selector: SELECTOR_OWN_CREATURES,
@@ -880,6 +913,7 @@ const cards = [
 			{
 				name: 'Lore',
 				cost: 2,
+				text: 'Draw a card',
 				effects: [
 					{
 						type: ACTION_GET_PROPERTY_VALUE,
@@ -901,6 +935,7 @@ const cards = [
 			{
 				name: 'Lore',
 				cost: 3,
+				text: 'Draw a card',
 				effects: [
 					{
 						type: ACTION_GET_PROPERTY_VALUE,
@@ -918,6 +953,7 @@ const cards = [
 		],
 	}),	
 	new Card('Vortex of Knowledge', TYPE_SPELL, REGION_NAROOM, 1, {
+		text: 'You and your opponent each draw two cards.',
 		effects: [
 			{
 				type: ACTION_EFFECT,
@@ -949,59 +985,71 @@ const cards = [
 	}),
 	new Card('Timber Hyren', TYPE_CREATURE, REGION_NAROOM, 7, {
 		powers: [
-			power('Tribute', [
-				select({
-					selector: SELECTOR_OWN_MAGI,
-				}),
-				getPropertyValue({
-					target: '$selected',
-					property: PROPERTY_ENERGY_COUNT,
-					variable: 'magi_energy',
-				}),
-				{
-					type: ACTION_CALCULATE,
-					operator: CALCULATION_MIN,
-					operandOne: '$magi_energy',
-					operandTwo: 5,
-					variable: 'max_tribute',
-				},
-				prompt({
-					promptType: PROMPT_TYPE_NUMBER,
-					min: 1,
-					max: '$max_tribute',
-				}),				
-				effect({
-					effectType: EFFECT_TYPE_MOVE_ENERGY,
-					source: '$selected',
-					target: '$sourceCreature',
-					amount: '$number',
-				}),
-			]),
+			{
+				name: 'Tribute',
+				cost: 0,
+				text: 'Move up to five energy from your Magi to Timber Hyren.',
+				effects: [
+					select({
+						selector: SELECTOR_OWN_MAGI,
+					}),
+					getPropertyValue({
+						target: '$selected',
+						property: PROPERTY_ENERGY_COUNT,
+						variable: 'magi_energy',
+					}),
+					{
+						type: ACTION_CALCULATE,
+						operator: CALCULATION_MIN,
+						operandOne: '$magi_energy',
+						operandTwo: 5,
+						variable: 'max_tribute',
+					},
+					prompt({
+						promptType: PROMPT_TYPE_NUMBER,
+						min: 1,
+						max: '$max_tribute',
+					}),				
+					effect({
+						effectType: EFFECT_TYPE_MOVE_ENERGY,
+						source: '$selected',
+						target: '$sourceCreature',
+						amount: '$number',
+					}),
+				],
+			},
 		],
 	}),
 	new Card('Fire Chogo', TYPE_CREATURE, REGION_CALD, 2, {
 		powers: [
-			power('Heat Storm', [
-				select({
-					selector: SELECTOR_CREATURES_NOT_OF_REGION,
-					region: REGION_CALD,
-				}),
-				effect({
-					effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-					target: '$sourceCreature',
-					amount: 1,
-				}),
-				effect({
-					effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
-					target: '$selected',
-					amount: 1,
-				}),
-			]),
+			{
+				name: 'Heat Storm',
+				cost: 0,
+				text: 'Discard Fire Chogo from play. Discard one energy from each non-Cald Creature in play.',
+				effects: [
+					select({
+						selector: SELECTOR_CREATURES_NOT_OF_REGION,
+						region: REGION_CALD,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+						target: '$sourceCreature',
+						amount: 1,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+						target: '$selected',
+						amount: 1,
+					}),
+				],
+			},
 		],
 	}),
 	new Card('Carillion', TYPE_CREATURE, REGION_NAROOM, 4, {
 		replacementEffects: [
 			{
+				name: 'Resilience',
+				text: 'If Carillion attacks a Creature that starts the attack with less than three energy, Carillion loses no energy in attack.',
 				find: {
 					effectType: EFFECT_TYPE_DEAL_DAMAGE,
 					conditions: [
@@ -1030,6 +1078,8 @@ const cards = [
 	new Card('Rudwot', TYPE_CREATURE, REGION_NAROOM, 3, {
 		triggerEffects: [
 			{
+				name: 'Trample',
+				text: 'If Rudwot attack a creature that starts the attack with less than three energy, add two energy to Rudwot before energy is removed',
 				find: {
 					effectType: EFFECT_TYPE_CREATURE_ATTACKS,
 					conditions: [
@@ -1066,6 +1116,8 @@ const cards = [
 		startingCards: ['Arboll', 'Weebo', 'Furok', 'Grow'],
 		staticAbilities: [
 			{
+				name: 'Double strike',
+				text: 'Your creatures may attack twice each turn',
 				selector: SELECTOR_OWN_CREATURES,
 				property: PROPERTY_ATTACKS_PER_TURN,
 				modifier: {
@@ -1077,20 +1129,25 @@ const cards = [
 	}),
 	new Card('Arboll', TYPE_CREATURE, REGION_NAROOM, 3, {
 		powers: [
-			power('Life Channel', [
-				prompt({
-					promptType: PROMPT_TYPE_SINGLE_MAGI,
-				}),
-				effect({
-					effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-					target: '$sourceCreature',
-				}),
-				effect({
-					effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
-					target: '$targetMagi',
-					amount: 4,
-				}),
-			]),
+			{
+				name: 'Life Channel', 
+				cost: 0,
+				text: 'Choose a Magi in play. Discard Arboll from play. Add four energy to the chosen Magi.',
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_SINGLE_MAGI,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+						target: '$sourceCreature',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+						target: '$targetMagi',
+						amount: 4,
+					}),
+				],
+			},
 		],
 	}),
 	new Card('Weebo', TYPE_CREATURE, REGION_NAROOM, 2, {
@@ -1098,6 +1155,7 @@ const cards = [
 			{
 				name: 'Vitalize',
 				cost: 2,
+				text: 'Choose a creature in play with energy less than its starting energy. Restore that creature to its starting energy.',
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE,
@@ -1116,6 +1174,7 @@ const cards = [
 			{
 				name: 'Hunt',
 				cost: 2,
+				text: 'Choose a Magi in play. Discard 4 energy from the chosen Magi.',
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_MAGI,
@@ -1133,6 +1192,8 @@ const cards = [
 		powers: [
 			{
 				name: 'Fireball',
+				cost: 0,
+				text: 'Choose a Creature in play. Discard Diobor from play. Discard 2 energy from the chosen Creature.',
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE,
@@ -1151,6 +1212,7 @@ const cards = [
 			{
 				name: 'Energy Transfer',
 				cost: COST_X,
+				text: 'Add X energy to your Magi',
 				effects: [
 					select({
 						selector: SELECTOR_OWN_MAGI,
@@ -1169,6 +1231,7 @@ const cards = [
 			{
 				name: 'Thermal Blast',
 				cost: 3,
+				text: 'Roll one die. Choose a Creature in play. Discard energy equal to the dice roll from the chosen Creature.',
 				effects: [
 					effect({
 						effectType: EFFECT_TYPE_ROLL_DIE,
@@ -1190,6 +1253,7 @@ const cards = [
 			{
 				name: 'Energy Transfer',
 				cost: COST_X,
+				text: 'Choose a Creature in play. Add X energy to the chosen Creature.',
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE,
@@ -1208,6 +1272,7 @@ const cards = [
 			{
 				name: 'Energy Transfer',
 				cost: COST_X,
+				text: 'Choose a Creature. Add X energy to the chosen Creature.',
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE,
@@ -1222,6 +1287,7 @@ const cards = [
 		],
 	}),
 	new Card('Flame Geyser', TYPE_SPELL, REGION_CALD, 7, {
+		text: 'Discard 3 energy from each Creature and Magi.',
 		effects: [
 			select({
 				selector: SELECTOR_CREATURES_AND_MAGI,
@@ -1229,27 +1295,35 @@ const cards = [
 			effect({
 				effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
 				target: '$selected',
+				amount: 3,
 			}),
 		],
 	}),
 	new Card('Syphon Stone', TYPE_RELIC, REGION_UNIVERSAL, 0, {
 		powers: [
-			power('Syphon', [
-				prompt({
-					promptType: PROMPT_TYPE_SINGLE_CREATURE,
-				}),
-				effect({
-					effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
-					target: '$source',
-				}),
-				effect({
-					effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
-					target: '$target',
-				}),
-			]),
+			{
+				name: 'Syphon', 
+				cost: 0,
+				text: 'Choose a Creature. Discard Syphon Stone. Discard 1 energy from the chosen Creature.',
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
+						target: '$source',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+						target: '$target',
+						amount: 1,
+					}),
+				],
+			},
 		],
 	}),
 	new Card('Grow', TYPE_SPELL, REGION_NAROOM, 3, {
+		text: 'Roll a die. Choose a Creature. Add energy equal to the die roll to the chosen Creature.',
 		effects: [
 			effect({
 				effectType: EFFECT_TYPE_ROLL_DIE,
@@ -1265,6 +1339,7 @@ const cards = [
 		],
 	}),
 	new Card('Submerge', TYPE_SPELL, REGION_OROTHE, 2, {
+		text: 'Choose an Orothe Creature. Add 3 energy to the chosen Creature.',
 		effects: [
 			prompt({
 				promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
@@ -1281,6 +1356,8 @@ const cards = [
 	new Card('Coral Hyren', TYPE_CREATURE, REGION_OROTHE, 4, {
 		triggerEffects: [
 			{
+				name: 'Spelltap',
+				text: 'When you play an Orothe spell, add 1 energy to Coral Hyren.',
 				find: {
 					effectType: EFFECT_TYPE_PLAY_SPELL,
 					conditions: [

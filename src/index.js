@@ -154,7 +154,7 @@ function clone(item) {
 	if (typeof result == 'undefined') {
 		if (Object.prototype.toString.call( item ) === '[object Array]') {
 			result = [];
-			item.forEach(function(child, index, array) { 
+			item.forEach(function(child, index) { 
 				result[index] = clone( child );
 			});
 		} else if (typeof item == 'object') {
