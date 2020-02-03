@@ -70,6 +70,7 @@ const {
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
 	EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+	EFFECT_TYPE_DEFENDER_DEALS_DAMAGE,
 	EFFECT_TYPE_DEAL_DAMAGE,
 	EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
 	EFFECT_TYPE_MOVE_ENERGY,
@@ -1051,7 +1052,7 @@ const cards = [
 				name: 'Resilience',
 				text: 'If Carillion attacks a Creature that starts the attack with less than three energy, Carillion loses no energy in attack.',
 				find: {
-					effectType: EFFECT_TYPE_DEAL_DAMAGE,
+					effectType: EFFECT_TYPE_DEFENDER_DEALS_DAMAGE,
 					conditions: [
 						{
 							objectOne: 'target',

@@ -62,6 +62,8 @@ const EFFECT_TYPE_NONE = 'effects/none';
 const EFFECT_TYPE_DRAW = 'effects/draw';
 const EFFECT_TYPE_RESHUFFLE_DISCARD = 'effects/reshuffle_discard';
 const EFFECT_TYPE_BEFORE_DAMAGE = 'effects/before_damage';
+const EFFECT_TYPE_ATTACKER_DEALS_DAMAGE = 'effects/attacker_deals_damage';
+const EFFECT_TYPE_DEFENDER_DEALS_DAMAGE = 'effects/defender_deals_damage';
 const EFFECT_TYPE_DEAL_DAMAGE = 'effects/deal_damage';
 const EFFECT_TYPE_AFTER_DAMAGE = 'effects/after_damage';
 const EFFECT_TYPE_CREATURE_DEFEATS_CREATURE = 'effects/creature_defeats_creature';
@@ -217,6 +219,8 @@ module.exports = {
 	EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
 	EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
 	EFFECT_TYPE_BEFORE_DAMAGE,
+	EFFECT_TYPE_ATTACKER_DEALS_DAMAGE,
+	EFFECT_TYPE_DEFENDER_DEALS_DAMAGE,
 	EFFECT_TYPE_DEAL_DAMAGE,
 	EFFECT_TYPE_DAMAGE_STEP,
 	EFFECT_TYPE_CREATURE_IS_DEFEATED,

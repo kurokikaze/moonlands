@@ -109,6 +109,8 @@ const {
 	EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
 	EFFECT_TYPE_CREATURE_IS_DEFEATED, // Possibly redundant
 	EFFECT_TYPE_BEFORE_DAMAGE,
+	EFFECT_TYPE_ATTACKER_DEALS_DAMAGE,
+	EFFECT_TYPE_DEFENDER_DEALS_DAMAGE,
 	EFFECT_TYPE_DEAL_DAMAGE,
 	EFFECT_TYPE_AFTER_DAMAGE,
 	EFFECT_TYPE_CREATURE_ATTACKS,
@@ -1481,7 +1483,7 @@ class State {
 							const damageActions = [
 								{  // from source to target
 									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_DEAL_DAMAGE,
+									effectType: EFFECT_TYPE_ATTACKER_DEALS_DAMAGE,
 									source: attackSource,
 									sourceAtStart: action.sourceAtStart,
 									target: attackTarget,
@@ -1491,7 +1493,7 @@ class State {
 								}, // from target to source (if attacking a creature)
 								(attackTarget.card.type === TYPE_CREATURE) ? {
 									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_DEAL_DAMAGE,
+									effectType: EFFECT_TYPE_DEFENDER_DEALS_DAMAGE,
 									source: attackTarget,
 									sourceAtStart: attackTarget.copy(),
 									target: attackSource,
@@ -1502,6 +1504,34 @@ class State {
 							].filter(Boolean);
 
 							this.transformIntoActions(...damageActions);
+							break;
+						}
+						case EFFECT_TYPE_ATTACKER_DEALS_DAMAGE: {
+							this.transformIntoActions({
+								type: ACTION_EFFECT,
+								effectType: EFFECT_TYPE_DEAL_DAMAGE,
+								source: action.source,
+								sourceAtStart: action.sourceAtStart,
+								target: action.target,
+								targetAtStart: action.targetAtStart,
+								amount: action.amount,
+								attack: true,
+								generatedBy: action.generatedBy,
+							});
+							break;
+						}
+						case EFFECT_TYPE_DEFENDER_DEALS_DAMAGE: {
+							this.transformIntoActions({
+								type: ACTION_EFFECT,
+								effectType: EFFECT_TYPE_DEAL_DAMAGE,
+								source: action.source,
+								sourceAtStart: action.sourceAtStart,
+								target: action.target,
+								targetAtStart: action.targetAtStart,
+								amount: action.amount,
+								attack: true,
+								generatedBy: action.generatedBy,
+							});
 							break;
 						}
 						case EFFECT_TYPE_DEAL_DAMAGE: {
