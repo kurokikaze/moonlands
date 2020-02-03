@@ -29,6 +29,7 @@ Done: **47** cards out of **190**
 - Robe of Vines
 - Coral Hyren
 - Submerge (tested with Coral Hyren)
+- Lava Balamant
 
 # Done, not tested
 
@@ -55,7 +56,7 @@ Done: **47** cards out of **190**
 
 # Possible sample decks:
 
-## Cald (+ Underneath splash)
+## Cald
 
 - Grega
 - Magam
@@ -71,7 +72,7 @@ Done: **47** cards out of **190**
 - 3 Drakan
 - 3 Thermal Blast
 - 3 Flame Geyser
-- 3 Cave Hyren
+- 3 Lava Balamant
 - 2 Magma Armor
 - 2 Fire Flow
 
@@ -97,27 +98,29 @@ Done: **47** cards out of **190**
 
 # Not done yet
 
-- Cyclone Vashp
-- Flood of Energy
-- Greater Vaal (maybe action of rolling N dice?)
-- Ground Breaker
-- Gruk
-- Lightning Hyren
-- Mushroom Hyren
-- Nimbulo
-- Ormagon
-- Paralit
-- Sap of Life
-- Shockwave
-- Shooting Star
-- Sinder
-- Storm Cloud
-- Tap Roots (will benefit from prompt texts)
-- Trug
-- Tryn
-- Typhoon
-- Updraft
-- Xyx
+- Bhatar [NAROOM]
+- Cyclone Vashp [ARDERIAL]
+- Flood of Energy [NAROOM]
+- Greater Vaal (maybe action of rolling N dice?) [CALD]
+- Ground Breaker [UNDERNEATH]
+- Gruk [UNDERNEATH]
+- Lightning Hyren [ARDERIAL]
+- Mushroom Hyren [UNDERNEATH]
+- Nimbulo [ARDERIAL]
+- Ormagon [UNDERNEATH]
+- Paralit [OROTHE]
+- Sap of Life [NAROOM]
+- Shockwave [ARDERIAL]
+- Shooting Star [ARDERIAL]
+- Sinder [CALD]
+- Storm Cloud [ARDERIAL]
+- Tap Roots (will benefit from prompt texts) [NAROOM]
+- Trug [UNDERNEATH]
+- Tryn [NAROOM]
+- Typhoon [OROTHE]
+- Updraft [ARDERIAL]
+- Xyx [ARDERIAL]
+- Furok [NAROOM]
 
 # Cost reduction/increase
 
@@ -129,10 +132,6 @@ Done: **47** cards out of **190**
 
 - Syphon Vortex
 
-# Attack
-
-- Corf (status "was attacked")
-
 # Custom prompts
 
 - Giant Vulbor
@@ -143,6 +142,7 @@ Done: **47** cards out of **190**
 - Thunderquake (choosing any number of creatures)
 - Vulbor (choosing player)
 - Xyx Minor (creature in play by name)
+- Corf (status "was attacked")
 
 # Conditionals
 
@@ -198,6 +198,7 @@ Done: **47** cards out of **190**
 - Orish
 - Spirit of the Flame
 - Vinoc
+- Adis
 
 # Looking at library, rearranging
 
@@ -211,19 +212,15 @@ Done: **47** cards out of **190**
 
 # Triggered abilities
 
-- Adis
 - Arderial's Crown
-- Bhatar
 - Blu
 - Bwill
 - Cave Rudwot
 - Evu
-- Furok
 - Gar
 - Gloves of Crystal
 - Jaela
 - Lasada
-- Lava Balamant
 - Magma Armor
 - Megathan
 - Motash

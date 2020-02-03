@@ -802,6 +802,32 @@ const cards = [
 			},
 		],
 	}),
+	new Card('Lava Balamant', TYPE_CREATURE, REGION_CALD, 5, {
+		triggerEffects: [{
+			name: 'Charge',
+			text: 'If Lava Balamant attacks, add one energy to it.',
+			find: {
+				effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+				conditions: [
+					{
+						objectOne: 'source',
+						propertyOne: PROPERTY_ID,
+						comparator: '=',
+						objectTwo: 'self',
+						propertyTwo: PROPERTY_ID,
+					},
+				],
+			},
+			effects: [
+				{
+					type: ACTION_EFFECT,
+					effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+					target: '%self',
+					amount: 1,
+				},
+			],
+		}],
+	}),
 	new Card('Lava Arboll', TYPE_CREATURE, REGION_CALD, 2, {
 		powers: [
 			{
