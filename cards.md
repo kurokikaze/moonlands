@@ -30,6 +30,7 @@ Done: **47** cards out of **190**
 - Coral Hyren
 - Submerge (tested with Coral Hyren)
 - Lava Balamant
+- Furok
 
 # Done, not tested
 
@@ -89,7 +90,7 @@ Done: **47** cards out of **190**
 - 3 Balamant
 - 3 Grow
 - 3 Giant Parathin
-- 3 Syphon Stone
+- 3 Furok
 - 3 Carillion
 - 3 Rudwot
 - 3 Stagadan
@@ -120,7 +121,6 @@ Done: **47** cards out of **190**
 - Typhoon [OROTHE]
 - Updraft [ARDERIAL]
 - Xyx [ARDERIAL]
-- Furok [NAROOM]
 
 # Cost reduction/increase
 

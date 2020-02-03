@@ -705,6 +705,85 @@ describe('Lava Balamant', () => {
 	});
 });
 
+describe('Furok', () => {
+	it('Retrieve', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const yaki = new CardInGame(byName('Yaki'), ACTIVE_PLAYER);
+		yaki.addEnergy(5);
+
+		const furok = new CardInGame(byName('Furok'), ACTIVE_PLAYER);
+		furok.addEnergy(5);
+		const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER);
+		weebo.addEnergy(3);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([yaki]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([furok, weebo]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.enableDebug();
+
+		const attackAction = {
+			type: moonlands.ACTION_ATTACK,
+			source: furok,
+			target: weebo,
+		};
+        
+		gameState.update(attackAction);
+
+		expect(furok.data.energy).toEqual(2, 'Furok loses 3 energy in attack, left at 2');
+		expect(weebo.data.energy).toEqual(0, 'Weebo is toast');
+		expect(yaki.data.energy).toEqual(7, 'Yaki gains 2 energy from Retrieve, left at 7');
+	});
+
+	it('Retrieve (Furok is attacked)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER);
+		yaki.addEnergy(5);
+
+		const furok = new CardInGame(byName('Furok'), NON_ACTIVE_PLAYER);
+		furok.addEnergy(5);
+		const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
+		weebo.addEnergy(3);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([furok, weebo]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: moonlands.ACTION_ATTACK,
+			source: weebo,
+			target: furok,
+		};
+        
+		gameState.update(attackAction);
+
+		expect(furok.data.energy).toEqual(2, 'Furok loses 3 energy in attack, left at 2');
+		expect(weebo.data.energy).toEqual(0, 'Weebo is toast');
+		expect(yaki.data.energy).toEqual(5, 'Yaki gains no energy');
+	});
+});
+
 describe('Magma Armor', () => {
 	it('Defense', () => {
 		const ACTIVE_PLAYER = 0;

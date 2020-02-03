@@ -802,6 +802,58 @@ const cards = [
 			},
 		],
 	}),
+	new Card('Furok', TYPE_CREATURE, REGION_NAROOM, 4, {
+		triggerEffects: [
+			{
+				name: 'Retrieve',
+				text: 'When a defending Creature removes energy from Furok, place half of that energy, rounded up, on your Magi',
+				find: {
+					effectType: EFFECT_TYPE_DEFENDER_DEALS_DAMAGE,
+					conditions: [
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_ID,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_ID,
+						},
+					],
+				},
+				effects: [
+					{
+						type: ACTION_GET_PROPERTY_VALUE,
+						target: '%targetAtStart',
+						property: PROPERTY_ENERGY_COUNT,
+						variable: 'furokEnergy',
+					},
+					{
+						type: ACTION_CALCULATE,
+						operator: CALCULATION_MIN,
+						operandOne: '%amount',
+						operandTwo: '$furokEnergy',
+						variable: 'damageToFurok',
+					},
+					{
+						type: ACTION_CALCULATE,
+						operator: CALCULATION_HALVE_ROUND_UP,
+						operandOne: '$damageToFurok',
+						variable: 'energyToRetrieve',
+					},
+					{
+						type: ACTION_SELECT,
+						selector: SELECTOR_OWN_MAGI,
+						variable: 'ownMagi',
+					},
+					{
+						type: ACTION_EFFECT,
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+						target: '$ownMagi',
+						amount: '$energyToRetrieve',
+					},
+				],
+			},
+		],
+	}),
 	new Card('Lava Balamant', TYPE_CREATURE, REGION_CALD, 5, {
 		triggerEffects: [{
 			name: 'Charge',
