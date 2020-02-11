@@ -705,6 +705,76 @@ describe('Lava Balamant', () => {
 	});
 });
 
+describe('Cave Rudwot', () => {
+	it('Defense', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER);
+		weebo.addEnergy(2);
+		const caveRudwot = new CardInGame(byName('Cave Rudwot'), ACTIVE_PLAYER);
+		caveRudwot.addEnergy(3);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([caveRudwot, weebo]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: moonlands.ACTION_ATTACK,
+			source: weebo,
+			target: caveRudwot,
+		};
+        
+		gameState.update(attackAction);
+
+		expect(caveRudwot.data.energy).toEqual(3, 'Cave Rudwot loses 2 energy in attack and gain 2 from Defense, left at 3');
+		expect(weebo.data.energy).toEqual(0, 'Weebo is toast');
+	});
+
+	it('Defense (Cave Rudwot attacks)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
+		weebo.addEnergy(2);
+		const caveRudwot = new CardInGame(byName('Cave Rudwot'), NON_ACTIVE_PLAYER);
+		caveRudwot.addEnergy(3);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([caveRudwot, weebo]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: moonlands.ACTION_ATTACK,
+			source: caveRudwot,
+			target: weebo,
+		};
+        
+		gameState.update(attackAction);
+
+		expect(caveRudwot.data.energy).toEqual(1, 'Cave Rudwot loses 2 energy in attack and gains none, left at 1');
+		expect(weebo.data.energy).toEqual(0, 'Weebo is toast');
+	});
+});
+
 describe('Furok', () => {
 	it('Retrieve', () => {
 		const ACTIVE_PLAYER = 0;
@@ -730,7 +800,6 @@ describe('Furok', () => {
 			activePlayer: ACTIVE_PLAYER,
 		});
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
-		gameState.enableDebug();
 
 		const attackAction = {
 			type: moonlands.ACTION_ATTACK,
@@ -940,6 +1009,50 @@ describe('Robe of Vines', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards.some(card => card.card.name == 'Arbolit')).toEqual(true, 'One of them is Arbolit');
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(14, 'Grega\'s energy is 14');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].data.energy).toEqual(1, 'Arbolit\'s energy is 1');
+		expect(gameState.getZone(ZONE_TYPE_HAND, activePlayer).length).toEqual(0, 'No cards in hand now');
+	});
+});
+
+describe('Ora', () => {
+	it('Strengthen', () => {
+		const activePlayer = 0;
+		const notActivePlayer = 1;
+
+		const ora = new CardInGame(byName('Ora'), activePlayer);
+		ora.addEnergy(15);
+
+		const pharan = new CardInGame(byName('Pharan'), activePlayer);
+
+		const zones = [
+			new Zone('Active player hand', ZONE_TYPE_HAND, activePlayer).add([pharan]),
+			new Zone('Non-active player hand', ZONE_TYPE_HAND, notActivePlayer),
+			new Zone('Active player deck', ZONE_TYPE_DECK, activePlayer),
+			new Zone('Non-active player deck', ZONE_TYPE_DECK, notActivePlayer),
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, activePlayer).add([ora]),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_CREATURES,
+			activePlayer,
+		});
+        
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'In play is empty before');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(15, 'Ora\'s Energy is 15');
+
+		gameState.update({
+			type: ACTION_PLAY, 
+			payload: {
+				player: activePlayer,
+				card: pharan,
+			},
+		});
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'In play has one cards');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Pharan', 'Card in play is Pharan');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(12, 'Ora\'s energy is 12 (Pharan costs 3)');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards.find(card => card.card.name == 'Pharan').data.energy).toEqual(4, 'Pharan\'s energy is 4');
 		expect(gameState.getZone(ZONE_TYPE_HAND, activePlayer).length).toEqual(0, 'No cards in hand now');
 	});
 });

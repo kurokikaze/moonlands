@@ -31,6 +31,8 @@ Done: **47** cards out of **190**
 - Submerge (tested with Coral Hyren)
 - Lava Balamant
 - Furok
+- Cave Rudwot
+- Ora
 
 # Done, not tested
 
@@ -54,6 +56,13 @@ Done: **47** cards out of **190**
 - Book of Ages
 - Agovo
 - Sea Barl
+- Cyclone Vashp
+- Shockwave
+- Shooting Star
+- Storm Cloud
+- Thunder Hyren
+- Xyx
+- Updraft
 
 # Possible sample decks:
 
@@ -97,10 +106,23 @@ Done: **47** cards out of **190**
 - 3 Robe of Vines
 - 1 Sea Barl
 
+## Arderial
+
+- Ora
+- 3 Pharan
+- 3 Alaban
+- 3 Ayebaw
+- 3 Cyclone Vashp
+- 3 Shockwave
+- 3 Shooting Star
+- 3 Storm Cloud
+- 3 Thunder Hyren
+- 3 Xyx
+- 3 Updraft
+
 # Not done yet
 
 - Bhatar [NAROOM]
-- Cyclone Vashp [ARDERIAL]
 - Flood of Energy [NAROOM]
 - Greater Vaal (maybe action of rolling N dice?) [CALD]
 - Ground Breaker [UNDERNEATH]
@@ -111,16 +133,12 @@ Done: **47** cards out of **190**
 - Ormagon [UNDERNEATH]
 - Paralit [OROTHE]
 - Sap of Life [NAROOM]
-- Shockwave [ARDERIAL]
-- Shooting Star [ARDERIAL]
 - Sinder [CALD]
-- Storm Cloud [ARDERIAL]
 - Tap Roots (will benefit from prompt texts) [NAROOM]
 - Trug [UNDERNEATH]
 - Tryn [NAROOM]
 - Typhoon [OROTHE]
 - Updraft [ARDERIAL]
-- Xyx [ARDERIAL]
 
 # Cost reduction/increase
 
@@ -215,7 +233,6 @@ Done: **47** cards out of **190**
 - Arderial's Crown
 - Blu
 - Bwill
-- Cave Rudwot
 - Evu
 - Gar
 - Gloves of Crystal
@@ -224,7 +241,6 @@ Done: **47** cards out of **190**
 - Magma Armor
 - Megathan
 - Motash
-- Ora
 - Orathan
 - Ring of Secrets
 - Scroll of Fire

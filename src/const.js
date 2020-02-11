@@ -36,6 +36,9 @@ const SELECTOR_ENEMY_CREATURES = 'selectors/enemy_creatures';
 const SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE = 'selectors/own_cards_with_energize_rate';
 const SELECTOR_CARDS_WITH_ENERGIZE_RATE = 'selectors/cards_with_energize_rate';
 const SELECTOR_OWN_CARDS_IN_PLAY = 'selectors/own_cards_in_play';
+const SELECTOR_CREATURES_OF_TYPE = 'selectors/creatures_of_type';
+const SELECTOR_CREATURES_NOT_OF_TYPE = 'selectors/creatures_not_of_type';
+const SELECTOR_OWN_CREATURES_OF_TYPE = 'selectors/own_creatures_of_type';
 
 const CALCULATION_SET = 'calculations/set';
 const CALCULATION_DOUBLE = 'calculations/double';
@@ -123,6 +126,8 @@ const PROMPT_TYPE_NUMBER_OF_RELICS = 'prompt/number_of_relics';
 const PROMPT_TYPE_NUMBER = 'prompt/number';
 
 const RESTRICTION_ENERGY_LESS_THAN_STARTING = 'restrictions/energy_less_than_starting';
+const RESTRICTION_OWN_CREATURE = 'restrictions/own_creature';
+const RESTRICTION_OPPONENT_CREATURE = 'restrictions/opponent_creature';
 const RESTRICTION_REGION = 'restrictions/region';
 
 const TYPE_CREATURE = 'types/creature';
@@ -177,6 +182,9 @@ module.exports = {
 	SELECTOR_ENEMY_CREATURES,
 	SELECTOR_TOP_MAGI_OF_PILE,
 	SELECTOR_OWN_CARDS_IN_PLAY,
+	SELECTOR_CREATURES_OF_TYPE,
+	SELECTOR_CREATURES_NOT_OF_TYPE,
+	SELECTOR_OWN_CREATURES_OF_TYPE,
 
 	PROPERTY_ID,
 	PROPERTY_ENERGY_COUNT,
@@ -236,6 +244,8 @@ module.exports = {
 	
 	RESTRICTION_ENERGY_LESS_THAN_STARTING,
 	RESTRICTION_REGION,
+	RESTRICTION_OWN_CREATURE,
+	RESTRICTION_OPPONENT_CREATURE,
 
 	NO_PRIORITY,
 	PRIORITY_PRS,

@@ -63,6 +63,9 @@ const {
 	SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE,
 	SELECTOR_CARDS_WITH_ENERGIZE_RATE,
 	SELECTOR_OWN_CARDS_IN_PLAY,
+	SELECTOR_CREATURES_OF_TYPE,
+	SELECTOR_CREATURES_NOT_OF_TYPE,
+	SELECTOR_OWN_CREATURES_OF_TYPE,
 
 	PROMPT_TYPE_NUMBER,
 	PROMPT_TYPE_SINGLE_CREATURE,
@@ -551,6 +554,16 @@ class State {
 				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_REGION) == argument && card.card.type == TYPE_CREATURE);
 			case SELECTOR_CREATURES_NOT_OF_REGION:
 				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_REGION) != argument && card.card.type == TYPE_CREATURE);
+			case SELECTOR_CREATURES_OF_TYPE:
+				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.name.split(' ').includes(argument) && card.card.type == TYPE_CREATURE);
+			case SELECTOR_CREATURES_NOT_OF_TYPE:
+				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => !card.card.name.split(' ').includes(argument) && card.card.type == TYPE_CREATURE);
+			case SELECTOR_OWN_CREATURES_OF_TYPE:
+				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card =>
+					this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player &&
+					card.card.name.split(' ').includes(argument) &&
+					card.card.type == TYPE_CREATURE
+				);
 		}
 	}
 
@@ -1048,6 +1061,18 @@ class State {
 					switch (action.selector) {
 						case SELECTOR_OWN_CARDS_IN_PLAY: {
 							result = this.useSelector(SELECTOR_OWN_CARDS_IN_PLAY, action.player);
+							break;
+						}
+						case SELECTOR_OWN_CREATURES_OF_TYPE: {
+							result = this.useSelector(SELECTOR_OWN_CREATURES_OF_TYPE, action.player, this.getMetaValue(action.type, action.generatedBy));
+							break;
+						}
+						case SELECTOR_CREATURES_OF_TYPE: {
+							result = this.useSelector(SELECTOR_CREATURES_OF_TYPE, null, this.getMetaValue(action.type, action.generatedBy));
+							break;
+						}
+						case SELECTOR_CREATURES_NOT_OF_TYPE: {
+							result = this.useSelector(SELECTOR_CREATURES_NOT_OF_TYPE, null, this.getMetaValue(action.type, action.generatedBy));
 							break;
 						}
 						case SELECTOR_CARDS_WITH_ENERGIZE_RATE: {

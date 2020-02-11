@@ -50,6 +50,8 @@ const {
 	SELECTOR_MAGI_NOT_OF_REGION,
 	SELECTOR_TOP_MAGI_OF_PILE,
 	SELECTOR_CARDS_WITH_ENERGIZE_RATE,
+	SELECTOR_OWN_CREATURES_OF_TYPE,
+	SELECTOR_CREATURES_OF_TYPE,
 
 	EFFECT_TYPE_NONE,
 	EFFECT_TYPE_DRAW,
@@ -85,6 +87,8 @@ const {
 	PROMPT_TYPE_SINGLE_MAGI,
 	PROMPT_TYPE_NUMBER,
 
+	RESTRICTION_OWN_CREATURE,
+	RESTRICTION_OPPONENT_CREATURE,
 	RESTRICTION_ENERGY_LESS_THAN_STARTING,
 	RESTRICTION_REGION,
 
@@ -302,6 +306,46 @@ const cards = [
 			},
 		],
 	}),
+	new Card('Thunder Hyren', TYPE_CREATURE, REGION_ARDERIAL, 7, {
+		powers: [
+			{
+				name: 'Shockstorm',
+				cost: 6,
+				text: 'Discard 2 energy from each non-Arderial Creature.',
+				effects: [
+					select({
+						selector: SELECTOR_CREATURES_NOT_OF_REGION,
+						region: REGION_ARDERIAL,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+						target: '$selected',
+						amount: 2,
+					}),
+				],
+			},
+			{
+				name: 'Replenish',
+				cost: 2,
+				text: 'Discard Thunder Hyren from play. Add 2 energy to each hyren you control.',
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+						target: '$sourceCreature',
+					}),
+					select({
+						selector: SELECTOR_OWN_CREATURES_OF_TYPE,
+						type: 'Hyren',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '$selected',
+						amount: 2,
+					}),
+				],
+			},
+		]
+	}),
 	new Card('Deep Hyren', TYPE_CREATURE, REGION_OROTHE, 6, {
 		powers: [
 			{
@@ -448,6 +492,65 @@ const cards = [
 			},
 		],
 	}),
+	new Card('Xyx', TYPE_CREATURE, REGION_ARDERIAL, 3, {
+		powers: [
+			{
+				name: 'Shock',
+				text: 'Choose a Magi. Discard 4 energy from the chosen Magi.',
+				cost: 3,
+				effects: [
+					{
+						type: ACTION_ENTER_PROMPT,
+						promptType: PROMPT_TYPE_SINGLE_MAGI,
+					},
+					{
+						type: ACTION_EFFECT,
+						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+						target: '$target',
+						amount: 4,
+					}
+				],
+			},
+		],
+	}),
+	new Card('Ora', TYPE_MAGI, REGION_ARDERIAL, null, {
+		startingEnergy: 12,
+		energize: 5,
+		startingCards: ['Xyx Elder', 'Xyx Minor', 'Shooting Star'],
+		triggerEffects: [
+			{
+				name: 'Strenghten',
+				text: 'Whenever you play a Arderial creature, add one additional energy to it.',
+				find: {
+					effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
+					conditions: [
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_REGION,
+							comparator: '=',
+							objectTwo: REGION_ARDERIAL,
+							propertyTwo: null,
+						},
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_CONTROLLER,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						}
+					],
+				},
+				effects: [
+					{
+						type: ACTION_EFFECT,
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '$creature_created',
+						amount: 1,
+					}
+				],
+			},
+		],
+	}),
 	new Card('Ashgar', TYPE_MAGI, REGION_CALD, null, {
 		startingEnergy: 10,
 		energize: 6,
@@ -487,6 +590,39 @@ const cards = [
 					},
 				],
 			}
+		],
+	}),
+	new Card('Updraft', TYPE_SPELL, REGION_ARDERIAL, 1, {
+		text: 'Choose your creature. Move its energy onto your Magi. Return chosen Creature into your hand.',
+		effects: [
+			{
+				type: ACTION_ENTER_PROMPT,
+				promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
+			},
+			{
+				type: ACTION_GET_PROPERTY_VALUE,
+				property: PROPERTY_ENERGY_COUNT,
+				target: '$target',
+				variable: 'creatureEnergy',
+			},
+			{
+				type: ACTION_SELECT,
+				selector: SELECTOR_OWN_MAGI,
+			},
+			{
+				type: ACTION_EFFECT,
+				effectType: EFFECT_TYPE_MOVE_ENERGY,
+				source: '$selected',
+				target: '$target',
+				amount: '$creatureEnergy',
+			},
+			{
+				type: ACTION_EFFECT,
+				effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+				sourceZone: ZONE_TYPE_IN_PLAY,
+				destinationZone: ZONE_TYPE_HAND,
+				target: '$target',
+			},
 		],
 	}),
 	new Card('Grega', TYPE_MAGI, REGION_CALD, null, {
@@ -798,6 +934,34 @@ const cards = [
 						target: '$selected',
 						amount: 1,
 					}),                    
+				],
+			},
+		],
+	}),
+	new Card('Cave Rudwot', TYPE_CREATURE, REGION_UNDERNEATH, 3, {
+		triggerEffects: [
+			{
+				name: 'Defense',
+				text: 'If Cave Rudwot is attacked, add 2 energy to it.',
+				find: {
+					effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+					conditions: [
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_ID,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_ID,
+						}
+					],
+				},
+				effects: [
+					{
+						type: ACTION_EFFECT,
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '%self',
+						amount: 2,
+					},
 				],
 			},
 		],
@@ -1346,6 +1510,45 @@ const cards = [
 			},
 		],
 	}),
+	new Card('Cyclone Vashp', TYPE_CREATURE, REGION_ARDERIAL, 4, {
+		powers: [
+			{
+				name: 'Cyclone',
+				cost: 1,
+				text: 'Choose your Creature and opponent\'s Creature. Discard energy from opponent\'s chosen Creature equal to energy on your chosen Creature. Discard your chosen Creature from play.',
+				effects: [
+					{
+						type: ACTION_ENTER_PROMPT,
+						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+						restriction: RESTRICTION_OWN_CREATURE,
+						variable: 'ownCreature',
+					},
+					{
+						type: ACTION_ENTER_PROMPT,
+						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+						restriction: RESTRICTION_OPPONENT_CREATURE,
+						variable: 'opponentCreature',
+					},
+					{
+						type: ACTION_GET_PROPERTY_VALUE,
+						property: PROPERTY_ENERGY_COUNT,
+						variable: 'creatureEnergy',
+					},
+					{
+						type: ACTION_EFFECT,
+						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+						target: '$opponentCreature',
+						amount: '$creatureEnergy',
+					},
+					{
+						type: ACTION_EFFECT,
+						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+						target: 'ownCreature',
+					},
+				],
+			},
+		],
+	}),
 	new Card('Leaf Hyren', TYPE_CREATURE, REGION_NAROOM, 4, {
 		powers: [
 			{
@@ -1417,6 +1620,57 @@ const cards = [
 			}),
 		],
 	}),
+	new Card('Shooting Star', TYPE_SPELL, REGION_ARDERIAL, 1, {
+		text: 'Choose an Arderial Creature. Add two energy to the chosen Creature.',
+		effects: [
+			prompt({
+				promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+				restriction: RESTRICTION_REGION,
+				restrictionValue: REGION_ARDERIAL,
+			}),
+			effect({
+				effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+				target: '$target',
+			}),
+		],
+	}),
+	new Card('Storm Cloud', TYPE_SPELL, REGION_ARDERIAL, 5, {
+		text: 'Choose an Arderial Creature. Add two energy to the chosen Creature.',
+		effects: [
+			prompt({
+				promptType: PROMPT_TYPE_SINGLE_CREATURE,
+			}),
+			getPropertyValue({						
+				target: '$target',
+				property: PROPERTY_ENERGY_COUNT,
+				variable: 'creatureEnergy',
+			}),
+			{
+				type: ACTION_CALCULATE,
+				operator: CALCULATION_SUBTRACT,
+				operandOne: '$creatureEnergy',
+				operandTwo: 1,
+				variable: 'energyToDiscard',
+			},
+			effect({
+				effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+				target: '$target',
+				amount: '$energyToDiscard',
+			}),
+		],
+	}),
+	new Card('Shockwave', TYPE_SPELL, REGION_ARDERIAL, 5, {
+		text: 'Choose a Creature. Discard chosen Creature from play.',
+		effects: [
+			prompt({
+				promptType: PROMPT_TYPE_SINGLE_CREATURE,
+			}),
+			effect({
+				effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+				target: '$target',
+			}),
+		],
+	}),	
 	new Card('Submerge', TYPE_SPELL, REGION_OROTHE, 2, {
 		text: 'Choose an Orothe Creature. Add 3 energy to the chosen Creature.',
 		effects: [
