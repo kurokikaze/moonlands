@@ -370,6 +370,10 @@ class State {
 			turn: this.state.turn,
 			goesFirst: this.state.goesFirst,
 			activePlayer: this.state.activePlayer,
+			prompt: this.state.prompt,
+			promptType: this.state.promptType,
+			promptGeneratedBy: this.state.promptGeneratedBy,
+			promptParams: this.state.promptParams,
 		};
 	}
 
