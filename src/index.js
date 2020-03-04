@@ -374,18 +374,18 @@ class State {
 	}
 
 	serializeZones(playerId) {
-		const opponentId = this.state.getOpponent(playerId);
+		const opponentId = this.getOpponent(playerId);
 		return {
-			playerHand: this.state.getZone(ZONE_TYPE_HAND, playerId).serialize(),
-			playerDeck: this.state.getZone(ZONE_TYPE_DECK, playerId).serialize(),
-			playerActiveMage: this.state.getZone(ZONE_TYPE_ACTIVE_MAGI, playerId).serialize(),
-			playerMagiPile: this.state.getZone(ZONE_TYPE_MAGI_PILE, playerId).serialize(),
-			opponentHand: this.state.getZone(ZONE_TYPE_MAGI_PILE, opponentId).serialize(),
-			opponentDeck: this.state.getZone(ZONE_TYPE_DECK, opponentId).serialize(),
-			opponentActiveMage: this.state.getZone(ZONE_TYPE_ACTIVE_MAGI, opponentId).serialize(),
-			opponentMagiPile: this.state.getZone(ZONE_TYPE_MAGI_PILE, opponentId).serialize(),
-			playerInPlay: this.state.getZone(ZONE_TYPE_IN_PLAY).filter(c => c.data.controller == playerId).map(c => c.serialize()),
-			opponentInPlay: this.state.getZone(ZONE_TYPE_IN_PLAY).filter(c => c.data.controller == playerId).map(c => c.serialize()),
+			playerHand: this.getZone(ZONE_TYPE_HAND, playerId).serialize(),
+			playerDeck: this.getZone(ZONE_TYPE_DECK, playerId).serialize(),
+			playerActiveMagi: this.getZone(ZONE_TYPE_ACTIVE_MAGI, playerId).serialize(),
+			playerMagiPile: this.getZone(ZONE_TYPE_MAGI_PILE, playerId).serialize(),
+			opponentHand: this.getZone(ZONE_TYPE_MAGI_PILE, opponentId).serialize(),
+			opponentDeck: this.getZone(ZONE_TYPE_DECK, opponentId).serialize(),
+			opponentActiveMagi: this.getZone(ZONE_TYPE_ACTIVE_MAGI, opponentId).serialize(),
+			opponentMagiPile: this.getZone(ZONE_TYPE_MAGI_PILE, opponentId).serialize(),
+			playerInPlay: this.getZone(ZONE_TYPE_IN_PLAY).filter(c => c.data.controller == playerId).map(c => c.serialize()),
+			opponentInPlay: this.getZone(ZONE_TYPE_IN_PLAY).filter(c => c.data.controller == opponentId).map(c => c.serialize()),
 		};
 	}
 
