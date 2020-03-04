@@ -384,8 +384,8 @@ class State {
 			opponentDeck: this.getZone(ZONE_TYPE_DECK, opponentId).serialize(),
 			opponentActiveMagi: this.getZone(ZONE_TYPE_ACTIVE_MAGI, opponentId).serialize(),
 			opponentMagiPile: this.getZone(ZONE_TYPE_MAGI_PILE, opponentId).serialize(),
-			playerInPlay: this.getZone(ZONE_TYPE_IN_PLAY).filter(c => c.data.controller == playerId).map(c => c.serialize()),
-			opponentInPlay: this.getZone(ZONE_TYPE_IN_PLAY).filter(c => c.data.controller == opponentId).map(c => c.serialize()),
+			playerInPlay: this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(c => c.data.controller == playerId).map(c => c.serialize()),
+			opponentInPlay: this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(c => c.data.controller == opponentId).map(c => c.serialize()),
 		};
 	}
 
