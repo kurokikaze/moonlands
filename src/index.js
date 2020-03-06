@@ -988,29 +988,39 @@ class State {
 					let promptParams = {};
 
 					switch (action.promptType) {
-						case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE:
+						case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
 							promptParams = {
 								source: this.getMetaValue(action.source, action.generatedBy),
 							};
 							break;
-						case PROMPT_TYPE_SINGLE_CREATURE_FILTERED:
+						}
+						case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
 							promptParams = {
 								restriction: action.restriction,
 								restrictionValue: action.restrictionValue,
 							};
 							break;
-						case PROMPT_TYPE_NUMBER:
+						}
+						case PROMPT_TYPE_CHOOSE_CARDS: {
+							promptParams = {
+								cards: action.promptParams,
+							};
+							break;
+						}
+						case PROMPT_TYPE_NUMBER: {
 							promptParams = {
 								min: this.getMetaValue(action.min, action.generatedBy),
 								max: this.getMetaValue(action.max, action.generatedBy),
 							};
 							break;
+						}
 					}
 					this.state = {
 						...this.state,
 						actions: [],
 						savedActions,
 						prompt: true,
+						promptPlayer: action.player,
 						promptType: action.promptType,
 						promptVariable: action.variable,
 						promptGeneratedBy: action.generatedBy,
@@ -1022,7 +1032,6 @@ class State {
 					const generatedBy = action.generatedBy || this.state.promptGeneratedBy;
 					const variable = action.variable || this.state.promptVariable;
 					let currentActionMetaData = this.state.spellMetaData[generatedBy] || {};
-
 					switch (this.state.promptType) {
 						case PROMPT_TYPE_NUMBER:
 							currentActionMetaData[variable || 'number'] = action.number;
