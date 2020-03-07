@@ -372,6 +372,7 @@ class State {
 			activePlayer: this.state.activePlayer,
 			prompt: this.state.prompt,
 			promptType: this.state.promptType,
+			promptPlayer: this.state.promptPlayer,
 			promptGeneratedBy: this.state.promptGeneratedBy,
 			promptParams: this.state.promptParams,
 		};
@@ -390,6 +391,10 @@ class State {
 			opponentMagiPile: this.getZone(ZONE_TYPE_MAGI_PILE, opponentId).serialize(),
 			playerInPlay: this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(c => c.data.controller == playerId).map(c => c.serialize()),
 			opponentInPlay: this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(c => c.data.controller == opponentId).map(c => c.serialize()),
+			playerDefeatedMagi: this.getZone(ZONE_TYPE_DEFEATED_MAGI, playerId).serialize(),
+			opponentDefeatedMagi: this.getZone(ZONE_TYPE_DEFEATED_MAGI, opponentId).serialize(),
+			playerDiscard: this.getZone(ZONE_TYPE_DISCARD, playerId).serialize(),
+			opponentDiscard: this.getZone(ZONE_TYPE_DISCARD, opponentId).serialize(),
 		};
 	}
 
@@ -1002,9 +1007,7 @@ class State {
 							break;
 						}
 						case PROMPT_TYPE_CHOOSE_CARDS: {
-							promptParams = {
-								cards: action.promptParams,
-							};
+							promptParams = action.promptParams;
 							break;
 						}
 						case PROMPT_TYPE_NUMBER: {
@@ -1386,7 +1389,9 @@ class State {
 									{
 										type: ACTION_ENTER_PROMPT,
 										promptType: PROMPT_TYPE_CHOOSE_CARDS,
-										promptParams: topMagi.card.data.startingCards,
+										promptParams: {
+											cards: topMagi.card.data.startingCards,
+										},
 										variable: 'startingCards',
 									},
 									{
