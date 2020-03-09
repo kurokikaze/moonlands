@@ -228,12 +228,11 @@ const cards = [
 					],
 				},
 				effects: [
-					{
-						type: ACTION_EFFECT,
+					effect({
 						effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
 						target: '%target',
 						amount: 2,
-					},
+					}),
 				],
 			}
 		],
@@ -442,17 +441,15 @@ const cards = [
 					],
 				},
 				effects: [
-					{
-						type: ACTION_SELECT,
+					select({
 						selector: SELECTOR_ENEMY_MAGI,
 						variable: 'enemyMagi',
-					},
-					{
-						type: ACTION_EFFECT,
+					}),
+					effect({
 						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
 						target: '$enemyMagi',
 						amount: 2,
-					},
+					}),
 				],
 			}
 		],
@@ -482,12 +479,11 @@ const cards = [
 					],
 				},
 				effects: [
-					{
-						type: ACTION_EFFECT,
+					effect({
 						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 						target: '$creature_created',
 						amount: 1,
-					}
+					}),
 				],
 			},
 		],
@@ -499,16 +495,14 @@ const cards = [
 				text: 'Choose a Magi. Discard 4 energy from the chosen Magi.',
 				cost: 3,
 				effects: [
-					{
-						type: ACTION_ENTER_PROMPT,
+					prompt({
 						promptType: PROMPT_TYPE_SINGLE_MAGI,
-					},
-					{
-						type: ACTION_EFFECT,
+					}),
+					effect({
 						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
 						target: '$target',
 						amount: 4,
-					}
+					}),
 				],
 			},
 		],
@@ -541,12 +535,11 @@ const cards = [
 					],
 				},
 				effects: [
-					{
-						type: ACTION_EFFECT,
+					effect({
 						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 						target: '$creature_created',
 						amount: 1,
-					}
+					}),
 				],
 			},
 		],
@@ -577,17 +570,15 @@ const cards = [
 					],
 				},
 				effects: [
-					{
-						type: ACTION_GET_PROPERTY_VALUE,
+					getPropertyValue({
 						property: PROPERTY_CONTROLLER,
 						target: '%self',
 						variable: 'controller',
-					},
-					{
-						type: ACTION_EFFECT,
+					}),
+					effect({
 						effectType: EFFECT_TYPE_DRAW,
 						player: '$controller',
-					},
+					}),
 				],
 			}
 		],
@@ -599,30 +590,26 @@ const cards = [
 				type: ACTION_ENTER_PROMPT,
 				promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
 			},
-			{
-				type: ACTION_GET_PROPERTY_VALUE,
+			getPropertyValue({
 				property: PROPERTY_ENERGY_COUNT,
 				target: '$target',
 				variable: 'creatureEnergy',
-			},
-			{
-				type: ACTION_SELECT,
+			}),
+			select({
 				selector: SELECTOR_OWN_MAGI,
-			},
-			{
-				type: ACTION_EFFECT,
+			}),
+			effect({
 				effectType: EFFECT_TYPE_MOVE_ENERGY,
 				source: '$selected',
 				target: '$target',
 				amount: '$creatureEnergy',
-			},
-			{
-				type: ACTION_EFFECT,
+			}),
+			effect({
 				effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
 				sourceZone: ZONE_TYPE_IN_PLAY,
 				destinationZone: ZONE_TYPE_HAND,
 				target: '$target',
-			},
+			}),
 		],
 	}),
 	new Card('Grega', TYPE_MAGI, REGION_CALD, null, {
@@ -657,17 +644,15 @@ const cards = [
 				cost: 2,
 				text: 'Draw a card',
 				effects: [
-					{
-						type: ACTION_GET_PROPERTY_VALUE,
+					getPropertyValue({
 						property: PROPERTY_CONTROLLER,
 						target: '$source',
 						variable: 'controller',
-					},
-					{
-						type: ACTION_EFFECT,
+					}),
+					effect({
 						effect: EFFECT_TYPE_DRAW,
 						player: '$controller',
-					}
+					}),
 				],
 			}
 		],
@@ -956,12 +941,11 @@ const cards = [
 					],
 				},
 				effects: [
-					{
-						type: ACTION_EFFECT,
+					effect({
 						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 						target: '%self',
 						amount: 2,
-					},
+					}),
 				],
 			},
 		],
@@ -984,12 +968,11 @@ const cards = [
 					],
 				},
 				effects: [
-					{
-						type: ACTION_GET_PROPERTY_VALUE,
+					getPropertyValue({
 						target: '%targetAtStart',
 						property: PROPERTY_ENERGY_COUNT,
 						variable: 'furokEnergy',
-					},
+					}),
 					{
 						type: ACTION_CALCULATE,
 						operator: CALCULATION_MIN,
@@ -1003,17 +986,15 @@ const cards = [
 						operandOne: '$damageToFurok',
 						variable: 'energyToRetrieve',
 					},
-					{
-						type: ACTION_SELECT,
+					select({
 						selector: SELECTOR_OWN_MAGI,
 						variable: 'ownMagi',
-					},
-					{
-						type: ACTION_EFFECT,
+					}),
+					effect({
 						effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
 						target: '$ownMagi',
 						amount: '$energyToRetrieve',
-					},
+					}),
 				],
 			},
 		],
@@ -1035,12 +1016,11 @@ const cards = [
 				],
 			},
 			effects: [
-				{
-					type: ACTION_EFFECT,
+				effect({
 					effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 					target: '%self',
 					amount: 1,
-				},
+				}),
 			],
 		}],
 	}),
@@ -1099,31 +1079,13 @@ const cards = [
 				cost: 2,
 				text: 'Choose a creature in play. Add 3 energy to the chosen Creature.',
 				effects: [
-					select({
-						selector: SELECTOR_OWN_MAGI,
-					}),
-					getPropertyValue({
-						target: '$selected',
-						property: PROPERTY_ENERGY_COUNT,
-						variable: 'magi_energy',
-					}),
-					{
-						type: ACTION_CALCULATE,
-						operator: CALCULATION_MIN,
-						operandOne: '$magi_energy',
-						operandTwo: 7,
-						variable: 'max_tribute',
-					},
 					prompt({
-						promptType: PROMPT_TYPE_NUMBER,
-						min: 1,
-						max: '$max_tribute',
+						promptType: PROMPT_TYPE_SINGLE_CREATURE,
 					}),
 					effect({
-						effectType: EFFECT_TYPE_MOVE_ENERGY,
-						source: '$selected',
-						target: '$sourceCreature',
-						amount: '$number',
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '$target',
+						amount: 3,
 					}),
 				],
 			},
@@ -1158,17 +1120,15 @@ const cards = [
 				cost: 2,
 				text: 'Draw a card',
 				effects: [
-					{
-						type: ACTION_GET_PROPERTY_VALUE,
+					getPropertyValue({
 						target: '$sourceCreature',
 						property: PROPERTY_CONTROLLER,
 						variable: 'controller',
-					},
-					{
-						type: ACTION_EFFECT,
+					}),
+					effect({
 						effectType: EFFECT_TYPE_DRAW,
 						player: '$controller',
-					}
+					}),
 				],
 			},
 		],
@@ -1180,17 +1140,15 @@ const cards = [
 				cost: 3,
 				text: 'Draw a card',
 				effects: [
-					{
-						type: ACTION_GET_PROPERTY_VALUE,
+					getPropertyValue({
 						target: '$sourceCreature',
 						property: PROPERTY_CONTROLLER,
 						variable: 'controller',
-					},
-					{
-						type: ACTION_EFFECT,
+					}),
+					effect({
 						effectType: EFFECT_TYPE_DRAW,
 						player: '$controller',
-					}
+					}),
 				],
 			},
 		],
@@ -1198,32 +1156,27 @@ const cards = [
 	new Card('Vortex of Knowledge', TYPE_SPELL, REGION_NAROOM, 1, {
 		text: 'You and your opponent each draw two cards.',
 		effects: [
-			{
-				type: ACTION_EFFECT,
+			effect({
 				effectType: EFFECT_TYPE_DRAW,
 				player: '$player',
-			},
-			{
-				type: ACTION_EFFECT,
+			}),
+			effect({
 				effectType: EFFECT_TYPE_DRAW,
 				player: '$player',
-			},
-			{
-				type: ACTION_SELECT,
+			}),
+			select({
 				selector: SELECTOR_OPPONENT_ID,
 				opponentOf: '$player',
 				variable: 'opponent',
-			},
-			{
-				type: ACTION_EFFECT,
+			}),
+			effect({
 				effectType: EFFECT_TYPE_DRAW,
 				player: '$opponent',
-			},
-			{
-				type: ACTION_EFFECT,
+			}),
+			effect({
 				effectType: EFFECT_TYPE_DRAW,
 				player: '$opponent',
-			},			
+			}),			
 		],
 	}),
 	new Card('Timber Hyren', TYPE_CREATURE, REGION_NAROOM, 7, {
@@ -1343,12 +1296,11 @@ const cards = [
 					],
 				},
 				effects: [
-					{
-						type: ACTION_EFFECT,
+					effect({
 						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 						target: '%self',
 						amount: 2,
-					},
+					}),
 				],
 			}
 		],
@@ -1517,34 +1469,31 @@ const cards = [
 				cost: 1,
 				text: 'Choose your Creature and opponent\'s Creature. Discard energy from opponent\'s chosen Creature equal to energy on your chosen Creature. Discard your chosen Creature from play.',
 				effects: [
-					{
-						type: ACTION_ENTER_PROMPT,
+					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
 						restriction: RESTRICTION_OWN_CREATURE,
 						variable: 'ownCreature',
-					},
-					{
+					}),
+					prompt({
 						type: ACTION_ENTER_PROMPT,
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
 						restriction: RESTRICTION_OPPONENT_CREATURE,
 						variable: 'opponentCreature',
-					},
-					{
-						type: ACTION_GET_PROPERTY_VALUE,
+					}),
+					getPropertyValue({
 						property: PROPERTY_ENERGY_COUNT,
+						target: '$ownCreature',
 						variable: 'creatureEnergy',
-					},
-					{
-						type: ACTION_EFFECT,
+					}),
+					effect({
 						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
 						target: '$opponentCreature',
 						amount: '$creatureEnergy',
-					},
-					{
-						type: ACTION_EFFECT,
+					}),
+					effect({
 						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
 						target: 'ownCreature',
-					},
+					}),
 				],
 			},
 		],
@@ -1711,12 +1660,11 @@ const cards = [
 					],
 				},
 				effects: [
-					{
-						type: ACTION_EFFECT,
+					effect({
 						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 						target: '%self',
 						amount: 1,
-					},
+					}),
 				],
 			},
 		],

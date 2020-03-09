@@ -1465,6 +1465,46 @@ describe('Grega', () => {
 	});
 });
 
+describe('Pruitt', () => {
+	it('Refresh', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const pruitt = new CardInGame(byName('Pruitt'), ACTIVE_PLAYER).addEnergy(4);
+		const pharan = new CardInGame(byName('Pharan'), ACTIVE_PLAYER).addEnergy(7);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [pharan], [pruitt]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: pruitt,
+			power: pruitt.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+			target: pharan,
+			player: ACTIVE_PLAYER,
+			generatedBy: pruitt.id,
+		};
+
+		gameState.update(powerAction);
+		gameState.update(targetingAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(pharan.id).data.energy).toEqual(10, 'Pharan now has less than 7 energy');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI).card.data.energy).toEqual(2, 'Pruitt now has 2 energy');
+	});
+});
+
 describe('Sinder', () => {
 	it('Refresh', () => {
 		const ACTIVE_PLAYER = 0;
