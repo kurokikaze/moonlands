@@ -1423,7 +1423,14 @@ class State {
 							const creatures = this.getZone(ZONE_TYPE_IN_PLAY).cards
 								.filter(card => card.card.type === TYPE_CREATURE && card.data.controller === action.player);
 							if (creatures.length > 0) {
-								creatures.forEach(creature => creature.clearAttackMarkers());
+								creatures.forEach(creature => {
+									creature.clearAttackMarkers();
+									creature.clearActionsUsed();
+								});
+							}
+							// if magi is active, reset its actions used too
+							if (this.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).length == 1) {
+								this.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).card.clearActionsUsed();
 							}
 							break;
 						}
