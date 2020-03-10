@@ -1968,21 +1968,31 @@ class State {
 						}
 						case EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY: {
 							const relicDiscardTarget = this.getMetaValue(action.target, action.generatedBy);
-							const discardPile = this.getZone(ZONE_TYPE_DISCARD, relicDiscardTarget.owner);
+
 							oneOrSeveral(relicDiscardTarget, relic => {
-								const cardInDiscard = new CardInGame(relic.card, relic.owner);
-								discardPile.add([cardInDiscard]);
-								this.getZone(ZONE_TYPE_IN_PLAY).removeById(relic.id);
+								this.transformIntoActions({
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+									target: relic,
+									sourceZone: ZONE_TYPE_IN_PLAY,
+									destinationZone: ZONE_TYPE_DISCARD,
+									generatedBy: action.generatedBy,
+								});
 							});
 							break;
 						}
 						case EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY: {
 							const creatureDiscardTarget = this.getMetaValue(action.target, action.generatedBy);
-							const discardPile = this.getZone(ZONE_TYPE_DISCARD, creatureDiscardTarget.owner);
+
 							oneOrSeveral(creatureDiscardTarget, creature => {
-								const cardInDiscard = new CardInGame(creature.card, creature.owner);
-								discardPile.add([cardInDiscard]);
-								this.getZone(ZONE_TYPE_IN_PLAY).removeById(creature.id);
+								this.transformIntoActions({
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+									target: creature,
+									sourceZone: ZONE_TYPE_IN_PLAY,
+									destinationZone: ZONE_TYPE_DISCARD,
+									generatedBy: action.generatedBy,
+								});
 							});
 							break;
 						}

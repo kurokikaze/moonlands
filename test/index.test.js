@@ -645,6 +645,7 @@ describe('Effects', () => {
 			type: moonlands.ACTION_EFFECT,
 			effectType: moonlands.EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
 			target: arbolit,
+			generatedBy: arbolit.id,
 		};
 
 		const gameState = new moonlands.State({
