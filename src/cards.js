@@ -838,7 +838,7 @@ const cards = [
 			},
 			prompt({
 				promptType: PROMPT_TYPE_SINGLE_CREATURE,
-				message: 'Choose a Creature to move up to {max_amount} energy from your Magi to it',
+				message: 'Choose a Creature to move up to ${max_amount} energy from your Magi to it',
 			}),
 			prompt({
 				promptType: PROMPT_TYPE_NUMBER,
@@ -1345,6 +1345,7 @@ const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_MAGI,
+						message: 'Choose a Magi to add 4 energy to',
 					}),
 					effect({
 						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,

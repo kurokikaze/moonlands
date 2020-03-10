@@ -1359,6 +1359,9 @@ describe('Activating power', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(0, 'No creatures in discard');
 		expect(gameState.state.prompt).toEqual(true, 'Waiting for prompt');
+		expect(gameState.state.promptGeneratedBy).toEqual(arboll.id, 'Source of prompt is saved in the state');
+		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Active player is prompted');
+		expect(gameState.state.promptMessage).toEqual('Choose a Magi to add 4 energy to', 'Prompt message is saved in the state');
 		expect(grega.data.energy).toEqual(15, 'Grega has 15 energy');
 
 		gameState.update(targetingAction);
