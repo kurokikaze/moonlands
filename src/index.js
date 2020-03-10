@@ -1878,7 +1878,19 @@ class State {
 						case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
 							oneOrSeveral(
 								this.getMetaValue(action.target, action.generatedBy),
-								target => target.removeEnergy(this.getMetaValue(action.amount, action.generatedBy))
+								target => {
+									target.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
+									if (target.data.energy == 0) {
+										this.transformIntoActions({
+											type: ACTION_EFFECT,
+											effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+											target: target,
+											sourceZone: ZONE_TYPE_IN_PLAY,
+											destinationZone: ZONE_TYPE_DISCARD,
+											generatedBy: action.generatedBy,
+										});
+									}
+								},
 							);
 							break;
 						}

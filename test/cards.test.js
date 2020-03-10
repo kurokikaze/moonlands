@@ -109,6 +109,56 @@ describe('Vortex of Knowledge', () => {
 	});
 });
 
+describe('Flame Geyser', () => {
+	it('Casting Flame Geyser', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(12);
+		const pruitt = new CardInGame(byName('Pruitt'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const rudwot = new CardInGame(byName('Rudwot'), NON_ACTIVE_PLAYER).addEnergy(1);
+		const arboll = new CardInGame(byName('Arboll'), NON_ACTIVE_PLAYER).addEnergy(1);
+		const seaBarl = new CardInGame(byName('Sea Barl'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const flameGeyser = new CardInGame(byName('Flame Geyser'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [rudwot, arboll, seaBarl], [grega]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([flameGeyser]);
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([pruitt]);
+
+		const vortexOfKnowledge = new CardInGame(byName('Vortex of Knowledge'), ACTIVE_PLAYER);
+
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([vortexOfKnowledge]);
+
+		const playSpellAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: flameGeyser,
+				player: ACTIVE_PLAYER,
+			},
+		};
+
+		expect(grega.data.energy).toEqual(12, 'Grega has 12 energy');
+		expect(pruitt.data.energy).toEqual(4, 'Pruitt has 4 energy');
+
+		gameState.update(playSpellAction);
+
+		expect(grega.data.energy).toEqual(2, 'Grega has 2 energy');
+		expect(pruitt.data.energy).toEqual(1, 'Pruitt has 1 energy');
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY, null).length).toEqual(1, 'Only one creature stayed in play');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY, null).card.card.name).toEqual('Sea Barl', 'It is Sea Barl');
+	});
+});
+
 describe('Alaban', () => {
 	it('Undream', () => {
 		const ACTIVE_PLAYER = 0;
