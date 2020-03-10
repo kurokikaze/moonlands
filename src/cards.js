@@ -161,6 +161,7 @@ const cards = [
 			}),
 			prompt({
 				promptType: PROMPT_TYPE_SINGLE_CREATURE,
+				message: 'Choose creature to discard ${roll_result} energy from',
 			}),
 			effect({
 				effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
@@ -289,6 +290,7 @@ const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
+						message: 'Choose your creature to move its energy to Kelthet',
 					}),
 					getPropertyValue({
 						target: '$target',
@@ -354,6 +356,7 @@ const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
+						message: 'Choose your creature to discard it from play.',
 					}),
 					effect({
 						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
@@ -390,6 +393,7 @@ const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+						message: 'Choose a creature to discard 1 energy from',
 					}),
 					effect({
 						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
@@ -405,6 +409,7 @@ const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
+						message: 'Choose a creature to add 2 energy to.',
 						source: '$sourceCreature',
 					}),
 					effect({
@@ -497,6 +502,7 @@ const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_MAGI,
+						message: 'Choose a Magi to discard 4 energy from.',
 					}),
 					effect({
 						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
@@ -586,10 +592,10 @@ const cards = [
 	new Card('Updraft', TYPE_SPELL, REGION_ARDERIAL, 1, {
 		text: 'Choose your creature. Move its energy onto your Magi. Return chosen Creature into your hand.',
 		effects: [
-			{
-				type: ACTION_ENTER_PROMPT,
+			prompt({
 				promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
-			},
+				message: 'Select your creature. Its energy will be moved onto your Magi and the creature will return to your hand.',
+			}),
 			getPropertyValue({
 				property: PROPERTY_ENERGY_COUNT,
 				target: '$target',
@@ -627,6 +633,7 @@ const cards = [
 					}),
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+						message: 'Choose Creature or Magi to discard ${roll_result} energy from',
 					}),
 					effect({
 						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
@@ -669,6 +676,7 @@ const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+						message: 'Choose a Creature to add 2 energy to.',
 					}),
 					effect({
 						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
@@ -688,6 +696,7 @@ const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+						message: 'Choose a Creature to add 2 energy to. Arbolit will be discarded from play.',
 					}),
 					effect({
 						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
@@ -710,10 +719,12 @@ const cards = [
 			effects: [
 				prompt({
 					promptType: PROMPT_TYPE_SINGLE_CREATURE,
+					message: 'Choose your creature.',
 					variable: 'yourCreature',
 				}),
 				prompt({
 					promptType: PROMPT_TYPE_SINGLE_CREATURE,
+					message: 'Choose opponent\'s creature.',
 					variable: 'opponentCreature',
 				}),
 				getPropertyValue({
@@ -748,6 +759,7 @@ const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+						message: 'Choose a Creature to discard from play.',
 					}),
 					effect({
 						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
@@ -792,6 +804,7 @@ const cards = [
 					},
 					prompt({
 						promptType: PROMPT_TYPE_NUMBER,
+						message: 'Choose up to ${max_tribute} energy to move to Quor Pup',
 						min: 0,
 						max: '$max_tribute',
 					}),
@@ -808,9 +821,6 @@ const cards = [
 	new Card('Fire Flow', TYPE_SPELL, REGION_CALD, 1, {
 		text: 'Choose a Creature. Move up to 4 energy from your Magi to chosen Creature.',
 		effects: [
-			prompt({
-				promptType: PROMPT_TYPE_SINGLE_CREATURE,
-			}),
 			select({
 				selector: SELECTOR_OWN_MAGI,
 			}),
@@ -826,6 +836,10 @@ const cards = [
 				operandTwo: 4,
 				variable: 'max_amount',
 			},
+			prompt({
+				promptType: PROMPT_TYPE_SINGLE_CREATURE,
+				message: 'Choose a Creature to move up to {max_amount} energy from your Magi to it',
+			}),
 			prompt({
 				promptType: PROMPT_TYPE_NUMBER,
 				min: 1,
@@ -1433,6 +1447,7 @@ const cards = [
 					}),
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+						message: 'Choose creature to discard ${roll_result} energy from',
 					}),
 					effect({
 						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
@@ -1472,12 +1487,13 @@ const cards = [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
 						restriction: RESTRICTION_OWN_CREATURE,
+						message: 'Choose your creature',
 						variable: 'ownCreature',
 					}),
 					prompt({
-						type: ACTION_ENTER_PROMPT,
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
 						restriction: RESTRICTION_OPPONENT_CREATURE,
+						message: 'Choose opponent\'s creature',
 						variable: 'opponentCreature',
 					}),
 					getPropertyValue({
@@ -1539,6 +1555,7 @@ const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+						message: 'Choose a creature to discard 1 energy from',
 					}),
 					effect({
 						effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
@@ -1561,6 +1578,7 @@ const cards = [
 			}),
 			prompt({
 				promptType: PROMPT_TYPE_SINGLE_CREATURE,
+				message: 'Choose a creature to add ${roll_result} energy to',
 			}),
 			effect({
 				effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,

@@ -33,6 +33,7 @@ Done: **47** cards out of **190**
 - Furok
 - Cave Rudwot
 - Ora
+- Pruitt
 
 # Done, not tested
 
@@ -48,7 +49,6 @@ Done: **47** cards out of **190**
 - Lava Aq
 - Lava Arboll
 - Magam
-- Pruitt
 - Poad
 - Grow
 - Flame Geyser
