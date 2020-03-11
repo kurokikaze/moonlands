@@ -1,4 +1,4 @@
-Done: **47** cards out of **190**
+Done: **61** cards out of **190**
 
 # Done, tested
 
@@ -28,12 +28,15 @@ Done: **47** cards out of **190**
 - Timber Hyren
 - Robe of Vines
 - Coral Hyren
+- Lava Aq
 - Submerge (tested with Coral Hyren)
 - Lava Balamant
 - Furok
 - Cave Rudwot
 - Ora
 - Pruitt
+- Undertow
+- Bhatar
 
 # Done, not tested
 
@@ -46,7 +49,6 @@ Done: **47** cards out of **190**
 - Leaf Hyren
 - Deep Hyren
 - Kelthet
-- Lava Aq
 - Lava Arboll
 - Magam
 - Poad
@@ -63,6 +65,8 @@ Done: **47** cards out of **190**
 - Thunder Hyren
 - Xyx
 - Updraft
+- Typhoon
+- Tryn
 
 # Possible sample decks:
 
@@ -122,7 +126,6 @@ Done: **47** cards out of **190**
 
 # Not done yet
 
-- Bhatar [NAROOM]
 - Flood of Energy [NAROOM]
 - Greater Vaal (maybe action of rolling N dice?) [CALD]
 - Ground Breaker [UNDERNEATH]
@@ -136,8 +139,6 @@ Done: **47** cards out of **190**
 - Sinder [CALD]
 - Tap Roots (will benefit from prompt texts) [NAROOM]
 - Trug [UNDERNEATH]
-- Tryn [NAROOM]
-- Typhoon [OROTHE]
 - Updraft [ARDERIAL]
 
 # Cost reduction/increase
@@ -187,10 +188,6 @@ Done: **47** cards out of **190**
 - Hyren's Call
 - O'Qua
 - Orwin's Staff
-
-# Shuffling into deck
-
-- Undertow (DISCARD_CREATURE_FROM_PLAY does not use MOVE_CARD_BETWEEN_ZONES, so the track of the card in Discard is lost)
 
 # More selectors
 

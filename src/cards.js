@@ -98,6 +98,8 @@ const {
 	ZONE_TYPE_MAGI_PILE,
 	ZONE_TYPE_HAND,
 	ZONE_TYPE_IN_PLAY,
+	ZONE_TYPE_DISCARD,
+	ZONE_TYPE_DECK,
 	/* eslint-enable no-unused-vars */
 } = require('./const');
 
@@ -202,6 +204,25 @@ const cards = [
 					}),
 				],
 			},
+		],
+	}),
+	new Card('Undertow', TYPE_SPELL, REGION_OROTHE, 5, {
+		text: 'Choose any one Creature in play. Discard the chosen Creature from play, but shuffle it into its owner\'s deck instead of placing it into the discard pile.',
+		effects: [
+			prompt({
+				promptType: PROMPT_TYPE_SINGLE_CREATURE,
+				message: 'Choose a Creature to discard and shuffle into deck',
+			}),
+			effect({
+				effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+				target: '$target',
+			}),
+			effect({
+				effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+				sourceZone: ZONE_TYPE_DISCARD,
+				destinationZone: ZONE_TYPE_DECK,
+				target: '$new_card',
+			}),
 		],
 	}),
 	new Card('Magma Armor', TYPE_RELIC, REGION_CALD, 0, {
@@ -1038,6 +1059,67 @@ const cards = [
 			],
 		}],
 	}),
+	new Card('Bhatar', TYPE_CREATURE, REGION_CALD, 5, {
+		triggerEffects: [{
+			name: 'Charge',
+			text: 'If Bhatar attacks non-Underneath Creature, add one energy to Bhatar before energy is removed.',
+			find: {
+				effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+				conditions: [
+					{
+						objectOne: 'source',
+						propertyOne: PROPERTY_ID,
+						comparator: '=',
+						objectTwo: 'self',
+						propertyTwo: PROPERTY_ID,
+					},
+					{
+						objectOne: 'target',
+						propertyOne: PROPERTY_REGION,
+						comparator: '!=',
+						objectTwo: REGION_UNDERNEATH,
+						propertyTwo: null,
+					},
+				],
+			},
+			effects: [
+				effect({
+					effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+					target: '%self',
+					amount: 1,
+				}),
+			],
+		}, {
+			name: 'Tunneling Charge',
+			text: 'If Bhatar attacks Underneath Creature, add three energy to Bhatar before energy is removed.',
+			find: {
+				effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+				conditions: [
+					{
+						objectOne: 'source',
+						propertyOne: PROPERTY_ID,
+						comparator: '=',
+						objectTwo: 'self',
+						propertyTwo: PROPERTY_ID,
+					},
+					{
+						objectOne: 'target',
+						propertyOne: PROPERTY_REGION,
+						comparator: '=',
+						objectTwo: REGION_UNDERNEATH,
+						propertyTwo: null,
+					},
+				],
+			},
+			effects: [
+				effect({
+					effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+					target: '%self',
+					amount: 3,
+				}),
+			],
+		}],
+	}),
 	new Card('Lava Arboll', TYPE_CREATURE, REGION_CALD, 2, {
 		powers: [
 			{
@@ -1105,6 +1187,28 @@ const cards = [
 			},
 		],
 	}),
+	new Card('Tryn', TYPE_MAGI, REGION_NAROOM, null, {
+		startingEnergy: 14,
+		energize: 5,
+		startingCards: ['Rudwot', 'Hood of Hiding', 'Grow'],
+		powers: [
+			{
+				name: 'Refresh',
+				cost: 0,
+				text: 'Choose a creature in play. Add 2 energy to the chosen Creature.',
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '$target',
+						amount: 2,
+					}),
+				],
+			},
+		],
+	}),
 	new Card('Poad', TYPE_MAGI, REGION_NAROOM, null, {
 		startingEnergy: 13,
 		energize: 5,
@@ -1125,6 +1229,23 @@ const cards = [
 					}),
 				],
 			},
+		],
+	}),
+	new Card('Typhoon', TYPE_SPELL, REGION_OROTHE, 8, {
+		text: 'Roll one die. Discard energy equal to the die roll from each non-Orothe Creature in play',
+		effects: [
+			effect({
+				effectType: EFFECT_TYPE_ROLL_DIE,
+			}),
+			select({
+				selector: SELECTOR_CREATURES_NOT_OF_REGION,
+				region: REGION_OROTHE,
+			}),
+			effect({
+				effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+				target: '$selected',
+				amount: 2,
+			}),
 		],
 	}),
 	new Card('Agovo', TYPE_CREATURE, REGION_UNDERNEATH, 4, {

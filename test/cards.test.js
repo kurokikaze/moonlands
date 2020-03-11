@@ -12,6 +12,7 @@ const {
 
 	PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
+	PROMPT_TYPE_OWN_SINGLE_CREATURE,
 	PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
 	PROMPT_TYPE_SINGLE_CREATURE,
 	PROMPT_TYPE_SINGLE_MAGI,
@@ -752,6 +753,145 @@ describe('Lava Balamant', () => {
 
 		expect(lavaBalamant.data.energy).toEqual(3, 'Lava Balamant loses 2 energy in attack, left at 3');
 		expect(weebo.data.energy).toEqual(0, 'Weebo is toast');
+	});
+});
+
+describe('Bhatar', () => {
+	it('Charge (non-Underneath Creature)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const bhatar = new CardInGame(byName('Bhatar'), ACTIVE_PLAYER);
+		bhatar.addEnergy(5);
+		const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER);
+		weebo.addEnergy(2);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([bhatar, weebo]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: moonlands.ACTION_ATTACK,
+			source: bhatar,
+			target: weebo,
+		};
+        
+		gameState.update(attackAction);
+
+		expect(bhatar.data.energy).toEqual(4, 'bhatar gains 1 energy and loses 2 energy in attack, left at 4');
+		expect(weebo.data.energy).toEqual(0, 'Weebo is toast');
+	});
+
+	it('Charge (Bhatar is attacked by non-Underneath Creature)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const bhatar = new CardInGame(byName('Bhatar'), NON_ACTIVE_PLAYER);
+		bhatar.addEnergy(5);
+		const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
+		weebo.addEnergy(2);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([bhatar, weebo]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: moonlands.ACTION_ATTACK,
+			source: weebo,
+			target: bhatar,
+		};
+        
+		gameState.update(attackAction);
+
+		expect(bhatar.data.energy).toEqual(3, 'Bhatar loses 2 energy in attack, left at 3');
+		expect(weebo.data.energy).toEqual(0, 'Weebo is toast');
+	});
+
+	it('Charge (Underneath Creature)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const bhatar = new CardInGame(byName('Bhatar'), ACTIVE_PLAYER);
+		bhatar.addEnergy(5);
+		const agovo = new CardInGame(byName('Agovo'), NON_ACTIVE_PLAYER);
+		agovo.addEnergy(2);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([bhatar, agovo]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: moonlands.ACTION_ATTACK,
+			source: bhatar,
+			target: agovo,
+		};
+        
+		gameState.update(attackAction);
+
+		expect(bhatar.data.energy).toEqual(6, 'Bhatar gains 3 energy and loses 2 energy in attack, left at 6');
+		expect(agovo.data.energy).toEqual(0, 'Agovo is toast');
+	});
+
+	it('Charge (Bhatar is attacked by Underneath Creature)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const bhatar = new CardInGame(byName('Bhatar'), NON_ACTIVE_PLAYER);
+		bhatar.addEnergy(5);
+		const agovo = new CardInGame(byName('Agovo'), ACTIVE_PLAYER);
+		agovo.addEnergy(2);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([bhatar, agovo]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: moonlands.ACTION_ATTACK,
+			source: agovo,
+			target: bhatar,
+		};
+        
+		gameState.update(attackAction);
+
+		expect(bhatar.data.energy).toEqual(3, 'Bhatar loses 2 energy in attack, left at 3');
+		expect(agovo.data.energy).toEqual(0, 'Agovo is toast');
 	});
 });
 
@@ -2014,5 +2154,102 @@ describe('Coral Hyren', () => {
 			HYREN_STARTING_ENERGY,
 			'Coral Hyren did not got 1 energy from Fire Ball as it is not an Orothe spell',
 		);
+	});
+});
+
+describe('Lava Aq', () => {
+	it('Firestorm', () => {
+		const ACTIVE_PLAYER = 411;
+		const NON_ACTIVE_PLAYER = 12;
+
+		// Cald player
+		const lavaAq = new CardInGame(byName('Lava Aq'), ACTIVE_PLAYER).addEnergy(6);
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER).addEnergy(1);
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(2);
+
+		// Naroom player
+		const pruitt = new CardInGame(byName('Pruitt'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER).addEnergy(1);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaAq, arbolit, weebo], [grega]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([pruitt]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: lavaAq,
+			power: lavaAq.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
+			target: arbolit,
+			generatedBy: lavaAq.id,
+		};
+
+		gameState.update(powerAction);
+		gameState.update(targetingAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'Only one creature left on the field');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Lava Aq', 'It is Lava Aq');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(4, 'It has 4 energy left');
+		
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toEqual(2, 'Grega has 2 energy');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).card.data.energy).toEqual(4, 'Pruitt has 4 energy');
+	});
+});
+
+describe('Undertow', () => {
+	it('Target is own Creature', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const poad = new CardInGame(byName('Poad'), ACTIVE_PLAYER).addEnergy(7);
+		const pharan = new CardInGame(byName('Pharan'), ACTIVE_PLAYER).addEnergy(1);
+		const undertow = new CardInGame(byName('Undertow'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [pharan], [poad]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([undertow]);
+
+		const playAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: undertow,
+				player: ACTIVE_PLAYER,
+			},
+		};
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+			target: pharan,
+			player: ACTIVE_PLAYER,
+			generatedBy: undertow.id,
+		};
+
+		gameState.update(playAction);
+		gameState.update(targetingAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'No cards on the battlefield');
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).length).toEqual(1, 'One card in the deck');
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).card.card.name).toEqual('Pharan', 'It is Pharan');
+		// WRONG
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'One card in discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Undertow', 'It is played Undertow');
 	});
 });

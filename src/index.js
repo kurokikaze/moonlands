@@ -71,6 +71,7 @@ const {
 	PROMPT_TYPE_SINGLE_CREATURE,
 	PROMPT_TYPE_SINGLE_MAGI,
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
+	PROMPT_TYPE_OWN_SINGLE_CREATURE,
 	PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
 	PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
 	PROMPT_TYPE_CHOOSE_CARDS,
@@ -714,6 +715,8 @@ class State {
 			const operandTwo = condition.propertyTwo ? this.modifyByStaticAbilities(objectTwo, condition.propertyTwo) : objectTwo;
 
 			switch (condition.comparator) {
+				case '!=':
+					return operandOne !== operandTwo;
 				case '=':
 					return operandOne == operandTwo;
 				case '>':
@@ -1047,6 +1050,13 @@ class State {
 							}
 							currentActionMetaData[variable || 'target'] = action.target;
 							break;
+						case PROMPT_TYPE_OWN_SINGLE_CREATURE: {
+							if (this.state.promptPlayer !== action.target.data.controller) {
+								throw new Error('Not-controlled creature supplied to Own Creatures prompt');
+							}
+							currentActionMetaData[variable || 'target'] = action.target;
+							break;
+						}
 						case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
 							currentActionMetaData[variable || 'target'] = action.target;
 							break;
