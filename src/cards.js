@@ -16,6 +16,8 @@ const {
 	CALCULATION_MIN,
 	CALCULATION_SET,
 
+	ACTION_PROPERTY,
+
 	PROPERTY_ENERGY_COUNT,
 	PROPERTY_CONTROLLER,
 	PROPERTY_TYPE,
@@ -53,6 +55,7 @@ const {
 	SELECTOR_OWN_CREATURES_OF_TYPE,
 	SELECTOR_CREATURES_OF_TYPE,
 
+	EFFECT_TYPE_END_OF_TURN,
 	EFFECT_TYPE_NONE,
 	EFFECT_TYPE_DRAW,
 	EFFECT_TYPE_ROLL_DIE,
@@ -68,6 +71,7 @@ const {
 	EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
 	EFFECT_TYPE_ENERGIZE,
 	EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+	EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
@@ -122,6 +126,22 @@ const prompt = data => ({
 	type: ACTION_ENTER_PROMPT,
 	...data,
 });
+
+const CONDITION_TARGET_IS_SELF = {
+	objectOne: 'target',
+	propertyOne: PROPERTY_ID,
+	comparator: '=',
+	objectTwo: 'self',
+	propertyTwo: PROPERTY_ID,
+};
+
+const CONDITION_SOURCE_IS_SELF = {
+	objectOne: 'source',
+	propertyOne: PROPERTY_ID,
+	comparator: '=',
+	objectTwo: 'self',
+	propertyTwo: PROPERTY_ID,
+};
 
 const cards = [
 	new Card('Alaban', TYPE_CREATURE, REGION_ARDERIAL, 6, {
@@ -457,13 +477,7 @@ const cards = [
 							objectTwo: TYPE_CREATURE,
 							propertyTwo: null,
 						},
-						{
-							objectOne: 'source',
-							propertyOne: PROPERTY_ID,
-							comparator: '=',
-							objectTwo: 'self',
-							propertyTwo: PROPERTY_ID,
-						}
+						CONDITION_SOURCE_IS_SELF,
 					],
 				},
 				effects: [
@@ -798,13 +812,7 @@ const cards = [
 				find: {
 					effectType: EFFECT_TYPE_CREATURE_ATTACKS,
 					conditions: [
-						{
-							objectOne: 'source',
-							propertyOne: PROPERTY_ID,
-							comparator: '=',
-							objectTwo: 'self',
-							propertyTwo: PROPERTY_ID,
-						},
+						CONDITION_SOURCE_IS_SELF,
 					],
 				},
 				effects: [
@@ -965,15 +973,7 @@ const cards = [
 				text: 'If Cave Rudwot is attacked, add 2 energy to it.',
 				find: {
 					effectType: EFFECT_TYPE_CREATURE_ATTACKS,
-					conditions: [
-						{
-							objectOne: 'target',
-							propertyOne: PROPERTY_ID,
-							comparator: '=',
-							objectTwo: 'self',
-							propertyTwo: PROPERTY_ID,
-						}
-					],
+					conditions: [CONDITION_TARGET_IS_SELF],
 				},
 				effects: [
 					effect({
@@ -993,13 +993,7 @@ const cards = [
 				find: {
 					effectType: EFFECT_TYPE_DEFENDER_DEALS_DAMAGE,
 					conditions: [
-						{
-							objectOne: 'target',
-							propertyOne: PROPERTY_ID,
-							comparator: '=',
-							objectTwo: 'self',
-							propertyTwo: PROPERTY_ID,
-						},
+						CONDITION_TARGET_IS_SELF,
 					],
 				},
 				effects: [
@@ -1041,13 +1035,7 @@ const cards = [
 			find: {
 				effectType: EFFECT_TYPE_CREATURE_ATTACKS,
 				conditions: [
-					{
-						objectOne: 'source',
-						propertyOne: PROPERTY_ID,
-						comparator: '=',
-						objectTwo: 'self',
-						propertyTwo: PROPERTY_ID,
-					},
+					CONDITION_SOURCE_IS_SELF,
 				],
 			},
 			effects: [
@@ -1066,13 +1054,7 @@ const cards = [
 			find: {
 				effectType: EFFECT_TYPE_CREATURE_ATTACKS,
 				conditions: [
-					{
-						objectOne: 'source',
-						propertyOne: PROPERTY_ID,
-						comparator: '=',
-						objectTwo: 'self',
-						propertyTwo: PROPERTY_ID,
-					},
+					CONDITION_SOURCE_IS_SELF,
 					{
 						objectOne: 'target',
 						propertyOne: PROPERTY_REGION,
@@ -1095,13 +1077,7 @@ const cards = [
 			find: {
 				effectType: EFFECT_TYPE_CREATURE_ATTACKS,
 				conditions: [
-					{
-						objectOne: 'source',
-						propertyOne: PROPERTY_ID,
-						comparator: '=',
-						objectTwo: 'self',
-						propertyTwo: PROPERTY_ID,
-					},
+					CONDITION_SOURCE_IS_SELF,
 					{
 						objectOne: 'target',
 						propertyOne: PROPERTY_REGION,
@@ -1182,6 +1158,54 @@ const cards = [
 						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 						target: '$target',
 						amount: 3,
+					}),
+				],
+			},
+		],
+	}),
+	new Card('Bwill', TYPE_CREATURE, REGION_OROTHE, 1, {
+		triggerEffects: [
+			{
+				name: 'Karma',
+				text: 'If a Creature attacks and defeats Bwill, discard that Creature from play',
+				find: {
+					effectType: EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
+					conditions: [
+						CONDITION_TARGET_IS_SELF,
+					],
+				},
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+						target: '%source',
+					}),
+				],
+			},
+		],
+	}),
+	new Card('Evu', TYPE_MAGI, REGION_NAROOM, null, {
+		startingEnergy: 15,
+		energize: 4,
+		startingCards: ['Plith', 'Furok', 'Vortex of Knowledge'],
+		triggerEffects: [
+			{
+				name: 'Lore',
+				text: 'At the end of each of your turns, draw a card.',
+				find: {
+					effectType: EFFECT_TYPE_END_OF_TURN,
+					conditions: [
+						{
+							objectOne: 'player',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						},
+					],
+				},
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_DRAW,
 					}),
 				],
 			},
@@ -1384,13 +1408,7 @@ const cards = [
 				find: {
 					effectType: EFFECT_TYPE_DEFENDER_DEALS_DAMAGE,
 					conditions: [
-						{
-							objectOne: 'target',
-							propertyOne: PROPERTY_ID,
-							comparator: '=',
-							objectTwo: 'self',
-							propertyTwo: PROPERTY_ID,
-						},
+						CONDITION_TARGET_IS_SELF,
 						{
 							objectOne: 'sourceAtStart',
 							propertyOne: PROPERTY_ENERGY_COUNT,
@@ -1414,13 +1432,7 @@ const cards = [
 				find: {
 					effectType: EFFECT_TYPE_CREATURE_ATTACKS,
 					conditions: [
-						{
-							objectOne: 'source',
-							propertyOne: PROPERTY_ID,
-							comparator: '=',
-							objectTwo: 'self',
-							propertyTwo: PROPERTY_ID,
-						},
+						CONDITION_SOURCE_IS_SELF,
 						{
 							objectOne: 'targetAtStart',
 							propertyOne: PROPERTY_ENERGY_COUNT,

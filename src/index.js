@@ -26,6 +26,8 @@ const {
 	ACTION_RESHUFFLE_DISCARD,
 	ACTION_PLAYER_WINS,
 
+	ACTION_PROPERTY,
+
 	PROPERTY_ID,
 	PROPERTY_TYPE,
 	PROPERTY_CONTROLLER,
@@ -710,9 +712,9 @@ class State {
 			const objectOne = this.getObjectOrSelf(action, self, condition.objectOne, condition.propertyOne);
 			const objectTwo = this.getObjectOrSelf(action, self, condition.objectTwo, condition.propertyTwo);
 
-			const operandOne = condition.propertyOne ? this.modifyByStaticAbilities(objectOne, condition.propertyOne) : objectOne;
+			const operandOne = (condition.propertyOne && condition.propertyOne !== ACTION_PROPERTY) ? this.modifyByStaticAbilities(objectOne, condition.propertyOne) : objectOne;
 
-			const operandTwo = condition.propertyTwo ? this.modifyByStaticAbilities(objectTwo, condition.propertyTwo) : objectTwo;
+			const operandTwo = (condition.propertyTwo && condition.propertyTwo !== ACTION_PROPERTY) ? this.modifyByStaticAbilities(objectTwo, condition.propertyTwo) : objectTwo;
 
 			switch (condition.comparator) {
 				case '!=':
@@ -751,9 +753,11 @@ class State {
 			] : acc,
 			[],
 		);
-
-		// const sourceId = action.generatedBy; // For accessing caught action's metaData
-
+		console.log('List of trigger effects:');
+		console.log('');
+		console.dir(triggerEffects);
+		console.log('');
+		console.log('===');
 		triggerEffects.forEach(replacer => {
 			const triggeredId = replacer.self.id; // Not really, but will work for now
 

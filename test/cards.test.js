@@ -9,6 +9,7 @@ const {
 	ACTION_ATTACK,
 	ACTION_POWER,
 	ACTION_RESOLVE_PROMPT,
+	ACTION_PASS,
 
 	PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
@@ -2204,6 +2205,96 @@ describe('Lava Aq', () => {
 		
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toEqual(2, 'Grega has 2 energy');
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).card.data.energy).toEqual(4, 'Pruitt has 4 energy');
+	});
+});
+
+describe.skip('Bwill', () => {
+	// The problem here is, when CREATURE_DEFEATS_CREATURE action is checked for triggers,
+	// Bwill is already in the discard, so his triggerAbilities are not checked.
+	// Moving CREATURE_DEFEATS_CREATURE before MOVE_CARD_BETWEEN_ZONES is not easy, and not
+	// really that intuitive. Maybe it's better to finally make something like State-Based Actions
+	// that will get rid of 0-energy Creatures on the battlefield.
+	// That will create separate problem with abilities like "when ~ is defeated, return it to the hand 
+	// instead of discard" (or maybe not? just return to hand?). Anyway, we'll lose the link between
+	// combat/targeting and zone change on 0 energy.
+	it('Karma (Bwill is attacked)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		// Naroom/Orothe side
+		const pruitt = new CardInGame(byName('Pruitt'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const bwill = new CardInGame(byName('Bwill'), NON_ACTIVE_PLAYER).addEnergy(1);
+
+		// Cald side
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(5);
+		const kelthet = new CardInGame(byName('Kelthet'), ACTIVE_PLAYER).addEnergy(6);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([pruitt]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([bwill, kelthet]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.enableDebug();
+
+		const attackAction = {
+			type: moonlands.ACTION_ATTACK,
+			source: kelthet,
+			target: bwill,
+		};
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two creatures on the field');
+
+		gameState.update(attackAction);
+
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'Active player has 1 card in discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Kelthet', 'It is Kelthet');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1, 'Non-active player has 1 card in discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Bwill', 'It is Bwill');
+	});
+});
+
+describe('Evu', () => {
+	it('Lore', () => {
+		const ACTIVE_PLAYER = 411;
+		const NON_ACTIVE_PLAYER = 12;
+
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(10);
+		// Naroom player
+		const evu = new CardInGame(byName('Evu'), ACTIVE_PLAYER).addEnergy(5);
+
+		const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
+		const furok = new CardInGame(byName('Furok'), ACTIVE_PLAYER);
+		const arboll = new CardInGame(byName('Arboll'), ACTIVE_PLAYER);
+
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [], [evu]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).add([weebo, furok, arboll]);
+		gameState.getZone(ZONE_TYPE_DECK, NON_ACTIVE_PLAYER).add([arbolit]);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		const passAction = {
+			type: ACTION_PASS,
+		};
+
+		gameState.update(passAction);
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(3, 'Active player drawn 3 cards');
 	});
 });
 

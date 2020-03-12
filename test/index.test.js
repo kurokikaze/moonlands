@@ -5,12 +5,17 @@ const CardInGame = require('../src/classes/CardInGame');
 const {caldDeck, naroomDeck} = require('./testData');
 
 const {
+	TYPE_EFFECT,
+
 	ACTION_SELECT,
+
 	SELECTOR_MAGI_NOT_OF_REGION,
 	SELECTOR_MAGI_OF_REGION,
+
 	REGION_NAROOM,
 	REGION_CALD,
 	REGION_OROTHE,
+
 	CALCULATION_DOUBLE,
 	CALCULATION_ADD,
 	CALCULATION_SUBTRACT,
@@ -18,8 +23,14 @@ const {
 	CALCULATION_HALVE_ROUND_UP,
 	CALCULATION_MIN,
 	CALCULATION_MAX,
+
+	ACTION_PROPERTY,
+
 	PROPERTY_ENERGIZE,
+
 	PROMPT_TYPE_CHOOSE_CARDS,
+
+	EFFECT_TYPE_MOVE_ENERGY,
 
 	ZONE_TYPE_ACTIVE_MAGI,
 	ZONE_TYPE_MAGI_PILE,
@@ -863,6 +874,180 @@ describe('Effects', () => {
 			'New card meta data points no new card',
 		);
 	});    
+});
+
+describe('Match actions', () => {
+	it('Matching object property with value', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+		// const GENERATED_BY = 123;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+
+		const zones = [
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			ACTIVE_PLAYER,
+		});
+
+		const actionToMatch = {
+			type: TYPE_EFFECT,
+			effectType: EFFECT_TYPE_MOVE_ENERGY,
+			source: grega,
+			target: yaki,
+			amount: 5,
+		};
+
+		// Seeking Move Energy action where source's Energize rate is 5
+		const find = {
+			effectType: EFFECT_TYPE_MOVE_ENERGY,
+			conditions: [
+				{
+					objectOne: 'source',
+					propertyOne: PROPERTY_ENERGIZE,
+					comparator: '=',
+					objectTwo: 5,
+					propertyTwo: null,
+				}
+			],
+		};
+
+		// Seeking Move Energy action where source's Energize rate is 5
+		const findToFail = {
+			effectType: EFFECT_TYPE_MOVE_ENERGY,
+			conditions: [
+				{
+					objectOne: 'source',
+					propertyOne: PROPERTY_ENERGIZE,
+					comparator: '=',
+					objectTwo: 6,
+					propertyTwo: null,
+				}
+			],
+		};
+
+		expect(gameState.matchAction(actionToMatch, find, yaki)).toEqual(true, 'Action matches');
+		expect(gameState.matchAction(actionToMatch, findToFail, yaki)).toEqual(false, 'Action fails to match');
+	});
+
+	it('Matching action property with value', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+		// const GENERATED_BY = 123;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+
+		const zones = [
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			ACTIVE_PLAYER,
+		});
+
+		const actionToMatch = {
+			type: TYPE_EFFECT,
+			effectType: EFFECT_TYPE_MOVE_ENERGY,
+			source: grega,
+			target: yaki,
+			amount: 5,
+		};
+
+		// Seeking Move Energy action where amount is 5
+		const find = {
+			effectType: EFFECT_TYPE_MOVE_ENERGY,
+			conditions: [
+				{
+					objectOne: 'amount',
+					propertyOne: ACTION_PROPERTY,
+					comparator: '=',
+					objectTwo: 5,
+					propertyTwo: null,
+				}
+			],
+		};
+
+		const findToFail = {
+			effectType: EFFECT_TYPE_MOVE_ENERGY,
+			conditions: [
+				{
+					objectOne: 'amount',
+					propertyOne: ACTION_PROPERTY,
+					comparator: '=',
+					objectTwo: 6,
+					propertyTwo: null,
+				}
+			],
+		};
+
+		expect(gameState.matchAction(actionToMatch, find, yaki)).toEqual(true, 'Action matches');
+		expect(gameState.matchAction(actionToMatch, findToFail, yaki)).toEqual(false, 'Action fails to match');
+	});
+
+	it('Matching value with value', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+		// const GENERATED_BY = 123;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+
+		const zones = [
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			ACTIVE_PLAYER,
+		});
+
+		const actionToMatch = {
+			type: TYPE_EFFECT,
+			effectType: EFFECT_TYPE_MOVE_ENERGY,
+			source: grega,
+			target: yaki,
+			amount: 5,
+		};
+
+		// Comparing 5 with 5
+		const find = {
+			effectType: EFFECT_TYPE_MOVE_ENERGY,
+			conditions: [
+				{
+					objectOne: 5,
+					propertyOne: null,
+					comparator: '=',
+					objectTwo: 5,
+					propertyTwo: null,
+				}
+			],
+		};
+
+		const findToFail = {
+			effectType: EFFECT_TYPE_MOVE_ENERGY,
+			conditions: [
+				{
+					objectOne: 5,
+					propertyOne: null,
+					comparator: '=',
+					objectTwo: 6,
+					propertyTwo: null,
+				}
+			],
+		};
+
+		expect(gameState.matchAction(actionToMatch, find, yaki)).toEqual(true, 'Action matches');
+		expect(gameState.matchAction(actionToMatch, findToFail, yaki)).toEqual(false, 'Action fails to match');
+	});
 });
 
 describe('Selector actions', () => {

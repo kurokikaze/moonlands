@@ -10,6 +10,7 @@ const ACTION_GET_PROPERTY_VALUE = 'actions/get_property_value';
 const ACTION_ATTACK = 'actions/attack';
 const ACTION_PLAYER_WINS ='actions/player_wins';
 
+const ACTION_PROPERTY = 'special_properties/action_property';
 const PROPERTY_ID = 'properties/id';
 const PROPERTY_TYPE = 'properties/type';
 const PROPERTY_ENERGY_COUNT = 'properties/energy_count';
@@ -186,6 +187,7 @@ module.exports = {
 	SELECTOR_CREATURES_NOT_OF_TYPE,
 	SELECTOR_OWN_CREATURES_OF_TYPE,
 
+	ACTION_PROPERTY,
 	PROPERTY_ID,
 	PROPERTY_ENERGY_COUNT,
 	PROPERTY_MAGI_STARTING_ENERGY,

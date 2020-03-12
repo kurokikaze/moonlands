@@ -1,4 +1,4 @@
-Done: **61** cards out of **190**
+Done: **62** cards out of **190**
 
 # Done, tested
 
@@ -37,6 +37,7 @@ Done: **61** cards out of **190**
 - Pruitt
 - Undertow
 - Bhatar
+- Evu
 
 # Done, not tested
 
@@ -165,6 +166,7 @@ Done: **61** cards out of **190**
 
 # Conditionals
 
+- Blu
 - Amulet of Ombor
 - Balamant Pup
 - Brub
@@ -228,9 +230,7 @@ Done: **61** cards out of **190**
 # Triggered abilities
 
 - Arderial's Crown
-- Blu
 - Bwill
-- Evu
 - Gar
 - Gloves of Crystal
 - Jaela
