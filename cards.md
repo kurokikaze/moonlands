@@ -71,6 +71,7 @@ Done: **66** cards out of **190**
 - Bwill
 - Jaela
 - Lasada
+- Trug
 
 # Possible sample decks:
 

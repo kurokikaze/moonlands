@@ -10,7 +10,10 @@ const {
 	ACTION_SELECT,
 
 	SELECTOR_MAGI_NOT_OF_REGION,
+	SELECTOR_OWN_CREATURES_OF_TYPE,
 	SELECTOR_MAGI_OF_REGION,
+	SELECTOR_CREATURES_OF_TYPE,
+	SELECTOR_CREATURES_NOT_OF_TYPE,
 	SELECTOR_MAGI,
 
 	REGION_NAROOM,
@@ -1084,6 +1087,123 @@ describe('Selector actions', () => {
 
 		expect(selectedMagi).toHaveLength(2, 'Magi selector returns two magi');
 		expect([selectedMagi[0].card.name, selectedMagi[1].card.name]).toEqual(['Grega', 'Yaki'], 'Magi selector returns both Magi');
+	});
+
+	it('SELECTOR_OWN_CREATURES_OF_TYPE', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+		const GENERATED_BY = 123;
+
+		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER).addEnergy(2);
+		const xyxElder = new CardInGame(byName('Xyx'), ACTIVE_PLAYER).addEnergy(3);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER).addEnergy(3);
+		const opponentsXyx = new CardInGame(byName('Xyx'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const zones = [
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In Play', ZONE_TYPE_IN_PLAY, null).add([xyx, xyxElder, lavaBalamant, opponentsXyx]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			ACTIVE_PLAYER,
+		});
+		
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const selectOwnOfTypeAction = {
+			type: ACTION_SELECT,
+			selector: SELECTOR_OWN_CREATURES_OF_TYPE,
+			creatureType: 'Xyx',
+			player: ACTIVE_PLAYER,
+			generatedBy: GENERATED_BY,
+		};
+
+		gameState.update(selectOwnOfTypeAction);
+
+		const selectedCreatures = gameState.state.spellMetaData[GENERATED_BY].selected;
+
+		expect(selectedCreatures).toHaveLength(2, 'Creature selector returns both of our Xyx');
+		expect([selectedCreatures[0].card.name, selectedCreatures[1].card.name]).toEqual(['Xyx', 'Xyx'], 'Creature selector returns both Xyx and Xyx Elder');
+	});
+
+	it('SELECTOR_CREATURES_OF_TYPE', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+		const GENERATED_BY = 123;
+
+		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER).addEnergy(2);
+		const xyxElder = new CardInGame(byName('Xyx'), ACTIVE_PLAYER).addEnergy(3);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER).addEnergy(3);
+		const opponentsXyx = new CardInGame(byName('Xyx'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const zones = [
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In Play', ZONE_TYPE_IN_PLAY, null).add([xyx, xyxElder, lavaBalamant, opponentsXyx]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			ACTIVE_PLAYER,
+		});
+		
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const selectCreaturesOfTypeAction = {
+			type: ACTION_SELECT,
+			selector: SELECTOR_CREATURES_OF_TYPE,
+			creatureType: 'Xyx',
+			player: ACTIVE_PLAYER,
+			generatedBy: GENERATED_BY,
+		};
+
+		gameState.update(selectCreaturesOfTypeAction);
+
+		const selectedCreatures = gameState.state.spellMetaData[GENERATED_BY].selected;
+
+		expect(selectedCreatures).toHaveLength(3, 'Creature selector returns both of our Xyx and an opponents Xyx');
+		expect([selectedCreatures[0].card.name, selectedCreatures[1].card.name, selectedCreatures[2].card.name]).toEqual(['Xyx', 'Xyx', 'Xyx'], 'Creature selector returns only Xyx-es');
+	});
+
+	it('SELECTOR_CREATURES_NOT_OF_TYPE', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+		const GENERATED_BY = 123;
+
+		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER).addEnergy(2);
+		const xyxElder = new CardInGame(byName('Xyx'), ACTIVE_PLAYER).addEnergy(3);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER).addEnergy(3);
+		const opponentsXyx = new CardInGame(byName('Xyx'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const zones = [
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In Play', ZONE_TYPE_IN_PLAY, null).add([xyx, xyxElder, lavaBalamant, opponentsXyx]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			ACTIVE_PLAYER,
+		});
+		
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const selectCreaturesOfTypeAction = {
+			type: ACTION_SELECT,
+			selector: SELECTOR_CREATURES_NOT_OF_TYPE,
+			creatureType: 'Xyx',
+			player: ACTIVE_PLAYER,
+			generatedBy: GENERATED_BY,
+		};
+
+		gameState.update(selectCreaturesOfTypeAction);
+
+		const selectedCreatures = gameState.state.spellMetaData[GENERATED_BY].selected;
+
+		expect(selectedCreatures).toHaveLength(1, 'Creature selector returns only one creature');
+		expect(selectedCreatures[0].card.name).toEqual('Lava Balamant', 'Creature selector returns only Lava Balamant');
 	});
 
 	it('Selecting Magi by region [SELECTOR_MAGI_OF_REGION]', () => {

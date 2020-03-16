@@ -46,6 +46,7 @@ const {
 	SELECTOR_OWN_MAGI,
 	SELECTOR_CREATURES,
 	SELECTOR_ENEMY_MAGI,
+	SELECTOR_RELICS,
 	SELECTOR_CREATURES_AND_MAGI,
 	SELECTOR_CREATURES_OF_REGION,
 	SELECTOR_CREATURES_NOT_OF_REGION,
@@ -272,6 +273,13 @@ const cards = [
 				}),
 				effect({
 					effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+				}),
+				select({
+					selector: SELECTOR_RELICS,
+				}),
+				effect({
+					effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
+					target: '$target',
 				}),
 				select({
 					selector: SELECTOR_MAGI,

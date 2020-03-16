@@ -41,6 +41,7 @@ const SELECTOR_OWN_CARDS_IN_PLAY = 'selectors/own_cards_in_play';
 const SELECTOR_CREATURES_OF_TYPE = 'selectors/creatures_of_type';
 const SELECTOR_CREATURES_NOT_OF_TYPE = 'selectors/creatures_not_of_type';
 const SELECTOR_OWN_CREATURES_OF_TYPE = 'selectors/own_creatures_of_type';
+const SELECTOR_RELICS = 'selectors/relics';
 
 const CALCULATION_SET = 'calculations/set';
 const CALCULATION_DOUBLE = 'calculations/double';
@@ -172,6 +173,7 @@ module.exports = {
 
 	SELECTOR_OPPONENT_ID,
 	SELECTOR_CREATURES,
+	SELECTOR_RELICS,
 	SELECTOR_MAGI,
 	SELECTOR_OWN_MAGI,
 	SELECTOR_ENEMY_MAGI,

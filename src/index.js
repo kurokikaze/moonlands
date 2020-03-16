@@ -52,6 +52,7 @@ const {
 	SELECTOR_CREATURES,
 	SELECTOR_MAGI,
 	SELECTOR_CREATURES_AND_MAGI,
+	SELECTOR_RELICS,
 	SELECTOR_OWN_MAGI,
 	SELECTOR_ENEMY_MAGI,
 	SELECTOR_ACTIVE_MAGI_OF_PLAYER,
@@ -541,6 +542,9 @@ class State {
 				return this.getZone(ZONE_TYPE_IN_PLAY).cards
 					.filter(card => this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player);
 			}
+			case SELECTOR_RELICS: {
+				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.type == TYPE_RELIC);
+			}
 			case SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE: {
 				return [
 					...this.getZone(ZONE_TYPE_IN_PLAY).cards
@@ -588,8 +592,8 @@ class State {
 			case SELECTOR_OWN_CREATURES_OF_TYPE:
 				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card =>
 					this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player &&
-					card.card.name.split(' ').includes(argument) &&
-					card.card.type == TYPE_CREATURE
+					card.card.type == TYPE_CREATURE &&
+					card.card.name.split(' ').includes(argument)
 				);
 		}
 	}
@@ -1105,20 +1109,24 @@ class State {
 							result = this.useSelector(SELECTOR_MAGI);
 							break;
 						}
+						case SELECTOR_RELICS: {
+							result = this.useSelector(SELECTOR_RELICS);
+							break;
+						}
 						case SELECTOR_OWN_CARDS_IN_PLAY: {
 							result = this.useSelector(SELECTOR_OWN_CARDS_IN_PLAY, action.player);
 							break;
 						}
 						case SELECTOR_OWN_CREATURES_OF_TYPE: {
-							result = this.useSelector(SELECTOR_OWN_CREATURES_OF_TYPE, action.player, this.getMetaValue(action.type, action.generatedBy));
+							result = this.useSelector(SELECTOR_OWN_CREATURES_OF_TYPE, action.player, this.getMetaValue(action.creatureType, action.generatedBy));
 							break;
 						}
 						case SELECTOR_CREATURES_OF_TYPE: {
-							result = this.useSelector(SELECTOR_CREATURES_OF_TYPE, null, this.getMetaValue(action.type, action.generatedBy));
+							result = this.useSelector(SELECTOR_CREATURES_OF_TYPE, null, this.getMetaValue(action.creatureType, action.generatedBy));
 							break;
 						}
 						case SELECTOR_CREATURES_NOT_OF_TYPE: {
-							result = this.useSelector(SELECTOR_CREATURES_NOT_OF_TYPE, null, this.getMetaValue(action.type, action.generatedBy));
+							result = this.useSelector(SELECTOR_CREATURES_NOT_OF_TYPE, null, this.getMetaValue(action.creatureType, action.generatedBy));
 							break;
 						}
 						case SELECTOR_CARDS_WITH_ENERGIZE_RATE: {
