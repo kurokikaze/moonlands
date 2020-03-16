@@ -1,4 +1,4 @@
-Done: **62** cards out of **190**
+Done: **66** cards out of **190**
 
 # Done, tested
 
@@ -68,6 +68,9 @@ Done: **62** cards out of **190**
 - Updraft
 - Typhoon
 - Tryn
+- Bwill
+- Jaela
+- Lasada
 
 # Possible sample decks:
 
@@ -163,6 +166,7 @@ Done: **62** cards out of **190**
 - Vulbor (choosing player)
 - Xyx Minor (creature in play by name)
 - Corf (status "was attacked")
+- Gar (between cards in play)
 
 # Conditionals
 
@@ -230,11 +234,7 @@ Done: **62** cards out of **190**
 # Triggered abilities
 
 - Arderial's Crown
-- Bwill
-- Gar
 - Gloves of Crystal
-- Jaela
-- Lasada
 - Magma Armor
 - Megathan
 - Motash

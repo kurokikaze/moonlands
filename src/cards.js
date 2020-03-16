@@ -43,6 +43,7 @@ const {
 
 	SELECTOR_OPPONENT_ID,
 	SELECTOR_OWN_MAGI,
+	SELECTOR_CREATURES,
 	SELECTOR_ENEMY_MAGI,
 	SELECTOR_CREATURES_AND_MAGI,
 	SELECTOR_CREATURES_OF_REGION,
@@ -62,6 +63,7 @@ const {
 	EFFECT_TYPE_PLAY_CREATURE,
 	EFFECT_TYPE_PLAY_RELIC,
 	EFFECT_TYPE_PLAY_SPELL,
+	EFFECT_TYPE_MAGI_IS_DEFEATED,
 	EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
 	EFFECT_TYPE_CREATURE_ENTERS_PLAY,
 	EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
@@ -1158,6 +1160,61 @@ const cards = [
 						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 						target: '$target',
 						amount: 3,
+					}),
+				],
+			},
+		],
+	}),
+	new Card('Lasada', TYPE_MAGI, REGION_ARDERIAL, null, {
+		startingEnergy: 11,
+		energize: 6,
+		startingCards: ['Thunder Vashp', 'Xyx', 'Shooting Star'],
+		triggerEffects: [
+			{
+				name: 'Warning',
+				text: 'When Lasada is defeated, draw three cards',
+				find: {
+					effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
+					conditions: [
+						CONDITION_TARGET_IS_SELF,
+					],
+				},
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_DRAW,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DRAW,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DRAW,
+					}),
+				],
+			},
+		],
+	}),
+	new Card('Jaela', TYPE_MAGI, REGION_ARDERIAL, null, {
+		startingEnergy: 15,
+		energize: 5,
+		startingCards: ['Xyx Elder', 'Lightning', 'Shooting Star'],
+		triggerEffects: [
+			{
+				name: 'Spite',
+				text: 'When Jaela is defeated, discard 1 energy from each Creature in play',
+				find: {
+					effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
+					conditions: [
+						CONDITION_TARGET_IS_SELF,
+					],
+				},
+				effects: [
+					select({
+						selector: SELECTOR_CREATURES,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+						target: '$selected',
+						amount: 1,
 					}),
 				],
 			},
