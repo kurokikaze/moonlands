@@ -2208,15 +2208,7 @@ describe('Lava Aq', () => {
 	});
 });
 
-describe.skip('Bwill', () => {
-	// The problem here is, when CREATURE_DEFEATS_CREATURE action is checked for triggers,
-	// Bwill is already in the discard, so his triggerAbilities are not checked.
-	// Moving CREATURE_DEFEATS_CREATURE before MOVE_CARD_BETWEEN_ZONES is not easy, and not
-	// really that intuitive. Maybe it's better to finally make something like State-Based Actions
-	// that will get rid of 0-energy Creatures on the battlefield.
-	// That will create separate problem with abilities like "when ~ is defeated, return it to the hand 
-	// instead of discard" (or maybe not? just return to hand?). Anyway, we'll lose the link between
-	// combat/targeting and zone change on 0 energy.
+describe('Bwill', () => {
 	it('Karma (Bwill is attacked)', () => {
 		const ACTIVE_PLAYER = 0;
 		const NON_ACTIVE_PLAYER = 1;
@@ -2242,7 +2234,6 @@ describe.skip('Bwill', () => {
 		});
 
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
-		gameState.enableDebug();
 
 		const attackAction = {
 			type: moonlands.ACTION_ATTACK,
@@ -2258,6 +2249,49 @@ describe.skip('Bwill', () => {
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Kelthet', 'It is Kelthet');
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1, 'Non-active player has 1 card in discard');
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Bwill', 'It is Bwill');
+	});
+
+	it('Karma (Bwill attacks)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		// Naroom/Orothe side
+		const pruitt = new CardInGame(byName('Pruitt'), ACTIVE_PLAYER).addEnergy(10);
+		const bwill = new CardInGame(byName('Bwill'), ACTIVE_PLAYER).addEnergy(1);
+
+		// Cald side
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const kelthet = new CardInGame(byName('Kelthet'), NON_ACTIVE_PLAYER).addEnergy(6);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([pruitt]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([bwill, kelthet]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: moonlands.ACTION_ATTACK,
+			source: bwill,
+			target: kelthet,
+		};
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two creatures on the field');
+
+		gameState.update(attackAction);
+
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'Active player has 1 card in discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Bwill', 'It is Bwill');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(0, 'Non-active player has 0 card in discard');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One card is on the field');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Kelthet', 'It is Kelthet');
 	});
 });
 

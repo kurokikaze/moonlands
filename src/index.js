@@ -753,11 +753,6 @@ class State {
 			] : acc,
 			[],
 		);
-		console.log('List of trigger effects:');
-		console.log('');
-		console.dir(triggerEffects);
-		console.log('');
-		console.log('===');
 		triggerEffects.forEach(replacer => {
 			const triggeredId = replacer.self.id; // Not really, but will work for now
 
@@ -1639,8 +1634,7 @@ class State {
 									target: action.target,
 									attack: true,
 									generatedBy: action.generatedBy,
-								});
-								this.transformIntoActions({
+								}, {
 									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_CREATURE_IS_DEFEATED,
 									target: action.target,
@@ -1826,6 +1820,7 @@ class State {
 											type: ACTION_EFFECT,
 											effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
 											amount: action.amount,
+											attack: action.attack || false,
 											target,
 											generatedBy: action.generatedBy,
 										});
@@ -1901,7 +1896,8 @@ class State {
 								this.getMetaValue(action.target, action.generatedBy),
 								target => {
 									target.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
-									if (target.data.energy == 0) {
+
+									if (target.data.energy == 0 && !action.attack) {
 										this.transformIntoActions({
 											type: ACTION_EFFECT,
 											effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
