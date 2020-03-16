@@ -50,6 +50,7 @@ const {
 	CALCULATION_MAX,
 
 	SELECTOR_CREATURES,
+	SELECTOR_MAGI,
 	SELECTOR_CREATURES_AND_MAGI,
 	SELECTOR_OWN_MAGI,
 	SELECTOR_ENEMY_MAGI,
@@ -105,6 +106,7 @@ const {
 	EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 	EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
 	EFFECT_TYPE_ENERGIZE,
+	EFFECT_TYPE_DEFEAT_MAGI,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
 	EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC,
 	EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
@@ -558,6 +560,11 @@ class State {
 				return this.players.find(id => id != argument);
 			case SELECTOR_CREATURES:
 				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.type == TYPE_CREATURE);
+			case SELECTOR_MAGI:
+				return [
+					...this.getZone(ZONE_TYPE_ACTIVE_MAGI, this.players[0]).cards,
+					...this.getZone(ZONE_TYPE_ACTIVE_MAGI, this.players[1]).cards,
+				].filter(Boolean);
 			case SELECTOR_TOP_MAGI_OF_PILE: {
 				const topMagi = this.getZone(ZONE_TYPE_MAGI_PILE, player).cards[0];
 				return [topMagi]; // Selectors always have to return array
@@ -1094,6 +1101,10 @@ class State {
 				case ACTION_SELECT: {
 					let result;
 					switch (action.selector) {
+						case SELECTOR_MAGI: {
+							result = this.useSelector(SELECTOR_MAGI);
+							break;
+						}
 						case SELECTOR_OWN_CARDS_IN_PLAY: {
 							result = this.useSelector(SELECTOR_OWN_CARDS_IN_PLAY, action.player);
 							break;
@@ -1855,6 +1866,19 @@ class State {
 									}
 								},
 							);
+							break;
+						}
+						case EFFECT_TYPE_DEFEAT_MAGI: {
+							const magiMiltiTarget = this.getMetaValue(action.target, action.generatedBy);
+
+							oneOrSeveral(magiMiltiTarget, target => {
+								this.transformIntoActions({
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
+									target,
+									generatedBy: action.generatedBy,
+								});
+							});
 							break;
 						}
 						case EFFECT_TYPE_MAGI_IS_DEFEATED: {

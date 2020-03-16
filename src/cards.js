@@ -42,6 +42,7 @@ const {
 	TYPE_SPELL,
 
 	SELECTOR_OPPONENT_ID,
+	SELECTOR_MAGI,
 	SELECTOR_OWN_MAGI,
 	SELECTOR_CREATURES,
 	SELECTOR_ENEMY_MAGI,
@@ -227,6 +228,59 @@ const cards = [
 				],
 			},
 		],
+	}),
+	new Card('Strag', TYPE_MAGI, REGION_UNDERNEATH, null, {
+		startingEnergy: 13,
+		energize: 5,
+		startingCards: ['Giant Parmalag', 'Gum-Gum', 'Bottomless Pit'],
+		triggerEffects: [
+			{
+				name: 'Defense',
+				text: 'Whenever one of your creature is attacked, add one energy to it before energy is removed',
+				find: {
+					effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+					conditions: [
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_CONTROLLER,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						},
+					],
+				},
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '$target',
+						amount: 1,
+					}),
+				],
+			},
+		],
+	}),
+	new Card('Trug', TYPE_MAGI, REGION_UNDERNEATH, null, {
+		startingEnergy: 9,
+		energize: 5,
+		powers: [{
+			name: 'Cataclysm',
+			cost: 15,
+			text: 'Discard all cards in play. Defeat all Magi.',
+			effects: [
+				select({
+					selector: SELECTOR_CREATURES,
+				}),
+				effect({
+					effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+				}),
+				select({
+					selector: SELECTOR_MAGI,
+				}),
+				effect({
+					effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
+				})
+			]
+		}],
 	}),
 	new Card('Undertow', TYPE_SPELL, REGION_OROTHE, 5, {
 		text: 'Choose any one Creature in play. Discard the chosen Creature from play, but shuffle it into its owner\'s deck instead of placing it into the discard pile.',

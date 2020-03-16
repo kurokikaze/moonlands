@@ -11,6 +11,7 @@ const {
 
 	SELECTOR_MAGI_NOT_OF_REGION,
 	SELECTOR_MAGI_OF_REGION,
+	SELECTOR_MAGI,
 
 	REGION_NAROOM,
 	REGION_CALD,
@@ -1051,6 +1052,40 @@ describe('Match actions', () => {
 });
 
 describe('Selector actions', () => {
+	it('SELECTOR_MAGI', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+		const GENERATED_BY = 123;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+
+		const zones = [
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			ACTIVE_PLAYER,
+		});
+		
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const selectMagiAction = {
+			type: ACTION_SELECT,
+			selector: SELECTOR_MAGI,
+			generatedBy: GENERATED_BY,
+		};
+
+		gameState.update(selectMagiAction);
+		// console.dir(gameState.state.spellMetaData[GENERATED_BY]);
+		const selectedMagi = gameState.state.spellMetaData[GENERATED_BY].selected;
+
+		expect(selectedMagi).toHaveLength(2, 'Magi selector returns two magi');
+		expect([selectedMagi[0].card.name, selectedMagi[1].card.name]).toEqual(['Grega', 'Yaki'], 'Magi selector returns both Magi');
+	});
+
 	it('Selecting Magi by region [SELECTOR_MAGI_OF_REGION]', () => {
 		const ACTIVE_PLAYER = 0;
 		const NON_ACTIVE_PLAYER = 1;

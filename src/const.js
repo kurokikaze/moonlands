@@ -24,6 +24,7 @@ const PROPERTY_CAN_ATTACK_MAGI_DIRECTLY = 'properties/can_attack_magi_directly';
 
 const SELECTOR_OPPONENT_ID = 'selectors/opponent_id'; // THIS WILL RETURN ID OF PLAYER'S OPPONENT
 const SELECTOR_CREATURES = 'selectors/creatures';
+const SELECTOR_MAGI = 'selectors/magi';
 const SELECTOR_CREATURES_AND_MAGI = 'selectors/creatures_and_magi';
 const SELECTOR_OWN_MAGI = 'selectors/own_magi';
 const SELECTOR_TOP_MAGI_OF_PILE = 'selectors/top_magi_of_pile';
@@ -72,6 +73,7 @@ const EFFECT_TYPE_DEAL_DAMAGE = 'effects/deal_damage';
 const EFFECT_TYPE_AFTER_DAMAGE = 'effects/after_damage';
 const EFFECT_TYPE_CREATURE_DEFEATS_CREATURE = 'effects/creature_defeats_creature';
 const EFFECT_TYPE_CREATURE_IS_DEFEATED = 'effects/creature_is_defeated';
+const EFFECT_TYPE_DEFEAT_MAGI = 'effects/defeat_magi';
 const EFFECT_TYPE_MAGI_IS_DEFEATED = 'effects/magi_is_defeated';
 const EFFECT_TYPE_ROLL_DIE = 'effects/roll_die';
 const EFFECT_TYPE_MOVE_ENERGY = 'effects/move_energy';
@@ -170,6 +172,7 @@ module.exports = {
 
 	SELECTOR_OPPONENT_ID,
 	SELECTOR_CREATURES,
+	SELECTOR_MAGI,
 	SELECTOR_OWN_MAGI,
 	SELECTOR_ENEMY_MAGI,
 	SELECTOR_CREATURES_OF_REGION,
@@ -208,6 +211,7 @@ module.exports = {
 	EFFECT_TYPE_PLAY_RELIC,
 	EFFECT_TYPE_PLAY_SPELL,
 	EFFECT_TYPE_MAGI_FLIPPED,
+	EFFECT_TYPE_DEFEAT_MAGI,
 	EFFECT_TYPE_CREATURE_ENTERS_PLAY,
 	EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
 	EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
