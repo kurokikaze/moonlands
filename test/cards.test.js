@@ -1657,7 +1657,7 @@ describe('Grega', () => {
 });
 
 describe('Xyx', () => {
-	it.only('Shock', () => {
+	it('Shock', () => {
 		const ACTIVE_PLAYER = 422;
 		const NON_ACTIVE_PLAYER = 1310;
 

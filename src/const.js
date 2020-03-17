@@ -110,6 +110,7 @@ const EFFECT_TYPE_END_OF_TURN = 'effects/end_of_turn';
 const EFFECT_TYPE_MAGI_FLIPPED = 'effects/magi_flipped';
 const EFFECT_TYPE_FIND_STARTING_CARDS = 'effects/find_starting_cards';
 const EFFECT_TYPE_DRAW_REST_OF_CARDS = 'effects/draw_rest_of_cards';
+const EFFECT_TYPE_DISCARD_CARDS_FROM_HAND = 'effects/discard_cards_from_hand';
 
 const NO_PRIORITY = 0;
 const PRIORITY_PRS = 1;
@@ -117,6 +118,7 @@ const PRIORITY_ATTACK = 2;
 const PRIORITY_CREATURES = 3;
 
 const PROMPT_TYPE_CHOOSE_CARDS = 'prompt/choose_cards';
+const PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE = 'prompt/choose_n_cards_from_zone';
 const PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE = 'prompt/any_creature_except_source';
 const PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI = 'prompt/creature_or_magi';
 const PROMPT_TYPE_SINGLE_CREATURE = 'prompt/creature';
@@ -249,6 +251,7 @@ module.exports = {
 	EFFECT_TYPE_END_OF_TURN,
 	EFFECT_TYPE_FIND_STARTING_CARDS,
 	EFFECT_TYPE_DRAW_REST_OF_CARDS,
+	EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
 	
 	RESTRICTION_ENERGY_LESS_THAN_STARTING,
 	RESTRICTION_REGION,
@@ -261,6 +264,7 @@ module.exports = {
 	PRIORITY_CREATURES,
 
 	PROMPT_TYPE_CHOOSE_CARDS,
+	PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 	PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
 	PROMPT_TYPE_SINGLE_CREATURE,

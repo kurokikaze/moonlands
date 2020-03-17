@@ -129,6 +129,7 @@ const {
 	EFFECT_TYPE_MAGI_FLIPPED,
 	EFFECT_TYPE_FIND_STARTING_CARDS,
 	EFFECT_TYPE_DRAW_REST_OF_CARDS,
+	EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
 
 	REGION_UNIVERSAL,
 
@@ -1511,6 +1512,21 @@ class State {
 								target: action.target,
 								generatedBy: action.generatedBy,
 							});
+							break;
+						}
+						/* End of starting actions */
+						case EFFECT_TYPE_DISCARD_CARDS_FROM_HAND: {
+							const targets = this.getMetaValue(action.target, action.generatedBy);
+							oneOrSeveral(targets, target =>
+								target && this.transformIntoActions({
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+									sourceZone: ZONE_TYPE_HAND,
+									destinationZone: ZONE_TYPE_DISCARD,
+									target,
+									generatedBy: action.generatedBy,
+								})
+							);
 							break;
 						}
 						case EFFECT_TYPE_DRAW: {

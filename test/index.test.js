@@ -35,6 +35,7 @@ const {
 	PROMPT_TYPE_CHOOSE_CARDS,
 
 	EFFECT_TYPE_MOVE_ENERGY,
+	EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
 
 	ZONE_TYPE_ACTIVE_MAGI,
 	ZONE_TYPE_MAGI_PILE,
@@ -647,6 +648,88 @@ describe('Prompts', () => {
 });
 
 describe('Effects', () => {
+	it('Discard cards from hand [EFFECT_TYPE_DISCARD_CARDS_FROM_HAND]', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 33;
+
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
+		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
+
+		const zones = [
+			new Zone('In play', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([arbolit, xyx]),
+			new Zone('Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+		];
+
+		const discardCardsEffect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
+			target: [arbolit, xyx],
+			generatedBy: arbolit.id,
+		};
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+			spellMetaData: {
+				[arbolit.id]: {
+					target: [arbolit, xyx],
+				}
+			}
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(2, 'Active player has 2 cards in hand');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(0, 'Discard pile is empty');
+
+		gameState.update(discardCardsEffect);
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(0, 'Active player\'s hand is empty');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(2, 'There are two cards in active player\'s Discard');
+	});
+
+	it('Discard cards from hand with metadata [EFFECT_TYPE_DISCARD_CARDS_FROM_HAND]', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 33;
+
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
+		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
+
+		const zones = [
+			new Zone('In play', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([arbolit, xyx]),
+			new Zone('Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+		];
+
+		const discardCardsEffect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
+			target: '$selected',
+			generatedBy: arbolit.id,
+		};
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+			spellMetaData: {
+				[arbolit.id]: {
+					selected: [arbolit, xyx],
+				}
+			}
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(2, 'Active player has 2 cards in hand');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(0, 'Discard pile is empty');
+
+		gameState.update(discardCardsEffect);
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(0, 'Active player\'s hand is empty');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(2, 'There are two cards in active player\'s Discard');
+	});
+
 	it('Discard creature from play [EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY]', () => {
 		const activePlayer = 0;
 		const arbolit = new CardInGame(byName('Arbolit'), activePlayer);

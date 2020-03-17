@@ -87,6 +87,7 @@ const {
 	EFFECT_TYPE_MOVE_ENERGY,
 	EFFECT_TYPE_CREATURE_ATTACKS,
 	EFFECT_TYPE_BEFORE_DAMAGE,
+	EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
 
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 	PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
@@ -95,6 +96,7 @@ const {
 	PROMPT_TYPE_OWN_SINGLE_CREATURE,
 	PROMPT_TYPE_SINGLE_MAGI,
 	PROMPT_TYPE_NUMBER,
+	PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 
 	RESTRICTION_OWN_CREATURE,
 	RESTRICTION_OPPONENT_CREATURE,
@@ -452,6 +454,39 @@ const cards = [
 				],
 			},
 		]
+	}),
+	new Card('Channeler\'s Gloves', TYPE_RELIC, REGION_UNIVERSAL, 0, {
+		powers: [
+			{
+				name: 'Channeling',
+				text: 'Discard two cards from your hand. Add two energy to your Magi.',
+				effects: [
+					getPropertyValue({
+						property: PROPERTY_CONTROLLER,
+						variable: 'relicController',
+					}),
+					prompt({
+						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+						zone: ZONE_TYPE_HAND,
+						zoneOwner: '$relicController',
+						numberOfCards: 2,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
+						target: '$selected',
+					}),
+					select({
+						selector: SELECTOR_OWN_MAGI,
+						variable: 'selectedMagi',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+						target: '$selectedMagi',
+						amount: 2,
+					}),
+				],
+			}
+		],
 	}),
 	new Card('Deep Hyren', TYPE_CREATURE, REGION_OROTHE, 6, {
 		powers: [
