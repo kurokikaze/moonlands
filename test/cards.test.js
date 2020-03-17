@@ -13,6 +13,7 @@ const {
 
 	PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
+	PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 	PROMPT_TYPE_OWN_SINGLE_CREATURE,
 	PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
 	PROMPT_TYPE_SINGLE_CREATURE,
@@ -28,6 +29,7 @@ const {
 	ZONE_TYPE_IN_PLAY,
 	ZONE_TYPE_DISCARD,
 	ZONE_TYPE_HAND,
+	ZONE_TYPE_DEFEATED_MAGI,
 } = require('../src/const');
 
 /* eslint-disable no-unused-vars */
@@ -48,8 +50,10 @@ const createZones = (player1, player2, creatures = [], activeMagi = []) => [
 	new Zone('Player 2 discard', ZONE_TYPE_DISCARD, player2),
 	new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, player1).add(activeMagi),
 	new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, player2),
-	new Zone('Player 1 active magi', ZONE_TYPE_MAGI_PILE, player1),
-	new Zone('Player 2 active magi', ZONE_TYPE_MAGI_PILE, player2),
+	new Zone('Player 1 Magi pile', ZONE_TYPE_MAGI_PILE, player1),
+	new Zone('Player 2 Magi pile', ZONE_TYPE_MAGI_PILE, player2),
+	new Zone('Player 1 defeated Magi', ZONE_TYPE_DEFEATED_MAGI, player1),
+	new Zone('Player 2 defeated Magi', ZONE_TYPE_DEFEATED_MAGI, player2),
 	new Zone('In play', ZONE_TYPE_IN_PLAY, null).add(creatures),
 ];
 
@@ -1656,6 +1660,95 @@ describe('Grega', () => {
 	});
 });
 
+describe('Adis', () => {
+	it('Haunt', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(4);
+		const adis = new CardInGame(byName('Adis'), NON_ACTIVE_PLAYER).addEnergy(2);
+		const jaela = new CardInGame(byName('Jaela'), NON_ACTIVE_PLAYER);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER).addEnergy(5);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaBalamant], [grega]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([adis]);
+		gameState.getZone(ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER).add([jaela]);
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: moonlands.ACTION_ATTACK,
+			source: lavaBalamant,
+			target: adis,
+		};
+		
+		gameState.update(attackAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, 'Game is in prompt state');
+		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game is prompting active player');
+		expect(gameState.state.promptParams).toEqual({
+			zone: ZONE_TYPE_HAND,
+			zoneOwner: ACTIVE_PLAYER,
+			numberOfCards: 3,
+		}, 'Game prompt params are right');
+	});
+
+	it('Haunt (on our turn)', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(15);
+		const adis = new CardInGame(byName('Adis'), ACTIVE_PLAYER).addEnergy(0);
+		const jaela = new CardInGame(byName('Jaela'), ACTIVE_PLAYER);
+
+		const pharan = new CardInGame(byName('Pharan'), ACTIVE_PLAYER).addEnergy(1);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [pharan], [adis]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+		gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([jaela]);
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: pharan,
+			power: pharan.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+			target: grega,
+			player: ACTIVE_PLAYER,
+			generatedBy: pharan.id,
+		};
+
+		gameState.update(powerAction);
+		gameState.update(targetingAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, 'Game is in correct prompt type');
+		expect(gameState.state.promptPlayer).toEqual(NON_ACTIVE_PLAYER, 'Game is prompting non-active player');
+		expect(gameState.state.promptParams).toEqual({
+			zone: ZONE_TYPE_HAND,
+			zoneOwner: NON_ACTIVE_PLAYER,
+			numberOfCards: 3,
+		}, 'Game prompt params are right');
+	});
+});
+
 describe('Xyx', () => {
 	it('Shock', () => {
 		const ACTIVE_PLAYER = 422;
@@ -1697,6 +1790,7 @@ describe('Xyx', () => {
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).byId(yaki.id).data.energy).toEqual(3, 'Yaki now has 3 energy');
 	});
 });
+
 describe('Pruitt', () => {
 	it('Refresh', () => {
 		const ACTIVE_PLAYER = 422;

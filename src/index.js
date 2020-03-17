@@ -79,6 +79,7 @@ const {
 	PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
 	PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
 	PROMPT_TYPE_CHOOSE_CARDS,
+	PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 
 	NO_PRIORITY,
 	PRIORITY_PRS,
@@ -1006,11 +1007,20 @@ class State {
 					}
 					const savedActions = this.state.actions;
 					let promptParams = {};
+					const promptPlayer = this.getMetaValue(action.player, action.generatedBy);
 
 					switch (action.promptType) {
 						case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
 							promptParams = {
 								source: this.getMetaValue(action.source, action.generatedBy),
+							};
+							break;
+						}
+						case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
+							promptParams = {
+								zone: this.getMetaValue(action.zone, action.generatedBy),
+								zoneOwner: this.getMetaValue(action.zoneOwner, action.generatedBy),
+								numberOfCards: this.getMetaValue(action.numberOfCards, action.generatedBy),
 							};
 							break;
 						}
@@ -1039,7 +1049,7 @@ class State {
 						savedActions,
 						prompt: true,
 						promptMessage: action.message,
-						promptPlayer: action.player,
+						promptPlayer,
 						promptType: action.promptType,
 						promptVariable: action.variable,
 						promptGeneratedBy: action.generatedBy,
@@ -1052,6 +1062,9 @@ class State {
 					const variable = action.variable || this.state.promptVariable;
 					let currentActionMetaData = this.state.spellMetaData[generatedBy] || {};
 					switch (this.state.promptType) {
+						case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE:
+							currentActionMetaData[variable || 'targetCards'] = action.cards;
+							break;
 						case PROMPT_TYPE_NUMBER:
 							currentActionMetaData[variable || 'number'] = action.number;
 							break;
@@ -1138,7 +1151,7 @@ class State {
 							result = this.useSelector(
 								SELECTOR_OPPONENT_ID,
 								action.player,
-								this.getMetaValue(action.opponentOf, action.generatedBy)
+								this.getMetaValue(action.opponentOf || action.player, action.generatedBy)
 							);
 							break;
 						}
@@ -1794,6 +1807,23 @@ class State {
 							});
 							break;
 						}
+						case EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES: {
+							// we should check if it was the last creature in play and Magi loses
+							if (action.sourceZone === ZONE_TYPE_IN_PLAY) {
+								const newCard = this.getMetaValue(action.destinationCard, action.generatedBy);
+								const magi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, newCard.data.owner).card;
+								const numberOfCreatures = this.useSelector(SELECTOR_OWN_CREATURES, newCard.data.owner).length;
+								if (magi && magi.data.energy === 0 && numberOfCreatures === 0) {
+									this.transformIntoActions({
+										type: ACTION_EFFECT,
+										effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
+										target: magi,
+										generatedBy: action.generatedBy,
+									});
+								}
+							}
+							break;
+						}
 						case EFFECT_TYPE_CREATURE_ENTERS_PLAY:
 							break;
 						case EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE: {
@@ -1816,6 +1846,26 @@ class State {
 
 							moveSource.removeEnergy(amountToMove);
 							moveTarget.addEnergy(amountToMove);
+							if (moveSource.data.energy === 0) {
+								switch (moveSource.card.type) {
+									case TYPE_CREATURE: {
+										// Creature goes to discard
+										this.transformIntoActions({
+											type: ACTION_EFFECT,
+											effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+											sourceZone: ZONE_TYPE_IN_PLAY,
+											destinationZone: ZONE_TYPE_DISCARD,
+											target: moveSource,
+											player: action.player,
+											generatedBy: action.generatedBy,
+										});
+										break;
+									}
+									case TYPE_MAGI: {
+										break;
+									}
+								}
+							}
 							break;
 						}
 						case EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI: {

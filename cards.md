@@ -1,4 +1,4 @@
-Done: **68** cards out of **190**
+Done: **70** cards out of **190**
 
 # Done, tested
 
@@ -73,6 +73,9 @@ Done: **68** cards out of **190**
 - Lasada
 - Trug
 - Xyx Elder
+- Channeler's Gloves
+- Baloo Root
+- Adis
 
 # Possible sample decks:
 
@@ -171,6 +174,7 @@ Done: **68** cards out of **190**
 - Orwin's Gaze (choosing card in Discard)
 - Thunderquake (choosing any number of creatures)
 - Vulbor (choosing player)
+- Heat Lens (choosing player)
 - Xyx Minor (creature in play by name)
 - Corf (status "was attacked")
 - Gar (between cards in play)
@@ -220,13 +224,10 @@ Done: **68** cards out of **190**
 
 # Discarding from hand
 
-- Channeler's Gloves
 - Cloud Scepter
-- Heat Lens
 - Orish
 - Spirit of the Flame
 - Vinoc
-- Adis
 
 # Looking at library, rearranging
 
@@ -286,7 +287,6 @@ Done: **68** cards out of **190**
 
 # Relic stuff (discarding, etc)
 
-- Baloo Root
 - Ebylon
 - Dream Balm
 - Raxis (also custom prompts, prompting opponent)

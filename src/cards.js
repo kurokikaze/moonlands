@@ -202,6 +202,46 @@ const cards = [
 	new Card('Ayebaw', TYPE_CREATURE, REGION_ARDERIAL, 5, {
 		attacksPerTurn: 2,
 	}),
+	new Card('Adis', TYPE_MAGI, REGION_ARDERIAL, null, {
+		startingEnergy: 15,
+		energize: 5,
+		startingCards: ['Epik', 'Orish', 'Shooting Star'],
+		triggerEffects: [
+			{
+				name: 'Haunt',
+				text: 'When Adis is defeated, each opponent discards three cards',
+				find: {
+					effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
+					conditions: [
+						CONDITION_TARGET_IS_SELF,
+					],
+				},
+				effects: [
+					getPropertyValue({
+						property: PROPERTY_CONTROLLER,
+						target: '$new_card',
+						variable: 'magiController',
+					}),
+					select({
+						selector: SELECTOR_OPPONENT_ID,
+						opponentOf: '$magiController',
+						variable: 'opponentId',
+					}),
+					prompt({
+						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+						zone: ZONE_TYPE_HAND,
+						player: '$opponentId',
+						zoneOwner: '$opponentId',
+						numberOfCards: 3,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
+						target: '$targetCards',
+					}),
+				],
+			},
+		],
+	}),
 	new Card('Paralit', TYPE_CREATURE, REGION_OROTHE, 3, {
 		powers: [
 			{
@@ -455,6 +495,28 @@ const cards = [
 			},
 		]
 	}),
+	new Card('Baloo Root', TYPE_RELIC, REGION_UNIVERSAL, 0, {
+		powers: [
+			{
+				name: 'Nourish',
+				text: 'Choose a Creature in play. Discard Baloo Root from play. Add one energy to the chosen Creature.',
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
+						target: '$source',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '$target',
+						amount: 1,
+					}),
+				],
+			},
+		],
+	}),
 	new Card('Channeler\'s Gloves', TYPE_RELIC, REGION_UNIVERSAL, 0, {
 		powers: [
 			{
@@ -473,7 +535,7 @@ const cards = [
 					}),
 					effect({
 						effectType: EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
-						target: '$selected',
+						target: '$targetCards',
 					}),
 					select({
 						selector: SELECTOR_OWN_MAGI,
@@ -1034,17 +1096,14 @@ const cards = [
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
 					}),
 					getPropertyValue({
-						target: '$yourCreature',
 						property: PROPERTY_ENERGY_COUNT,
+						target: '$source',
 						variable: 'energyToRestore',
 					}),
 					effect({
-						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-						target: '$sourceCreature',
-					}),
-					effect({
-						effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
-						target: '$targetMagi',
+						effectType: EFFECT_TYPE_MOVE_ENERGY,
+						source: '$source',
+						target: '$target',
 						amount: '$energyToRestore',
 					}),
 				],
