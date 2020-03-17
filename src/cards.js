@@ -606,7 +606,7 @@ const cards = [
 					}),
 					effect({
 						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
-						target: '$target',
+						target: '$targetMagi',
 						amount: 4,
 					}),
 				],
@@ -728,8 +728,8 @@ const cards = [
 			}),
 			effect({
 				effectType: EFFECT_TYPE_MOVE_ENERGY,
-				source: '$selected',
-				target: '$target',
+				source: '$target',
+				target: '$selected',
 				amount: '$creatureEnergy',
 			}),
 			effect({
@@ -1872,8 +1872,9 @@ const cards = [
 				restrictionValue: REGION_ARDERIAL,
 			}),
 			effect({
-				effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+				effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 				target: '$target',
+				amount: 2,
 			}),
 		],
 	}),

@@ -1,4 +1,4 @@
-Done: **66** cards out of **190**
+Done: **68** cards out of **190**
 
 # Done, tested
 
@@ -38,6 +38,7 @@ Done: **66** cards out of **190**
 - Undertow
 - Bhatar
 - Evu
+- Xyx
 
 # Done, not tested
 
@@ -64,7 +65,6 @@ Done: **66** cards out of **190**
 - Shooting Star
 - Storm Cloud
 - Thunder Hyren
-- Xyx
 - Updraft
 - Typhoon
 - Tryn
@@ -119,6 +119,8 @@ Done: **66** cards out of **190**
 ## Arderial
 
 - Ora
+- Lasada
+- Jaela
 - 3 Pharan
 - 3 Alaban
 - 3 Ayebaw
@@ -128,7 +130,10 @@ Done: **66** cards out of **190**
 - 3 Storm Cloud
 - 3 Thunder Hyren
 - 3 Xyx
+- 3 Xyx Elder
 - 3 Updraft
+- 3 Typhoon
+- 1 Syphon Stone
 
 # Not done yet
 
