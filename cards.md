@@ -72,6 +72,7 @@ Done: **66** cards out of **190**
 - Jaela
 - Lasada
 - Trug
+- Xyx Elder
 
 # Possible sample decks:
 

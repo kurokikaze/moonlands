@@ -50,6 +50,7 @@ const {
 	SELECTOR_CREATURES_AND_MAGI,
 	SELECTOR_CREATURES_OF_REGION,
 	SELECTOR_CREATURES_NOT_OF_REGION,
+	SELECTOR_CREATURES_NOT_OF_TYPE,
 	SELECTOR_OWN_CREATURES,
 	SELECTOR_OPPONENT_CREATURES,
 	SELECTOR_MAGI_NOT_OF_REGION,
@@ -607,6 +608,28 @@ const cards = [
 						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
 						target: '$target',
 						amount: 4,
+					}),
+				],
+			},
+		],
+	}),
+	new Card('Xyx Elder', TYPE_CREATURE, 6, {
+		powers: [
+			{
+				name: 'Shockstorm',
+				text: 'Roll one die. Discard energy equal to the dice roll from each non-Xyx Creature in play.',
+				cost: 6,
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_ROLL_DIE,
+					}),
+					select({
+						selector: SELECTOR_CREATURES_NOT_OF_TYPE,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+						target: '$selected',
+						amount: '$roll_result',
 					}),
 				],
 			},
