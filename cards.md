@@ -1,81 +1,84 @@
-Done: **70** cards out of **190**
+Done: **74** cards out of **190**
 
 # Done, tested
 
+- Adis
 - Alaban
 - Arbolit
 - Arboll
+- Ashgar
+- Ayebaw
 - Balamant
+- Bhatar
+- Bwill
+- Carillion
 - Cave Hyren
+- Cave Rudwot
+- Coral Hyren
 - Diobor
 - Drakan
+- Evu
+- Flame Geyser
+- Furok
+- Giant Carillion
 - Giant Parathin
-- Great Carillion
 - Grega
-- Weebo
-- Ayebaw
-- Yaki
-- Carillion
-- Sinder
-- Stagadan
-- Rudwot
+- Lava Aq
+- Lava Balamant
 - Magma Armor
 - Magma Hyren
-- Vortex of Knowledge
-- Ashgar
-- Quor
-- Quor Pup
-- Timber Hyren
-- Robe of Vines
-- Coral Hyren
-- Lava Aq
-- Submerge (tested with Coral Hyren)
-- Lava Balamant
-- Furok
-- Cave Rudwot
 - Ora
 - Pruitt
+- Quor
+- Quor Pup
+- Robe of Vines
+- Rudwot
+- Sinder
+- Stagadan
+- Timber Hyren
 - Undertow
-- Bhatar
-- Evu
+- Vortex of Knowledge
+- Weebo
 - Xyx
+- Yaki
 
 # Done, not tested
 
+- Adis
+- Agovo
+- Baloo Root
+- Book of Ages
+- Bwill
+- Channeler's Gloves
+- Cyclone Vashp
+- Deep Hyren
+- Fire Ball
 - Fire Chogo
 - Fire Flow
 - Fire Grag
-- Pharan
-- Thermal Blast
-- Water of Life
-- Leaf Hyren
-- Deep Hyren
-- Kelthet
-- Lava Arboll
-- Magam
-- Poad
 - Grow
-- Flame Geyser
-- Syphon Stone
-- Book of Ages
-- Agovo
+- Jaela
+- Kelthet
+- Lasada
+- Lava Arboll
+- Leaf Hyren
+- Magam
+- Pharan
+- Poad
 - Sea Barl
-- Cyclone Vashp
 - Shockwave
 - Shooting Star
 - Storm Cloud
+- Submerge
+- Syphon Stone
+- Thermal Blast
 - Thunder Hyren
-- Updraft
-- Typhoon
-- Tryn
-- Bwill
-- Jaela
-- Lasada
 - Trug
+- Tryn
+- Typhoon
+- Updraft
+- Water of Life
 - Xyx Elder
-- Channeler's Gloves
-- Baloo Root
-- Adis
 
 # Possible sample decks:
 
