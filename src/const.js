@@ -88,6 +88,7 @@ const EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL = 'effects/paying_energy_for_spell';
 const EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE = 'effects/paying_energy_for_creature';
 const EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE = 'effects/starting_energy_on_creature';
 const EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES = 'effects/move_card_between_zones';
+const EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES = 'effects/move_cards_between_zones';
 const EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES = 'effects/card_moved_between_zones';
 
 const EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI = 'effects/add_energy_to_creature_or_magi';
@@ -224,6 +225,7 @@ module.exports = {
 	EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
 	EFFECT_TYPE_ENERGIZE,
 	EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+	EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
 	EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
 	EFFECT_TYPE_RELIC_ENTERS_PLAY,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,

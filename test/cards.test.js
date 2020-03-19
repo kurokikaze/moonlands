@@ -2185,6 +2185,63 @@ describe('Quor Pup', () => {
 	});
 });
 
+describe('Orwin\'s Gaze', () => {
+	it('Casting', () => {
+		const ACTIVE_PLAYER = 100;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const yaki = new CardInGame(byName('Yaki'), ACTIVE_PLAYER).addEnergy(10);
+		const coralHyren = new CardInGame(byName('Coral Hyren'), ACTIVE_PLAYER);
+		const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
+		const orwinsGaze = new CardInGame(byName('Orwin\'s Gaze'), ACTIVE_PLAYER);
+
+		const sinder = new CardInGame(byName('Sinder'), NON_ACTIVE_PLAYER).addEnergy(10);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [], [yaki]);
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		// Deck content to verify card goes to the top of the deck, not the bottom
+		gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).add([weebo]);
+		gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).add([coralHyren]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([orwinsGaze]);
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([sinder]);
+
+		const playSpellAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: orwinsGaze,
+				player: ACTIVE_PLAYER,
+			},
+		};
+
+		gameState.update(playSpellAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Engine prompts us for the card');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, 'Engine waits for a Card from discard');
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).length).toEqual(1, 'One card in player deck');
+
+		const choicePromptAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			cards: [coralHyren],
+			player: ACTIVE_PLAYER,
+			generatedBy: orwinsGaze.id,
+		};
+
+		gameState.update(choicePromptAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Prompt is resolved');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'Player discard pile contains just one card');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Orwin\'s Gaze', 'It is Orwin\'s Gaze');
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).length).toEqual(2, 'Two cards in player deck');
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).cards[0].card.name).toEqual('Coral Hyren', 'Coral Hyren is on top');
+	});
+});
+
 describe('Coral Hyren', () => {
 	it('Spelltap', () => {
 		const ACTIVE_PLAYER = 100;

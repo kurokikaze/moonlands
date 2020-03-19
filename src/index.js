@@ -102,6 +102,7 @@ const {
 	EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC,
 	EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
 	EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+	EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
 	EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
 	EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
 	EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI,
@@ -1391,6 +1392,10 @@ class State {
 											},
 											...preparedEffects,
 										);
+										let currentMetaData = {
+											source: action.payload.card,
+										};
+										this.setSpellMetadata(currentMetaData, action.payload.card.id);
 									}
 									break;
 								}
@@ -1774,6 +1779,46 @@ class State {
 								variable: 'creature_created',
 								generatedBy: action.generatedBy,
 							});
+							break;
+						}
+						case EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES: {
+							if (!action.sourceZone || !action.destinationZone) {
+								console.log('Source zone or destination zone invalid');
+								throw new Error('Invalid params for EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
+							}
+							const zoneChangingTargets = this.getMetaValue(action.target, action.generatedBy);
+							// We assume all cards changing zones are in one zone intially
+							const zoneOwner = zoneChangingTargets[0].owner;
+
+							const sourceZoneType = this.getMetaValue(action.sourceZone, action.generatedBy);
+							const sourceZone = this.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
+							const destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
+							const destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
+							const newCards = [];
+
+							oneOrSeveral(zoneChangingTargets, zoneChangingCard => {
+								const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner);
+								if (action.bottom) {
+									destinationZone.add([newObject]);
+								} else {
+									destinationZone.addToTop([newObject]);
+								}
+								sourceZone.removeById(zoneChangingCard.id);
+
+								newCards.push(newObject);
+
+								this.transformIntoActions({
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
+									sourceCard: zoneChangingCard,
+									sourceZone: sourceZoneType,
+									destinationCard: newObject,
+									destinationZone: destinationZoneType,
+									generatedBy: action.generatedBy,
+								});
+							});
+							this.setSpellMetaDataField('new_cards', newCards, action.generatedBy);
+
 							break;
 						}
 						case EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES: {

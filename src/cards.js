@@ -76,6 +76,7 @@ const {
 	EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
 	EFFECT_TYPE_ENERGIZE,
 	EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+	EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
 	EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
@@ -273,6 +274,71 @@ const cards = [
 			},
 		],
 	}),
+	new Card('Paralit', TYPE_CREATURE, REGION_OROTHE, 3, {
+		powers: [
+			{
+				name: 'Life Channel',
+				text: 'Discard Paralit from play. Add five energy to your Magi. Discard one energy from each of your Creatures in play.',
+				cost: 1,
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+						target: '$source',
+					}),
+					select({
+						selector: SELECTOR_OWN_MAGI,
+						variable: 'ownMagi',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+						target: '$ownMagi',
+						amount: 5,
+					}),
+					select({
+						selector: SELECTOR_OWN_CREATURES,
+						variable: 'selected',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+						target: '$selected',
+						amount: 1,
+					}),
+				],
+			},
+		],
+	}),
+	new Card('Gruk', TYPE_MAGI, REGION_UNDERNEATH, null, {
+		startingEnergy: 13,
+		energize: 5,
+		startingCards: ['Agovo', 'Crystal Arbol', 'Gloves of Crystal'],
+		powers: [
+			{
+				name: 'Undream',
+				cost: 1,
+				text: 'Choose one of your Creatures in play. Return it to your hand and place its energy to Gruk.',
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
+					}),
+					getPropertyValue({
+						property: PROPERTY_ENERGY_COUNT,
+						variable: 'energyToRecover',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+						target: '$target',
+						sourceZone: ZONE_TYPE_IN_PLAY,
+						targetZone: ZONE_TYPE_HAND,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+						target: '$source',
+						amount: '$energyToRecover',
+					}),
+				],
+			},
+		],
+	}),
 	new Card('Strag', TYPE_MAGI, REGION_UNDERNEATH, null, {
 		startingEnergy: 13,
 		energize: 5,
@@ -332,6 +398,35 @@ const cards = [
 				})
 			]
 		}],
+	}),
+	new Card('Nimbulo', TYPE_MAGI, REGION_ARDERIAL, null, {
+		startingEnergy: 14,
+		energize: 5,
+		startingCards: ['Fog Bank', 'Lovian', 'Shooting Star'],
+		powers: [
+			{
+				name: 'Energy Drain',
+				text: 'Choose any two Creatures in play. Move one energy from one creature to another',
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+						message: 'Choose a Creature to drain one energy from',
+						variable: 'donor',
+					}),
+					prompt({
+						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+						message: 'Choose a Creature to give one energy to',
+						variable: 'recipient',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_MOVE_ENERGY,
+						source: '$donor',
+						target: '$recipient',
+						amount: 1,
+					}),
+				],
+			},
+		],
 	}),
 	new Card('Undertow', TYPE_SPELL, REGION_OROTHE, 5, {
 		text: 'Choose any one Creature in play. Discard the chosen Creature from play, but shuffle it into its owner\'s deck instead of placing it into the discard pile.',
@@ -515,6 +610,29 @@ const cards = [
 					}),
 				],
 			},
+		],
+	}),
+	new Card('Orwin\'s Gaze', TYPE_SPELL, REGION_NAROOM, 3, {
+		text: 'Take any one card from your discard pile and place it on top of your deck.',
+		effects: [
+			getPropertyValue({
+				property: PROPERTY_CONTROLLER,
+				target: '$source',
+				variable: 'spellController', 
+			}),
+			prompt({
+				promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+				zone: ZONE_TYPE_DISCARD,
+				zoneOwner: '$spellController',
+				numberOfCards: 1,
+				variable: 'selectedCard',
+			}),
+			effect({
+				effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+				target: '$selectedCard',
+				sourceZone: ZONE_TYPE_DISCARD,
+				destinationZone: ZONE_TYPE_DECK,
+			}),
 		],
 	}),
 	new Card('Channeler\'s Gloves', TYPE_RELIC, REGION_UNIVERSAL, 0, {

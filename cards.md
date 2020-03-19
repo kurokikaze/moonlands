@@ -1,4 +1,4 @@
-Done: **74** cards out of **190**
+Done: **77** cards out of **190**
 
 # Done, tested
 
@@ -28,6 +28,7 @@ Done: **74** cards out of **190**
 - Magma Armor
 - Magma Hyren
 - Ora
+- Orwin's Gaze
 - Pruitt
 - Quor
 - Quor Pup
@@ -57,12 +58,14 @@ Done: **74** cards out of **190**
 - Fire Flow
 - Fire Grag
 - Grow
+- Gruk
 - Jaela
 - Kelthet
 - Lasada
 - Lava Arboll
 - Leaf Hyren
 - Magam
+- Paralit
 - Pharan
 - Poad
 - Sea Barl
@@ -110,7 +113,7 @@ Done: **74** cards out of **190**
 - 3 Leaf Hyren
 - 3 Weebo
 - 3 Arboll
-- 3 Great Carillion
+- 3 Giant Carillion
 - 3 Timber Hyren
 - 3 Balamant
 - 3 Grow
@@ -151,7 +154,6 @@ Done: **74** cards out of **190**
 - Mushroom Hyren [UNDERNEATH]
 - Nimbulo [ARDERIAL]
 - Ormagon [UNDERNEATH]
-- Paralit [OROTHE]
 - Sap of Life [NAROOM]
 - Sinder [CALD]
 - Tap Roots (will benefit from prompt texts) [NAROOM]
@@ -174,7 +176,6 @@ Done: **74** cards out of **190**
 - Lightning
 - Implosion (discarding specific cards)
 - Mirror Pendant (choosing power on Magi)
-- Orwin's Gaze (choosing card in Discard)
 - Thunderquake (choosing any number of creatures)
 - Vulbor (choosing player)
 - Heat Lens (choosing player)
@@ -193,6 +194,7 @@ Done: **74** cards out of **190**
 - Eye of the Storm
 - Gorgle's Ring
 - Plith
+- Shimmer
 
 # Rearranging Energy
 
@@ -252,7 +254,6 @@ Done: **74** cards out of **190**
 - Orathan
 - Ring of Secrets
 - Scroll of Fire
-- Shimmer
 - Sphor
 - Staff of Hyren
 - Staff of Korrits (also trigger on fucking banding)
