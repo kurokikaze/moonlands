@@ -132,6 +132,7 @@ const PROMPT_TYPE_RELIC = 'prompt/relic';
 const PROMPT_TYPE_NUMBER_OF_RELICS = 'prompt/number_of_relics';
 const PROMPT_TYPE_NUMBER = 'prompt/number';
 
+const RESTRICTION_TYPE ='restrictions/type';
 const RESTRICTION_ENERGY_LESS_THAN_STARTING = 'restrictions/energy_less_than_starting';
 const RESTRICTION_OWN_CREATURE = 'restrictions/own_creature';
 const RESTRICTION_OPPONENT_CREATURE = 'restrictions/opponent_creature';
@@ -255,6 +256,7 @@ module.exports = {
 	EFFECT_TYPE_DRAW_REST_OF_CARDS,
 	EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
 	
+	RESTRICTION_TYPE,
 	RESTRICTION_ENERGY_LESS_THAN_STARTING,
 	RESTRICTION_REGION,
 	RESTRICTION_OWN_CREATURE,

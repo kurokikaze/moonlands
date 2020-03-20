@@ -8,6 +8,8 @@ const {
 	TYPE_EFFECT,
 
 	ACTION_SELECT,
+	ACTION_ENTER_PROMPT,
+	ACTION_RESOLVE_PROMPT,
 
 	SELECTOR_MAGI_NOT_OF_REGION,
 	SELECTOR_OWN_CREATURES_OF_TYPE,
@@ -33,6 +35,9 @@ const {
 	PROPERTY_ENERGIZE,
 
 	PROMPT_TYPE_CHOOSE_CARDS,
+	PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+
+	RESTRICTION_REGION,
 
 	EFFECT_TYPE_MOVE_ENERGY,
 	EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
@@ -645,6 +650,81 @@ describe('Prompts', () => {
 		expect(gameState.state.savedActions.length).toEqual(0, 'No actions saved for later');
 		expect(arbolit.data.energy).toEqual(3, 'Energy was removed from creature');
 	});
+
+	it('Card selection prompt checks restrictions', () => {
+		const ACTIVE_PLAYER = 12; 
+		const arbolit = new CardInGame(byName('Arbolit', ACTIVE_PLAYER));
+		const kelthet = new CardInGame(byName('Kelthet', ACTIVE_PLAYER));
+		const weebo = new CardInGame(byName('Weebo', ACTIVE_PLAYER));
+
+		arbolit.addEnergy(5);
+		kelthet.addEnergy(2);
+
+		const zones = [
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit, kelthet]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		const enterPromptAction = {
+			type: ACTION_ENTER_PROMPT,
+			promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+			player: ACTIVE_PLAYER,
+			zone: ZONE_TYPE_IN_PLAY,
+			zoneOwner: ACTIVE_PLAYER,
+			restriction: RESTRICTION_REGION,
+			restrictionValue: REGION_CALD,
+			numberOfCards: 2,
+			variable: 'caldCreatures',
+		};
+
+		gameState.update(enterPromptAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Engine is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, 'Prompt type is correct');
+
+		const tooFewCardsAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+			player: ACTIVE_PLAYER,
+			cards: [arbolit],
+		};
+
+		const tooFewResult = gameState.update(tooFewCardsAction);
+
+		expect(tooFewResult).toEqual(false, 'Resolve action with too few cards fails');
+		expect(gameState.state.prompt).toEqual(true, 'Engine is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, 'Prompt type is correct');
+
+		const wrongRegionCardsAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+			player: ACTIVE_PLAYER,
+			cards: [arbolit, weebo],
+		};
+
+		const wrongRegionResult = gameState.update(wrongRegionCardsAction);
+
+		expect(wrongRegionResult).toEqual(false, 'Resolve action with restriction breaking cards fails');
+		expect(gameState.state.prompt).toEqual(true, 'Engine is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, 'Prompt type is correct');
+
+		const correctCardsAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+			player: ACTIVE_PLAYER,
+			cards: [arbolit, kelthet],
+		};
+
+		const correctResult = gameState.update(correctCardsAction);
+
+		expect(correctResult).toEqual(true, 'Resolve action with restriction breaking cards fails');
+		expect(gameState.state.prompt).toEqual(false, 'Engine is not in prompt state');
+	});
 });
 
 describe('Effects', () => {
@@ -1165,7 +1245,6 @@ describe('Selector actions', () => {
 		};
 
 		gameState.update(selectMagiAction);
-		// console.dir(gameState.state.spellMetaData[GENERATED_BY]);
 		const selectedMagi = gameState.state.spellMetaData[GENERATED_BY].selected;
 
 		expect(selectedMagi).toHaveLength(2, 'Magi selector returns two magi');

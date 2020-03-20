@@ -1,4 +1,4 @@
-Done: **77** cards out of **190**
+Done: **78** cards out of **190**
 
 # Done, tested
 
@@ -49,6 +49,7 @@ Done: **77** cards out of **190**
 - Agovo
 - Baloo Root
 - Book of Ages
+- Book of Life
 - Bwill
 - Channeler's Gloves
 - Cyclone Vashp
@@ -222,10 +223,6 @@ Done: **77** cards out of **190**
 - Thunder Hyren (creature in play by name)
 - Thunder Vashp (creature in play with N or less energy)
 - Xyx Elder (creatures in play not by name)
-
-# Choosing cards in zones (discard)
-
-- Book of Life
 
 # Discarding from hand
 

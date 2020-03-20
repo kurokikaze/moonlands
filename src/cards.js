@@ -103,6 +103,7 @@ const {
 	RESTRICTION_OPPONENT_CREATURE,
 	RESTRICTION_ENERGY_LESS_THAN_STARTING,
 	RESTRICTION_REGION,
+	RESTRICTION_TYPE,
 
 	COST_X,
 
@@ -607,6 +608,37 @@ const cards = [
 						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 						target: '$target',
 						amount: 1,
+					}),
+				],
+			},
+		],
+	}),
+	new Card('Book of Life', TYPE_RELIC, REGION_NAROOM, 0, {
+		powers: [
+			{
+				name: 'Relearn',
+				text: 'Choose a Spell card in your discard. Place it on top of your deck.',
+				cost: 3,
+				effects: [
+					getPropertyValue({
+						property: PROPERTY_CONTROLLER,
+						target: '$source',
+						variable: 'relicController', 
+					}),
+					prompt({
+						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+						zone: ZONE_TYPE_DISCARD,
+						zoneOwner: '$spellController',
+						restriction: RESTRICTION_TYPE,
+						restrictionValue: TYPE_SPELL,
+						numberOfCards: 1,
+						variable: 'selectedCard',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+						target: '$selectedCard',
+						sourceZone: ZONE_TYPE_DISCARD,
+						destinationZone: ZONE_TYPE_DECK,
 					}),
 				],
 			},

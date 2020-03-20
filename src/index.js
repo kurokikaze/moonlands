@@ -135,6 +135,10 @@ const {
 
 	REGION_UNIVERSAL,
 
+	RESTRICTION_TYPE,
+	RESTRICTION_REGION,
+	RESTRICTION_ENERGY_LESS_THAN_STARTING,
+
 	COST_X,
 	
 	ZONE_TYPE_HAND,
@@ -1019,6 +1023,8 @@ class State {
 						}
 						case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
 							promptParams = {
+								restriction: this.getMetaValue(action.restriction, action.generatedBy) || null,
+								restrictionValue: this.getMetaValue(action.restrictionValue, action.generatedBy) || null,
 								zone: this.getMetaValue(action.zone, action.generatedBy),
 								zoneOwner: this.getMetaValue(action.zoneOwner, action.generatedBy),
 								numberOfCards: this.getMetaValue(action.numberOfCards, action.generatedBy),
@@ -1064,6 +1070,25 @@ class State {
 					let currentActionMetaData = this.state.spellMetaData[generatedBy] || {};
 					switch (this.state.promptType) {
 						case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE:
+							if (this.state.promptParams.numberOfCards !== action.cards.length) {
+								return false;
+							}
+							if (this.state.promptParams.restriction) {
+								switch (this.state.promptParams.restriction) {
+									case RESTRICTION_TYPE: {
+										if (!action.cards.every(card => card.card.type === this.state.promptParams.restrictionValue)) {
+											return false;
+										}
+										break;
+									}
+									case RESTRICTION_REGION: {
+										if (!action.cards.every(card => card.card.region === this.state.promptParams.restrictionValue)) {
+											return false;
+										}
+										break;
+									}
+								}
+							}
 							currentActionMetaData[variable || 'targetCards'] = action.cards;
 							break;
 						case PROMPT_TYPE_NUMBER:
@@ -2154,6 +2179,7 @@ class State {
 				}
 			} // switch (action.type)
 		} // while(this.hasActions())
+		return true;
 	}
 }
 
