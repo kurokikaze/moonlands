@@ -1627,6 +1627,7 @@ class State {
 								attackTarget.data.energy :
 								0
 							;
+
 							const damageActions = [
 								{  // from source to target
 									type: ACTION_EFFECT,
@@ -1635,6 +1636,8 @@ class State {
 									sourceAtStart: action.sourceAtStart,
 									target: attackTarget,
 									targetAtStart: action.targetAtStart,
+									sourceBeforeDamage: attackSource.copy(),
+									targetBeforeDamage: attackTarget.copy(),
 									amount: damageByAttacker,
 									generatedBy: attackSource.id,
 								}, // from target to source (if attacking a creature)
@@ -1642,10 +1645,12 @@ class State {
 									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_DEFENDER_DEALS_DAMAGE,
 									source: attackTarget,
-									sourceAtStart: attackTarget.copy(),
+									sourceAtStart: action.targetAtStart,
 									target: attackSource,
 									amount: damageByDefender,
-									targetAtStart: attackSource.copy(),
+									targetAtStart: action.sourceAtStart,
+									sourceBeforeDamage: attackTarget.copy(),
+									targetBeforeDamage: attackSource.copy(),
 									generatedBy: attackSource.id,
 								} : null,
 							].filter(Boolean);

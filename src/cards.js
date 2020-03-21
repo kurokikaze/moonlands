@@ -1786,6 +1786,34 @@ const cards = [
 			},
 		],
 	}),
+	new Card('Orathan', TYPE_CREATURE, REGION_OROTHE, 5, {
+		triggerEffects: [
+			{
+				name: 'Engulf',
+				text: 'If Orathan attacks a Creature with less than three energy, add two energy to Orathan before energy is removed.',
+				find: {
+					effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+					conditions: [
+						CONDITION_SOURCE_IS_SELF,
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_ENERGY_COUNT,
+							comparator: '<',
+							objectTwo: 3,
+							propertyTwo: null,
+						}
+					],
+				},
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '%self',
+						amount: 2,
+					}),
+				],
+			}
+		]
+	}),
 	new Card('Carillion', TYPE_CREATURE, REGION_NAROOM, 4, {
 		replacementEffects: [
 			{

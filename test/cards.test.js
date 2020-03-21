@@ -654,6 +654,41 @@ describe('Carillion', () => {
 		expect(leafHyren.data.energy).toEqual(0, 'Hyren is toast');
 	});
 
+	it('Resilience (Cave Rudwot)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const carillion = new CardInGame(byName('Carillion'), ACTIVE_PLAYER);
+		carillion.addEnergy(2);
+		const caveRudwot = new CardInGame(byName('Cave Rudwot'), NON_ACTIVE_PLAYER);
+		caveRudwot.addEnergy(2);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([carillion, caveRudwot]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.enableDebug();
+
+		const attackAction = {
+			type: moonlands.ACTION_ATTACK,
+			source: carillion,
+			target: caveRudwot,
+		};
+        
+		gameState.update(attackAction);
+
+		expect(carillion.data.energy).toEqual(2, 'Carillion loses no energy in the attack');
+		expect(caveRudwot.data.energy).toEqual(2, 'Cave Rudwot is at 2 energy');
+	});
+
 	it('Resilience (Carillion is attacked)', () => {
 		const ACTIVE_PLAYER = 0;
 		const NON_ACTIVE_PLAYER = 1;
@@ -1489,6 +1524,126 @@ describe('Rudwot', () => {
 
 		expect(rudwot.data.energy).toEqual(1, 'Rudwot loses 4 energy in the attack, gaining none');
 		expect(leafHyren.data.energy).toEqual(0, 'Hyren is toast');
+	});
+
+	it('Trample (Cave Rudwot)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const rudwot = new CardInGame(byName('Rudwot'), ACTIVE_PLAYER);
+		rudwot.addEnergy(3);
+		const caveRudwot = new CardInGame(byName('Cave Rudwot'), NON_ACTIVE_PLAYER);
+		caveRudwot.addEnergy(2);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([rudwot, caveRudwot]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.enableDebug();
+
+		const attackAction = {
+			type: moonlands.ACTION_ATTACK,
+			source: rudwot,
+			target: caveRudwot,
+		};
+        
+		gameState.update(attackAction);
+
+		expect(rudwot.data.energy).toEqual(1, 'Rudwot loses 4 energy but gains 2 energy in the attack');
+		expect(caveRudwot.data.energy).toEqual(0, 'Cave Rudwot is toast');
+	});
+});
+
+describe('Orathan', () => {
+	it('Engulf', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const orathan = new CardInGame(byName('Orathan'), ACTIVE_PLAYER);
+		orathan.addEnergy(5);
+		const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER);
+		weebo.addEnergy(2);
+		const leafHyren = new CardInGame(byName('Leaf Hyren'), NON_ACTIVE_PLAYER);
+		leafHyren.addEnergy(4);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([orathan, weebo, leafHyren]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: moonlands.ACTION_ATTACK,
+			source: orathan,
+			target: weebo,
+		};
+        
+		const attackHyrenAction = {
+			type: moonlands.ACTION_ATTACK,
+			source: orathan,
+			target: leafHyren,
+		};
+        
+		gameState.update(attackAction);
+
+		expect(orathan.data.energy).toEqual(5, 'Orathan loses 2 energy but gains 2 energy in the attack');
+		expect(weebo.data.energy).toEqual(0, 'Weebo is toast');
+
+		orathan.clearAttackMarkers();
+
+		gameState.update(attackHyrenAction);
+
+		expect(orathan.data.energy).toEqual(1, 'Orathan loses 4 energy in the attack, gaining none');
+		expect(leafHyren.data.energy).toEqual(0, 'Hyren is toast');
+	});
+
+	it('Engulf (Cave Rudwot)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const orathan = new CardInGame(byName('Orathan'), ACTIVE_PLAYER);
+		orathan.addEnergy(5);
+		const caveRudwot = new CardInGame(byName('Cave Rudwot'), NON_ACTIVE_PLAYER);
+		caveRudwot.addEnergy(1);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([orathan, caveRudwot]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: moonlands.ACTION_ATTACK,
+			source: orathan,
+			target: caveRudwot,
+		};
+        
+		gameState.update(attackAction);
+
+		expect(orathan.data.energy).toEqual(4, 'Orathan loses 3 energy, gaining two');
+		expect(caveRudwot.data.energy).toEqual(0, 'Cave Rudwot is toast');
 	});
 });
 
