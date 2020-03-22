@@ -40,6 +40,7 @@ const {
 	PROPERTY_ATTACKS_PER_TURN,
 	PROPERTY_CAN_ATTACK_MAGI_DIRECTLY,
 	PROPERTY_POWER_COST,
+	PROPERTY_CREATURE_TYPES,
 
 	CALCULATION_SET,
 	CALCULATION_DOUBLE,
@@ -630,6 +631,8 @@ class State {
 				return target.id;
 			case PROPERTY_TYPE:
 				return target.card.type;
+			case PROPERTY_CREATURE_TYPES:
+				return target.card.name.split(' ');
 			case PROPERTY_CONTROLLER:
 				return target.data.controller;
 			case PROPERTY_ENERGY_COUNT:
@@ -775,6 +778,8 @@ class State {
 					return operandOne >= operandTwo;
 				case '<=':
 					return operandOne <= operandTwo;
+				case 'includes':
+					return operandOne.length && operandOne.includes(operandTwo);
 			}
 
 			return false;
@@ -801,7 +806,6 @@ class State {
 		);
 		triggerEffects.forEach(replacer => {
 			const triggeredId = replacer.self.id; // Not really, but will work for now
-
 			if (this.matchAction(action, replacer.find, replacer.self)) {
 				// Turn effect-templates into actual effect actions by preparing meta-values
 				const preparedEffects = replacer.effects.map(effect => {

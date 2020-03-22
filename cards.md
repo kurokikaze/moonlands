@@ -39,6 +39,7 @@ Done: **86** cards out of **190**
 - Robes of the Ages
 - Rudwot
 - Sinder
+- Staff of Hyren (tested with O'Qua)
 - Stagadan
 - Timber Hyren
 - Undertow
@@ -267,13 +268,10 @@ Done: **86** cards out of **190**
 
 - Arderial's Crown
 - Gloves of Crystal
-- Magma Armor
 - Motash
-- Orathan
 - Ring of Secrets
 - Scroll of Fire
 - Sphor
-- Staff of Hyren
 - Staff of Korrits (also trigger on fucking banding)
 - Storm Ring
 - Stradus

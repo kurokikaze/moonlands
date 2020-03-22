@@ -29,6 +29,7 @@ const {
 	PROPERTY_MAGI_STARTING_ENERGY,
 	PROPERTY_ATTACKS_PER_TURN,
 	PROPERTY_POWER_COST,
+	PROPERTY_CREATURE_TYPES,
 
 	REGION_ARDERIAL,
 	REGION_CALD,
@@ -224,7 +225,7 @@ const cards = [
 				variable: 'startingEnergy',
 			}),
 			effect({
-				effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+				effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
 				target: '$new_card',
 				amount: '$startingEnergy',
 			}),
@@ -268,7 +269,7 @@ const cards = [
 						target: '$orotheCreature',
 					}),
 					effect({
-						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
 						target: '$new_card',
 						amount: 4,
 					}),
@@ -989,6 +990,40 @@ const cards = [
 			},
 		],
 	}),
+	new Card('Staff of Hyren', TYPE_RELIC, REGION_UNIVERSAL, 0, {
+		triggerEffects: [
+			{
+				name: 'Strenghten',
+				text: 'Whenever you play Hyren creature, add one additional energy to it.',
+				find: {
+					effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
+					conditions: [
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_CREATURE_TYPES,
+							comparator: 'includes',
+							objectTwo: 'Hyren',
+							propertyTwo: null,
+						},
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_CONTROLLER,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						}
+					],
+				},
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '%target',
+						amount: 1,
+					}),
+				],
+			},
+		],
+	}),
 	new Card('Xyx', TYPE_CREATURE, REGION_ARDERIAL, 3, {
 		powers: [
 			{
@@ -1061,7 +1096,7 @@ const cards = [
 				effects: [
 					effect({
 						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
-						target: '$creature_created',
+						target: '%target',
 						amount: 1,
 					}),
 				],

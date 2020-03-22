@@ -18,6 +18,7 @@ const PROPERTY_CONTROLLER = 'properties/controller';
 const PROPERTY_REGION = 'properties/region';
 const PROPERTY_COST = 'properties/cost';
 const PROPERTY_ENERGIZE = 'properties/energize';
+const PROPERTY_CREATURE_TYPES = 'properties/creature_types';
 const PROPERTY_MAGI_STARTING_ENERGY = 'properties/magi_starting_energy';
 const PROPERTY_ATTACKS_PER_TURN = 'properties/attacks_per_turn';
 const PROPERTY_CAN_ATTACK_MAGI_DIRECTLY = 'properties/can_attack_magi_directly';
@@ -215,6 +216,7 @@ module.exports = {
 	PROPERTY_CAN_ATTACK_MAGI_DIRECTLY,
 	PROPERTY_TYPE,
 	PROPERTY_POWER_COST,
+	PROPERTY_CREATURE_TYPES,
 
 	EFFECT_TYPE_NONE,
 	EFFECT_TYPE_DRAW,

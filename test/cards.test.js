@@ -1942,6 +1942,69 @@ describe('O\'Qua', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(4, 'Paralit has 4 energy');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.attacked).toEqual(100, 'Paralit will not be able to attack this turn');
 	});
+
+	it('Conjure (additional energy on cast)', () => {
+		const ACTIVE_PLAYER = 40;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const oqua = new CardInGame(byName('O\'Qua'), ACTIVE_PLAYER).addEnergy(10);
+
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(15);
+
+		const staffOfHyren = new CardInGame(byName('Staff of Hyren'), ACTIVE_PLAYER);
+		const deepHyren = new CardInGame(byName('Deep Hyren'), ACTIVE_PLAYER);
+		const paralith = new CardInGame(byName('Paralit'), ACTIVE_PLAYER);
+		const bwill = new CardInGame(byName('Paralit'), ACTIVE_PLAYER);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+				new Zone('AP Deck', ZONE_TYPE_DECK, ACTIVE_PLAYER).add([deepHyren, paralith, bwill]),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([oqua]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([staffOfHyren]),
+			],
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerUseAction = {
+			type: ACTION_POWER,
+			source: oqua,
+			power: oqua.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+        
+		gameState.update(powerUseAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in Prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, 'Game is prompting for cards from zone');
+		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game is prompting active player');
+		expect(gameState.state.promptParams.zone).toEqual(ZONE_TYPE_DECK, 'Prompt awaiting card from hand');
+		expect(gameState.state.promptParams.numberOfCards).toEqual(1, 'Prompt awaiting one card');
+		expect(gameState.state.promptParams.zoneOwner).toEqual(ACTIVE_PLAYER, 'Prompt awaiting card from active players hand');
+
+		const cardChoiceAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			cards: [deepHyren],
+			generatedBy: oqua.id,
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(cardChoiceAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in Prompt state');
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'One card is in play');
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).length).toEqual(2, 'Deck has 2 cards left');
+		// expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Deep Hyren', 'Card is Deep Hyren');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards.find(card => card.card.name === 'Deep Hyren').data.energy).toEqual(5, 'Deep Hyren has 5 energy (4 from ability and 1 from Staff of Hyren)');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards.find(card => card.card.name === 'Deep Hyren').data.attacked).toEqual(100, 'Deep Hyren will not be able to attack this turn');
+	});
 });
 
 describe('Giant Parathin', () => {
