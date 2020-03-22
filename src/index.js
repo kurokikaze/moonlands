@@ -39,11 +39,13 @@ const {
 	PROPERTY_MAGI_STARTING_ENERGY,
 	PROPERTY_ATTACKS_PER_TURN,
 	PROPERTY_CAN_ATTACK_MAGI_DIRECTLY,
+	PROPERTY_POWER_COST,
 
 	CALCULATION_SET,
 	CALCULATION_DOUBLE,
 	CALCULATION_ADD,
 	CALCULATION_SUBTRACT,
+	CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE,
 	CALCULATION_HALVE_ROUND_DOWN,
 	CALCULATION_HALVE_ROUND_UP,
 	CALCULATION_MIN,
@@ -64,6 +66,7 @@ const {
 	SELECTOR_MAGI_OF_REGION,
 	SELECTOR_OPPONENT_ID,
 	SELECTOR_MAGI_NOT_OF_REGION,
+	SELECTOR_OWN_SPELLS_IN_HAND,
 	SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE,
 	SELECTOR_CARDS_WITH_ENERGIZE_RATE,
 	SELECTOR_OWN_CARDS_IN_PLAY,
@@ -596,6 +599,8 @@ class State {
 			}
 			case SELECTOR_OWN_MAGI:
 				return this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).cards;
+			case SELECTOR_OWN_SPELLS_IN_HAND:
+				return this.getZone(ZONE_TYPE_HAND, player).cards.filter(card => card.card.type == TYPE_SPELL);
 			case SELECTOR_ENEMY_MAGI:
 				return this.getZone(ZONE_TYPE_ACTIVE_MAGI, this.getOpponent(player)).cards;
 			case SELECTOR_OWN_CREATURES:
@@ -619,7 +624,7 @@ class State {
 		}
 	}
 
-	getByProperty(target, property) {
+	getByProperty(target, property, subProperty = null) {
 		switch(property) {
 			case PROPERTY_ID:
 				return target.id;
@@ -641,14 +646,16 @@ class State {
 				return target.card.data.canAttackMagiDirectly;
 			case PROPERTY_MAGI_STARTING_ENERGY:
 				return target.card.data.startingEnergy;
+			case PROPERTY_POWER_COST:
+				return target.card.data.powers.find(({name}) => name === subProperty).cost;
 		}
 	}
 
-	modifyByStaticAbilities(target, property) {
+	modifyByStaticAbilities(target, property, subProperty = null) {
 		const PLAYER_ONE = this.players[0];
 		const PLAYER_TWO = this.players[1];
 
-		// gathering static abilities from the field, adding players to them
+		// gathering static abilities from the field, adding players Magi to them
 		const allZonesCards = [
 			...this.getZone(ZONE_TYPE_IN_PLAY).cards,
 			...this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE).cards,
@@ -664,13 +671,20 @@ class State {
 		);
 		const staticAbilities = [...zoneAbilities]; // @TODO static abilities of Magi
 
-		let initialValue = this.getByProperty(target, property);
+		let initialValue = this.getByProperty(target, property, subProperty);
 
 		staticAbilities.forEach(staticAbility => {
 			const selected = this.useSelector(staticAbility.selector, staticAbility.player, staticAbility.selectorParameter);
 			if (selected.includes(target) && staticAbility.modifier) {
 				const {operator, operandOne} = staticAbility.modifier;
-				initialValue = this.performCalculation(operator, operandOne, initialValue);
+				
+				// For specifying value to substract in modifiers as positive ("CALCULATION_SUBSTRACT, 1")
+				if (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) {
+					initialValue = this.performCalculation(operator, initialValue, operandOne);
+				} else {
+					initialValue = this.performCalculation(operator, operandOne, initialValue);
+				}
+				
 			}
 		});
 
@@ -834,6 +848,10 @@ class State {
 				result = operandOne - operandTwo;
 				break;
 			}
+			case CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE: {
+				result = Math.max(operandOne - operandTwo, 1);
+				break;
+			}
 			case CALCULATION_HALVE_ROUND_DOWN: {
 				result = Math.floor(operandOne / 2);
 				break;
@@ -984,7 +1002,8 @@ class State {
 
 						source.setActionUsed(action.power.name);
 
-						if (action.power.cost == COST_X) {
+						const powerCost = this.modifyByStaticAbilities(action.source, PROPERTY_POWER_COST, action.power.name);
+						if (powerCost == COST_X) {
 							this.addActions(
 								{
 									type: ACTION_ENTER_PROMPT,
@@ -1007,12 +1026,12 @@ class State {
 									generatedBy: source.id,
 								},
 							);
-						} else if (action.power.cost > 0) {
+						} else if (powerCost > 0) {
 							this.addActions({
 								type: ACTION_EFFECT,
 								effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
 								target: source,
-								amount: action.power.cost,
+								amount: powerCost,
 								generatedBy: source.id,
 							});
 						}
@@ -1340,16 +1359,18 @@ class State {
 						) {
 							// Здесь должен быть полный шаг определения стоимости
 							const activeMagi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card;
+							const baseCost = this.modifyByStaticAbilities(action.payload.card, PROPERTY_COST);
 							const regionPenalty = (activeMagi.card.region == baseCard.region || baseCard.region == REGION_UNIVERSAL) ? 0 : 1;
+
 							switch (cardType) {
 								case TYPE_CREATURE: {
-									if (activeMagi.data.energy >= baseCard.cost + regionPenalty) {
+									if (activeMagi.data.energy >= baseCost + regionPenalty) {
 										this.transformIntoActions(
 											{
 												type: ACTION_EFFECT,
 												effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
 												from: activeMagi,
-												amount: baseCard.cost + regionPenalty,
+												amount: baseCost + regionPenalty,
 												player: action.payload.player,
 												generatedBy: action.payload.card.id,
 											},
@@ -1392,7 +1413,7 @@ class State {
 												type: ACTION_EFFECT,
 												effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC,
 												from: activeMagi,
-												amount: baseCard.cost,
+												amount: baseCost,
 												player,
 												generatedBy: action.payload.card.id,
 											},
@@ -1435,7 +1456,7 @@ class State {
 												type: ACTION_EFFECT,
 												effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
 												from: activeMagi,
-												amount: baseCard.cost + regionPenalty,
+												amount: baseCost + regionPenalty,
 												player: action.payload.player,
 												generatedBy: action.payload.card.id,
 											},

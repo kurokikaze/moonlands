@@ -11,6 +11,7 @@ const {
 	CALCULATION_DOUBLE,
 	CALCULATION_ADD,
 	CALCULATION_SUBTRACT,
+	CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE,
 	CALCULATION_HALVE_ROUND_DOWN,
 	CALCULATION_HALVE_ROUND_UP,
 	CALCULATION_MIN,
@@ -27,6 +28,7 @@ const {
 	PROPERTY_ENERGIZE,
 	PROPERTY_MAGI_STARTING_ENERGY,
 	PROPERTY_ATTACKS_PER_TURN,
+	PROPERTY_POWER_COST,
 
 	REGION_ARDERIAL,
 	REGION_CALD,
@@ -59,6 +61,7 @@ const {
 	SELECTOR_CARDS_WITH_ENERGIZE_RATE,
 	SELECTOR_OWN_CREATURES_OF_TYPE,
 	SELECTOR_CREATURES_OF_TYPE,
+	SELECTOR_OWN_SPELLS_IN_HAND,
 
 	EFFECT_TYPE_END_OF_TURN,
 	EFFECT_TYPE_NONE,
@@ -1196,6 +1199,38 @@ const cards = [
 			},
 		]
 	}),
+	new Card('Orwin\'s Staff', TYPE_RELIC, REGION_NAROOM, 0, {
+		powers: [
+			{
+				name: 'Preordinance',
+				text: 'Dicard Orwin\'s Staff from play and discard two cards from your hand. Search your deck for any one card. Place that card in your hand without showing it to your opponents. Shuffle your deck.',
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+						zone: ZONE_TYPE_HAND,
+						zoneOwner: '$player',
+						numberOfCards: 2,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
+						target: '$targetCards',
+					}),
+					prompt({
+						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+						zone: ZONE_TYPE_DECK,
+						zoneOwner: '$player',
+						numberOfCards: 1,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+						sourceZone: ZONE_TYPE_DECK,
+						destinationZone: ZONE_TYPE_HAND,
+						target: '$targetCard',
+					}),
+				],
+			},
+		],
+	}),
 	new Card('Book of Ages', TYPE_RELIC, REGION_UNIVERSAL, 0, {
 		powers: [
 			{
@@ -2062,6 +2097,34 @@ const cards = [
 				modifier: {
 					operator: CALCULATION_SET,
 					operandOne: 2,
+				},
+			},
+		],
+	}),
+	new Card('Orothean Gloves', TYPE_RELIC, REGION_OROTHE, 0, {
+		staticAbilities: [
+			{
+				name: 'Empower',
+				text: 'Powers on Creatures you control cost one less to a minimum of one',
+				selector: SELECTOR_OWN_CREATURES,
+				property: PROPERTY_POWER_COST,
+				modifier: {
+					operator: CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE,
+					operandOne: 1,
+				},
+			},
+		],
+	}),
+	new Card('Robes of the Ages', TYPE_RELIC, REGION_UNIVERSAL, 0, {
+		staticAbilities: [
+			{
+				name: 'Ancestral Favor',
+				text: 'Your Spells cost one less to a minimum of one',
+				selector: SELECTOR_OWN_SPELLS_IN_HAND,
+				property: PROPERTY_COST,
+				modifier: {
+					operator: CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE,
+					operandOne: 1,
 				},
 			},
 		],

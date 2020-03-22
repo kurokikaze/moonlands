@@ -1,4 +1,4 @@
-Done: **83** cards out of **190**
+Done: **86** cards out of **190**
 
 # Done, tested
 
@@ -29,12 +29,14 @@ Done: **83** cards out of **190**
 - Magma Armor
 - Magma Hyren
 - Ora
+- Orothean Gloves
 - Orwin's Gaze
 - O'Qua
 - Pruitt
 - Quor
 - Quor Pup
 - Robe of Vines
+- Robes of the Ages
 - Rudwot
 - Sinder
 - Stagadan
@@ -71,6 +73,7 @@ Done: **83** cards out of **190**
 - Lava Arboll
 - Leaf Hyren
 - Magam
+- Orwin's Staff
 - Paralit
 - Pharan
 - Poad
@@ -167,7 +170,7 @@ Done: **83** cards out of **190**
 - 3 Submerge
 - 3 Water of Life
 - 2 Book of Ages
-- 2 Channeler's Gloves
+- 2 Orothean Gloves
 
 # Not done yet
 
@@ -183,8 +186,6 @@ Done: **83** cards out of **190**
 
 # Cost reduction/increase
 
-- Orothean Gloves
-- Robes of the Ages
 - Tidal Wave (additional cost while spell resolves)
 
 # "X + Number" cost
@@ -207,6 +208,7 @@ Done: **83** cards out of **190**
 # Conditionals
 
 - Blu
+- Megathan
 - Amulet of Ombor
 - Balamant Pup
 - Brub
@@ -227,8 +229,7 @@ Done: **83** cards out of **190**
 
 # Searching decks
 
-- Ancestral Flute
-- Orwin's Staff
+- Ancestral Flute (seaching by name, choosing up to N creatures)
 
 # More selectors
 
@@ -248,6 +249,10 @@ Done: **83** cards out of **190**
 - Spirit of the Flame
 - Vinoc
 
+# May-abilities
+
+- Vellup
+
 # Looking at library, rearranging
 
 - Barak
@@ -263,7 +268,6 @@ Done: **83** cards out of **190**
 - Arderial's Crown
 - Gloves of Crystal
 - Magma Armor
-- Megathan
 - Motash
 - Orathan
 - Ring of Secrets
@@ -277,7 +281,6 @@ Done: **83** cards out of **190**
 - Twee
 - Ulk
 - Valkan
-- Vellup (also searching library)
 - Wellisk (also prompting on opponent turn)
 - Wellisk Pup
 

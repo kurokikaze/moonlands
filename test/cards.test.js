@@ -1718,6 +1718,103 @@ describe('Whall', () => {
 	});
 });
 
+describe('Orothean Gloves', () => {
+	it('Powers cost', () => {
+		const ACTIVE_PLAYER = 40;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const oqua = new CardInGame(byName('O\'Qua'), ACTIVE_PLAYER).addEnergy(10);
+		const orotheanGloves = new CardInGame(byName('Orothean Gloves'), ACTIVE_PLAYER);
+		const seaBarl = new CardInGame(byName('Sea Barl'), ACTIVE_PLAYER).addEnergy(4);
+
+		const undertow = new CardInGame(byName('Undertow'), ACTIVE_PLAYER);
+
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(15);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+				new Zone('AP Deck', ZONE_TYPE_DECK, ACTIVE_PLAYER).add([undertow]),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([oqua]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([orotheanGloves, seaBarl]),
+			],
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: seaBarl,
+			power: seaBarl.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(1, 'Lore drawn us a card');
+		expect(seaBarl.data.energy).toEqual(2, 'Lore costs 2 instead of usual 3');
+	});
+});
+
+describe('Robes of the Ages', () => {
+	it('Spells cost', () => {
+		const ACTIVE_PLAYER = 40;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const oqua = new CardInGame(byName('O\'Qua'), ACTIVE_PLAYER).addEnergy(10);
+		const robesOfTheAges = new CardInGame(byName('Robes of the Ages'), ACTIVE_PLAYER);
+		const seaBarl = new CardInGame(byName('Sea Barl'), ACTIVE_PLAYER).addEnergy(2);
+		const undertow = new CardInGame(byName('Undertow'), ACTIVE_PLAYER);
+
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(15);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([undertow]),
+				new Zone('AP Deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([oqua]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([robesOfTheAges]),
+			],
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const spellPlayAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: undertow,
+				player: ACTIVE_PLAYER,
+			},
+		};
+
+		gameState.update(spellPlayAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is prompting us');
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: seaBarl,
+			player: ACTIVE_PLAYER,
+			generatedBy: undertow.id,
+		};
+
+		gameState.update(targetingAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+		expect(oqua.data.energy).toEqual(6, 'O\'Qua has 6 energy (Undertow costed us 4 instead of 5)');
+	});
+});
+
 describe('Hyren\'s Call', () => {
 	it('Casting', () => {
 		const ACTIVE_PLAYER = 40;

@@ -21,6 +21,7 @@ const PROPERTY_ENERGIZE = 'properties/energize';
 const PROPERTY_MAGI_STARTING_ENERGY = 'properties/magi_starting_energy';
 const PROPERTY_ATTACKS_PER_TURN = 'properties/attacks_per_turn';
 const PROPERTY_CAN_ATTACK_MAGI_DIRECTLY = 'properties/can_attack_magi_directly';
+const PROPERTY_POWER_COST = 'properties/power_cost'; // NOT FOR PROPERTY GETTER, ONLY STATIC ABILITIES
 
 const SELECTOR_OPPONENT_ID = 'selectors/opponent_id'; // THIS WILL RETURN ID OF PLAYER'S OPPONENT
 const SELECTOR_CREATURES = 'selectors/creatures';
@@ -42,11 +43,13 @@ const SELECTOR_CREATURES_OF_TYPE = 'selectors/creatures_of_type';
 const SELECTOR_CREATURES_NOT_OF_TYPE = 'selectors/creatures_not_of_type';
 const SELECTOR_OWN_CREATURES_OF_TYPE = 'selectors/own_creatures_of_type';
 const SELECTOR_RELICS = 'selectors/relics';
+const SELECTOR_OWN_SPELLS_IN_HAND = 'selectors/own_spells_in_hand';
 
 const CALCULATION_SET = 'calculations/set';
 const CALCULATION_DOUBLE = 'calculations/double';
 const CALCULATION_ADD = 'calculations/add';
 const CALCULATION_SUBTRACT = 'calculations/subtract';
+const CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE = 'calculations/subtract_to_minimum_of_one';
 const CALCULATION_HALVE_ROUND_DOWN = 'calculations/halve_round_down';
 const CALCULATION_HALVE_ROUND_UP = 'calculations/halve_round_up';
 const CALCULATION_MIN = 'calculations/min';
@@ -173,6 +176,7 @@ module.exports = {
 	CALCULATION_ADD,
 	CALCULATION_SUBTRACT,
 	CALCULATION_HALVE_ROUND_DOWN,
+	CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE,
 	CALCULATION_HALVE_ROUND_UP,
 	CALCULATION_MIN,
 	CALCULATION_MAX,
@@ -191,6 +195,7 @@ module.exports = {
 	SELECTOR_MAGI_OF_REGION,
 	SELECTOR_MAGI_NOT_OF_REGION,
 	SELECTOR_OWN_CREATURES,
+	SELECTOR_OWN_SPELLS_IN_HAND,
 	SELECTOR_ENEMY_CREATURES,
 	SELECTOR_TOP_MAGI_OF_PILE,
 	SELECTOR_OWN_CARDS_IN_PLAY,
@@ -209,6 +214,7 @@ module.exports = {
 	PROPERTY_ATTACKS_PER_TURN,
 	PROPERTY_CAN_ATTACK_MAGI_DIRECTLY,
 	PROPERTY_TYPE,
+	PROPERTY_POWER_COST,
 
 	EFFECT_TYPE_NONE,
 	EFFECT_TYPE_DRAW,
