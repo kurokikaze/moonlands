@@ -675,7 +675,6 @@ describe('Carillion', () => {
 			activePlayer: ACTIVE_PLAYER,
 		});
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
-		gameState.enableDebug();
 
 		const attackAction = {
 			type: moonlands.ACTION_ATTACK,
@@ -1547,7 +1546,6 @@ describe('Rudwot', () => {
 			activePlayer: ACTIVE_PLAYER,
 		});
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
-		gameState.enableDebug();
 
 		const attackAction = {
 			type: moonlands.ACTION_ATTACK,
@@ -1642,7 +1640,7 @@ describe('Orathan', () => {
         
 		gameState.update(attackAction);
 
-		expect(orathan.data.energy).toEqual(4, 'Orathan loses 3 energy, gaining two');
+		expect(orathan.data.energy).toEqual(2, 'Orathan loses 3 energy, gaining none, because at damage step Cave Rudwot has 3 energy');
 		expect(caveRudwot.data.energy).toEqual(0, 'Cave Rudwot is toast');
 	});
 });

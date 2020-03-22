@@ -1792,7 +1792,7 @@ const cards = [
 				name: 'Engulf',
 				text: 'If Orathan attacks a Creature with less than three energy, add two energy to Orathan before energy is removed.',
 				find: {
-					effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+					effectType: EFFECT_TYPE_BEFORE_DAMAGE,
 					conditions: [
 						CONDITION_SOURCE_IS_SELF,
 						{
