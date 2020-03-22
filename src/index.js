@@ -74,6 +74,7 @@ const {
 	PROMPT_TYPE_NUMBER,
 	PROMPT_TYPE_SINGLE_CREATURE,
 	PROMPT_TYPE_SINGLE_MAGI,
+	PROMPT_TYPE_RELIC,
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 	PROMPT_TYPE_OWN_SINGLE_CREATURE,
 	PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
@@ -964,6 +965,7 @@ class State {
 
 						let currentPowerMetaData = {
 							source,
+							player: action.player,
 							sourceCreature: source,
 						}; // No retrieving old metadata from old activations
 
@@ -1100,6 +1102,13 @@ class State {
 							}
 							currentActionMetaData[variable || 'target'] = action.target;
 							break;
+						case PROMPT_TYPE_RELIC: {
+							if (action.target.card.type !== TYPE_RELIC) {
+								throw new Error('Got forbidden target on prompt');
+							}
+							currentActionMetaData[variable || 'target'] = action.target;
+							break;
+						}
 						case PROMPT_TYPE_OWN_SINGLE_CREATURE: {
 							if (this.state.promptPlayer !== action.target.data.controller) {
 								throw new Error('Not-controlled creature supplied to Own Creatures prompt');

@@ -53,6 +53,7 @@ const {
 	SELECTOR_CREATURES_NOT_OF_TYPE,
 	SELECTOR_OWN_CREATURES,
 	SELECTOR_OPPONENT_CREATURES,
+	SELECTOR_MAGI_OF_REGION,
 	SELECTOR_MAGI_NOT_OF_REGION,
 	SELECTOR_TOP_MAGI_OF_PILE,
 	SELECTOR_CARDS_WITH_ENERGIZE_RATE,
@@ -96,6 +97,7 @@ const {
 	PROMPT_TYPE_SINGLE_CREATURE,
 	PROMPT_TYPE_OWN_SINGLE_CREATURE,
 	PROMPT_TYPE_SINGLE_MAGI,
+	PROMPT_TYPE_RELIC,
 	PROMPT_TYPE_NUMBER,
 	PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 
@@ -185,6 +187,27 @@ const cards = [
 			},
 		}],
 	}),
+	new Card('Ebylon', TYPE_MAGI, REGION_OROTHE, null, {
+		startingEnergy: 13,
+		energize: 5,
+		startingCards: ['Orpus', 'Sea Barl', 'Submerge'],
+		powers: [
+			{
+				name: 'Shatterwave',
+				text: 'Choose a Relic in play. Discard the chosen Relic from play.',
+				cost: 1,
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_RELIC,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
+						target: '$target',
+					}),
+				],
+			},
+		],
+	}),
 	new Card('Thermal Blast', TYPE_SPELL, REGION_CALD, 3, {
 		effects: [
 			effect({
@@ -196,6 +219,22 @@ const cards = [
 			}),
 			effect({
 				effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+				target: '$target',
+				amount: '$roll_result',
+			}),
+		],
+	}),
+	new Card('Ground Breaker', TYPE_SPELL, REGION_UNDERNEATH, 3, {
+		effects: [
+			effect({
+				effectType: EFFECT_TYPE_ROLL_DIE,
+			}),
+			prompt({
+				promptType: PROMPT_TYPE_SINGLE_MAGI,
+				message: 'Choose Magi to discard ${roll_result} energy from',
+			}),
+			effect({
+				effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
 				target: '$target',
 				amount: '$roll_result',
 			}),
@@ -239,6 +278,50 @@ const cards = [
 					effect({
 						effectType: EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
 						target: '$targetCards',
+					}),
+				],
+			},
+		],
+	}),
+	new Card('Whall', TYPE_MAGI, REGION_OROTHE, null, {
+		startingEnergy: 10,
+		energize: 5,
+		startingCards: ['Deep Hyren', 'Karak', 'Submerge'],
+		powers: [
+			{
+				name: 'Dream Twist',
+				text: 'Choose your Creature and discard it from play. Choose a Creature from your hand. Put it onto the battlefield. Place energy on it equal to its starting energy.',
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+						target: '$target',
+					}),
+					prompt({
+						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+						zone: ZONE_TYPE_HAND,
+						restriction: RESTRICTION_TYPE,
+						restrictionValue: TYPE_CREATURE,
+						zoneOwner: '$player',
+						numberOfCards: 1,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+						sourceZone: ZONE_TYPE_HAND,
+						destinationZone: ZONE_TYPE_IN_PLAY,
+						target: '$targetCards'
+					}),
+					getPropertyValue({
+						property: PROPERTY_COST,
+						target: '$new_card',
+						variable: 'startingEnergy',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '$new_card',
+						amount: '$startingEnergy',
 					}),
 				],
 			},
@@ -985,6 +1068,43 @@ const cards = [
 				destinationZone: ZONE_TYPE_HAND,
 				target: '$target',
 			}),
+		],
+	}),
+	new Card('Greater Vaal', TYPE_CREATURE, REGION_CALD, 5, {
+		powers: [
+			{
+				name: 'Immolate',
+				cost: 5,
+				text: 'Roll two die. Choose a Creature or Magi in play. Discard energy equal to the die rolls total from the chosen Creature or Magi',
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_ROLL_DIE,
+						variable: 'diceOne',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ROLL_DIE,
+						variable: 'diceTwo',
+					}),
+					{
+						type: ACTION_CALCULATE,
+						operandOne: '$diceOne',
+						propertyOne: null,
+						operandTwo: '$diceTwo',
+						propertyTwo: null,
+						operator: CALCULATION_ADD,
+						variable: 'roll_result',
+					},
+					prompt({
+						promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+						message: 'Choose Creature or Magi to discard ${roll_result} energy from',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
+						target: '$target',
+						amount: '$roll_result',
+					}),
+				],
+			},
 		],
 	}),
 	new Card('Grega', TYPE_MAGI, REGION_CALD, null, {
@@ -2004,6 +2124,47 @@ const cards = [
 					}),
 				],
 			},
+		],
+	}),
+	new Card('Cave In', TYPE_SPELL, REGION_UNDERNEATH, 4, {
+		text: 'Discard one energy from each non-Underneath Creature and Magi in play. Then discard one additional energy from each Arderial Creature and Magi.',
+		effects: [
+			select({
+				selector: SELECTOR_CREATURES_NOT_OF_REGION,
+				region: REGION_UNDERNEATH,
+			}),
+			effect({
+				effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+				target: '$selected',
+				amount: 1,
+			}),
+			select({
+				selector: SELECTOR_MAGI_NOT_OF_REGION,
+				region: REGION_UNDERNEATH,
+			}),
+			effect({
+				effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+				target: '$selected',
+				amount: 1,
+			}),
+			select({
+				selector: SELECTOR_CREATURES_OF_REGION,
+				region: REGION_ARDERIAL,
+			}),
+			effect({
+				effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+				target: '$selected',
+				amount: 1,
+			}),
+			select({
+				selector: SELECTOR_MAGI_OF_REGION,
+				region: REGION_ARDERIAL,
+			}),
+			effect({
+				effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+				target: '$selected',
+				amount: 1,
+			}),
 		],
 	}),
 	new Card('Cave Hyren', TYPE_CREATURE, REGION_UNDERNEATH, 5, {

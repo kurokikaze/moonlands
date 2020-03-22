@@ -1,4 +1,4 @@
-Done: **78** cards out of **190**
+Done: **81** cards out of **190**
 
 # Done, tested
 
@@ -40,25 +40,28 @@ Done: **78** cards out of **190**
 - Undertow
 - Vortex of Knowledge
 - Weebo
+- Whall
 - Xyx
 - Yaki
 
 # Done, not tested
 
-- Adis
 - Agovo
 - Baloo Root
 - Book of Ages
 - Book of Life
-- Bwill
+- Cave In
 - Channeler's Gloves
 - Cyclone Vashp
 - Deep Hyren
+- Ebylon
 - Fire Ball
 - Fire Chogo
 - Fire Flow
 - Fire Grag
+- Greater Vaal
 - Grow
+- Ground Breaker
 - Gruk
 - Jaela
 - Kelthet
@@ -145,20 +148,21 @@ Done: **78** cards out of **190**
 - 3 Typhoon
 - 1 Syphon Stone
 
+## Orothe
+
+- Ebylon
+- Whall
+
 # Not done yet
 
 - Flood of Energy [NAROOM]
-- Greater Vaal (maybe action of rolling N dice?) [CALD]
 - Ground Breaker [UNDERNEATH]
-- Gruk [UNDERNEATH]
 - Lightning Hyren [ARDERIAL]
 - Mushroom Hyren [UNDERNEATH]
 - Nimbulo [ARDERIAL]
 - Ormagon [UNDERNEATH]
 - Sap of Life [NAROOM]
-- Sinder [CALD]
 - Tap Roots (will benefit from prompt texts) [NAROOM]
-- Trug [UNDERNEATH]
 - Updraft [ARDERIAL]
 
 # Cost reduction/increase
@@ -215,7 +219,6 @@ Done: **78** cards out of **190**
 # More selectors
 
 - Bottomless Pit
-- Cave In (active magi, magi by region)
 - Cloud Narth (creature in play by name, combining selectors)
 - Hubdra's Spear (magi w/o creatures)
 - Pack Korrit (creature in play by name)
@@ -288,7 +291,6 @@ Done: **78** cards out of **190**
 
 # Relic stuff (discarding, etc)
 
-- Ebylon
 - Dream Balm
 - Raxis (also custom prompts, prompting opponent)
 
