@@ -112,6 +112,7 @@ const EFFECT_TYPE_MAGI_FLIPPED = 'effects/magi_flipped';
 const EFFECT_TYPE_FIND_STARTING_CARDS = 'effects/find_starting_cards';
 const EFFECT_TYPE_DRAW_REST_OF_CARDS = 'effects/draw_rest_of_cards';
 const EFFECT_TYPE_DISCARD_CARDS_FROM_HAND = 'effects/discard_cards_from_hand';
+const EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE = 'effects/forbid_attack_to_creature';
 
 const NO_PRIORITY = 0;
 const PRIORITY_PRS = 1;
@@ -137,6 +138,7 @@ const RESTRICTION_ENERGY_LESS_THAN_STARTING = 'restrictions/energy_less_than_sta
 const RESTRICTION_OWN_CREATURE = 'restrictions/own_creature';
 const RESTRICTION_OPPONENT_CREATURE = 'restrictions/opponent_creature';
 const RESTRICTION_REGION = 'restrictions/region';
+const RESTRICTION_CREATURE_TYPE = 'restrictions/creature_type';
 
 const TYPE_CREATURE = 'types/creature';
 const TYPE_MAGI = 'types/magi';
@@ -255,12 +257,14 @@ module.exports = {
 	EFFECT_TYPE_FIND_STARTING_CARDS,
 	EFFECT_TYPE_DRAW_REST_OF_CARDS,
 	EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
+	EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
 	
 	RESTRICTION_TYPE,
 	RESTRICTION_ENERGY_LESS_THAN_STARTING,
 	RESTRICTION_REGION,
 	RESTRICTION_OWN_CREATURE,
 	RESTRICTION_OPPONENT_CREATURE,
+	RESTRICTION_CREATURE_TYPE,
 
 	NO_PRIORITY,
 	PRIORITY_PRS,

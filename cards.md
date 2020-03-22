@@ -1,4 +1,4 @@
-Done: **81** cards out of **190**
+Done: **83** cards out of **190**
 
 # Done, tested
 
@@ -23,12 +23,14 @@ Done: **81** cards out of **190**
 - Giant Carillion
 - Giant Parathin
 - Grega
+- Hyren's Call
 - Lava Aq
 - Lava Balamant
 - Magma Armor
 - Magma Hyren
 - Ora
 - Orwin's Gaze
+- O'Qua
 - Pruitt
 - Quor
 - Quor Pup
@@ -152,6 +154,20 @@ Done: **81** cards out of **190**
 
 - Ebylon
 - Whall
+- O'Qua
+- 3 Paralit
+- 3 Giant Parathin
+- 3 Deep Hyren
+- 3 Bwill
+- 3 Sea Barl
+- 3 Orathan
+- 3 Coral Hyren
+- 3 Undertow
+- 3 Typhoon
+- 3 Submerge
+- 3 Water of Life
+- 2 Book of Ages
+- 2 Channeler's Gloves
 
 # Not done yet
 
@@ -212,8 +228,6 @@ Done: **81** cards out of **190**
 # Searching decks
 
 - Ancestral Flute
-- Hyren's Call
-- O'Qua
 - Orwin's Staff
 
 # More selectors

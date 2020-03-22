@@ -90,6 +90,7 @@ const {
 	EFFECT_TYPE_CREATURE_ATTACKS,
 	EFFECT_TYPE_BEFORE_DAMAGE,
 	EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
+	EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
 
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 	PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
@@ -106,6 +107,7 @@ const {
 	RESTRICTION_ENERGY_LESS_THAN_STARTING,
 	RESTRICTION_REGION,
 	RESTRICTION_TYPE,
+	RESTRICTION_CREATURE_TYPE,
 
 	COST_X,
 
@@ -186,6 +188,94 @@ const cards = [
 				operandOne: 1,
 			},
 		}],
+	}),
+	new Card('Hyren\'s Call', TYPE_SPELL, REGION_NAROOM, 6, {
+		text: 'Search your deck for Hyren Creature card, place into play with its starting energy. That Creature cannot attack this turn.',
+		effects: [
+			prompt({
+				promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+				zone: ZONE_TYPE_DECK,
+				zoneOwner: '$player',
+				restrictions: [
+					{
+						type: RESTRICTION_TYPE,
+						value: TYPE_CREATURE,
+					},
+					{
+						type: RESTRICTION_CREATURE_TYPE,
+						value: 'Hyren',
+					},
+				],
+				numberOfCards: 1,
+				variable: 'chosenHyren',
+			}),
+			effect({
+				effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+				sourceZone: ZONE_TYPE_DECK,
+				destinationZone: ZONE_TYPE_IN_PLAY,
+				target: '$chosenHyren',
+			}),
+			getPropertyValue({
+				property: PROPERTY_COST,
+				target: '$new_card',
+				variable: 'startingEnergy',
+			}),
+			effect({
+				effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+				target: '$new_card',
+				amount: '$startingEnergy',
+			}),
+			effect({
+				effectType: EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
+				target: '$new_card',
+			}),
+		],
+	}),
+	new Card('O\'Qua', TYPE_MAGI, REGION_OROTHE,null, {
+		startingEnergy: 11,
+		energize: 4,
+		startingCards: ['Orothean Belt', 'Submerge', 'Implosion'],
+		powers: [
+			{
+				name: 'Conjure',
+				cost: 4,
+				text: 'Search your deck for any Orothe Creature. Play that Creature with four energy counters. It may not attack this turn.',
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+						zone: ZONE_TYPE_DECK,
+						zoneOwner: '$player',
+						restrictions: [
+							{
+								type: RESTRICTION_TYPE,
+								value: TYPE_CREATURE,
+							},
+							{
+								type: RESTRICTION_REGION,
+								value: REGION_OROTHE,
+							},
+						],
+						numberOfCards: 1,
+						variable: 'orotheCreature',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+						sourceZone: ZONE_TYPE_DECK,
+						destinationZone: ZONE_TYPE_IN_PLAY,
+						target: '$orotheCreature',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '$new_card',
+						amount: 4,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
+						target: '$new_card',
+					}),
+				],
+			},
+		],
 	}),
 	new Card('Ebylon', TYPE_MAGI, REGION_OROTHE, null, {
 		startingEnergy: 13,
@@ -323,36 +413,9 @@ const cards = [
 						target: '$new_card',
 						amount: '$startingEnergy',
 					}),
-				],
-			},
-		],
-	}),
-	new Card('Paralit', TYPE_CREATURE, REGION_OROTHE, 3, {
-		powers: [
-			{
-				name: 'Life Channel',
-				cost: 0,
-				text: 'Discard Paralit from play. Add 5 energy to your Magi. Discard one energy from each of your Creatures.',
-				effects: [
 					effect({
-						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-						target: '$sourceCreature',
-					}),
-					select({
-						selector: SELECTOR_OWN_MAGI,
-					}),
-					effect({
-						effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
-						target: '$selected',
-						amount: 5,
-					}),
-					select({
-						selector: SELECTOR_OWN_CREATURES,
-					}),
-					effect({
-						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
-						target: '$selected',
-						amount: 1,
+						effectType: EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
+						target: '$new_card',
 					}),
 				],
 			},

@@ -31,6 +31,10 @@ class CardInGame {
 		this.data.attacked += 1;
 	}
 
+	forbidAttacks() {
+		this.data.attacked = 100; // Hack, but will work for now
+	}
+
 	markAttackReceived() {
 		this.data.wasAttacked = true;
 	}
