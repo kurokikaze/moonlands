@@ -80,6 +80,7 @@ const {
 	EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 	EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
 	EFFECT_TYPE_ENERGIZE,
+	EFFECT_TYPE_START_OF_TURN,
 	EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
 	EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
 	EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
@@ -485,6 +486,171 @@ const cards = [
 						effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
 						target: '$source',
 						amount: '$energyToRecover',
+					}),
+				],
+			},
+		],
+	}),
+	new Card('Scroll of Fire', TYPE_RELIC, REGION_CALD, 0, {
+		triggerEffects: [
+			{
+				name: 'Pyromancy',
+				text: 'Whenever a Spell or Power you control discards energy from any number of Creatures, discard one additional energy from each of those Creatures.',
+				find: {
+					effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+					conditions: [
+						{
+							objectOne: 'source',
+							propertyOne: PROPERTY_TYPE,
+							comparator: '=',
+							objectTwo: TYPE_SPELL,
+							propertyTwo: null,
+						},
+						{
+							objectOne: 'source',
+							propertyOne: PROPERTY_CONTROLLER,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						},
+					],
+				},
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+						target: '%target',
+						amount: 1,
+					}),
+				],
+			},
+			{
+				name: 'Pyromancy',
+				text: 'Whenever a Spell or Power you control discards energy from any number of Creatures, discard one additional energy from each of those Creatures.',
+				find: {
+					effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+					conditions: [
+						{
+							objectOne: 'power',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '=',
+							objectTwo: true,
+							propertyTwo: null,
+						},
+						{
+							objectOne: 'player',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						},
+					],
+				},
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+						target: '%target',
+						amount: 1,
+					}),
+				],
+			},
+		],
+	}),
+	new Card('Valkan', TYPE_MAGI, REGION_CALD, null, {
+		startingEnergy: 12,
+		energize: 4,
+		startingCards: ['Arbolit', 'Quor', 'Spirit of the Flame'],
+		triggerEffects: [
+			{
+				name: 'Pyromancy',
+				text: 'Whenever a Spell Valkan plays discards energy from any number of Creatures, discard two additional energy from each of those Creatures.',
+				find: {
+					effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+					conditions: [
+						{
+							objectOne: 'source',
+							propertyOne: PROPERTY_TYPE,
+							comparator: '=',
+							objectTwo: TYPE_SPELL,
+							propertyTwo: null,
+						},
+						{
+							objectOne: 'source',
+							propertyOne: PROPERTY_CONTROLLER,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						},
+					],
+				},
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+						target: '%target',
+						amount: 2,
+					}),
+				],
+			},
+		],
+	}),
+	new Card('Arderial Crown', TYPE_RELIC, REGION_ARDERIAL, 0, {
+		triggerEffects: [
+			{
+				name: 'Strengthen',
+				text: 'At the start of your turn choose any one Creature in play. Add one energy to chosen Creature.',
+				find: {
+					effectType: EFFECT_TYPE_START_OF_TURN,
+					conditions: [
+						{
+							objectOne: 'player',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						},
+					],
+				},
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '$target',
+						amount: 1,
+					}),
+				],
+			},
+		],
+	}),
+	new Card('Ulk', TYPE_MAGI, REGION_UNDERNEATH, null, {
+		startingEnergy: 12,
+		energize: 6,
+		startingCards: ['Korrit', 'Gum-Gum', 'Burrow'],
+		triggerEffects: [
+			{
+				name: 'Strengthen',
+				text: 'At the start of your turn add one energy to each Korrit you control',
+				find: {
+					effectType: EFFECT_TYPE_START_OF_TURN,
+					conditions: [
+						{
+							objectOne: 'player',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						},
+					],
+				},
+				effects: [
+					select({
+						selector: SELECTOR_OWN_CREATURES_OF_TYPE,
+						creatureType: 'Korrit',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '$selected',
+						amount: 1,
 					}),
 				],
 			},
@@ -1097,6 +1263,113 @@ const cards = [
 					effect({
 						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 						target: '%target',
+						amount: 1,
+					}),
+				],
+			},
+		],
+	}),
+	new Card('Ring of Secrets', TYPE_RELIC, REGION_UNIVERSAL, 0, {
+		triggerEffects: [
+			{
+				find: {
+					effectType: EFFECT_TYPE_PLAY_RELIC,
+					conditions: [
+						{
+							objectOne: 'player',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						},
+					],
+				},
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+						message: 'Choose a Creature to add 1 energy to',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '$target',
+						amount: 1,
+					}),
+				],
+			},
+		],
+	}),
+	new Card('Sphor', TYPE_CREATURE, REGION_OROTHE, 2, {
+		triggerEffects: [
+			{
+				find: {
+					effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+					conditions: [
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_CONTROLLER,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						},
+					],
+				},
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '%self',
+						amount: 1,
+					}),
+				],
+			},
+		],
+	}),
+	new Card('Storm Ring', TYPE_RELIC, REGION_UNIVERSAL, 0, {
+		triggerEffects: [
+			{
+				find: {
+					effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+					conditions: [
+						{
+							objectOne: 'source',
+							propertyOne: PROPERTY_CONTROLLER,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						},
+					],
+				},
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '%source',
+						amount: 1,
+					}),
+				],
+			},
+			{
+				find: {
+					effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+					conditions: [
+						{
+							objectOne: 'source',
+							propertyOne: PROPERTY_CONTROLLER,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						},
+						{
+							objectOne: 'source',
+							propertyOne: PROPERTY_CREATURE_TYPES,
+							comparator: 'includes',
+							objectTwo: 'Hyren',
+							propertyTwo: null,
+						},					
+					],
+				},
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '%source',
 						amount: 1,
 					}),
 				],

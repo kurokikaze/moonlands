@@ -994,12 +994,14 @@ class State {
 				case ACTION_POWER: {
 					if (!action.source.wasActionUsed(action.power.name)) {
 						const source = action.source;
+						const sourcePower = action.power;
 						const effects = action.power.effects;
 							
-						const preparedActions = effects.map(effect => ({...effect, generatedBy: source.id, player: action.player}));
+						const preparedActions = effects.map(effect => ({...effect, power: true, generatedBy: source.id, player: action.player}));
 
 						let currentPowerMetaData = {
 							source,
+							sourcePower,
 							player: action.player,
 							sourceCreature: source,
 						}; // No retrieving old metadata from old activations

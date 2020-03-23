@@ -1,4 +1,4 @@
-Done: **86** cards out of **190**
+Done: **94** cards out of **190**
 
 # Done, tested
 
@@ -52,6 +52,7 @@ Done: **86** cards out of **190**
 # Done, not tested
 
 - Agovo
+- Arderial's Crown
 - Baloo Root
 - Book of Ages
 - Book of Life
@@ -78,10 +79,15 @@ Done: **86** cards out of **190**
 - Paralit
 - Pharan
 - Poad
+- Ring of Secrets
+- Scroll of Fire
 - Sea Barl
 - Shockwave
 - Shooting Star
+- Sphor
 - Storm Cloud
+- Storm Ring
+- Strag
 - Submerge
 - Syphon Stone
 - Thermal Blast
@@ -89,7 +95,9 @@ Done: **86** cards out of **190**
 - Trug
 - Tryn
 - Typhoon
+- Ulk
 - Updraft
+- Valkan
 - Water of Life
 - Xyx Elder
 
@@ -176,14 +184,13 @@ Done: **86** cards out of **190**
 # Not done yet
 
 - Flood of Energy [NAROOM]
-- Ground Breaker [UNDERNEATH]
 - Lightning Hyren [ARDERIAL]
 - Mushroom Hyren [UNDERNEATH]
 - Nimbulo [ARDERIAL]
 - Ormagon [UNDERNEATH]
 - Sap of Life [NAROOM]
 - Tap Roots (will benefit from prompt texts) [NAROOM]
-- Updraft [ARDERIAL]
+- Relic Stalker [UNDERNEATH]
 
 # Cost reduction/increase
 
@@ -219,6 +226,7 @@ Done: **86** cards out of **190**
 - Gorgle's Ring
 - Plith
 - Shimmer
+- Wellisk Pup
 
 # Rearranging Energy
 
@@ -253,6 +261,11 @@ Done: **86** cards out of **190**
 # May-abilities
 
 - Vellup
+- Stradus
+- Wellisk
+- Orthea
+- Orpus
+- Relic Mirror
 
 # Looking at library, rearranging
 
@@ -266,21 +279,10 @@ Done: **86** cards out of **190**
 
 # Triggered abilities
 
-- Arderial's Crown
 - Gloves of Crystal
 - Motash
-- Ring of Secrets
-- Scroll of Fire
-- Sphor
 - Staff of Korrits (also trigger on fucking banding)
-- Storm Ring
-- Stradus
-- Strag
 - Twee
-- Ulk
-- Valkan
-- Wellisk (also prompting on opponent turn)
-- Wellisk Pup
 
 ## Delayed triggers
 
@@ -299,10 +301,6 @@ Done: **86** cards out of **190**
 - Motash's Staff
 - Orathan Flyer (also custom prompts)
 - Orothean Belt
-- Orpus
-- Orthea
-- Relic Mirror (also "may" effects)
-- Relic Stalker
 
 # Relic stuff (discarding, etc)
 
@@ -339,7 +337,6 @@ Done: **86** cards out of **190**
 - Eclipse
 - Energy Band
 - Platheus
-- Whall (the rest of the Power should work)
 
 ## Ability to be attacked
 
