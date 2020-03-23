@@ -185,7 +185,6 @@ describe('Valkan', () => {
 			activePlayer: ACTIVE_PLAYER,
 		});
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
-		gameState.enableDebug();
 
 		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([flameGeyser]);
 

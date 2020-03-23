@@ -1210,7 +1210,7 @@ const cards = [
 			},
 		],
 	}),
-	new Card('Xyx Elder', TYPE_CREATURE, 6, {
+	new Card('Xyx Elder', TYPE_CREATURE, REGION_ARDERIAL, 6, {
 		powers: [
 			{
 				name: 'Shockstorm',
