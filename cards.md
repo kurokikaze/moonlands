@@ -43,6 +43,7 @@ Done: **94** cards out of **190**
 - Stagadan
 - Timber Hyren
 - Undertow
+- Valkan
 - Vortex of Knowledge
 - Weebo
 - Whall
@@ -97,7 +98,6 @@ Done: **94** cards out of **190**
 - Typhoon
 - Ulk
 - Updraft
-- Valkan
 - Water of Life
 - Xyx Elder
 

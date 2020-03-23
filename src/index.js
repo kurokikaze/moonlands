@@ -655,6 +655,9 @@ class State {
 	}
 
 	modifyByStaticAbilities(target, property, subProperty = null) {
+		if (!target) {
+			return null;
+		}
 		const PLAYER_ONE = this.players[0];
 		const PLAYER_TWO = this.players[1];
 
@@ -673,7 +676,6 @@ class State {
 			[],
 		);
 		const staticAbilities = [...zoneAbilities]; // @TODO static abilities of Magi
-
 		let initialValue = this.getByProperty(target, property, subProperty);
 
 		staticAbilities.forEach(staticAbility => {
@@ -1445,6 +1447,7 @@ class State {
 									if (activeMagi.data.energy >= baseCard.cost + regionPenalty) {
 										const preparedEffects = baseCard.data.effects
 											.map(effect => ({
+												source: action.payload.card,
 												player: action.payload.player, // Spell can rewrite this to make opponent do something - draw a card, for example
 												...effect,
 												generatedBy: action.payload.card.id,
@@ -2053,6 +2056,7 @@ class State {
 											effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
 											amount: action.amount,
 											attack: action.attack || false,
+											source: action.source || null,
 											target,
 											generatedBy: action.generatedBy,
 										});
@@ -2061,6 +2065,7 @@ class State {
 										this.transformIntoActions({
 											type: ACTION_EFFECT,
 											effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+											source: action.source || null,
 											amount: action.amount,
 											target,
 											generatedBy: action.generatedBy,
@@ -2081,6 +2086,7 @@ class State {
 										this.transformIntoActions({
 											type: ACTION_EFFECT,
 											effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
+											source: action.source || null,
 											target,
 											generatedBy: action.generatedBy,
 										});
@@ -2147,6 +2153,7 @@ class State {
 											type: ACTION_EFFECT,
 											effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
 											target: target,
+											source: action.source || null,
 											sourceZone: ZONE_TYPE_IN_PLAY,
 											destinationZone: ZONE_TYPE_DISCARD,
 											generatedBy: action.generatedBy,
@@ -2163,6 +2170,7 @@ class State {
 								this.transformIntoActions({
 									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+									source: action.source || null,
 									target: restoreTarget,
 									amount: restoreAmount,
 									player: action.player,

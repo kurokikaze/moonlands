@@ -165,6 +165,58 @@ describe('Flame Geyser', () => {
 	});
 });
 
+describe('Valkan', () => {
+	it('Casting Flame Geyser (by Valkan)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const valkan = new CardInGame(byName('Valkan'), ACTIVE_PLAYER).addEnergy(12);
+		const pruitt = new CardInGame(byName('Pruitt'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const rudwot = new CardInGame(byName('Rudwot'), NON_ACTIVE_PLAYER).addEnergy(1);
+		const arboll = new CardInGame(byName('Arboll'), NON_ACTIVE_PLAYER).addEnergy(1);
+		const seaBarl = new CardInGame(byName('Sea Barl'), NON_ACTIVE_PLAYER).addEnergy(6);
+		const flameGeyser = new CardInGame(byName('Flame Geyser'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [rudwot, arboll, seaBarl], [valkan]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.enableDebug();
+
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([flameGeyser]);
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([pruitt]);
+
+		const vortexOfKnowledge = new CardInGame(byName('Vortex of Knowledge'), ACTIVE_PLAYER);
+
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([vortexOfKnowledge]);
+
+		const playSpellAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: flameGeyser,
+				player: ACTIVE_PLAYER,
+			},
+		};
+
+		expect(valkan.data.energy).toEqual(12, 'Valkan has 12 energy');
+		expect(pruitt.data.energy).toEqual(4, 'Pruitt has 4 energy');
+
+		gameState.update(playSpellAction);
+
+		expect(valkan.data.energy).toEqual(2, 'Valkan has 2 energy');
+		expect(pruitt.data.energy).toEqual(1, 'Pruitt has 1 energy');
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY, null).length).toEqual(1, 'Only one creature stayed in play');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY, null).card.card.name).toEqual('Sea Barl', 'It is Sea Barl');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY, null).card.data.energy).toEqual(1, 'Sea Barl has 1 energy left (starting 6, -3 for Flame Geyser, additional -2 for Valkan)');
+	});
+});
+
 describe('Alaban', () => {
 	it('Undream', () => {
 		const ACTIVE_PLAYER = 0;
