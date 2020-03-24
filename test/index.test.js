@@ -9,9 +9,13 @@ const {
 
 	TYPE_CREATURE,
 
+	ACTION_EFFECT,
 	ACTION_SELECT,
 	ACTION_ENTER_PROMPT,
 	ACTION_RESOLVE_PROMPT,
+
+	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+	EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
 
 	SELECTOR_MAGI_NOT_OF_REGION,
 	SELECTOR_OWN_CREATURES_OF_TYPE,
@@ -825,6 +829,201 @@ describe('Prompts', () => {
 
 		expect(correctResult).toEqual(true, 'Resolve action with correct cards passes');
 		expect(gameState.state.prompt).toEqual(false, 'Engine is not in prompt state');
+	});
+});
+
+describe('Losing the game', () => {
+	it('Losing your last creature while having 0 energy (AP)', () => {
+		const ACTIVE_PLAYER = 12;
+		const NON_ACTIVE_PLAYER = 44;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+		const yaki =new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER);
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER).addEnergy(5);
+		const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const zones = [
+			new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('AP Magi Grave', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('NAP Magi Grave', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit, weebo]),
+			new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const discardEnergyAction = {
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+			target: arbolit,
+			amount: 10,
+			generatedBy: grega.id,
+		};
+
+		gameState.update(discardEnergyAction);
+		expect(gameState.winner).toEqual(NON_ACTIVE_PLAYER);
+	});
+
+	it('Losing all energy on your Magi while having no creatures (AP)', () => {
+		const ACTIVE_PLAYER = 12;
+		const NON_ACTIVE_PLAYER = 44;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(5);
+		const yaki =new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER);
+		const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const zones = [
+			new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('AP Magi Grave', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('NAP Magi Grave', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([weebo]),
+			new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const discardEnergyAction = {
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+			target: grega,
+			amount: 10,
+			generatedBy: grega.id,
+		};
+
+		gameState.update(discardEnergyAction);
+		expect(gameState.winner).toEqual(NON_ACTIVE_PLAYER);
+	});
+
+	it('Losing all energy on your Magi while having no creatures (moving energy)', () => {
+		const ACTIVE_PLAYER = 12;
+		const NON_ACTIVE_PLAYER = 44;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(5);
+		const yaki =new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER);
+		const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const zones = [
+			new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('AP Magi Grave', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('NAP Magi Grave', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([weebo]),
+			new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const discardEnergyAction = {
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_MOVE_ENERGY,
+			source: grega,
+			target: yaki,
+			amount: 10,
+			generatedBy: grega.id,
+		};
+
+		gameState.update(discardEnergyAction);
+		expect(gameState.winner).toEqual(NON_ACTIVE_PLAYER);
+	});
+
+	it('Losing your last creature while having 0 energy (NAP)', () => {
+		const ACTIVE_PLAYER = 12;
+		const NON_ACTIVE_PLAYER = 44;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+		const yaki =new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER);
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER).addEnergy(5);
+		const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const zones = [
+			new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('AP Magi Grave', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('NAP Magi Grave', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit, weebo]),
+			new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const discardEnergyAction = {
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+			target: weebo,
+			amount: 10,
+			player: ACTIVE_PLAYER,
+			generatedBy: yaki.id,
+		};
+
+		gameState.update(discardEnergyAction);
+
+		expect(gameState.winner).toEqual(ACTIVE_PLAYER);
+	});
+
+	it('Losing all energy on your Magi while having no creatures (NAP)', () => {
+		const ACTIVE_PLAYER = 12;
+		const NON_ACTIVE_PLAYER = 44;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+		const yaki =new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER).addEnergy(5);
+
+		const zones = [
+			new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('AP Magi Grave', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('NAP Magi Grave', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
+			new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const discardEnergyAction = {
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+			target: yaki,
+			amount: 10,
+			player: ACTIVE_PLAYER,
+			generatedBy: yaki.id,
+		};
+
+		gameState.update(discardEnergyAction);
+
+		expect(gameState.winner).toEqual(ACTIVE_PLAYER);
 	});
 });
 

@@ -1943,6 +1943,7 @@ class State {
 							} else {
 								destinationZone.addToTop([newObject]);
 							}
+
 							sourceZone.removeById(zoneChangingCard.id);
 
 							this.setSpellMetaDataField('new_card', newObject, action.generatedBy);
@@ -1961,8 +1962,9 @@ class State {
 							// we should check if it was the last creature in play and Magi loses
 							if (action.sourceZone === ZONE_TYPE_IN_PLAY) {
 								const newCard = this.getMetaValue(action.destinationCard, action.generatedBy);
-								const magi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, newCard.data.owner).card;
-								const numberOfCreatures = this.useSelector(SELECTOR_OWN_CREATURES, newCard.data.owner).length;
+								const magi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, newCard.owner).card;
+								const numberOfCreatures = this.useSelector(SELECTOR_OWN_CREATURES, newCard.owner).length;
+
 								if (magi && magi.data.energy === 0 && numberOfCreatures === 0) {
 									this.transformIntoActions({
 										type: ACTION_EFFECT,
@@ -2012,6 +2014,16 @@ class State {
 										break;
 									}
 									case TYPE_MAGI: {
+										const hisCreatures = this.useSelector(SELECTOR_OWN_CREATURES, moveSource.data.controller);
+										if (hisCreatures.length === 0) {
+											this.transformIntoActions({
+												type: ACTION_EFFECT,
+												effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
+												source: action.source || null,
+												target: moveSource,
+												generatedBy: action.generatedBy,
+											});
+										}
 										break;
 									}
 								}

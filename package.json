@@ -1,6 +1,6 @@
 {
   "name": "moonlands",
-  "version": "v0.0.41",
+  "version": "v0.1.0",
   "description": "Magi-Nation Duel engine",
   "main": "src/index.js",
   "directories": {
