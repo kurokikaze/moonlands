@@ -1988,7 +1988,7 @@ const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-						targetRestriction: RESTRICTION_ENERGY_LESS_THAN_STARTING,
+						restriction: RESTRICTION_ENERGY_LESS_THAN_STARTING,
 					}),
 					effect({
 						effectType: EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
@@ -2470,7 +2470,7 @@ const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE,
-						targetRestriction: RESTRICTION_ENERGY_LESS_THAN_STARTING,
+						restriction: RESTRICTION_ENERGY_LESS_THAN_STARTING,
 					}),
 					effect({
 						effectType: EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
