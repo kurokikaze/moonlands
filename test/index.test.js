@@ -832,6 +832,59 @@ describe('Prompts', () => {
 	});
 });
 
+describe('Serializing the state', () => {
+	it('Serializing winning state', () => {
+		const ACTIVE_PLAYER = 12;
+		const NON_ACTIVE_PLAYER = 333;
+
+		const zones = [
+			new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('NAP Hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('AP Deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+			new Zone('NAP Deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('AP Magi Pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER),
+			new Zone('NAP Magi Pile', ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER),
+			new Zone('AP Magi Grave', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('NAP Magi Grave', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null),
+			new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const firstSerializationResultAP = gameState.serializeData(ACTIVE_PLAYER);
+		const firstSerializationResultNAP = gameState.serializeData(NON_ACTIVE_PLAYER);
+
+		expect(firstSerializationResultAP.gameEnded).toEqual(false, 'Game not ended yet');
+		expect(firstSerializationResultAP.winner).toEqual(null, 'No winner determined');
+
+		expect(firstSerializationResultNAP.gameEnded).toEqual(false, 'Game not ended yet');
+		expect(firstSerializationResultNAP.winner).toEqual(null, 'No winner determined');
+
+		gameState.setWinner(ACTIVE_PLAYER);
+
+		const serializationResultAP = gameState.serializeData(ACTIVE_PLAYER);
+		const serializationResultNAP = gameState.serializeData(NON_ACTIVE_PLAYER);
+
+		expect(serializationResultAP.gameEnded).toEqual(true, 'Game ended correctly');
+		expect(serializationResultAP.winner).toEqual(ACTIVE_PLAYER, 'Winner saved correctly');
+
+		expect(serializationResultNAP.gameEnded).toEqual(true, 'Game ended correctly (for NAP)');
+		expect(serializationResultNAP.winner).toEqual(ACTIVE_PLAYER, 'Winner saved correctly (for NAP)');
+	});
+});
+
 describe('Losing the game', () => {
 	it('Losing your last creature while having 0 energy (AP)', () => {
 		const ACTIVE_PLAYER = 12;

@@ -395,6 +395,8 @@ class State {
 	}
 
 	serializeData(playerId) {
+		const gameEnded = !(this.winner === false);
+
 		return {
 			zones: this.serializeZones(playerId),
 			step: this.state.step,
@@ -407,6 +409,8 @@ class State {
 			promptPlayer: this.state.promptPlayer,
 			promptGeneratedBy: this.state.promptGeneratedBy,
 			promptParams: this.state.promptParams,
+			gameEnded,
+			winner: gameEnded ? this.winner : null,
 		};
 	}
 
