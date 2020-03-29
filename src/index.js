@@ -1497,6 +1497,12 @@ class State {
 								const startingEnergy = this.modifyByStaticAbilities(topMagi, PROPERTY_MAGI_STARTING_ENERGY);
 								const firstMagi = this.getZone(ZONE_TYPE_DEFEATED_MAGI, action.player).length == 0;
 
+								const deckCards = this.getZone(ZONE_TYPE_DECK, action.player).cards.map(({card}) => card.name);
+								const discardCards = this.getZone(ZONE_TYPE_DISCARD, action.player).cards.map(({card}) => card.name);
+								const searchableCards = [...deckCards, ...discardCards];
+
+								const availableCards = topMagi.card.data.startingCards.filter(card => searchableCards.includes(card));
+
 								const actionsToTake = [
 									{
 										type: ACTION_EFFECT,
@@ -1519,6 +1525,7 @@ class State {
 										promptType: PROMPT_TYPE_CHOOSE_CARDS,
 										promptParams: {
 											cards: topMagi.card.data.startingCards,
+											availableCards,
 										},
 										variable: 'startingCards',
 									},

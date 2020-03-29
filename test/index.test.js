@@ -224,6 +224,7 @@ describe('Magi stuff', () => {
 		expect(gameState.state.prompt).toEqual(true, 'Game waiting for prompt');
 		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game waiting for active player to resolve prompt');
 		expect(gameState.state.promptParams.cards).toEqual(grega.card.data.startingCards, 'Prompt params lists starting cards of Grega');
+		expect(gameState.state.promptParams.availableCards).toEqual(['Arbolit', 'Quor Pup'], 'Prompt params says Arbolit from deck and Quor Pup from discard are available');
 
 		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_CARDS, 'Game waiting for you to choose starting cards');
 
