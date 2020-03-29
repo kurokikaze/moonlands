@@ -215,6 +215,13 @@ function clone(item) {
 	return result;
 }
 
+const convertCard = cardInGame => ({
+	id: cardInGame.id,
+	owner: cardInGame.owner,
+	card: cardInGame._card.name,
+	data: cardInGame.data,
+});
+
 function checkCardsForRestriction(cards, restriction, restrictionValue) {
 	switch (restriction) {
 		case RESTRICTION_CREATURE_TYPE:
@@ -1080,15 +1087,16 @@ class State {
 							const zone = this.getMetaValue(action.zone, action.generatedBy);
 							const zoneOwner = this.getMetaValue(action.zoneOwner, action.generatedBy);
 							const numberOfCards = this.getMetaValue(action.numberOfCards, action.generatedBy);
-							const cardFilter = makeCardFilter(restrictions);
+							const cardFilter = makeCardFilter(restrictions || []);
 							const zoneContent = this.getZone(zone, zoneOwner).cards;
 							const cards = restrictions ? zoneContent.filter(cardFilter) : zoneContent;
+
 							promptParams = {
 								zone,
 								zoneOwner,
 								restrictions,
 								numberOfCards,
-								cards,
+								cards: cards.map(convertCard),
 							};
 							break;
 						}
