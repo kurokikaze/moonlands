@@ -158,6 +158,7 @@ const {
 	/* eslint-enable no-unused-vars */
 } = require('./const');
 
+const {makeCardFilter} = require('./utils/restrictions');
 const {showAction} = require('./logAction');
 const {byName} = require('./cards');
 const CardInGame = require('./classes/CardInGame');
@@ -1071,34 +1072,24 @@ class State {
 							if (action.restriction && action.restrictions) {
 								throw new Error('PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE error: single and multiple restrictions specified');
 							}
+							const restrictions = action.restrictions || (action.restriction ? {
+								type: this.getMetaValue(action.restriction, action.generatedBy),
+								value: this.getMetaValue(action.restrictionValue, action.generatedBy),
+							} : null);
 
-							if (action.restriction && action.restrictionValue) {
-								promptParams = {
-									restrictions: [
-										{
-											type: this.getMetaValue(action.restriction, action.generatedBy),
-											value: this.getMetaValue(action.restrictionValue, action.generatedBy),
-										},
-									],
-									zone: this.getMetaValue(action.zone, action.generatedBy),
-									zoneOwner: this.getMetaValue(action.zoneOwner, action.generatedBy),
-									numberOfCards: this.getMetaValue(action.numberOfCards, action.generatedBy),
-								};
-							} else if (action.restrictions) {
-								promptParams = {
-									restrictions: action.restrictions,
-									zone: this.getMetaValue(action.zone, action.generatedBy),
-									zoneOwner: this.getMetaValue(action.zoneOwner, action.generatedBy),
-									numberOfCards: this.getMetaValue(action.numberOfCards, action.generatedBy),
-								};
-							} else {
-								promptParams = {
-									restrictions: null,
-									zone: this.getMetaValue(action.zone, action.generatedBy),
-									zoneOwner: this.getMetaValue(action.zoneOwner, action.generatedBy),
-									numberOfCards: this.getMetaValue(action.numberOfCards, action.generatedBy),
-								};
-							}
+							const zone = this.getMetaValue(action.zone, action.generatedBy);
+							const zoneOwner = this.getMetaValue(action.zoneOwner, action.generatedBy);
+							const numberOfCards = this.getMetaValue(action.numberOfCards, action.generatedBy);
+							const cardFilter = makeCardFilter(restrictions);
+							const zoneContent = this.getZone(zone, zoneOwner).cards;
+							const cards = restrictions ? zoneContent.filter(cardFilter) : zoneContent;
+							promptParams = {
+								zone,
+								zoneOwner,
+								restrictions,
+								numberOfCards,
+								cards,
+							};
 							break;
 						}
 						case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
