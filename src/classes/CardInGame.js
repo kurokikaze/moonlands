@@ -66,10 +66,10 @@ class CardInGame {
 		return newCard;
 	}
 
-	serialize() {
+	serialize(hidden) {
 		return {
-			card: this.card.name,
-			data: this.data,
+			card: hidden ? null : this.card.name,
+			data: hidden ? {} : this.data,
 			id: this.id,
 		};
 	}

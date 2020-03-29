@@ -81,8 +81,8 @@ class Zone {
 		this.cards = [];
 	}
 
-	serialize() {
-		return this.cards.map(card => card.serialize());
+	serialize(hidden = false) {
+		return this.cards.map(card => card.serialize(hidden));
 	}
 }
 
