@@ -564,6 +564,11 @@ describe('Diobor', () => {
 		};
 
 		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_NUMBER, 'Game is waiting for number');
+		expect(gameState.state.promptParams).toEqual({min: 1, max: 6}, 'Min and max energy passed correctly');
+
 		gameState.update(costChoiceAction);
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(diobor.id).data.energy).toEqual(3, 'Diobor now has 3 energy left');

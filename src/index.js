@@ -1030,6 +1030,8 @@ class State {
 									promptType: PROMPT_TYPE_NUMBER,
 									player: action.player,
 									generatedBy: source.id,
+									min: 1,
+									max: action.source.data.energy,
 								},
 								{
 									type: ACTION_CALCULATE,
