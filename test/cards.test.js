@@ -2259,6 +2259,7 @@ describe('Adis', () => {
 		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, 'Game is in prompt state');
 		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game is prompting active player');
 		expect(gameState.state.promptParams).toEqual({
+			cards: [],
 			zone: ZONE_TYPE_HAND,
 			zoneOwner: ACTIVE_PLAYER,
 			restrictions: null,
@@ -2310,6 +2311,7 @@ describe('Adis', () => {
 		expect(gameState.state.promptPlayer).toEqual(NON_ACTIVE_PLAYER, 'Game is prompting non-active player');
 		expect(gameState.state.promptParams).toEqual({
 			zone: ZONE_TYPE_HAND,
+			cards: [],
 			restrictions: null,
 			zoneOwner: NON_ACTIVE_PLAYER,
 			numberOfCards: 3,

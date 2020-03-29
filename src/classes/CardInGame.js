@@ -18,12 +18,12 @@ class CardInGame {
 	}
 
 	addEnergy(amount = 0) {
-		this.data.energy += amount;
+		this.data.energy += parseInt(amount, 10);
 		return this;
 	}
 
 	removeEnergy(amount = 0) {
-		this.data.energy = Math.max(this.data.energy - amount, 0);
+		this.data.energy = Math.max(this.data.energy - parseInt(amount), 0);
 	}
 
 	markAttackDone() {

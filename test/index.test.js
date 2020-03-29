@@ -23,6 +23,7 @@ const {
 	SELECTOR_CREATURES_OF_TYPE,
 	SELECTOR_CREATURES_NOT_OF_TYPE,
 	SELECTOR_MAGI,
+	SELECTOR_CREATURES,
 
 	REGION_NAROOM,
 	REGION_CALD,
@@ -1610,7 +1611,7 @@ describe('Selector actions', () => {
 		const GENERATED_BY = 123;
 
 		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER).addEnergy(2);
-		const xyxElder = new CardInGame(byName('Xyx'), ACTIVE_PLAYER).addEnergy(3);
+		const xyxElder = new CardInGame(byName('Xyx Elder'), ACTIVE_PLAYER).addEnergy(3);
 		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER).addEnergy(3);
 		const opponentsXyx = new CardInGame(byName('Xyx'), NON_ACTIVE_PLAYER).addEnergy(2);
 
@@ -1639,8 +1640,46 @@ describe('Selector actions', () => {
 
 		const selectedCreatures = gameState.state.spellMetaData[GENERATED_BY].selected;
 
-		expect(selectedCreatures).toHaveLength(2, 'Creature selector returns both of our Xyx');
-		expect([selectedCreatures[0].card.name, selectedCreatures[1].card.name]).toEqual(['Xyx', 'Xyx'], 'Creature selector returns both Xyx and Xyx Elder');
+		expect(selectedCreatures).toHaveLength(2, 'Creature selector returns both our Xyx and Xyx Elder');
+		expect([selectedCreatures[0].card.name, selectedCreatures[1].card.name]).toEqual(['Xyx', 'Xyx Elder'], 'Creature selector returns both Xyx and Xyx Elder');
+	});
+
+	it('SELECTOR_CREATURES', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+		const GENERATED_BY = 123;
+
+		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER).addEnergy(2);
+		const xyxElder = new CardInGame(byName('Xyx Elder'), ACTIVE_PLAYER).addEnergy(3);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER).addEnergy(3);
+		const opponentsXyx = new CardInGame(byName('Xyx'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const zones = [
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In Play', ZONE_TYPE_IN_PLAY, null).add([xyx, xyxElder, lavaBalamant, opponentsXyx]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			ACTIVE_PLAYER,
+		});
+		
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const selectOwnOfTypeAction = {
+			type: ACTION_SELECT,
+			selector: SELECTOR_CREATURES,
+			player: ACTIVE_PLAYER,
+			generatedBy: GENERATED_BY,
+		};
+
+		gameState.update(selectOwnOfTypeAction);
+
+		const selectedCreatures = gameState.state.spellMetaData[GENERATED_BY].selected;
+
+		expect(selectedCreatures).toHaveLength(4, 'Creature selector returns all 4 creatures');
+		expect(selectedCreatures.map(card => card.card.name)).toEqual(['Xyx', 'Xyx Elder', 'Lava Balamant', 'Xyx'], 'Creature selector returns all creatures');
 	});
 
 	it('SELECTOR_CREATURES_OF_TYPE', () => {

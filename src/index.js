@@ -1079,10 +1079,12 @@ class State {
 							if (action.restriction && action.restrictions) {
 								throw new Error('PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE error: single and multiple restrictions specified');
 							}
-							const restrictions = action.restrictions || (action.restriction ? {
-								type: this.getMetaValue(action.restriction, action.generatedBy),
-								value: this.getMetaValue(action.restrictionValue, action.generatedBy),
-							} : null);
+							const restrictions = action.restrictions || (action.restriction ? [
+								{
+									type: this.getMetaValue(action.restriction, action.generatedBy),
+									value: this.getMetaValue(action.restrictionValue, action.generatedBy),
+								},
+							] : null);
 
 							const zone = this.getMetaValue(action.zone, action.generatedBy);
 							const zoneOwner = this.getMetaValue(action.zoneOwner, action.generatedBy);
@@ -1215,14 +1217,6 @@ class State {
 				case ACTION_SELECT: {
 					let result;
 					switch (action.selector) {
-						case SELECTOR_MAGI: {
-							result = this.useSelector(SELECTOR_MAGI);
-							break;
-						}
-						case SELECTOR_RELICS: {
-							result = this.useSelector(SELECTOR_RELICS);
-							break;
-						}
 						case SELECTOR_OWN_CARDS_IN_PLAY: {
 							result = this.useSelector(SELECTOR_OWN_CARDS_IN_PLAY, action.player);
 							break;
@@ -1263,26 +1257,6 @@ class State {
 							];
 							break;
 						}
-						case SELECTOR_TOP_MAGI_OF_PILE: {
-							result = this.useSelector(SELECTOR_TOP_MAGI_OF_PILE, action.player);
-							break;
-						}
-						case SELECTOR_OWN_MAGI: {
-							result = this.useSelector(SELECTOR_OWN_MAGI, action.player);
-							break;
-						}
-						case SELECTOR_OWN_CREATURES: {
-							result = this.useSelector(SELECTOR_OWN_CREATURES, action.player);
-							break;
-						}
-						case SELECTOR_ENEMY_CREATURES: {
-							result = this.useSelector(SELECTOR_ENEMY_CREATURES, action.player);
-							break;
-						}
-						case SELECTOR_ENEMY_MAGI: {
-							result = this.useSelector(SELECTOR_ENEMY_MAGI, action.player);
-							break;
-						}
 						case SELECTOR_CREATURES_OF_REGION: {
 							result = this.useSelector(SELECTOR_CREATURES_OF_REGION, action.player, action.region);
 							break;
@@ -1305,6 +1279,10 @@ class State {
 							].filter(magi => this.modifyByStaticAbilities(magi, PROPERTY_REGION) != action.region);
 							break;
 						}
+						default: {
+							result = this.useSelector(action.selector, action.player);
+						}
+
 					}
 					const variable = action.variable || 'selected';
 					this.setSpellMetaDataField(variable, result, action.generatedBy);
