@@ -92,6 +92,8 @@ const {
 	PRIORITY_CREATURES,
 
 	EFFECT_TYPE_DRAW,
+	EFFECT_TYPE_ADD_DELAYED_TRIGGER,
+	EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI,
 	EFFECT_TYPE_RESHUFFLE_DISCARD,
 	EFFECT_TYPE_MOVE_ENERGY,
 	EFFECT_TYPE_ROLL_DIE,
@@ -138,6 +140,7 @@ const {
 	EFFECT_TYPE_DRAW_REST_OF_CARDS,
 	EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
 	EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
+	EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP,
 
 	REGION_UNIVERSAL,
 
@@ -274,11 +277,7 @@ const steps = [
 		effects: [
 			{
 				type: ACTION_EFFECT,
-				effectType: EFFECT_TYPE_DRAW,
-			},
-			{
-				type: ACTION_EFFECT,
-				effectType: EFFECT_TYPE_DRAW,
+				effectType: EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP,
 			},
 		],
 	},
@@ -287,6 +286,7 @@ const steps = [
 const defaultState = {
 	actions: [],
 	savedActions: [],
+	delayedTriggers: [],
 	activePlayer: 0,
 	prompt: false,
 	promptType: null,
@@ -500,6 +500,10 @@ class State {
 
 	transformIntoActions() {
 		this.state.actions.unshift(...arguments);
+	}
+
+	removeDelayedTrigger(triggerId) {
+		this.state.delayedTriggers = this.state.delayedTriggers.filter(({id}) => id != triggerId);
 	}
 
 	getNextAction() {
@@ -811,22 +815,24 @@ class State {
 			...(this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO) || {cards: []}).cards,
 		];
 
-		const triggerEffects = allZonesCards.reduce(
+		const cardTriggerEffects = allZonesCards.reduce(
 			(acc, cardInPlay) => cardInPlay.card.data.triggerEffects ? [
 				...acc,
 				...cardInPlay.card.data.triggerEffects.map(effect => ({...effect, self: cardInPlay})),
 			] : acc,
 			[],
 		);
+
+		const triggerEffects = [...cardTriggerEffects, ...this.state.delayedTriggers];
 		triggerEffects.forEach(replacer => {
-			const triggeredId = replacer.self.id; // Not really, but will work for now
+			const triggeredId = replacer.id || replacer.self.id; // Not really, but will work for now
 			if (this.matchAction(action, replacer.find, replacer.self)) {
 				// Turn effect-templates into actual effect actions by preparing meta-values
 				const preparedEffects = replacer.effects.map(effect => {
 					let resultEffect =  {
 						type: effect.type || ACTION_EFFECT,
 						effectType: effect.effectType, // Do we need to replace this? Maybe later
-						generatedBy: action.generatedBy,
+						generatedBy: action.generatedBy || triggeredId, // Some actions do not have generatedBy (game actions). We still need one though.
 						triggeredId: [triggeredId],
 						player: replacer.self.data.controller,
 					};
@@ -843,6 +849,9 @@ class State {
 				});
 
 				this.transformIntoActions(...preparedEffects);
+				if (replacer.id) {
+					this.removeDelayedTrigger(replacer.id);
+				}
 			}
 		});
 	}
@@ -1488,13 +1497,46 @@ class State {
 				}
 				case ACTION_EFFECT: {
 					switch(action.effectType) {
+						case EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP: {
+							this.transformIntoActions(
+								{
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_DRAW,
+									stepEffect: true,
+									generatedBy: action.generatedBy,
+								},
+								{
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_DRAW,
+									stepEffect: true,
+									generatedBy: action.generatedBy,
+								},
+							);
+							break;
+						}
+						case EFFECT_TYPE_ADD_DELAYED_TRIGGER: {
+							const metaData = this.getSpellMetadata(action.generatedBy);
+							// "new_card" fallback is for "defeated" triggers
+							const self = metaData.source || metaData.new_card;
+							this.state = {
+								...this.state,
+								delayedTriggers: [
+									...this.state.delayedTriggers,
+									{
+										id: nanoid(),
+										self,
+										...action.delayedTrigger,
+									}
+								],
+							};
+							break;
+						}
 						case EFFECT_TYPE_START_OF_TURN: {
 							if (
 								this.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).length == 0 &&
 								this.getZone(ZONE_TYPE_MAGI_PILE, action.player).length > 0
 							) {
 								const topMagi = this.getZone(ZONE_TYPE_MAGI_PILE, action.player).cards[0];
-								const startingEnergy = this.modifyByStaticAbilities(topMagi, PROPERTY_MAGI_STARTING_ENERGY);
 								const firstMagi = this.getZone(ZONE_TYPE_DEFEATED_MAGI, action.player).length == 0;
 
 								const deckCards = this.getZone(ZONE_TYPE_DECK, action.player).cards.map(({card}) => card.name);
@@ -1516,9 +1558,8 @@ class State {
 									}, 
 									{
 										type: ACTION_EFFECT,
-										effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+										effectType: EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI,
 										target: '$ownMagi',
-										amount: startingEnergy,
 									},
 									{
 										type: ACTION_ENTER_PROMPT,
@@ -2201,6 +2242,21 @@ class State {
 							const addTarget = this.getMetaValue(action.target, action.generatedBy);
 
 							addTarget.addEnergy(this.getMetaValue(action.amount, action.generatedBy));
+							break;
+						}
+						case EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI: {
+							const magiTargets = this.getMetaValue(action.target, action.generatedBy);
+							oneOrSeveral(magiTargets, magiTarget => {
+								const startingEnergy = this.modifyByStaticAbilities(magiTarget, PROPERTY_MAGI_STARTING_ENERGY);
+
+								this.transformIntoActions({
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+									target: magiTarget,
+									amount: startingEnergy,
+									generatedBy: action.generatedBy,
+								});
+							});
 							break;
 						}
 						case EFFECT_TYPE_ADD_ENERGY_TO_MAGI: {

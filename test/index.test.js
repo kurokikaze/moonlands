@@ -9,6 +9,7 @@ const {
 
 	TYPE_CREATURE,
 
+	ACTION_PASS,
 	ACTION_EFFECT,
 	ACTION_SELECT,
 	ACTION_ENTER_PROMPT,
@@ -16,6 +17,8 @@ const {
 
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+	EFFECT_TYPE_ADD_DELAYED_TRIGGER,
+	EFFECT_TYPE_DRAW,
 
 	SELECTOR_MAGI_NOT_OF_REGION,
 	SELECTOR_OWN_CREATURES_OF_TYPE,
@@ -2995,5 +2998,135 @@ describe('Zones', () => {
 			expect(card).toHaveProperty('data.controller', ACTIVE_PLAYER);
 			expect(card).toHaveProperty('data.energy');
 		});
+	});
+});
+
+describe('Delayed Triggers', () => {
+	it('Action adds delayed trigger', () => {
+		const PLAYER_ONE = 10;
+		const PLAYER_TWO = 12;
+
+		const leafHyren = new CardInGame(byName('Leaf Hyren'), PLAYER_ONE);
+
+		const zones = [];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: null,
+			activePlayer: PLAYER_ONE,
+			spellMetaData: {
+				[leafHyren.id]: {
+					source: leafHyren,
+				},
+			},
+		});
+
+		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
+
+		const delayedTrigger = {
+			name: 'Lore',
+			text: 'At the card draw step, draw an additional card',
+			find: {
+				effectType: EFFECT_TYPE_DRAW,
+				conditions: [
+					{
+						objectOne: 'stepEffect',
+						propertyOne: ACTION_PROPERTY,
+						comparator: '=',
+						objectTwo: true,
+						propertyTwo: null,
+					}
+				],
+			},
+			effects: [
+				{
+					type: TYPE_EFFECT,
+					effectType: EFFECT_TYPE_DRAW,
+				},
+			],
+		};
+
+		const delayedTriggerAction = {
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_ADD_DELAYED_TRIGGER,
+			delayedTrigger,
+			generatedBy: leafHyren.id,
+		};
+
+		gameState.update(delayedTriggerAction);
+		
+		expect(gameState.state.delayedTriggers).toHaveLength(1, 'Delayed trigger added to state');
+		expect(gameState.state.delayedTriggers[0].name).toEqual('Lore', 'Trigger name saved');
+		expect(gameState.state.delayedTriggers[0].id).toEqual(expect.any(String), 'Trigger has id');
+		expect(gameState.state.delayedTriggers[0].self.id).toEqual(leafHyren.id, 'Source is assigned from spell metadata');
+	});
+
+	it('Delayed trigger triggers on conditions', () => {
+		const PLAYER_ONE = 10;
+		const PLAYER_TWO = 12;
+
+		const leafHyren = new CardInGame(byName('Leaf Hyren'), PLAYER_ONE);
+
+		const arbollOne = new CardInGame(byName('Arboll'), PLAYER_ONE);
+		const arbollTwo = new CardInGame(byName('Arboll'), PLAYER_ONE);
+		const arbollThree = new CardInGame(byName('Arboll'), PLAYER_ONE);
+
+		const gameState = new moonlands.State({
+			step: STEP_PRS_SECOND,
+			activePlayer: PLAYER_ONE,
+			spellMetaData: {
+				[leafHyren.id]: {
+					source: leafHyren,
+				},
+			},
+		});
+		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
+		gameState.state.zones = gameState.createZones();
+
+		gameState.getZone(ZONE_TYPE_DECK, PLAYER_ONE).add([arbollOne, arbollTwo, arbollThree]);
+
+		const delayedTrigger = {
+			name: 'Lore',
+			text: 'At the card draw step, draw an additional card',
+			find: {
+				effectType: EFFECT_TYPE_DRAW,
+				conditions: [
+					{
+						objectOne: 'stepEffect',
+						propertyOne: ACTION_PROPERTY,
+						comparator: '=',
+						objectTwo: true,
+						propertyTwo: null,
+					}
+				],
+			},
+			effects: [
+				{
+					type: TYPE_EFFECT,
+					effectType: EFFECT_TYPE_DRAW,
+				},
+			],
+		};
+
+		const delayedTriggerAction = {
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_ADD_DELAYED_TRIGGER,
+			delayedTrigger,
+			generatedBy: leafHyren.id,
+		};
+
+		gameState.update(delayedTriggerAction);
+
+		expect(gameState.state.delayedTriggers).toHaveLength(1, 'Delayed trigger added to state');
+
+		const passAction = {
+			type: ACTION_PASS,
+			player: PLAYER_ONE,
+		};
+
+		gameState.update(passAction);
+		expect(gameState.getZone(ZONE_TYPE_HAND, PLAYER_ONE)).toHaveLength(3, 'Three cards drawn');
+		expect(gameState.getZone(ZONE_TYPE_DECK, PLAYER_ONE)).toHaveLength(0, 'Deck is empty');
+		expect(gameState.state.delayedTriggers).toHaveLength(0, 'Delayed trigger expires after matching');
 	});
 });

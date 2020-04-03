@@ -98,6 +98,7 @@ const EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES = 'effects/card_moved_between_zones';
 const EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI = 'effects/add_energy_to_creature_or_magi';
 const EFFECT_TYPE_ADD_ENERGY_TO_CREATURE = 'effects/add_energy_to_creature';
 const EFFECT_TYPE_ADD_ENERGY_TO_MAGI = 'effects/add_energy_to_magi';
+const EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI = 'effects/add_starting_energy_to_magi';
 const EFFECT_TYPE_ENERGIZE = 'effects/energize';
 const EFFECT_TYPE_DAMAGE_STEP = 'effects/damage_step';
 const EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE = 'effects/discard_energy_from_creature';
@@ -110,6 +111,7 @@ const EFFECT_TYPE_PAYING_ENERGY_FOR_POWER = 'effects/paying_energy_for_power';
 const EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY = 'effects/discard_relic_from_play';
 const EFFECT_TYPE_CREATURE_ATTACKS = 'effects/creature_attacks';
 const EFFECT_TYPE_CREATURE_IS_ATTACKED = 'effects/creature_is_attacked';
+const EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP = 'effects/draw_cards_in_draw_step';
 const EFFECT_TYPE_START_OF_TURN = 'effects/start_of_turn';
 const EFFECT_TYPE_END_OF_TURN = 'effects/end_of_turn';
 const EFFECT_TYPE_MAGI_FLIPPED = 'effects/magi_flipped';
@@ -117,6 +119,7 @@ const EFFECT_TYPE_FIND_STARTING_CARDS = 'effects/find_starting_cards';
 const EFFECT_TYPE_DRAW_REST_OF_CARDS = 'effects/draw_rest_of_cards';
 const EFFECT_TYPE_DISCARD_CARDS_FROM_HAND = 'effects/discard_cards_from_hand';
 const EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE = 'effects/forbid_attack_to_creature';
+const EFFECT_TYPE_ADD_DELAYED_TRIGGER = 'effects/add_delayed_trigger';
 
 const NO_PRIORITY = 0;
 const PRIORITY_PRS = 1;
@@ -234,6 +237,7 @@ module.exports = {
 	EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI,
 	EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 	EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+	EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI,
 	EFFECT_TYPE_ENERGIZE,
 	EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
 	EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
@@ -266,6 +270,9 @@ module.exports = {
 	EFFECT_TYPE_DRAW_REST_OF_CARDS,
 	EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
 	EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
+	EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP,
+
+	EFFECT_TYPE_ADD_DELAYED_TRIGGER,
 	
 	RESTRICTION_TYPE,
 	RESTRICTION_ENERGY_LESS_THAN_STARTING,

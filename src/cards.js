@@ -69,6 +69,9 @@ const {
 	EFFECT_TYPE_DRAW,
 	EFFECT_TYPE_ROLL_DIE,
 	EFFECT_TYPE_PLAY_CREATURE,
+	EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP,
+	EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI,
+	EFFECT_TYPE_ADD_DELAYED_TRIGGER,
 	EFFECT_TYPE_PLAY_RELIC,
 	EFFECT_TYPE_PLAY_SPELL,
 	EFFECT_TYPE_MAGI_IS_DEFEATED,
@@ -1953,6 +1956,49 @@ const cards = [
 			],
 		}],
 	}),
+	new Card('Mobis', TYPE_MAGI, REGION_OROTHE, null, {
+		startingCards: ['Bwill', 'Wellisk', 'Submerge'],
+		startingEnergy: 16,
+		energize: 5,
+		triggerEffects: [
+			{
+				name: 'Legacy',
+				find: {
+					effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
+					conditions: [
+						CONDITION_TARGET_IS_SELF,
+					],
+				},
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_ADD_DELAYED_TRIGGER,
+						delayedTrigger: {
+							name: 'Legacy',
+							find: {
+								effectType: EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI,
+								conditions: [
+									{
+										objectOne: '%target',
+										propertyOne: PROPERTY_CONTROLLER,
+										comparator: '=',
+										objectTwo: '$source',
+										propertyTwo: PROPERTY_CONTROLLER,
+									},
+								],
+							},
+							effects: [
+								effect({
+									type: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+									target: '%target',
+									amount: 3,
+								}),
+							],
+						},
+					}),
+				],
+			}
+		]
+	}),
 	new Card('Lava Arboll', TYPE_CREATURE, REGION_CALD, 2, {
 		powers: [
 			{
@@ -2144,6 +2190,57 @@ const cards = [
 				],
 			},
 		],
+	}),
+	new Card('Orwin', TYPE_MAGI, REGION_NAROOM, null, {
+		startingEnergy: 16,
+		energize: 5,
+		startingCards: ['Eebit', 'Leaf Hyren', 'Grow'],
+		powers: [
+			{
+				name: 'Recall',
+				cost: 2,
+				text: 'Add one energy to each of your Creatures',
+				effects: [
+					getPropertyValue({
+						property: PROPERTY_CONTROLLER,
+						target: '$source',
+						variable: 'spellController', 
+					}),
+					prompt({
+						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+						zone: ZONE_TYPE_DISCARD,
+						zoneOwner: '$spellController',
+						numberOfCards: 1,
+						variable: 'selectedCard',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+						target: '$selectedCard',
+						sourceZone: ZONE_TYPE_DISCARD,
+						destinationZone: ZONE_TYPE_DECK,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ADD_DELAYED_TRIGGER,
+						delayedTrigger: {
+							find: {
+								effectType: EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP,
+								conditions: [
+									{
+										objectOne: '%player',
+										propertyOne: ACTION_PROPERTY,
+										comparator: '=',
+										objectTwo: '$source',
+										propertyTwo: PROPERTY_CONTROLLER,
+									},
+								],
+							},
+							effects: [],
+						}
+					})
+				],
+			},
+		],
+
 	}),
 	new Card('Poad', TYPE_MAGI, REGION_NAROOM, null, {
 		startingEnergy: 13,

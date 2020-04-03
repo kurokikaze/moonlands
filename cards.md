@@ -1,4 +1,4 @@
-Done: **94** cards out of **190**
+Done: **96** cards out of **190**
 
 # Done, tested
 
@@ -28,6 +28,7 @@ Done: **94** cards out of **190**
 - Lava Balamant
 - Magma Armor
 - Magma Hyren
+- Mobis
 - Ora
 - Orothean Gloves
 - Orwin's Gaze
@@ -100,6 +101,7 @@ Done: **94** cards out of **190**
 - Updraft
 - Water of Life
 - Xyx Elder
+- Orwin
 
 # Possible sample decks:
 
@@ -311,7 +313,6 @@ Done: **94** cards out of **190**
 
 ## Static abilities with delayed triggers
 
-- Orwin
 - Parmalag
 - Vaal
 
