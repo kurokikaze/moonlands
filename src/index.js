@@ -1328,14 +1328,12 @@ class State {
 					var newStep;
 					if (this.state.step === null) {
 						// Null-start
-						newStep = 0;
-						const activePlayer = this.state.activePlayer;
-
-						this.state = {
-							...this.state,
-							step: newStep,
-							activePlayer,
-						};
+						this.transformIntoActions({
+							type: ACTION_EFFECT,
+							effectType: EFFECT_TYPE_START_TURN,
+							player: this.state.activePlayer,
+							generatedBy: nanoid(),
+						});
 					} else {
 						newStep = (this.state.step + 1) % steps.length;
 
@@ -1358,7 +1356,7 @@ class State {
 							this.transformIntoActions({
 								type: ACTION_EFFECT,
 								effectType: EFFECT_TYPE_START_STEP,
-								player: this.getOpponent(this.state.activePlayer),
+								player: this.state.activePlayer,
 								step: newStep,
 								generatedBy: nanoid(),
 							});
