@@ -1,4 +1,4 @@
-Done: **98** cards out of **190**
+Done: **99** cards out of **190**
 
 # Done, tested
 
@@ -18,6 +18,7 @@ Done: **98** cards out of **190**
 - Coral Hyren
 - Diobor
 - Drakan
+- Eebit
 - Evu
 - Flame Geyser
 - Furok
@@ -296,7 +297,6 @@ Done: **98** cards out of **190**
 
 # Replacement effect
 
-- Eebit
 - Motash's Staff
 - Orathan Flyer (also custom prompts)
 - Orothean Belt
@@ -338,17 +338,17 @@ Done: **98** cards out of **190**
 
 ## Ability to be attacked
 
-- Fog Bank
-- Giant Parmalag
-- Hood of Hiding
+- Fog Bank (also continuous effects)
+- Giant Parmalag (also continuous effects)
+- Hood of Hiding (also continuous effects)
 
 ## Ability to play spells
 
-- Entangle
+- Entangle (also continuous effects)
 
 ## Control changing
 
-- Abaquist
+- Abaquist (also continuous effects)
 
 ## Changing attack state
 

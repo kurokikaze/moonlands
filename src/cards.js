@@ -2339,6 +2339,49 @@ const cards = [
 			},
 		],
 	}),
+	new Card('Eebit', TYPE_CREATURE, REGION_NAROOM, 2, {
+		triggerEffects: [
+			{
+				name: 'Escape',
+				text: 'If Eebit is defeated in attack, return it to its owners hand',
+				find: {
+					effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+					conditions: [
+						CONDITION_TARGET_IS_SELF,
+						{
+							objectOne: 'sourceZone',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '=',
+							objectTwo: ZONE_TYPE_IN_PLAY,
+							propertyTwo: null,
+						},
+						{
+							objectOne: 'destinationZone',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '=',
+							objectTwo: ZONE_TYPE_DISCARD,
+							propertyTwo: null,
+						},
+						{
+							objectOne: 'attack',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '=',
+							objectTwo: true,
+							propertyTwo: null,
+						},
+					],
+				},
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+						target: '$new_card',
+						sourceZone: ZONE_TYPE_DISCARD,
+						destinationZone: ZONE_TYPE_HAND,
+					}),
+				],
+			},
+		],
+	}),
 	new Card('Orwin', TYPE_MAGI, REGION_NAROOM, null, {
 		startingEnergy: 16,
 		energize: 5,
