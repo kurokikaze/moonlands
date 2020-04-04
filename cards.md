@@ -1,9 +1,10 @@
-Done: **97** cards out of **190**
+Done: **98** cards out of **190**
 
 # Done, tested
 
 - Adis
 - Alaban
+- Amulet of Ombor
 - Arbolit
 - Arboll
 - Ashgar
@@ -218,7 +219,6 @@ Done: **97** cards out of **190**
 
 # Conditionals
 
-- Amulet of Ombor
 - Balamant Pup
 - Brub
 - Corf Pearl

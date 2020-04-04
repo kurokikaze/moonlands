@@ -2388,6 +2388,132 @@ describe('Mobis', () => {
 	});
 });
 
+describe('Amulet of Ombor', () => {
+	it('Roll value of 1~3', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const mobis = new CardInGame(byName('Mobis'), ACTIVE_PLAYER).addEnergy(12);
+		const amuletOfOmbor = new CardInGame(byName('Amulet of Ombor'), ACTIVE_PLAYER);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const arboll = new CardInGame(byName('Arboll'), ACTIVE_PLAYER).addEnergy(3);
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(2);
+		const fireChogo = new CardInGame(byName('Fire Chogo'), NON_ACTIVE_PLAYER).addEnergy(2);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arboll, arbolit, fireChogo, amuletOfOmbor], [mobis]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: amuletOfOmbor,
+			power: amuletOfOmbor.card.data.powers[0],
+		};
+
+		gameState.setRollDebugValue(3);
+
+		gameState.update(powerAction);
+
+		expect(arbolit.data.energy).toEqual(3, 'Arbolit gained 1 energy due to Amulet of Ombor controller rolling 3');
+		expect(fireChogo.data.energy).toEqual(3, 'Fire Chogo gained 1 energy due to Amulet of Ombor controller rolling 3');
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+	});
+
+	it('Roll value of 5', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const mobis = new CardInGame(byName('Mobis'), ACTIVE_PLAYER).addEnergy(12);
+		const amuletOfOmbor = new CardInGame(byName('Amulet of Ombor'), ACTIVE_PLAYER);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const arboll = new CardInGame(byName('Arboll'), ACTIVE_PLAYER).addEnergy(3);
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(2);
+		const fireChogo = new CardInGame(byName('Fire Chogo'), NON_ACTIVE_PLAYER).addEnergy(2);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arboll, arbolit, fireChogo, amuletOfOmbor], [mobis]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: amuletOfOmbor,
+			power: amuletOfOmbor.card.data.powers[0],
+		};
+
+		gameState.setRollDebugValue(5);
+
+		gameState.update(powerAction);
+
+		expect(arbolit.data.energy).toEqual(2, 'Arbolit gained no energy');
+		expect(fireChogo.data.energy).toEqual(2, 'Fire Chogo gained no energy');
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_SINGLE_CREATURE, 'Game is in prompting for single creature');
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: arboll,
+			generatedBy: amuletOfOmbor.id,
+		};
+
+		gameState.update(targetingAction);
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+		expect(arboll.data.energy).toEqual(5, 'Arboll got 2 energy from Amulet of Ombor');
+	});
+
+	it('Roll value of 6', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const mobis = new CardInGame(byName('Mobis'), ACTIVE_PLAYER).addEnergy(12);
+		const amuletOfOmbor = new CardInGame(byName('Amulet of Ombor'), ACTIVE_PLAYER);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const arboll = new CardInGame(byName('Arboll'), ACTIVE_PLAYER).addEnergy(3);
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(2);
+		const fireChogo = new CardInGame(byName('Fire Chogo'), NON_ACTIVE_PLAYER).addEnergy(2);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arboll, arbolit, fireChogo, amuletOfOmbor], [mobis]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: amuletOfOmbor,
+			power: amuletOfOmbor.card.data.powers[0],
+		};
+
+		gameState.setRollDebugValue(6);
+
+		gameState.update(powerAction);
+
+		expect(arbolit.data.energy).toEqual(2, 'Arbolit gained no energy');
+		expect(fireChogo.data.energy).toEqual(2, 'Fire Chogo gained no energy');
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_SINGLE_CREATURE, 'Game is in prompting for single creature');
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: arboll,
+			generatedBy: amuletOfOmbor.id,
+		};
+
+		gameState.update(targetingAction);
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+		expect(arboll.data.energy).toEqual(7, 'Arboll got 4 energy from Amulet of Ombor');
+	});
+});
+
 describe('Megathan', () => {
 	it('Feed', () => {
 		const ACTIVE_PLAYER = 422;

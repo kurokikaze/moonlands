@@ -321,6 +321,9 @@ class State {
 		this.decks = [];
 		this.winner = false;
 		this.debug = false;
+
+		this.rollDebugValue = null,
+
 		this.actionsOne = [];
 		this.actionsTwo = [];
 
@@ -357,6 +360,14 @@ class State {
 
 	enableDebug() {
 		this.debug = true;
+	}
+
+	setRollDebugValue(value) {
+		this.rollDebugValue = value;
+	}
+
+	resetRollDebugValue() {
+		this.rollDebugValue = null;
 	}
 
 	setWinner(player) {
@@ -778,6 +789,13 @@ class State {
 	}
 
 	checkCondition(action, self, condition) {
+		if (
+			!Object.prototype.hasOwnProperty.call(condition, 'objectOne') ||
+			!Object.prototype.hasOwnProperty.call(condition, 'objectTwo')
+		) {
+			console.dir(condition);
+			throw new Error('Missing object field in condition');
+		}
 		const objectOne = this.getObjectOrSelf(action, self, condition.objectOne, condition.propertyOne);
 		const objectTwo = this.getObjectOrSelf(action, self, condition.objectTwo, condition.propertyTwo);
 		const operandOne = (condition.propertyOne && condition.propertyOne !== ACTION_PROPERTY) ? this.modifyByStaticAbilities(objectOne, condition.propertyOne) : objectOne;
@@ -1884,8 +1902,8 @@ class State {
 							break;
 						}
 						case EFFECT_TYPE_ROLL_DIE: {
-							const result = action.result || (Math.floor(Math.random() * 6) + 1);
-
+							const result = action.result || 
+								(this.rollDebugValue === null ? (Math.floor(Math.random() * 6) + 1) : this.rollDebugValue);
 							this.setSpellMetaDataField('roll_result', result, action.generatedBy);
 							break;
 						}
@@ -2280,9 +2298,11 @@ class State {
 							break;
 						}
 						case EFFECT_TYPE_ADD_ENERGY_TO_CREATURE: {
-							const addTarget = this.getMetaValue(action.target, action.generatedBy);
+							const addTargets = this.getMetaValue(action.target, action.generatedBy);
 
-							addTarget.addEnergy(this.getMetaValue(action.amount, action.generatedBy));
+							oneOrSeveral(addTargets, addTarget =>
+								addTarget.addEnergy(this.getMetaValue(action.amount, action.generatedBy)),
+							);
 							break;
 						}
 						case EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI: {

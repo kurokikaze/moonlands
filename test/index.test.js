@@ -19,6 +19,7 @@ const {
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
 	EFFECT_TYPE_ADD_DELAYED_TRIGGER,
 	EFFECT_TYPE_DRAW,
+	EFFECT_TYPE_ROLL_DIE,
 
 	SELECTOR_MAGI_NOT_OF_REGION,
 	SELECTOR_OWN_CREATURES_OF_TYPE,
@@ -3128,5 +3129,78 @@ describe('Delayed Triggers', () => {
 		expect(gameState.getZone(ZONE_TYPE_HAND, PLAYER_ONE)).toHaveLength(3, 'Three cards drawn');
 		expect(gameState.getZone(ZONE_TYPE_DECK, PLAYER_ONE)).toHaveLength(0, 'Deck is empty');
 		expect(gameState.state.delayedTriggers).toHaveLength(0, 'Delayed trigger expires after matching');
+	});
+});
+
+describe('Debugging roll values', () => {
+	it('Setting roll value through action', () => {
+		const PLAYER_ONE = 10;
+		const PLAYER_TWO = 12;
+
+		const gameState = new moonlands.State({
+			step: STEP_PRS_SECOND,
+			activePlayer: PLAYER_ONE,
+		});
+
+		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
+
+		const rollAction = {
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_ROLL_DIE,
+			result: 10,
+			generatedBy: 'test',
+		};
+
+		gameState.update(rollAction);
+
+		expect(gameState.state.spellMetaData.test.roll_result).toEqual(10, 'Dice roll action uses action result value');
+	});
+
+	it('Resetting roll value', () => {
+		const PLAYER_ONE = 10;
+		const PLAYER_TWO = 12;
+
+		const gameState = new moonlands.State({
+			step: STEP_PRS_SECOND,
+			activePlayer: PLAYER_ONE,
+		});
+
+		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
+
+		gameState.setRollDebugValue(7);
+
+		const rollAction = {
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_ROLL_DIE,
+			generatedBy: 'test',
+		};
+
+		gameState.update(rollAction);
+
+		expect(gameState.state.spellMetaData.test.roll_result).toEqual(7, 'Dice roll action uses debug value');
+	});
+
+	it('Setting roll value', () => {
+		const PLAYER_ONE = 10;
+		const PLAYER_TWO = 12;
+
+		const gameState = new moonlands.State({
+			step: STEP_PRS_SECOND,
+			activePlayer: PLAYER_ONE,
+		});
+
+		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
+
+		gameState.setRollDebugValue(7);
+		gameState.resetRollDebugValue();
+		const rollAction = {
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_ROLL_DIE,
+			generatedBy: 'test',
+		};
+
+		gameState.update(rollAction);
+
+		expect(gameState.state.spellMetaData.test.roll_result).toBeLessThan(7, 'Dice roll action stops using debug value after reset');
 	});
 });

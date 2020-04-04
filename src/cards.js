@@ -56,7 +56,7 @@ const {
 	SELECTOR_CREATURES_NOT_OF_REGION,
 	SELECTOR_CREATURES_NOT_OF_TYPE,
 	SELECTOR_OWN_CREATURES,
-	SELECTOR_OPPONENT_CREATURES,
+	SELECTOR_ENEMY_CREATURES,
 	SELECTOR_MAGI_OF_REGION,
 	SELECTOR_MAGI_NOT_OF_REGION,
 	SELECTOR_TOP_MAGI_OF_PILE,
@@ -198,6 +198,120 @@ const cards = [
 				operandOne: 1,
 			},
 		}],
+	}),
+	new Card('Amulet of Ombor', TYPE_RELIC, REGION_OROTHE, 0, {
+		powers: [
+			{
+				name: 'Energy Boost',
+				cost: 0,
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_ROLL_DIE,
+					}),
+					effect({ // 1-3: Add one energy to each of opponent's creatures
+						effectType: EFFECT_TYPE_CONDITIONAL,
+						rollResult: '$roll_result',
+						conditions: [
+							/**
+							{
+								objectOne: 'self',
+								propertyOne: PROPERTY_STATUS_DEFEATED_CREATURE,
+								comparator: '=',
+								objectTwo: true,
+								propertyTwo: null,
+							},							
+							 */
+							{
+								objectOne: 'rollResult',
+								propertyOne: ACTION_PROPERTY,
+								comparator: '<=',
+								objectTwo: 3,
+								propertyTwo: null,
+							}
+						],
+						thenEffects: [
+							select({
+								selector: SELECTOR_ENEMY_CREATURES,
+							}),
+							effect({
+								effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+								target: '$selected',
+								amount: 1,
+							}),
+						],
+					}),
+					effect({ // 4: add two energy to target Creature
+						effectType: EFFECT_TYPE_CONDITIONAL,
+						rollResult: '$roll_result',
+						conditions: [
+							{
+								objectOne: 'rollResult',
+								propertyOne: ACTION_PROPERTY,
+								comparator: '=',
+								objectTwo: 4,
+								propertyTwo: null,
+							}
+						],
+						thenEffects: [
+							prompt({
+								promptType: PROMPT_TYPE_SINGLE_CREATURE,
+							}),
+							effect({
+								effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+								target: '$target',
+								amount: 2,
+							}),
+						],
+					}),
+					effect({ // 5: add two energy to target Creature
+						effectType: EFFECT_TYPE_CONDITIONAL,
+						rollResult: '$roll_result',
+						conditions: [
+							{
+								objectOne: 'rollResult',
+								propertyOne: ACTION_PROPERTY,
+								comparator: '=',
+								objectTwo: 5,
+								propertyTwo: null,
+							}
+						],
+						thenEffects: [
+							prompt({
+								promptType: PROMPT_TYPE_SINGLE_CREATURE,
+							}),
+							effect({
+								effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+								target: '$target',
+								amount: 2,
+							}),
+						],
+					}),
+					effect({ // 6: add four energy to target Creature
+						effectType: EFFECT_TYPE_CONDITIONAL,
+						rollResult: '$roll_result',
+						conditions: [
+							{
+								objectOne: 'rollResult',
+								propertyOne: ACTION_PROPERTY,
+								comparator: '=',
+								objectTwo: 6,
+								propertyTwo: null,
+							}
+						],
+						thenEffects: [
+							prompt({
+								promptType: PROMPT_TYPE_SINGLE_CREATURE,
+							}),
+							effect({
+								effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+								target: '$target',
+								amount: 4,
+							}),
+						],
+					}),					
+				],
+			},
+		],
 	}),
 	new Card('Hyren\'s Call', TYPE_SPELL, REGION_NAROOM, 6, {
 		text: 'Search your deck for Hyren Creature card, place into play with its starting energy. That Creature cannot attack this turn.',
