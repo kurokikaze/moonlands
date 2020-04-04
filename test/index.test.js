@@ -65,12 +65,14 @@ const {
 
 const Zone = require('../src/classes/Zone');
 
-const STEP_ENERGIZE = 0;
-const STEP_PRS_FIRST = 1;
-const STEP_ATTACK = 2;
-const STEP_CREATURES = 3;
-const STEP_PRS_SECOND = 4;
-const STEP_DRAW = 5;
+const {
+	STEP_ENERGIZE,
+	STEP_PRS_FIRST,
+	STEP_ATTACK,
+	STEP_CREATURES,
+	STEP_PRS_SECOND,
+	STEP_DRAW,
+} = require('./utils');
 
 describe('Updating state with action', () => {
 	it('Pass action', () => {

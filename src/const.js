@@ -73,6 +73,8 @@ const REGION_UNIVERSAL = 'regions/universal';
 
 const EFFECT_TYPE_NONE = 'effects/none';
 const EFFECT_TYPE_DRAW = 'effects/draw';
+const EFFECT_TYPE_START_STEP = 'effects/start_step';
+const EFFECT_TYPE_START_TURN = 'effects/start_turn';
 const EFFECT_TYPE_RESHUFFLE_DISCARD = 'effects/reshuffle_discard';
 const EFFECT_TYPE_BEFORE_DAMAGE = 'effects/before_damage';
 const EFFECT_TYPE_ATTACKER_DEALS_DAMAGE = 'effects/attacker_deals_damage';
@@ -229,6 +231,8 @@ module.exports = {
 
 	EFFECT_TYPE_NONE,
 	EFFECT_TYPE_DRAW,
+	EFFECT_TYPE_START_STEP,
+	EFFECT_TYPE_START_TURN,
 	EFFECT_TYPE_RESHUFFLE_DISCARD,
 	EFFECT_TYPE_MOVE_ENERGY,
 	EFFECT_TYPE_ROLL_DIE,

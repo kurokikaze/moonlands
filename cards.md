@@ -248,9 +248,7 @@ Done: **98** cards out of **190**
 - Hubdra's Spear (magi w/o creatures)
 - Pack Korrit (creature in play by name)
 - Rod of Coals (creature in play with N energy)
-- Thunder Hyren (creature in play by name)
 - Thunder Vashp (creature in play with N or less energy)
-- Xyx Elder (creatures in play not by name)
 
 # Discarding from hand
 
@@ -268,6 +266,7 @@ Done: **98** cards out of **190**
 - Orthea
 - Orpus
 - Relic Mirror
+- Fossik
 
 # Looking at library, rearranging
 
@@ -288,7 +287,6 @@ Done: **98** cards out of **190**
 
 ## Delayed triggers
 
-- Mobis
 - Wence (also drawing, showing cards to opponent)
 
 ## Fucking banding
@@ -299,7 +297,6 @@ Done: **98** cards out of **190**
 # Replacement effect
 
 - Eebit
-- Fossik (also "may" effects)
 - Motash's Staff
 - Orathan Flyer (also custom prompts)
 - Orothean Belt
@@ -311,10 +308,10 @@ Done: **98** cards out of **190**
 
 # Static ability rework:
 
-## Static abilities with delayed triggers
+## Continuous effects
 
-- Parmalag
 - Vaal
+- Parmalag
 
 ## Statuses
 
