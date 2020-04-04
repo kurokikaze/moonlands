@@ -1,4 +1,4 @@
-Done: **96** cards out of **190**
+Done: **97** cards out of **190**
 
 # Done, tested
 
@@ -28,6 +28,7 @@ Done: **96** cards out of **190**
 - Lava Balamant
 - Magma Armor
 - Magma Hyren
+- Megathan
 - Mobis
 - Ora
 - Orothean Gloves
@@ -217,8 +218,6 @@ Done: **96** cards out of **190**
 
 # Conditionals
 
-- Blu
-- Megathan
 - Amulet of Ombor
 - Balamant Pup
 - Brub
@@ -262,6 +261,7 @@ Done: **96** cards out of **190**
 
 # May-abilities
 
+- Blu
 - Vellup
 - Stradus
 - Wellisk

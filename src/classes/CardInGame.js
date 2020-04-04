@@ -9,6 +9,9 @@ class CardInGame {
 			controller: owner,
 			attacked: 0,
 			actionsUsed: [],
+			defeatedCreature: false,
+			hasAttacked: false,
+			wasAttacked: false,
 		};
 		this.owner = owner;
 	}
@@ -39,6 +42,10 @@ class CardInGame {
 		this.data.wasAttacked = true;
 	}
 
+	markDefeatedCreature() {
+		this.data.defeatedCreature = true;
+	}
+
 	// In future, refer to actions by ID, not name
 	wasActionUsed(actionName) {
 		return this.data.actionsUsed.includes(actionName);
@@ -56,6 +63,7 @@ class CardInGame {
 		this.data.wasAttacked = false;
 		this.data.hasAttacked = false;
 		this.data.attacked = 0;
+		this.data.defeatedCreature = false;
 	}
 
 	copy() {

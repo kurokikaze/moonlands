@@ -30,6 +30,7 @@ const {
 	PROPERTY_ATTACKS_PER_TURN,
 	PROPERTY_POWER_COST,
 	PROPERTY_CREATURE_TYPES,
+	PROPERTY_STATUS_DEFEATED_CREATURE,
 
 	REGION_ARDERIAL,
 	REGION_CALD,
@@ -83,6 +84,7 @@ const {
 	EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 	EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
 	EFFECT_TYPE_ENERGIZE,
+	EFFECT_TYPE_CONDITIONAL,
 	EFFECT_TYPE_START_OF_TURN,
 	EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
 	EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
@@ -1955,6 +1957,38 @@ const cards = [
 				}),
 			],
 		}],
+	}),
+	new Card('Megathan', TYPE_CREATURE, REGION_OROTHE, 8, {
+		triggerEffects: [
+			{
+				name: 'Feed',
+				find: {
+					effectType: EFFECT_TYPE_END_OF_TURN,
+					conditions: [],
+				},
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_CONDITIONAL,
+						conditions: [
+							{
+								objectOne: 'self',
+								propertyOne: PROPERTY_STATUS_DEFEATED_CREATURE,
+								comparator: '=',
+								objectTwo: true,
+								propertyTwo: null,
+							},
+						],
+						thenEffects: [
+							effect({
+								effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+								target: '$sourceCreature',
+								amount: 1,
+							}),
+						]
+					})
+				],
+			},
+		],
 	}),
 	new Card('Mobis', TYPE_MAGI, REGION_OROTHE, null, {
 		startingCards: ['Bwill', 'Wellisk', 'Submerge'],

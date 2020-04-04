@@ -23,6 +23,9 @@ const PROPERTY_MAGI_STARTING_ENERGY = 'properties/magi_starting_energy';
 const PROPERTY_ATTACKS_PER_TURN = 'properties/attacks_per_turn';
 const PROPERTY_CAN_ATTACK_MAGI_DIRECTLY = 'properties/can_attack_magi_directly';
 const PROPERTY_POWER_COST = 'properties/power_cost'; // NOT FOR PROPERTY GETTER, ONLY STATIC ABILITIES
+// Maybe make statuses into separate category
+const PROPERTY_STATUS_DEFEATED_CREATURE = 'properties/status/defeated_creature';
+const PROPERTY_STATUS_WAS_ATTACKED = 'properties/status/was_attacked';
 
 const SELECTOR_OPPONENT_ID = 'selectors/opponent_id'; // THIS WILL RETURN ID OF PLAYER'S OPPONENT
 const SELECTOR_CREATURES = 'selectors/creatures';
@@ -94,7 +97,7 @@ const EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE = 'effects/starting_energy_on_crea
 const EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES = 'effects/move_card_between_zones';
 const EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES = 'effects/move_cards_between_zones';
 const EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES = 'effects/card_moved_between_zones';
-
+const EFFECT_TYPE_CONDITIONAL = 'effects/conditional';
 const EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI = 'effects/add_energy_to_creature_or_magi';
 const EFFECT_TYPE_ADD_ENERGY_TO_CREATURE = 'effects/add_energy_to_creature';
 const EFFECT_TYPE_ADD_ENERGY_TO_MAGI = 'effects/add_energy_to_magi';
@@ -221,6 +224,9 @@ module.exports = {
 	PROPERTY_POWER_COST,
 	PROPERTY_CREATURE_TYPES,
 
+	PROPERTY_STATUS_DEFEATED_CREATURE,
+	PROPERTY_STATUS_WAS_ATTACKED,
+
 	EFFECT_TYPE_NONE,
 	EFFECT_TYPE_DRAW,
 	EFFECT_TYPE_RESHUFFLE_DISCARD,
@@ -271,7 +277,7 @@ module.exports = {
 	EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
 	EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
 	EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP,
-
+	EFFECT_TYPE_CONDITIONAL,
 	EFFECT_TYPE_ADD_DELAYED_TRIGGER,
 	
 	RESTRICTION_TYPE,

@@ -41,6 +41,8 @@ const {
 	PROPERTY_CAN_ATTACK_MAGI_DIRECTLY,
 	PROPERTY_POWER_COST,
 	PROPERTY_CREATURE_TYPES,
+	PROPERTY_STATUS_WAS_ATTACKED,
+	PROPERTY_STATUS_DEFEATED_CREATURE,
 
 	CALCULATION_SET,
 	CALCULATION_DOUBLE,
@@ -141,6 +143,7 @@ const {
 	EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
 	EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
 	EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP,
+	EFFECT_TYPE_CONDITIONAL,
 
 	REGION_UNIVERSAL,
 
@@ -667,6 +670,10 @@ class State {
 				return target.card.data.startingEnergy;
 			case PROPERTY_POWER_COST:
 				return target.card.data.powers.find(({name}) => name === subProperty).cost;
+			case PROPERTY_STATUS_WAS_ATTACKED:
+				return target.data.wasAttacked || false;
+			case PROPERTY_STATUS_DEFEATED_CREATURE:
+				return target.data.defeatedCreature || false;
 		}
 	}
 
@@ -770,38 +777,40 @@ class State {
 		return action;
 	}
 
+	checkCondition(action, self, condition) {
+		const objectOne = this.getObjectOrSelf(action, self, condition.objectOne, condition.propertyOne);
+		const objectTwo = this.getObjectOrSelf(action, self, condition.objectTwo, condition.propertyTwo);
+		const operandOne = (condition.propertyOne && condition.propertyOne !== ACTION_PROPERTY) ? this.modifyByStaticAbilities(objectOne, condition.propertyOne) : objectOne;
+
+		const operandTwo = (condition.propertyTwo && condition.propertyTwo !== ACTION_PROPERTY) ? this.modifyByStaticAbilities(objectTwo, condition.propertyTwo) : objectTwo;
+		switch (condition.comparator) {
+			case '!=':
+				return operandOne !== operandTwo;
+			case '=':
+				return operandOne == operandTwo;
+			case '>':
+				return operandOne > operandTwo;
+			case '<':
+				return operandOne < operandTwo;
+			case '>=':
+				return operandOne >= operandTwo;
+			case '<=':
+				return operandOne <= operandTwo;
+			case 'includes':
+				return operandOne.length && operandOne.includes(operandTwo);
+		}
+
+		return false;
+	}
+
 	matchAction(action, find, self) {
 		if (action.effectType !== find.effectType) {
 			return false;
 		}
 
-		const conditions = find.conditions.map(condition => {
-			const objectOne = this.getObjectOrSelf(action, self, condition.objectOne, condition.propertyOne);
-			const objectTwo = this.getObjectOrSelf(action, self, condition.objectTwo, condition.propertyTwo);
-
-			const operandOne = (condition.propertyOne && condition.propertyOne !== ACTION_PROPERTY) ? this.modifyByStaticAbilities(objectOne, condition.propertyOne) : objectOne;
-
-			const operandTwo = (condition.propertyTwo && condition.propertyTwo !== ACTION_PROPERTY) ? this.modifyByStaticAbilities(objectTwo, condition.propertyTwo) : objectTwo;
-
-			switch (condition.comparator) {
-				case '!=':
-					return operandOne !== operandTwo;
-				case '=':
-					return operandOne == operandTwo;
-				case '>':
-					return operandOne > operandTwo;
-				case '<':
-					return operandOne < operandTwo;
-				case '>=':
-					return operandOne >= operandTwo;
-				case '<=':
-					return operandOne <= operandTwo;
-				case 'includes':
-					return operandOne.length && operandOne.includes(operandTwo);
-			}
-
-			return false;
-		});
+		const conditions = find.conditions.map(condition =>
+			this.checkCondition(action, self, condition),
+		);
 
 		return conditions.every(result => result === true);
 	}
@@ -827,13 +836,20 @@ class State {
 		triggerEffects.forEach(replacer => {
 			const triggeredId = replacer.id || replacer.self.id; // Not really, but will work for now
 			if (this.matchAction(action, replacer.find, replacer.self)) {
-				// Turn effect-templates into actual effect actions by preparing meta-values
+				// Save source to *trigger source* metadata (it's probably empty)
+				// For creatures set creatureSource field (just for convenience)
+				this.setSpellMetaDataField('source', replacer.self, action.generatedBy || triggeredId);
+				if (replacer.self.card.type === TYPE_CREATURE) {
+					this.setSpellMetaDataField('sourceCreature', replacer.self, action.generatedBy || triggeredId);
+				}
+				// Turn effect-templates into actual effect actions by preparing meta-values				
 				const preparedEffects = replacer.effects.map(effect => {
 					let resultEffect =  {
 						type: effect.type || ACTION_EFFECT,
 						effectType: effect.effectType, // Do we need to replace this? Maybe later
 						generatedBy: action.generatedBy || triggeredId, // Some actions do not have generatedBy (game actions). We still need one though.
 						triggeredId: [triggeredId],
+						triggerSource: replacer.self,
 						player: replacer.self.data.controller,
 					};
 
@@ -924,17 +940,6 @@ class State {
 					break;
 				}
 				case ACTION_ATTACK: {
-					/*
-							source
-							target
-
-							---
-
-							BEFORE_DAMAGE,
-							DEAL_DAMAGE,
-							DEAL_DAMAGE,
-							AFTER_DAMAGE,
-						*/
 					const attackSource = this.getMetaValue(action.source, action.generatedBy);
 					const attackTarget = this.getMetaValue(action.target, action.generatedBy);
 
@@ -1497,6 +1502,41 @@ class State {
 				}
 				case ACTION_EFFECT: {
 					switch(action.effectType) {
+						case EFFECT_TYPE_CONDITIONAL: {
+							const metaData = this.getSpellMetadata(action.generatedBy);
+							// "new_card" fallback is for "defeated" triggers
+							const self = metaData.source || metaData.new_card || action.triggerSource;
+
+							// checkCondition(action, self, condition)
+							const results = action.conditions.map(condition =>
+								this.checkCondition(action, self, condition),
+							);
+
+							if (results.every(result => result === true)) {
+								if (action.thenEffects) {
+									const preparedEffects = action.thenEffects
+										.map(effect => ({
+											source: self,
+											player: self.data.controller,
+											...effect,
+											generatedBy: action.generatedBy,
+										}));
+									this.transformIntoActions(...preparedEffects);									
+								}
+							} else {
+								if (action.elseEffects) {
+									const preparedEffects = action.elseEffects
+										.map(effect => ({
+											source: self,
+											player: self.data.controller,
+											...effect,
+											generatedBy: action.generatedBy,
+										}));
+									this.transformIntoActions(...preparedEffects);									
+								}
+							}
+							break;
+						}
 						case EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP: {
 							this.transformIntoActions(
 								{
@@ -1830,6 +1870,7 @@ class State {
 						}
 						case EFFECT_TYPE_CREATURE_DEFEATS_CREATURE: {
 							if (action.target.data.energy === 0) {
+								action.source.markDefeatedCreature();
 								this.transformIntoActions({
 									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
