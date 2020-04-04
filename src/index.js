@@ -1638,12 +1638,14 @@ class State {
 									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_DRAW,
 									stepEffect: true,
+									player: action.player,
 									generatedBy: action.generatedBy,
 								},
 								{
 									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_DRAW,
 									stepEffect: true,
+									player: action.player,
 									generatedBy: action.generatedBy,
 								},
 							);
@@ -1679,7 +1681,8 @@ class State {
 								const searchableCards = [...deckCards, ...discardCards];
 
 								const availableCards = topMagi.card.data.startingCards.filter(card => searchableCards.includes(card));
-
+								// Forbid Magi to energize on the first turn w/ continous effect
+								// if it's the first Magi and the player goes first
 								const actionsToTake = [
 									{
 										type: ACTION_EFFECT,
