@@ -1305,7 +1305,7 @@ class State {
 							break;
 						}
 						case SELECTOR_CREATURES_NOT_OF_REGION: {
-							result = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_REGION) != action.region);
+							result = this.useSelector(SELECTOR_CREATURES_NOT_OF_REGION, action.player, action.region);
 							break;
 						}
 						case SELECTOR_MAGI_OF_REGION: {
