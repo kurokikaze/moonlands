@@ -1040,7 +1040,15 @@ class State {
 					break;
 				}
 				case ACTION_POWER: {
-					if (!action.source.wasActionUsed(action.power.name)) {
+					const powerCost = this.modifyByStaticAbilities(action.source, PROPERTY_POWER_COST, action.power.name);
+					if (!action.source.wasActionUsed(action.power.name) &&
+						(
+							action.source.data.energy >= powerCost || 
+							(
+								action.source.data.energy > 0 && powerCost === COST_X
+							)
+						)
+					) {
 						const source = action.source;
 						const sourcePower = action.power;
 						const effects = action.power.effects;
@@ -1056,7 +1064,6 @@ class State {
 
 						source.setActionUsed(action.power.name);
 
-						const powerCost = this.modifyByStaticAbilities(action.source, PROPERTY_POWER_COST, action.power.name);
 						if (powerCost == COST_X) {
 							this.addActions(
 								{

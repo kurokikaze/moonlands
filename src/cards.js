@@ -504,6 +504,7 @@ const cards = [
 		powers: [
 			{
 				name: 'Dream Twist',
+				cost: 0,
 				text: 'Choose your Creature and discard it from play. Choose a Creature from your hand. Put it onto the battlefield. Place energy on it equal to its starting energy.',
 				effects: [
 					prompt({
