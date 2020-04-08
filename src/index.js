@@ -323,7 +323,7 @@ class State {
 		this.decks = [];
 		this.winner = false;
 		this.debug = false;
-		this.turn = 0;
+		this.turn = null;
 
 		this.rollDebugValue = null,
 
@@ -1565,7 +1565,6 @@ class State {
 							} else {
 								this.turn += 1;
 							}
-							this.turn += 1;
 							this.transformIntoActions(
 								{
 									type: ACTION_EFFECT,
@@ -1591,7 +1590,7 @@ class State {
 						}
 						case EFFECT_TYPE_START_STEP: {
 							// Player who goes first do not energize on first turn
-							const isFirstEnergize = this.step === 0 &&
+							const isFirstEnergize = this.turn === 0 &&
 								action.player === this.state.goesFirst &&
 								action.step === 0;
 
