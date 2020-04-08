@@ -323,6 +323,7 @@ class State {
 		this.decks = [];
 		this.winner = false;
 		this.debug = false;
+		this.turn = 0;
 
 		this.rollDebugValue = null,
 
@@ -1559,6 +1560,12 @@ class State {
 				case ACTION_EFFECT: {
 					switch(action.effectType) {
 						case EFFECT_TYPE_START_TURN: {
+							if (this.turn === null) {
+								this.turn = 0;
+							} else {
+								this.turn += 1;
+							}
+							this.turn += 1;
 							this.transformIntoActions(
 								{
 									type: ACTION_EFFECT,
@@ -1583,7 +1590,12 @@ class State {
 							break;
 						}
 						case EFFECT_TYPE_START_STEP: {
-							if (steps[action.step].effects) {
+							// Player who goes first do not energize on first turn
+							const isFirstEnergize = this.step === 0 &&
+								action.player === this.state.goesFirst &&
+								action.step === 0;
+
+							if (steps[action.step].effects && !isFirstEnergize) {
 								const transformedActions = steps[action.step].effects.map(effect =>
 									({
 										...effect,
@@ -1688,8 +1700,6 @@ class State {
 								const searchableCards = [...deckCards, ...discardCards];
 
 								const availableCards = topMagi.card.data.startingCards.filter(card => searchableCards.includes(card));
-								// Forbid Magi to energize on the first turn w/ continous effect
-								// if it's the first Magi and the player goes first
 								const actionsToTake = [
 									{
 										type: ACTION_EFFECT,
