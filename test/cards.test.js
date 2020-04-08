@@ -3193,6 +3193,66 @@ describe('Coral Hyren', () => {
 	});
 });
 
+describe('Fire Grag', () => {
+	it('Metabolize', () => {
+		const ACTIVE_PLAYER = 104;
+		const NON_ACTIVE_PLAYER = 12;
+		const magam = new CardInGame(byName('Magam'), ACTIVE_PLAYER).addEnergy(10);
+		const nimbulo = new CardInGame(byName('Nimbulo'), ACTIVE_PLAYER).addEnergy(10);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER).addEnergy(3);
+		const fireGrag = new CardInGame(byName('Fire Grag'), ACTIVE_PLAYER).addEnergy(6);
+		const thunderHyren = new CardInGame(byName('Thunder Hyren'), NON_ACTIVE_PLAYER).addEnergy(7);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaBalamant, fireGrag, thunderHyren], [magam]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.enableDebug();
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([nimbulo]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: fireGrag,
+			power: fireGrag.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+			generatedBy: fireGrag.id,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+
+		const chooseCreatureAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: lavaBalamant,
+			player: ACTIVE_PLAYER,
+			generatedBy: fireGrag.id,
+		};
+
+		gameState.update(chooseCreatureAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game still in prompt state');
+
+		const chooseTargetAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: thunderHyren,
+			player: ACTIVE_PLAYER,
+			generatedBy: fireGrag.id,
+		};
+
+		gameState.update(chooseTargetAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+		expect(thunderHyren.data.energy).toEqual(1, 'Thunder Hyren has 1 energy left');
+	});
+});
+
 describe('Lava Aq', () => {
 	it('Firestorm', () => {
 		const ACTIVE_PLAYER = 411;

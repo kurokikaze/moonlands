@@ -1733,7 +1733,7 @@ const cards = [
 			text: 'Choose your Creature and opponent\'s Creature. Discard twice your Creature\'s energy from opponent\'s Creature. Discard your Creature from play.',
 			effects: [
 				prompt({
-					promptType: PROMPT_TYPE_SINGLE_CREATURE,
+					promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
 					message: 'Choose your creature.',
 					variable: 'yourCreature',
 				}),
@@ -1745,6 +1745,7 @@ const cards = [
 				getPropertyValue({
 					target: '$yourCreature',
 					property: PROPERTY_ENERGY_COUNT,
+					variable: 'creaturePower',
 				}),
 				{
 					type: ACTION_CALCULATE,
