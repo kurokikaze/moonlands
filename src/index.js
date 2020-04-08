@@ -2312,17 +2312,18 @@ class State {
 								}, {
 									type: ACTION_SELECT,
 									selector: SELECTOR_OWN_CARDS_IN_PLAY,
-									action: target.owner,
+									player: target.owner,
 									variable: 'cardsInPlay',
 									generatedBy,
 								}, {
 									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC,
 									target: '$cardsInPlay',
+									player: target.owner,
 									generatedBy,
 								});
 							} else {
-								const winner = this.getOpponent(action.target.owner);
+								const winner = this.getOpponent(target.owner);
 
 								this.transformIntoActions({
 									type: ACTION_PLAYER_WINS,

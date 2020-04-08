@@ -32,6 +32,7 @@ const {
 	SELECTOR_CREATURES_NOT_OF_REGION,
 	SELECTOR_MAGI,
 	SELECTOR_CREATURES,
+	SELECTOR_OWN_CARDS_IN_PLAY,
 
 	REGION_NAROOM,
 	REGION_CALD,
@@ -1967,6 +1968,51 @@ describe('Selector actions', () => {
 
 		const selectedNotOfOrothe = gameState.state.spellMetaData[GENERATED_BY].selected;
 		expect(selectedNotOfOrothe).toHaveLength(2, '"Not Of Orothe" selector returns two magi');
+	});
+
+	it('SELECTOR_OWN_CARDS_IN_PLAY', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+		const GENERATED_BY = 123;
+
+		const nimbulo = new CardInGame(byName('Nimbulo'), ACTIVE_PLAYER).addEnergy(10);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(10);
+
+		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER).addEnergy(2);
+		const xyxElder = new CardInGame(byName('Xyx'), ACTIVE_PLAYER).addEnergy(3);
+		const waterOfLife = new CardInGame(byName('Water of Life'), ACTIVE_PLAYER);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), NON_ACTIVE_PLAYER).addEnergy(3);
+		const moreXyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER).addEnergy(2);
+
+		const zones = [
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([nimbulo]),
+			new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+			new Zone('In play', ZONE_TYPE_IN_PLAY).add([xyx, xyxElder, waterOfLife, lavaBalamant, moreXyx]),
+			new Zone('Player 1 discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('Player 2 discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('Player 1 defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('Player 2 defeated Magi', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+		];
+
+		const selectOwnCardsInPlayAction = {
+			type: ACTION_SELECT,
+			selector: SELECTOR_OWN_CARDS_IN_PLAY,
+			player: ACTIVE_PLAYER,
+			generatedBy: GENERATED_BY,
+			variable: 'allOwnCards',
+		};
+
+		const gameState = new moonlands.State({
+			zones,
+			ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.update(selectOwnCardsInPlayAction);
+
+		expect(gameState.state.spellMetaData[GENERATED_BY].allOwnCards.length).toEqual(4, '4 cards in play selected');
+		expect(gameState.state.spellMetaData[GENERATED_BY].allOwnCards.map(({card}) => card.name)).toEqual(['Xyx', 'Xyx', 'Water of Life', 'Xyx'], 'Cards are selected correctly');
 	});
 });
 
