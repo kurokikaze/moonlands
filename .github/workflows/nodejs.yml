@@ -9,7 +9,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [8.x, 10.x, 12.x]
+        node-version: 10.x
 
     steps:
     - uses: actions/checkout@v1
@@ -21,5 +21,12 @@ jobs:
       run: |
         npm ci
         npm test
+        npm coverage
       env:
         CI: true
+    - name: Coveralls GitHub Action
+      uses: coverallsapp/github-action@v1.1.1
+      with:
+        github-token: ${{ secrets.github_token }}
+        flag-name: run-${{ matrix.test_number }}
+        parallel: true
