@@ -1,0 +1,1 @@
+[![Coverage Status](https://coveralls.io/repos/github/kurokikaze/moonlands/badge.svg?branch=master)](https://coveralls.io/github/kurokikaze/moonlands?branch=master)
