@@ -21,7 +21,7 @@ jobs:
       run: |
         npm ci
         npm test
-        npm coverage
+        npm run coverage
       env:
         CI: true
     - name: Coveralls GitHub Action
