@@ -3212,7 +3212,6 @@ describe('Fire Grag', () => {
 		});
 
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
-		gameState.enableDebug();
 
 		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([nimbulo]);
 
