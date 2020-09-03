@@ -1,8 +1,8 @@
-const {Writable} = require('stream');
-const EventEmitter = require('events');
-const nanoid = require('nanoid');
+import {Writable} from 'stream';
+import EventEmitter from 'events';
+import nanoid from 'nanoid';
 
-const {
+import {
 	/* eslint-disable no-unused-vars */
 	TYPE_CREATURE,
 	TYPE_MAGI,
@@ -164,16 +164,16 @@ const {
 	ZONE_TYPE_DECK,
 	ZONE_TYPE_DEFEATED_MAGI,
 	/* eslint-enable no-unused-vars */
-} = require('./const');
+} from './const';
 
-const {makeCardFilter} = require('./utils/restrictions');
-const {showAction} = require('./logAction');
+import {makeCardFilter} from './utils/restrictions';
+import {showAction} from './logAction';
 
-const clone = require('./clone');
+import clone from './clone';
 
-const {byName} = require('./cards');
-const CardInGame = require('./classes/CardInGame');
-const Zone = require('./classes/Zone');
+import {byName} from './cards';
+import CardInGame from './classes/CardInGame';
+import Zone from './classes/Zone';
 
 const convertCard = cardInGame => ({
 	id: cardInGame.id,
@@ -263,7 +263,7 @@ const oneOrSeveral = (targets, callback) => {
 	}
 };
 
-class State {
+export class State {
 	constructor(state) {
 		this.state = {
 			...clone(defaultState),
@@ -2436,9 +2436,7 @@ class State {
 	}
 }
 
-module.exports = {
-	State,
-
+export {
 	TYPE_CREATURE,
 	TYPE_MAGI,
 	TYPE_RELIC,

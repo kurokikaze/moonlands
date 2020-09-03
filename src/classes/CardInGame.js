@@ -1,6 +1,6 @@
-const nanoid = require('nanoid');
+import nanoid from 'nanoid';
 
-class CardInGame {
+export default class CardInGame {
 	constructor(card, owner) {
 		this._card = card;
 		this.id = nanoid();
@@ -82,5 +82,3 @@ class CardInGame {
 		};
 	}
 }
-
-module.exports = CardInGame;

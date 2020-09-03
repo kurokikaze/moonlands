@@ -1,10 +1,10 @@
 /* global expect, describe, it */
-const moonlands = require('../src/index');
-const {byName} = require('../src/cards');
-const CardInGame = require('../src/classes/CardInGame');
-const Zone = require('../src/classes/Zone');
+import {State} from '../src/index.js';
+import {byName} from '../src/cards.js';
+import CardInGame from '../src/classes/CardInGame.js';
+import Zone from '../src/classes/Zone.js';
 
-const {
+import {
 	ACTION_PLAY,
 	ACTION_ATTACK,
 	ACTION_POWER,
@@ -29,10 +29,10 @@ const {
 	ZONE_TYPE_IN_PLAY,
 	ZONE_TYPE_DISCARD,
 	ZONE_TYPE_HAND,
-} = require('../src/const');
+} from '../src/const';
 
 /* eslint-disable no-unused-vars */
-const {
+import {
 	STEP_ENERGIZE,
 	STEP_PRS_FIRST,
 	STEP_ATTACK,
@@ -40,7 +40,7 @@ const {
 	STEP_PRS_SECOND,
 	STEP_DRAW,
 	createZones,
-} = require('./utils');
+} from './utils';
 /* eslint-enable no-unused-vars */
 
 describe('Vortex of Knowledge', () => {
@@ -52,7 +52,7 @@ describe('Vortex of Knowledge', () => {
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [], [yaki]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -115,7 +115,7 @@ describe('Flame Geyser', () => {
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [rudwot, arboll, seaBarl], [grega]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -165,7 +165,7 @@ describe('Valkan', () => {
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [rudwot, arboll, seaBarl], [valkan]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -211,7 +211,7 @@ describe('Alaban', () => {
 		const caveHyren = new CardInGame(byName('Cave Hyren'), ACTIVE_PLAYER).addEnergy(2);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [caveHyren, alaban]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -248,7 +248,7 @@ describe('Alaban', () => {
 		const caveHyren = new CardInGame(byName('Cave Hyren'), NON_ACTIVE_PLAYER).addEnergy(2);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [caveHyren, alaban]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -288,7 +288,7 @@ describe('Arbolit', () => {
 		const fireGrag = new CardInGame(byName('Fire Grag'), ACTIVE_PLAYER).addEnergy(5);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arbolit, fireGrag]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -325,7 +325,7 @@ describe('Arbolit', () => {
 		const pharan = new CardInGame(byName('Pharan'), NON_ACTIVE_PLAYER).addEnergy(5);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arbolit, pharan]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -364,7 +364,7 @@ describe('Arboll', () => {
 		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(5);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arboll], [grega]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -405,7 +405,7 @@ describe('Balamant', () => {
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [balamant], [grega]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -443,7 +443,7 @@ describe('Cave Hyren', () => {
 		const fireGrag = new CardInGame(byName('Fire Grag'), ACTIVE_PLAYER).addEnergy(2);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [caveHyren, fireGrag]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -489,7 +489,7 @@ describe('Diobor', () => {
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [weebo, diobor]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -529,7 +529,7 @@ describe('Diobor', () => {
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [diobor], [grega]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -571,7 +571,7 @@ describe('Drakan', () => {
 		const caveHyren = new CardInGame(byName('Cave Hyren'), ACTIVE_PLAYER).addEnergy(7);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [drakan, caveHyren]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -610,7 +610,7 @@ describe('Ayebaw', () => {
 		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER);
 		grega.addEnergy(10);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -624,7 +624,7 @@ describe('Ayebaw', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: ayebaw,
 			target: grega,
 		};
@@ -658,7 +658,7 @@ describe('Carillion', () => {
 		const leafHyren = new CardInGame(byName('Leaf Hyren'), NON_ACTIVE_PLAYER);
 		leafHyren.addEnergy(4);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -672,13 +672,13 @@ describe('Carillion', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: carillion,
 			target: weebo,
 		};
         
 		const attackHyrenAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: carillion,
 			target: leafHyren,
 		};
@@ -705,7 +705,7 @@ describe('Carillion', () => {
 		const caveRudwot = new CardInGame(byName('Cave Rudwot'), NON_ACTIVE_PLAYER);
 		caveRudwot.addEnergy(2);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -719,7 +719,7 @@ describe('Carillion', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: carillion,
 			target: caveRudwot,
 		};
@@ -741,7 +741,7 @@ describe('Carillion', () => {
 		const leafHyren = new CardInGame(byName('Leaf Hyren'), NON_ACTIVE_PLAYER);
 		leafHyren.addEnergy(4);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -755,7 +755,7 @@ describe('Carillion', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: weebo,
 			target: carillion,
 		};
@@ -777,7 +777,7 @@ describe('Lava Balamant', () => {
 		const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER);
 		weebo.addEnergy(2);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -791,7 +791,7 @@ describe('Lava Balamant', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: lavaBalamant,
 			target: weebo,
 		};
@@ -811,7 +811,7 @@ describe('Lava Balamant', () => {
 		const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
 		weebo.addEnergy(2);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -825,7 +825,7 @@ describe('Lava Balamant', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: weebo,
 			target: lavaBalamant,
 		};
@@ -847,7 +847,7 @@ describe('Bhatar', () => {
 		const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER);
 		weebo.addEnergy(2);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -861,7 +861,7 @@ describe('Bhatar', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: bhatar,
 			target: weebo,
 		};
@@ -881,7 +881,7 @@ describe('Bhatar', () => {
 		const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
 		weebo.addEnergy(2);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -895,7 +895,7 @@ describe('Bhatar', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: weebo,
 			target: bhatar,
 		};
@@ -915,7 +915,7 @@ describe('Bhatar', () => {
 		const agovo = new CardInGame(byName('Agovo'), NON_ACTIVE_PLAYER);
 		agovo.addEnergy(2);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -929,7 +929,7 @@ describe('Bhatar', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: bhatar,
 			target: agovo,
 		};
@@ -949,7 +949,7 @@ describe('Bhatar', () => {
 		const agovo = new CardInGame(byName('Agovo'), ACTIVE_PLAYER);
 		agovo.addEnergy(2);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -964,7 +964,7 @@ describe('Bhatar', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: agovo,
 			target: bhatar,
 		};
@@ -986,7 +986,7 @@ describe('Cave Rudwot', () => {
 		const caveRudwot = new CardInGame(byName('Cave Rudwot'), ACTIVE_PLAYER);
 		caveRudwot.addEnergy(3);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -1000,7 +1000,7 @@ describe('Cave Rudwot', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: weebo,
 			target: caveRudwot,
 		};
@@ -1020,7 +1020,7 @@ describe('Cave Rudwot', () => {
 		const caveRudwot = new CardInGame(byName('Cave Rudwot'), NON_ACTIVE_PLAYER);
 		caveRudwot.addEnergy(3);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -1034,7 +1034,7 @@ describe('Cave Rudwot', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: caveRudwot,
 			target: weebo,
 		};
@@ -1059,7 +1059,7 @@ describe('Furok', () => {
 		const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER);
 		weebo.addEnergy(3);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -1073,7 +1073,7 @@ describe('Furok', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: furok,
 			target: weebo,
 		};
@@ -1097,7 +1097,7 @@ describe('Furok', () => {
 		const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
 		weebo.addEnergy(3);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -1111,7 +1111,7 @@ describe('Furok', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: weebo,
 			target: furok,
 		};
@@ -1135,7 +1135,7 @@ describe('Magma Armor', () => {
 		const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
 		weebo.addEnergy(1);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -1149,7 +1149,7 @@ describe('Magma Armor', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackMagiAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: weebo,
 			target: grega,
 		};
@@ -1170,7 +1170,7 @@ describe('Magma Armor', () => {
 		const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
 		weebo.addEnergy(1);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -1184,7 +1184,7 @@ describe('Magma Armor', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackMagiAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: weebo,
 			target: grega,
 		};
@@ -1216,7 +1216,7 @@ describe('Robe of Vines', () => {
 			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([robeOfVines]),
 		];
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_CREATURES,
 			activePlayer,
@@ -1259,7 +1259,7 @@ describe('Robe of Vines', () => {
 			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([robeOfVines]),
 		];
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: 3,
 			activePlayer: 0,
@@ -1303,7 +1303,7 @@ describe('Ora', () => {
 			new Zone('In play', ZONE_TYPE_IN_PLAY, null),
 		];
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_CREATURES,
 			activePlayer,
@@ -1339,7 +1339,7 @@ describe('Magma Hyren', () => {
 		const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER);
 		weebo.addEnergy(1);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -1382,7 +1382,7 @@ describe('Magma Hyren', () => {
 		const fireGrag = new CardInGame(byName('Fire Grag'), ACTIVE_PLAYER);
 		fireGrag.addEnergy(2);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -1436,7 +1436,7 @@ describe('Ashgar', () => {
 		const yaki = new CardInGame(byName('Yaki'), ACTIVE_PLAYER);
 		yaki.addEnergy(7);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -1486,7 +1486,7 @@ describe('Quor', () => {
 		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER);
 		yaki.addEnergy(7);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -1529,7 +1529,7 @@ describe('Rudwot', () => {
 		const leafHyren = new CardInGame(byName('Leaf Hyren'), NON_ACTIVE_PLAYER);
 		leafHyren.addEnergy(4);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -1543,13 +1543,13 @@ describe('Rudwot', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: rudwot,
 			target: weebo,
 		};
         
 		const attackHyrenAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: rudwot,
 			target: leafHyren,
 		};
@@ -1576,7 +1576,7 @@ describe('Rudwot', () => {
 		const caveRudwot = new CardInGame(byName('Cave Rudwot'), NON_ACTIVE_PLAYER);
 		caveRudwot.addEnergy(2);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -1590,7 +1590,7 @@ describe('Rudwot', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: rudwot,
 			target: caveRudwot,
 		};
@@ -1614,7 +1614,7 @@ describe('Orathan', () => {
 		const leafHyren = new CardInGame(byName('Leaf Hyren'), NON_ACTIVE_PLAYER);
 		leafHyren.addEnergy(4);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -1628,13 +1628,13 @@ describe('Orathan', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: orathan,
 			target: weebo,
 		};
         
 		const attackHyrenAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: orathan,
 			target: leafHyren,
 		};
@@ -1661,7 +1661,7 @@ describe('Orathan', () => {
 		const caveRudwot = new CardInGame(byName('Cave Rudwot'), NON_ACTIVE_PLAYER);
 		caveRudwot.addEnergy(1);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -1675,7 +1675,7 @@ describe('Orathan', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: orathan,
 			target: caveRudwot,
 		};
@@ -1699,7 +1699,7 @@ describe('Whall', () => {
 
 		const paralith = new CardInGame(byName('Paralit'), ACTIVE_PLAYER);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -1773,7 +1773,7 @@ describe('Orothean Gloves', () => {
 
 		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(15);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -1815,7 +1815,7 @@ describe('Robes of the Ages', () => {
 
 		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(15);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -1871,7 +1871,7 @@ describe('Hyren\'s Call', () => {
 		const paralith = new CardInGame(byName('Paralit'), ACTIVE_PLAYER);
 		const bwill = new CardInGame(byName('Paralit'), ACTIVE_PLAYER);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -1935,7 +1935,7 @@ describe('O\'Qua', () => {
 		const paralith = new CardInGame(byName('Paralit'), ACTIVE_PLAYER);
 		const bwill = new CardInGame(byName('Paralit'), ACTIVE_PLAYER);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -1998,7 +1998,7 @@ describe('O\'Qua', () => {
 		const paralith = new CardInGame(byName('Paralit'), ACTIVE_PLAYER);
 		const bwill = new CardInGame(byName('Paralit'), ACTIVE_PLAYER);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -2059,7 +2059,7 @@ describe('Giant Parathin', () => {
 		const yaki = new CardInGame(byName('Yaki'), ACTIVE_PLAYER);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [giantParathin], [grega]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -2101,7 +2101,7 @@ describe('Giant Carillion', () => {
 		const pharan = new CardInGame(byName('Pharan'), NON_ACTIVE_PLAYER).addEnergy(2);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [greatCarillion, pharan]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -2141,7 +2141,7 @@ describe('Grega', () => {
 		const pharan = new CardInGame(byName('Pharan'), NON_ACTIVE_PLAYER).addEnergy(7);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [pharan], [grega]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -2181,7 +2181,7 @@ describe('Grega', () => {
 		const pharan = new CardInGame(byName('Pharan'), NON_ACTIVE_PLAYER).addEnergy(7);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [pharan], [grega]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -2228,7 +2228,7 @@ describe('Adis', () => {
 		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER).addEnergy(5);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaBalamant], [grega]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_ATTACK,
 			activePlayer: ACTIVE_PLAYER,
@@ -2239,7 +2239,7 @@ describe('Adis', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: lavaBalamant,
 			target: adis,
 		};
@@ -2269,7 +2269,7 @@ describe('Adis', () => {
 		const pharan = new CardInGame(byName('Pharan'), ACTIVE_PLAYER).addEnergy(1);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [pharan], [adis]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_ATTACK,
 			activePlayer: ACTIVE_PLAYER,
@@ -2321,7 +2321,7 @@ describe('Mobis', () => {
 		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER).addEnergy(5);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaBalamant], [grega]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_ATTACK,
 			activePlayer: ACTIVE_PLAYER,
@@ -2332,7 +2332,7 @@ describe('Mobis', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: lavaBalamant,
 			target: mobis,
 		};
@@ -2387,7 +2387,7 @@ describe('Amulet of Ombor', () => {
 		const fireChogo = new CardInGame(byName('Fire Chogo'), NON_ACTIVE_PLAYER).addEnergy(2);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arboll, arbolit, fireChogo, amuletOfOmbor], [mobis]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_ATTACK,
 			activePlayer: ACTIVE_PLAYER,
@@ -2421,7 +2421,7 @@ describe('Amulet of Ombor', () => {
 		const fireChogo = new CardInGame(byName('Fire Chogo'), NON_ACTIVE_PLAYER).addEnergy(2);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arboll, arbolit, fireChogo, amuletOfOmbor], [mobis]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_ATTACK,
 			activePlayer: ACTIVE_PLAYER,
@@ -2466,7 +2466,7 @@ describe('Amulet of Ombor', () => {
 		const fireChogo = new CardInGame(byName('Fire Chogo'), NON_ACTIVE_PLAYER).addEnergy(2);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arboll, arbolit, fireChogo, amuletOfOmbor], [mobis]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_ATTACK,
 			activePlayer: ACTIVE_PLAYER,
@@ -2511,7 +2511,7 @@ describe('Megathan', () => {
 		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER).addEnergy(1);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [megathan, arbolit], [mobis]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_ATTACK,
 			activePlayer: ACTIVE_PLAYER,
@@ -2521,7 +2521,7 @@ describe('Megathan', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: megathan,
 			target: arbolit,
 		};
@@ -2559,7 +2559,7 @@ describe('Megathan', () => {
 		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER).addEnergy(1);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [megathan, arbolit], [mobis]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_ATTACK,
 			activePlayer: ACTIVE_PLAYER,
@@ -2602,7 +2602,7 @@ describe('Xyx', () => {
 		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER).addEnergy(3);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [xyx], [grega]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -2643,7 +2643,7 @@ describe('Pruitt', () => {
 		const pharan = new CardInGame(byName('Pharan'), ACTIVE_PLAYER).addEnergy(7);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [pharan], [pruitt]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -2683,7 +2683,7 @@ describe('Sinder', () => {
 		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER).addEnergy(4);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arbolit], [sinder]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -2721,7 +2721,7 @@ describe('Weebo', () => {
 		const fireGrag = new CardInGame(byName('Fire Grag'), ACTIVE_PLAYER).addEnergy(4);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [weebo, fireGrag]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -2766,7 +2766,7 @@ describe('Stagadan', () => {
 		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER);
 		yaki.addEnergy(10);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -2780,13 +2780,13 @@ describe('Stagadan', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackByArbolitAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: arbolit,
 			target: yaki,
 		};
 
 		const attackByStagadanAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: stagadan,
 			target: yaki,
 		};
@@ -2812,7 +2812,7 @@ describe('Yaki', () => {
 		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER);
 		grega.addEnergy(10);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -2826,7 +2826,7 @@ describe('Yaki', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: weebo,
 			target: grega,
 		};
@@ -2859,7 +2859,7 @@ describe('Timber Hyren', () => {
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [timberHyren], [yaki]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_FIRST,
 			activePlayer: ACTIVE_PLAYER,
@@ -2899,7 +2899,7 @@ describe('Timber Hyren', () => {
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [timberHyren], [yaki]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_FIRST,
 			activePlayer: ACTIVE_PLAYER,
@@ -2945,7 +2945,7 @@ describe('Quor Pup', () => {
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [quorPup, weebo], [sinder]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_ATTACK,
 			activePlayer: ACTIVE_PLAYER,
@@ -2991,7 +2991,7 @@ describe('Quor Pup', () => {
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [quorPup], [sinder]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_ATTACK,
 			activePlayer: ACTIVE_PLAYER,
@@ -3041,7 +3041,7 @@ describe('Orwin\'s Gaze', () => {
 		const sinder = new CardInGame(byName('Sinder'), NON_ACTIVE_PLAYER).addEnergy(10);
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [], [yaki]);
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_FIRST,
 			activePlayer: ACTIVE_PLAYER,
@@ -3099,7 +3099,7 @@ describe('Coral Hyren', () => {
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [coralHyren, deepHyren], [sinder]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_FIRST,
 			activePlayer: ACTIVE_PLAYER,
@@ -3152,7 +3152,7 @@ describe('Coral Hyren', () => {
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [coralHyren, deepHyren], [sinder]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_FIRST,
 			activePlayer: ACTIVE_PLAYER,
@@ -3205,7 +3205,7 @@ describe('Fire Grag', () => {
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaBalamant, fireGrag, thunderHyren], [magam]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_FIRST,
 			activePlayer: ACTIVE_PLAYER,
@@ -3268,7 +3268,7 @@ describe('Lava Aq', () => {
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaAq, arbolit, weebo], [grega]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -3315,7 +3315,7 @@ describe('Eebit', () => {
 		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(5);
 		const kelthet = new CardInGame(byName('Kelthet'), ACTIVE_PLAYER).addEnergy(6);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -3331,7 +3331,7 @@ describe('Eebit', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: kelthet,
 			target: eebit,
 		};
@@ -3359,7 +3359,7 @@ describe('Eebit', () => {
 		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(5);
 		const kelthet = new CardInGame(byName('Kelthet'), NON_ACTIVE_PLAYER).addEnergy(6);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -3405,7 +3405,7 @@ describe('Bwill', () => {
 		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(5);
 		const kelthet = new CardInGame(byName('Kelthet'), ACTIVE_PLAYER).addEnergy(6);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -3420,7 +3420,7 @@ describe('Bwill', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: kelthet,
 			target: bwill,
 		};
@@ -3447,7 +3447,7 @@ describe('Bwill', () => {
 		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(5);
 		const kelthet = new CardInGame(byName('Kelthet'), NON_ACTIVE_PLAYER).addEnergy(6);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
@@ -3462,7 +3462,7 @@ describe('Bwill', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
-			type: moonlands.ACTION_ATTACK,
+			type: ACTION_ATTACK,
 			source: bwill,
 			target: kelthet,
 		};
@@ -3496,7 +3496,7 @@ describe('Evu', () => {
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [], [evu]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
@@ -3527,7 +3527,7 @@ describe('Undertow', () => {
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [pharan], [poad]);
 
-		const gameState = new moonlands.State({
+		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,

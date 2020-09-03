@@ -1,13 +1,13 @@
-const {
+import {
 	TYPE_CREATURE,
 
 	RESTRICTION_TYPE,
 	RESTRICTION_ENERGY_LESS_THAN_STARTING,
 	RESTRICTION_REGION,
 	RESTRICTION_CREATURE_TYPE,
-} = require('../const');
+} from '../const.js';
 
-const getRestrictionFilter = (restriction, value) => {
+export const getRestrictionFilter = (restriction, value) => {
 	switch(restriction) {
 		case RESTRICTION_TYPE:
 			return card => card.card.type === value;
@@ -20,13 +20,8 @@ const getRestrictionFilter = (restriction, value) => {
 	}
 };
 
-const makeCardFilter = (restrictions = []) => {
+export const makeCardFilter = (restrictions = []) => {
 	const checkers = restrictions.map(({type, value}) => getRestrictionFilter(type, value));
 	return card =>
 		checkers.map(checker => checker(card)).every(a => a === true); // combine checkers
-};
-
-module.exports = {
-	getRestrictionFilter,
-	makeCardFilter,
 };

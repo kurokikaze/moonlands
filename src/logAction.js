@@ -1,4 +1,4 @@
-const CardInGame = require('./classes/CardInGame');
+import CardInGame from './classes/CardInGame';
 
 const FgRed = '\x1b[31m';
 const FgGreen = '\x1b[32m';
@@ -10,7 +10,7 @@ const FgWhite = '\x1b[37m';
 
 const Reset = '\x1b[0m';
 
-const color = {
+export const color = {
 	red: word => `${FgRed}${word}${Reset}`,
 	green: word => `${FgGreen}${word}${Reset}`,
 	yellow: word => `${FgYellow}${word}${Reset}`,
@@ -22,7 +22,7 @@ const color = {
 
 const showCard = card => (card instanceof CardInGame) ? `<${color.blue(card.card.name)} [${card.id}]>` : card;
 
-const showAction = action => {
+export const showAction = action => {
 	const fields = Object.keys(action).filter(f => f != 'type').map(field => {
 		return `\t${field}: ${showCard(action[field])}`;
 	});
@@ -33,7 +33,3 @@ ${fields.join('\n')}
 }`);
 };
 
-module.exports = {
-	color,
-	showAction,
-};

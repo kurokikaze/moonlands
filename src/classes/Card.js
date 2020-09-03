@@ -1,4 +1,4 @@
-const {
+import {
 	TYPE_CREATURE,
 	TYPE_MAGI,
 	TYPE_RELIC,
@@ -11,9 +11,9 @@ const {
 	REGION_UNDERNEATH,
 	REGION_UNIVERSAL,
 	REGION_BOGRATH,
-} = require('../const');
+} from '../const.js';
 
-class Card {
+export default class Card {
 	constructor(name, type, region, cost, data = {}) {
 		if (![TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL].includes(type)) {
 			throw new Error(`Unknown card type: "${type}" for card ${name}`);
@@ -48,5 +48,3 @@ class Card {
 		return this.cost;
 	}
 }
-
-module.exports = Card;

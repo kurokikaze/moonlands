@@ -1,7 +1,8 @@
 /* global expect, describe, it */
-const nanoid = require('nanoid');
-const moonlands = require('../src/index');
-const {
+import nanoid from 'nanoid';
+import * as moonlands from '../src/index.js';
+
+import {
 	ACTION_PASS,
 	ACTION_CALCULATE,
 	ACTION_SELECT,
@@ -14,9 +15,9 @@ const {
 
 	ZONE_TYPE_MAGI_PILE,
 	ZONE_TYPE_DECK,
-} = require('../src/const');
+} from '../src/const.js';
 
-const {caldDeck, naroomDeck} = require('./testData');
+import {caldDeck, naroomDeck} from './testData';
 
 describe('Stream of actions', () => {
 	it('Streams actions', () => {

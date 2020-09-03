@@ -1,10 +1,10 @@
 /* global expect, describe, it */
-const moonlands = require('../src/index');
-const {byName} = require('../src/cards');
-const CardInGame = require('../src/classes/CardInGame');
-const {caldDeck, naroomDeck} = require('./testData');
+import * as moonlands from '../src/index';
+import {byName} from '../src/cards';
+import CardInGame from '../src/classes/CardInGame';
+import {caldDeck, naroomDeck} from './testData';
 
-const {
+import {
 	TYPE_EFFECT,
 
 	TYPE_CREATURE,
@@ -66,18 +66,18 @@ const {
 	ZONE_TYPE_DECK,
 	ZONE_TYPE_IN_PLAY,
 	ZONE_TYPE_HAND,
-} = require('../src/const');
+}  from '../src/const.js';
 
-const Zone = require('../src/classes/Zone');
+import Zone from '../src/classes/Zone.js';
 
-const {
+import {
 	STEP_ENERGIZE,
 	STEP_PRS_FIRST,
 	STEP_ATTACK,
 	STEP_CREATURES,
 	STEP_PRS_SECOND,
 	STEP_DRAW,
-} = require('./utils');
+} from './utils.js';
 
 describe('Updating state with action', () => {
 	it('Pass action', () => {

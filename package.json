@@ -2,6 +2,7 @@
   "name": "moonlands",
   "version": "v0.1.17",
   "description": "Magi-Nation Duel engine",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "git@github.com:kurokikaze/moonlands.git"
@@ -11,8 +12,8 @@
     "test": "test"
   },
   "scripts": {
-    "test": "jest",
-    "coverage": "jest --coverage"
+    "test": "./node_modules/.bin/jest",
+    "coverage": "./node_modules/.bin/jest --coverage"
   },
   "keywords": [
     "ccg"
@@ -24,6 +25,8 @@
     "jest": "^24.9.0"
   },
   "dependencies": {
+    "@babel/preset-env": "^7.11.5",
+    "babel-jest": "^26.3.0",
     "nanoid": "^2.1.9",
     "socket.io": "^2.3.0"
   }

@@ -1,4 +1,4 @@
-const Card = require('./classes/Card');
+import Card from './classes/Card.js';
 
 const {
 	/* eslint-disable no-unused-vars */

@@ -1,4 +1,4 @@
-const caldDeck = [
+export const caldDeck = [
 	'Grega',
 	'Magam',
 	'Sinder',
@@ -44,7 +44,7 @@ const caldDeck = [
 	'Fire Flow',
 ];
 
-const naroomDeck =[
+export const naroomDeck =[
 	'Pruitt',
 	'Poad',
 	'Yaki',
@@ -90,7 +90,3 @@ const naroomDeck =[
 	'Sea Barl',
 ];
 
-module.exports = {
-	caldDeck,
-	naroomDeck,
-};

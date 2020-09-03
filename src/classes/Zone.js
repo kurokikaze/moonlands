@@ -17,7 +17,7 @@ function shuffle(array) {
 	return array;
 }
 
-class Zone {
+export default class Zone {
 	constructor(name, type, player = null, ordered = false) {
 		this._name = name;
 		this._player = player;
@@ -85,5 +85,3 @@ class Zone {
 		return this.cards.map(card => card.serialize(hidden));
 	}
 }
-
-module.exports = Zone;

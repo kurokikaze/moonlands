@@ -1,4 +1,4 @@
-function clone(item) {
+export default function clone(item) {
 	if (!item) { return item; } // null, undefined values check
 
 	var types = [ Number, String, Boolean ], 
@@ -48,5 +48,3 @@ function clone(item) {
 
 	return result;
 }
-
-module.exports = clone;
