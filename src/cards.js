@@ -166,7 +166,7 @@ const CONDITION_SOURCE_IS_SELF = {
 	propertyTwo: PROPERTY_ID,
 };
 
-const cards = [
+export const cards = [
 	new Card('Alaban', TYPE_CREATURE, REGION_ARDERIAL, 6, {
 		powers: [
 			{
@@ -3123,9 +3123,4 @@ const cards = [
 	}),
 ];
 
-const byName = name => cards.find(card => card.name === name);
-
-module.exports = {
-	cards,
-	byName,
-};
+export const byName = name => cards.find(card => card.name === name);
