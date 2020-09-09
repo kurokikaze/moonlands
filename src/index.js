@@ -162,7 +162,7 @@ import {
 	ZONE_TYPE_MAGI_PILE,
 	ZONE_TYPE_DECK,
 	ZONE_TYPE_DEFEATED_MAGI,
-} from './const';
+} from './const.js';
 
 import {makeCardFilter} from './utils/restrictions.js';
 import {showAction} from './logAction.js';
@@ -1713,22 +1713,46 @@ export class State {
 						}
 						case EFFECT_TYPE_FIND_STARTING_CARDS: {
 							const cardsToFind = this.getMetaValue(action.cards, action.generatedBy);
-							const deck = this.getZone(ZONE_TYPE_DECK, action.player);
-							const discard = this.getZone(ZONE_TYPE_DISCARD, action.player);
-							const hand = this.getZone(ZONE_TYPE_HAND, action.player);
+
 							let foundCards = [];
 							if (cardsToFind.length) {
+								const deck = this.getZone(ZONE_TYPE_DECK, action.player);
+								const discard = this.getZone(ZONE_TYPE_DISCARD, action.player);
+								const hand = this.getZone(ZONE_TYPE_HAND, action.player);
+
 								cardsToFind.forEach(cardName => {
 									if (discard.cards.some(({card}) => card.name == cardName)) {
 										const card = discard.cards.find(({card}) => card.name == cardName);
-										hand.add([new CardInGame(card.card, action.player)]);
+										const newCard = new CardInGame(card.card, action.player);
+										hand.add([newCard]);
 										discard.removeById(card.id);
 										foundCards.push(cardName);
+
+										this.transformIntoActions({
+											type: ACTION_EFFECT,
+											effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
+											sourceCard: card,
+											sourceZone: ZONE_TYPE_DISCARD,
+											destinationCard: newCard,
+											destinationZone: ZONE_TYPE_HAND,
+											generatedBy: action.generatedBy,
+										});
 									} else if (deck.cards.some(({card}) => card.name == cardName)) {
 										const card = deck.cards.find(({card}) => card.name == cardName);
-										hand.add([new CardInGame(card.card, action.player)]);
+										const newCard = new CardInGame(card.card, action.player);
+										hand.add([newCard]);
 										deck.removeById(card.id);
 										foundCards.push(cardName);
+
+										this.transformIntoActions({
+											type: ACTION_EFFECT,
+											effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
+											sourceCard: card,
+											sourceZone: ZONE_TYPE_DECK,
+											destinationCard: newCard,
+											destinationZone: ZONE_TYPE_HAND,
+											generatedBy: action.generatedBy,
+										});
 									}
 								});
 							}
