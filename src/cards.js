@@ -1,6 +1,6 @@
 import Card from './classes/Card.js';
 
-const {
+import {
 	/* eslint-disable no-unused-vars */
 	ACTION_EFFECT,
 	ACTION_SELECT,
@@ -128,7 +128,7 @@ const {
 	ZONE_TYPE_DISCARD,
 	ZONE_TYPE_DECK,
 	/* eslint-enable no-unused-vars */
-} = require('./const');
+} from './const.js';
 
 const effect = data => ({
 	type: ACTION_EFFECT,

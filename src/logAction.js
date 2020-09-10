@@ -1,4 +1,4 @@
-import CardInGame from './classes/CardInGame';
+import CardInGame from './classes/CardInGame.js';
 
 const FgRed = '\x1b[31m';
 const FgGreen = '\x1b[32m';
