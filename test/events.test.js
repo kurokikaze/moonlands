@@ -7,6 +7,7 @@ import {
 	ACTION_CALCULATE,
 	ACTION_SELECT,
 	ACTION_GET_PROPERTY_VALUE,
+	ACTION_RESOLVE_PROMPT,
 
 	SELECTOR_OWN_MAGI,
 	PROPERTY_ENERGIZE,
@@ -137,6 +138,41 @@ describe('Stream of actions', () => {
 		});
 
 		expect(seenActions.length).toEqual(0, 'Select actions are not relayed to players');
+	});
+
+	it('Streams not skipping prompt resolutions', () => {
+		const PLAYER_ONE = 10;
+		const PLAYER_TWO = 12;
+
+		const zones = [];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: null,
+			activePlayer: PLAYER_ONE,
+		});
+
+		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
+
+		gameState.setDeck(PLAYER_ONE, caldDeck);
+		gameState.setDeck(PLAYER_TWO, naroomDeck);
+
+		gameState.setup();
+
+		const seenActions = [];
+
+		gameState.actionStreamOne.on('action', function(action) {
+			seenActions.push(action);
+		});
+
+		gameState.commandStream.write({
+			type: ACTION_RESOLVE_PROMPT,
+			number: 12,
+			player: PLAYER_ONE,
+			generatedBy: nanoid(),
+		});
+
+		expect(seenActions.length).toEqual(1, 'Prompt resolution actions are relayed to players');
 	});
 
 	it('Streams skipping property getters', () => {

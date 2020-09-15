@@ -212,15 +212,6 @@ export const cards = [
 						effectType: EFFECT_TYPE_CONDITIONAL,
 						rollResult: '$roll_result',
 						conditions: [
-							/**
-							{
-								objectOne: 'self',
-								propertyOne: PROPERTY_STATUS_DEFEATED_CREATURE,
-								comparator: '=',
-								objectTwo: true,
-								propertyTwo: null,
-							},							
-							 */
 							{
 								objectOne: 'rollResult',
 								propertyOne: ACTION_PROPERTY,

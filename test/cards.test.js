@@ -1823,7 +1823,7 @@ describe('Robes of the Ages', () => {
 				new Zone('AP Deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
 				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([oqua]),
 				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
-				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([robesOfTheAges]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([robesOfTheAges, seaBarl]),
 			],
 			step: STEP_PRS_FIRST,
 			activePlayer: ACTIVE_PLAYER,

@@ -5,10 +5,9 @@ import CardInGame from '../src/classes/CardInGame';
 import {caldDeck, naroomDeck} from './testData';
 
 import {
-	TYPE_EFFECT,
-
 	TYPE_CREATURE,
 
+	ACTION_PLAY,
 	ACTION_PASS,
 	ACTION_EFFECT,
 	ACTION_SELECT,
@@ -77,6 +76,7 @@ import {
 	STEP_CREATURES,
 	STEP_PRS_SECOND,
 	STEP_DRAW,
+	createZones,
 } from './utils.js';
 
 describe('Updating state with action', () => {
@@ -1429,7 +1429,7 @@ describe('Match actions', () => {
 		});
 
 		const actionToMatch = {
-			type: TYPE_EFFECT,
+			type: ACTION_EFFECT,
 			effectType: EFFECT_TYPE_MOVE_ENERGY,
 			source: grega,
 			target: yaki,
@@ -1487,7 +1487,7 @@ describe('Match actions', () => {
 		});
 
 		const actionToMatch = {
-			type: TYPE_EFFECT,
+			type: ACTION_EFFECT,
 			effectType: EFFECT_TYPE_MOVE_ENERGY,
 			source: grega,
 			target: yaki,
@@ -1544,7 +1544,7 @@ describe('Match actions', () => {
 		});
 
 		const actionToMatch = {
-			type: TYPE_EFFECT,
+			type: ACTION_EFFECT,
 			effectType: EFFECT_TYPE_MOVE_ENERGY,
 			source: grega,
 			target: yaki,
@@ -2712,7 +2712,7 @@ describe('Casting things', () => {
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(2, 'Grega\'s Energy is 2');
 
 		gameState.update({
-			type: moonlands.ACTION_PLAY, 
+			type: ACTION_PLAY, 
 			payload: {
 				player: 0,
 				card: kelthet,
@@ -3173,7 +3173,7 @@ describe('Delayed Triggers', () => {
 			},
 			effects: [
 				{
-					type: TYPE_EFFECT,
+					type: ACTION_EFFECT,
 					effectType: EFFECT_TYPE_DRAW,
 				},
 			],
@@ -3235,7 +3235,7 @@ describe('Delayed Triggers', () => {
 			},
 			effects: [
 				{
-					type: TYPE_EFFECT,
+					type: ACTION_EFFECT,
 					effectType: EFFECT_TYPE_DRAW,
 				},
 			],
@@ -3334,5 +3334,207 @@ describe('Debugging roll values', () => {
 		gameState.update(rollAction);
 
 		expect(gameState.state.spellMetaData.test.roll_result).toBeLessThan(7, 'Dice roll action stops using debug value after reset');
+	});
+});
+
+describe('Not entering prompts when spell being cast will lead to inescapable prompt',	() => {
+	it('No creatures on the field [PROMPT_TYPE_SINGLE_CREATURE]', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const pruitt = new CardInGame(byName('Pruitt'), ACTIVE_PLAYER).addEnergy(7);
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(17);
+		const grow = new CardInGame(byName('Grow'), ACTIVE_PLAYER);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [], [pruitt]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([grow]);
+
+		const spellAction = {
+			type: ACTION_PLAY,
+			payload: {
+				player: ACTIVE_PLAYER,
+				card: grow,
+			},
+		};
+
+		gameState.update(spellAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'No cards to cast Grow on, so the cast does not happen');
+	});
+
+	it('Have creatures on the field [PROMPT_TYPE_SINGLE_CREATURE]', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const pruitt = new CardInGame(byName('Pruitt'), ACTIVE_PLAYER).addEnergy(7);
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(17);
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(2);
+		const grow = new CardInGame(byName('Grow'), ACTIVE_PLAYER);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arbolit], [pruitt]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([grow]);
+
+		const spellAction = {
+			type: ACTION_PLAY,
+			payload: {
+				player: ACTIVE_PLAYER,
+				card: grow,
+			},
+		};
+
+		gameState.update(spellAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'One creature is present, can cast');
+	});
+
+	it('No own creatures on the field [PROMPT_TYPE_OWN_SINGLE_CREATURE]', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const pruitt = new CardInGame(byName('Pruitt'), ACTIVE_PLAYER).addEnergy(7);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(17);
+		const leafHyren = new CardInGame(byName('Leaf Hyren'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const updraft = new CardInGame(byName('Updraft'), ACTIVE_PLAYER);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [leafHyren], [pruitt]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([updraft]);
+
+		const spellAction = {
+			type: ACTION_PLAY,
+			payload: {
+				player: ACTIVE_PLAYER,
+				card: updraft,
+			},
+		};
+
+		gameState.update(spellAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'No cards to cast Updraft on, so the cast does not happen');
+	});
+
+	
+	it('Have own creatures on the field [PROMPT_TYPE_OWN_SINGLE_CREATURE]', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const pruitt = new CardInGame(byName('Pruitt'), ACTIVE_PLAYER).addEnergy(7);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(17);
+		const leafHyren = new CardInGame(byName('Leaf Hyren'), ACTIVE_PLAYER).addEnergy(5);
+		const updraft = new CardInGame(byName('Updraft'), ACTIVE_PLAYER);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [leafHyren], [pruitt]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([updraft]);
+
+		const spellAction = {
+			type: ACTION_PLAY,
+			payload: {
+				player: ACTIVE_PLAYER,
+				card: updraft,
+			},
+		};
+
+		gameState.update(spellAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Have creature to cast Updraft on, so the cast does happen');
+	});
+
+	it('No creatures on the field satisfying the restriction [PROMPT_TYPE_OWN_SINGLE_CREATURE]', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const pruitt = new CardInGame(byName('Pruitt'), ACTIVE_PLAYER).addEnergy(7);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(17);
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(2);
+		const leafHyren = new CardInGame(byName('Leaf Hyren'), ACTIVE_PLAYER).addEnergy(5);
+		const shootingStar = new CardInGame(byName('Shooting Star'), ACTIVE_PLAYER);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arbolit, leafHyren], [pruitt]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([shootingStar]);
+
+		const spellAction = {
+			type: ACTION_PLAY,
+			payload: {
+				player: ACTIVE_PLAYER,
+				card: shootingStar,
+			},
+		};
+
+		gameState.update(spellAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'No cards to cast Shooting Star on, so the cast does not happen');
+	});
+
+	it('Creatures on the field satisfying the restriction [PROMPT_TYPE_OWN_SINGLE_CREATURE]', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const pruitt = new CardInGame(byName('Pruitt'), ACTIVE_PLAYER).addEnergy(7);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(17);
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(2);
+		const alaban = new CardInGame(byName('Alaban'), ACTIVE_PLAYER).addEnergy(5);
+		const shootingStar = new CardInGame(byName('Shooting Star'), ACTIVE_PLAYER);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arbolit, alaban], [pruitt]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([shootingStar]);
+
+		const spellAction = {
+			type: ACTION_PLAY,
+			payload: {
+				player: ACTIVE_PLAYER,
+				card: shootingStar,
+			},
+		};
+
+		gameState.update(spellAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'No cards to cast Shooting Star on, so the cast does not happen');
 	});
 });
