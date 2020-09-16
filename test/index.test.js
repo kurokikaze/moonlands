@@ -8,6 +8,7 @@ import {
 	TYPE_CREATURE,
 
 	ACTION_PLAY,
+	ACTION_POWER,
 	ACTION_PASS,
 	ACTION_EFFECT,
 	ACTION_SELECT,
@@ -3536,5 +3537,175 @@ describe('Not entering prompts when spell being cast will lead to inescapable pr
 		gameState.update(spellAction);
 
 		expect(gameState.state.prompt).toEqual(true, 'No cards to cast Shooting Star on, so the cast does not happen');
+	});
+});
+
+describe('Not entering prompts when activating power will lead to inescapable prompt', () => {
+	it('No creatures on battlefield [PROMPT_TYPE_SINGLE_CREATURE]', () => {
+		const ACTIVE_PLAYER = 411;
+		const NON_ACTIVE_PLAYER = 12;
+
+		// Cald player
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		// Naroom player
+		const pruitt = new CardInGame(byName('Pruitt'), ACTIVE_PLAYER).addEnergy(5);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [], [pruitt]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: pruitt,
+			power: pruitt.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Pruitt cannot activate power as no creatures are present');
+	});
+
+	it('No relics on battlefield [PROMPT_TYPE_RELIC]', () => {
+		const ACTIVE_PLAYER = 411;
+		const NON_ACTIVE_PLAYER = 12;
+
+		// Cald player
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		// Naroom player
+		const ebylon = new CardInGame(byName('Ebylon'), ACTIVE_PLAYER).addEnergy(6);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [], [ebylon]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: ebylon,
+			power: ebylon.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Ebylon cannot activate power as no relic is present');
+	});
+
+	it('No own creatures on battlefield [PROMPT_TYPE_SINGLE_OWN_CREATURE]', () => {
+		const ACTIVE_PLAYER = 411;
+		const NON_ACTIVE_PLAYER = 12;
+
+		// Cald player
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(2);
+		const lavaArboll = new CardInGame(byName('Lava Arboll'), NON_ACTIVE_PLAYER).addEnergy(7);
+
+		// Naroom player
+		const whall = new CardInGame(byName('Whall'), ACTIVE_PLAYER).addEnergy(6);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaArboll], [whall]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: whall,
+			power: whall.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Whall cannot activate power as he controls no creatures');
+	});
+
+	it('No creatures matching restriction on battlefield [PROMPT_TYPE_SINGLE_CREATURE_FILTERED]', () => {
+		const ACTIVE_PLAYER = 411;
+		const NON_ACTIVE_PLAYER = 12;
+
+		// Cald player
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(2);
+		const lavaArboll = new CardInGame(byName('Lava Arboll'), NON_ACTIVE_PLAYER).addEnergy(7);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER).addEnergy(5);
+
+		// Cald player
+		const magam = new CardInGame(byName('Magam'), ACTIVE_PLAYER).addEnergy(6);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaArboll, lavaBalamant], [magam]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: magam,
+			power: magam.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Magam cannot activate power as he controls no creatures with less than starting energy');
+	});
+
+	it('Cannot activate power that references "other creature" if no other creatures are present', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const magmaHyren = new CardInGame(byName('Magma Hyren'), ACTIVE_PLAYER);
+		magmaHyren.addEnergy(3);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([magmaHyren]),
+			],
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const healingFlameAction = {
+			type: ACTION_POWER,
+			source: magmaHyren,
+			power: magmaHyren.card.data.powers[1],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(healingFlameAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Power is not activated');
 	});
 });

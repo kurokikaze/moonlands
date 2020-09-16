@@ -145,7 +145,7 @@ import {
 
 	RESTRICTION_TYPE,
 	RESTRICTION_REGION,
-	// RESTRICTION_ENERGY_LESS_THAN_STARTING,
+	RESTRICTION_ENERGY_LESS_THAN_STARTING,
 	RESTRICTION_CREATURE_TYPE,
 
 	COST_X,
@@ -183,6 +183,8 @@ function checkCardsForRestriction(cards, restriction, restrictionValue) {
 			return cards.every(card => card.card.type === restrictionValue);
 		case RESTRICTION_REGION:
 			return cards.every(card => card.card.region === restrictionValue);
+		case RESTRICTION_ENERGY_LESS_THAN_STARTING:
+			return cards.every(card => card.card.type === TYPE_CREATURE && card.data.energy < card.card.cost);
 	}
 }
 
@@ -194,6 +196,8 @@ function checkAnyCardForRestriction(cards, restriction, restrictionValue) {
 			return cards.some(card => card.card.type === restrictionValue);
 		case RESTRICTION_REGION:
 			return cards.some(card => card.card.region === restrictionValue);
+		case RESTRICTION_ENERGY_LESS_THAN_STARTING:
+			return cards.some(card => card.card.type === TYPE_CREATURE && card.data.energy < card.card.cost);
 	}
 }
 
@@ -1012,51 +1016,101 @@ export class State {
 							
 						const preparedActions = effects.map(effect => ({...effect, power: true, generatedBy: source.id, player: action.player}));
 
-						let currentPowerMetaData = {
-							source,
-							sourcePower,
-							player: action.player,
-							sourceCreature: source,
-						}; // No retrieving old metadata from old activations
+						// Calculate if prompts are resolvable
+						// If source is Magi, it will not be filtered out, being in another zone
+						const creatureWillSurvive = source.data.energy > powerCost;
+						const ourCardsInPlay = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => (creatureWillSurvive ? card.id !== action.source.id : true) && card.data.controller === action.source.data.controller);
+						const allCardsInPlay = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => creatureWillSurvive ? card.id !== action.source.id : true);
 
-						source.setActionUsed(action.power.name);
+						// powerPromptsDoable
+						const testablePrompts = [
+							PROMPT_TYPE_SINGLE_CREATURE,
+							PROMPT_TYPE_RELIC,
+							PROMPT_TYPE_OWN_SINGLE_CREATURE,
+							PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+							PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
+						];
 
-						if (powerCost == COST_X) {
-							this.addActions(
-								{
-									type: ACTION_ENTER_PROMPT,
-									promptType: PROMPT_TYPE_NUMBER,
-									player: action.player,
-									generatedBy: source.id,
-									min: 1,
-									max: action.source.data.energy,
-								},
-								{
-									type: ACTION_CALCULATE,
-									operator: CALCULATION_SET,
-									operandOne: '$number',
-									variable: 'chosen_cost',
-									generatedBy: source.id,
-								},
-								{
+						const allPrompts = preparedActions.filter(action => 
+							action.type === ACTION_ENTER_PROMPT && testablePrompts.includes(action.promptType));
+
+						const allPromptsAreDoable = allPrompts.every(promptAction => {
+							switch (promptAction.promptType) {
+								case PROMPT_TYPE_SINGLE_CREATURE:
+									return allCardsInPlay.some(card => card.card.type === TYPE_CREATURE);
+								case PROMPT_TYPE_RELIC:
+									return allCardsInPlay.some(card => card.card.type === TYPE_RELIC);
+								case PROMPT_TYPE_OWN_SINGLE_CREATURE:
+									return ourCardsInPlay.some(card => card.card.type === TYPE_CREATURE);
+								case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
+									return this.getZone(ZONE_TYPE_IN_PLAY).cards.some(card => card.id !== action.source.id);
+								}
+								case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
+									if (promptAction.restrictions) {
+										return promptAction.restrictions.every(({type, value}) => 
+											checkAnyCardForRestriction(allCardsInPlay, type, value)
+										);
+									} else if (promptAction.restriction) {
+										return checkAnyCardForRestriction(
+											allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE), 
+											promptAction.restriction, 
+											promptAction.restrictionValue,
+										);
+									}
+									return true;
+								}
+								default:
+									return true;
+							}
+						});
+
+						if (allPromptsAreDoable) {
+							let currentPowerMetaData = {
+								source,
+								sourcePower,
+								player: action.player,
+								sourceCreature: source,
+							}; // No retrieving old metadata from old activations
+	
+							source.setActionUsed(action.power.name);
+	
+							if (powerCost == COST_X) {
+								this.addActions(
+									{
+										type: ACTION_ENTER_PROMPT,
+										promptType: PROMPT_TYPE_NUMBER,
+										player: action.player,
+										generatedBy: source.id,
+										min: 1,
+										max: action.source.data.energy,
+									},
+									{
+										type: ACTION_CALCULATE,
+										operator: CALCULATION_SET,
+										operandOne: '$number',
+										variable: 'chosen_cost',
+										generatedBy: source.id,
+									},
+									{
+										type: ACTION_EFFECT,
+										effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
+										target: source,
+										amount: '$number',
+										generatedBy: source.id,
+									},
+								);
+							} else if (powerCost > 0) {
+								this.addActions({
 									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
 									target: source,
-									amount: '$number',
+									amount: powerCost,
 									generatedBy: source.id,
-								},
-							);
-						} else if (powerCost > 0) {
-							this.addActions({
-								type: ACTION_EFFECT,
-								effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
-								target: source,
-								amount: powerCost,
-								generatedBy: source.id,
-							});
+								});
+							}
+							this.addActions(...preparedActions);
+							this.setSpellMetadata(currentPowerMetaData, source.id);
 						}
-						this.addActions(...preparedActions);
-						this.setSpellMetadata(currentPowerMetaData, source.id);
 					}
 					break;
 				}

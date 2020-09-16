@@ -3193,6 +3193,55 @@ describe('Coral Hyren', () => {
 	});
 });
 
+describe('Magam', () => {
+	it('Vitalize', () => {
+		const ACTIVE_PLAYER = 411;
+		const NON_ACTIVE_PLAYER = 12;
+
+		// Cald player
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(2);
+		const lavaArboll = new CardInGame(byName('Lava Arboll'), NON_ACTIVE_PLAYER).addEnergy(7);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER).addEnergy(1);
+
+		// Cald player
+		const magam = new CardInGame(byName('Magam'), ACTIVE_PLAYER).addEnergy(6);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaArboll, lavaBalamant], [magam]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: magam,
+			power: magam.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		const targetPromptAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: lavaBalamant,
+			player: ACTIVE_PLAYER,
+			generatedBy: magam.id,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in the Prompt state');
+
+		gameState.update(targetPromptAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in Prompt state');
+		expect(lavaBalamant.data.energy).toEqual(5, 'Lava Balamant energy is restored to 5');
+	});
+});
+
 describe('Fire Grag', () => {
 	it('Metabolize', () => {
 		const ACTIVE_PLAYER = 104;
