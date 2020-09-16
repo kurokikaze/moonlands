@@ -29,7 +29,6 @@
     "@babel/preset-env": "^7.11.5",
     "babel-jest": "^26.3.0",
     "nanoid": "^2.1.9",
-    "protobufjs": "^6.10.1",
     "socket.io": "^2.3.0"
   }
 }
