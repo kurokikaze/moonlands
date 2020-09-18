@@ -46,6 +46,7 @@ export const SELECTOR_OWN_CARDS_IN_PLAY = 'selectors/own_cards_in_play';
 export const SELECTOR_CREATURES_OF_TYPE = 'selectors/creatures_of_type';
 export const SELECTOR_CREATURES_NOT_OF_TYPE = 'selectors/creatures_not_of_type';
 export const SELECTOR_OWN_CREATURES_OF_TYPE = 'selectors/own_creatures_of_type';
+export const SELECTOR_OTHER_CREATURES_OF_TYPE = 'selectors/other_creatures_of_type';
 export const SELECTOR_RELICS = 'selectors/relics';
 export const SELECTOR_OWN_SPELLS_IN_HAND = 'selectors/own_spells_in_hand';
 

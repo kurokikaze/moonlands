@@ -1,4 +1,4 @@
-Done: **111** cards out of **190**
+Done: **115** cards out of **190**
 
 # Done, tested
 
@@ -57,6 +57,8 @@ Done: **111** cards out of **190**
 - Cloud Narth
 - Wellisk Pup
 - Balamant Pup
+- Korrit
+- Pack Korrit
 
 # Done, not tested
 
@@ -83,6 +85,8 @@ Done: **111** cards out of **190**
 - Lasada
 - Lava Arboll
 - Leaf Hyren
+- Numbulo
+- Orathan
 - Orwin's Staff
 - Paralit
 - Pharan

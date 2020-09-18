@@ -70,6 +70,7 @@ import {
 	SELECTOR_CREATURES_OF_TYPE,
 	SELECTOR_CREATURES_NOT_OF_TYPE,
 	SELECTOR_OWN_CREATURES_OF_TYPE,
+	SELECTOR_OTHER_CREATURES_OF_TYPE,
 
 	PROMPT_TYPE_NUMBER,
 	PROMPT_TYPE_SINGLE_CREATURE,
@@ -922,8 +923,13 @@ export class State {
 					const attackSource = this.getMetaValue(action.source, action.generatedBy);
 					const attackTarget = this.getMetaValue(action.target, action.generatedBy);
 
+					const additionalAttackers = this.getMetaValue(action.additionalAttackers, action.generatedBy) || [];
+
 					const sourceAttacksPerTurn = this.modifyByStaticAbilities(attackSource, PROPERTY_ATTACKS_PER_TURN);
+
 					const sourceHasAttacksLeft = attackSource.data.attacked < sourceAttacksPerTurn;
+					const additionalAttackersHasAttacksLeft = additionalAttackers.every(card => card.card.data.canPackHunt && card.data.attacked < this.modifyByStaticAbilities(card, PROPERTY_ATTACKS_PER_TURN));
+
 					const targetIsMagi = attackTarget.card.type == TYPE_MAGI;
 					const magiHasCreatures = this.useSelector(SELECTOR_OWN_CREATURES, attackTarget.owner).length > 0;
 
@@ -934,7 +940,9 @@ export class State {
 						)
 					);
 
-					if (sourceHasAttacksLeft && attackApproved && this.getCurrentPriority() == PRIORITY_ATTACK) {
+					const enoughAttacksLeft = (sourceHasAttacksLeft && (additionalAttackersHasAttacksLeft || additionalAttackers.length === 0));
+
+					if (enoughAttacksLeft && attackApproved && this.getCurrentPriority() == PRIORITY_ATTACK) {
 						const attackSequence = [
 							{
 								type: ACTION_EFFECT,
@@ -970,9 +978,54 @@ export class State {
 								target: attackTarget,
 								generatedBy: attackSource.id,
 							},
-						].filter(Boolean);
+						];
 
 						this.transformIntoActions(...attackSequence);
+
+						if (additionalAttackers) {
+							const preparedEffects = additionalAttackers.map(card => [
+								{
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+									source: card,
+									sourceAtStart: card.copy(),
+									packHuntAttack: true,
+									target: attackTarget,
+									targetAtStart: attackTarget.copy(),
+									generatedBy: attackSource.id,
+								},
+								{
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_BEFORE_DAMAGE,
+									source: card,
+									sourceAtStart: card.copy(),
+									packHuntAttack: true,
+									target: attackTarget,
+									targetAtStart: attackTarget.copy(),
+									generatedBy: attackSource.id,
+								},
+								{
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_DAMAGE_STEP,
+									source: card,
+									sourceAtStart: card.copy(),
+									packHuntAttack: true,
+									target: attackTarget,
+									targetAtStart: attackTarget.copy(),
+									generatedBy: attackSource.id,
+								},
+								{
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_AFTER_DAMAGE,
+									source: card,
+									packHuntAttack: true,
+									target: attackTarget,
+									generatedBy: attackSource.id,
+								},
+							]).flat();
+
+							this.transformIntoActions(...preparedEffects);
+						}
 					}
 					break;
 				}
@@ -1315,6 +1368,11 @@ export class State {
 						}
 						case SELECTOR_CREATURES_NOT_OF_REGION: {
 							result = this.useSelector(SELECTOR_CREATURES_NOT_OF_REGION, action.player, action.region);
+							break;
+						}
+						case SELECTOR_OTHER_CREATURES_OF_TYPE: {
+							result = this.useSelector(SELECTOR_CREATURES_OF_TYPE, null, this.getMetaValue(action.creatureType, action.generatedBy))
+								.filter(card => card.id !== action.generatedBy);
 							break;
 						}
 						case SELECTOR_MAGI_OF_REGION: {
@@ -1936,7 +1994,7 @@ export class State {
 									amount: damageByAttacker,
 									generatedBy: attackSource.id,
 								}, // from target to source (if attacking a creature)
-								(attackTarget.card.type === TYPE_CREATURE) ? {
+								(attackTarget.card.type === TYPE_CREATURE && !action.packHuntAttack) ? {
 									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_DEFENDER_DEALS_DAMAGE,
 									source: attackTarget,

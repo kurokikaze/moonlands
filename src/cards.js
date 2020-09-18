@@ -64,6 +64,7 @@ import {
 	SELECTOR_OWN_CREATURES_OF_TYPE,
 	SELECTOR_CREATURES_OF_TYPE,
 	SELECTOR_OWN_SPELLS_IN_HAND,
+	SELECTOR_OTHER_CREATURES_OF_TYPE,
 
 	EFFECT_TYPE_END_OF_TURN,
 	EFFECT_TYPE_NONE,
@@ -871,6 +872,29 @@ export const cards = [
 				})
 			]
 		}],
+	}),
+	new Card('Korrit', TYPE_CREATURE, REGION_UNDERNEATH, 3, {
+		canPackHunt: true,
+	}),
+	new Card('Pack Korrit', TYPE_CREATURE, REGION_UNDERNEATH, 1, {
+		powers: [
+			{
+				name: 'Morale',
+				cost: 1,
+				text: 'Add 1 energy to each other Korrit in play',
+				effects: [
+					select({
+						selector: SELECTOR_OTHER_CREATURES_OF_TYPE,
+						creatureType: 'Korrit',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '$selected',
+						amount: 1,
+					}),
+				],
+			},
+		],
 	}),
 	new Card('Nimbulo', TYPE_MAGI, REGION_ARDERIAL, null, {
 		startingEnergy: 14,
