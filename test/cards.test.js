@@ -2591,6 +2591,118 @@ describe('Megathan', () => {
 	});
 });
 
+describe('Cloud Narth', () => {
+	it('Healing Rain', () => {
+		const ACTIVE_PLAYER = 421;
+		const NON_ACTIVE_PLAYER = 160;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(4);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(7);
+		const cloudNarth = new CardInGame(byName('Cloud Narth'), ACTIVE_PLAYER).addEnergy(2);
+		const thunderVashp = new CardInGame(byName('Cloud Narth'), ACTIVE_PLAYER).addEnergy(1);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [cloudNarth, thunderVashp], [grega]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: cloudNarth,
+			power: cloudNarth.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_SINGLE_MAGI,
+			target: thunderVashp,
+			player: ACTIVE_PLAYER,
+			generatedBy: cloudNarth.id,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, 'Game is prompting you for a single creature or Magi');
+
+		gameState.update(targetingAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state anymore');
+
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'Active player discard has one card');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Cloud Narth', 'It is Cloud Narth');
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(thunderVashp.id).data.energy).toEqual(3, 'Thunder Vashp now has 3 energy');
+	});
+
+	it('Healing Storm', () => {
+		const ACTIVE_PLAYER = 421;
+		const NON_ACTIVE_PLAYER = 160;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(4);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(7);
+		const cloudNarth = new CardInGame(byName('Cloud Narth'), ACTIVE_PLAYER).addEnergy(2);
+		const pharan = new CardInGame(byName('Pharan'), ACTIVE_PLAYER).addEnergy(2);
+		const thunderVashp = new CardInGame(byName('Cloud Narth'), ACTIVE_PLAYER).addEnergy(1);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [cloudNarth, pharan, thunderVashp], [grega]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: cloudNarth,
+			power: cloudNarth.card.data.powers[1],
+			player: ACTIVE_PLAYER,
+		};
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_SINGLE_MAGI,
+			target: thunderVashp,
+			player: ACTIVE_PLAYER,
+			generatedBy: cloudNarth.id,
+		};
+
+		const pharanChoosingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+			target: pharan,
+			player: ACTIVE_PLAYER,
+			generatedBy: cloudNarth.id,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, 'Game is prompting you for a single creature or Magi');
+
+		gameState.update(targetingAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state still');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_SINGLE_CREATURE_FILTERED, 'Game is prompting you for a Pharan');
+
+		gameState.update(pharanChoosingAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state anymore');
+
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(2, 'Active player discard has two cards');
+	
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(thunderVashp.id).data.energy).toEqual(8, 'Thunder Vashp now has 8 energy');
+	});
+});
 
 describe('Xyx', () => {
 	it('Shock', () => {
@@ -2798,6 +2910,88 @@ describe('Stagadan', () => {
 		gameState.update(attackByStagadanAction);
 
 		expect(yaki.data.energy).toEqual(7, 'Yaki now has 7 energy left');
+	});
+});
+
+describe('Wellisk Pup', () => {
+	it('Erratic Shield (roll <= 4)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const welliskPup = new CardInGame(byName('Wellisk Pup'), ACTIVE_PLAYER).addEnergy(2);
+
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(3);
+
+		const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const pruitt = new CardInGame(byName('Pruitt'), ACTIVE_PLAYER).addEnergy(2);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([pruitt]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY).add([welliskPup, arbolit, weebo]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: NON_ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.setRollDebugValue(3);
+
+		const attackByArbolitAction = {
+			type: ACTION_ATTACK,
+			source: arbolit,
+			target: welliskPup,
+		};
+
+		gameState.update(attackByArbolitAction);
+
+		expect(welliskPup.data.energy).toEqual(2, 'Wellisk pup gains 3 energy and loses 3 energy, left at 2');
+	});
+
+	it('Erratic Shield (roll >= 5)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const welliskPup = new CardInGame(byName('Wellisk Pup'), ACTIVE_PLAYER).addEnergy(2);
+
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(1);
+
+		const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const pruitt = new CardInGame(byName('Pruitt'), ACTIVE_PLAYER).addEnergy(2);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([pruitt]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY).add([welliskPup, arbolit, weebo]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: NON_ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.setRollDebugValue(6);
+
+		const attackByArbolitAction = {
+			type: ACTION_ATTACK,
+			source: arbolit,
+			target: welliskPup,
+		};
+
+		gameState.update(attackByArbolitAction);
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).cards.length).toEqual(1, 'NAP discard has 1 card');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Arbolit', 'It\'s Arbolit');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).cards.length).toEqual(1, 'AP discard has 1 card');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Wellisk Pup', 'It\'s Wellisk Pup');
 	});
 });
 

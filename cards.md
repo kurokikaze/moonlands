@@ -1,4 +1,4 @@
-Done: **99** cards out of **190**
+Done: **102** cards out of **190**
 
 # Done, tested
 
@@ -53,6 +53,9 @@ Done: **99** cards out of **190**
 - Whall
 - Xyx
 - Yaki
+- Magam
+- Cloud Narth
+- Wellisk Pup
 
 # Done, not tested
 
@@ -79,7 +82,6 @@ Done: **99** cards out of **190**
 - Lasada
 - Lava Arboll
 - Leaf Hyren
-- Magam
 - Orwin's Staff
 - Paralit
 - Pharan
@@ -228,7 +230,6 @@ Done: **99** cards out of **190**
 - Gorgle's Ring
 - Plith
 - Shimmer
-- Wellisk Pup
 
 # Rearranging Energy
 
@@ -245,7 +246,6 @@ Done: **99** cards out of **190**
 # More selectors
 
 - Bottomless Pit
-- Cloud Narth (creature in play by name, combining selectors)
 - Hubdra's Spear (magi w/o creatures)
 - Pack Korrit (creature in play by name)
 - Rod of Coals (creature in play with N energy)

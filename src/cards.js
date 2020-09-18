@@ -1873,6 +1873,75 @@ export const cards = [
 			}),
 		],
 	}),
+	new Card('Cloud Narth', TYPE_CREATURE, REGION_ARDERIAL, 2, {
+		powers: [
+			{
+				name: 'Healing Rain',
+				cost: 0,
+				text: 'Choose a Creature or Magi. Move Cloud Narth\'s energy to the chosen Creature or Magi.',
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+					}),
+					getPropertyValue({
+						property: PROPERTY_ENERGY_COUNT,
+						target: '$source',
+						variable: 'energyToRestore',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_MOVE_ENERGY,
+						source: '$source',
+						target: '$target',
+						amount: '$energyToRestore',
+					}),
+				],
+			},
+			{
+				name: 'Healing Storm',
+				cost: 0,
+				text: 'Choose a Creature or Magi and a Pharan you control. Move Cloud Narth\'s energy to the chosen Creature or Magi. Move chosen Pharan\'s energy to the chosen Creature or Magi. Add three additional energy to the chosen Creature or Magi.',
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+					}),
+					prompt({
+						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+						restriction: RESTRICTION_CREATURE_TYPE,
+						restrictionValue: 'Pharan',
+						message: 'Choose a Pharan',
+						variable: 'chosenPharan',
+					}),
+					getPropertyValue({
+						property: PROPERTY_ENERGY_COUNT,
+						target: '$source',
+						variable: 'energyToRestore',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_MOVE_ENERGY,
+						source: '$source',
+						target: '$target',
+						amount: '$energyToRestore',
+					}),
+					getPropertyValue({
+						property: PROPERTY_ENERGY_COUNT,
+						target: '$chosenPharan',
+						variable: 'pharanEnergy',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_MOVE_ENERGY,
+						source: '$chosenPharan',
+						target: '$target',
+						amount: '$pharanEnergy',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI,
+						target: '$target',
+						amount: 3,
+					}),
+				],
+			},
+		],
+	}),
 	new Card('Pharan', TYPE_CREATURE, REGION_ARDERIAL, 3, {
 		powers: [
 			{
@@ -2015,6 +2084,64 @@ export const cards = [
 				}),
 			],
 		}],
+	}),
+	new Card('Wellisk Pup', TYPE_CREATURE, REGION_OROTHE, 2, {
+		triggerEffects: [
+			{
+				name: 'Erratic shield',
+				text: 'Whenever Wellisk Pup is attacked, roll one die before energy is removed. add one energy to it before energy is removed. 1, 2, 3 or 4: Add 3 energy to Wellisk Pup. 5, 6: Discard Wellisk Pup from play.',
+				find: {
+					effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+					conditions: [
+						CONDITION_TARGET_IS_SELF,
+					],
+				},
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_ROLL_DIE,
+					}),
+					effect({ // 1-4: Add 3 energy to Wellisk Pup
+						effectType: EFFECT_TYPE_CONDITIONAL,
+						rollResult: '$roll_result',
+						conditions: [
+							{
+								objectOne: 'rollResult',
+								propertyOne: ACTION_PROPERTY,
+								comparator: '<=',
+								objectTwo: 4,
+								propertyTwo: null,
+							}
+						],
+						thenEffects: [
+							effect({
+								effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+								target: '$source',
+								amount: 3,
+							}),
+						],
+					}),
+					effect({ // 5-6: discard Wellisk Pup from play
+						effectType: EFFECT_TYPE_CONDITIONAL,
+						rollResult: '$roll_result',
+						conditions: [
+							{
+								objectOne: 'rollResult',
+								propertyOne: ACTION_PROPERTY,
+								comparator: '>=',
+								objectTwo: 5,
+								propertyTwo: null,
+							}
+						],
+						thenEffects: [
+							effect({
+								effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+								target: '$source',
+							}),
+						],
+					}),
+				],
+			},
+		],
 	}),
 	new Card('Bhatar', TYPE_CREATURE, REGION_CALD, 5, {
 		triggerEffects: [{
