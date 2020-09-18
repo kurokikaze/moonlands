@@ -697,7 +697,6 @@ export class State {
 		if (object == 'self') {
 			return self;
 		}
-
 		return property ? this.getMetaValue(action[object], action.generatedBy) : object;
 	}
 
@@ -756,7 +755,6 @@ export class State {
 			!Object.prototype.hasOwnProperty.call(condition, 'objectOne') ||
 			!Object.prototype.hasOwnProperty.call(condition, 'objectTwo')
 		) {
-			console.dir(condition);
 			throw new Error('Missing object field in condition');
 		}
 		const objectOne = this.getObjectOrSelf(action, self, condition.objectOne, condition.propertyOne);

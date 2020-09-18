@@ -1,4 +1,4 @@
-Done: **102** cards out of **190**
+Done: **111** cards out of **190**
 
 # Done, tested
 
@@ -56,6 +56,7 @@ Done: **102** cards out of **190**
 - Magam
 - Cloud Narth
 - Wellisk Pup
+- Balamant Pup
 
 # Done, not tested
 
@@ -107,6 +108,14 @@ Done: **102** cards out of **190**
 - Water of Life
 - Xyx Elder
 - Orwin
+- Lightning Hyren
+- Mushroom Hyren
+- Ormagon
+- Relic Stalker
+- Sap of Life
+- Dream Balm
+- Xyx Minor
+- Brub
 
 # Possible sample decks:
 
@@ -191,13 +200,8 @@ Done: **102** cards out of **190**
 # Not done yet
 
 - Flood of Energy [NAROOM]
-- Lightning Hyren [ARDERIAL]
-- Mushroom Hyren [UNDERNEATH]
 - Nimbulo [ARDERIAL]
-- Ormagon [UNDERNEATH]
-- Sap of Life [NAROOM]
 - Tap Roots (will benefit from prompt texts) [NAROOM]
-- Relic Stalker [UNDERNEATH]
 
 # Cost reduction/increase
 
@@ -216,14 +220,11 @@ Done: **102** cards out of **190**
 - Thunderquake (choosing any number of creatures)
 - Vulbor (choosing player)
 - Heat Lens (choosing player)
-- Xyx Minor (creature in play by name)
 - Corf (status "was attacked")
 - Gar (between cards in play)
 
 # Conditionals
 
-- Balamant Pup
-- Brub
 - Corf Pearl
 - Crystal Arboll
 - Eye of the Storm
@@ -303,7 +304,6 @@ Done: **102** cards out of **190**
 
 # Relic stuff (discarding, etc)
 
-- Dream Balm
 - Raxis (also custom prompts, prompting opponent)
 
 # Static ability rework:

@@ -413,6 +413,51 @@ export const cards = [
 			},
 		],
 	}),
+	new Card('Relic Stalker', TYPE_RELIC, REGION_UNIVERSAL, 0, {
+		powers: [
+			{
+				name: 'Pound Pound Pound',
+				text: 'Choose a Relic in play. Discard Relic Stalker from play. Discard the chosen Relic from play.',
+				cost: 1,
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_RELIC,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
+						target: '$source',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
+						target: '$target',
+					}),
+				],
+			},
+		],
+	}),
+	new Card('Dream Balm', TYPE_RELIC, REGION_UNIVERSAL, 0, {
+		powers: [
+			{
+				name: 'Vitalize',
+				cost: 2,
+				text: 'Choose a Creature in play with less than its starting energy. Discard Dream Balm from play. Restore that Creature to its starting energy.',
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+						restriction: RESTRICTION_ENERGY_LESS_THAN_STARTING,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
+						target: '$source',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
+						target: '$target',
+					}),
+				],
+			},
+		],
+	}),
 	new Card('Thermal Blast', TYPE_SPELL, REGION_CALD, 3, {
 		effects: [
 			effect({
@@ -1380,6 +1425,28 @@ export const cards = [
 			},
 		],
 	}),
+	new Card('Xyx Minor', TYPE_CREATURE, REGION_ARDERIAL, 2, {
+		powers: [
+			{
+				name: 'Gathering Clouds',
+				text: 'Choose any one Xyx in play. Add 4 energy to the chosen Xyx.',
+				cost: 2,
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+						restriction: RESTRICTION_CREATURE_TYPE,
+						restrictionValue: 'Xyx',
+						message: 'Choose a Creature to add 4 energy to',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '$target',
+						amount: 4,
+					}),
+				],
+			},
+		],
+	}),
 	new Card('Ring of Secrets', TYPE_RELIC, REGION_UNIVERSAL, 0, {
 		triggerEffects: [
 			{
@@ -2085,6 +2152,61 @@ export const cards = [
 			],
 		}],
 	}),
+	new Card('Lightning Hyren', TYPE_CREATURE, REGION_ARDERIAL, 5, {
+		powers: [
+			{
+				name: 'Shockstorm',
+				cost: 4,
+				text: 'Discard one energy from each non-Arderial Creature in play.',
+				effects: [
+					select({
+						selector: SELECTOR_CREATURES_NOT_OF_REGION,
+						region: REGION_ARDERIAL,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+						target: '$selected',
+						amount: 1,
+					}),
+				],
+			},
+		],
+	}),
+	new Card('Mushroom Hyren', TYPE_CREATURE, REGION_OROTHE, 7, {
+		powers: [
+			{
+				name: 'Sanctuary',
+				text: 'Choose your Creature in play. Move its energy to your Magi and return the Creature to your hand.',
+				cost: 1,
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
+						message: 'Select your creature. Its energy will be moved onto your Magi and the creature will return to your hand.',
+					}),
+					getPropertyValue({
+						property: PROPERTY_ENERGY_COUNT,
+						target: '$target',
+						variable: 'creatureEnergy',
+					}),
+					select({
+						selector: SELECTOR_OWN_MAGI,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_MOVE_ENERGY,
+						source: '$target',
+						target: '$selected',
+						amount: '$creatureEnergy',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+						sourceZone: ZONE_TYPE_IN_PLAY,
+						destinationZone: ZONE_TYPE_HAND,
+						target: '$target',
+					}),
+				],
+			}
+		],
+	}),
 	new Card('Wellisk Pup', TYPE_CREATURE, REGION_OROTHE, 2, {
 		triggerEffects: [
 			{
@@ -2310,6 +2432,19 @@ export const cards = [
 					}),
 				],
 			},
+		],
+	}),
+	new Card('Sap of Life', TYPE_SPELL, REGION_NAROOM, 3, {
+		text: 'Choose a Creature in play with less than its starting energy. Restore that Creature to its starting energy.',
+		effects: [
+			prompt({
+				promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+				restriction: RESTRICTION_ENERGY_LESS_THAN_STARTING,
+			}),
+			effect({
+				effectType: EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
+				target: '$target',
+			}),
 		],
 	}),
 	new Card('Pruitt', TYPE_MAGI, REGION_NAROOM, null, {
@@ -2551,7 +2686,108 @@ export const cards = [
 				],
 			},
 		],
-
+	}),
+	new Card('Brub', TYPE_CREATURE, REGION_UNDERNEATH, 2, {
+		powers: [
+			{
+				name: 'Scrub',
+				text: 'Choose a Korrit in play. If you control that Korrit, move its energy onto Brub. If not, discard the chosen Korrit from play.',
+				cost: 0,
+				effects: [
+					prompt({
+						message: 'Choose a Korrit in play',
+						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+						restriction: RESTRICTION_CREATURE_TYPE,
+						restrictionValue: 'Korrit',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_CONDITIONAL,
+						chosenKorrit: '$target',
+						conditions: [
+							{
+								objectOne: 'chosenKorrit',
+								propertyOne: PROPERTY_CONTROLLER,
+								comparator: '=',
+								objectTwo: 'self',
+								propertyTwo: PROPERTY_CONTROLLER,
+							},
+						],
+						thenEffects: [
+							getPropertyValue({
+								target: '$target',
+								property: PROPERTY_ENERGY_COUNT,
+								variable: 'korritEnergy',
+							}),
+							effect({
+								effectType: EFFECT_TYPE_MOVE_ENERGY,
+								source: '$target',
+								target: '$source',
+								amount: '$korritEnergy',
+							}),	
+						],
+					}),
+					effect({
+						effectType: EFFECT_TYPE_CONDITIONAL,
+						chosenKorrit: '$target',
+						conditions: [
+							{
+								objectOne: 'chosenKorrit',
+								propertyOne: PROPERTY_CONTROLLER,
+								comparator: '!=',
+								objectTwo: 'self',
+								propertyTwo: PROPERTY_CONTROLLER,
+							},
+						],
+						thenEffects: [
+							effect({
+								effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+								target: '$target',
+							}),
+						],
+					}),
+				],
+			},
+		],
+	}),
+	new Card('Balamant Pup', TYPE_CREATURE, REGION_NAROOM, 4, {
+		powers: [
+			{
+				name: 'Support', 
+				cost: 2,
+				text: 'Choose a Creature in play. Add 2 energy to the chosen Creature. Add additional 2 energy if the chosen Creature is a Balamant.',
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+						message: 'Choose a Creature to add 2 energy to',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '$target',
+						amount: 2,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_CONDITIONAL,
+						chosenCreature: '$target',
+						conditions: [
+							{
+								objectOne: 'chosenCreature',
+								propertyOne: PROPERTY_CREATURE_TYPES,
+								comparator: 'includes',
+								objectTwo: 'Balamant',
+								propertyTwo: null,
+							},
+						],
+						thenEffects: [
+							effect({
+								effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+								target: '$target',
+								amount: 2,
+							}),	
+						],
+					}),
+				],
+			},
+		],
 	}),
 	new Card('Poad', TYPE_MAGI, REGION_NAROOM, null, {
 		startingEnergy: 13,
@@ -2715,6 +2951,25 @@ export const cards = [
 						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
 						target: '$selected',
 						amount: 1,
+					}),
+				],
+			},
+		],
+	}),
+	new Card('Ormagon', TYPE_CREATURE, REGION_UNDERNEATH, 10, {
+		powers: [
+			{
+				name: 'Devastate',
+				cost: 10,
+				text: 'Discard every non-Underneath Creature in play.',
+				effects: [
+					select({
+						selector: SELECTOR_CREATURES_NOT_OF_REGION,
+						region: REGION_UNDERNEATH,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+						target: '$selected',
 					}),
 				],
 			},
