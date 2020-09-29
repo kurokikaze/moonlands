@@ -2424,10 +2424,6 @@ export const cards = [
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
 					}),
 					effect({
-						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-						target: '$sourceCreature',
-					}),
-					effect({
 						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI,
 						target: '$target',
 						amount: 3,
