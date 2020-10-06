@@ -1815,13 +1815,15 @@ export const cards = [
 			text: 'Choose your Creature and opponent\'s Creature. Discard twice your Creature\'s energy from opponent\'s Creature. Discard your Creature from play.',
 			effects: [
 				prompt({
-					promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
-					message: 'Choose your creature.',
+					promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+					restriction: RESTRICTION_OWN_CREATURE,
+					message: 'Choose your creature',
 					variable: 'yourCreature',
 				}),
 				prompt({
-					promptType: PROMPT_TYPE_SINGLE_CREATURE,
-					message: 'Choose opponent\'s creature.',
+					promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+					restriction: RESTRICTION_OPPONENT_CREATURE,
+					message: 'Choose opponent\'s creature',
 					variable: 'opponentCreature',
 				}),
 				getPropertyValue({

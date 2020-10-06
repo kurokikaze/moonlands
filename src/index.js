@@ -148,6 +148,8 @@ import {
 	RESTRICTION_REGION,
 	RESTRICTION_ENERGY_LESS_THAN_STARTING,
 	RESTRICTION_CREATURE_TYPE,
+	RESTRICTION_OWN_CREATURE,
+	RESTRICTION_OPPONENT_CREATURE,
 
 	COST_X,
 	
@@ -157,7 +159,7 @@ import {
 	ZONE_TYPE_ACTIVE_MAGI,
 	ZONE_TYPE_MAGI_PILE,
 	ZONE_TYPE_DECK,
-	ZONE_TYPE_DEFEATED_MAGI,
+	ZONE_TYPE_DEFEATED_MAGI, 
 } from './const.js';
 
 import {makeCardFilter} from './utils/restrictions.js';
@@ -199,6 +201,11 @@ function checkAnyCardForRestriction(cards, restriction, restrictionValue) {
 			return cards.some(card => card.card.region === restrictionValue);
 		case RESTRICTION_ENERGY_LESS_THAN_STARTING:
 			return cards.some(card => card.card.type === TYPE_CREATURE && card.data.energy < card.card.cost);
+		// For own and opponents creatures we pass effect controller as restrictionValue
+		case RESTRICTION_OWN_CREATURE:
+			return cards.some(card => card.data.controller === restrictionValue);
+		case RESTRICTION_OPPONENT_CREATURE:
+			return cards.some(card => card.data.controller !== restrictionValue);
 	}
 }
 
@@ -1102,11 +1109,29 @@ export class State {
 											checkAnyCardForRestriction(allCardsInPlay, type, value)
 										);
 									} else if (promptAction.restriction) {
-										return checkAnyCardForRestriction(
-											allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE), 
-											promptAction.restriction, 
-											promptAction.restrictionValue,
-										);
+										switch (promptAction.restriction) {
+											case RESTRICTION_OWN_CREATURE: {
+												return checkAnyCardForRestriction(
+													allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE), 
+													promptAction.restriction, 
+													action.source.data.controller,
+												); 
+											}
+											case RESTRICTION_OPPONENT_CREATURE: {
+												return checkAnyCardForRestriction(
+													allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE), 
+													promptAction.restriction, 
+													action.source.data.controller,
+												);
+											}
+											default: {
+												return checkAnyCardForRestriction(
+													allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE), 
+													promptAction.restriction, 
+													promptAction.restrictionValue,
+												); 
+											}
+										}
 									}
 									return true;
 								}
