@@ -1402,6 +1402,7 @@ export const cards = [
 					}),
 					select({
 						selector: SELECTOR_CREATURES_NOT_OF_TYPE,
+						creatureType: 'Xyx',
 					}),
 					effect({
 						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,

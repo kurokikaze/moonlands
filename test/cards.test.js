@@ -2848,6 +2848,80 @@ describe('Xyx', () => {
 	});
 });
 
+describe('Xyx Elder', () => {
+	it('Shockstorm', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(4);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(7);
+		const xyxElder = new CardInGame(byName('Xyx Elder'), ACTIVE_PLAYER).addEnergy(7);
+		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER).addEnergy(2);
+		const arboll = new CardInGame(byName('Arboll'), NON_ACTIVE_PLAYER).addEnergy(2);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [xyx, xyxElder, arboll], [grega]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.setRollDebugValue(3);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: xyxElder,
+			power: xyxElder.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(0, 'Active player discard has no cards');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1, 'Non-active player discard has 1 card');
+		expect(xyx.data.energy).toEqual(2, 'Another Xyx lost no energy');
+		expect(xyxElder.data.energy).toEqual(1, 'Xyx Elder lost only 6 energy as power cost');
+	});
+
+	it('Shockstorm (hitting own creatures)', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(4);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(7);
+		const xyxElder = new CardInGame(byName('Xyx Elder'), ACTIVE_PLAYER).addEnergy(7);
+		const xyx = new CardInGame(byName('Xyx'), NON_ACTIVE_PLAYER).addEnergy(2);
+		const arboll = new CardInGame(byName('Arboll'), ACTIVE_PLAYER).addEnergy(2);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [xyx, xyxElder, arboll], [grega]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.setRollDebugValue(3);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: xyxElder,
+			power: xyxElder.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'Active player discard has one card');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(0, 'Non-active player discard has 0 cards');
+		expect(xyx.data.energy).toEqual(2, 'Another Xyx lost no energy');
+		expect(xyxElder.data.energy).toEqual(1, 'Xyx Elder lost only 6 energy as power cost');
+	});
+});
+
 describe('Pruitt', () => {
 	it('Refresh', () => {
 		const ACTIVE_PLAYER = 422;
