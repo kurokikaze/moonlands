@@ -1529,7 +1529,7 @@ export class State {
 									const magiRegion = activeMagi.card.region;
 									const regionAllows = relicRegion === magiRegion || relicRegion === REGION_UNIVERSAL;
 
-									if (!alreadyHasOne && regionAllows && activeMagi.data.energy > baseCard.cost) {
+									if (!alreadyHasOne && regionAllows && activeMagi.data.energy >= baseCard.cost) {
 										this.transformIntoActions(
 											{
 												type: ACTION_EFFECT,

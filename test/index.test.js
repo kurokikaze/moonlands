@@ -2767,6 +2767,50 @@ describe('Casting things', () => {
 		expect(gameState.getZone(ZONE_TYPE_HAND, activePlayer).length).toEqual(0, 'No cards in hand now');
 	});
 
+	it('Cast relic from hand (no energy)', () => {
+		const activePlayer = 0;
+		const notActivePlayer = 1;
+
+		const grega = new CardInGame(byName('Grega'), activePlayer);
+		const kelthet = new CardInGame(byName('Kelthet'), activePlayer).addEnergy(4);
+
+		const waterOfLife = new CardInGame(byName('Water of Life'), activePlayer);
+
+		const zones = [
+			new Zone('Active player hand', ZONE_TYPE_HAND, activePlayer).add([waterOfLife]),
+			new Zone('Non-active player hand', ZONE_TYPE_HAND, notActivePlayer),
+			new Zone('Active player deck', ZONE_TYPE_DECK, activePlayer),
+			new Zone('Non-active player deck', ZONE_TYPE_DECK, notActivePlayer),
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, activePlayer).add([grega]),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([kelthet]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: 0,
+		});
+		gameState.setPlayers(0, 1);
+        
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'Only Kelthet is in play');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(0, 'Grega\'s Energy is 0');
+
+		gameState.update({
+			type: moonlands.ACTION_PLAY, 
+			payload: {
+				player: 0,
+				card: waterOfLife,
+			},
+		});
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'In play has one card');
+		// expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].card.name).toEqual('Water of Life', 'It is Water of Life');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(0, 'Grega\'s energy is 0');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].data.energy).toEqual(0, 'Water of Life\'s energy is 0');
+		expect(gameState.getZone(ZONE_TYPE_HAND, activePlayer).length).toEqual(0, 'No cards in hand now');
+	});
+
+
 	it('Cast relic from hand', () => {
 		const activePlayer = 0;
 		const notActivePlayer = 1;
