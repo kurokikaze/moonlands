@@ -629,24 +629,42 @@ export const cards = [
 					prompt({
 						promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
 					}),
-					getPropertyValue({
-						property: PROPERTY_ENERGY_COUNT,
-						variable: 'energyToRecover',
-					}),
 					effect({
-						effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+						effectType: EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY,
 						target: '$target',
-						sourceZone: ZONE_TYPE_IN_PLAY,
-						targetZone: ZONE_TYPE_HAND,
-					}),
-					effect({
-						effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
-						target: '$source',
-						amount: '$energyToRecover',
 					}),
 				],
 			},
 		],
+	}),
+	new Card('Motash\'s Staff', TYPE_RELIC, REGION_UNDERNEATH, 0, {
+		replacementEffects: [{
+			name: 'Dreamcatch',
+			text: 'If one of your creatures is returned to your hand, place its energy back on your Magi instead of discarding it',
+			find: {
+				effectType: EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY,
+				conditions: [
+					{
+						objectOne: 'target',
+						propertyOne: PROPERTY_CONTROLLER,
+						comparator: '=',
+						objectTwo: 'self',
+						propertyTwo: PROPERTY_CONTROLLER,
+					},
+					{
+						objectOne: 'source',
+						propertyOne: PROPERTY_CONTROLLER,
+						comparator: '!=',
+						objectTwo: 'self',
+						propertyTwo: PROPERTY_CONTROLLER,
+					}
+				],
+			},
+			replaceWith: {
+				effectType: EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY,
+				target: '%target',
+			},
+		}],
 	}),
 	new Card('Scroll of Fire', TYPE_RELIC, REGION_CALD, 0, {
 		triggerEffects: [
@@ -1630,26 +1648,6 @@ export const cards = [
 				effectType: EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY,
 				target: '$target',
 			}),
-			/* getPropertyValue({
-				property: PROPERTY_ENERGY_COUNT,
-				target: '$target',
-				variable: 'creatureEnergy',
-			}),
-			select({
-				selector: SELECTOR_OWN_MAGI,
-			}),
-			effect({
-				effectType: EFFECT_TYPE_MOVE_ENERGY,
-				source: '$target',
-				target: '$selected',
-				amount: '$creatureEnergy',
-			}),
-			effect({
-				effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-				sourceZone: ZONE_TYPE_IN_PLAY,
-				destinationZone: ZONE_TYPE_HAND,
-				target: '$target',
-			}), */
 		],
 	}),
 	new Card('Greater Vaal', TYPE_CREATURE, REGION_CALD, 5, {

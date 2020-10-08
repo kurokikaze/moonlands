@@ -279,6 +279,51 @@ describe('Alaban', () => {
 	});
 });
 
+describe('Motash\'s Staff', () => {
+	it('Returns energy to Magi when creature is returned to hand', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const alaban = new CardInGame(byName('Alaban'), ACTIVE_PLAYER).addEnergy(7);
+		const caveHyren = new CardInGame(byName('Cave Hyren'), NON_ACTIVE_PLAYER).addEnergy(2);
+		const trug = new CardInGame(byName('Trug'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const motashsStaff = new CardInGame(byName('Motash\'s Staff'), NON_ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [caveHyren, alaban, motashsStaff]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([trug]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: alaban,
+			power: alaban.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: caveHyren,
+			generatedBy: alaban.id,
+		};
+
+		gameState.update(powerAction);
+		gameState.update(targetingAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two cards in play');
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(1, 'One creature in opponents hand');
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).card.card.name).toEqual('Cave Hyren', 'Cave Hyren is in opponents hand');
+		expect(trug.data.energy).toEqual(7, 'Energy from Cave Hyren was placed onto Trug instead of being discarded');
+	});
+});
+
 describe('Arbolit', () => {
 	it('Healing Flame (own creature)', () => {
 		const ACTIVE_PLAYER = 422;

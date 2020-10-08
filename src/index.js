@@ -729,7 +729,9 @@ export class State {
 
 		let replacementFound = false;
 		let appliedReplacerId = null;
+		let appliedReplacerSelf = null;
 		let replaceWith = null;
+
 		zoneReplacements.forEach(replacer => {
 			const replacerId = replacer.self.id; // Not really, but will work for now
             
@@ -739,6 +741,7 @@ export class State {
 
 			if (this.matchAction(action, replacer.find, replacer.self)) {
 				replacementFound = true;
+				appliedReplacerSelf = replacer.self;
 				appliedReplacerId = replacerId;
 				replaceWith = replacer.replaceWith;
 			}
@@ -747,14 +750,25 @@ export class State {
 		const previouslyReplacedBy = action.replacedBy || [];
 
 		if (replacementFound) {
-			return {
+			let resultEffect = {
 				type: ACTION_EFFECT,
 				...replaceWith,
 				replacedBy: [
 					...previouslyReplacedBy,
 					appliedReplacerId,
 				],
+				generatedBy: action.generatedBy,
 			};
+
+			// prepare %-values on created action
+			Object.keys(replaceWith)
+				.filter(key => !['type', 'effectType'].includes(key))
+				.forEach(key => {
+					const value = this.prepareMetaValue(replaceWith[key], action, appliedReplacerSelf, action.generatedBy);
+					resultEffect[key] = value;
+				});
+
+			return resultEffect;
 		}
 
 		return action;
@@ -1967,7 +1981,6 @@ export class State {
 						case EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY: {
 							const card = this.getMetaValue(action.target, action.generatedBy);
 							const ownersMagi = this.useSelector(SELECTOR_OWN_MAGI, card.owner)[0];
-
 							this.transformIntoActions(
 								{
 									type: ACTION_GET_PROPERTY_VALUE,
@@ -1978,8 +1991,7 @@ export class State {
 								},
 								{
 									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_MOVE_ENERGY,
-									source: card,
+									effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
 									target: ownersMagi,
 									amount: '$creatureEnergyToRefund',
 									generatedBy: action.generatedBy,
