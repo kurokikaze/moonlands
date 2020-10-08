@@ -3613,12 +3613,121 @@ describe('Magam', () => {
 	});
 });
 
+describe('Updraft', () => {
+	it('Casting', () => {
+		const NON_ACTIVE_PLAYER = 104;
+		const ACTIVE_PLAYER = 12;
+
+		const nimbulo = new CardInGame(byName('Nimbulo'), ACTIVE_PLAYER).addEnergy(10);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER).addEnergy(5);
+		const updraft = new CardInGame(byName('Updraft'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaBalamant], [nimbulo]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([updraft]);
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const playAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: updraft,
+				player: ACTIVE_PLAYER,
+			},
+		};
+
+		gameState.update(playAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+			target: lavaBalamant,
+			player: ACTIVE_PLAYER,
+			generatedBy: updraft.id,
+		};
+		gameState.update(targetingAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).cards.length).toEqual(1, 'Active player has 1 card in hand');
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).card.card.name).toEqual('Lava Balamant', 'It is Lava Balamant');
+
+		expect(nimbulo.data.energy).toEqual(14, 'Nimbulo energy is now 14 (10 -1 for Updraft +5 from Lava Balamant');
+	});
+});
+
+describe('Nimbulo', () => {
+	it('Energy Drain', () => {
+		const NON_ACTIVE_PLAYER = 104;
+		const ACTIVE_PLAYER = 12;
+
+		const magam = new CardInGame(byName('Magam'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const nimbulo = new CardInGame(byName('Nimbulo'), ACTIVE_PLAYER).addEnergy(10);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER).addEnergy(3);
+		const fireGrag = new CardInGame(byName('Fire Grag'), ACTIVE_PLAYER).addEnergy(6);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaBalamant, fireGrag], [nimbulo]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([magam]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: nimbulo,
+			power: nimbulo.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+			generatedBy: nimbulo.id,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+
+		const chooseCreatureAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: lavaBalamant,
+			player: ACTIVE_PLAYER,
+			generatedBy: nimbulo.id,
+		};
+
+		gameState.update(chooseCreatureAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game still in prompt state');
+
+		const chooseTargetAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: fireGrag,
+			player: ACTIVE_PLAYER,
+			generatedBy: nimbulo.id,
+		};
+
+		gameState.update(chooseTargetAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+
+		expect(lavaBalamant.data.energy).toEqual(2, 'Lava Balamant now has 2 energy');
+		expect(fireGrag.data.energy).toEqual(7, 'Fire Grag now has 7 energy');
+	});
+});
+
 describe('Fire Grag', () => {
 	it('Metabolize', () => {
 		const ACTIVE_PLAYER = 104;
 		const NON_ACTIVE_PLAYER = 12;
 		const magam = new CardInGame(byName('Magam'), ACTIVE_PLAYER).addEnergy(10);
-		const nimbulo = new CardInGame(byName('Nimbulo'), ACTIVE_PLAYER).addEnergy(10);
+		const nimbulo = new CardInGame(byName('Nimbulo'), NON_ACTIVE_PLAYER).addEnergy(10);
 		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER).addEnergy(3);
 		const fireGrag = new CardInGame(byName('Fire Grag'), ACTIVE_PLAYER).addEnergy(6);
 		const thunderHyren = new CardInGame(byName('Thunder Hyren'), NON_ACTIVE_PLAYER).addEnergy(7);

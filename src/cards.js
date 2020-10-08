@@ -80,6 +80,8 @@ import {
 	EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
 	EFFECT_TYPE_CREATURE_ENTERS_PLAY,
 	EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
+	EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY,
+	EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY,
 	EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
 	EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI,
 	EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
@@ -179,9 +181,7 @@ export const cards = [
 						promptType: PROMPT_TYPE_SINGLE_CREATURE,
 					}),
 					effect({
-						effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-						sourceZone: ZONE_TYPE_IN_PLAY,
-						destinationZone: ZONE_TYPE_HAND,
+						effectType: EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY,
 						target: '$target',
 					}),
 				],
@@ -904,6 +904,7 @@ export const cards = [
 			{
 				name: 'Energy Drain',
 				text: 'Choose any two Creatures in play. Move one energy from one creature to another',
+				cost: 1,
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE,
@@ -1625,7 +1626,11 @@ export const cards = [
 				promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
 				message: 'Select your creature. Its energy will be moved onto your Magi and the creature will return to your hand.',
 			}),
-			getPropertyValue({
+			effect({
+				effectType: EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY,
+				target: '$target',
+			}),
+			/* getPropertyValue({
 				property: PROPERTY_ENERGY_COUNT,
 				target: '$target',
 				variable: 'creatureEnergy',
@@ -1644,7 +1649,7 @@ export const cards = [
 				sourceZone: ZONE_TYPE_IN_PLAY,
 				destinationZone: ZONE_TYPE_HAND,
 				target: '$target',
-			}),
+			}), */
 		],
 	}),
 	new Card('Greater Vaal', TYPE_CREATURE, REGION_CALD, 5, {
@@ -2199,7 +2204,7 @@ export const cards = [
 			},
 		],
 	}),
-	new Card('Mushroom Hyren', TYPE_CREATURE, REGION_OROTHE, 7, {
+	new Card('Mushroom Hyren', TYPE_CREATURE, REGION_UNDERNEATH, 7, {
 		powers: [
 			{
 				name: 'Sanctuary',

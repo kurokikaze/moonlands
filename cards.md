@@ -59,6 +59,8 @@ Done: **115** cards out of **190**
 - Balamant Pup
 - Korrit
 - Pack Korrit
+- Nimbulo
+- Updraft
 
 # Done, not tested
 
@@ -85,7 +87,6 @@ Done: **115** cards out of **190**
 - Lasada
 - Lava Arboll
 - Leaf Hyren
-- Numbulo
 - Orathan
 - Orwin's Staff
 - Paralit
@@ -108,7 +109,6 @@ Done: **115** cards out of **190**
 - Tryn
 - Typhoon
 - Ulk
-- Updraft
 - Water of Life
 - Xyx Elder
 - Orwin
@@ -204,7 +204,6 @@ Done: **115** cards out of **190**
 # Not done yet
 
 - Flood of Energy [NAROOM]
-- Nimbulo [ARDERIAL]
 - Tap Roots (will benefit from prompt texts) [NAROOM]
 
 # Cost reduction/increase
