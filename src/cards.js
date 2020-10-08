@@ -465,11 +465,11 @@ export const cards = [
 				effectType: EFFECT_TYPE_ROLL_DIE,
 			}),
 			prompt({
-				promptType: PROMPT_TYPE_SINGLE_CREATURE,
-				message: 'Choose creature to discard ${roll_result} energy from',
+				promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+				message: 'Choose Creature or Magi to discard ${roll_result} energy from',
 			}),
 			effect({
-				effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+				effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
 				target: '$target',
 				amount: '$roll_result',
 			}),

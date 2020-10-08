@@ -3416,6 +3416,7 @@ describe('Orwin\'s Gaze', () => {
 			step: STEP_PRS_FIRST,
 			activePlayer: ACTIVE_PLAYER,
 		});
+
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 		// Deck content to verify card goes to the top of the deck, not the bottom
 		gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).add([weebo]);
