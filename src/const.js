@@ -154,6 +154,7 @@ export const RESTRICTION_OWN_CREATURE = 'restrictions/own_creature';
 export const RESTRICTION_OPPONENT_CREATURE = 'restrictions/opponent_creature';
 export const RESTRICTION_REGION = 'restrictions/region';
 export const RESTRICTION_CREATURE_TYPE = 'restrictions/creature_type';
+export const RESTRICTION_PLAYABLE = 'restrictions/card_playable';
 
 export const TYPE_CREATURE = 'types/creature';
 export const TYPE_MAGI = 'types/magi';

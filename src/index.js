@@ -152,6 +152,7 @@ import {
 	RESTRICTION_CREATURE_TYPE,
 	RESTRICTION_OWN_CREATURE,
 	RESTRICTION_OPPONENT_CREATURE,
+	RESTRICTION_PLAYABLE,
 
 	COST_X,
 	
@@ -179,37 +180,6 @@ const convertCard = cardInGame => ({
 	card: cardInGame._card.name,
 	data: cardInGame.data,
 });
-
-function checkCardsForRestriction(cards, restriction, restrictionValue) {
-	switch (restriction) {
-		case RESTRICTION_CREATURE_TYPE:
-			return cards.every(card => card.card.name.split(' ').includes(restrictionValue));
-		case RESTRICTION_TYPE:
-			return cards.every(card => card.card.type === restrictionValue);
-		case RESTRICTION_REGION:
-			return cards.every(card => card.card.region === restrictionValue);
-		case RESTRICTION_ENERGY_LESS_THAN_STARTING:
-			return cards.every(card => card.card.type === TYPE_CREATURE && card.data.energy < card.card.cost);
-	}
-}
-
-function checkAnyCardForRestriction(cards, restriction, restrictionValue) {
-	switch (restriction) {
-		case RESTRICTION_CREATURE_TYPE:
-			return cards.some(card => card.card.name.split(' ').includes(restrictionValue));
-		case RESTRICTION_TYPE:
-			return cards.some(card => card.card.type === restrictionValue);
-		case RESTRICTION_REGION:
-			return cards.some(card => card.card.region === restrictionValue);
-		case RESTRICTION_ENERGY_LESS_THAN_STARTING:
-			return cards.some(card => card.card.type === TYPE_CREATURE && card.data.energy < card.card.cost);
-		// For own and opponents creatures we pass effect controller as restrictionValue
-		case RESTRICTION_OWN_CREATURE:
-			return cards.some(card => card.data.controller === restrictionValue);
-		case RESTRICTION_OPPONENT_CREATURE:
-			return cards.some(card => card.data.controller !== restrictionValue);
-	}
-}
 
 const steps = [
 	{
@@ -703,6 +673,49 @@ export class State {
 		return initialValue;
 	}
 
+	checkAnyCardForRestriction(cards, restriction, restrictionValue) {
+		switch (restriction) {
+			case RESTRICTION_CREATURE_TYPE:
+				return cards.some(card => card.card.name.split(' ').includes(restrictionValue));
+			case RESTRICTION_TYPE:
+				return cards.some(card => card.card.type === restrictionValue);
+			case RESTRICTION_PLAYABLE:
+				return cards.some(card => {
+					const magi = this.useSelector(SELECTOR_OWN_MAGI, card.owner)[0];
+					const cardCost = this.calculateTotalCost(card);
+					return magi.data.energy >= cardCost; 
+				});
+			case RESTRICTION_REGION:
+				return cards.some(card => card.card.region === restrictionValue);
+			case RESTRICTION_ENERGY_LESS_THAN_STARTING:
+				return cards.some(card => card.card.type === TYPE_CREATURE && card.data.energy < card.card.cost);
+			// For own and opponents creatures we pass effect controller as restrictionValue
+			case RESTRICTION_OWN_CREATURE:
+				return cards.some(card => card.data.controller === restrictionValue);
+			case RESTRICTION_OPPONENT_CREATURE:
+				return cards.some(card => card.data.controller !== restrictionValue);
+		}
+	}
+
+	checkCardsForRestriction(cards, restriction, restrictionValue) {
+		switch (restriction) {
+			case RESTRICTION_CREATURE_TYPE:
+				return cards.every(card => card.card.name.split(' ').includes(restrictionValue));
+			case RESTRICTION_TYPE:
+				return cards.every(card => card.card.type === restrictionValue);
+			case RESTRICTION_REGION:
+				return cards.every(card => card.card.region === restrictionValue);
+			case RESTRICTION_ENERGY_LESS_THAN_STARTING:
+				return cards.every(card => card.card.type === TYPE_CREATURE && card.data.energy < card.card.cost);
+			case RESTRICTION_PLAYABLE:
+				return cards.every(card => {
+					const magi = this.useSelector(SELECTOR_OWN_MAGI, card.owner)[0];
+					const cardCost = this.calculateTotalCost(card);
+					return magi.data.energy >= cardCost; 
+				});
+		}
+	}
+
 	getObjectOrSelf(action, self, object, property) {
 		if (object == 'self') {
 			return self;
@@ -919,6 +932,19 @@ export class State {
 		return result;
 	}
 
+	calculateTotalCost(card) {
+		const activeMagiSelected = this.useSelector(SELECTOR_OWN_MAGI, card.owner);
+		if (activeMagiSelected.length) {
+			const activeMagi = activeMagiSelected[0];
+			const baseCost = this.modifyByStaticAbilities(card, PROPERTY_COST);
+			const regionPenalty = (activeMagi.card.region == card.card.region || card.card.region == REGION_UNIVERSAL) ? 0 : 1;
+	
+			return baseCost + regionPenalty;
+		}
+
+		return null;
+	}
+
 	update(initialAction) {
 		if (this.hasWinner()) {
 			return false;
@@ -1123,26 +1149,26 @@ export class State {
 								case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
 									if (promptAction.restrictions) {
 										return promptAction.restrictions.every(({type, value}) => 
-											checkAnyCardForRestriction(allCardsInPlay, type, value)
+											this.checkAnyCardForRestriction(allCardsInPlay, type, value)
 										);
 									} else if (promptAction.restriction) {
 										switch (promptAction.restriction) {
 											case RESTRICTION_OWN_CREATURE: {
-												return checkAnyCardForRestriction(
+												return this.checkAnyCardForRestriction(
 													allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE), 
 													promptAction.restriction, 
 													action.source.data.controller,
 												); 
 											}
 											case RESTRICTION_OPPONENT_CREATURE: {
-												return checkAnyCardForRestriction(
+												return this.checkAnyCardForRestriction(
 													allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE), 
 													promptAction.restriction, 
 													action.source.data.controller,
 												);
 											}
 											default: {
-												return checkAnyCardForRestriction(
+												return this.checkAnyCardForRestriction(
 													allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE), 
 													promptAction.restriction, 
 													promptAction.restrictionValue,
@@ -1157,26 +1183,26 @@ export class State {
 									const cardsInZone = this.getZone(promptAction.zone, zoneOwner).cards;
 									if (promptAction.restrictions) {
 										return promptAction.restrictions.every(({type, value}) => 
-											checkAnyCardForRestriction(cardsInZone, type, value)
+											this.checkAnyCardForRestriction(cardsInZone, type, value)
 										);
 									} else if (promptAction.restriction) {
 										switch (promptAction.restriction) {
 											case RESTRICTION_OWN_CREATURE: {
-												return checkAnyCardForRestriction(
+												return this.checkAnyCardForRestriction(
 													cardsInZone.filter(card => card.card.type === TYPE_CREATURE), 
 													promptAction.restriction, 
 													action.source.data.controller,
 												); 
 											}
 											case RESTRICTION_OPPONENT_CREATURE: {
-												return checkAnyCardForRestriction(
+												return this.checkAnyCardForRestriction(
 													cardsInZone.filter(card => card.card.type === TYPE_CREATURE), 
 													promptAction.restriction, 
 													action.source.data.controller,
 												);
 											}
 											default: {
-												return checkAnyCardForRestriction(
+												return this.checkAnyCardForRestriction(
 													cardsInZone.filter(card => card.card.type === TYPE_CREATURE), 
 													promptAction.restriction, 
 													promptAction.restrictionValue,
@@ -1270,7 +1296,15 @@ export class State {
 							const zone = this.getMetaValue(action.zone, action.generatedBy);
 							const zoneOwner = this.getMetaValue(action.zoneOwner, action.generatedBy);
 							const numberOfCards = this.getMetaValue(action.numberOfCards, action.generatedBy);
-							const cardFilter = makeCardFilter(restrictions || []);
+
+							var magiEnergy = 0;
+							if (restrictions && restrictions.some(({type}) => type === RESTRICTION_PLAYABLE)) {
+								const ourMagi = this.useSelector(SELECTOR_OWN_MAGI, zoneOwner);
+								if (ourMagi.length) {
+									magiEnergy = ourMagi[0].data.energy;
+								} 
+							}
+							const cardFilter = makeCardFilter(restrictions || [], magiEnergy);
 							const zoneContent = this.getZone(zone, zoneOwner).cards;
 							const cards = restrictions ? zoneContent.filter(cardFilter) : zoneContent;
 
@@ -1328,7 +1362,7 @@ export class State {
 							}
 							if (this.state.promptParams.restrictions) {
 								const checkResult = this.state.promptParams.restrictions.every(({type, value}) => 
-									checkCardsForRestriction(action.cards, type, value)
+									this.checkCardsForRestriction(action.cards, type, value)
 								);
 								if (!checkResult) {
 									return false;
@@ -1516,58 +1550,64 @@ export class State {
 					break;
 				}
 				case ACTION_PLAY: {
-					const player = action.payload.player;
+					const castCards = this.getMetaValue(action.card, action.generatedBy);
+					const castCard = castCards ? (castCards.length ? castCards[0] : castCard) : null;
+					const player = (action.payload) ? action.payload.player : action.player;
+					const cardItself = (action.payload) ? action.payload.card : castCard;
+
 					const playerHand = this.getZone(ZONE_TYPE_HAND, player);
-					const cardInHand = playerHand.containsId(action.payload.card.id);
+					const cardInHand = playerHand.containsId(cardItself.id);
 					if (cardInHand) {
 						// baseCard is "abstract" card, CardInPlay is concrete instance
-						const baseCard = action.payload.card.card;
+						const baseCard = (action.payload) ? action.payload.card.card : castCard.card;
 
 						const currentPriority = this.getCurrentPriority();
 						const cardType = baseCard.type;
 						if (
 							(cardType == TYPE_CREATURE && currentPriority == PRIORITY_CREATURES) ||
 							(cardType == TYPE_RELIC && currentPriority == PRIORITY_PRS) ||
-							(cardType == TYPE_SPELL && currentPriority == PRIORITY_PRS)
+							(cardType == TYPE_SPELL && currentPriority == PRIORITY_PRS) ||
+							action.forcePriority
 						) {
 							// Здесь должен быть полный шаг определения стоимости
 							const activeMagi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card;
-							const baseCost = this.modifyByStaticAbilities(action.payload.card, PROPERTY_COST);
-							const regionPenalty = (activeMagi.card.region == baseCard.region || baseCard.region == REGION_UNIVERSAL) ? 0 : 1;
+							// const baseCost = this.modifyByStaticAbilities(cardItself, PROPERTY_COST);
+							// const regionPenalty = (activeMagi.card.region == baseCard.region || baseCard.region == REGION_UNIVERSAL) ? 0 : 1;
 
+							const totalCost = this.calculateTotalCost(cardItself);
 							switch (cardType) {
 								case TYPE_CREATURE: {
-									if (activeMagi.data.energy >= baseCost + regionPenalty) {
+									if (activeMagi.data.energy >= totalCost) {
 										this.transformIntoActions(
 											{
 												type: ACTION_EFFECT,
 												effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
 												from: activeMagi,
-												amount: baseCost + regionPenalty,
-												player: action.payload.player,
-												generatedBy: action.payload.card.id,
+												amount: totalCost,
+												player: player,
+												generatedBy: cardItself.id,
 											},
 											{
 												type: ACTION_EFFECT,
 												effectType: EFFECT_TYPE_PLAY_CREATURE,
-												card: action.payload.card,
-												player: action.payload.player,
-												generatedBy: action.payload.card.id,
+												card: cardItself,
+												player: player,
+												generatedBy: cardItself.id,
 											},
 											{
 												type: ACTION_EFFECT,
 												effectType: EFFECT_TYPE_CREATURE_ENTERS_PLAY,
 												target: '$creature_created',
-												player: action.payload.player,
-												generatedBy: action.payload.card.id,
+												player: player,
+												generatedBy: cardItself.id,
 											},
 											{
 												type: ACTION_EFFECT,
 												effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
 												target: '$creature_created',
-												player: action.payload.player,
+												player: player,
 												amount: baseCard.cost,
-												generatedBy: action.payload.card.id,
+												generatedBy: cardItself.id,
 											}
 										);
 									}
@@ -1586,7 +1626,7 @@ export class State {
 												type: ACTION_EFFECT,
 												effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC,
 												from: activeMagi,
-												amount: baseCost,
+												amount: totalCost,
 												player,
 												generatedBy: action.payload.card.id,
 											},
@@ -1609,7 +1649,7 @@ export class State {
 									break;
 								}
 								case TYPE_SPELL: {
-									if (activeMagi.data.energy >= baseCard.cost + regionPenalty) {
+									if (activeMagi.data.energy >= totalCost) {
 										const preparedEffects = baseCard.data.effects
 											.map(effect => ({
 												source: action.payload.card,
@@ -1639,10 +1679,10 @@ export class State {
 												case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
 													if (promptAction.restrictions) {
 														return promptAction.restrictions.every(({type, value}) => 
-															checkAnyCardForRestriction(this.getZone(ZONE_TYPE_IN_PLAY).cards, type, value)
+															this.checkAnyCardForRestriction(this.getZone(ZONE_TYPE_IN_PLAY).cards, type, value)
 														);
 													} else if (promptAction.restriction) {
-														return checkAnyCardForRestriction(
+														return this.checkAnyCardForRestriction(
 															this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.type === TYPE_CREATURE), 
 															promptAction.restriction, 
 															promptAction.restrictionValue,
@@ -1668,7 +1708,7 @@ export class State {
 													type: ACTION_EFFECT,
 													effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
 													from: activeMagi,
-													amount: baseCost + regionPenalty,
+													amount: totalCost,
 													player: action.payload.player,
 													generatedBy: action.payload.card.id,
 												},

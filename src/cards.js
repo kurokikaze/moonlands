@@ -7,6 +7,7 @@ import {
 	ACTION_ENTER_PROMPT,
 	ACTION_CALCULATE,
 	ACTION_GET_PROPERTY_VALUE,
+	ACTION_PLAY,
 
 	CALCULATION_DOUBLE,
 	CALCULATION_ADD,
@@ -130,6 +131,7 @@ import {
 	ZONE_TYPE_IN_PLAY,
 	ZONE_TYPE_DISCARD,
 	ZONE_TYPE_DECK,
+	RESTRICTION_PLAYABLE,
 	/* eslint-enable no-unused-vars */
 } from './const.js';
 
@@ -509,14 +511,9 @@ export const cards = [
 					],
 				},
 				effects: [
-					getPropertyValue({
-						property: PROPERTY_CONTROLLER,
-						target: '$new_card',
-						variable: 'magiController',
-					}),
 					select({
 						selector: SELECTOR_OPPONENT_ID,
-						opponentOf: '$magiController',
+						opponentOf: '$player',
 						variable: 'opponentId',
 					}),
 					prompt({
@@ -530,6 +527,43 @@ export const cards = [
 						effectType: EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
 						target: '$targetCards',
 					}),
+				],
+			},
+		],
+	}),
+	new Card('Warrior\'s Boots', TYPE_RELIC, REGION_UNIVERSAL, 0, {
+		powers: [
+			{
+				name: 'Warpath',
+				text: 'Discard Warrior\'s Boots from play. Immediately select and play a creature from your hand. You must still pay all costs of the Creature.',
+				cost: 0,
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
+						target: '$source',
+					}),
+					prompt({
+						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+						zone: ZONE_TYPE_HAND,
+						zoneOwner: '$player',
+						numberOfCards: 1,
+						restrictions: [
+							{
+								type: RESTRICTION_TYPE,
+								value: TYPE_CREATURE,
+							},
+							{
+								type: RESTRICTION_PLAYABLE,
+							}
+						],
+					}),
+					{
+						type: ACTION_PLAY,
+						sourceZone: ZONE_TYPE_HAND,
+						destinationZone: ZONE_TYPE_IN_PLAY,
+						forcePriority: true,
+						card: '$targetCards'
+					},
 				],
 			},
 		],

@@ -1916,7 +1916,7 @@ describe('Hyren\'s Call', () => {
 
 		const deepHyren = new CardInGame(byName('Deep Hyren'), ACTIVE_PLAYER);
 		const paralith = new CardInGame(byName('Paralit'), ACTIVE_PLAYER);
-		const bwill = new CardInGame(byName('Paralit'), ACTIVE_PLAYER);
+		const bwill = new CardInGame(byName('Bwill'), ACTIVE_PLAYER);
 
 		const gameState = new State({
 			zones: [
@@ -1966,6 +1966,206 @@ describe('Hyren\'s Call', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Deep Hyren', 'Card is Deep Hyren');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(6, 'Deep Hyren has 6 energy - its starting value');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.attacked).toEqual(100, 'Deep Hyren will not be able to attack this turn');
+	});
+});
+
+describe('Warrior\'s Boots', () => {
+	it('Warpath', () => {
+		const ACTIVE_PLAYER = 29;
+		const NON_ACTIVE_PLAYER = 12;
+
+		const yaki = new CardInGame(byName('Yaki'), ACTIVE_PLAYER).addEnergy(4);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(15);
+
+		const arboll = new CardInGame(byName('Arboll'), ACTIVE_PLAYER);
+		const giantCarillion = new CardInGame(byName('Giant Carillion'), ACTIVE_PLAYER);
+
+		const warriorsBoots = new CardInGame(byName('Warrior\'s Boots'), ACTIVE_PLAYER);
+
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([arboll, giantCarillion]),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([yaki]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([warriorsBoots]),
+			],
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerUseAction = {
+			type: ACTION_POWER,
+			source: warriorsBoots,
+			power: warriorsBoots.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerUseAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in Prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, 'Game is prompting for cards from zone');
+		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game is prompting active player');
+		expect(gameState.state.promptParams.zone).toEqual(ZONE_TYPE_HAND, 'Prompt awaiting card from hand');
+		expect(gameState.state.promptParams.numberOfCards).toEqual(1, 'Prompt awaiting one card');
+		expect(gameState.state.promptParams.zoneOwner).toEqual(ACTIVE_PLAYER, 'Prompt awaiting card from active players hand');
+		
+		const cardChoiceAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			cards: [arboll],
+			generatedBy: warriorsBoots.id,
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(cardChoiceAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in Prompt state');
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One card is in play');
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(1, 'Hand has 1 card left');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Arboll', 'Card in play is Arboll');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(3, 'Arboll has 3 energy - its starting value');
+
+		expect(yaki.data.energy).toEqual(1, 'Yaki paid for Arboll');
+	});
+
+	it('Warpath (but not enough energy)', () => {
+		const ACTIVE_PLAYER = 29;
+		const NON_ACTIVE_PLAYER = 12;
+
+		const yaki = new CardInGame(byName('Yaki'), ACTIVE_PLAYER).addEnergy(2);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(15);
+
+		const arboll = new CardInGame(byName('Arboll'), ACTIVE_PLAYER);
+		const giantCarillion = new CardInGame(byName('Giant Carillion'), ACTIVE_PLAYER);
+
+		const warriorsBoots = new CardInGame(byName('Warrior\'s Boots'), ACTIVE_PLAYER);
+
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([arboll, giantCarillion]),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([yaki]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([warriorsBoots]),
+			],
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerUseAction = {
+			type: ACTION_POWER,
+			source: warriorsBoots,
+			power: warriorsBoots.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerUseAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in Prompt state');
+	});
+
+	it('Warpath (but not enough energy because of region penalty)', () => {
+		const ACTIVE_PLAYER = 29;
+		const NON_ACTIVE_PLAYER = 12;
+
+		const yaki = new CardInGame(byName('Yaki'), ACTIVE_PLAYER).addEnergy(2);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(15);
+
+		const fireChogo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER);
+		const giantCarillion = new CardInGame(byName('Giant Carillion'), ACTIVE_PLAYER);
+
+		const warriorsBoots = new CardInGame(byName('Warrior\'s Boots'), ACTIVE_PLAYER);
+
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([fireChogo, giantCarillion]),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([yaki]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([warriorsBoots]),
+			],
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerUseAction = {
+			type: ACTION_POWER,
+			source: warriorsBoots,
+			power: warriorsBoots.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerUseAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in Prompt state');
+	});
+
+	it('Warpath with Robe of the Vines', () => {
+		const ACTIVE_PLAYER = 29;
+		const NON_ACTIVE_PLAYER = 12;
+
+		const yaki = new CardInGame(byName('Yaki'), ACTIVE_PLAYER).addEnergy(4);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(15);
+
+		const arboll = new CardInGame(byName('Arboll'), ACTIVE_PLAYER);
+		const giantCarillion = new CardInGame(byName('Giant Carillion'), ACTIVE_PLAYER);
+
+		const warriorsBoots = new CardInGame(byName('Warrior\'s Boots'), ACTIVE_PLAYER);
+		const robeOfVines = new CardInGame(byName('Robe of Vines'), ACTIVE_PLAYER);
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([arboll, giantCarillion]),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([yaki]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([warriorsBoots, robeOfVines]),
+			],
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerUseAction = {
+			type: ACTION_POWER,
+			source: warriorsBoots,
+			power: warriorsBoots.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerUseAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in Prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, 'Game is prompting for cards from zone');
+		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game is prompting active player');
+		expect(gameState.state.promptParams.zone).toEqual(ZONE_TYPE_HAND, 'Prompt awaiting card from hand');
+		expect(gameState.state.promptParams.numberOfCards).toEqual(1, 'Prompt awaiting one card');
+		expect(gameState.state.promptParams.zoneOwner).toEqual(ACTIVE_PLAYER, 'Prompt awaiting card from active players hand');
+		
+		const cardChoiceAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			cards: [arboll],
+			generatedBy: warriorsBoots.id,
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(cardChoiceAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in Prompt state');
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two cards are in play');
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(1, 'Hand has 1 card left');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards.map(card => card.card.name)).toEqual(['Arboll', 'Robe of Vines'], 'Cards in play are Arboll and Robe of Vines');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards.find(card => card.card.name == 'Arboll').data.energy).toEqual(4, 'Arboll has 4 energy - 3 starting and one from Robe of Vines');
+
+		expect(yaki.data.energy).toEqual(1, 'Yaki paid for Arboll');
 	});
 });
 
