@@ -43,7 +43,7 @@ Done: **120** cards out of **190**
 - Robes of the Ages
 - Rudwot
 - Sinder
-- Staff of Hyren (tested with O'Qua)
+- Staff of Hyren
 - Stagadan
 - Timber Hyren
 - Undertow
@@ -109,6 +109,7 @@ Done: **120** cards out of **190**
 - Syphon Stone
 - Thermal Blast
 - Thunder Hyren
+- Thunder Vashp
 - Trug
 - Tryn
 - Typhoon
@@ -209,13 +210,12 @@ Done: **120** cards out of **190**
 # Not done yet
 
 - Abaquist
-- Adis
 - Ancestral Flute
+- Barak
 - Bisiwog
 - Blu
 - Burrow
 - Carnivorous Cave
-- Channeler's Gloves
 - Cloud Sceptre
 - Colossus
 - Corf Pearl
@@ -226,13 +226,17 @@ Done: **120** cards out of **190**
 - Entangle
 - Epik
 - Eye of the Storm
-- Fire Flow
 - Flame Control
+- Flame Hyren
 - Flood of Energy
 - Fog Bank
 - Fossik
 - Gar
+- Giant Korrit
 - Giant Parmalag
+- Giant Vulbor
+- Gloves of Crystal
+- Gogor
 - Gum-Gum
 - Heat Lens
 - Hood of Hiding
@@ -243,15 +247,24 @@ Done: **120** cards out of **190**
 - Lovian
 - Mask of Abwyn
 - Mirror Pendant
-- Orlon
+- Motash
+- Motash's Staff
+- Orathan Flyer
 - Orish
+- Orlon
+- Orothean Belt
+- Orothean Goggles
 - Orpus
 - Orthea
-- Orwin's Staff
 - Parmalag
 - Platheus
+- Plith
+- Raxis
 - Relic Mirror
+- Rod of Coals
+- Shimmer
 - Spirit of the Flame
+- Staff of Korrits
 - Stradus
 - Syphon Vortex
 - Tap Roots
@@ -260,6 +273,7 @@ Done: **120** cards out of **190**
 - Twee
 - Vaal
 - Vellup
+- Vinoc
 - Vulbor
 - Wellisk
 - Wence
