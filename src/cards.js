@@ -133,6 +133,7 @@ import {
 	ZONE_TYPE_DECK,
 	RESTRICTION_PLAYABLE,
 	RESTRICTION_ENERGY_LESS_THAN,
+	RESTRICTION_CREATURE_WAS_ATTACKED,
 	/* eslint-enable no-unused-vars */
 } from './const.js';
 
@@ -185,6 +186,24 @@ export const cards = [
 					}),
 					effect({
 						effectType: EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY,
+						target: '$target',
+					}),
+				],
+			},
+		],
+	}),
+	new Card('Corf', TYPE_CREATURE, REGION_OROTHE, 3, {
+		powers: [
+			{
+				name: 'Final Blow',
+				cost: 3,
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+						restriction: RESTRICTION_CREATURE_WAS_ATTACKED,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
 						target: '$target',
 					}),
 				],
@@ -683,6 +702,50 @@ export const cards = [
 						target: '$target',
 					}),
 				],
+			},
+		],
+	}),
+	new Card('Crystal Arboll', TYPE_CREATURE, REGION_UNDERNEATH, 2, {
+		powers: [
+			{
+				name: 'Healing Light',
+				text: 'Choose any one Creature in play. Discard Crystal Arbol from play. Add two energy to the chosen Creature. Add two additional energy if that Creature is Underneath.',
+				cost: 0,
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+						target: '$source',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '$target',
+						amount: 2,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_CONDITIONAL,
+						chosenCreature: '$target',
+						conditions: [
+							{
+								objectOne: 'chosenCreature',
+								propertyOne: PROPERTY_REGION,
+								comparator: '=',
+								objectTwo: REGION_UNDERNEATH,
+								propertyTwo: null,
+							}
+						],
+						thenEffects: [
+							effect({
+								effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+								target: '$target',
+								amount: 2,
+							}),
+						],
+					}),
+
+				]
 			},
 		],
 	}),
@@ -3539,7 +3602,7 @@ export const cards = [
 		triggerEffects: [
 			{
 				name: 'Spelltap',
-				text: 'When you play an Orothe spell, add 1 energy to Coral Hyren.',
+				text: 'When you play an Orothe spell, add 1 energy to Coral Hyren',
 				find: {
 					effectType: EFFECT_TYPE_PLAY_SPELL,
 					conditions: [

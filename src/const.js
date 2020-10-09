@@ -145,7 +145,6 @@ export const PROMPT_TYPE_NUMBER_OF_CREATURES = 'prompt/number_of_creatures';
 export const PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED = 'prompt/number_of_creatures_filtered';
 export const PROMPT_TYPE_SINGLE_MAGI = 'prompt/magi';
 export const PROMPT_TYPE_RELIC = 'prompt/relic';
-export const PROMPT_TYPE_NUMBER_OF_RELICS = 'prompt/number_of_relics';
 export const PROMPT_TYPE_NUMBER = 'prompt/number';
 
 export const RESTRICTION_TYPE ='restrictions/type';
@@ -156,6 +155,8 @@ export const RESTRICTION_OPPONENT_CREATURE = 'restrictions/opponent_creature';
 export const RESTRICTION_REGION = 'restrictions/region';
 export const RESTRICTION_CREATURE_TYPE = 'restrictions/creature_type';
 export const RESTRICTION_PLAYABLE = 'restrictions/card_playable';
+export const RESTRICTION_CREATURE_WAS_ATTACKED = 'restrictions/creature_was_attacked';
+export const RESTRICTION_MAGI_WITHOUT_CREATURES = 'restrictions/magi_without_creatures';
 
 export const TYPE_CREATURE = 'types/creature';
 export const TYPE_MAGI = 'types/magi';

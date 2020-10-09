@@ -402,6 +402,90 @@ describe('Arbolit', () => {
 	});
 });
 
+describe('Crystal Arbol', () => {
+	it('Healing Light (Underneath creature)', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const crystalArboll = new CardInGame(byName('Crystal Arboll'), ACTIVE_PLAYER).addEnergy(2);
+		const mushroomHyren = new CardInGame(byName('Mushroom Hyren'), ACTIVE_PLAYER).addEnergy(5);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [crystalArboll, mushroomHyren]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: crystalArboll,
+			power: crystalArboll.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_SINGLE_CREATURE,
+			target: mushroomHyren,
+			generatedBy: crystalArboll.id,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in Prompt state');
+
+		gameState.update(targetingAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(mushroomHyren.id).data.energy).toEqual(9, 'Mushroom Hyren now has 9 energy');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'One card in Player 1 discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Crystal Arboll', 'Card in Player 1 discard is Crystal Arboll');
+	});
+
+	it('Healing Light (Non-Underneath Creature)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const crystalArboll = new CardInGame(byName('Crystal Arboll'), ACTIVE_PLAYER).addEnergy(2);
+		const pharan = new CardInGame(byName('Pharan'), NON_ACTIVE_PLAYER).addEnergy(3);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [crystalArboll, pharan]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: crystalArboll,
+			power: crystalArboll.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_SINGLE_CREATURE,
+			target: pharan,
+			generatedBy: crystalArboll.id,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in Prompt state');
+
+		gameState.update(targetingAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in Prompt state');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(pharan.id).data.energy).toEqual(5, 'Pharan now has 5 energy');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'One card in Player 1 discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Crystal Arboll', 'Card in Player 1 discard is Crystal Arboll');
+	});
+});
+
 describe('Arboll', () => {
 	it('Life channel', () => {
 		const ACTIVE_PLAYER = 422;
@@ -3282,6 +3366,85 @@ describe('Weebo', () => {
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(weebo.id).data.energy).toEqual(1, 'Weebo now has 1 energy');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireGrag.id).data.energy).toEqual(6, 'Fire Grag restored to 6 energy');
+	});
+});
+
+describe('Corf', () => {
+	it('Final Blow', () => {
+		const ACTIVE_PLAYER = 15;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const corf = new CardInGame(byName('Corf'), ACTIVE_PLAYER).addEnergy(6);
+		const fireGrag = new CardInGame(byName('Fire Grag'), NON_ACTIVE_PLAYER).addEnergy(4);
+
+		fireGrag.markAttackReceived();
+
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [corf, fireGrag]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: corf,
+			power: corf.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+			target: fireGrag,
+			generatedBy: corf.id,
+		};
+
+		gameState.update(powerAction);
+		gameState.update(targetingAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards.length).toEqual(1, 'Only one card is in play');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(corf.id).data.energy).toEqual(3, 'Corf now has 3 energy');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1, 'Non-Active player has one card in discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Fire Grag', 'It is Fire Grag');
+	});
+
+	it('Final Blow (no targets)', () => {
+		const ACTIVE_PLAYER = 15;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const corf = new CardInGame(byName('Corf'), ACTIVE_PLAYER).addEnergy(6);
+		const fireGrag = new CardInGame(byName('Fire Grag'), NON_ACTIVE_PLAYER).addEnergy(4);
+
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [corf, fireGrag]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: corf,
+			power: corf.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
 	});
 });
 

@@ -1,4 +1,4 @@
-Done: **117** cards out of **190**
+Done: **119** cards out of **190**
 
 # Done, tested
 
@@ -63,6 +63,8 @@ Done: **117** cards out of **190**
 - Updraft
 - Warrior's Boots
 - Xyx Elder
+- Corf
+- Crystal Arboll
 
 # Done, not tested
 
@@ -224,13 +226,11 @@ Done: **117** cards out of **190**
 - Thunderquake (choosing any number of creatures)
 - Vulbor (choosing player)
 - Heat Lens (choosing player)
-- Corf (status "was attacked")
 - Gar (between cards in play)
 
 # Conditionals
 
 - Corf Pearl
-- Crystal Arboll
 - Eye of the Storm
 - Gorgle's Ring
 - Plith

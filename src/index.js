@@ -154,6 +154,8 @@ import {
 	RESTRICTION_OWN_CREATURE,
 	RESTRICTION_OPPONENT_CREATURE,
 	RESTRICTION_PLAYABLE,
+	RESTRICTION_CREATURE_WAS_ATTACKED,
+	RESTRICTION_MAGI_WITHOUT_CREATURES,
 
 	COST_X,
 	
@@ -685,12 +687,21 @@ export class State {
 					const cardCost = this.calculateTotalCost(card);
 					return magi.data.energy >= cardCost; 
 				};
+			case RESTRICTION_MAGI_WITHOUT_CREATURES:
+				return card => {
+					if (card.card.type !== TYPE_MAGI) return false;
+					const creatures = this.useSelector(SELECTOR_OWN_CREATURES, card.owner);
+
+					return creatures.length === 0;
+				};
 			case RESTRICTION_REGION:
 				return card => card.card.region === restrictionValue;
 			case RESTRICTION_ENERGY_LESS_THAN_STARTING:
 				return card => card.card.type === TYPE_CREATURE && card.data.energy < card.card.cost;
 			case RESTRICTION_ENERGY_LESS_THAN:
 				return card => card.card.type === TYPE_CREATURE && card.data.energy < restrictionValue;
+			case RESTRICTION_CREATURE_WAS_ATTACKED:
+				return card => card.card.type === TYPE_CREATURE && card.data.wasAttacked === true;
 			// For own and opponents creatures we pass effect controller as restrictionValue
 			case RESTRICTION_OWN_CREATURE:
 				return card => card.data.controller === restrictionValue;
