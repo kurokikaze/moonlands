@@ -2316,7 +2316,7 @@ export class State {
 							this.transformIntoActions({
 								type: ACTION_EFFECT,
 								effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
-								sourceCard: zoneChangingTarget,
+								sourceCard: zoneChangingCard,
 								sourceZone: sourceZoneType,
 								destinationCard: newObject,
 								destinationZone: destinationZoneType,

@@ -246,6 +246,7 @@ describe('Alaban', () => {
 
 		const alaban = new CardInGame(byName('Alaban'), ACTIVE_PLAYER).addEnergy(6);
 		const caveHyren = new CardInGame(byName('Cave Hyren'), NON_ACTIVE_PLAYER).addEnergy(2);
+		const trug = new CardInGame(byName('Trug'), NON_ACTIVE_PLAYER).addEnergy(2);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [caveHyren, alaban]);
 
 		const gameState = new State({
@@ -253,7 +254,7 @@ describe('Alaban', () => {
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
 		});
-
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([trug]);
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const powerAction = {
@@ -276,6 +277,7 @@ describe('Alaban', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Alaban', 'Alaban is in play');
 		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(1, 'One creature in opponents hand');
 		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).card.card.name).toEqual('Cave Hyren', 'Cave Hyren is in opponents hand');
+		expect(trug.data.energy).toEqual(2, 'Trug energy is not changed, Cave Hyren energy was discarded');
 	});
 });
 
