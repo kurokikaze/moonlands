@@ -166,7 +166,6 @@ import {
 	ZONE_TYPE_DEFEATED_MAGI, 
 } from './const.js';
 
-import {makeCardFilter} from './utils/restrictions.js';
 import {showAction} from './logAction.js';
 
 import clone from './clone.js';
@@ -708,6 +707,12 @@ export class State {
 
 	checkCardsForRestriction(cards, restriction, restrictionValue) {
 		return cards.every(this.makeChecker(restriction, restrictionValue));
+	}
+
+	makeCardFilter (restrictions = []) {
+		const checkers = restrictions.map(({type, value}) => this.makeChecker(type, value));
+		return card =>
+			checkers.map(checker => checker(card)).every(a => a === true); // combine checkers
 	}
 
 	getObjectOrSelf(action, self, object, property) {
@@ -1291,14 +1296,7 @@ export class State {
 							const zoneOwner = this.getMetaValue(action.zoneOwner, action.generatedBy);
 							const numberOfCards = this.getMetaValue(action.numberOfCards, action.generatedBy);
 
-							var magiEnergy = 0;
-							if (restrictions && restrictions.some(({type}) => type === RESTRICTION_PLAYABLE)) {
-								const ourMagi = this.useSelector(SELECTOR_OWN_MAGI, zoneOwner);
-								if (ourMagi.length) {
-									magiEnergy = ourMagi[0].data.energy;
-								} 
-							}
-							const cardFilter = makeCardFilter(restrictions || [], magiEnergy);
+							const cardFilter = this.makeCardFilter(restrictions || []);
 							const zoneContent = this.getZone(zone, zoneOwner).cards;
 							const cards = restrictions ? zoneContent.filter(cardFilter) : zoneContent;
 
