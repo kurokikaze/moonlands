@@ -132,6 +132,7 @@ import {
 	ZONE_TYPE_DISCARD,
 	ZONE_TYPE_DECK,
 	RESTRICTION_PLAYABLE,
+	RESTRICTION_ENERGY_LESS_THAN,
 	/* eslint-enable no-unused-vars */
 } from './const.js';
 
@@ -531,11 +532,25 @@ export const cards = [
 			},
 		],
 	}),
+	new Card('Bottomless Pit', TYPE_SPELL, REGION_UNDERNEATH, 3, {
+		text: 'Choose a Creature in play with less than five energy. Discard the chosen Creature.',
+		effects: [
+			prompt({
+				promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+				restriction: RESTRICTION_ENERGY_LESS_THAN,
+				restrictionValue: 5,
+			}),
+			effect({
+				effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+				target: '$target',
+			}),
+		],
+	}),
 	new Card('Warrior\'s Boots', TYPE_RELIC, REGION_UNIVERSAL, 0, {
 		powers: [
 			{
 				name: 'Warpath',
-				text: 'Discard Warrior\'s Boots from play. Immediately select and play a creature from your hand. You must still pay all costs of the Creature.',
+				text: 'Discard Warrior\'s Boots from play. Immediately select and play a Creature from your hand. You must still pay all costs of the Creature.',
 				cost: 0,
 				effects: [
 					effect({

@@ -149,6 +149,7 @@ import {
 	RESTRICTION_TYPE,
 	RESTRICTION_REGION,
 	RESTRICTION_ENERGY_LESS_THAN_STARTING,
+	RESTRICTION_ENERGY_LESS_THAN,
 	RESTRICTION_CREATURE_TYPE,
 	RESTRICTION_OWN_CREATURE,
 	RESTRICTION_OPPONENT_CREATURE,
@@ -673,47 +674,40 @@ export class State {
 		return initialValue;
 	}
 
-	checkAnyCardForRestriction(cards, restriction, restrictionValue) {
+	makeChecker(restriction, restrictionValue) {
 		switch (restriction) {
 			case RESTRICTION_CREATURE_TYPE:
-				return cards.some(card => card.card.name.split(' ').includes(restrictionValue));
+				return card => card.card.name.split(' ').includes(restrictionValue);
 			case RESTRICTION_TYPE:
-				return cards.some(card => card.card.type === restrictionValue);
+				return card => card.card.type === restrictionValue;
 			case RESTRICTION_PLAYABLE:
-				return cards.some(card => {
+				return card => {
 					const magi = this.useSelector(SELECTOR_OWN_MAGI, card.owner)[0];
 					const cardCost = this.calculateTotalCost(card);
 					return magi.data.energy >= cardCost; 
-				});
+				};
 			case RESTRICTION_REGION:
-				return cards.some(card => card.card.region === restrictionValue);
+				return card => card.card.region === restrictionValue;
 			case RESTRICTION_ENERGY_LESS_THAN_STARTING:
-				return cards.some(card => card.card.type === TYPE_CREATURE && card.data.energy < card.card.cost);
+				return card => card.card.type === TYPE_CREATURE && card.data.energy < card.card.cost;
+			case RESTRICTION_ENERGY_LESS_THAN:
+				return card => card.card.type === TYPE_CREATURE && card.data.energy < restrictionValue;
 			// For own and opponents creatures we pass effect controller as restrictionValue
 			case RESTRICTION_OWN_CREATURE:
-				return cards.some(card => card.data.controller === restrictionValue);
+				return card => card.data.controller === restrictionValue;
 			case RESTRICTION_OPPONENT_CREATURE:
-				return cards.some(card => card.data.controller !== restrictionValue);
+				return card => card.data.controller !== restrictionValue;
+			default:
+				return () => true;
 		}
 	}
 
+	checkAnyCardForRestriction(cards, restriction, restrictionValue) {
+		return cards.some(this.makeChecker(restriction, restrictionValue));
+	}
+
 	checkCardsForRestriction(cards, restriction, restrictionValue) {
-		switch (restriction) {
-			case RESTRICTION_CREATURE_TYPE:
-				return cards.every(card => card.card.name.split(' ').includes(restrictionValue));
-			case RESTRICTION_TYPE:
-				return cards.every(card => card.card.type === restrictionValue);
-			case RESTRICTION_REGION:
-				return cards.every(card => card.card.region === restrictionValue);
-			case RESTRICTION_ENERGY_LESS_THAN_STARTING:
-				return cards.every(card => card.card.type === TYPE_CREATURE && card.data.energy < card.card.cost);
-			case RESTRICTION_PLAYABLE:
-				return cards.every(card => {
-					const magi = this.useSelector(SELECTOR_OWN_MAGI, card.owner)[0];
-					const cardCost = this.calculateTotalCost(card);
-					return magi.data.energy >= cardCost; 
-				});
-		}
+		return cards.every(this.makeChecker(restriction, restrictionValue));
 	}
 
 	getObjectOrSelf(action, self, object, property) {

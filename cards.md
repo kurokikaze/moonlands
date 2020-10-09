@@ -61,6 +61,8 @@ Done: **115** cards out of **190**
 - Pack Korrit
 - Nimbulo
 - Updraft
+- Warrior's Boots
+- Xyx Elder
 
 # Done, not tested
 
@@ -110,7 +112,6 @@ Done: **115** cards out of **190**
 - Typhoon
 - Ulk
 - Water of Life
-- Xyx Elder
 - Orwin
 - Lightning Hyren
 - Mushroom Hyren
@@ -120,6 +121,7 @@ Done: **115** cards out of **190**
 - Dream Balm
 - Xyx Minor
 - Brub
+- Bottomless Pit
 
 # Possible sample decks:
 
@@ -216,7 +218,6 @@ Done: **115** cards out of **190**
 
 # Custom prompts
 
-- Giant Vulbor
 - Lightning
 - Implosion (discarding specific cards)
 - Mirror Pendant (choosing power on Magi)
@@ -249,7 +250,6 @@ Done: **115** cards out of **190**
 
 # More selectors
 
-- Bottomless Pit
 - Hubdra's Spear (magi w/o creatures)
 - Pack Korrit (creature in play by name)
 - Rod of Coals (creature in play with N energy)
@@ -261,6 +261,7 @@ Done: **115** cards out of **190**
 - Orish
 - Spirit of the Flame
 - Vinoc
+- Giant Vulbor (Choosing up to N cards)
 
 # May-abilities
 
@@ -324,10 +325,6 @@ Done: **115** cards out of **190**
 - Digging Goggles
 - Enrich
 - Gogor
-
-## Priority changes
-
-- Warior's Boots
 
 ## Ability to play certain cards
 

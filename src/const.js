@@ -150,6 +150,7 @@ export const PROMPT_TYPE_NUMBER = 'prompt/number';
 
 export const RESTRICTION_TYPE ='restrictions/type';
 export const RESTRICTION_ENERGY_LESS_THAN_STARTING = 'restrictions/energy_less_than_starting';
+export const RESTRICTION_ENERGY_LESS_THAN = 'restrictions/energy_less_than';
 export const RESTRICTION_OWN_CREATURE = 'restrictions/own_creature';
 export const RESTRICTION_OPPONENT_CREATURE = 'restrictions/opponent_creature';
 export const RESTRICTION_REGION = 'restrictions/region';
