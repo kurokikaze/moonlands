@@ -1103,6 +1103,7 @@ export class State {
 							PROMPT_TYPE_OWN_SINGLE_CREATURE,
 							PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
 							PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
+							PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 						];
 
 						const allPrompts = preparedActions.filter(action => 
@@ -1143,6 +1144,40 @@ export class State {
 											default: {
 												return checkAnyCardForRestriction(
 													allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE), 
+													promptAction.restriction, 
+													promptAction.restrictionValue,
+												); 
+											}
+										}
+									}
+									return true;
+								}
+								case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
+									const zoneOwner = this.getMetaValue(action.zoneOwner, source.id);
+									const cardsInZone = this.getZone(promptAction.zone, zoneOwner).cards;
+									if (promptAction.restrictions) {
+										return promptAction.restrictions.every(({type, value}) => 
+											checkAnyCardForRestriction(cardsInZone, type, value)
+										);
+									} else if (promptAction.restriction) {
+										switch (promptAction.restriction) {
+											case RESTRICTION_OWN_CREATURE: {
+												return checkAnyCardForRestriction(
+													cardsInZone.filter(card => card.card.type === TYPE_CREATURE), 
+													promptAction.restriction, 
+													action.source.data.controller,
+												); 
+											}
+											case RESTRICTION_OPPONENT_CREATURE: {
+												return checkAnyCardForRestriction(
+													cardsInZone.filter(card => card.card.type === TYPE_CREATURE), 
+													promptAction.restriction, 
+													action.source.data.controller,
+												);
+											}
+											default: {
+												return checkAnyCardForRestriction(
+													cardsInZone.filter(card => card.card.type === TYPE_CREATURE), 
 													promptAction.restriction, 
 													promptAction.restrictionValue,
 												); 
