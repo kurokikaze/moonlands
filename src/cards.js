@@ -565,6 +565,44 @@ export const cards = [
 			}),
 		],
 	}),
+	new Card('Rod of Coals', TYPE_RELIC, REGION_CALD, 0, {
+		powers: [{
+			name: 'Snuff Out',
+			text: 'Choose a Creature in play with 1 energy. Discard the chosen Creature from play.',
+			effects: [
+				prompt({
+					promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+					restriction: RESTRICTION_ENERGY_LESS_THAN,
+					restrictionValue: 2,
+				}),
+				effect({
+					effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+					target: '$target',
+				}),
+			],	
+		}],
+	}),
+	new Card('Thunder Vashp', TYPE_CREATURE, REGION_ARDERIAL, 2, {
+		powers: [{
+			name: 'Thunderclap',
+			text: 'Choose a Creature in play with less than 4 energy. Discard Thunder Vashp from play. Discard the chosen Creature from play.',
+			effects: [
+				prompt({
+					promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+					restriction: RESTRICTION_ENERGY_LESS_THAN,
+					restrictionValue: 4,
+				}),
+				effect({
+					effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+					target: '$source',
+				}),
+				effect({
+					effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+					target: '$target',
+				}),
+			],	
+		}],
+	}),
 	new Card('Warrior\'s Boots', TYPE_RELIC, REGION_UNIVERSAL, 0, {
 		powers: [
 			{
@@ -879,7 +917,7 @@ export const cards = [
 			},
 		],
 	}),
-	new Card('Arderial Crown', TYPE_RELIC, REGION_ARDERIAL, 0, {
+	new Card('Arderial\'s Crown', TYPE_RELIC, REGION_ARDERIAL, 0, {
 		triggerEffects: [
 			{
 				name: 'Strengthen',

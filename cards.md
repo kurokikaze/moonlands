@@ -1,4 +1,4 @@
-Done: **119** cards out of **190**
+Done: **120** cards out of **190**
 
 # Done, tested
 
@@ -124,6 +124,7 @@ Done: **119** cards out of **190**
 - Xyx Minor
 - Brub
 - Bottomless Pit
+- Gorgle's Ring
 
 # Possible sample decks:
 
@@ -207,8 +208,62 @@ Done: **119** cards out of **190**
 
 # Not done yet
 
-- Flood of Energy [NAROOM]
-- Tap Roots (will benefit from prompt texts) [NAROOM]
+- Abaquist
+- Adis
+- Ancestral Flute
+- Bisiwog
+- Blu
+- Burrow
+- Carnivorous Cave
+- Channeler's Gloves
+- Cloud Sceptre
+- Colossus
+- Corf Pearl
+- Digging Goggles
+- Eclipse
+- Energy Band
+- Enrich
+- Entangle
+- Epik
+- Eye of the Storm
+- Fire Flow
+- Flame Control
+- Flood of Energy
+- Fog Bank
+- Fossik
+- Gar
+- Giant Parmalag
+- Gum-Gum
+- Heat Lens
+- Hood of Hiding
+- Hubdra's Spear
+- Implosion
+- Karak
+- Lightning
+- Lovian
+- Mask of Abwyn
+- Mirror Pendant
+- Orlon
+- Orish
+- Orpus
+- Orthea
+- Orwin's Staff
+- Parmalag
+- Platheus
+- Relic Mirror
+- Spirit of the Flame
+- Stradus
+- Syphon Vortex
+- Tap Roots
+- Thunderquake
+- Tidal Wave
+- Twee
+- Vaal
+- Vellup
+- Vulbor
+- Wellisk
+- Wence
+- Will of Orothe
 
 # Cost reduction/increase
 
@@ -232,7 +287,6 @@ Done: **119** cards out of **190**
 
 - Corf Pearl
 - Eye of the Storm
-- Gorgle's Ring
 - Plith
 - Shimmer
 
@@ -251,9 +305,6 @@ Done: **119** cards out of **190**
 # More selectors
 
 - Hubdra's Spear (magi w/o creatures)
-- Pack Korrit (creature in play by name)
-- Rod of Coals (creature in play with N energy)
-- Thunder Vashp (creature in play with N or less energy)
 
 # Discarding from hand
 
@@ -290,6 +341,7 @@ Done: **119** cards out of **190**
 - Motash
 - Staff of Korrits (also trigger on fucking banding)
 - Twee
+- Orothean Belt
 
 ## Delayed triggers
 
@@ -304,7 +356,6 @@ Done: **119** cards out of **190**
 
 - Motash's Staff
 - Orathan Flyer (also custom prompts)
-- Orothean Belt
 
 # Relic stuff (discarding, etc)
 
