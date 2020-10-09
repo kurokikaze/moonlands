@@ -2349,11 +2349,98 @@ export const cards = [
 			}
 		],
 	}),
+	new Card('Gorgle\'s Ring', TYPE_RELIC, REGION_CALD, 0, {
+		powers: [{
+			name: 'Wild Fire',
+			text: 'Roll a die. 1, 2 or 3: Discard 1 energy from each of your Creatures. 4 or 5: Choose any one Creature in play. Discard 2 energy from the chosen Creature. 6: Choose a Magi in play. Discard 4 energy from the chosen Magi.',
+			effects: [
+				effect({
+					effectType: EFFECT_TYPE_ROLL_DIE,
+				}),
+				effect({ // 1-3: Discard 1 energy from each of your Creatures
+					effectType: EFFECT_TYPE_CONDITIONAL,
+					rollResult: '$roll_result',
+					conditions: [
+						{
+							objectOne: 'rollResult',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '<=',
+							objectTwo: 3,
+							propertyTwo: null,
+						}
+					],
+					thenEffects: [
+						select({
+							selector: SELECTOR_OWN_CREATURES,
+						}),
+						effect({
+							effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+							target: '$selected',
+							amount: 1,
+						}),
+					],
+				}),
+				effect({ // 5-6: discard Wellisk Pup from play
+					effectType: EFFECT_TYPE_CONDITIONAL,
+					rollResult: '$roll_result',
+					conditions: [
+						{
+							objectOne: 'rollResult',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '>=',
+							objectTwo: 4,
+							propertyTwo: null,
+						},
+						{
+							objectOne: 'rollResult',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '<=',
+							objectTwo: 5,
+							propertyTwo: null,
+						}
+					],
+					thenEffects: [
+						prompt({
+							promptType: PROMPT_TYPE_SINGLE_CREATURE,
+						}),
+						effect({
+							effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+							target: '$target',
+							amount: 2,
+						}),
+					],
+				}),
+				effect({ // 6: discard 4 energy from chosen Magi
+					effectType: EFFECT_TYPE_CONDITIONAL,
+					rollResult: '$roll_result',
+					conditions: [
+						{
+							objectOne: 'rollResult',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '=',
+							objectTwo: 6,
+							propertyTwo: null,
+						},
+					],
+					thenEffects: [
+						prompt({
+							promptType: PROMPT_TYPE_SINGLE_MAGI,
+						}),
+						effect({
+							effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+							target: '$target',
+							amount: 4,
+						}),
+					],
+				}),
+			],
+		}],
+	}),
 	new Card('Wellisk Pup', TYPE_CREATURE, REGION_OROTHE, 2, {
 		triggerEffects: [
 			{
 				name: 'Erratic shield',
-				text: 'Whenever Wellisk Pup is attacked, roll one die before energy is removed. add one energy to it before energy is removed. 1, 2, 3 or 4: Add 3 energy to Wellisk Pup. 5, 6: Discard Wellisk Pup from play.',
+				text: 'Whenever Wellisk Pup is attacked, roll one die before energy is removed. 1, 2, 3 or 4: Add 3 energy to Wellisk Pup. 5, 6: Discard Wellisk Pup from play.',
 				find: {
 					effectType: EFFECT_TYPE_CREATURE_ATTACKS,
 					conditions: [
