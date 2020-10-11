@@ -238,6 +238,7 @@ const defaultState = {
 	prompt: false,
 	promptType: null,
 	promptParams: {},
+	log: [],
 	step: 0,
 	zones: [],
 	players: [],
@@ -341,6 +342,130 @@ export class State {
 			throw new Error(`Non-existing player: ${player}`);
 		}
 	}
+	
+	addActionToLog(action) {
+		const LOG_ENTRY_PLAY = 'log_entry/play';
+		const LOG_ENTRY_DRAW = 'log_entry/draw';
+		const LOG_ENTRY_CHOOSES_STARTING_CARDS = 'log_entry/choose_starting_cards';
+		const LOG_ENTRY_POWER_ACTIVATION = 'log_entry/power_activation';
+		const LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY = 'log_entry/creature_discarded_from_play';
+		const LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY = 'log_entry/relic_discarded_from_play';
+		// const LOG_ENTRY_CREATURE_RETURNED_TO_HAND = 'log_entry/creature_returned_to_hand';
+		const LOG_ENTRY_TARGETING = 'log_entry/targeting';
+
+		const LOG_ENTRY_ATTACK = 'log_entry/attack';
+		const LOG_ENTRY_CREATURE_ENERGY_LOSS = 'log_entry/creature_energy_loss';
+		const LOG_ENTRY_MAGI_ENERGY_LOSS = 'log_entry/creature_energy_loss';
+		const LOG_ENTRY_MAGI_DEFEATED = 'log_entry/magi_defeated';
+		// const LOG_ENTRY_ENERGIZE = 'log_entry/energize';
+
+		var newLogEntry = false;
+
+		switch(action.type) {
+			case ACTION_PLAY: {
+				newLogEntry = {
+					type: LOG_ENTRY_PLAY,
+					card: action.payload.card.card.name,
+					player: action.player,
+				};
+				break;
+			}
+			case ACTION_POWER: {
+				newLogEntry = {
+					type: LOG_ENTRY_POWER_ACTIVATION,
+					card: action.source,
+					name: action.power.name,
+					player: action.player,
+				};
+				break;
+			}
+			case ACTION_ATTACK: {
+				newLogEntry = {
+					type: LOG_ENTRY_ATTACK,
+					source: action.source,
+					target: action.target,
+					name: action.power.name,
+					player: action.player,
+				};
+				break;
+			}
+			case ACTION_EFFECT: {
+				switch (action.effectType) {
+					case EFFECT_TYPE_DRAW: {
+						newLogEntry = {
+							type: LOG_ENTRY_DRAW,
+							player: this.getMetaValue(action.player, action.generatedBy),
+						};
+						break;
+					}
+					case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
+						newLogEntry = {
+							type: LOG_ENTRY_CREATURE_ENERGY_LOSS,
+							card: this.getMetaValue(action.target, action.generatedBy).card.name,
+							amount: this.getMetaValue(action.amount, action.generatedBy),
+						};
+						break;
+					}
+					case EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI: {
+						newLogEntry = {
+							type: LOG_ENTRY_MAGI_ENERGY_LOSS,
+							card: this.getMetaValue(action.target, action.generatedBy).card.name,
+							amount: this.getMetaValue(action.amount, action.generatedBy),
+						};
+						break;
+					}
+					case EFFECT_TYPE_FIND_STARTING_CARDS: {
+						newLogEntry = {
+							type: LOG_ENTRY_CHOOSES_STARTING_CARDS,
+							player: action.player,
+						};
+						break;
+					}
+					case EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY: {
+						newLogEntry = {
+							type: LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY,
+							card: this.getMetaValue(action.target, action.generatedBy).card.name,
+							player: action.player,
+						};
+						break;
+					}
+					case EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY: {
+						newLogEntry = {
+							type: LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,
+							card: this.getMetaValue(action.target, action.generatedBy).card.name,
+							player: action.player,
+						};
+						break;
+					}
+					case EFFECT_TYPE_MAGI_IS_DEFEATED: {
+						newLogEntry = {
+							type: LOG_ENTRY_MAGI_DEFEATED,
+							card: this.getMetaValue(action.target, action.generatedBy).card.name,
+							player: action.player,
+						};
+						break;
+					}
+				}
+				break;
+			}
+			case ACTION_RESOLVE_PROMPT: {
+				newLogEntry = {
+					type: LOG_ENTRY_TARGETING,
+					card: action.target.card.name,
+					player: action.player,
+				};
+				break;
+			}
+		}
+
+		if (newLogEntry) {
+			this.state.log = [
+				...this.state.log,
+				newLogEntry,
+			];
+		}
+
+	}
 
 	createZones() {
 		const [playerOne, playerTwo] = this.players;
@@ -377,6 +502,7 @@ export class State {
 			promptPlayer: this.state.promptPlayer,
 			promptGeneratedBy: this.state.promptGeneratedBy,
 			promptParams: this.state.promptParams,
+			log: this.state.log,
 			gameEnded,
 			winner: gameEnded ? this.winner : null,
 		};
