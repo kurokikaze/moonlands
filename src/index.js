@@ -274,6 +274,7 @@ export class State {
 
 		this.actionStreamOne = new EventEmitter();
 		this.actionStreamTwo = new EventEmitter();
+		this.logStream =  new EventEmitter();
 
 		this.commandStream = new Writable({
 			encoding: 'utf-8',
@@ -288,19 +289,19 @@ export class State {
 
 	closeStreams() {
 		this.actionStreamOne.destroy();
+		this.actionStreamTwo.destroy();
+		this.logStream.destroy();
 		this.commandStream.destroy();
 	}
 
 	addActionToStream(action) {
-
-		this.actionsOne.unshift(action);
-		this.actionsTwo.unshift(action);
-
 		// Do not send outside CALCULATE, SELECT and so on
 		if (![ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE].includes(action.type)) {
 			this.actionStreamOne.emit('action', action);
 			this.actionStreamTwo.emit('action', action);
 		}
+
+		this.logStream.emit('action', action);
 	}
 
 	enableDebug() {
