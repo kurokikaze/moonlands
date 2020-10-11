@@ -1773,12 +1773,9 @@ export class State {
 							(cardType == TYPE_SPELL && currentPriority == PRIORITY_PRS) ||
 							action.forcePriority
 						) {
-							// Здесь должен быть полный шаг определения стоимости
 							const activeMagi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card;
-							// const baseCost = this.modifyByStaticAbilities(cardItself, PROPERTY_COST);
-							// const regionPenalty = (activeMagi.card.region == baseCard.region || baseCard.region == REGION_UNIVERSAL) ? 0 : 1;
-
 							const totalCost = this.calculateTotalCost(cardItself);
+
 							switch (cardType) {
 								case TYPE_CREATURE: {
 									if (activeMagi.data.energy >= totalCost) {

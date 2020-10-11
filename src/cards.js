@@ -2661,10 +2661,14 @@ export const cards = [
 			{
 				name: 'Healing Flame',
 				cost: 2,
-				text: 'Choose a Creature or Magi in play. Add 3 energy to the chosen Creature or Magi.',
+				text: 'Choose a Creature or Magi in play. Discard Lava Arboll from play. Add 3 energy to the chosen Creature or Magi.',
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+						target: '$source',
 					}),
 					effect({
 						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI,
