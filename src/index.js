@@ -165,7 +165,20 @@ import {
 	ZONE_TYPE_ACTIVE_MAGI,
 	ZONE_TYPE_MAGI_PILE,
 	ZONE_TYPE_DECK,
-	ZONE_TYPE_DEFEATED_MAGI, 
+	ZONE_TYPE_DEFEATED_MAGI,
+
+	LOG_ENTRY_PLAY,
+	LOG_ENTRY_DRAW,
+	LOG_ENTRY_CHOOSES_STARTING_CARDS,
+	LOG_ENTRY_POWER_ACTIVATION,
+	LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY,
+	LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,
+	LOG_ENTRY_TARGETING,
+	LOG_ENTRY_NUMBER_CHOICE,	
+	LOG_ENTRY_ATTACK,
+	LOG_ENTRY_CREATURE_ENERGY_LOSS,
+	LOG_ENTRY_MAGI_ENERGY_LOSS,
+	LOG_ENTRY_MAGI_DEFEATED,
 } from './const.js';
 
 import {showAction} from './logAction.js';
@@ -344,22 +357,6 @@ export class State {
 	}
 	
 	addActionToLog(action) {
-		const LOG_ENTRY_PLAY = 'log_entry/play';
-		const LOG_ENTRY_DRAW = 'log_entry/draw';
-		const LOG_ENTRY_CHOOSES_STARTING_CARDS = 'log_entry/choose_starting_cards';
-		const LOG_ENTRY_POWER_ACTIVATION = 'log_entry/power_activation';
-		const LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY = 'log_entry/creature_discarded_from_play';
-		const LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY = 'log_entry/relic_discarded_from_play';
-		// const LOG_ENTRY_CREATURE_RETURNED_TO_HAND = 'log_entry/creature_returned_to_hand';
-		const LOG_ENTRY_TARGETING = 'log_entry/targeting';
-		const LOG_ENTRY_NUMBER_CHOICE = 'log_entry/number_choice';
-
-		const LOG_ENTRY_ATTACK = 'log_entry/attack';
-		const LOG_ENTRY_CREATURE_ENERGY_LOSS = 'log_entry/creature_energy_loss';
-		const LOG_ENTRY_MAGI_ENERGY_LOSS = 'log_entry/creature_energy_loss';
-		const LOG_ENTRY_MAGI_DEFEATED = 'log_entry/magi_defeated';
-		// const LOG_ENTRY_ENERGIZE = 'log_entry/energize';
-
 		var newLogEntry = false;
 
 		switch(action.type) {
@@ -474,11 +471,11 @@ export class State {
 			}
 			case ACTION_RESOLVE_PROMPT: {
 				if (
-					action.promptType === PROMPT_TYPE_SINGLE_CREATURE ||
-					action.promptType === PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE ||
-					action.promptType === PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI ||
-					action.promptType === PROMPT_TYPE_OWN_SINGLE_CREATURE ||
-					action.promptType === PROMPT_TYPE_SINGLE_MAGI
+					this.state.promptType === PROMPT_TYPE_SINGLE_CREATURE ||
+					this.state.promptType === PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE ||
+					this.state.promptType === PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI ||
+					this.state.promptType === PROMPT_TYPE_OWN_SINGLE_CREATURE ||
+					this.state.promptType === PROMPT_TYPE_SINGLE_MAGI
 				) {
 					newLogEntry = {
 						type: LOG_ENTRY_TARGETING,
@@ -486,7 +483,7 @@ export class State {
 						player: action.player,
 					};
 				}
-				if (action.promptType === PROMPT_TYPE_NUMBER) {
+				if (this.state.promptType === PROMPT_TYPE_NUMBER) {
 					newLogEntry = {
 						type: LOG_ENTRY_NUMBER_CHOICE,
 						number: action.number,

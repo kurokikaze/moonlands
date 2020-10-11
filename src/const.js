@@ -172,3 +172,17 @@ export const ZONE_TYPE_DECK = 'zones/deck';
 export const ZONE_TYPE_IN_PLAY = 'zones/in_play';
 export const ZONE_TYPE_DISCARD = 'zones/discard';
 export const ZONE_TYPE_HAND = 'zones/hand';
+
+export const LOG_ENTRY_PLAY = 'log_entry/play';
+export const LOG_ENTRY_DRAW = 'log_entry/draw';
+export const LOG_ENTRY_CHOOSES_STARTING_CARDS = 'log_entry/choose_starting_cards';
+export const LOG_ENTRY_POWER_ACTIVATION = 'log_entry/power_activation';
+export const LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY = 'log_entry/creature_discarded_from_play';
+export const LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY = 'log_entry/relic_discarded_from_play';
+export const LOG_ENTRY_TARGETING = 'log_entry/targeting';
+export const LOG_ENTRY_NUMBER_CHOICE = 'log_entry/number_choice';
+
+export const LOG_ENTRY_ATTACK = 'log_entry/attack';
+export const LOG_ENTRY_CREATURE_ENERGY_LOSS = 'log_entry/creature_energy_loss';
+export const LOG_ENTRY_MAGI_ENERGY_LOSS = 'log_entry/magi_energy_loss';
+export const LOG_ENTRY_MAGI_DEFEATED = 'log_entry/magi_defeated';
