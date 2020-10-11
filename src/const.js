@@ -185,4 +185,6 @@ export const LOG_ENTRY_NUMBER_CHOICE = 'log_entry/number_choice';
 export const LOG_ENTRY_ATTACK = 'log_entry/attack';
 export const LOG_ENTRY_CREATURE_ENERGY_LOSS = 'log_entry/creature_energy_loss';
 export const LOG_ENTRY_MAGI_ENERGY_LOSS = 'log_entry/magi_energy_loss';
+export const LOG_ENTRY_CREATURE_ENERGY_GAIN = 'log_entry/creature_energy_gain';
+export const LOG_ENTRY_MAGI_ENERGY_GAIN = 'log_entry/magi_energy_gain';
 export const LOG_ENTRY_MAGI_DEFEATED = 'log_entry/magi_defeated';

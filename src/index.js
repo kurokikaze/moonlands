@@ -178,6 +178,8 @@ import {
 	LOG_ENTRY_ATTACK,
 	LOG_ENTRY_CREATURE_ENERGY_LOSS,
 	LOG_ENTRY_MAGI_ENERGY_LOSS,
+	LOG_ENTRY_CREATURE_ENERGY_GAIN,
+	LOG_ENTRY_MAGI_ENERGY_GAIN,
 	LOG_ENTRY_MAGI_DEFEATED,
 } from './const.js';
 
@@ -411,6 +413,23 @@ export class State {
 						}
 						break;
 					}
+					case EFFECT_TYPE_ADD_ENERGY_TO_CREATURE: {
+						const target = this.getMetaValue(action.target, action.generatedBy);
+						if (Array.isArray(target)) {
+							newLogEntry = {
+								type: LOG_ENTRY_CREATURE_ENERGY_GAIN,
+								card: target[0].card.name,
+								amount: this.getMetaValue(action.amount, action.generatedBy),
+							};
+						} else {
+							newLogEntry = {
+								type: LOG_ENTRY_CREATURE_ENERGY_GAIN,
+								card: target.card.name,
+								amount: this.getMetaValue(action.amount, action.generatedBy),
+							};
+						}
+						break;
+					}
 					case EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI: {
 						const target = this.getMetaValue(action.target, action.generatedBy);
 						if (Array.isArray(target)) {
@@ -422,6 +441,23 @@ export class State {
 						} else {
 							newLogEntry = {
 								type: LOG_ENTRY_MAGI_ENERGY_LOSS,
+								card: target.card.name,
+								amount: this.getMetaValue(action.amount, action.generatedBy),
+							};		
+						}
+						break;
+					}
+					case EFFECT_TYPE_ADD_ENERGY_TO_MAGI: {
+						const target = this.getMetaValue(action.target, action.generatedBy);
+						if (Array.isArray(target)) {
+							newLogEntry = {
+								type: LOG_ENTRY_MAGI_ENERGY_GAIN,
+								card: target[0].card.name,
+								amount: this.getMetaValue(action.amount, action.generatedBy),
+							};
+						} else {
+							newLogEntry = {
+								type: LOG_ENTRY_MAGI_ENERGY_GAIN,
 								card: target.card.name,
 								amount: this.getMetaValue(action.amount, action.generatedBy),
 							};		
