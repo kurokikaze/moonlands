@@ -376,19 +376,13 @@ export class State {
 			case ACTION_POWER: {
 				newLogEntry = {
 					type: LOG_ENTRY_POWER_ACTIVATION,
-					card: action.source,
+					card: action.source.card.name,
 					name: action.power.name,
 					player: action.player,
 				};
 				break;
 			}
 			case ACTION_ATTACK: {
-				newLogEntry = {
-					type: LOG_ENTRY_ATTACK,
-					source: action.source,
-					target: action.target,
-					player: action.player,
-				};
 				break;
 			}
 			case ACTION_EFFECT: {
@@ -408,7 +402,6 @@ export class State {
 								card: target[0].card.name,
 								amount: this.getMetaValue(action.amount, action.generatedBy),
 							};
-
 						} else {
 							newLogEntry = {
 								type: LOG_ENTRY_CREATURE_ENERGY_LOSS,
@@ -465,6 +458,14 @@ export class State {
 							player: action.player,
 						};
 						break;
+					}
+					case EFFECT_TYPE_CREATURE_ATTACKS: {
+						newLogEntry = {
+							type: LOG_ENTRY_ATTACK,
+							source: this.getMetaValue(action.source, action.generatedBy).card.name,
+							target: this.getMetaValue(action.target, action.generatedBy).card.name,
+							player: action.player,
+						};
 					}
 				}
 				break;
