@@ -1584,11 +1584,16 @@ export class State {
 				}
 				case ACTION_POWER: {
 					const powerCost = this.modifyByStaticAbilities(action.source, PROPERTY_POWER_COST, action.power.name);
+
+					const payingCard = (action.source.card.type === TYPE_RELIC) ?
+						this.getZone(ZONE_TYPE_ACTIVE_MAGI, action.source.owner).card :
+						action.source;
+
 					if (!action.source.wasActionUsed(action.power.name) &&
 						(
-							action.source.data.energy >= powerCost || 
+							payingCard.data.energy >= powerCost || 
 							(
-								action.source.data.energy > 0 && powerCost === COST_X
+								payingCard.data.energy > 0 && powerCost === COST_X
 							)
 						)
 					) {
