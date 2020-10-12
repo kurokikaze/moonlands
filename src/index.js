@@ -74,6 +74,7 @@ import {
 	SELECTOR_OWN_CREATURES_OF_TYPE,
 	SELECTOR_OTHER_CREATURES_OF_TYPE,
 	SELECTOR_STATUS,
+	SELECTOR_OWN_CREATURES_WITH_STATUS,
 
 	STATUS_BURROWED,
 
@@ -387,9 +388,6 @@ export class State {
 					name: action.power.name,
 					player: action.player,
 				};
-				break;
-			}
-			case ACTION_ATTACK: {
 				break;
 			}
 			case ACTION_EFFECT: {
@@ -864,7 +862,7 @@ export class State {
 			// These properties can only be modified by static abilities / continuous effects
 			case PROPERTY_ENERGY_LOSS_THRESHOLD:
 				return target.modifiedCard ?
-					target.modifiedCard.data.energyLossThreshold :0;
+					target.modifiedCard.data.energyLossThreshold : 0;
 			case PROPERTY_ABLE_TO_ATTACK:
 				return target.modifiedCard ?
 					target.modifiedCard.data.ableToAttack : true;
@@ -885,6 +883,10 @@ export class State {
 			}
 			case SELECTOR_STATUS: {
 				return this.getByProperty(card, PROPERTY_STATUS, staticAbility.selectorParameter);
+			}
+			case SELECTOR_OWN_CREATURES_WITH_STATUS: {
+				return this.getByProperty(card, PROPERTY_STATUS, staticAbility.selectorParameter) &&
+                    card.data.controller === staticAbility.player;
 			}
 			case SELECTOR_OWN_SPELLS_IN_HAND: {
 				return this.getZone(ZONE_TYPE_HAND, staticAbility.player).cards.some(({id}) => id === card.id);
@@ -956,6 +958,11 @@ export class State {
 			card: target.card,
 			modifiedCard: {
 				...target.card,
+				data: {
+					...target.card.data,
+					energyLossThreshold: 0,
+					ableToAttack: true,
+				},
 			},
 			data: {
 				...target.data,
@@ -1041,6 +1048,25 @@ export class State {
 							data: {
 								...currentCard.modifiedCard.data,
 								energyLossThreshold: resultValue,
+							},
+						},
+					};
+				}
+				case PROPERTY_ABLE_TO_ATTACK: {
+					const initialValue = this.getByProperty(currentCard, PROPERTY_ABLE_TO_ATTACK);
+					const {operator, operandOne} = staticAbility.modifier;
+
+					const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
+						this.performCalculation(operator, initialValue, operandOne) :
+						this.performCalculation(operator, operandOne, initialValue);
+
+					return {
+						...currentCard,
+						modifiedCard: {
+							...currentCard.modifiedCard,
+							data: {
+								...currentCard.modifiedCard.data,
+								ableToAttack: resultValue,
 							},
 						},
 					};
@@ -1427,13 +1453,18 @@ export class State {
 
 					const sourceAttacksPerTurn = this.modifyByStaticAbilities(attackSource, PROPERTY_ATTACKS_PER_TURN);
 
+					const attackerCanAttack = this.modifyByStaticAbilities(attackSource, PROPERTY_ABLE_TO_ATTACK);
+					if (!attackerCanAttack) {
+						console.log(`Somehow ${attackSource.card.name} cannot attack`);
+					}
 					const sourceHasAttacksLeft = attackSource.data.attacked < sourceAttacksPerTurn;
 					const additionalAttackersHasAttacksLeft = additionalAttackers.every(card => card.card.data.canPackHunt && card.data.attacked < this.modifyByStaticAbilities(card, PROPERTY_ATTACKS_PER_TURN));
 
 					const targetIsMagi = attackTarget.card.type == TYPE_MAGI;
 					const magiHasCreatures = this.useSelector(SELECTOR_OWN_CREATURES, attackTarget.owner).length > 0;
 
-					const attackApproved = !targetIsMagi || ( // Either we attack a creature
+					const attackApproved = attackerCanAttack &&
+						!targetIsMagi || ( // Either we attack a creature
 						targetIsMagi && ( // Or we are attacking a magi, but then...
 							!magiHasCreatures || // ...he either shouldn't have creatures
 								this.modifyByStaticAbilities(attackSource, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY) // ...or we can just trample through

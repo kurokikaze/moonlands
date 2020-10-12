@@ -66,6 +66,7 @@ import {
 	SELECTOR_CREATURES_OF_TYPE,
 	SELECTOR_OWN_SPELLS_IN_HAND,
 	SELECTOR_OTHER_CREATURES_OF_TYPE,
+	SELECTOR_OWN_CREATURES_WITH_STATUS,
 
 	EFFECT_TYPE_END_OF_TURN,
 	EFFECT_TYPE_NONE,
@@ -134,6 +135,9 @@ import {
 	RESTRICTION_PLAYABLE,
 	RESTRICTION_ENERGY_LESS_THAN,
 	RESTRICTION_CREATURE_WAS_ATTACKED,
+	SELECTOR_STATUS,
+	STATUS_BURROWED,
+	PROPERTY_ABLE_TO_ATTACK,
 	/* eslint-enable no-unused-vars */
 } from './const.js';
 
@@ -3349,6 +3353,21 @@ export const cards = [
 				modifier: {
 					operator: CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE,
 					operandOne: 1,
+				},
+			},
+		],
+	}),
+	new Card('Digging Goggles', TYPE_RELIC, REGION_UNDERNEATH, 0, {
+		staticAbilities: [
+			{
+				name: 'Tunnelling Attack',
+				text: 'Your Burrowed creatures may attack as normal',
+				selector: SELECTOR_OWN_CREATURES_WITH_STATUS,
+				selectorParameter: STATUS_BURROWED,
+				property: PROPERTY_ABLE_TO_ATTACK,
+				modifier: {
+					operator: CALCULATION_SET,
+					operandOne: true,
 				},
 			},
 		],

@@ -1,4 +1,4 @@
-Done: **120** cards out of **190**
+Done: **121** cards out of **190**
 
 # Done, tested
 
@@ -65,6 +65,7 @@ Done: **120** cards out of **190**
 - Xyx Elder
 - Corf
 - Crystal Arboll
+- Digging Goggles
 
 # Done, not tested
 
@@ -219,7 +220,6 @@ Done: **120** cards out of **190**
 - Cloud Sceptre
 - Colossus
 - Corf Pearl
-- Digging Goggles
 - Eclipse
 - Energy Band
 - Enrich
@@ -364,11 +364,9 @@ Done: **120** cards out of **190**
 ## Fucking banding
 
 - Giant Korrit
-- Korrit
 
 # Replacement effect
 
-- Motash's Staff
 - Orathan Flyer (also custom prompts)
 
 # Relic stuff (discarding, etc)
@@ -384,10 +382,8 @@ Done: **120** cards out of **190**
 
 ## Statuses
 
-- Bisiwog
 - Burrow
 - Carnivorous Cave
-- Digging Goggles
 - Enrich
 - Gogor
 
@@ -424,6 +420,10 @@ Done: **120** cards out of **190**
 - Colossus
 - Lovian
 - Orlon
+
+## Additional selectors (selector of card itself)
+
+- Bisiwog
 
 # Controlling another player
 

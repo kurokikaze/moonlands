@@ -53,6 +53,7 @@ export const SELECTOR_OWN_CREATURES_OF_TYPE = 'selectors/own_creatures_of_type';
 export const SELECTOR_OTHER_CREATURES_OF_TYPE = 'selectors/other_creatures_of_type';
 export const SELECTOR_RELICS = 'selectors/relics';
 export const SELECTOR_OWN_SPELLS_IN_HAND = 'selectors/own_spells_in_hand';
+export const SELECTOR_OWN_CREATURES_WITH_STATUS = 'selectors/own_creatures_with_status';
 export const SELECTOR_STATUS = 'selectors/status';
 
 export const STATUS_BURROWED = 'status/burrowed';
