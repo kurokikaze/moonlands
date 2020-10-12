@@ -2,6 +2,7 @@
 import * as moonlands from '../src/index';
 import {byName} from '../src/cards';
 import CardInGame from '../src/classes/CardInGame';
+import Card from '../src/classes/Card';
 import {caldDeck, naroomDeck} from './testData';
 
 import {
@@ -37,6 +38,7 @@ import {
 	REGION_NAROOM,
 	REGION_CALD,
 	REGION_OROTHE,
+	REGION_UNDERNEATH,
 
 	CALCULATION_DOUBLE,
 	CALCULATION_ADD,
@@ -66,6 +68,13 @@ import {
 	ZONE_TYPE_DECK,
 	ZONE_TYPE_IN_PLAY,
 	ZONE_TYPE_HAND,
+
+	PROPERTY_ENERGY_LOSS_THRESHOLD,
+	PROPERTY_STATUS,
+
+	SELECTOR_STATUS,
+
+	STATUS_BURROWED,
 }  from '../src/const.js';
 
 import Zone from '../src/classes/Zone.js';
@@ -3751,5 +3760,53 @@ describe('Not entering prompts when activating power will lead to inescapable pr
 		gameState.update(healingFlameAction);
 
 		expect(gameState.state.prompt).toEqual(false, 'Power is not activated');
+	});
+});
+
+describe('Burrowed status', () => {
+	it('Relic to limit energy loss', () => {
+		const ACTIVE_PLAYER = 12;
+		const NON_ACTIVE_PLAYER = 22;
+
+		const protoPylofufCard = new Card('Proto-Pylofuf', TYPE_CREATURE, REGION_UNDERNEATH, 4, {
+			burrowed: true,
+		});
+
+		const protoPylofuf = new CardInGame(protoPylofufCard, ACTIVE_PLAYER).addEnergy(4);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([protoPylofuf]),
+			],
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		expect(gameState.modifyByStaticAbilities(protoPylofuf, PROPERTY_STATUS, STATUS_BURROWED)).toEqual(true, 'Proto-Pylofuf is considered Burrowed by engine');
+		expect(gameState.useSelector(SELECTOR_STATUS, ACTIVE_PLAYER, STATUS_BURROWED).length).toEqual(1, 'Only one card matches the Burrowed status selector');
+		expect(gameState.useSelector(SELECTOR_STATUS, ACTIVE_PLAYER, STATUS_BURROWED)[0].card.name).toEqual('Proto-Pylofuf', 'It is Proto-Pylofuf');
+		expect(gameState.modifyByStaticAbilities(protoPylofuf, PROPERTY_ENERGY_LOSS_THRESHOLD)).toEqual(2, 'Proto-Pylofuf is considered protected by his Burrowed status');
+
+		const fiveEnergyLossAction = {
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+			target: protoPylofuf,
+			amount: 5,
+			generatedBy: 'test',
+		};
+
+		gameState.update(fiveEnergyLossAction);
+
+		expect(protoPylofuf.data.energy).toEqual(2, 'Proto-Pylofuf lost only 2 energy due to being Burrowed');
+		expect(protoPylofuf.data.energyLostThisTurn).toEqual(2, 'Proto-Pylofuf has energy loss marked');
+
+		gameState.update(fiveEnergyLossAction);
+
+		expect(protoPylofuf.data.energy).toEqual(2, 'Proto-Pylofuf lost no energy due to being Burrowed and already losing his limit of 2 energy');
+		expect(protoPylofuf.data.energyLostThisTurn).toEqual(2, 'Proto-Pylofuf still has energy loss marked');
 	});
 });

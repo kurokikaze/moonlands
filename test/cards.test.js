@@ -2251,6 +2251,70 @@ describe('Warrior\'s Boots', () => {
 
 		expect(yaki.data.energy).toEqual(1, 'Yaki paid for Arboll');
 	});
+
+	it('Warpath (Orothe creatures)', () => {
+		const ACTIVE_PLAYER = 29;
+		const NON_ACTIVE_PLAYER = 12;
+
+		const whall = new CardInGame(byName('Whall'), ACTIVE_PLAYER).addEnergy(15);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(4);
+
+		const bookOfAges = new CardInGame(byName('Book of Ages'), ACTIVE_PLAYER);
+		const typhoonOne = new CardInGame(byName('Typhoon'), ACTIVE_PLAYER);
+		const typhoonTeo = new CardInGame(byName('Typhoon'), ACTIVE_PLAYER);
+		const deepHyren = new CardInGame(byName('Deep Hyren'), ACTIVE_PLAYER);
+		const giantParathin = new CardInGame(byName('Giant Parathin'), ACTIVE_PLAYER);
+
+		const warriorsBoots = new CardInGame(byName('Warrior\'s Boots'), ACTIVE_PLAYER);
+
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([bookOfAges, giantParathin, typhoonOne, typhoonTeo, deepHyren]),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([whall]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([warriorsBoots]),
+			],
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerUseAction = {
+			type: ACTION_POWER,
+			source: warriorsBoots,
+			power: warriorsBoots.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerUseAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in Prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, 'Game is prompting for cards from zone');
+		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game is prompting active player');
+		expect(gameState.state.promptParams.zone).toEqual(ZONE_TYPE_HAND, 'Prompt awaiting card from hand');
+		expect(gameState.state.promptParams.numberOfCards).toEqual(1, 'Prompt awaiting one card');
+		expect(gameState.state.promptParams.zoneOwner).toEqual(ACTIVE_PLAYER, 'Prompt awaiting card from active players hand');
+		
+		const cardChoiceAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			cards: [giantParathin],
+			generatedBy: warriorsBoots.id,
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(cardChoiceAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in Prompt state');
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One card is in play');
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(4, 'Hand has 1 card left');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Giant Parathin', 'Card in play is Arboll');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(10, 'Giant Parathin has 3 energy - its starting value');
+
+		expect(whall.data.energy).toEqual(5, 'Whall paid for Giant Parathin');
+	});
 });
 
 describe('O\'Qua', () => {

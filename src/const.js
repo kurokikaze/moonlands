@@ -23,9 +23,11 @@ export const PROPERTY_MAGI_STARTING_ENERGY = 'properties/magi_starting_energy';
 export const PROPERTY_ATTACKS_PER_TURN = 'properties/attacks_per_turn';
 export const PROPERTY_CAN_ATTACK_MAGI_DIRECTLY = 'properties/can_attack_magi_directly';
 export const PROPERTY_POWER_COST = 'properties/power_cost'; // NOT FOR PROPERTY GETTER, ONLY STATIC ABILITIES
+export const PROPERTY_ENERGY_LOSS_THRESHOLD = 'properties/energy_loss_threshold';
 // Maybe make statuses into separate category
 export const PROPERTY_STATUS_DEFEATED_CREATURE = 'properties/status/defeated_creature';
 export const PROPERTY_STATUS_WAS_ATTACKED = 'properties/status/was_attacked';
+export const PROPERTY_STATUS = 'properties/status';
 
 export const SELECTOR_OPPONENT_ID = 'selectors/opponent_id'; // THIS WILL RETURN ID OF PLAYER'S OPPONENT
 export const SELECTOR_CREATURES = 'selectors/creatures';
@@ -49,6 +51,10 @@ export const SELECTOR_OWN_CREATURES_OF_TYPE = 'selectors/own_creatures_of_type';
 export const SELECTOR_OTHER_CREATURES_OF_TYPE = 'selectors/other_creatures_of_type';
 export const SELECTOR_RELICS = 'selectors/relics';
 export const SELECTOR_OWN_SPELLS_IN_HAND = 'selectors/own_spells_in_hand';
+export const SELECTOR_STATUS = 'selectors/status';
+
+export const STATUS_BURROWED = 'status/burrowed';
+export const STATUS_FROZEN = 'status/frozen';
 
 export const CALCULATION_SET = 'calculations/set';
 export const CALCULATION_DOUBLE = 'calculations/double';

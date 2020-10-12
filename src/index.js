@@ -37,6 +37,8 @@ import {
 	PROPERTY_CREATURE_TYPES,
 	PROPERTY_STATUS_WAS_ATTACKED,
 	PROPERTY_STATUS_DEFEATED_CREATURE,
+	PROPERTY_ENERGY_LOSS_THRESHOLD,
+	PROPERTY_STATUS,
 
 	CALCULATION_SET,
 	CALCULATION_DOUBLE,
@@ -71,6 +73,9 @@ import {
 	SELECTOR_CREATURES_NOT_OF_TYPE,
 	SELECTOR_OWN_CREATURES_OF_TYPE,
 	SELECTOR_OTHER_CREATURES_OF_TYPE,
+	SELECTOR_STATUS,
+
+	STATUS_BURROWED,
 
 	PROMPT_TYPE_NUMBER,
 	PROMPT_TYPE_SINGLE_CREATURE,
@@ -797,6 +802,10 @@ export class State {
 					card.card.type == TYPE_CREATURE &&
 					card.card.name.split(' ').includes(argument)
 				);
+			case SELECTOR_STATUS:
+				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card =>
+					this.modifyByStaticAbilities(card, PROPERTY_STATUS, argument),
+				);
 		}
 	}
 
@@ -830,15 +839,61 @@ export class State {
 				return target.data.wasAttacked || false;
 			case PROPERTY_STATUS_DEFEATED_CREATURE:
 				return target.data.defeatedCreature || false;
+			case PROPERTY_ENERGY_LOSS_THRESHOLD:
+				return 0; // can only be modified by static abilities / continuous effects
+			case PROPERTY_STATUS: {
+				switch (subProperty) {
+					case STATUS_BURROWED:
+						return target.card.data.burrowed;
+					default:
+						return false;
+				}
+			}
 		}
 	}
 
-	modifyByStaticAbilities(target, property, subProperty = null) {
+	isCardAffectedByStaticAbility(card, staticAbility) {
+		switch (staticAbility.selector) {
+			case SELECTOR_OWN_CREATURES: {
+				return card.card.type === TYPE_CREATURE &&
+				this.getZone(ZONE_TYPE_IN_PLAY).cards.includes(card) &&
+				this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER, null, staticAbility) === staticAbility.player;
+			}
+			case SELECTOR_OWN_MAGI: {
+				return card.card.type === TYPE_MAGI &&
+				this.getZone(ZONE_TYPE_ACTIVE_MAGI, staticAbility.player).cards.length === 1 &&
+				this.getZone(ZONE_TYPE_ACTIVE_MAGI, staticAbility.player).card === card;
+			}
+			case SELECTOR_STATUS: {
+				return this.modifyByStaticAbilities(card, PROPERTY_STATUS, staticAbility.selectorParameter, staticAbility);
+			}
+			default: {
+				const selected = this.useSelector(staticAbility.selector, staticAbility.player, staticAbility.selectorParameter);
+				return (selected.includes(card) && staticAbility.modifier);
+			}
+		}
+	}
+
+	modifyByStaticAbilities(target, property, subProperty = null, excludeAbility = null) {
 		if (!target) {
 			return null;
 		}
 		const PLAYER_ONE = this.players[0];
 		const PLAYER_TWO = this.players[1];
+
+		const gameStaticAbilities = [
+			{
+				name: 'Burrowed',
+				text: 'Your creatures may not lose more than 2 energy each turn',
+				selector: SELECTOR_STATUS,
+				selectorParameter: STATUS_BURROWED,
+				property: PROPERTY_ENERGY_LOSS_THRESHOLD,
+				modifier: {
+					operator: CALCULATION_SET,
+					operandOne: 2,
+				},
+			},
+		];
 
 		// gathering static abilities from the field, adding players Magi to them
 		const allZonesCards = [
@@ -854,14 +909,14 @@ export class State {
 			] : acc,
 			[],
 		);
-		const staticAbilities = [...zoneAbilities]; // @TODO static abilities of Magi
+		const staticAbilities = [...gameStaticAbilities, ...zoneAbilities].filter(({name}) => !excludeAbility || name !== excludeAbility.name);
+
 		let initialValue = this.getByProperty(target, property, subProperty);
 
 		staticAbilities.forEach(staticAbility => {
-			const selected = this.useSelector(staticAbility.selector, staticAbility.player, staticAbility.selectorParameter);
-			if (selected.includes(target) && staticAbility.modifier) {
+			if (this.isCardAffectedByStaticAbility(target, staticAbility) && staticAbility.property === property) {
 				const {operator, operandOne} = staticAbility.modifier;
-				
+
 				// For specifying value to substract in modifiers as positive ("CALCULATION_SUBSTRACT, 1")
 				if (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) {
 					initialValue = this.performCalculation(operator, initialValue, operandOne);
@@ -2801,7 +2856,14 @@ export class State {
 							oneOrSeveral(
 								this.getMetaValue(action.target, action.generatedBy),
 								target => {
-									target.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
+									var energyToLose = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
+									const energyLossThreshold = this.modifyByStaticAbilities(target, PROPERTY_ENERGY_LOSS_THRESHOLD);
+									const energyLostAlready = target.data.energyLostThisTurn;
+									if (energyLossThreshold > 0) {
+										const energyCanLoseThisTurn = Math.max(energyLossThreshold - energyLostAlready, 0);
+										energyToLose = Math.min(energyToLose, energyCanLoseThisTurn);
+									}
+									target.removeEnergy(energyToLose);
 
 									if (target.data.energy == 0 && !action.attack) {
 										this.transformIntoActions({

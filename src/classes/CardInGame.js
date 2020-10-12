@@ -9,6 +9,7 @@ export default class CardInGame {
 			controller: owner,
 			attacked: 0,
 			actionsUsed: [],
+			energyLostThisTurn: 0,
 			defeatedCreature: false,
 			hasAttacked: false,
 			wasAttacked: false,
@@ -26,7 +27,9 @@ export default class CardInGame {
 	}
 
 	removeEnergy(amount = 0) {
-		this.data.energy = Math.max(this.data.energy - parseInt(amount), 0);
+		const amountToRemove = Math.min(this.data.energy, parseInt(amount, 10));
+		this.data.energy -= amountToRemove;
+		this.data.energyLostThisTurn += amountToRemove;
 	}
 
 	markAttackDone() {
@@ -64,6 +67,7 @@ export default class CardInGame {
 		this.data.hasAttacked = false;
 		this.data.attacked = 0;
 		this.data.defeatedCreature = false;
+		this.data.energyLostThisTurn = 0;
 	}
 
 	copy() {
