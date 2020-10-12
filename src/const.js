@@ -8,6 +8,7 @@ export const ACTION_ENTER_PROMPT = 'actions/enter_prompt';
 export const ACTION_RESOLVE_PROMPT = 'actions/resolve_prompt';
 export const ACTION_GET_PROPERTY_VALUE = 'actions/get_property_value';
 export const ACTION_ATTACK = 'actions/attack';
+export const ACTION_CONCEDE = 'actions/concede';
 export const ACTION_PLAYER_WINS ='actions/player_wins';
 
 export const ACTION_PROPERTY = 'special_properties/action_property';
@@ -21,6 +22,7 @@ export const PROPERTY_ENERGIZE = 'properties/energize';
 export const PROPERTY_CREATURE_TYPES = 'properties/creature_types';
 export const PROPERTY_MAGI_STARTING_ENERGY = 'properties/magi_starting_energy';
 export const PROPERTY_ATTACKS_PER_TURN = 'properties/attacks_per_turn';
+export const PROPERTY_ABLE_TO_ATTACK = 'properties/able_to_attack';
 export const PROPERTY_CAN_ATTACK_MAGI_DIRECTLY = 'properties/can_attack_magi_directly';
 export const PROPERTY_POWER_COST = 'properties/power_cost'; // NOT FOR PROPERTY GETTER, ONLY STATIC ABILITIES
 export const PROPERTY_ENERGY_LOSS_THRESHOLD = 'properties/energy_loss_threshold';

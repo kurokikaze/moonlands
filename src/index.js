@@ -19,6 +19,7 @@ import {
 	ACTION_GET_PROPERTY_VALUE,
 	ACTION_ATTACK,
 	ACTION_PLAYER_WINS,
+	ACTION_CONCEDE,
 
 	ACTION_PROPERTY,
 
@@ -29,7 +30,6 @@ import {
 	PROPERTY_REGION,
 	PROPERTY_COST,
 	PROPERTY_ENERGIZE,
-	// PROPERTY_STARTING_ENERGY,
 	PROPERTY_MAGI_STARTING_ENERGY,
 	PROPERTY_ATTACKS_PER_TURN,
 	PROPERTY_CAN_ATTACK_MAGI_DIRECTLY,
@@ -39,6 +39,7 @@ import {
 	PROPERTY_STATUS_DEFEATED_CREATURE,
 	PROPERTY_ENERGY_LOSS_THRESHOLD,
 	PROPERTY_STATUS,
+	PROPERTY_ABLE_TO_ATTACK,
 
 	CALCULATION_SET,
 	CALCULATION_DOUBLE,
@@ -56,7 +57,6 @@ import {
 	SELECTOR_RELICS,
 	SELECTOR_OWN_MAGI,
 	SELECTOR_ENEMY_MAGI,
-	// SELECTOR_ACTIVE_MAGI_OF_PLAYER,
 	SELECTOR_CREATURES_OF_REGION,
 	SELECTOR_CREATURES_NOT_OF_REGION,
 	SELECTOR_OWN_CREATURES,
@@ -342,7 +342,7 @@ export class State {
 	}
 
 	hasWinner() {
-		return this.winner === null;
+		return this.winner !== false;
 	}
 
 	setPlayers(player1, player2) {
@@ -822,33 +822,52 @@ export class State {
 			case PROPERTY_ENERGY_COUNT:
 				return target.data.energy;
 			case PROPERTY_ATTACKS_PER_TURN:
-				return target.card.data.attacksPerTurn;
+				return target.modifiedCard ?
+					target.modifiedCard.data.attacksPerTurn :
+					target.card.data.attacksPerTurn;
 			case PROPERTY_COST:
-				return target.card.cost;
+				return target.modifiedCard ?
+					target.modifiedCard.cost :
+					target.card.cost;
 			case PROPERTY_ENERGIZE:
-				return target.card.data.energize;
+				return target.modifiedCard ?
+					target.modifiedCard.data.energize :
+					target.card.data.energize;
 			case PROPERTY_REGION:
 				return target.card.region;
 			case PROPERTY_CAN_ATTACK_MAGI_DIRECTLY:
-				return target.card.data.canAttackMagiDirectly;
+				return target.modifiedCard ?
+					target.modifiedCard.data.canAttackMagiDirectly :
+					target.card.data.canAttackMagiDirectly;
 			case PROPERTY_MAGI_STARTING_ENERGY:
-				return target.card.data.startingEnergy;
+				return target.modifiedCard ?
+					target.modifiedCard.data.startingEnergy :
+					target.card.data.startingEnergy;
 			case PROPERTY_POWER_COST:
-				return target.card.data.powers.find(({name}) => name === subProperty).cost;
+				return target.modifiedCard ?
+					target.modifiedCard.data.powers.find(({name}) => name === subProperty).cost :
+					target.card.data.powers.find(({name}) => name === subProperty).cost;
 			case PROPERTY_STATUS_WAS_ATTACKED:
 				return target.data.wasAttacked || false;
 			case PROPERTY_STATUS_DEFEATED_CREATURE:
 				return target.data.defeatedCreature || false;
-			case PROPERTY_ENERGY_LOSS_THRESHOLD:
-				return 0; // can only be modified by static abilities / continuous effects
 			case PROPERTY_STATUS: {
 				switch (subProperty) {
 					case STATUS_BURROWED:
-						return target.card.data.burrowed;
+						return Object.hasOwnProperty.call(target.data, 'burrowed') ?
+							target.data.burrowed :
+							target.card.data.burrowed;
 					default:
 						return false;
 				}
 			}
+			// These properties can only be modified by static abilities / continuous effects
+			case PROPERTY_ENERGY_LOSS_THRESHOLD:
+				return target.modifiedCard ?
+					target.modifiedCard.data.energyLossThreshold :0;
+			case PROPERTY_ABLE_TO_ATTACK:
+				return target.modifiedCard ?
+					target.modifiedCard.data.ableToAttack : true;
 		}
 	}
 
@@ -856,41 +875,52 @@ export class State {
 		switch (staticAbility.selector) {
 			case SELECTOR_OWN_CREATURES: {
 				return card.card.type === TYPE_CREATURE &&
-				this.getZone(ZONE_TYPE_IN_PLAY).cards.includes(card) &&
-				this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER, null, staticAbility) === staticAbility.player;
+				this.getZone(ZONE_TYPE_IN_PLAY).cards.some(({id}) => id === card.id) &&
+				card.data.controller === staticAbility.player;
 			}
 			case SELECTOR_OWN_MAGI: {
 				return card.card.type === TYPE_MAGI &&
 				this.getZone(ZONE_TYPE_ACTIVE_MAGI, staticAbility.player).cards.length === 1 &&
-				this.getZone(ZONE_TYPE_ACTIVE_MAGI, staticAbility.player).card === card;
+				this.getZone(ZONE_TYPE_ACTIVE_MAGI, staticAbility.player).card.id === card.id;
 			}
 			case SELECTOR_STATUS: {
-				return this.modifyByStaticAbilities(card, PROPERTY_STATUS, staticAbility.selectorParameter, staticAbility);
+				return this.getByProperty(card, PROPERTY_STATUS, staticAbility.selectorParameter);
 			}
-			default: {
-				const selected = this.useSelector(staticAbility.selector, staticAbility.player, staticAbility.selectorParameter);
-				return (selected.includes(card) && staticAbility.modifier);
+			case SELECTOR_OWN_SPELLS_IN_HAND: {
+				return this.getZone(ZONE_TYPE_HAND, staticAbility.player).cards.some(({id}) => id === card.id);
 			}
 		}
 	}
 
-	modifyByStaticAbilities(target, property, subProperty = null, excludeAbility = null) {
+	modifyByStaticAbilities(target, property, subProperty = null) {
 		if (!target) {
 			return null;
 		}
+
 		const PLAYER_ONE = this.players[0];
 		const PLAYER_TWO = this.players[1];
 
 		const gameStaticAbilities = [
 			{
-				name: 'Burrowed',
-				text: 'Your creatures may not lose more than 2 energy each turn',
+				name: 'Burrowed - Energy loss',
+				text: 'Your burrowed creatures may not lose more than 2 energy each turn',
 				selector: SELECTOR_STATUS,
 				selectorParameter: STATUS_BURROWED,
 				property: PROPERTY_ENERGY_LOSS_THRESHOLD,
 				modifier: {
 					operator: CALCULATION_SET,
 					operandOne: 2,
+				},
+			},
+			{
+				name: 'Burrowed - Ability to attack',
+				text: 'Your burrowed creatures cannot attack',
+				selector: SELECTOR_STATUS,
+				selectorParameter: STATUS_BURROWED,
+				property: PROPERTY_ABLE_TO_ATTACK,
+				modifier: {
+					operator: CALCULATION_SET,
+					operandOne: false,
 				},
 			},
 		];
@@ -902,32 +932,178 @@ export class State {
 			...this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO).cards,
 		];
 
+		const propertyLayers = {
+			[PROPERTY_COST]: 1,
+			[PROPERTY_ENERGIZE]: 2,
+			[PROPERTY_STATUS]: 3,
+			[PROPERTY_ATTACKS_PER_TURN]: 4,
+			[PROPERTY_CAN_ATTACK_MAGI_DIRECTLY]: 5,
+			[PROPERTY_ENERGY_LOSS_THRESHOLD]: 6,
+			[PROPERTY_ABLE_TO_ATTACK]: 7,
+		};
+ 
 		const zoneAbilities = allZonesCards.reduce(
 			(acc, cardInPlay) => cardInPlay.card.data.staticAbilities ? [
 				...acc,
-				...(cardInPlay.card.data.staticAbilities.filter(a => a.property == property).map(a => ({...a, player: cardInPlay.data.controller})))
+				...(cardInPlay.card.data.staticAbilities.map(a => ({...a, player: cardInPlay.data.controller})))
 			] : acc,
 			[],
 		);
-		const staticAbilities = [...gameStaticAbilities, ...zoneAbilities].filter(({name}) => !excludeAbility || name !== excludeAbility.name);
 
-		let initialValue = this.getByProperty(target, property, subProperty);
+		const staticAbilities = [...gameStaticAbilities, ...zoneAbilities].sort((a, b) => propertyLayers[a.property] - propertyLayers[b.property]);
 
-		staticAbilities.forEach(staticAbility => {
-			if (this.isCardAffectedByStaticAbility(target, staticAbility) && staticAbility.property === property) {
-				const {operator, operandOne} = staticAbility.modifier;
+		let initialCardData = {
+			card: target.card,
+			modifiedCard: {
+				...target.card,
+			},
+			data: {
+				...target.data,
+			},
+			id: target.id,
+			owner: target.owner,
+		};
 
-				// For specifying value to substract in modifiers as positive ("CALCULATION_SUBSTRACT, 1")
-				if (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) {
-					initialValue = this.performCalculation(operator, initialValue, operandOne);
-				} else {
-					initialValue = this.performCalculation(operator, operandOne, initialValue);
+		const modifiedCardData = staticAbilities.reduce(this.layeredDataReducer.bind(this), initialCardData);
+
+		return this.getByProperty(modifiedCardData, property, subProperty);
+	}
+
+	layeredDataReducer(currentCard, staticAbility) {
+		if (this.isCardAffectedByStaticAbility(currentCard, staticAbility)) {
+			switch (staticAbility.property) {
+				case PROPERTY_COST: {
+					const initialValue = this.getByProperty(currentCard, PROPERTY_COST);
+					const {operator, operandOne} = staticAbility.modifier;
+
+					const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
+						this.performCalculation(operator, initialValue, operandOne) :
+						this.performCalculation(operator, operandOne, initialValue);
+
+					return {
+						...currentCard,
+						modifiedCard: {
+							...currentCard.modifiedCard,
+							cost: resultValue,
+						},
+					};
 				}
-				
-			}
-		});
+				case PROPERTY_ENERGIZE: {
+					const initialValue = this.getByProperty(currentCard, PROPERTY_ENERGIZE);
+					const {operator, operandOne} = staticAbility.modifier;
 
-		return initialValue;
+					const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
+						this.performCalculation(operator, initialValue, operandOne) :
+						this.performCalculation(operator, operandOne, initialValue);
+
+					return {
+						...currentCard,
+						modifiedCard: {
+							...currentCard.modifiedCard,
+							data: {
+								...currentCard.modifiedCard.data,
+								energize: resultValue,
+							},
+						},
+					};
+				}
+				case PROPERTY_ATTACKS_PER_TURN: {
+					const initialValue = this.getByProperty(currentCard, PROPERTY_ATTACKS_PER_TURN);
+					const {operator, operandOne} = staticAbility.modifier;
+
+					const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
+						this.performCalculation(operator, initialValue, operandOne) :
+						this.performCalculation(operator, operandOne, initialValue);
+
+					return {
+						...currentCard,
+						modifiedCard: {
+							...currentCard.modifiedCard,
+							data: {
+								...currentCard.modifiedCard.data,
+								attacksPerTurn: resultValue,
+							},
+						},
+					};
+				}
+				case PROPERTY_ENERGY_LOSS_THRESHOLD: {
+					const initialValue = this.getByProperty(currentCard, PROPERTY_ENERGIZE);
+					const {operator, operandOne} = staticAbility.modifier;
+
+					const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
+						this.performCalculation(operator, initialValue, operandOne) :
+						this.performCalculation(operator, operandOne, initialValue);
+
+					return {
+						...currentCard,
+						modifiedCard: {
+							...currentCard.modifiedCard,
+							data: {
+								...currentCard.modifiedCard.data,
+								energyLossThreshold: resultValue,
+							},
+						},
+					};
+				}
+				case PROPERTY_STATUS: {
+					const initialValue = this.getByProperty(currentCard, PROPERTY_STATUS, staticAbility.subProperty);
+					const {operator, operandOne} = staticAbility.modifier;
+
+					const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
+						this.performCalculation(operator, initialValue, operandOne) :
+						this.performCalculation(operator, operandOne, initialValue);
+					switch (staticAbility.subProperty) {
+						case [STATUS_BURROWED]: {
+							return {
+								...currentCard,
+								data: {
+									...currentCard.data,
+									burrowed: resultValue,
+								},
+							};
+						}
+						default: {
+							return currentCard;
+						}
+					}
+				}
+				case PROPERTY_POWER_COST: {
+					if (currentCard.modifiedCard.data.powers) {
+						const updatedPowers = currentCard.modifiedCard.data.powers.map(power => {
+							const initialValue = this.getByProperty(currentCard, PROPERTY_POWER_COST, power.name);
+							const {operator, operandOne} = staticAbility.modifier;
+		
+							const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
+								this.performCalculation(operator, initialValue, operandOne) :
+								this.performCalculation(operator, operandOne, initialValue);
+							
+							return {
+								...power,
+								cost: resultValue,
+							};
+						});
+
+						return {
+							...currentCard,
+							modifiedCard: {
+								...currentCard.modifiedCard,
+								data: {
+									...currentCard.modifiedCard.data,
+									powers: updatedPowers,
+								},
+							},
+						};
+					}
+
+					return currentCard;
+				}
+				default: {
+					return currentCard;
+				}
+			}
+		}
+
+		return currentCard;
 	}
 
 	makeChecker(restriction, restrictionValue) {
@@ -1229,6 +1405,15 @@ export class State {
 			this.triggerAbilities(action);
 
 			switch (action.type) {
+				case ACTION_CONCEDE: {
+					const opponentId = this.getOpponent(action.player);
+					this.transformIntoActions({
+						type: ACTION_PLAYER_WINS,
+						player: opponentId,
+					});
+
+					break;
+				}
 				case ACTION_PLAYER_WINS: {
 					this.setWinner(action.player);
 					this.state.actions = [];
@@ -1911,9 +2096,10 @@ export class State {
 												source: action.payload.card,
 												player: action.payload.player, // Spell can rewrite this to make opponent do something - draw a card, for example
 												...effect,
+												spell: true,
 												generatedBy: action.payload.card.id,
 											}));
-										
+
 										const testablePrompts = [
 											PROMPT_TYPE_SINGLE_CREATURE,
 											PROMPT_TYPE_RELIC,
@@ -2859,7 +3045,8 @@ export class State {
 									var energyToLose = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
 									const energyLossThreshold = this.modifyByStaticAbilities(target, PROPERTY_ENERGY_LOSS_THRESHOLD);
 									const energyLostAlready = target.data.energyLostThisTurn;
-									if (energyLossThreshold > 0) {
+
+									if (energyLossThreshold > 0 && (action.power || action.spell || action.attack)) {
 										const energyCanLoseThisTurn = Math.max(energyLossThreshold - energyLostAlready, 0);
 										energyToLose = Math.min(energyToLose, energyCanLoseThisTurn);
 									}
