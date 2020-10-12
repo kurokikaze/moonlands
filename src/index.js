@@ -1734,7 +1734,7 @@ export class State {
 									{
 										type: ACTION_EFFECT,
 										effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
-										target: source,
+										target: payingCard,
 										amount: '$number',
 										generatedBy: source.id,
 									},
@@ -1743,7 +1743,7 @@ export class State {
 								this.addActions({
 									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
-									target: source,
+									target: payingCard,
 									amount: powerCost,
 									generatedBy: source.id,
 								});
