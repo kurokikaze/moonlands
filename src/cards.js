@@ -791,6 +791,37 @@ export const cards = [
 			},
 		],
 	}),
+	new Card('Motash', TYPE_MAGI, REGION_UNDERNEATH, null, {
+		replacementEffects: [
+			{
+				name: 'Escape',
+				text: 'Whenever one of your Creatures is defeated in attack, return it to your hand instead of discarding it',
+				find: {
+					effectType: EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
+					conditions: [
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_CONTROLLER,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						},
+						{
+							objectOne: 'attack',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '=',
+							objectTwo: true,
+							propertyTwo: null,
+						}
+					],
+				},
+				replaceWith: effect({
+					effectType: EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY,
+					target: '%target',
+				}),
+			},
+		],
+	}),
 	new Card('Motash\'s Staff', TYPE_RELIC, REGION_UNDERNEATH, 0, {
 		replacementEffects: [{
 			name: 'Dreamcatch',

@@ -777,6 +777,47 @@ describe('Ayebaw', () => {
 	});
 });
 
+describe('Motash', () => {
+	it('Escape', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const ayebaw = new CardInGame(byName('Ayebaw'), ACTIVE_PLAYER).addEnergy(5);
+
+		const motash = new CardInGame(byName('Motash'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const mushroomHyren = new CardInGame(byName('Mushroom Hyren'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+				new Zone('NAP Hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([motash]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([ayebaw, mushroomHyren]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: ACTION_ATTACK,
+			source: ayebaw,
+			target: mushroomHyren,
+		};
+
+		gameState.update(attackAction);
+
+		expect(ayebaw.data.energy).toEqual(3, 'Ayebaw has 3 energy');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).cards.length).toEqual(0, 'No cards in non-active player discard');
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).cards.length).toEqual(1, 'One card in non-active player hand');
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).card.card.name).toEqual('Mushroom Hyren', 'It is Mushroom Hyren');
+	});
+});
+
 describe('Carillion', () => {
 	it('Resilience', () => {
 		const ACTIVE_PLAYER = 0;

@@ -1,4 +1,4 @@
-Done: **122** cards out of **190**
+Done: **124** cards out of **190**
 
 # Done, tested
 
@@ -66,6 +66,8 @@ Done: **122** cards out of **190**
 - Corf
 - Crystal Arboll
 - Digging Goggles
+- Motash
+- Motash's Staff
 
 # Done, not tested
 
@@ -248,8 +250,6 @@ Done: **122** cards out of **190**
 - Lovian
 - Mask of Abwyn
 - Mirror Pendant
-- Motash
-- Motash's Staff
 - Orathan Flyer
 - Orish
 - Orlon
@@ -351,11 +351,13 @@ Done: **122** cards out of **190**
 
 # Triggered abilities
 
-- Gloves of Crystal
 - Motash
 - Staff of Korrits (also trigger on fucking banding)
 - Twee
-- Orothean Belt
+
+# May-abilities
+
+- Gloves of Crystal
 
 ## Delayed triggers
 
