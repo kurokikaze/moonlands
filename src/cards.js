@@ -884,6 +884,40 @@ export const cards = [
 			},
 		],
 	}),
+	new Card('Orothean Belt', TYPE_RELIC, REGION_OROTHE, 0, {
+		triggerEffects: [
+			{
+				name: 'Hydromancy',
+				text: 'Whenever a Spell you control adds energy from any number of Creatures, add one additional energy to each of those Creatures.',
+				find: {
+					effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+					conditions: [
+						{
+							objectOne: 'source',
+							propertyOne: PROPERTY_TYPE,
+							comparator: '=',
+							objectTwo: TYPE_SPELL,
+							propertyTwo: null,
+						},
+						{
+							objectOne: 'source',
+							propertyOne: PROPERTY_CONTROLLER,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						},
+					],
+				},
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '%target',
+						amount: 1,
+					}),
+				],
+			},
+		],
+	}),
 	new Card('Valkan', TYPE_MAGI, REGION_CALD, null, {
 		startingEnergy: 12,
 		energize: 4,

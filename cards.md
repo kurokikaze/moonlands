@@ -1,4 +1,4 @@
-Done: **121** cards out of **190**
+Done: **122** cards out of **190**
 
 # Done, tested
 
@@ -127,6 +127,7 @@ Done: **121** cards out of **190**
 - Brub
 - Bottomless Pit
 - Gorgle's Ring
+- Orothean Belt
 
 # Possible sample decks:
 
@@ -252,7 +253,6 @@ Done: **121** cards out of **190**
 - Orathan Flyer
 - Orish
 - Orlon
-- Orothean Belt
 - Orothean Goggles
 - Orpus
 - Orthea
