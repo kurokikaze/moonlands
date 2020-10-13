@@ -54,6 +54,7 @@ export const SELECTOR_OTHER_CREATURES_OF_TYPE = 'selectors/other_creatures_of_ty
 export const SELECTOR_RELICS = 'selectors/relics';
 export const SELECTOR_OWN_SPELLS_IN_HAND = 'selectors/own_spells_in_hand';
 export const SELECTOR_OWN_CREATURES_WITH_STATUS = 'selectors/own_creatures_with_status';
+export const SELECTOR_CREATURES_WITHOUT_STATUS = 'selectors/creatures_without_status';
 export const SELECTOR_STATUS = 'selectors/status';
 
 export const STATUS_BURROWED = 'status/burrowed';
@@ -166,6 +167,7 @@ export const RESTRICTION_CREATURE_TYPE = 'restrictions/creature_type';
 export const RESTRICTION_PLAYABLE = 'restrictions/card_playable';
 export const RESTRICTION_CREATURE_WAS_ATTACKED = 'restrictions/creature_was_attacked';
 export const RESTRICTION_MAGI_WITHOUT_CREATURES = 'restrictions/magi_without_creatures';
+export const RESTRICTION_STATUS = 'restrictions/status';
 
 export const TYPE_CREATURE = 'types/creature';
 export const TYPE_MAGI = 'types/magi';

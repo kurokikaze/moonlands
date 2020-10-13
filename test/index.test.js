@@ -17,8 +17,6 @@ import {
 	ACTION_RESOLVE_PROMPT,
 	ACTION_CONCEDE,
 
-	REGION_ARDERIAL,
-
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
 	EFFECT_TYPE_ADD_DELAYED_TRIGGER,
@@ -35,11 +33,13 @@ import {
 	SELECTOR_MAGI,
 	SELECTOR_CREATURES,
 	SELECTOR_OWN_CARDS_IN_PLAY,
+	SELECTOR_STATUS,
 
 	REGION_NAROOM,
 	REGION_CALD,
 	REGION_OROTHE,
 	REGION_UNDERNEATH,
+	REGION_ARDERIAL,
 
 	CALCULATION_DOUBLE,
 	CALCULATION_ADD,
@@ -55,9 +55,11 @@ import {
 
 	PROMPT_TYPE_CHOOSE_CARDS,
 	PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+	PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
 
 	RESTRICTION_REGION,
 	RESTRICTION_TYPE,
+	RESTRICTION_STATUS,
 
 	EFFECT_TYPE_MOVE_ENERGY,
 	EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
@@ -72,11 +74,9 @@ import {
 
 	PROPERTY_ENERGY_LOSS_THRESHOLD,
 	PROPERTY_STATUS,
-
-	SELECTOR_STATUS,
+	PROPERTY_ABLE_TO_ATTACK,
 
 	STATUS_BURROWED,
-	PROPERTY_ABLE_TO_ATTACK,
 }  from '../src/const.js';
 
 import Zone from '../src/classes/Zone.js';
@@ -4077,4 +4077,59 @@ describe('Burrowed status', () => {
 		expect(protoPylofuf.data.energy).toEqual(2, 'Proto-Pylofuf lost no energy due to being Burrowed and already losing his limit of 2 energy');
 		expect(protoPylofuf.data.energyLostThisTurn).toEqual(2, 'Proto-Pylofuf still has energy loss marked');
 	});
+});
+
+describe('Enrich', () => {
+	it('Affects burrowed creatures', () => {
+		const ACTIVE_PLAYER = 64;
+		const NON_ACTIVE_PLAYER = 30;
+
+		const protoPylofufCard = new Card('Proto-Pylofuf', TYPE_CREATURE, REGION_UNDERNEATH, 4, {
+			burrowed: true,
+		});
+
+		const motash = new CardInGame(byName('Motash'), ACTIVE_PLAYER).addEnergy(4);
+		const protoPylofuf = new CardInGame(protoPylofufCard, ACTIVE_PLAYER).addEnergy(4);
+		const enrich = new CardInGame(byName('Enrich'), ACTIVE_PLAYER);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([enrich]),
+				new Zone('NAP Discard', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([motash]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([protoPylofuf]),
+			],
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		const playAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: enrich,
+				player: ACTIVE_PLAYER,
+			},
+		};
+
+		gameState.update(playAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in Prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_SINGLE_CREATURE_FILTERED, 'Prompt is of correct type');
+		expect(gameState.state.promptParams.restriction).toEqual(RESTRICTION_STATUS, 'Prompt is restricted by status');
+		expect(gameState.state.promptParams.restrictionValue).toEqual(STATUS_BURROWED, 'Status is Burrowed');
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: protoPylofuf,
+			generatedBy: enrich.id,
+		};
+
+		gameState.update(targetingAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in Prompt state');
+		expect(protoPylofuf.data.energy).toEqual(7, 'Proto-Pylofuf has 7 energy now');
+	});	
 });

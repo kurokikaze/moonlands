@@ -1,4 +1,4 @@
-Done: **124** cards out of **190**
+Done: **128** cards out of **190**
 
 # Done, tested
 
@@ -68,6 +68,7 @@ Done: **124** cards out of **190**
 - Digging Goggles
 - Motash
 - Motash's Staff
+- Enrich
 
 # Done, not tested
 
@@ -130,6 +131,8 @@ Done: **124** cards out of **190**
 - Bottomless Pit
 - Gorgle's Ring
 - Orothean Belt
+- Corf Pearl
+- Carnivorous Cave
 
 # Possible sample decks:
 
@@ -222,10 +225,8 @@ Done: **124** cards out of **190**
 - Carnivorous Cave
 - Cloud Sceptre
 - Colossus
-- Corf Pearl
 - Eclipse
 - Energy Band
-- Enrich
 - Entangle
 - Epik
 - Eye of the Storm
@@ -296,11 +297,10 @@ Done: **124** cards out of **190**
 - Vulbor (choosing player)
 - Heat Lens (choosing player)
 - Gar (between cards in play)
+- Eye of the Storm (choosing between drawing five or opponent discarding their hand)
 
 # Conditionals
 
-- Corf Pearl
-- Eye of the Storm
 - Plith
 - Shimmer
 
@@ -351,9 +351,7 @@ Done: **124** cards out of **190**
 
 # Triggered abilities
 
-- Motash
 - Staff of Korrits (also trigger on fucking banding)
-- Twee
 
 # May-abilities
 
@@ -385,7 +383,6 @@ Done: **124** cards out of **190**
 ## Statuses
 
 - Burrow
-- Carnivorous Cave
 - Enrich
 - Gogor
 
@@ -423,9 +420,10 @@ Done: **124** cards out of **190**
 - Lovian
 - Orlon
 
-## Additional selectors (selector of card itself)
+## Additional selectors
 
-- Bisiwog
+- Bisiwog (selector of card itself)
+- Twee (next card in the zone)
 
 # Controlling another player
 

@@ -67,6 +67,7 @@ import {
 	SELECTOR_OWN_SPELLS_IN_HAND,
 	SELECTOR_OTHER_CREATURES_OF_TYPE,
 	SELECTOR_OWN_CREATURES_WITH_STATUS,
+	SELECTOR_CREATURES_WITHOUT_STATUS,
 
 	EFFECT_TYPE_END_OF_TURN,
 	EFFECT_TYPE_NONE,
@@ -138,6 +139,7 @@ import {
 	SELECTOR_STATUS,
 	STATUS_BURROWED,
 	PROPERTY_ABLE_TO_ATTACK,
+	RESTRICTION_STATUS,
 	/* eslint-enable no-unused-vars */
 } from './const.js';
 
@@ -1906,6 +1908,28 @@ export const cards = [
 			},
 		],
 	}),
+	new Card('Carnivorous Cave', TYPE_SPELL, REGION_UNDERNEATH, 3, {
+		text: 'Discard 1 energy from each Magi and each non-Burrowed Creature in play.',
+		effects: [
+			select({
+				selector: SELECTOR_MAGI,
+			}),
+			effect({
+				effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+				target: '$selected',
+				amount: 1,
+			}),
+			select({
+				selector: SELECTOR_CREATURES_WITHOUT_STATUS,
+				status: STATUS_BURROWED,
+			}),
+			effect({
+				effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+				target: '$selected',
+				amount: 1,
+			}),
+		],
+	}),
 	new Card('Grega', TYPE_MAGI, REGION_CALD, null, {
 		startingEnergy: 10,
 		energize: 5,
@@ -2186,6 +2210,21 @@ export const cards = [
 				effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
 				target: '$target',
 				amount: '2',
+			}),
+		],
+	}),
+	new Card('Enrich', TYPE_SPELL, REGION_UNDERNEATH, 1, {
+		text: 'Choose any Burrowed Creature in play. Add 3 energy to the chosen Creature.',
+		effects: [
+			prompt({
+				promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+				restriction: RESTRICTION_STATUS,
+				restrictionValue: STATUS_BURROWED,
+			}),
+			effect({
+				effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+				target: '$target',
+				amount: 3,
 			}),
 		],
 	}),
@@ -2537,6 +2576,93 @@ export const cards = [
 							effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
 							target: '$target',
 							amount: 4,
+						}),
+					],
+				}),
+			],
+		}],
+	}),
+	new Card('Corf Pearl', TYPE_RELIC, REGION_CALD, 0, {
+		powers: [{
+			name: 'Wild Fire',
+			text: 'Roll a die. 1, 2 or 3: Discard 1 energy from each of your Creatures. 4 or 5: Choose any one Creature in play. Discard 2 energy from the chosen Creature. 6: Choose a Creature in play. Add 3 energy to the chosen Creature.',
+			effects: [
+				effect({
+					effectType: EFFECT_TYPE_ROLL_DIE,
+				}),
+				effect({ // 1-3: Discard 1 energy from each of your Creatures
+					effectType: EFFECT_TYPE_CONDITIONAL,
+					rollResult: '$roll_result',
+					conditions: [
+						{
+							objectOne: 'rollResult',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '<=',
+							objectTwo: 3,
+							propertyTwo: null,
+						}
+					],
+					thenEffects: [
+						select({
+							selector: SELECTOR_OWN_MAGI,
+						}),
+						effect({
+							effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+							target: '$selected',
+							amount: 3,
+						}),
+					],
+				}),
+				effect({ // 4-5: discard Wellisk Pup from play
+					effectType: EFFECT_TYPE_CONDITIONAL,
+					rollResult: '$roll_result',
+					conditions: [
+						{
+							objectOne: 'rollResult',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '>=',
+							objectTwo: 4,
+							propertyTwo: null,
+						},
+						{
+							objectOne: 'rollResult',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '<=',
+							objectTwo: 5,
+							propertyTwo: null,
+						}
+					],
+					thenEffects: [
+						prompt({
+							promptType: PROMPT_TYPE_SINGLE_CREATURE,
+						}),
+						effect({
+							effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+							target: '$target',
+							amount: 2,
+						}),
+					],
+				}),
+				effect({ // 6: add 3 energy to target Creature
+					effectType: EFFECT_TYPE_CONDITIONAL,
+					rollResult: '$roll_result',
+					conditions: [
+						{
+							objectOne: 'rollResult',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '=',
+							objectTwo: 6,
+							propertyTwo: null,
+						},
+					],
+					thenEffects: [
+						prompt({
+							promptType: PROMPT_TYPE_SINGLE_CREATURE,
+						}),
+						effect({
+							effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+							target: '$target',
+							amount: 3,
 						}),
 					],
 				}),

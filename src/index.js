@@ -75,6 +75,7 @@ import {
 	SELECTOR_OTHER_CREATURES_OF_TYPE,
 	SELECTOR_STATUS,
 	SELECTOR_OWN_CREATURES_WITH_STATUS,
+	SELECTOR_CREATURES_WITHOUT_STATUS,
 
 	STATUS_BURROWED,
 
@@ -162,6 +163,7 @@ import {
 	RESTRICTION_PLAYABLE,
 	RESTRICTION_CREATURE_WAS_ATTACKED,
 	RESTRICTION_MAGI_WITHOUT_CREATURES,
+	RESTRICTION_STATUS,
 
 	COST_X,
 	
@@ -804,6 +806,10 @@ export class State {
 				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card =>
 					this.modifyByStaticAbilities(card, PROPERTY_STATUS, argument),
 				);
+			case SELECTOR_CREATURES_WITHOUT_STATUS:
+				return this.getZone(ZONE_TYPE_IN_PLAY).cards
+					.filter(card => card.card.type == TYPE_CREATURE)
+					.filter(card => !this.modifyByStaticAbilities(card, PROPERTY_STATUS, argument));
 		}
 	}
 
@@ -1164,6 +1170,8 @@ export class State {
 				return card => card.data.controller === restrictionValue;
 			case RESTRICTION_OPPONENT_CREATURE:
 				return card => card.data.controller !== restrictionValue;
+			case RESTRICTION_STATUS:
+				return card => this.modifyByStaticAbilities(card, PROPERTY_STATUS, restrictionValue);
 			default:
 				return () => true;
 		}
@@ -1977,6 +1985,14 @@ export class State {
 								...this.useSelector(SELECTOR_OWN_MAGI, action.player),
 								...this.useSelector(SELECTOR_ENEMY_MAGI, action.player),
 							].filter(magi => this.modifyByStaticAbilities(magi, PROPERTY_REGION) != action.region);
+							break;
+						}
+						case SELECTOR_STATUS: {
+							result = this.useSelector(action.selector, action.player, action.status);
+							break;
+						}
+						case SELECTOR_CREATURES_WITHOUT_STATUS: {
+							result = this.useSelector(action.selector, action.player, action.status);
 							break;
 						}
 						default: {
