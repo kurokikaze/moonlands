@@ -888,7 +888,7 @@ export const cards = [
 		triggerEffects: [
 			{
 				name: 'Hydromancy',
-				text: 'Whenever a Spell you control adds energy from any number of Creatures, add one additional energy to each of those Creatures.',
+				text: 'Whenever a Spell you control adds energy to any number of Creatures, add one additional energy to each of those Creatures.',
 				find: {
 					effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 					conditions: [
