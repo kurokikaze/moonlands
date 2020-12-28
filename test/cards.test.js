@@ -4639,6 +4639,54 @@ describe('Korrit', () => {
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Kelthet', 'It is Kelthet');
 	});
 
+	it('Pack Hunt (monstrous Korrit)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		// Naroom/Underneath side
+		const pruitt = new CardInGame(byName('Pruitt'), ACTIVE_PLAYER).addEnergy(10);
+		const korrit = new CardInGame(byName('Korrit'), ACTIVE_PLAYER).addEnergy(13);
+		const mushroomHyren = new CardInGame(byName('Mushroom Hyren'), ACTIVE_PLAYER).addEnergy(3);
+
+		// Cald side
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const kelthet = new CardInGame(byName('Kelthet'), NON_ACTIVE_PLAYER).addEnergy(6);
+
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([pruitt]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([korrit, mushroomHyren, kelthet]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: ACTION_ATTACK,
+			source: mushroomHyren,
+			target: kelthet,
+			additionalAttackers: [korrit],
+		};
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(3, 'Three creatures on the field');
+
+		gameState.update(attackAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature on the field');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Korrit', 'It is Korrit');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(13, 'It has 13 energy');		
+
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'Active player has 1 card in discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Mushroom Hyren', 'It is Mushroom Hyren');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1, 'Non-active player has 1 card in discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Kelthet', 'It is Kelthet');
+	});
+
 	it('Pack Hunt (three additional attackers)', () => {
 		const ACTIVE_PLAYER = 0;
 		const NON_ACTIVE_PLAYER = 1;

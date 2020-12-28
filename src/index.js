@@ -1448,11 +1448,13 @@ export class State {
 
 					break;
 				}
+
 				case ACTION_PLAYER_WINS: {
 					this.setWinner(action.player);
 					this.state.actions = [];
 					break;
 				}
+
 				case ACTION_ATTACK: {
 					const attackSource = this.getMetaValue(action.source, action.generatedBy);
 					const attackTarget = this.getMetaValue(action.target, action.generatedBy);
@@ -1482,7 +1484,7 @@ export class State {
 					const enoughAttacksLeft = (sourceHasAttacksLeft && (additionalAttackersHasAttacksLeft || additionalAttackers.length === 0));
 
 					if (enoughAttacksLeft && attackApproved && this.getCurrentPriority() == PRIORITY_ATTACK) {
-						const attackSequence = [
+						let attackSequence = [
 							{
 								type: ACTION_EFFECT,
 								effectType: EFFECT_TYPE_CREATURE_ATTACKS,
@@ -1518,8 +1520,6 @@ export class State {
 								generatedBy: attackSource.id,
 							},
 						];
-
-						this.transformIntoActions(...attackSequence);
 
 						if (additionalAttackers) {
 							const preparedEffects = additionalAttackers.map(card => [
@@ -1563,8 +1563,10 @@ export class State {
 								},
 							]).flat();
 
-							this.transformIntoActions(...preparedEffects);
+							attackSequence = [...attackSequence, ...preparedEffects];
 						}
+
+						this.transformIntoActions(...attackSequence);
 					}
 					break;
 				}
