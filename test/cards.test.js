@@ -2464,6 +2464,46 @@ describe('Warrior\'s Boots', () => {
 	});
 });
 
+describe('Book of Ages', () => {
+	it('Lore', () => {
+		const ACTIVE_PLAYER = 40;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const ebylon = new CardInGame(byName('Ebylon'), ACTIVE_PLAYER).addEnergy(6);
+		const bookOfAges = new CardInGame(byName('Book of Ages'), ACTIVE_PLAYER);
+
+		const seaBarl = new CardInGame(byName('Sea Barl'), ACTIVE_PLAYER);
+		const ormagon = new CardInGame(byName('Ormagon'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [bookOfAges], [ebylon]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).add([seaBarl, ormagon]);
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: bookOfAges,
+			power: bookOfAges.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerAction);
+
+		expect(ebylon.data.energy).toEqual(4, 'Ebylon has 4 energy left');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One card in play');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Book of Ages', 'Book of Ages is in play');
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(1, 'One card in hand');
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).card.card.name).toEqual('Sea Barl', 'Sea Barl is in hand');
+	});
+});
+
 describe('O\'Qua', () => {
 	it('Conjure', () => {
 		const ACTIVE_PLAYER = 40;

@@ -2008,7 +2008,7 @@ export const cards = [
 						variable: 'controller',
 					}),
 					effect({
-						effect: EFFECT_TYPE_DRAW,
+						effectType: EFFECT_TYPE_DRAW,
 						player: '$controller',
 					}),
 				],

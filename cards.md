@@ -1,4 +1,4 @@
-Done: **128** cards out of **190**
+Done: **129** cards out of **190**
 
 # Done, tested
 
@@ -11,6 +11,7 @@ Done: **128** cards out of **190**
 - Ayebaw
 - Balamant
 - Bhatar
+- Book of Ages
 - Bwill
 - Carillion
 - Cave Hyren
@@ -75,7 +76,6 @@ Done: **128** cards out of **190**
 - Agovo
 - Arderial's Crown
 - Baloo Root
-- Book of Ages
 - Book of Life
 - Cave In
 - Channeler's Gloves
@@ -379,10 +379,6 @@ Done: **128** cards out of **190**
 ## Delayed triggers
 
 - Wence (also drawing, showing cards to opponent)
-
-## Fucking banding
-
-- Giant Korrit
 
 # Replacement effect
 
