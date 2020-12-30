@@ -1148,6 +1148,7 @@ export class State {
 				return card => {
 					const magi = this.useSelector(SELECTOR_OWN_MAGI, card.owner)[0];
 					const cardCost = this.calculateTotalCost(card);
+
 					return magi.data.energy >= cardCost; 
 				};
 			case RESTRICTION_MAGI_WITHOUT_CREATURES:
@@ -1181,14 +1182,18 @@ export class State {
 		return cards.some(this.makeChecker(restriction, restrictionValue));
 	}
 
+	checkAnyCardForRestrictions(cards, restrictions) {
+		return cards.some(this.makeCardFilter(restrictions));
+	}
+
 	checkCardsForRestriction(cards, restriction, restrictionValue) {
 		return cards.every(this.makeChecker(restriction, restrictionValue));
 	}
 
-	makeCardFilter (restrictions = []) {
+	makeCardFilter(restrictions = []) {
 		const checkers = restrictions.map(({type, value}) => this.makeChecker(type, value));
 		return card =>
-			checkers.map(checker => checker(card)).every(a => a === true); // combine checkers
+			checkers.every(checker => checker(card)); // combine checkers
 	}
 
 	getObjectOrSelf(action, self, object, property) {
@@ -1645,9 +1650,7 @@ export class State {
 								}
 								case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
 									if (promptAction.restrictions) {
-										return promptAction.restrictions.every(({type, value}) => 
-											this.checkAnyCardForRestriction(allCardsInPlay, type, value)
-										);
+										return this.checkAnyCardForRestrictions(allCardsInPlay, promptAction.restrictions);
 									} else if (promptAction.restriction) {
 										switch (promptAction.restriction) {
 											case RESTRICTION_OWN_CREATURE: {
@@ -1679,9 +1682,7 @@ export class State {
 									const zoneOwner = this.getMetaValue(action.zoneOwner, source.id);
 									const cardsInZone = this.getZone(promptAction.zone, zoneOwner).cards;
 									if (promptAction.restrictions) {
-										return promptAction.restrictions.every(({type, value}) => 
-											this.checkAnyCardForRestriction(cardsInZone, type, value)
-										);
+										return this.checkAnyCardForRestrictions(cardsInZone, promptAction.restrictions);
 									} else if (promptAction.restriction) {
 										switch (promptAction.restriction) {
 											case RESTRICTION_OWN_CREATURE: {

@@ -732,7 +732,7 @@ export const cards = [
 	new Card('Gruk', TYPE_MAGI, REGION_UNDERNEATH, null, {
 		startingEnergy: 13,
 		energize: 5,
-		startingCards: ['Agovo', 'Crystal Arbol', 'Gloves of Crystal'],
+		startingCards: ['Agovo', 'Crystal Arboll', 'Gloves of Crystal'],
 		powers: [
 			{
 				name: 'Undream',
@@ -797,7 +797,7 @@ export const cards = [
 	new Card('Motash', TYPE_MAGI, REGION_UNDERNEATH, null, {
 		startingEnergy: 16,
 		energize: 4,
-		startingCards: ['Crystal Arbol', 'Mushroom Hyren', 'Digging Goggles'],
+		startingCards: ['Crystal Arboll', 'Mushroom Hyren', 'Digging Goggles'],
 		replacementEffects: [
 			{
 				name: 'Escape',

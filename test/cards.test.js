@@ -2261,6 +2261,45 @@ describe('Warrior\'s Boots', () => {
 		expect(gameState.state.prompt).toEqual(false, 'Game is not in Prompt state');
 	});
 
+	it('Warpath (but not enough energy, Underneath)', () => {
+		const ACTIVE_PLAYER = 29;
+		const NON_ACTIVE_PLAYER = 12;
+
+		const motash = new CardInGame(byName('Motash'), ACTIVE_PLAYER).addEnergy(7);
+		const lasada = new CardInGame(byName('Lasada'), NON_ACTIVE_PLAYER).addEnergy(15);
+
+		const ormagonOne = new CardInGame(byName('Ormagon'), ACTIVE_PLAYER);
+		const ormagonTwo = new CardInGame(byName('Ormagon'), ACTIVE_PLAYER);
+		const caveIn = new CardInGame(byName('Cave In'), ACTIVE_PLAYER);
+
+		const warriorsBoots = new CardInGame(byName('Warrior\'s Boots'), ACTIVE_PLAYER);
+
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([ormagonOne, ormagonTwo, caveIn]),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([motash]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([lasada]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([warriorsBoots]),
+			],
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerUseAction = {
+			type: ACTION_POWER,
+			source: warriorsBoots,
+			power: warriorsBoots.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerUseAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in Prompt state');
+	});
+
 	it('Warpath (but not enough energy because of region penalty)', () => {
 		const ACTIVE_PLAYER = 29;
 		const NON_ACTIVE_PLAYER = 12;
