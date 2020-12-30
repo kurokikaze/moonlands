@@ -504,6 +504,7 @@ export const cards = [
 		],
 	}),
 	new Card('Ground Breaker', TYPE_SPELL, REGION_UNDERNEATH, 3, {
+		text: 'Roll one die. Discard that amount of energy from a chosen Magi.',
 		effects: [
 			effect({
 				effectType: EFFECT_TYPE_ROLL_DIE,
@@ -753,7 +754,7 @@ export const cards = [
 		powers: [
 			{
 				name: 'Healing Light',
-				text: 'Choose any one Creature in play. Discard Crystal Arbol from play. Add two energy to the chosen Creature. Add two additional energy if that Creature is Underneath.',
+				text: 'Choose any one Creature in play. Discard Crystal Arboll from play. Add two energy to the chosen Creature. Add two additional energy if that Creature is Underneath.',
 				cost: 0,
 				effects: [
 					prompt({
@@ -794,6 +795,9 @@ export const cards = [
 		],
 	}),
 	new Card('Motash', TYPE_MAGI, REGION_UNDERNEATH, null, {
+		startingEnergy: 16,
+		energize: 4,
+		startingCards: ['Crystal Arbol', 'Mushroom Hyren', 'Digging Goggles'],
 		replacementEffects: [
 			{
 				name: 'Escape',
@@ -1113,6 +1117,9 @@ export const cards = [
 		}],
 	}),
 	new Card('Korrit', TYPE_CREATURE, REGION_UNDERNEATH, 3, {
+		canPackHunt: true,
+	}),
+	new Card('Giant Korrit', TYPE_CREATURE, REGION_UNDERNEATH, 5, {
 		canPackHunt: true,
 	}),
 	new Card('Pack Korrit', TYPE_CREATURE, REGION_UNDERNEATH, 1, {
@@ -1766,7 +1773,7 @@ export const cards = [
 			},
 		],
 	}),
-	new Card('Storm Ring', TYPE_RELIC, REGION_UNIVERSAL, 0, {
+	new Card('Storm Ring', TYPE_RELIC, REGION_ARDERIAL, 0, {
 		triggerEffects: [
 			{
 				find: {

@@ -86,6 +86,7 @@ Done: **128** cards out of **190**
 - Fire Chogo
 - Fire Flow
 - Fire Grag
+- Giant Korrit
 - Greater Vaal
 - Grow
 - Ground Breaker
@@ -214,6 +215,25 @@ Done: **128** cards out of **190**
 - 2 Book of Ages
 - 2 Orothean Gloves
 
+## Underneath
+
+- Motash
+- Strag
+- Trug
+- 3 Korrit
+- 3 Pack Korrit
+- 3 Giant Korrit
+- 3 Mushroom Hyren
+- 3 Cave Rudwot
+- 3 Agovo // 18
+- 3 Cave In
+- 3 Cave Hyren
+- 3 Ground Breaker
+- 3 Bottomless Pit
+- 3 Warrior's Boots
+- 2 Staff of Hyren
+- 2 Ormagon
+
 # Not done yet
 
 - Abaquist
@@ -236,7 +256,6 @@ Done: **128** cards out of **190**
 - Fog Bank
 - Fossik
 - Gar
-- Giant Korrit
 - Giant Parmalag
 - Giant Vulbor
 - Gloves of Crystal
