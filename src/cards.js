@@ -1079,7 +1079,7 @@ export const cards = [
 				effects: [
 					effect({
 						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
-						target: '$target',
+						target: '%target',
 						amount: 1,
 					}),
 				],

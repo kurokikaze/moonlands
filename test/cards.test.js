@@ -1859,6 +1859,41 @@ describe('Orathan', () => {
 	});
 });
 
+describe('Strag', () => {
+	it('Defense', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+	
+		const strag = new CardInGame(byName('Strag'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const thunderVashp = new CardInGame(byName('Thunder Vashp'), ACTIVE_PLAYER).addEnergy(2);
+		const mushroomHyren = new CardInGame(byName('Mushroom Hyren'), NON_ACTIVE_PLAYER).addEnergy(2);
+	
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([strag]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([thunderVashp, mushroomHyren]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+	
+		const attackAction = {
+			type: ACTION_ATTACK,
+			source: thunderVashp,
+			target: mushroomHyren,
+		};
+			
+		gameState.update(attackAction);
+	
+		expect(thunderVashp.data.energy).toEqual(0, 'Thunder Vashp loses 2 energy, dies');
+		expect(mushroomHyren.data.energy).toEqual(1, 'Mushroom Hyren gains 1 energy, loses 2, survives');
+	});
+});
+
 describe('Whall', () => {
 	it('Dream Twist', () => {
 		const ACTIVE_PLAYER = 40;

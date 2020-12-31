@@ -70,6 +70,7 @@ Done: **129** cards out of **190**
 - Motash
 - Motash's Staff
 - Enrich
+- Strag
 
 # Done, not tested
 
@@ -109,7 +110,6 @@ Done: **129** cards out of **190**
 - Sphor
 - Storm Cloud
 - Storm Ring
-- Strag
 - Submerge
 - Syphon Stone
 - Thermal Blast
