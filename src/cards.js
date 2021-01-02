@@ -163,6 +163,11 @@ const prompt = data => ({
 	...data,
 });
 
+const calculate = data => ({
+	type: ACTION_CALCULATE,
+	...data,
+});
+
 const CONDITION_TARGET_IS_SELF = {
 	objectOne: 'target',
 	propertyOne: PROPERTY_ID,
@@ -1323,7 +1328,7 @@ export const cards = [
 					}),
 					select({
 						selector: SELECTOR_OWN_CREATURES_OF_TYPE,
-						type: 'Hyren',
+						creatureType: 'Hyren',
 					}),
 					effect({
 						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
@@ -1893,15 +1898,14 @@ export const cards = [
 						effectType: EFFECT_TYPE_ROLL_DIE,
 						variable: 'diceTwo',
 					}),
-					{
-						type: ACTION_CALCULATE,
+					calculate({
 						operandOne: '$diceOne',
 						propertyOne: null,
 						operandTwo: '$diceTwo',
 						propertyTwo: null,
 						operator: CALCULATION_ADD,
 						variable: 'roll_result',
-					},
+					}),
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
 						message: 'Choose Creature or Magi to discard ${roll_result} energy from',
@@ -2085,12 +2089,11 @@ export const cards = [
 					property: PROPERTY_ENERGY_COUNT,
 					variable: 'creaturePower',
 				}),
-				{
-					type: ACTION_CALCULATE,
+				calculate({
 					operator: CALCULATION_DOUBLE,
 					operandOne: '$creaturePower',
 					variable: 'doubleEnergy', 
-				},
+				}),
 				effect({
 					effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
 					target: '$opponentCreature',
@@ -2143,13 +2146,12 @@ export const cards = [
 						property: PROPERTY_ENERGY_COUNT,
 						variable: 'magi_energy',
 					}),
-					{
-						type: ACTION_CALCULATE,
+					calculate({
 						operator: CALCULATION_MIN,
 						operandOne: '$magi_energy',
 						operandTwo: 2,
 						variable: 'max_tribute',
-					},
+					}),
 					prompt({
 						promptType: PROMPT_TYPE_NUMBER,
 						message: 'Choose up to ${max_tribute} energy to move to Quor Pup',
@@ -2177,13 +2179,12 @@ export const cards = [
 				property: PROPERTY_ENERGY_COUNT,
 				variable: 'magi_energy',
 			}),
-			{
-				type: ACTION_CALCULATE,
+			calculate({
 				operator: CALCULATION_MIN,
 				operandOne: '$magi_energy',
 				operandTwo: 4,
 				variable: 'max_amount',
-			},
+			}),
 			prompt({
 				promptType: PROMPT_TYPE_SINGLE_CREATURE,
 				message: 'Choose a Creature to move up to ${max_amount} energy from your Magi to it',
@@ -2402,19 +2403,17 @@ export const cards = [
 						property: PROPERTY_ENERGY_COUNT,
 						variable: 'furokEnergy',
 					}),
-					{
-						type: ACTION_CALCULATE,
+					calculate({
 						operator: CALCULATION_MIN,
 						operandOne: '%amount',
 						operandTwo: '$furokEnergy',
 						variable: 'damageToFurok',
-					},
-					{
-						type: ACTION_CALCULATE,
+					}),
+					calculate({
 						operator: CALCULATION_HALVE_ROUND_UP,
 						operandOne: '$damageToFurok',
 						variable: 'energyToRetrieve',
-					},
+					}),
 					select({
 						selector: SELECTOR_OWN_MAGI,
 						variable: 'ownMagi',
@@ -3378,13 +3377,12 @@ export const cards = [
 						property: PROPERTY_ENERGY_COUNT,
 						variable: 'magi_energy',
 					}),
-					{
-						type: ACTION_CALCULATE,
+					calculate({
 						operator: CALCULATION_MIN,
 						operandOne: '$magi_energy',
 						operandTwo: 5,
 						variable: 'max_tribute',
-					},
+					}),
 					prompt({
 						promptType: PROMPT_TYPE_NUMBER,
 						min: 1,
@@ -3903,13 +3901,12 @@ export const cards = [
 				property: PROPERTY_ENERGY_COUNT,
 				variable: 'creatureEnergy',
 			}),
-			{
-				type: ACTION_CALCULATE,
+			calculate({
 				operator: CALCULATION_SUBTRACT,
 				operandOne: '$creatureEnergy',
 				operandTwo: 1,
 				variable: 'energyToDiscard',
-			},
+			}),
 			effect({
 				effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
 				target: '$target',

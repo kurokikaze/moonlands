@@ -2335,6 +2335,59 @@ describe('Warrior\'s Boots', () => {
 		expect(gameState.state.prompt).toEqual(false, 'Game is not in Prompt state');
 	});
 
+	it('Warpath (from Underneath / Arderial match)', () => {
+		const ACTIVE_PLAYER = 29;
+		const NON_ACTIVE_PLAYER = 12;
+
+		const jaela = new CardInGame(byName('Jaela'), ACTIVE_PLAYER).addEnergy(20);
+		const motash = new CardInGame(byName('Motash'), NON_ACTIVE_PLAYER);
+
+		const korrit = new CardInGame(byName('Korrit'), NON_ACTIVE_PLAYER).addEnergy(1);
+
+		const activePlayerHand = [
+			new CardInGame(byName('Cyclone Vashp'), ACTIVE_PLAYER),
+			new CardInGame(byName('Updraft'), ACTIVE_PLAYER),
+			new CardInGame(byName('Updraft'), ACTIVE_PLAYER),
+			new CardInGame(byName('Typhoon'), ACTIVE_PLAYER),
+			new CardInGame(byName('Typhoon'), ACTIVE_PLAYER),
+			new CardInGame(byName('Typhoon'), ACTIVE_PLAYER),
+			new CardInGame(byName('Alaban'), ACTIVE_PLAYER),
+			new CardInGame(byName('Alaban'), ACTIVE_PLAYER),
+			new CardInGame(byName('Pharan'), ACTIVE_PLAYER),
+			new CardInGame(byName('Storm Cloud'), ACTIVE_PLAYER),
+			new CardInGame(byName('Xyx Elder'), ACTIVE_PLAYER),
+			new CardInGame(byName('Shooting Star'), ACTIVE_PLAYER),
+		];
+
+		const warriorsBoots = new CardInGame(byName('Warrior\'s Boots'), ACTIVE_PLAYER);
+
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add(activePlayerHand),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([jaela]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([motash]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([korrit, warriorsBoots]),
+			],
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerUseAction = {
+			type: ACTION_POWER,
+			source: warriorsBoots,
+			power: warriorsBoots.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerUseAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in Prompt state');
+	});
+
 	it('Warpath (but not enough energy because of region penalty)', () => {
 		const ACTIVE_PLAYER = 29;
 		const NON_ACTIVE_PLAYER = 12;
@@ -2492,8 +2545,8 @@ describe('Warrior\'s Boots', () => {
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One card is in play');
 		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(4, 'Hand has 1 card left');
-		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Giant Parathin', 'Card in play is Arboll');
-		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(10, 'Giant Parathin has 3 energy - its starting value');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Giant Parathin', 'Card in play is Giant Parathin');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(10, 'Giant Parathin has 10 energy - its starting value');
 
 		expect(whall.data.energy).toEqual(5, 'Whall paid for Giant Parathin');
 	});
