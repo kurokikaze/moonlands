@@ -1,4 +1,4 @@
-import Card from './classes/Card.js';
+import Card from './classes/Card';
 
 import {
 	/* eslint-disable no-unused-vars */
@@ -124,7 +124,9 @@ import {
 	RESTRICTION_REGION,
 	RESTRICTION_TYPE,
 	RESTRICTION_CREATURE_TYPE,
-
+	RESTRICTION_PLAYABLE,
+	RESTRICTION_ENERGY_LESS_THAN,
+	RESTRICTION_CREATURE_WAS_ATTACKED,
 	COST_X,
 
 	ZONE_TYPE_ACTIVE_MAGI,
@@ -133,42 +135,42 @@ import {
 	ZONE_TYPE_IN_PLAY,
 	ZONE_TYPE_DISCARD,
 	ZONE_TYPE_DECK,
-	RESTRICTION_PLAYABLE,
-	RESTRICTION_ENERGY_LESS_THAN,
-	RESTRICTION_CREATURE_WAS_ATTACKED,
+
 	SELECTOR_STATUS,
 	STATUS_BURROWED,
 	PROPERTY_ABLE_TO_ATTACK,
 	RESTRICTION_STATUS,
 	/* eslint-enable no-unused-vars */
-} from './const.js';
+} from './const';
 
-const effect = data => ({
+import {ConditionType, CalculateType, EffectType, PromptParams, PromptType, PropertyGetterType, PropertyGetterParams, SelectType, SelectorParams} from './classes/types';
+
+const effect = (data): EffectType => ({
 	type: ACTION_EFFECT,
 	...data,
 });
 
-const select = data => ({
+const select = (data: SelectorParams): SelectType => ({
 	type: ACTION_SELECT,
 	...data,
 });
 
-const getPropertyValue = data => ({
+const getPropertyValue = (data: PropertyGetterParams): PropertyGetterType => ({
 	type: ACTION_GET_PROPERTY_VALUE,
 	...data,
 });
 
-const prompt = data => ({
+const prompt = (data: PromptParams): PromptType => ({
 	type: ACTION_ENTER_PROMPT,
 	...data,
 });
 
-const calculate = data => ({
+const calculate = (data): CalculateType => ({
 	type: ACTION_CALCULATE,
 	...data,
 });
 
-const CONDITION_TARGET_IS_SELF = {
+const CONDITION_TARGET_IS_SELF: ConditionType = {
 	objectOne: 'target',
 	propertyOne: PROPERTY_ID,
 	comparator: '=',
@@ -176,7 +178,7 @@ const CONDITION_TARGET_IS_SELF = {
 	propertyTwo: PROPERTY_ID,
 };
 
-const CONDITION_SOURCE_IS_SELF = {
+const CONDITION_SOURCE_IS_SELF: ConditionType = {
 	objectOne: 'source',
 	propertyOne: PROPERTY_ID,
 	comparator: '=',
@@ -2345,7 +2347,6 @@ export const cards = [
 						target: '$target',
 					}),
 					select({
-						type: ACTION_SELECT,
 						selector: SELECTOR_CREATURES_NOT_OF_REGION,
 						region: REGION_CALD,
 					}),

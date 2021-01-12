@@ -1,8 +1,8 @@
 /* global expect, describe, it */
-import * as moonlands from '../src/index';
-import {byName} from '../src/cards';
-import CardInGame from '../src/classes/CardInGame';
-import Card from '../src/classes/Card';
+import * as moonlands from '../src/index.ts';
+import {byName} from '../src/cards.ts';
+import CardInGame from '../src/classes/CardInGame.ts';
+import Card from '../src/classes/Card.ts';
 import {caldDeck, naroomDeck} from './testData';
 
 import {
@@ -77,9 +77,9 @@ import {
 	PROPERTY_ABLE_TO_ATTACK,
 
 	STATUS_BURROWED,
-}  from '../src/const.js';
+}  from '../src/const.ts';
 
-import Zone from '../src/classes/Zone.js';
+import Zone from '../src/classes/Zone.ts';
 
 import {
 	STEP_ENERGIZE,

@@ -1,6 +1,6 @@
 /* global expect, describe, it */
 import nanoid from 'nanoid';
-import * as moonlands from '../src/index.js';
+import * as moonlands from '../src/index';
 
 import {
 	ACTION_PASS,
@@ -16,7 +16,7 @@ import {
 
 	ZONE_TYPE_MAGI_PILE,
 	ZONE_TYPE_DECK,
-} from '../src/const.js';
+} from '../src/const';
 
 import {caldDeck, naroomDeck} from './testData';
 

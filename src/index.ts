@@ -189,15 +189,16 @@ import {
 	LOG_ENTRY_CREATURE_ENERGY_GAIN,
 	LOG_ENTRY_MAGI_ENERGY_GAIN,
 	LOG_ENTRY_MAGI_DEFEATED,
-} from './const.js';
+} from './const';
 
 import {showAction} from './logAction.js';
 
-import clone from './clone.js';
+import clone from './clone';
 
-import {byName} from './cards.js';
-import CardInGame from './classes/CardInGame.js';
-import Zone from './classes/Zone.js';
+import {byName} from './cards';
+import CardInGame from './classes/CardInGame';
+import Zone from './classes/Zone';
+import { AnyEffectType, RestrictionObjectType, RestrictionType, SelectorTypeType } from './classes/types';
 
 const convertCard = cardInGame => ({
 	id: cardInGame.id,
@@ -277,7 +278,32 @@ const oneOrSeveral = (targets, callback) => {
 	}
 };
 
+type LogEntryType = {
+	type: string,
+	card?: string,
+	name?: string,
+	player?: number,
+	source?: string,
+	target?: string,
+	number?: number,
+	amount?: number,
+};
+
 export class State {
+	state: any;
+	players: number[];
+	decks: any[];
+	winner: boolean;
+	debug: boolean;
+	turn: number;
+	rollDebugValue: any;
+	actionsOne: any[];
+	actionsTwo: any[];
+	actionStreamOne: EventEmitter;
+	actionStreamTwo: EventEmitter;
+	logStream: any;
+	commandStream: Writable;
+
 	constructor(state) {
 		this.state = {
 			...clone(defaultState),
@@ -301,9 +327,8 @@ export class State {
 		this.logStream =  new EventEmitter();
 
 		this.commandStream = new Writable({
-			encoding: 'utf-8',
 			objectMode: true,
-			write: command => {
+			write: (command: AnyEffectType) => {
 				if (Object.prototype.hasOwnProperty.call(command, 'type')) {
 					this.update(command);
 				}
@@ -318,7 +343,7 @@ export class State {
 		this.commandStream.destroy();
 	}
 
-	addActionToStream(action) {
+	addActionToStream(action: AnyEffectType) {
 		// Do not send outside CALCULATE, SELECT and so on
 		if (![ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE].includes(action.type)) {
 			this.actionStreamOne.emit('action', action);
@@ -354,7 +379,7 @@ export class State {
 		return this;
 	}
 
-	setDeck(player, cardNames) {
+	setDeck(player: number, cardNames: string[]) {
 		if (this.players.includes(player)) {
 			const deck = cardNames.map(card => new CardInGame(byName(card), player));
 			this.decks.push({
@@ -366,8 +391,8 @@ export class State {
 		}
 	}
 	
-	addActionToLog(action) {
-		var newLogEntry = false;
+	addActionToLog(action: AnyEffectType) {
+		var newLogEntry: LogEntryType | boolean = false;
 
 		try {
 			switch(action.type) {
@@ -663,12 +688,12 @@ export class State {
 		return steps[this.state.step].priority;
 	}
 
-	addActions() {
-		this.state.actions.push(...arguments);
+	addActions(...args: AnyEffectType[]) {
+		this.state.actions.push(...args);
 	}
 
-	transformIntoActions() {
-		this.state.actions.unshift(...arguments);
+	transformIntoActions(...args: AnyEffectType[]) {
+		this.state.actions.unshift(...args);
 	}
 
 	removeDelayedTrigger(triggerId) {
@@ -746,7 +771,7 @@ export class State {
 		}
 	}
 
-	useSelector(selector, player, argument) {
+	useSelector(selector: SelectorTypeType, player, argument) {
 		switch (selector) {
 			case SELECTOR_OWN_CARDS_IN_PLAY: {
 				return this.getZone(ZONE_TYPE_IN_PLAY).cards
@@ -987,7 +1012,7 @@ export class State {
 		return this.getByProperty(modifiedCardData, property, subProperty);
 	}
 
-	layeredDataReducer(currentCard, staticAbility) {
+	layeredDataReducer(currentCard: CardInGame, staticAbility) {
 		if (this.isCardAffectedByStaticAbility(currentCard, staticAbility)) {
 			switch (staticAbility.property) {
 				case PROPERTY_COST: {
@@ -1143,65 +1168,65 @@ export class State {
 		return currentCard;
 	}
 
-	makeChecker(restriction, restrictionValue) {
+	makeChecker(restriction: RestrictionType, restrictionValue: any): (card: CardInGame) => boolean {
 		switch (restriction) {
 			case RESTRICTION_CREATURE_TYPE:
-				return card => card.card.name.split(' ').includes(restrictionValue);
+				return (card: CardInGame) => card.card.name.split(' ').includes(restrictionValue);
 			case RESTRICTION_TYPE:
-				return card => card.card.type === restrictionValue;
+				return (card: CardInGame) => card.card.type === restrictionValue;
 			case RESTRICTION_PLAYABLE:
-				return card => {
-					const magi = this.useSelector(SELECTOR_OWN_MAGI, card.owner)[0];
+				return (card: CardInGame) => {
+					const magi = this.useSelector(SELECTOR_OWN_MAGI, card.owner, null)[0];
 					const cardCost = this.calculateTotalCost(card);
 
 					return magi.data.energy >= cardCost; 
 				};
 			case RESTRICTION_MAGI_WITHOUT_CREATURES:
-				return card => {
+				return (card: CardInGame) => {
 					if (card.card.type !== TYPE_MAGI) return false;
-					const creatures = this.useSelector(SELECTOR_OWN_CREATURES, card.owner);
+					const creatures = this.useSelector(SELECTOR_OWN_CREATURES, card.owner, null);
 
 					return creatures.length === 0;
 				};
 			case RESTRICTION_REGION:
-				return card => card.card.region === restrictionValue;
+				return (card: CardInGame) => card.card.region === restrictionValue;
 			case RESTRICTION_ENERGY_LESS_THAN_STARTING:
-				return card => card.card.type === TYPE_CREATURE && card.data.energy < card.card.cost;
+				return (card: CardInGame) => card.card.type === TYPE_CREATURE && card.data.energy < card.card.cost;
 			case RESTRICTION_ENERGY_LESS_THAN:
-				return card => card.card.type === TYPE_CREATURE && card.data.energy < restrictionValue;
+				return (card: CardInGame) => card.card.type === TYPE_CREATURE && card.data.energy < restrictionValue;
 			case RESTRICTION_CREATURE_WAS_ATTACKED:
-				return card => card.card.type === TYPE_CREATURE && card.data.wasAttacked === true;
+				return (card: CardInGame) => card.card.type === TYPE_CREATURE && card.data.wasAttacked === true;
 			// For own and opponents creatures we pass effect controller as restrictionValue
 			case RESTRICTION_OWN_CREATURE:
-				return card => card.data.controller === restrictionValue;
+				return (card: CardInGame) => card.data.controller === restrictionValue;
 			case RESTRICTION_OPPONENT_CREATURE:
-				return card => card.data.controller !== restrictionValue;
+				return (card: CardInGame) => card.data.controller !== restrictionValue;
 			case RESTRICTION_STATUS:
-				return card => this.modifyByStaticAbilities(card, PROPERTY_STATUS, restrictionValue);
+				return (card: CardInGame) => this.modifyByStaticAbilities(card, PROPERTY_STATUS, restrictionValue);
 			default:
 				return () => true;
 		}
 	}
 
-	checkAnyCardForRestriction(cards, restriction, restrictionValue) {
+	checkAnyCardForRestriction(cards: CardInGame[], restriction: RestrictionType, restrictionValue) {
 		return cards.some(this.makeChecker(restriction, restrictionValue));
 	}
 
-	checkAnyCardForRestrictions(cards, restrictions) {
+	checkAnyCardForRestrictions(cards: CardInGame[], restrictions: RestrictionObjectType[]) {
 		return cards.some(this.makeCardFilter(restrictions));
 	}
 
-	checkCardsForRestriction(cards, restriction, restrictionValue) {
+	checkCardsForRestriction(cards: CardInGame[], restriction: RestrictionType, restrictionValue) {
 		return cards.every(this.makeChecker(restriction, restrictionValue));
 	}
 
-	makeCardFilter(restrictions = []) {
+	makeCardFilter(restrictions: RestrictionObjectType[] = []) {
 		const checkers = restrictions.map(({type, value}) => this.makeChecker(type, value));
 		return card =>
 			checkers.every(checker => checker(card)); // combine checkers
 	}
 
-	getObjectOrSelf(action, self, object, property) {
+	getObjectOrSelf(action: AnyEffectType, self: CardInGame, object: string, property: boolean) {
 		if (object == 'self') {
 			return self;
 		}
@@ -1304,7 +1329,11 @@ export class State {
 		return false;
 	}
 
-	matchAction(action, find, self) {
+	matchAction(action: AnyEffectType, find, self) {
+		if (action.type !== ACTION_EFFECT) {
+			return false;
+		}
+
 		if (action.effectType !== find.effectType) {
 			return false;
 		}
@@ -1316,7 +1345,7 @@ export class State {
 		return conditions.every(result => result === true);
 	}
 
-	triggerAbilities(action) {
+	triggerAbilities(action: AnyEffectType) {
 		const PLAYER_ONE = this.players[0];
 		const PLAYER_TWO = this.players[1];
 		const allZonesCards = [
@@ -1418,7 +1447,7 @@ export class State {
 	}
 
 	calculateTotalCost(card) {
-		const activeMagiSelected = this.useSelector(SELECTOR_OWN_MAGI, card.owner);
+		const activeMagiSelected = this.useSelector(SELECTOR_OWN_MAGI, card.owner, null);
 		if (activeMagiSelected.length) {
 			const activeMagi = activeMagiSelected[0];
 			const baseCost = this.modifyByStaticAbilities(card, PROPERTY_COST);
@@ -1430,14 +1459,14 @@ export class State {
 		return null;
 	}
 
-	update(initialAction) {
+	update(initialAction: AnyEffectType) {
 		if (this.hasWinner()) {
 			return false;
 		}
 		this.addActions(initialAction);
 		while (this.hasActions()) {
 			const rawAction = this.getNextAction();
-			const action = this.replaceByReplacementEffect(rawAction);
+			const action: AnyEffectType = this.replaceByReplacementEffect(rawAction);
 
 			if (this.debug) {
 				showAction(action);
@@ -1481,7 +1510,7 @@ export class State {
 					const additionalAttackersHasAttacksLeft = additionalAttackers.every(card => card.card.data.canPackHunt && card.data.attacked < this.modifyByStaticAbilities(card, PROPERTY_ATTACKS_PER_TURN));
 
 					const targetIsMagi = attackTarget.card.type == TYPE_MAGI;
-					const magiHasCreatures = this.useSelector(SELECTOR_OWN_CREATURES, attackTarget.owner).length > 0;
+					const magiHasCreatures = this.useSelector(SELECTOR_OWN_CREATURES, attackTarget.owner, null).length > 0;
 
 					const attackApproved = attackerCanAttack &&
 						!targetIsMagi || ( // Either we attack a creature
@@ -1929,7 +1958,7 @@ export class State {
 					let result;
 					switch (action.selector) {
 						case SELECTOR_OWN_CARDS_IN_PLAY: {
-							result = this.useSelector(SELECTOR_OWN_CARDS_IN_PLAY, action.player);
+							result = this.useSelector(SELECTOR_OWN_CARDS_IN_PLAY, action.player, null);
 							break;
 						}
 						case SELECTOR_OWN_CREATURES_OF_TYPE: {
@@ -1945,7 +1974,7 @@ export class State {
 							break;
 						}
 						case SELECTOR_CARDS_WITH_ENERGIZE_RATE: {
-							result = this.useSelector(SELECTOR_CARDS_WITH_ENERGIZE_RATE, action.player);
+							result = this.useSelector(SELECTOR_CARDS_WITH_ENERGIZE_RATE, action.player, null);
 							break;
 						}
 						case SELECTOR_OPPONENT_ID: {
@@ -1957,14 +1986,14 @@ export class State {
 							break;
 						}
 						case SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE: {
-							result = this.useSelector(SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, action.player);
+							result = this.useSelector(SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, action.player, null);
 							break;
 						}
 						case SELECTOR_CREATURES_AND_MAGI: {
 							result = [
-								...this.useSelector(SELECTOR_OWN_MAGI, action.player),
-								...this.useSelector(SELECTOR_ENEMY_MAGI, action.player),
-								...this.useSelector(SELECTOR_CREATURES),
+								...this.useSelector(SELECTOR_OWN_MAGI, action.player, null),
+								...this.useSelector(SELECTOR_ENEMY_MAGI, action.player, null),
+								...this.useSelector(SELECTOR_CREATURES, null, null),
 							];
 							break;
 						}
@@ -1983,15 +2012,15 @@ export class State {
 						}
 						case SELECTOR_MAGI_OF_REGION: {
 							result = [
-								...this.useSelector(SELECTOR_OWN_MAGI, action.player),
-								...this.useSelector(SELECTOR_ENEMY_MAGI, action.player),
+								...this.useSelector(SELECTOR_OWN_MAGI, action.player, null),
+								...this.useSelector(SELECTOR_ENEMY_MAGI, action.player, null),
 							].filter(magi => this.modifyByStaticAbilities(magi, PROPERTY_REGION) === action.region);
 							break;
 						}
 						case SELECTOR_MAGI_NOT_OF_REGION: {
 							result = [
-								...this.useSelector(SELECTOR_OWN_MAGI, action.player),
-								...this.useSelector(SELECTOR_ENEMY_MAGI, action.player),
+								...this.useSelector(SELECTOR_OWN_MAGI, action.player, null),
+								...this.useSelector(SELECTOR_ENEMY_MAGI, action.player, null),
 							].filter(magi => this.modifyByStaticAbilities(magi, PROPERTY_REGION) != action.region);
 							break;
 						}
@@ -2004,7 +2033,7 @@ export class State {
 							break;
 						}
 						default: {
-							result = this.useSelector(action.selector, action.player);
+							result = this.useSelector(action.selector, action.player, null);
 						}
 
 					}
@@ -2391,7 +2420,7 @@ export class State {
 								const searchableCards = [...deckCards, ...discardCards];
 
 								const availableCards = topMagi.card.data.startingCards.filter(card => searchableCards.includes(card));
-								const actionsToTake = [
+								const actionsToTake: AnyEffectType[] = [
 									{
 										type: ACTION_EFFECT,
 										effectType: EFFECT_TYPE_MAGI_FLIPPED,
@@ -2640,7 +2669,7 @@ export class State {
 								0
 							;
 
-							const damageActions = [
+							const damageActions: AnyEffectType[] = [
 								{  // from source to target
 									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_ATTACKER_DEALS_DAMAGE,
@@ -2906,7 +2935,7 @@ export class State {
 							if (action.sourceZone === ZONE_TYPE_IN_PLAY) {
 								const newCard = this.getMetaValue(action.destinationCard, action.generatedBy);
 								const magi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, newCard.owner).card;
-								const numberOfCreatures = this.useSelector(SELECTOR_OWN_CREATURES, newCard.owner).length;
+								const numberOfCreatures = this.useSelector(SELECTOR_OWN_CREATURES, newCard.owner, null).length;
 
 								if (magi && magi.data.energy === 0 && numberOfCreatures === 0) {
 									this.transformIntoActions({

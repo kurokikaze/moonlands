@@ -1,7 +1,13 @@
 import nanoid from 'nanoid';
+import Card from './Card';
 
 export default class CardInGame {
-	constructor(card, owner) {
+	_card: Card;
+	id: string;
+	data: { energy: number; controller: number; attacked: number; actionsUsed: any[]; energyLostThisTurn: number; defeatedCreature: boolean; hasAttacked: boolean; wasAttacked: boolean; };
+	owner: number;
+	modifiedCard: CardInGame;
+	constructor(card: Card, owner: number) {
 		this._card = card;
 		this.id = nanoid();
 		this.data = {
@@ -21,12 +27,12 @@ export default class CardInGame {
 		return this._card;
 	}
 
-	addEnergy(amount = 0) {
+	addEnergy(amount = '0') {
 		this.data.energy += parseInt(amount, 10);
 		return this;
 	}
 
-	removeEnergy(amount = 0) {
+	removeEnergy(amount = '0') {
 		const amountToRemove = Math.min(this.data.energy, parseInt(amount, 10));
 		this.data.energy -= amountToRemove;
 		this.data.energyLostThisTurn += amountToRemove;

@@ -1,8 +1,8 @@
 /* global expect, describe, it */
-import {State} from '../src/index.js';
-import {byName} from '../src/cards.js';
-import CardInGame from '../src/classes/CardInGame.js';
-import Zone from '../src/classes/Zone.js';
+import {State} from '../src/index.ts';
+import {byName} from '../src/cards.ts';
+import CardInGame from '../src/classes/CardInGame.ts';
+import Zone from '../src/classes/Zone.ts';
 
 import {
 	ACTION_PLAY,
@@ -29,7 +29,7 @@ import {
 	ZONE_TYPE_IN_PLAY,
 	ZONE_TYPE_DISCARD,
 	ZONE_TYPE_HAND,
-} from '../src/const';
+} from '../src/const.ts';
 
 /* eslint-disable no-unused-vars */
 import {

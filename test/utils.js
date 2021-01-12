@@ -6,9 +6,9 @@ import {
 	ZONE_TYPE_DISCARD,
 	ZONE_TYPE_HAND,
 	ZONE_TYPE_DEFEATED_MAGI,
-} from '../src/const.js';
+} from '../src/const.ts';
 
-import Zone from '../src/classes/Zone.js';
+import Zone from '../src/classes/Zone.ts';
 
 export const STEP_ENERGIZE = 0;
 export const STEP_PRS_FIRST = 1;

@@ -18,6 +18,11 @@ function shuffle(array) {
 }
 
 export default class Zone {
+	_name: any;
+	_player: any;
+	_type: any;
+	ordered: boolean;
+	cards: any[];
 	constructor(name, type, player = null, ordered = false) {
 		this._name = name;
 		this._player = player;
