@@ -40,6 +40,7 @@ import { SelectType } from './select';
 import { EffectTypeType, EffectType } from './effect';
 import { PromptTypeType, PropertyType, ConditionType } from './common';
 import { AttackEffect } from './attack';
+import { type } from 'os';
 export { AttackerDealsDamageEffect, DefenderDealsDamageEffect } from './attack';
 export { Region, CardType, PromptTypeType, PropertyType, ConditionType, ZoneType } from './common';
 export { SelectType, SelectorTypeType, SelectorParams, RefinedSelectParams } from './select';
@@ -74,15 +75,17 @@ type PowerType = {
     effects: AnyEffectType[];
 }
 
-type StaticAbilityType = {
+
+export type StaticAbilityType = {
 	name: string,
 	text: string,
     selector: string,
     selectorParameter?: string, 
-	property: PropertyType,
+    property: PropertyType,
+    subProperty?: string;
 	modifier: {
-		operator: string,
-		operandOne: number | string | boolean,
+		operator: OperatorType,
+		operandOne: number | boolean,
 	},
 }
 
@@ -155,7 +158,7 @@ type ReplacingEffectType = {
     target?: string;
 }
 
-type OperatorType = typeof CALCULATION_SET |
+export type OperatorType = typeof CALCULATION_SET |
     typeof CALCULATION_DOUBLE |
     typeof CALCULATION_ADD |
     typeof CALCULATION_SUBTRACT |
@@ -165,12 +168,17 @@ type OperatorType = typeof CALCULATION_SET |
     typeof CALCULATION_MIN |
     typeof CALCULATION_MAX;
 
-export type CalculateType = EnrichedAction & {
-    type: typeof ACTION_CALCULATE;
+export type CalculateParams = {
     operator: OperatorType;
     operandOne: string | number;
+    propertyOne?: string | null;
     operandTwo?: string | number;
+    propertyTwo?: string | null;
     variable: string;
+}
+
+export type CalculateType = CalculateParams & EnrichedAction & {
+    type: typeof ACTION_CALCULATE;
     generatedBy?: string;
 }
 

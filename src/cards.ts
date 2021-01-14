@@ -143,9 +143,21 @@ import {
 	/* eslint-enable no-unused-vars */
 } from './const';
 
-import {ConditionType, CalculateType, EffectType, PromptParams, PromptType, PropertyGetterType, PropertyGetterParams, SelectType, RefinedSelectParams} from './types';
+import {
+	ConditionType,
+	CalculateParams,
+	CalculateType, 
+	EffectType,
+	PromptParams,
+	PromptType,
+	PropertyGetterType,
+	PropertyGetterParams,
+	SelectType,
+	RefinedSelectParams,
+	OperatorType
+} from './types';
 
-const effect = (data): EffectType => ({
+const effect = (data: any): EffectType => ({
 	type: ACTION_EFFECT,
 	...data,
 });
@@ -165,7 +177,7 @@ const prompt = (data: PromptParams): PromptType => ({
 	...data,
 });
 
-const calculate = (data): CalculateType => ({
+const calculate = (data: CalculateParams): CalculateType => ({
 	type: ACTION_CALCULATE,
 	...data,
 });

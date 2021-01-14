@@ -1,10 +1,31 @@
 import nanoid from 'nanoid';
 import Card from './Card';
 
-export default class CardInGame {
-	_card: Card;
+type InGameData = { 
+	energy: number;
+	controller: number;
+	attacked: number;
+	actionsUsed: any[];
+	energyLostThisTurn: number;
+	defeatedCreature: boolean;
+	hasAttacked: boolean;
+	wasAttacked: boolean;
+	burrowed?: boolean;
+	ableToAttack?: boolean;
+	energyLossThreshold?: number;
+}
+
+export type ConvertedCard = {
 	id: string;
-	data: { energy: number; controller: number; attacked: number; actionsUsed: any[]; energyLostThisTurn: number; defeatedCreature: boolean; hasAttacked: boolean; wasAttacked: boolean; burrowed?: boolean; ableToAttack?: boolean; energyLossThreshold?: number; };
+	card: string;
+	owner: number;
+	data: InGameData;
+}
+
+export default class CardInGame {
+	private _card: Card;
+	id: string;
+	data: InGameData;
 	owner: number;
 	modifiedCard: Card;
 	constructor(card: Card, owner: number) {

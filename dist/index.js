@@ -123,7 +123,7 @@ const Zone_1 = __importDefault(require("./classes/Zone"));
 const convertCard = (cardInGame) => ({
     id: cardInGame.id,
     owner: cardInGame.owner,
-    card: cardInGame._card.name,
+    card: cardInGame.card.name,
     data: cardInGame.data,
 });
 const steps = [
@@ -820,6 +820,7 @@ class State {
             owner: target.owner,
         };
         const modifiedCardData = staticAbilities.reduce(this.layeredDataReducer.bind(this), initialCardData);
+        // @ts-ignore
         return this.getByProperty(modifiedCardData, property, subProperty);
     }
     layeredDataReducer(currentCard, staticAbility) {
@@ -829,50 +830,46 @@ class State {
                     const initialValue = this.getByProperty(currentCard, const_1.PROPERTY_COST);
                     const { operator, operandOne } = staticAbility.modifier;
                     const resultValue = (operator === const_1.CALCULATION_SUBTRACT || operator === const_1.CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-                        this.performCalculation(operator, initialValue, operandOne) :
-                        this.performCalculation(operator, operandOne, initialValue);
+                        this.performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
+                        this.performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
                     return Object.assign(Object.assign({}, currentCard), { modifiedCard: Object.assign(Object.assign({}, currentCard.modifiedCard), { cost: resultValue }) });
                 }
                 case const_1.PROPERTY_ENERGIZE: {
                     const initialValue = this.getByProperty(currentCard, const_1.PROPERTY_ENERGIZE);
                     const { operator, operandOne } = staticAbility.modifier;
                     const resultValue = (operator === const_1.CALCULATION_SUBTRACT || operator === const_1.CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-                        this.performCalculation(operator, initialValue, operandOne) :
-                        this.performCalculation(operator, operandOne, initialValue);
+                        this.performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
+                        this.performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
                     return Object.assign(Object.assign({}, currentCard), { modifiedCard: Object.assign(Object.assign({}, currentCard.modifiedCard), { data: Object.assign(Object.assign({}, currentCard.modifiedCard.data), { energize: resultValue }) }) });
                 }
                 case const_1.PROPERTY_ATTACKS_PER_TURN: {
                     const initialValue = this.getByProperty(currentCard, const_1.PROPERTY_ATTACKS_PER_TURN);
                     const { operator, operandOne } = staticAbility.modifier;
                     const resultValue = (operator === const_1.CALCULATION_SUBTRACT || operator === const_1.CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-                        this.performCalculation(operator, initialValue, operandOne) :
-                        this.performCalculation(operator, operandOne, initialValue);
+                        this.performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
+                        this.performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
                     return Object.assign(Object.assign({}, currentCard), { modifiedCard: Object.assign(Object.assign({}, currentCard.modifiedCard), { data: Object.assign(Object.assign({}, currentCard.modifiedCard.data), { attacksPerTurn: resultValue }) }) });
                 }
                 case const_1.PROPERTY_ENERGY_LOSS_THRESHOLD: {
                     const initialValue = this.getByProperty(currentCard, const_1.PROPERTY_ENERGIZE);
                     const { operator, operandOne } = staticAbility.modifier;
                     const resultValue = (operator === const_1.CALCULATION_SUBTRACT || operator === const_1.CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-                        this.performCalculation(operator, initialValue, operandOne) :
-                        this.performCalculation(operator, operandOne, initialValue);
+                        this.performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
+                        this.performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
                     return Object.assign(Object.assign({}, currentCard), { modifiedCard: Object.assign(Object.assign({}, currentCard.modifiedCard), { data: Object.assign(Object.assign({}, currentCard.modifiedCard.data), { energyLossThreshold: resultValue }) }) });
                 }
                 case const_1.PROPERTY_ABLE_TO_ATTACK: {
                     const initialValue = this.getByProperty(currentCard, const_1.PROPERTY_ABLE_TO_ATTACK);
                     const { operator, operandOne } = staticAbility.modifier;
-                    const resultValue = (operator === const_1.CALCULATION_SUBTRACT || operator === const_1.CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-                        this.performCalculation(operator, initialValue, operandOne) :
-                        this.performCalculation(operator, operandOne, initialValue);
+                    const resultValue = (operator === const_1.CALCULATION_SET) ? operandOne : initialValue;
                     return Object.assign(Object.assign({}, currentCard), { modifiedCard: Object.assign(Object.assign({}, currentCard.modifiedCard), { data: Object.assign(Object.assign({}, currentCard.modifiedCard.data), { ableToAttack: resultValue }) }) });
                 }
                 case const_1.PROPERTY_STATUS: {
                     const initialValue = this.getByProperty(currentCard, const_1.PROPERTY_STATUS, staticAbility.subProperty);
                     const { operator, operandOne } = staticAbility.modifier;
-                    const resultValue = (operator === const_1.CALCULATION_SUBTRACT || operator === const_1.CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-                        this.performCalculation(operator, initialValue, operandOne) :
-                        this.performCalculation(operator, operandOne, initialValue);
+                    const resultValue = (operator === const_1.CALCULATION_SET) ? operandOne : initialValue;
                     switch (staticAbility.subProperty) {
-                        case [const_1.STATUS_BURROWED]: {
+                        case const_1.STATUS_BURROWED: {
                             return Object.assign(Object.assign({}, currentCard), { data: Object.assign(Object.assign({}, currentCard.data), { burrowed: resultValue }) });
                         }
                         default: {
@@ -886,8 +883,8 @@ class State {
                             const initialValue = this.getByProperty(currentCard, const_1.PROPERTY_POWER_COST, power.name);
                             const { operator, operandOne } = staticAbility.modifier;
                             const resultValue = (operator === const_1.CALCULATION_SUBTRACT || operator === const_1.CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-                                this.performCalculation(operator, initialValue, operandOne) :
-                                this.performCalculation(operator, operandOne, initialValue);
+                                this.performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
+                                this.performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
                             return Object.assign(Object.assign({}, power), { cost: resultValue });
                         });
                         return Object.assign(Object.assign({}, currentCard), { modifiedCard: Object.assign(Object.assign({}, currentCard.modifiedCard), { data: Object.assign(Object.assign({}, currentCard.modifiedCard.data), { powers: updatedPowers }) }) });

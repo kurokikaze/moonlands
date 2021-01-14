@@ -196,20 +196,46 @@ import {showAction} from './logAction.js';
 import clone from './clone';
 
 import {byName} from './cards';
-import CardInGame from './classes/CardInGame';
+import CardInGame, { ConvertedCard } from './classes/CardInGame';
 import Zone from './classes/Zone';
-import { AnyEffectType, PromptTypeType, RestrictionObjectType, RestrictionType, SelectorTypeType, LogEntryType, NormalPlayType, PropertyType, PromptType, AttackerDealsDamageEffect, DefenderDealsDamageEffect, MoveCardBetwenZonesEffect, EnrichedAction } from './types';
+import { 
+	AnyEffectType,
+	PromptTypeType,
+	RestrictionObjectType,
+	RestrictionType,
+	SelectorTypeType,
+	LogEntryType,
+	NormalPlayType,
+	PropertyType,
+	PromptType,
+	AttackerDealsDamageEffect,
+	DefenderDealsDamageEffect,
+	MoveCardBetwenZonesEffect,
+	EnrichedAction,
+	StaticAbilityType,
+	OperatorType
+} from './types';
 
-const convertCard = (cardInGame: CardInGame) => ({
+const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
 	id: cardInGame.id,
 	owner: cardInGame.owner,
-	card: cardInGame._card.name,
+	card: cardInGame.card.name,
 	data: cardInGame.data,
 });
 
+type EnrichedStaticAbilityType = StaticAbilityType & {
+	player: number;
+}
+
+type GameStaticAbility = StaticAbilityType & {
+	selector: typeof SELECTOR_STATUS;
+}
+
+type PriorityType = typeof NO_PRIORITY | typeof PRIORITY_PRS | typeof PRIORITY_ATTACK | typeof PRIORITY_CREATURES;
+
 type StepType = {
 	name: string,
-	priority: typeof NO_PRIORITY | typeof PRIORITY_PRS | typeof PRIORITY_ATTACK | typeof PRIORITY_CREATURES;
+	priority: PriorityType;
 	automatic: boolean;
 	effects?: AnyEffectType[]
 }
@@ -325,10 +351,10 @@ export class State {
 	state: StateShape;
 	players: number[];
 	decks: any[];
-	winner: boolean;
+	winner: boolean | number;
 	debug: boolean;
 	turn: number;
-	rollDebugValue: any;
+	rollDebugValue: number;
 	actionsOne: any[];
 	actionsTwo: any[];
 	actionStreamOne: EventEmitter;
@@ -392,7 +418,7 @@ export class State {
 		this.debug = true;
 	}
 
-	setRollDebugValue(value: boolean) {
+	setRollDebugValue(value: number) {
 		this.rollDebugValue = value;
 	}
 
@@ -400,7 +426,7 @@ export class State {
 		this.rollDebugValue = null;
 	}
 
-	setWinner(player) {
+	setWinner(player: number) {
 		this.winner = player;
 	}
 
@@ -635,7 +661,7 @@ export class State {
 		];		
 	}
 
-	serializeData(playerId) {
+	serializeData(playerId: number) {
 		const gameEnded = !(this.winner === false);
 
 		return {
@@ -708,7 +734,7 @@ export class State {
 		};
 	}
 
-	getOpponent(player) {
+	getOpponent(player: number) {
 		return this.players.find(pl => pl != player);
 	}
 
@@ -724,7 +750,7 @@ export class State {
 		return this.state.activePlayer;
 	}
 
-	getCurrentPriority() {
+	getCurrentPriority(): PriorityType {
 		return steps[this.state.step].priority;
 	}
 
@@ -748,7 +774,7 @@ export class State {
 		return this.state.actions.length > 0;
 	}
 
-	setSpellMetadata(metadata: any, spellId: string) {
+	setSpellMetadata(metadata: any, spellId: string): void {
 		this.state = {
 			...this.state,
 			spellMetaData: {
@@ -762,7 +788,7 @@ export class State {
 		return this.state.spellMetaData[spellId] ? this.state.spellMetaData[spellId] : {};
 	}
 
-	setSpellMetaDataField(field: string, value: any, spellId: string) {
+	setSpellMetaDataField(field: string, value: any, spellId: string): void {
 		if (!spellId) {
 			throw new Error('Saving spell metadata field without spellId');
 		}
@@ -773,14 +799,14 @@ export class State {
 		}, spellId);
 	}
 
-	getMetaValue(value: string | any, spellId: string) {
+	getMetaValue<T>(value: string | T, spellId: string): T | any {
 		if (
 			typeof value == 'string' &&
             value[0] == '$'
 		) {
 			const variableName = value.slice(1);
 			const spellMetaData = this.getSpellMetadata(spellId);
-			return Object.prototype.hasOwnProperty.call(spellMetaData,variableName) ? spellMetaData[variableName] : null;
+			return Object.prototype.hasOwnProperty.call(spellMetaData, variableName) ? spellMetaData[variableName] : null;
 		} else {
 			return value;
 		}
@@ -791,7 +817,7 @@ export class State {
      * $-variables are kept intact, we probably need them
      * %-variables include usual "self": link to trigger source
      */
-	prepareMetaValue(value: string | any, action: AnyEffectType, self: CardInGame, spellId: string) {
+	prepareMetaValue<T>(value: string | T, action: AnyEffectType, self: CardInGame, spellId: string): T | any {
 		if (value === '%self') return self;
 
 		if (
@@ -805,13 +831,13 @@ export class State {
 
 			// if not, we use spellMetaData
 			const spellMetaData = this.getSpellMetadata(spellId);
-			return Object.prototype.hasOwnProperty.call(spellMetaData,variableName) ? spellMetaData[variableName] : null;
+			return Object.prototype.hasOwnProperty.call(spellMetaData, variableName) ? spellMetaData[variableName] : null;
 		} else {
 			return value;
 		}
 	}
 
-	useSelector(selector: SelectorTypeType, player: number, argument) {
+	useSelector(selector: SelectorTypeType, player: number, argument): CardInGame[] | number {
 		switch (selector) {
 			case SELECTOR_OWN_CARDS_IN_PLAY: {
 				return this.getZone(ZONE_TYPE_IN_PLAY).cards
@@ -945,7 +971,7 @@ export class State {
 		}
 	}
 
-	isCardAffectedByStaticAbility(card: CardInGame, staticAbility) {
+	isCardAffectedByStaticAbility(card: CardInGame, staticAbility: EnrichedStaticAbilityType | GameStaticAbility) {
 		switch (staticAbility.selector) {
 			case SELECTOR_OWN_CREATURES: {
 				return card.card.type === TYPE_CREATURE &&
@@ -978,7 +1004,7 @@ export class State {
 		const PLAYER_ONE = this.players[0];
 		const PLAYER_TWO = this.players[1];
 
-		const gameStaticAbilities = [
+		const gameStaticAbilities: GameStaticAbility[] = [
 			{
 				name: 'Burrowed - Energy loss',
 				text: 'Your burrowed creatures may not lose more than 2 energy each turn',
@@ -1020,7 +1046,7 @@ export class State {
 			[PROPERTY_ABLE_TO_ATTACK]: 7,
 		};
  
-		const zoneAbilities = allZonesCards.reduce(
+		const zoneAbilities: EnrichedStaticAbilityType[] = allZonesCards.reduce(
 			(acc, cardInPlay) => cardInPlay.card.data.staticAbilities ? [
 				...acc,
 				...(cardInPlay.card.data.staticAbilities.map(a => ({...a, player: cardInPlay.data.controller})))
@@ -1046,12 +1072,14 @@ export class State {
 			id: target.id,
 			owner: target.owner,
 		};
+	
 		const modifiedCardData = staticAbilities.reduce(this.layeredDataReducer.bind(this), initialCardData);
 
+		// @ts-ignore
 		return this.getByProperty(modifiedCardData, property, subProperty);
 	}
 
-	layeredDataReducer(currentCard: CardInGame, staticAbility) {
+	layeredDataReducer(currentCard: CardInGame, staticAbility: EnrichedStaticAbilityType | GameStaticAbility) {
 		if (this.isCardAffectedByStaticAbility(currentCard, staticAbility)) {
 			switch (staticAbility.property) {
 				case PROPERTY_COST: {
@@ -1059,8 +1087,8 @@ export class State {
 					const {operator, operandOne} = staticAbility.modifier;
 
 					const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-						this.performCalculation(operator, initialValue, operandOne) :
-						this.performCalculation(operator, operandOne, initialValue);
+						this.performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
+						this.performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
 
 					return {
 						...currentCard,
@@ -1075,8 +1103,8 @@ export class State {
 					const {operator, operandOne} = staticAbility.modifier;
 
 					const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-						this.performCalculation(operator, initialValue, operandOne) :
-						this.performCalculation(operator, operandOne, initialValue);
+						this.performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
+						this.performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
 
 					return {
 						...currentCard,
@@ -1094,8 +1122,8 @@ export class State {
 					const {operator, operandOne} = staticAbility.modifier;
 
 					const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-						this.performCalculation(operator, initialValue, operandOne) :
-						this.performCalculation(operator, operandOne, initialValue);
+						this.performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
+						this.performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
 
 					return {
 						...currentCard,
@@ -1113,8 +1141,8 @@ export class State {
 					const {operator, operandOne} = staticAbility.modifier;
 
 					const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-						this.performCalculation(operator, initialValue, operandOne) :
-						this.performCalculation(operator, operandOne, initialValue);
+						this.performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
+						this.performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
 
 					return {
 						...currentCard,
@@ -1131,9 +1159,7 @@ export class State {
 					const initialValue = this.getByProperty(currentCard, PROPERTY_ABLE_TO_ATTACK);
 					const {operator, operandOne} = staticAbility.modifier;
 
-					const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-						this.performCalculation(operator, initialValue, operandOne) :
-						this.performCalculation(operator, operandOne, initialValue);
+					const resultValue = (operator === CALCULATION_SET) ? operandOne : initialValue;
 
 					return {
 						...currentCard,
@@ -1150,11 +1176,10 @@ export class State {
 					const initialValue = this.getByProperty(currentCard, PROPERTY_STATUS, staticAbility.subProperty);
 					const {operator, operandOne} = staticAbility.modifier;
 
-					const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-						this.performCalculation(operator, initialValue, operandOne) :
-						this.performCalculation(operator, operandOne, initialValue);
+					const resultValue = (operator === CALCULATION_SET) ? operandOne : initialValue;
+
 					switch (staticAbility.subProperty) {
-						case [STATUS_BURROWED]: {
+						case STATUS_BURROWED: {
 							return {
 								...currentCard,
 								data: {
@@ -1175,9 +1200,9 @@ export class State {
 							const {operator, operandOne} = staticAbility.modifier;
 		
 							const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-								this.performCalculation(operator, initialValue, operandOne) :
-								this.performCalculation(operator, operandOne, initialValue);
-							
+								this.performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
+								this.performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
+
 							return {
 								...power,
 								cost: resultValue,
@@ -1441,8 +1466,8 @@ export class State {
 		});
 	}
 
-	performCalculation(operator, operandOne, operandTwo) {
-		let result;
+	performCalculation(operator: OperatorType, operandOne: number, operandTwo: number): number {
+		let result: number;
 		switch (operator) {
 			case CALCULATION_SET: {
 				result = operandOne;
@@ -1485,7 +1510,7 @@ export class State {
 		return result;
 	}
 
-	calculateTotalCost(card) {
+	calculateTotalCost(card: CardInGame): number | null {
 		const activeMagiSelected = this.useSelector(SELECTOR_OWN_MAGI, card.owner, null);
 		if (activeMagiSelected instanceof Array && activeMagiSelected.length) {
 			const activeMagi = activeMagiSelected[0];
