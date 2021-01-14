@@ -1073,6 +1073,8 @@ export class State {
 			owner: target.owner,
 		};
 	
+		// Okay, sooner or later this should be rewritten
+		// Here we should construct new CardInGame object containing new Card object (both with new values)
 		const modifiedCardData = staticAbilities.reduce(this.layeredDataReducer.bind(this), initialCardData);
 
 		// @ts-ignore
