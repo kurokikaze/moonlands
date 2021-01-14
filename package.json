@@ -7,11 +7,12 @@
     "type": "git",
     "url": "git@github.com:kurokikaze/moonlands.git"
   },
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
+    "build": "./node_modules/.bin/tsc -p ./tsconfig.json",
     "test": "./node_modules/.bin/jest",
     "coverage": "./node_modules/.bin/jest --coverage"
   },
@@ -28,8 +29,8 @@
   "dependencies": {
     "@babel/preset-env": "^7.11.5",
     "@babel/preset-typescript": "^7.12.7",
-    "babel-jest": "^26.3.0",
     "@types/node": ">=4.2.0 < 13",
+    "babel-jest": "^26.3.0",
     "is-promise": "^2.1.0",
     "nanoid": "^2.1.9",
     "socket.io": "^2.3.0",

@@ -127,6 +127,7 @@ import {
 	RESTRICTION_PLAYABLE,
 	RESTRICTION_ENERGY_LESS_THAN,
 	RESTRICTION_CREATURE_WAS_ATTACKED,
+
 	COST_X,
 
 	ZONE_TYPE_ACTIVE_MAGI,
@@ -136,21 +137,20 @@ import {
 	ZONE_TYPE_DISCARD,
 	ZONE_TYPE_DECK,
 
-	SELECTOR_STATUS,
 	STATUS_BURROWED,
 	PROPERTY_ABLE_TO_ATTACK,
 	RESTRICTION_STATUS,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
-import {ConditionType, CalculateType, EffectType, PromptParams, PromptType, PropertyGetterType, PropertyGetterParams, SelectType, SelectorParams} from './classes/types';
+import {ConditionType, CalculateType, EffectType, PromptParams, PromptType, PropertyGetterType, PropertyGetterParams, SelectType, RefinedSelectParams} from './types';
 
 const effect = (data): EffectType => ({
 	type: ACTION_EFFECT,
 	...data,
 });
 
-const select = (data: SelectorParams): SelectType => ({
+const select = (data: RefinedSelectParams): SelectType => ({
 	type: ACTION_SELECT,
 	...data,
 });
@@ -209,6 +209,7 @@ export const cards = [
 		powers: [
 			{
 				name: 'Final Blow',
+				text: 'Choose a creature in play that was attacked this turn. Discard chosen Creature from play',
 				cost: 3,
 				effects: [
 					prompt({
@@ -239,6 +240,7 @@ export const cards = [
 		powers: [
 			{
 				name: 'Energy Boost',
+				text: 'Roll a die. 1-3: add one energy to each of opponents Creatures. 4-5: Add two energy to a Creature of your choice. 6: Add four energy to a Creature of your choice.',
 				cost: 0,
 				effects: [
 					effect({
@@ -583,6 +585,7 @@ export const cards = [
 		powers: [{
 			name: 'Snuff Out',
 			text: 'Choose a Creature in play with 1 energy. Discard the chosen Creature from play.',
+			cost: 0,
 			effects: [
 				prompt({
 					promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
@@ -600,6 +603,7 @@ export const cards = [
 		powers: [{
 			name: 'Thunderclap',
 			text: 'Choose a Creature in play with less than 4 energy. Discard Thunder Vashp from play. Discard the chosen Creature from play.',
+			cost: 0,
 			effects: [
 				prompt({
 					promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
@@ -1236,6 +1240,7 @@ export const cards = [
 		powers: [
 			{
 				name: 'Intercharge',
+				text: 'Discard Giant Parathin from play. Place your active Magi on the bottom of your Magi pile face down. Bring in your next Magi with his or her starting energy. Do not search for their starting cards. You keep your Relics and Creatures.',
 				cost: 0,
 				effects: [
 					effect({
@@ -1346,6 +1351,7 @@ export const cards = [
 			{
 				name: 'Nourish',
 				text: 'Choose a Creature in play. Discard Baloo Root from play. Add one energy to the chosen Creature.',
+				cost: 0,
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE,
@@ -1422,6 +1428,7 @@ export const cards = [
 			{
 				name: 'Channeling',
 				text: 'Discard two cards from your hand. Add two energy to your Magi.',
+				cost: 0,
 				effects: [
 					getPropertyValue({
 						property: PROPERTY_CONTROLLER,
@@ -1973,7 +1980,8 @@ export const cards = [
 		powers: [
 			{
 				name: 'Preordinance',
-				text: 'Dicard Orwin\'s Staff from play and discard two cards from your hand. Search your deck for any one card. Place that card in your hand without showing it to your opponents. Shuffle your deck.',
+				cost: 0,
+				text: 'Discard Orwin\'s Staff from play and discard two cards from your hand. Search your deck for any one card. Place that card in your hand without showing it to your opponents. Shuffle your deck.',
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
@@ -2505,6 +2513,7 @@ export const cards = [
 	new Card('Gorgle\'s Ring', TYPE_RELIC, REGION_CALD, 0, {
 		powers: [{
 			name: 'Wild Fire',
+			cost: 0,
 			text: 'Roll a die. 1, 2 or 3: Discard 1 energy from each of your Creatures. 4 or 5: Choose any one Creature in play. Discard 2 energy from the chosen Creature. 6: Choose a Magi in play. Discard 4 energy from the chosen Magi.',
 			effects: [
 				effect({
@@ -2592,6 +2601,7 @@ export const cards = [
 	new Card('Corf Pearl', TYPE_RELIC, REGION_CALD, 0, {
 		powers: [{
 			name: 'Wild Fire',
+			cost: 0,
 			text: 'Roll a die. 1, 2 or 3: Discard 1 energy from each of your Creatures. 4 or 5: Choose any one Creature in play. Discard 2 energy from the chosen Creature. 6: Choose a Creature in play. Add 3 energy to the chosen Creature.',
 			effects: [
 				effect({

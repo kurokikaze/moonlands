@@ -1,3 +1,6 @@
+import CardInGame from "./CardInGame";
+import { ZoneType } from "../types";
+
 function shuffle(array) {
 	var currentIndex = array.length, temporaryValue, randomIndex;
 
@@ -18,12 +21,12 @@ function shuffle(array) {
 }
 
 export default class Zone {
-	_name: any;
-	_player: any;
-	_type: any;
+	_name: string;
+	_player: number | null;
+	_type: ZoneType;
 	ordered: boolean;
-	cards: any[];
-	constructor(name, type, player = null, ordered = false) {
+	cards: CardInGame[];
+	constructor(name: string, type: ZoneType, player = null, ordered = false) {
 		this._name = name;
 		this._player = player;
 		this._type = type;

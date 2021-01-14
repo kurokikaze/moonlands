@@ -13,7 +13,7 @@ import {
 	REGION_BOGRATH,
 } from '../const';
 
-import {Region, CardType, CardData} from './types';
+import {Region, CardType, CardData} from '../types';
 
 export default class Card {
 	name: string;

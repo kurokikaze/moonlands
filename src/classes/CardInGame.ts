@@ -4,9 +4,9 @@ import Card from './Card';
 export default class CardInGame {
 	_card: Card;
 	id: string;
-	data: { energy: number; controller: number; attacked: number; actionsUsed: any[]; energyLostThisTurn: number; defeatedCreature: boolean; hasAttacked: boolean; wasAttacked: boolean; };
+	data: { energy: number; controller: number; attacked: number; actionsUsed: any[]; energyLostThisTurn: number; defeatedCreature: boolean; hasAttacked: boolean; wasAttacked: boolean; burrowed?: boolean; ableToAttack?: boolean; energyLossThreshold?: number; };
 	owner: number;
-	modifiedCard: CardInGame;
+	modifiedCard: Card;
 	constructor(card: Card, owner: number) {
 		this._card = card;
 		this.id = nanoid();
@@ -27,13 +27,13 @@ export default class CardInGame {
 		return this._card;
 	}
 
-	addEnergy(amount = '0') {
-		this.data.energy += parseInt(amount, 10);
+	addEnergy(amount: number = 0) {
+		this.data.energy += amount;
 		return this;
 	}
 
-	removeEnergy(amount = '0') {
-		const amountToRemove = Math.min(this.data.energy, parseInt(amount, 10));
+	removeEnergy(amount: number = 0) {
+		const amountToRemove = Math.min(this.data.energy, amount);
 		this.data.energy -= amountToRemove;
 		this.data.energyLostThisTurn += amountToRemove;
 	}
@@ -84,7 +84,7 @@ export default class CardInGame {
 		return newCard;
 	}
 
-	serialize(hidden) {
+	serialize(hidden = false) {
 		return {
 			card: hidden ? null : this.card.name,
 			data: hidden ? {} : this.data,
