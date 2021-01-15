@@ -1,6 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-function clone(item) {
+export default function clone(item) {
     if (!item) {
         return item;
     } // null, undefined values check
@@ -52,5 +50,4 @@ function clone(item) {
     }
     return result;
 }
-exports.default = clone;
 //# sourceMappingURL=clone.js.map

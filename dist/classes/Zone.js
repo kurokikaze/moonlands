@@ -1,12 +1,3 @@
-"use strict";
-var __spreadArrays = (this && this.__spreadArrays) || function () {
-    for (var s = 0, i = 0, il = arguments.length; i < il; i++) s += arguments[i].length;
-    for (var r = Array(s), k = 0, i = 0; i < il; i++)
-        for (var a = arguments[i], j = 0, jl = a.length; j < jl; j++, k++)
-            r[k] = a[j];
-    return r;
-};
-Object.defineProperty(exports, "__esModule", { value: true });
 function shuffle(array) {
     var currentIndex = array.length, temporaryValue, randomIndex;
     // While there remain elements to shuffle...
@@ -21,81 +12,56 @@ function shuffle(array) {
     }
     return array;
 }
-var Zone = /** @class */ (function () {
-    function Zone(name, type, player, ordered) {
-        if (player === void 0) { player = null; }
-        if (ordered === void 0) { ordered = false; }
+export default class Zone {
+    constructor(name, type, player = null, ordered = false) {
         this._name = name;
         this._player = player;
         this._type = type;
         this.ordered = ordered;
         this.cards = [];
     }
-    Object.defineProperty(Zone.prototype, "card", {
-        // Возвращаем карту если она единственная
-        // Для зон типа ACTIVE_MAGI
-        get: function () {
-            return this.cards.length == 1 ? this.cards[0] : null;
-        },
-        enumerable: false,
-        configurable: true
-    });
-    Object.defineProperty(Zone.prototype, "name", {
-        get: function () {
-            return this._name;
-        },
-        enumerable: false,
-        configurable: true
-    });
-    Object.defineProperty(Zone.prototype, "player", {
-        get: function () {
-            return this._player;
-        },
-        enumerable: false,
-        configurable: true
-    });
-    Object.defineProperty(Zone.prototype, "type", {
-        get: function () {
-            return this._type;
-        },
-        enumerable: false,
-        configurable: true
-    });
-    Object.defineProperty(Zone.prototype, "length", {
-        get: function () {
-            return this.cards.length;
-        },
-        enumerable: false,
-        configurable: true
-    });
-    Zone.prototype.add = function (cards) {
-        this.cards = __spreadArrays(this.cards, cards);
+    // Возвращаем карту если она единственная
+    // Для зон типа ACTIVE_MAGI
+    get card() {
+        return this.cards.length == 1 ? this.cards[0] : null;
+    }
+    get name() {
+        return this._name;
+    }
+    get player() {
+        return this._player;
+    }
+    get type() {
+        return this._type;
+    }
+    get length() {
+        return this.cards.length;
+    }
+    add(cards) {
+        this.cards = [...this.cards, ...cards];
         return this;
-    };
-    Zone.prototype.addToTop = function (cards) {
-        this.cards = __spreadArrays(cards, this.cards);
+    }
+    addToTop(cards) {
+        this.cards = [...cards, ...this.cards];
         return this;
-    };
-    Zone.prototype.byId = function (id) {
-        return this.cards.find(function (card) { return card.id === id; });
-    };
-    Zone.prototype.containsId = function (id) {
-        return this.cards.some(function (card) { return card.id === id; });
-    };
-    Zone.prototype.removeById = function (id) {
-        this.cards = this.cards.filter(function (card) { return card.id != id; });
-    };
-    Zone.prototype.shuffle = function () {
+    }
+    byId(id) {
+        return this.cards.find(card => card.id === id);
+    }
+    containsId(id) {
+        return this.cards.some(card => card.id === id);
+    }
+    removeById(id) {
+        this.cards = this.cards.filter(card => card.id != id);
+    }
+    shuffle() {
         this.cards = shuffle(this.cards);
-    };
-    Zone.prototype.empty = function () {
+    }
+    empty() {
         this.cards = [];
-    };
-    Zone.prototype.serialize = function (hidden) {
-        if (hidden === void 0) { hidden = false; }
-        return this.cards.map(function (card) { return card.serialize(hidden); });
-    };
-    return Zone;
-}());
-exports.default = Zone;
+    }
+    serialize(hidden = false) {
+        return this.cards.map(card => card.serialize(hidden));
+    }
+}
 //# sourceMappingURL=Zone.js.map
