@@ -1,24 +1,35 @@
 "use strict";
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.byName = exports.cards = void 0;
-const Card_1 = __importDefault(require("./classes/Card"));
-const const_1 = require("./const");
-const effect = (data) => (Object.assign({ type: const_1.ACTION_EFFECT }, data));
-const select = (data) => (Object.assign({ type: const_1.ACTION_SELECT }, data));
-const getPropertyValue = (data) => (Object.assign({ type: const_1.ACTION_GET_PROPERTY_VALUE }, data));
-const prompt = (data) => (Object.assign({ type: const_1.ACTION_ENTER_PROMPT }, data));
-const calculate = (data) => (Object.assign({ type: const_1.ACTION_CALCULATE }, data));
-const CONDITION_TARGET_IS_SELF = {
+var Card_1 = __importDefault(require("./classes/Card"));
+var const_1 = require("./const");
+var effect = function (data) { return (__assign({ type: const_1.ACTION_EFFECT }, data)); };
+var select = function (data) { return (__assign({ type: const_1.ACTION_SELECT }, data)); };
+var getPropertyValue = function (data) { return (__assign({ type: const_1.ACTION_GET_PROPERTY_VALUE }, data)); };
+var prompt = function (data) { return (__assign({ type: const_1.ACTION_ENTER_PROMPT }, data)); };
+var calculate = function (data) { return (__assign({ type: const_1.ACTION_CALCULATE }, data)); };
+var CONDITION_TARGET_IS_SELF = {
     objectOne: 'target',
     propertyOne: const_1.PROPERTY_ID,
     comparator: '=',
     objectTwo: 'self',
     propertyTwo: const_1.PROPERTY_ID,
 };
-const CONDITION_SOURCE_IS_SELF = {
+var CONDITION_SOURCE_IS_SELF = {
     objectOne: 'source',
     propertyOne: const_1.PROPERTY_ID,
     comparator: '=',
@@ -3825,6 +3836,6 @@ exports.cards = [
         ],
     }),
 ];
-const byName = name => exports.cards.find(card => card.name === name);
+var byName = function (name) { return exports.cards.find(function (card) { return card.name === name; }); };
 exports.byName = byName;
 //# sourceMappingURL=cards.js.map

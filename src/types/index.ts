@@ -40,7 +40,7 @@ import { SelectType } from './select';
 import { EffectTypeType, EffectType } from './effect';
 import { PromptTypeType, PropertyType, ConditionType } from './common';
 import { AttackEffect } from './attack';
-import { type } from 'os';
+
 export { AttackerDealsDamageEffect, DefenderDealsDamageEffect } from './attack';
 export { Region, CardType, PromptTypeType, PropertyType, ConditionType, ZoneType } from './common';
 export { SelectType, SelectorTypeType, SelectorParams, RefinedSelectParams } from './select';

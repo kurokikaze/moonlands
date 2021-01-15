@@ -191,7 +191,7 @@ import {
 	LOG_ENTRY_MAGI_DEFEATED,
 } from './const';
 
-import {showAction} from './logAction.js';
+import {showAction} from './logAction';
 
 import clone from './clone';
 
