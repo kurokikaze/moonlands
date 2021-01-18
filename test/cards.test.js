@@ -2666,6 +2666,46 @@ describe('Scroll of Fire', () => {
 		expect(balamantPup.data.energy).toEqual(3);
 		expect(lavaArboll.data.energy).toEqual(5);
 	});
+
+	it('Syphon Stone (should not be affected by the Scroll)', () => {
+		const ACTIVE_PLAYER = 432;
+		const NON_ACTIVE_PLAYER = 710;
+
+		const mobis = new CardInGame(byName('Mobis'), NON_ACTIVE_PLAYER).addEnergy(12);
+		const orathan = new CardInGame(byName('Orathan'), NON_ACTIVE_PLAYER).addEnergy(5);
+
+		const scrollOfFire = new CardInGame(byName('Scroll of Fire'), ACTIVE_PLAYER);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const syphonStone = new CardInGame(byName('Syphon Stone'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [scrollOfFire, orathan, syphonStone], [grega]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([mobis]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: syphonStone,
+			power: syphonStone.card.data.powers[0],
+		};
+
+		gameState.update(powerAction);
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: orathan,
+			generatedBy: syphonStone.id,
+		};
+
+		gameState.update(targetingAction);
+
+		expect(orathan.data.energy).toEqual(4);
+	});
 });
 
 describe('Book of Ages', () => {
