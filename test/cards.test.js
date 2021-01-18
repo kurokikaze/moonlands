@@ -1905,17 +1905,18 @@ describe('Whall', () => {
 		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(15);
 
 		const paralith = new CardInGame(byName('Paralit'), ACTIVE_PLAYER);
+		const waterOfLife = new CardInGame(byName('Water of Life'), ACTIVE_PLAYER);
 
 		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
 				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
-				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([paralith]),
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([paralith, waterOfLife]),
 				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([whall]),
 				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
 				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([orathan]),
 			],
-			step: STEP_PRS_FIRST,
+			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
 		});
 
@@ -1929,6 +1930,7 @@ describe('Whall', () => {
 		};
         
 		gameState.update(powerUseAction);
+
 		expect(gameState.state.prompt).toEqual(true, 'Game is in Prompt state');
 		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_OWN_SINGLE_CREATURE, 'Game is prompting for own single creature');
 		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game is prompting active player');
@@ -1948,6 +1950,83 @@ describe('Whall', () => {
 		expect(gameState.state.promptParams.zone).toEqual(ZONE_TYPE_HAND, 'Prompt awaiting card from hand');
 		expect(gameState.state.promptParams.numberOfCards).toEqual(1, 'Prompt awaiting one card');
 		expect(gameState.state.promptParams.zoneOwner).toEqual(ACTIVE_PLAYER, 'Prompt awaiting card from active players hand');
+		expect(gameState.state.promptParams.cards).toHaveLength(1, 'Only 1 card we can choose');
+		expect(gameState.state.promptParams.cards[0].card).toEqual('Paralit');
+
+		const cardChoiceAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			cards: [paralith],
+			generatedBy: whall.id,
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(cardChoiceAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in Prompt state');
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One card is in play');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Paralit', 'Card is Paralit');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.cost, 'Card has starting energy');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.attacked).toEqual(100, 'Paralit will not be able to attack this turn');
+	});
+
+	it('Dream Twist through the death zone (no creatures, no energy on Magi)', () => {
+		const ACTIVE_PLAYER = 40;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const bwill = new CardInGame(byName('Bwill'), ACTIVE_PLAYER).addEnergy(1);
+		const whall = new CardInGame(byName('Whall'), ACTIVE_PLAYER).addEnergy(5);
+
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(15);
+
+		const paralith = new CardInGame(byName('Paralit'), ACTIVE_PLAYER);
+		const waterOfLife = new CardInGame(byName('Water of Life'), ACTIVE_PLAYER);
+
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([paralith, waterOfLife]),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([whall]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([bwill]),
+			],
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerUseAction = {
+			type: ACTION_POWER,
+			source: whall,
+			power: whall.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+        
+		gameState.update(powerUseAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in Prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_OWN_SINGLE_CREATURE, 'Game is prompting for own single creature');
+		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game is prompting active player');
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			prompt: ACTIVE_PLAYER,
+			target: bwill,
+			generatedBy: whall.id,
+		};
+
+		gameState.update(targetingAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in Prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, 'Game is prompting for cards from zone');
+		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game is prompting active player');
+		expect(gameState.state.promptParams.zone).toEqual(ZONE_TYPE_HAND, 'Prompt awaiting card from hand');
+		expect(gameState.state.promptParams.numberOfCards).toEqual(1, 'Prompt awaiting one card');
+		expect(gameState.state.promptParams.zoneOwner).toEqual(ACTIVE_PLAYER, 'Prompt awaiting card from active players hand');
+		expect(gameState.state.promptParams.cards).toHaveLength(1, 'Only 1 card we can choose');
+		expect(gameState.state.promptParams.cards[0].card).toEqual('Paralit');
 
 		const cardChoiceAction = {
 			type: ACTION_RESOLVE_PROMPT,
@@ -2759,6 +2838,196 @@ describe('Giant Parathin', () => {
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toEqual(14, 'Yaki has 14 energy');
 		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(1, 'One magi in pile');
 		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).card.card.name).toEqual('Grega', 'Grega is in pile');
+	});
+
+	it('Interchange Juggle', () => {
+		const ACTIVE_PLAYER = 5;
+		const NON_ACTIVE_PLAYER = 15;
+
+		const oneParathin = new CardInGame(byName('Giant Parathin'), ACTIVE_PLAYER).addEnergy(10);
+		const twoParathin = new CardInGame(byName('Giant Parathin'), ACTIVE_PLAYER);
+		const threeParathin = new CardInGame(byName('Giant Parathin'), ACTIVE_PLAYER);
+		const orathan = new CardInGame(byName('Orathan'), ACTIVE_PLAYER);
+		const whall = new CardInGame(byName('Whall'), ACTIVE_PLAYER).addEnergy(4);
+		const oQua = new CardInGame(byName('O\'Qua'), ACTIVE_PLAYER);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [oneParathin], [whall]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([oQua]);
+		gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).add([twoParathin]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([threeParathin, orathan]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: oneParathin,
+			power: oneParathin.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One card in play');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).length).toEqual(1, 'One magi is active');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.card.name).toEqual('Whall', 'Whall is active Magi');
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(1, 'One magi in pile');
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).card.card.name).toEqual('O\'Qua', 'O\'Qua is in pile');
+
+		gameState.update(powerAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'No cards in play');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).length).toEqual(1, 'One magi is active');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.card.name).toEqual('O\'Qua', 'Yaki is active Magi');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toEqual(11, 'O\'Qua has 11 energy');
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(1, 'One magi in pile');
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).card.card.name).toEqual('Whall', 'Whall is in pile');
+
+		const newOQua = gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card;
+		const conjureAction = {
+			type: ACTION_POWER,
+			source: newOQua,
+			power: newOQua.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(conjureAction);
+		
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE);
+		expect(gameState.state.promptParams.cards[0].id).toEqual(twoParathin.id);
+
+		const cardChoiceAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			cards: [twoParathin],
+			generatedBy: newOQua.id,
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(cardChoiceAction);
+		expect(gameState.state.prompt).toEqual(false);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1);
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Giant Parathin');
+
+		const newTwoParathin = gameState.getZone(ZONE_TYPE_IN_PLAY).card;
+
+		const secondPowerAction = {
+			type: ACTION_POWER,
+			source: newTwoParathin,
+			power: newTwoParathin.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(secondPowerAction);
+
+		expect(gameState.state.prompt).toEqual(false);
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).length).toEqual(1, 'One magi is active');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.card.name).toEqual('Whall', 'Whall is active Magi');
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(1, 'One magi in pile');
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).card.card.name).toEqual('O\'Qua', 'O\'Qua is in pile');
+
+		const passAction = {
+			type: ACTION_PASS,
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(passAction);
+
+		expect(gameState.state.step).toEqual(STEP_ATTACK);
+
+		gameState.update(passAction);
+
+		expect(gameState.state.step).toEqual(STEP_CREATURES);
+
+		const playOrathanAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: orathan,
+				player: ACTIVE_PLAYER,
+			},
+		};
+
+		gameState.update(playOrathanAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1);
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Orathan');
+
+		gameState.update(passAction);
+
+		expect(gameState.state.step).toEqual(STEP_PRS_SECOND);
+
+		const newWhall = gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card;
+		expect(newWhall.data.energy).toEqual(5);
+		const newOrathan = gameState.getZone(ZONE_TYPE_IN_PLAY).card;
+
+		const powerUseAction = {
+			type: ACTION_POWER,
+			source: newWhall,
+			power: newWhall.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerUseAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in Prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_OWN_SINGLE_CREATURE, 'Game is prompting for own single creature');
+		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game is prompting active player');
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			prompt: ACTIVE_PLAYER,
+			target: newOrathan,
+			generatedBy: newWhall.id,
+		};
+
+		gameState.update(targetingAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in Prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, 'Game is prompting for cards from zone');
+		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game is prompting active player');
+		expect(gameState.state.promptParams.zone).toEqual(ZONE_TYPE_HAND, 'Prompt awaiting card from hand');
+		expect(gameState.state.promptParams.numberOfCards).toEqual(1, 'Prompt awaiting one card');
+		expect(gameState.state.promptParams.zoneOwner).toEqual(ACTIVE_PLAYER, 'Prompt awaiting card from active players hand');
+		expect(gameState.state.promptParams.cards).toHaveLength(1, 'Only 1 card we can choose');
+		expect(gameState.state.promptParams.cards[0].card).toEqual('Giant Parathin');
+		expect(gameState.state.promptParams.cards[0].id).toEqual(threeParathin.id);
+
+		const anotherCardChoiceAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			cards: [threeParathin],
+			generatedBy: newWhall.id,
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(anotherCardChoiceAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in Prompt state');
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1);
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Giant Parathin');
+
+		const newThreeParathin = gameState.getZone(ZONE_TYPE_IN_PLAY).card;
+
+		const finalInterchangeAction = {
+			type: ACTION_POWER,
+			source: newThreeParathin,
+			power: newThreeParathin.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(finalInterchangeAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'No cards in play');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).length).toEqual(1, 'One magi is active');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.card.name).toEqual('O\'Qua', 'O\'Qua is active Magi');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toEqual(11, 'O\'Qua has 11 energy');
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(1, 'One magi in pile');
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).card.card.name).toEqual('Whall', 'Whall is in pile');
+		expect(gameState.hasWinner()).toEqual(false);
 	});
 });
 

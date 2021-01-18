@@ -2,6 +2,12 @@ import CardInGame from '../classes/CardInGame';
 import {
     ACTION_CALCULATE,
     ACTION_ENTER_PROMPT,
+    ACTION_PLAY,
+    ACTION_POWER,
+    ACTION_NONE,
+    ACTION_PLAYER_WINS,
+    ACTION_PASS,
+    ACTION_CONCEDE,
 
     CALCULATION_SET,
 	CALCULATION_DOUBLE,
@@ -26,13 +32,8 @@ import {
     RESTRICTION_CREATURE_WAS_ATTACKED,
     RESTRICTION_STATUS,
 
-    ACTION_PLAYER_WINS,
-    ACTION_PASS,
-    ACTION_CONCEDE,
     RESTRICTION_MAGI_WITHOUT_CREATURES,
     COST_X,
-    ACTION_PLAY,
-    ACTION_POWER,
 } from '../const';
 
 import { ResolvePromptType } from './resolvePrompt';
@@ -232,6 +233,11 @@ export type ForcedPlayType = EnrichedAction & {
     generatedBy?: string;
 }
 
+type NoneType = EnrichedAction & {
+    type: typeof ACTION_NONE;
+    generatedBy?: string;
+}
+
 type PlayType = NormalPlayType | ForcedPlayType;
 
 type PowerActionType = EnrichedAction & {
@@ -242,4 +248,4 @@ type PowerActionType = EnrichedAction & {
     generatedBy?: string;
 }
 
-export type AnyEffectType = EffectType | PromptType | SelectType | CalculateType | PropertyGetterType | PlayerWinType | PassType | ConcedeType | ResolvePromptType | PlayType | PowerActionType | AttackEffect;
+export type AnyEffectType = EffectType | PromptType | SelectType | CalculateType | PropertyGetterType | PlayerWinType | PassType | ConcedeType | ResolvePromptType | PlayType | PowerActionType | AttackEffect | NoneType;

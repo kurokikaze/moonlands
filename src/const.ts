@@ -10,6 +10,7 @@ export const ACTION_GET_PROPERTY_VALUE = 'actions/get_property_value';
 export const ACTION_ATTACK = 'actions/attack';
 export const ACTION_CONCEDE = 'actions/concede';
 export const ACTION_PLAYER_WINS ='actions/player_wins';
+export const ACTION_NONE = 'actions/none';
 
 export const ACTION_PROPERTY = 'special_properties/action_property';
 export const PROPERTY_ID = 'properties/id';

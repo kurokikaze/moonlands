@@ -189,6 +189,7 @@ import {
 	LOG_ENTRY_CREATURE_ENERGY_GAIN,
 	LOG_ENTRY_MAGI_ENERGY_GAIN,
 	LOG_ENTRY_MAGI_DEFEATED,
+	ACTION_NONE,
 } from './const';
 
 import {showAction} from './logAction';
@@ -213,7 +214,8 @@ import {
 	MoveCardBetwenZonesEffect,
 	EnrichedAction,
 	StaticAbilityType,
-	OperatorType
+	OperatorType,
+	ConditionType
 } from './types';
 
 const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
@@ -1292,8 +1294,11 @@ export class State {
 			checkers.every(checker => checker(card)); // combine checkers
 	}
 
-	getObjectOrSelf(action: AnyEffectType, self: CardInGame, object: string, property: boolean) {
-		if (object == 'self') {
+	getObjectOrSelf(action: AnyEffectType, self: CardInGame, object: string | number | boolean, property: boolean) {
+		if (typeof object === 'boolean' || typeof object === 'number') {
+			return object;
+		}
+		if (object === 'self') {
 			return self;
 		}
 		return property ? this.getMetaValue(action[object], action.generatedBy) : object;
@@ -1363,15 +1368,17 @@ export class State {
 		return action;
 	}
 
-	checkCondition(action, self, condition) {
+	checkCondition(action: AnyEffectType, self: CardInGame, condition: ConditionType) {
 		if (
-			!Object.prototype.hasOwnProperty.call(condition, 'objectOne') ||
-			!Object.prototype.hasOwnProperty.call(condition, 'objectTwo')
+			!('objectOne' in condition) ||
+			!('objectTwo' in condition)
 		) {
 			throw new Error('Missing object field in condition');
 		}
-		const objectOne = this.getObjectOrSelf(action, self, condition.objectOne, condition.propertyOne);
-		const objectTwo = this.getObjectOrSelf(action, self, condition.objectTwo, condition.propertyTwo);
+
+		const objectOne = this.getObjectOrSelf(action, self, condition.objectOne, 'propertyOne' in condition && Boolean(condition.propertyOne));
+		const objectTwo = this.getObjectOrSelf(action, self, condition.objectTwo, 'propertyTwo' in condition && Boolean(condition.propertyTwo));
+
 		const operandOne = (condition.propertyOne && condition.propertyOne !== ACTION_PROPERTY) ? this.modifyByStaticAbilities(objectOne, condition.propertyOne) : objectOne;
 
 		const operandTwo = (condition.propertyTwo && condition.propertyTwo !== ACTION_PROPERTY) ? this.modifyByStaticAbilities(objectTwo, condition.propertyTwo) : objectTwo;
@@ -1932,6 +1939,7 @@ export class State {
 							break;
 						}
 					}
+
 					this.state = {
 						...this.state,
 						actions: [],
@@ -3024,7 +3032,7 @@ export class State {
 						}
 						case EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES: {
 							// we should check if it was the last creature in play and Magi loses
-							if (action.sourceZone === ZONE_TYPE_IN_PLAY) {
+							/* if (action.sourceZone === ZONE_TYPE_IN_PLAY) {
 								const newCard = this.getMetaValue(action.destinationCard, action.generatedBy);
 								const magi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, newCard.owner).card;
 								const creatures = this.useSelector(SELECTOR_OWN_CREATURES, newCard.owner, null);
@@ -3039,7 +3047,7 @@ export class State {
 										generatedBy: action.generatedBy,
 									});
 								}
-							}
+							}*/
 							break;
 						}
 						case EFFECT_TYPE_CREATURE_ENTERS_PLAY:
@@ -3081,7 +3089,7 @@ export class State {
 										});
 										break;
 									}
-									case TYPE_MAGI: {
+									/* case TYPE_MAGI: {
 										const hisCreatures = this.useSelector(SELECTOR_OWN_CREATURES, moveSource.data.controller, null);
 										if (hisCreatures instanceof Array && hisCreatures.length === 0) {
 											this.transformIntoActions({
@@ -3093,7 +3101,7 @@ export class State {
 											});
 										}
 										break;
-									}
+									} */
 								}
 							}
 							break;
@@ -3163,7 +3171,7 @@ export class State {
 									target.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
 
 									const hisCreatures = this.useSelector(SELECTOR_OWN_CREATURES, target.data.controller, null);
-									if (target.data.energy === 0 && hisCreatures instanceof Array && hisCreatures.length === 0) {
+									/* if (target.data.energy === 0 && hisCreatures instanceof Array && hisCreatures.length === 0) {
 										this.transformIntoActions({
 											type: ACTION_EFFECT,
 											effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
@@ -3171,7 +3179,7 @@ export class State {
 											target,
 											generatedBy: action.generatedBy,
 										});
-									}
+									} */
 								},
 							);
 							break;
@@ -3379,6 +3387,34 @@ export class State {
 				}
 			} // switch (action.type)
 		} // while(this.hasActions())
+
+		// SBA for Magi losing
+		if (!this.state.prompt) {
+			const sbActions: AnyEffectType[] = [];
+			this.players.forEach(player => {
+				if (this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).length === 1) {
+					const magi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card;
+					
+					const creatures = this.useSelector(SELECTOR_OWN_CREATURES, player, null);
+					if (magi.data.energy === 0 && creatures instanceof Array && creatures.length === 0) {
+						sbActions.push({
+							type: ACTION_EFFECT,
+							effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
+							source: null,
+							target: magi,
+							generatedBy: nanoid(),
+							player,
+						});
+					}
+				}
+			});
+			if (sbActions.length > 0) {
+				this.addActions(...sbActions);
+				this.update({
+					type: ACTION_NONE,
+				});
+			}
+		}
 		return true;
 	}
 }
