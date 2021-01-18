@@ -756,7 +756,7 @@ export const cards = [
             },
             {
                 name: 'Pyromancy',
-                text: 'Whenever a Power you control discards energy from any number of Creatures, discard one additional energy from each of those Creatures.',
+                text: 'Whenever a Power on a Creature you control discards energy from any number of Creatures, discard one additional energy from each of those Creatures.',
                 find: {
                     effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
                     conditions: [
@@ -765,6 +765,13 @@ export const cards = [
                             propertyOne: ACTION_PROPERTY,
                             comparator: '=',
                             objectTwo: true,
+                            propertyTwo: null,
+                        },
+                        {
+                            objectOne: 'source',
+                            propertyOne: PROPERTY_TYPE,
+                            comparator: '=',
+                            objectTwo: TYPE_CREATURE,
                             propertyTwo: null,
                         },
                         {
