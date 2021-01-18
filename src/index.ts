@@ -2558,6 +2558,8 @@ export class State {
 
 								this.transformIntoActions(...actions);
 							}
+
+							// Reset creatures' actions and attacks
 							const creatures = this.getZone(ZONE_TYPE_IN_PLAY).cards
 								.filter(card => card.card.type === TYPE_CREATURE && card.data.controller === action.player);
 							if (creatures.length > 0) {
@@ -2566,6 +2568,14 @@ export class State {
 									creature.clearActionsUsed();
 								});
 							}
+
+							// Reset relics' actions
+							const relics = this.getZone(ZONE_TYPE_IN_PLAY).cards
+								.filter(card => card.card.type === TYPE_RELIC && card.data.controller === action.player);
+							if (relics.length > 0) {
+								relics.forEach(relic => relic.clearActionsUsed());
+							}
+
 							// if magi is active, reset its actions used too
 							if (this.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).length == 1) {
 								this.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).card.clearActionsUsed();
