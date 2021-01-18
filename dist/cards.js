@@ -397,9 +397,14 @@ export const cards = [
                     ],
                 },
                 effects: [
+                    getPropertyValue({
+                        property: PROPERTY_CONTROLLER,
+                        target: '$source',
+                        variable: 'adisController',
+                    }),
                     select({
                         selector: SELECTOR_OPPONENT_ID,
-                        opponentOf: '$player',
+                        opponentOf: '$adisController',
                         variable: 'opponentId',
                     }),
                     prompt({
@@ -515,7 +520,7 @@ export const cards = [
         powers: [
             {
                 name: 'Dream Twist',
-                cost: 0,
+                cost: 5,
                 text: 'Choose your Creature and discard it from play. Choose a Creature from your hand. Put it onto the battlefield. Place energy on it equal to its starting energy.',
                 effects: [
                     prompt({
@@ -3181,12 +3186,16 @@ export const cards = [
             {
                 name: 'Lore',
                 cost: 3,
-                text: 'Draw a card',
+                text: 'Draw 2 cards',
                 effects: [
                     getPropertyValue({
                         target: '$sourceCreature',
                         property: PROPERTY_CONTROLLER,
                         variable: 'controller',
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_DRAW,
+                        player: '$controller',
                     }),
                     effect({
                         effectType: EFFECT_TYPE_DRAW,
