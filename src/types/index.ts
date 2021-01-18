@@ -114,27 +114,24 @@ export type PromptType = PromptParams & {
     generatedBy?: string;
 }
 
+export type FindType = {
+    effectType: EffectTypeType;
+    conditions: ConditionType[];
+};
+
 type TriggerEffectType = {
     name?: string;
     text?: string;
-    find: {
-        effectType: EffectTypeType;
-        conditions: ConditionType[];
-    },
+    find: FindType;
     effects: AnyEffectType[];
 }
 
 type ReplacementEffectType = {
     name?: string;
     text?: string;
-    find: {
-        effectType: EffectTypeType;
-        conditions: ConditionType[];
-    },
+    find: FindType;
     replaceWith: ReplacingEffectType | EffectType;   
 }
-
-// type PropertyType = typeof PROPERTY_CONTROLLER | typeof PROPERTY_ID | typeof ACTION_PROPERTY | typeof PROPERTY_TYPE | typeof PROPERTY_REGION | typeof PROPERTY_CREATURE_TYPES| typeof PROPERTY_ENERGY_COUNT | typeof PROPERTY_COST | typeof PROPERTY_MAGI_STARTING_ENERGY;
 
 export type RestrictionType = typeof RESTRICTION_CREATURE_WAS_ATTACKED | 
     typeof RESTRICTION_OWN_CREATURE |

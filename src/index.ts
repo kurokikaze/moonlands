@@ -132,6 +132,7 @@ import {
 	EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
 	EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
+	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
 	EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
 	EFFECT_TYPE_CREATURE_IS_DEFEATED, // Possibly redundant
 	EFFECT_TYPE_BEFORE_DAMAGE,
@@ -215,7 +216,8 @@ import {
 	EnrichedAction,
 	StaticAbilityType,
 	OperatorType,
-	ConditionType
+	ConditionType,
+	FindType
 } from './types';
 
 const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
@@ -1382,6 +1384,7 @@ export class State {
 		const operandOne = (condition.propertyOne && condition.propertyOne !== ACTION_PROPERTY) ? this.modifyByStaticAbilities(objectOne, condition.propertyOne) : objectOne;
 
 		const operandTwo = (condition.propertyTwo && condition.propertyTwo !== ACTION_PROPERTY) ? this.modifyByStaticAbilities(objectTwo, condition.propertyTwo) : objectTwo;
+
 		switch (condition.comparator) {
 			case '!=':
 				return operandOne !== operandTwo;
@@ -1398,11 +1401,9 @@ export class State {
 			case 'includes':
 				return operandOne.length && operandOne.includes(operandTwo);
 		}
-
-		return false;
 	}
 
-	matchAction(action: AnyEffectType, find, self) {
+	matchAction(action: AnyEffectType, find: FindType, self: CardInGame) {
 		if (action.type !== ACTION_EFFECT) {
 			return false;
 		}
@@ -1725,7 +1726,14 @@ export class State {
 						const sourcePower = action.power;
 						const effects = action.power.effects;
 						
-						const enrichAction = <T>(effect: T): T & EnrichedAction => ({...effect, power: true, generatedBy: source.id, player: action.player});
+						const enrichAction = <T>(effect: T): T & EnrichedAction => ({
+							source,
+							player: source.data.controller,
+							...effect,
+							power: true,
+							generatedBy:
+							source.id,
+						});
 						const preparedActions: AnyEffectType[] = effects.map(enrichAction);
 
 						// Calculate if prompts are resolvable
@@ -3243,6 +3251,30 @@ export class State {
 								});
 							}
 							break;
+						}
+						case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES: {
+							// Right now multitarget EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE cannot be distinguished on target-by-target basis
+							// No cards use this effect now, but some may later
+							// Also, multitarget EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE was probably a bad idea from the start
+							const multiTarget: CardInGame | CardInGame[] = this.getMetaValue(action.target, action.generatedBy);
+							oneOrSeveral(
+								multiTarget,
+								target => {
+									var amount = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
+
+									this.transformIntoActions({
+										type: ACTION_EFFECT,
+										effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+										target,
+										amount,
+										power: action.power,
+										spell: action.spell,
+										source: action.source,
+										attack: action.attack,
+										generatedBy: action.generatedBy,
+									});
+								},
+							);
 						}
 						case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
 							const multiTarget: CardInGame | CardInGame[] = this.getMetaValue(action.target, action.generatedBy);

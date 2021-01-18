@@ -1,4 +1,4 @@
-import { AnyEffectType } from '.';
+import { AnyEffectType, FindType } from '.';
 import { ConditionType, ZoneType } from './common';
 import CardInGame from '../classes/CardInGame'
 
@@ -31,6 +31,7 @@ import {
 	EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
 	EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
 	EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
+	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
@@ -201,6 +202,16 @@ type DiscardEnergyFromCreatureOrMagiEffect = ActionEffect & {
     attack: boolean;
 }
 
+type DiscardEnergyFromCreaturesEffect = ActionEffect & {
+    effectType: typeof EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES;
+    target: string | CardInGame[];
+    source: CardInGame;
+    power?: boolean;
+    attack?: boolean;
+    spell?: boolean;
+    amount: number;
+}
+
 type DiscardEnergyFromCreatureEffect = ActionEffect & {
     effectType: typeof EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE;
     target: CardInGame | CardInGame[];
@@ -313,10 +324,7 @@ type ConditionalEffect = ActionEffect & {
 
 type DelayedTriggerType = {
     name: string;
-    find: {
-        effectType: EffectType;
-        conditions: ConditionType[];
-    }
+    find: FindType;
     effects: AnyEffectType[];
 }
 
@@ -368,6 +376,7 @@ export type EffectType = ActionEffect & {
     NoneEffect |
     CardMovedBetweenZonesEffect |
     DiscardEnergyFromCreatureOrMagiEffect |
+    DiscardEnergyFromCreaturesEffect |
     DiscardEnergyFromCreatureEffect |
     DiscardEnergyFromMagiEffect |
     PayingEnergyForPowerEffect |

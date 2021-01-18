@@ -2631,6 +2631,43 @@ describe('Warrior\'s Boots', () => {
 	});
 });
 
+describe('Scroll of Fire', () => {
+	it('Fire Chogo', () => {
+		const ACTIVE_PLAYER = 432;
+		const NON_ACTIVE_PLAYER = 710;
+
+		const mobis = new CardInGame(byName('Mobis'), NON_ACTIVE_PLAYER).addEnergy(12);
+		const orathan = new CardInGame(byName('Orathan'), NON_ACTIVE_PLAYER).addEnergy(5);
+
+		const scrollOfFire = new CardInGame(byName('Scroll of Fire'), ACTIVE_PLAYER);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const fireChogo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER).addEnergy(2);
+		const lavaArboll = new CardInGame(byName('Lava Arboll'), ACTIVE_PLAYER).addEnergy(5);
+		const balamantPup = new CardInGame(byName('Balamant Pup'), ACTIVE_PLAYER).addEnergy(5);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [fireChogo, scrollOfFire, orathan, balamantPup, lavaArboll], [grega]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([mobis]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: fireChogo,
+			power: fireChogo.card.data.powers[0],
+		};
+
+		gameState.update(powerAction);
+
+		expect(orathan.data.energy).toEqual(3);
+		expect(balamantPup.data.energy).toEqual(3);
+		expect(lavaArboll.data.energy).toEqual(5);
+	});
+});
+
 describe('Book of Ages', () => {
 	it('Lore', () => {
 		const ACTIVE_PLAYER = 40;

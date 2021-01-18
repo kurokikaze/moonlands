@@ -121,6 +121,7 @@ export const EFFECT_TYPE_DAMAGE_STEP = 'effects/damage_step';
 export const EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY = 'effects/return_creature_discarding_energy';
 export const EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY = 'effects/return_creature_returning_energy';
 export const EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE = 'effects/discard_energy_from_creature';
+export const EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES = 'effects/discard_energy_from_creatures';
 export const EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI = 'effects/discard_energy_from_magi';
 export const EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY = 'effects/discard_creature_from_play';
 export const EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC = 'effects/discard_creature_or_relic';

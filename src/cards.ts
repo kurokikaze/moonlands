@@ -140,6 +140,7 @@ import {
 	STATUS_BURROWED,
 	PROPERTY_ABLE_TO_ATTACK,
 	RESTRICTION_STATUS,
+	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -889,7 +890,7 @@ export const cards = [
 		triggerEffects: [
 			{
 				name: 'Pyromancy',
-				text: 'Whenever a Spell or Power you control discards energy from any number of Creatures, discard one additional energy from each of those Creatures.',
+				text: 'Whenever a Spell you control discards energy from any number of Creatures, discard one additional energy from each of those Creatures.',
 				find: {
 					effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
 					conditions: [
@@ -919,7 +920,7 @@ export const cards = [
 			},
 			{
 				name: 'Pyromancy',
-				text: 'Whenever a Spell or Power you control discards energy from any number of Creatures, discard one additional energy from each of those Creatures.',
+				text: 'Whenever a Power you control discards energy from any number of Creatures, discard one additional energy from each of those Creatures.',
 				find: {
 					effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
 					conditions: [
@@ -3447,7 +3448,7 @@ export const cards = [
 						amount: 1,
 					}),
 					effect({
-						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
 						target: '$selected',
 						amount: 1,
 					}),
