@@ -2,7 +2,7 @@ import { Writable } from 'stream';
 import EventEmitter from 'events';
 import nanoid from 'nanoid';
 import { TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, ACTION_PASS, ACTION_PLAY, ACTION_POWER, ACTION_EFFECT, ACTION_SELECT, ACTION_CALCULATE, ACTION_ENTER_PROMPT, ACTION_RESOLVE_PROMPT, ACTION_GET_PROPERTY_VALUE, ACTION_ATTACK, ACTION_PLAYER_WINS, ACTION_CONCEDE, ACTION_PROPERTY, PROPERTY_ID, PROPERTY_TYPE, PROPERTY_CONTROLLER, PROPERTY_ENERGY_COUNT, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, PROPERTY_POWER_COST, PROPERTY_CREATURE_TYPES, PROPERTY_STATUS_WAS_ATTACKED, PROPERTY_STATUS_DEFEATED_CREATURE, PROPERTY_ENERGY_LOSS_THRESHOLD, PROPERTY_STATUS, PROPERTY_ABLE_TO_ATTACK, CALCULATION_SET, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, CALCULATION_HALVE_ROUND_DOWN, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_MAX, SELECTOR_CREATURES, SELECTOR_MAGI, SELECTOR_CREATURES_AND_MAGI, SELECTOR_RELICS, SELECTOR_OWN_MAGI, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_MAGI_OF_REGION, SELECTOR_OPPONENT_ID, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_OWN_SPELLS_IN_HAND, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, SELECTOR_CREATURES_OF_TYPE, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_OTHER_CREATURES_OF_TYPE, SELECTOR_STATUS, SELECTOR_OWN_CREATURES_WITH_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, STATUS_BURROWED, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_RELIC, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_OWN_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_CHOOSE_CARDS, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, NO_PRIORITY, PRIORITY_PRS, PRIORITY_ATTACK, PRIORITY_CREATURES, EFFECT_TYPE_START_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_DRAW, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_PLAY_CREATURE, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_DAMAGE_STEP, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_RELIC_ENTERS_PLAY, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE, EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC, EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_DEFEAT_MAGI, EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY, EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_PAYING_ENERGY_FOR_POWER, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_CREATURE_IS_DEFEATED, // Possibly redundant
-EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_ATTACKER_DEALS_DAMAGE, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_IS_ATTACKED, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_DRAW_REST_OF_CARDS, EFFECT_TYPE_DISCARD_CARDS_FROM_HAND, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_CONDITIONAL, REGION_UNIVERSAL, RESTRICTION_TYPE, RESTRICTION_REGION, RESTRICTION_ENERGY_LESS_THAN_STARTING, RESTRICTION_ENERGY_LESS_THAN, RESTRICTION_CREATURE_TYPE, RESTRICTION_OWN_CREATURE, RESTRICTION_OPPONENT_CREATURE, RESTRICTION_PLAYABLE, RESTRICTION_CREATURE_WAS_ATTACKED, RESTRICTION_MAGI_WITHOUT_CREATURES, RESTRICTION_STATUS, COST_X, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, LOG_ENTRY_PLAY, LOG_ENTRY_DRAW, LOG_ENTRY_CHOOSES_STARTING_CARDS, LOG_ENTRY_POWER_ACTIVATION, LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY, LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY, LOG_ENTRY_TARGETING, LOG_ENTRY_NUMBER_CHOICE, LOG_ENTRY_ATTACK, LOG_ENTRY_CREATURE_ENERGY_LOSS, LOG_ENTRY_MAGI_ENERGY_LOSS, LOG_ENTRY_CREATURE_ENERGY_GAIN, LOG_ENTRY_MAGI_ENERGY_GAIN, LOG_ENTRY_MAGI_DEFEATED, ACTION_NONE, } from './const';
+EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_ATTACKER_DEALS_DAMAGE, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_IS_ATTACKED, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_DRAW_REST_OF_CARDS, EFFECT_TYPE_DISCARD_CARDS_FROM_HAND, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_CONDITIONAL, REGION_UNIVERSAL, RESTRICTION_TYPE, RESTRICTION_REGION, RESTRICTION_ENERGY_LESS_THAN_STARTING, RESTRICTION_ENERGY_LESS_THAN, RESTRICTION_CREATURE_TYPE, RESTRICTION_OWN_CREATURE, RESTRICTION_OPPONENT_CREATURE, RESTRICTION_PLAYABLE, RESTRICTION_CREATURE_WAS_ATTACKED, RESTRICTION_MAGI_WITHOUT_CREATURES, RESTRICTION_STATUS, COST_X, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, LOG_ENTRY_PLAY, LOG_ENTRY_DRAW, LOG_ENTRY_CHOOSES_STARTING_CARDS, LOG_ENTRY_POWER_ACTIVATION, LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY, LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY, LOG_ENTRY_TARGETING, LOG_ENTRY_NUMBER_CHOICE, LOG_ENTRY_ATTACK, LOG_ENTRY_CREATURE_ENERGY_LOSS, LOG_ENTRY_MAGI_ENERGY_LOSS, LOG_ENTRY_CREATURE_ENERGY_GAIN, LOG_ENTRY_MAGI_ENERGY_GAIN, LOG_ENTRY_MAGI_DEFEATED, ACTION_NONE, PROMPT_TYPE_MAY_ABILITY, } from './const';
 import { showAction } from './logAction';
 import clone from './clone';
 import { byName } from './cards';
@@ -14,7 +14,6 @@ const convertCard = (cardInGame) => ({
     card: cardInGame.card.name,
     data: cardInGame.data,
 });
-
 const steps = [
     {
         name: 'Energize',
@@ -65,12 +64,11 @@ const steps = [
         ],
     },
 ];
-
 const defaultState = {
     actions: [],
     savedActions: [],
-    mayEffectActions: [],
     delayedTriggers: [],
+    mayEffectActions: [],
     activePlayer: 0,
     prompt: false,
     promptType: null,
@@ -1040,6 +1038,7 @@ export class State {
         ] : acc, []);
         const triggerEffects = [...cardTriggerEffects, ...this.state.delayedTriggers];
         triggerEffects.forEach(replacer => {
+            // @ts-ignore
             const triggeredId = replacer.id || replacer.self.id; // Not really, but will work for now
             if (this.matchAction(action, replacer.find, replacer.self)) {
                 // Save source to *trigger source* metadata (it's probably empty)
@@ -1050,14 +1049,19 @@ export class State {
                 }
                 // Turn effect-templates into actual effect actions by preparing meta-values				
                 const preparedEffects = replacer.effects.map(effect => {
+                    // @ts-ignore
                     let resultEffect = {
                         type: effect.type || ACTION_EFFECT,
-                        effectType: effect.effectType,
                         generatedBy: action.generatedBy || triggeredId,
                         triggeredId: [triggeredId],
                         triggerSource: replacer.self,
                         player: replacer.self.data.controller,
                     };
+                    // Do we need to replace this? Maybe later
+                    if (effect.type === ACTION_EFFECT) {
+                        // @ts-ignore
+                        resultEffect.effectType = effect.effectType;
+                    }
                     // prepare %-values on created action
                     Object.keys(effect)
                         .filter(key => !['type', 'effectType'].includes(key))
@@ -1067,8 +1071,27 @@ export class State {
                     });
                     return resultEffect;
                 });
-                this.transformIntoActions(...preparedEffects);
+                if (replacer.mayEffect) {
+                    this.state.mayEffectActions = preparedEffects;
+                    this.transformIntoActions({
+                        type: ACTION_ENTER_PROMPT,
+                        promptType: PROMPT_TYPE_MAY_ABILITY,
+                        promptParams: {
+                            effect: {
+                                name: replacer.name,
+                                text: replacer.text,
+                            },
+                        },
+                        generatedBy: replacer.self.id,
+                        player: replacer.self.data.controller,
+                    });
+                }
+                else {
+                    this.transformIntoActions(...preparedEffects);
+                }
+                // @ts-ignore
                 if (replacer.id) {
+                    // @ts-ignore
                     this.removeDelayedTrigger(replacer.id);
                 }
             }
@@ -1471,12 +1494,6 @@ export class State {
                             };
                             break;
                         }
-                        case PROMPT_TYPE_MAY_ABILITY: {
-                            promptParams = {
-                                effect: action.effect,
-                            };
-                            break;
-                        }
                     }
                     this.state = {
                         ...this.state,
@@ -1493,79 +1510,100 @@ export class State {
                     break;
                 }
                 case ACTION_RESOLVE_PROMPT: {
-                    const generatedBy = action.generatedBy || this.state.promptGeneratedBy;
-                    const variable = action.variable || this.state.promptVariable;
-                    let currentActionMetaData = this.state.spellMetaData[generatedBy] || {};
-                    switch (this.state.promptType) {
-                        case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
-                            if (this.state.promptParams.numberOfCards !== action.cards.length) {
-                                return false;
-                            }
-                            if (this.state.promptParams.restrictions) {
-                                const checkResult = this.state.promptParams.restrictions.every(({ type, value }) => this.checkCardsForRestriction(action.cards, type, value));
-                                if (!checkResult) {
+                    if (this.state.promptType === PROMPT_TYPE_MAY_ABILITY) {
+                        const mayEffectActions = this.state.mayEffectActions || [];
+                        const savedActions = this.state.savedActions || [];
+                        const actions = action.useEffect ? [...mayEffectActions, ...savedActions] : savedActions;
+                        this.state = {
+                            ...this.state,
+                            actions,
+                            savedActions: [],
+                            prompt: false,
+                            promptType: null,
+                            promptMessage: null,
+                            promptGeneratedBy: null,
+                            promptVariable: null,
+                            promptParams: {},
+                            spellMetaData: {
+                                ...this.state.spellMetaData,
+                            },
+                        };
+                    }
+                    else {
+                        const generatedBy = action.generatedBy || this.state.promptGeneratedBy;
+                        const variable = action.variable || this.state.promptVariable;
+                        let currentActionMetaData = this.state.spellMetaData[generatedBy] || {};
+                        switch (this.state.promptType) {
+                            case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
+                                if (this.state.promptParams.numberOfCards !== action.cards.length) {
                                     return false;
                                 }
+                                if (this.state.promptParams.restrictions) {
+                                    const checkResult = this.state.promptParams.restrictions.every(({ type, value }) => this.checkCardsForRestriction(action.cards, type, value));
+                                    if (!checkResult) {
+                                        return false;
+                                    }
+                                }
+                                currentActionMetaData[variable || 'targetCards'] = action.cards;
+                                break;
                             }
-                            currentActionMetaData[variable || 'targetCards'] = action.cards;
-                            break;
-                        }
-                        case PROMPT_TYPE_NUMBER:
-                            currentActionMetaData[variable || 'number'] = action.number;
-                            break;
-                        case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE:
-                            if (this.state.promptParams.source.id === action.target.id) {
-                                throw new Error('Got forbidden target on prompt');
+                            case PROMPT_TYPE_NUMBER:
+                                currentActionMetaData[variable || 'number'] = action.number;
+                                break;
+                            case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE:
+                                if (this.state.promptParams.source.id === action.target.id) {
+                                    throw new Error('Got forbidden target on prompt');
+                                }
+                                currentActionMetaData[variable || 'target'] = action.target;
+                                break;
+                            case PROMPT_TYPE_RELIC: {
+                                if (action.target.card.type !== TYPE_RELIC) {
+                                    throw new Error('Got forbidden target on prompt');
+                                }
+                                currentActionMetaData[variable || 'target'] = action.target;
+                                break;
                             }
-                            currentActionMetaData[variable || 'target'] = action.target;
-                            break;
-                        case PROMPT_TYPE_RELIC: {
-                            if (action.target.card.type !== TYPE_RELIC) {
-                                throw new Error('Got forbidden target on prompt');
+                            case PROMPT_TYPE_OWN_SINGLE_CREATURE: {
+                                if (this.state.promptPlayer !== action.target.data.controller) {
+                                    throw new Error('Not-controlled creature supplied to Own Creatures prompt');
+                                }
+                                currentActionMetaData[variable || 'target'] = action.target;
+                                break;
                             }
-                            currentActionMetaData[variable || 'target'] = action.target;
-                            break;
-                        }
-                        case PROMPT_TYPE_OWN_SINGLE_CREATURE: {
-                            if (this.state.promptPlayer !== action.target.data.controller) {
-                                throw new Error('Not-controlled creature supplied to Own Creatures prompt');
+                            case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
+                                currentActionMetaData[variable || 'target'] = action.target;
+                                break;
                             }
-                            currentActionMetaData[variable || 'target'] = action.target;
-                            break;
+                            case PROMPT_TYPE_SINGLE_CREATURE:
+                                currentActionMetaData[variable || 'target'] = action.target;
+                                break;
+                            case PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI:
+                                currentActionMetaData[variable || 'target'] = action.target;
+                                break;
+                            case PROMPT_TYPE_SINGLE_MAGI:
+                                currentActionMetaData[variable || 'targetMagi'] = action.target;
+                                break;
+                            case PROMPT_TYPE_CHOOSE_CARDS:
+                                currentActionMetaData[variable || 'selectedCards'] = action.cards || [];
+                                break;
                         }
-                        case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-                            currentActionMetaData[variable || 'target'] = action.target;
-                            break;
-                        }
-                        case PROMPT_TYPE_SINGLE_CREATURE:
-                            currentActionMetaData[variable || 'target'] = action.target;
-                            break;
-                        case PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI:
-                            currentActionMetaData[variable || 'target'] = action.target;
-                            break;
-                        case PROMPT_TYPE_SINGLE_MAGI:
-                            currentActionMetaData[variable || 'targetMagi'] = action.target;
-                            break;
-                        case PROMPT_TYPE_CHOOSE_CARDS:
-                            currentActionMetaData[variable || 'selectedCards'] = action.cards || [];
-                            break;
+                        const actions = this.state.savedActions || [];
+                        this.state = {
+                            ...this.state,
+                            actions,
+                            savedActions: [],
+                            prompt: false,
+                            promptType: null,
+                            promptMessage: null,
+                            promptGeneratedBy: null,
+                            promptVariable: null,
+                            promptParams: {},
+                            spellMetaData: {
+                                ...this.state.spellMetaData,
+                                [generatedBy]: currentActionMetaData,
+                            },
+                        };
                     }
-                    const actions = this.state.savedActions || [];
-                    this.state = {
-                        ...this.state,
-                        actions,
-                        savedActions: [],
-                        prompt: false,
-                        promptType: null,
-                        promptMessage: null,
-                        promptGeneratedBy: null,
-                        promptVariable: null,
-                        promptParams: {},
-                        spellMetaData: {
-                            ...this.state.spellMetaData,
-                            [generatedBy]: currentActionMetaData,
-                        },
-                    };
                     break;
                 }
                 case ACTION_SELECT: {
