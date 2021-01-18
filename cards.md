@@ -71,6 +71,7 @@ Done: **129** cards out of **190**
 - Motash's Staff
 - Enrich
 - Strag
+- Vellup
 
 # Done, not tested
 
@@ -292,7 +293,6 @@ Done: **129** cards out of **190**
 - Tidal Wave
 - Twee
 - Vaal
-- Vellup
 - Vinoc
 - Vulbor
 - Wellisk
@@ -350,7 +350,6 @@ Done: **129** cards out of **190**
 # May-abilities
 
 - Blu
-- Vellup
 - Stradus
 - Wellisk
 - Orthea

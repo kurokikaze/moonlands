@@ -119,9 +119,10 @@ export type FindType = {
     conditions: ConditionType[];
 };
 
-type TriggerEffectType = {
+export type TriggerEffectType = {
     name?: string;
     text?: string;
+    mayEffect?: boolean;
     find: FindType;
     effects: AnyEffectType[];
 }

@@ -9,4 +9,5 @@ export type ResolvePromptType = {
     player: number;
     cards?: CardInGame[];
     target?: CardInGame;
+    useEffect?: boolean;
 }

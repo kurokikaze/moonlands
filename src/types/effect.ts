@@ -119,6 +119,7 @@ interface ActionEffect {
     player?: number;
     spell?: boolean;
     triggerSource?: CardInGame;
+    triggeredId?: string[];
 }
 
 type PayingEnergyForPowerEffect = ActionEffect & {

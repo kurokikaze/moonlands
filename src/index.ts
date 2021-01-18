@@ -191,6 +191,7 @@ import {
 	LOG_ENTRY_MAGI_ENERGY_GAIN,
 	LOG_ENTRY_MAGI_DEFEATED,
 	ACTION_NONE,
+	PROMPT_TYPE_MAY_ABILITY,
 } from './const';
 
 import {showAction} from './logAction';
@@ -217,7 +218,8 @@ import {
 	StaticAbilityType,
 	OperatorType,
 	ConditionType,
-	FindType
+	FindType,
+	TriggerEffectType
 } from './types';
 
 const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
@@ -299,6 +301,7 @@ const defaultState: StateShape = {
 	actions: [],
 	savedActions: [],
 	delayedTriggers: [],
+	mayEffectActions: [],
 	activePlayer: 0,
 	prompt: false,
 	promptType: null,
@@ -347,6 +350,7 @@ type StateShape = {
 	log: LogEntryType[];
 	actions: AnyEffectType[];
 	savedActions: AnyEffectType[];
+	mayEffectActions: AnyEffectType[];
 	spellMetaData: Record<string, MetadataRecord>;
 	delayedTriggers: Record<string, any>[];
 }
@@ -841,7 +845,7 @@ export class State {
 		}
 	}
 
-	useSelector(selector: SelectorTypeType, player: number, argument): CardInGame[] | number {
+	useSelector(selector: SelectorTypeType, player: number, argument: any): CardInGame[] | number {
 		switch (selector) {
 			case SELECTOR_OWN_CARDS_IN_PLAY: {
 				return this.getZone(ZONE_TYPE_IN_PLAY).cards
@@ -1436,8 +1440,16 @@ export class State {
 			[],
 		);
 
-		const triggerEffects = [...cardTriggerEffects, ...this.state.delayedTriggers];
+		interface WithSelf {
+			self: CardInGame;
+		}
+
+		type TriggerTypeEnhanced = WithSelf & TriggerEffectType;
+
+		const triggerEffects: TriggerTypeEnhanced[] = [...cardTriggerEffects, ...this.state.delayedTriggers];
+
 		triggerEffects.forEach(replacer => {
+			// @ts-ignore
 			const triggeredId = replacer.id || replacer.self.id; // Not really, but will work for now
 			if (this.matchAction(action, replacer.find, replacer.self)) {
 				// Save source to *trigger source* metadata (it's probably empty)
@@ -1448,14 +1460,20 @@ export class State {
 				}
 				// Turn effect-templates into actual effect actions by preparing meta-values				
 				const preparedEffects = replacer.effects.map(effect => {
-					let resultEffect =  {
+					// @ts-ignore
+					let resultEffect: AnyEffectType = {
 						type: effect.type || ACTION_EFFECT,
-						effectType: effect.effectType, // Do we need to replace this? Maybe later
 						generatedBy: action.generatedBy || triggeredId, // Some actions do not have generatedBy (game actions). We still need one though.
 						triggeredId: [triggeredId],
 						triggerSource: replacer.self,
 						player: replacer.self.data.controller,
 					};
+
+					 // Do we need to replace this? Maybe later
+					if (effect.type === ACTION_EFFECT) {
+						// @ts-ignore
+						resultEffect.effectType = effect.effectType;
+					}
 
 					// prepare %-values on created action
 					Object.keys(effect)
@@ -1468,8 +1486,28 @@ export class State {
 					return resultEffect;
 				});
 
-				this.transformIntoActions(...preparedEffects);
+				if (replacer.mayEffect) {
+					this.state.mayEffectActions = preparedEffects;
+
+					this.transformIntoActions({
+						type: ACTION_ENTER_PROMPT,
+						promptType: PROMPT_TYPE_MAY_ABILITY,
+						promptParams: {
+							effect: {
+								name: replacer.name,
+								text: replacer.text,
+							},
+						},
+						generatedBy: replacer.self.id,
+						player: replacer.self.data.controller,
+					});
+				} else {
+					this.transformIntoActions(...preparedEffects);
+				}
+
+				// @ts-ignore
 				if (replacer.id) {
+					// @ts-ignore
 					this.removeDelayedTrigger(replacer.id);
 				}
 			}
@@ -1963,82 +2001,104 @@ export class State {
 					break;
 				}
 				case ACTION_RESOLVE_PROMPT: {
-					const generatedBy = action.generatedBy || this.state.promptGeneratedBy;
-					const variable = action.variable || this.state.promptVariable;
-					let currentActionMetaData = this.state.spellMetaData[generatedBy] || {};
+					if (this.state.promptType === PROMPT_TYPE_MAY_ABILITY) {
+						const mayEffectActions = this.state.mayEffectActions || [];
+						const savedActions = this.state.savedActions || [];
 
-					switch (this.state.promptType) {
-						case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
-							if (this.state.promptParams.numberOfCards !== action.cards.length) {
-								return false;
-							}
-							if (this.state.promptParams.restrictions) {
-								const checkResult = this.state.promptParams.restrictions.every(({type, value}) => 
-									this.checkCardsForRestriction(action.cards, type, value)
-								);
-								if (!checkResult) {
+						const actions = action.useEffect ? [...mayEffectActions, ...savedActions] : savedActions;
+
+						this.state = {
+							...this.state,
+							actions,
+							savedActions: [],
+							prompt: false,
+							promptType: null,
+							promptMessage: null,
+							promptGeneratedBy: null,
+							promptVariable: null,
+							promptParams: {},
+							spellMetaData: {
+								...this.state.spellMetaData,
+							},
+						};
+					} else {
+						const generatedBy = action.generatedBy || this.state.promptGeneratedBy;
+						const variable = action.variable || this.state.promptVariable;
+						let currentActionMetaData = this.state.spellMetaData[generatedBy] || {};
+	
+						switch (this.state.promptType) {
+							case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
+								if (this.state.promptParams.numberOfCards !== action.cards.length) {
 									return false;
 								}
+								if (this.state.promptParams.restrictions) {
+									const checkResult = this.state.promptParams.restrictions.every(({type, value}) => 
+										this.checkCardsForRestriction(action.cards, type, value)
+									);
+									if (!checkResult) {
+										return false;
+									}
+								}
+								currentActionMetaData[variable || 'targetCards'] = action.cards;
+								break;
 							}
-							currentActionMetaData[variable || 'targetCards'] = action.cards;
-							break;
-						}
-						case PROMPT_TYPE_NUMBER:
-							currentActionMetaData[variable || 'number'] = action.number;
-							break;
-						case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE:
-							if (this.state.promptParams.source.id === action.target.id) {
-								throw new Error('Got forbidden target on prompt');
+							case PROMPT_TYPE_NUMBER:
+								currentActionMetaData[variable || 'number'] = action.number;
+								break;
+							case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE:
+								if (this.state.promptParams.source.id === action.target.id) {
+									throw new Error('Got forbidden target on prompt');
+								}
+								currentActionMetaData[variable || 'target'] = action.target;
+								break;
+							case PROMPT_TYPE_RELIC: {
+								if (action.target.card.type !== TYPE_RELIC) {
+									throw new Error('Got forbidden target on prompt');
+								}
+								currentActionMetaData[variable || 'target'] = action.target;
+								break;
 							}
-							currentActionMetaData[variable || 'target'] = action.target;
-							break;
-						case PROMPT_TYPE_RELIC: {
-							if (action.target.card.type !== TYPE_RELIC) {
-								throw new Error('Got forbidden target on prompt');
+							case PROMPT_TYPE_OWN_SINGLE_CREATURE: {
+								if (this.state.promptPlayer !== action.target.data.controller) {
+									throw new Error('Not-controlled creature supplied to Own Creatures prompt');
+								}
+								currentActionMetaData[variable || 'target'] = action.target;
+								break;
 							}
-							currentActionMetaData[variable || 'target'] = action.target;
-							break;
-						}
-						case PROMPT_TYPE_OWN_SINGLE_CREATURE: {
-							if (this.state.promptPlayer !== action.target.data.controller) {
-								throw new Error('Not-controlled creature supplied to Own Creatures prompt');
+							case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
+								currentActionMetaData[variable || 'target'] = action.target;
+								break;
 							}
-							currentActionMetaData[variable || 'target'] = action.target;
-							break;
+							case PROMPT_TYPE_SINGLE_CREATURE:
+								currentActionMetaData[variable || 'target'] = action.target;
+								break;
+							case PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI:
+								currentActionMetaData[variable || 'target'] = action.target;
+								break;
+							case PROMPT_TYPE_SINGLE_MAGI:
+								currentActionMetaData[variable || 'targetMagi'] = action.target;
+								break;
+							case PROMPT_TYPE_CHOOSE_CARDS:
+								currentActionMetaData[variable || 'selectedCards'] = action.cards || [];
+								break;
 						}
-						case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-							currentActionMetaData[variable || 'target'] = action.target;
-							break;
-						}
-						case PROMPT_TYPE_SINGLE_CREATURE:
-							currentActionMetaData[variable || 'target'] = action.target;
-							break;
-						case PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI:
-							currentActionMetaData[variable || 'target'] = action.target;
-							break;
-						case PROMPT_TYPE_SINGLE_MAGI:
-							currentActionMetaData[variable || 'targetMagi'] = action.target;
-							break;
-						case PROMPT_TYPE_CHOOSE_CARDS:
-							currentActionMetaData[variable || 'selectedCards'] = action.cards || [];
-							break;
+						const actions = this.state.savedActions || [];
+						this.state = {
+							...this.state,
+							actions,
+							savedActions: [],
+							prompt: false,
+							promptType: null,
+							promptMessage: null,
+							promptGeneratedBy: null,
+							promptVariable: null,
+							promptParams: {},
+							spellMetaData: {
+								...this.state.spellMetaData,
+								[generatedBy]: currentActionMetaData,
+							},
+						};
 					}
-					const actions = this.state.savedActions || [];
-					this.state = {
-						...this.state,
-						actions,
-						savedActions: [],
-						prompt: false,
-						promptType: null,
-						promptMessage: null,
-						promptGeneratedBy: null,
-						promptVariable: null,
-						promptParams: {},
-						spellMetaData: {
-							...this.state.spellMetaData,
-							[generatedBy]: currentActionMetaData,
-						},
-					};
 					break;
 				}
 				case ACTION_SELECT: {

@@ -12,6 +12,7 @@ export const ACTION_CONCEDE = 'actions/concede';
 export const ACTION_PLAYER_WINS = 'actions/player_wins';
 export const ACTION_NONE = 'actions/none';
 export const ACTION_PROPERTY = 'special_properties/action_property';
+
 export const PROPERTY_ID = 'properties/id';
 export const PROPERTY_TYPE = 'properties/type';
 export const PROPERTY_ENERGY_COUNT = 'properties/energy_count';
@@ -30,6 +31,7 @@ export const PROPERTY_ENERGY_LOSS_THRESHOLD = 'properties/energy_loss_threshold'
 export const PROPERTY_STATUS_DEFEATED_CREATURE = 'properties/status/defeated_creature';
 export const PROPERTY_STATUS_WAS_ATTACKED = 'properties/status/was_attacked';
 export const PROPERTY_STATUS = 'properties/status';
+
 export const SELECTOR_OPPONENT_ID = 'selectors/opponent_id'; // THIS WILL RETURN ID OF PLAYER'S OPPONENT
 export const SELECTOR_CREATURES = 'selectors/creatures';
 export const SELECTOR_MAGI = 'selectors/magi';
@@ -55,8 +57,10 @@ export const SELECTOR_OWN_SPELLS_IN_HAND = 'selectors/own_spells_in_hand';
 export const SELECTOR_OWN_CREATURES_WITH_STATUS = 'selectors/own_creatures_with_status';
 export const SELECTOR_CREATURES_WITHOUT_STATUS = 'selectors/creatures_without_status';
 export const SELECTOR_STATUS = 'selectors/status';
+
 export const STATUS_BURROWED = 'status/burrowed';
 export const STATUS_FROZEN = 'status/frozen';
+
 export const CALCULATION_SET = 'calculations/set';
 export const CALCULATION_DOUBLE = 'calculations/double';
 export const CALCULATION_ADD = 'calculations/add';
@@ -66,6 +70,7 @@ export const CALCULATION_HALVE_ROUND_DOWN = 'calculations/halve_round_down';
 export const CALCULATION_HALVE_ROUND_UP = 'calculations/halve_round_up';
 export const CALCULATION_MIN = 'calculations/min';
 export const CALCULATION_MAX = 'calculations/max';
+
 export const REGION_ARDERIAL = 'regions/arderial';
 export const REGION_CALD = 'regions/cald';
 export const REGION_NAROOM = 'regions/naroom';
@@ -77,6 +82,7 @@ export const REGION_BOGRATH = 'regions/bograth';
 // export const REGION_PARADWYN = 'regions/paradwyn';
 // export const REGION_D_RESH = 'regions/d_resh';
 export const REGION_UNIVERSAL = 'regions/universal';
+
 export const EFFECT_TYPE_NONE = 'effects/none';
 export const EFFECT_TYPE_DRAW = 'effects/draw';
 export const EFFECT_TYPE_START_STEP = 'effects/start_step';
@@ -134,10 +140,12 @@ export const EFFECT_TYPE_DRAW_REST_OF_CARDS = 'effects/draw_rest_of_cards';
 export const EFFECT_TYPE_DISCARD_CARDS_FROM_HAND = 'effects/discard_cards_from_hand';
 export const EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE = 'effects/forbid_attack_to_creature';
 export const EFFECT_TYPE_ADD_DELAYED_TRIGGER = 'effects/add_delayed_trigger';
+
 export const NO_PRIORITY = 0;
 export const PRIORITY_PRS = 1;
 export const PRIORITY_ATTACK = 2;
 export const PRIORITY_CREATURES = 3;
+
 export const PROMPT_TYPE_CHOOSE_CARDS = 'prompt/choose_cards';
 export const PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE = 'prompt/choose_n_cards_from_zone';
 export const PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE = 'prompt/any_creature_except_source';
@@ -149,7 +157,9 @@ export const PROMPT_TYPE_NUMBER_OF_CREATURES = 'prompt/number_of_creatures';
 export const PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED = 'prompt/number_of_creatures_filtered';
 export const PROMPT_TYPE_SINGLE_MAGI = 'prompt/magi';
 export const PROMPT_TYPE_RELIC = 'prompt/relic';
+export const PROMPT_TYPE_MAY_ABILITY = 'prompt/may_ability';
 export const PROMPT_TYPE_NUMBER = 'prompt/number';
+
 export const RESTRICTION_TYPE = 'restrictions/type';
 export const RESTRICTION_ENERGY_LESS_THAN_STARTING = 'restrictions/energy_less_than_starting';
 export const RESTRICTION_ENERGY_LESS_THAN = 'restrictions/energy_less_than';
@@ -161,11 +171,16 @@ export const RESTRICTION_PLAYABLE = 'restrictions/card_playable';
 export const RESTRICTION_CREATURE_WAS_ATTACKED = 'restrictions/creature_was_attacked';
 export const RESTRICTION_MAGI_WITHOUT_CREATURES = 'restrictions/magi_without_creatures';
 export const RESTRICTION_STATUS = 'restrictions/status';
+
 export const TYPE_CREATURE = 'types/creature';
 export const TYPE_MAGI = 'types/magi';
 export const TYPE_RELIC = 'types/relic';
 export const TYPE_SPELL = 'types/spell';
+
+export const TRIGGER_SPECIAL_CAST = 'triggers/special/cast';
+
 export const COST_X = 'X';
+
 export const ZONE_TYPE_ACTIVE_MAGI = 'zones/active_magi';
 export const ZONE_TYPE_MAGI_PILE = 'zones/magi_pile';
 export const ZONE_TYPE_DEFEATED_MAGI = 'zones/defeated_magi';
@@ -173,6 +188,7 @@ export const ZONE_TYPE_DECK = 'zones/deck';
 export const ZONE_TYPE_IN_PLAY = 'zones/in_play';
 export const ZONE_TYPE_DISCARD = 'zones/discard';
 export const ZONE_TYPE_HAND = 'zones/hand';
+
 export const LOG_ENTRY_PLAY = 'log_entry/play';
 export const LOG_ENTRY_DRAW = 'log_entry/draw';
 export const LOG_ENTRY_CHOOSES_STARTING_CARDS = 'log_entry/choose_starting_cards';

@@ -2708,6 +2708,120 @@ describe('Scroll of Fire', () => {
 	});
 });
 
+describe('Vellup', () => {
+	it('Flock (use ability)', () => {
+		const ACTIVE_PLAYER = 40;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const jaela = new CardInGame(byName('Jaela'), ACTIVE_PLAYER).addEnergy(6);
+
+		const vellup = new CardInGame(byName('Vellup'), ACTIVE_PLAYER);
+		const vellupTwo = new CardInGame(byName('Vellup'), ACTIVE_PLAYER);
+
+		const xyxElder = new CardInGame(byName('Xyx Elder'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [], [jaela]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_CREATURES,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([vellup]);
+		gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).add([vellupTwo, xyxElder]);
+
+		const playAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: vellup,
+				player: ACTIVE_PLAYER,
+			}
+		};
+		
+		gameState.update(playAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1);
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Vellup');
+
+		const newVellup = gameState.getZone(ZONE_TYPE_IN_PLAY).card;
+
+		const allowEffect = {
+			type: ACTION_RESOLVE_PROMPT,
+			useEffect: true,
+			generatedBy: newVellup.id,
+		};
+
+		gameState.update(allowEffect);
+
+		expect(gameState.state.prompt).toEqual(true); // Game is in prompt state
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE);
+
+		const selectCardAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			cards: [vellupTwo],
+			generatedBy: vellup.id,
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(selectCardAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1);
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Vellup');
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(1);
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).card.card.name).toEqual('Vellup');
+	});
+
+	it('Flock (use ability)', () => {
+		const ACTIVE_PLAYER = 40;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const jaela = new CardInGame(byName('Jaela'), ACTIVE_PLAYER).addEnergy(6);
+
+		const vellup = new CardInGame(byName('Vellup'), ACTIVE_PLAYER);
+		const vellupTwo = new CardInGame(byName('Vellup'), ACTIVE_PLAYER);
+
+		const xyxElder = new CardInGame(byName('Xyx Elder'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [], [jaela]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_CREATURES,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([vellup]);
+		gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).add([vellupTwo, xyxElder]);
+
+		const playAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: vellup,
+				player: ACTIVE_PLAYER,
+			}
+		};
+		
+		gameState.update(playAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1);
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Vellup');
+		
+		const denyEffect = {
+			type: ACTION_RESOLVE_PROMPT,
+			useEffect: false,
+			generatedBy: vellup.id,
+		};
+
+		gameState.update(denyEffect);
+
+		expect(gameState.state.prompt).toEqual(false);
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1);
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Vellup');
+	});
+});
+
 describe('Book of Ages', () => {
 	it('Lore', () => {
 		const ACTIVE_PLAYER = 40;

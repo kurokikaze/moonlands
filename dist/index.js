@@ -14,6 +14,7 @@ const convertCard = (cardInGame) => ({
     card: cardInGame.card.name,
     data: cardInGame.data,
 });
+
 const steps = [
     {
         name: 'Energize',
@@ -64,9 +65,11 @@ const steps = [
         ],
     },
 ];
+
 const defaultState = {
     actions: [],
     savedActions: [],
+    mayEffectActions: [],
     delayedTriggers: [],
     activePlayer: 0,
     prompt: false,
@@ -1465,6 +1468,12 @@ export class State {
                             promptParams = {
                                 min: this.getMetaValue(action.min, action.generatedBy),
                                 max: this.getMetaValue(action.max, action.generatedBy),
+                            };
+                            break;
+                        }
+                        case PROMPT_TYPE_MAY_ABILITY: {
+                            promptParams = {
+                                effect: action.effect,
                             };
                             break;
                         }

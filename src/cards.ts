@@ -957,6 +957,40 @@ export const cards = [
 			},
 		],
 	}),
+	new Card('Vellup', TYPE_CREATURE, REGION_ARDERIAL, 2, {
+		triggerEffects: [
+			{
+				name: 'Flock',
+				text: 'When you play Vellup, you may search your deck for another Vellup. Show it to your opponent and put it into your hand. Shuffle the deck.',
+				mayEffect: true,
+				find: {
+					effectType: EFFECT_TYPE_CREATURE_ENTERS_PLAY,
+					conditions: [
+						CONDITION_TARGET_IS_SELF,
+					],
+				},
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+						zone: ZONE_TYPE_DECK,
+						zoneOwner: '$player',
+						restrictions: [{
+							type: RESTRICTION_CREATURE_TYPE,
+							value: 'Vellup',
+						}],
+						numberOfCards: 1,
+						variable: 'targetCard',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+						sourceZone: ZONE_TYPE_DECK,
+						destinationZone: ZONE_TYPE_HAND,
+						target: '$targetCard',
+					}),
+				],
+			},
+		],
+	}),
 	new Card('Orothean Belt', TYPE_RELIC, REGION_OROTHE, 0, {
 		triggerEffects: [
 			{

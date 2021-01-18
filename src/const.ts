@@ -158,6 +158,7 @@ export const PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED = 'prompt/number_of_creatu
 export const PROMPT_TYPE_SINGLE_MAGI = 'prompt/magi';
 export const PROMPT_TYPE_RELIC = 'prompt/relic';
 export const PROMPT_TYPE_NUMBER = 'prompt/number';
+export const PROMPT_TYPE_MAY_ABILITY = 'prompt/may_ability';
 
 export const RESTRICTION_TYPE ='restrictions/type';
 export const RESTRICTION_ENERGY_LESS_THAN_STARTING = 'restrictions/energy_less_than_starting';
