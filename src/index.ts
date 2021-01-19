@@ -219,7 +219,8 @@ import {
 	OperatorType,
 	ConditionType,
 	FindType,
-	TriggerEffectType
+	TriggerEffectType,
+	ReplacementEffectType
 } from './types';
 import Card from './classes/Card';
 
@@ -303,6 +304,7 @@ const defaultState: StateShape = {
 	savedActions: [],
 	delayedTriggers: [],
 	mayEffectActions: [],
+	fallbackActions: [],
 	activePlayer: 0,
 	prompt: false,
 	promptType: null,
@@ -351,7 +353,8 @@ type StateShape = {
 	log: LogEntryType[];
 	actions: AnyEffectType[];
 	savedActions: AnyEffectType[];
-	mayEffectActions: AnyEffectType[];
+	mayEffectActions: AnyEffectType[]; // Actions to apply if we allow may effect or may effect replacement
+	fallbackActions: AnyEffectType[]; // Actions to apply if we deny may effect replacement
 	spellMetaData: Record<string, MetadataRecord>;
 	delayedTriggers: Record<string, any>[];
 }
@@ -1311,16 +1314,22 @@ export class State {
 		return property ? this.getMetaValue(action[object], action.generatedBy) : object;
 	}
 
-	replaceByReplacementEffect(action) {
+	replaceByReplacementEffect(action: AnyEffectType) {
 		const PLAYER_ONE = this.players[0];
 		const PLAYER_TWO = this.players[1];
+
 		const allZonesCards = [
 			...(this.getZone(ZONE_TYPE_IN_PLAY) || {cards: []}).cards,
 			...(this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE)).cards,
 			...(this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO)).cards,
 		];
 
-		const zoneReplacements = allZonesCards.reduce(
+		interface WithSelf {
+			self: CardInGame;
+		}
+
+		type ReplacementEffectEnhanced = ReplacementEffectType & WithSelf;
+		const zoneReplacements: ReplacementEffectEnhanced[] = allZonesCards.reduce(
 			(acc, cardInPlay) => cardInPlay.card.data.replacementEffects ? [
 				...acc,
 				...cardInPlay.card.data.replacementEffects.map(effect => ({...effect, self: cardInPlay})),
@@ -1332,15 +1341,17 @@ export class State {
 		let appliedReplacerId = null;
 		let appliedReplacerSelf = null;
 		let replaceWith = null;
+		let foundReplacer: ReplacementEffectEnhanced;
 
 		zoneReplacements.forEach(replacer => {
 			const replacerId = replacer.self.id; // Not really, but will work for now
             
-			if (action.replacedBy && action.replacedBy.includes(replacerId)) {
+			if ('replacedBy' in action && action.replacedBy.includes(replacerId)) {
 				return false;
 			}
 
 			if (this.matchAction(action, replacer.find, replacer.self)) {
+				foundReplacer = replacer;
 				replacementFound = true;
 				appliedReplacerSelf = replacer.self;
 				appliedReplacerId = replacerId;
@@ -1348,7 +1359,7 @@ export class State {
 			}
 		});
 
-		const previouslyReplacedBy = action.replacedBy || [];
+		const previouslyReplacedBy = 'replacedBy' in action ? action.replacedBy : [];
 
 		if (replacementFound) {
 			let resultEffect = {
@@ -1369,7 +1380,28 @@ export class State {
 					resultEffect[key] = value;
 				});
 
-			return resultEffect;
+			if (foundReplacer.mayEffect) {
+				this.state.mayEffectActions = [resultEffect];
+				this.state.fallbackActions = [{
+					...action,
+					replacedBy:	('replacedBy' in action) ? [...action.replacedBy, appliedReplacerId] : [appliedReplacerId],
+				}];
+
+				return {
+					type: ACTION_ENTER_PROMPT,
+					promptType: PROMPT_TYPE_MAY_ABILITY,
+					promptParams: {
+						effect: {
+							name: foundReplacer.name,
+							text: foundReplacer.text,
+						},
+					},
+					generatedBy: appliedReplacerId,
+					player: appliedReplacerSelf.data.controller,
+				};
+			} else {
+				return resultEffect;
+			}
 		}
 
 		return action;
@@ -2019,14 +2051,17 @@ export class State {
 				case ACTION_RESOLVE_PROMPT: {
 					if (this.state.promptType === PROMPT_TYPE_MAY_ABILITY) {
 						const mayEffectActions = this.state.mayEffectActions || [];
+						const fallbackActions = this.state.fallbackActions || [];
 						const savedActions = this.state.savedActions || [];
 
-						const actions = action.useEffect ? [...mayEffectActions, ...savedActions] : savedActions;
+						const actions = action.useEffect ? [...mayEffectActions, ...savedActions] : [...fallbackActions, ...savedActions];
 
 						this.state = {
 							...this.state,
 							actions,
 							savedActions: [],
+							mayEffectActions: [],
+							fallbackActions: [],
 							prompt: false,
 							promptType: null,
 							promptMessage: null,
@@ -3333,11 +3368,11 @@ export class State {
 							// No cards use this effect now, but some may later
 							// Also, multitarget EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE was probably a bad idea from the start
 							const multiTarget: CardInGame | CardInGame[] = this.getMetaValue(action.target, action.generatedBy);
+							var amount = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
+
 							oneOrSeveral(
 								multiTarget,
 								target => {
-									var amount = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
-
 									this.transformIntoActions({
 										type: ACTION_EFFECT,
 										effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
@@ -3347,10 +3382,12 @@ export class State {
 										spell: action.spell,
 										source: action.source,
 										attack: action.attack,
+										player: action.player,
 										generatedBy: action.generatedBy,
 									});
 								},
 							);
+							break;
 						}
 						case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
 							const multiTarget: CardInGame | CardInGame[] = this.getMetaValue(action.target, action.generatedBy);

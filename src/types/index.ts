@@ -67,6 +67,7 @@ export type CardData = {
 
 export interface EnrichedAction {
     source?: CardInGame;
+    replacedBy?: string[];
 }
 
 type PowerType = {
@@ -112,6 +113,7 @@ export type PromptType = PromptParams & {
 
     },
     generatedBy?: string;
+    replacedBy?: string[];
 }
 
 export type FindType = {
@@ -127,11 +129,12 @@ export type TriggerEffectType = {
     effects: AnyEffectType[];
 }
 
-type ReplacementEffectType = {
+export type ReplacementEffectType = {
     name?: string;
     text?: string;
     find: FindType;
-    replaceWith: ReplacingEffectType | EffectType;   
+    replaceWith: ReplacingEffectType | EffectType;
+    mayEffect?: boolean;
 }
 
 export type RestrictionType = typeof RESTRICTION_CREATURE_WAS_ATTACKED | 

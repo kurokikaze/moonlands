@@ -1,4 +1,4 @@
-Done: **129** cards out of **190**
+Done: **131** card out of **190**
 
 # Done, tested
 
@@ -72,6 +72,8 @@ Done: **129** cards out of **190**
 - Enrich
 - Strag
 - Vellup
+- Orpus
+- Orathan
 
 # Done, not tested
 
@@ -98,7 +100,6 @@ Done: **129** cards out of **190**
 - Lasada
 - Lava Arboll
 - Leaf Hyren
-- Orathan
 - Orwin's Staff
 - Paralit
 - Pharan
@@ -353,7 +354,6 @@ Done: **129** cards out of **190**
 - Stradus
 - Wellisk
 - Orthea
-- Orpus
 - Relic Mirror
 - Fossik
 

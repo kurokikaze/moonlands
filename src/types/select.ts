@@ -68,6 +68,7 @@ interface SelectAction {
     player?: number;
     variable?: string;
     generatedBy?: string;
+    replacedBy?: string[];
 }
 
 // Variable can always be specified

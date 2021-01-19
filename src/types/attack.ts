@@ -16,6 +16,7 @@ import CardInGame from "../classes/CardInGame";
 interface AttackEffectAction {
     type: typeof ACTION_EFFECT;
     generatedBy: string; // Damage actions are always from something to something, they always has `generatedBy`
+    replacedBy?: string[];
 }
 
 type AttackType = {
@@ -26,6 +27,7 @@ type AttackType = {
     targetAtStart: CardInGame;
     additionalAttackers: CardInGame[];
     generatedBy?: string;
+    replacedBy?: string[];
 }
 
 type CreatureAttacksEffect = AttackEffectAction & {
@@ -70,8 +72,7 @@ export type AttackerDealsDamageEffect = AttackEffectAction & {
     amount: number;
 }
 
-export type DefenderDealsDamageEffect = {
-    type: typeof ACTION_EFFECT,
+export type DefenderDealsDamageEffect = AttackEffectAction & {
     effectType: typeof EFFECT_TYPE_DEFENDER_DEALS_DAMAGE,
     source: CardInGame;
     sourceAtStart: CardInGame;
@@ -80,7 +81,6 @@ export type DefenderDealsDamageEffect = {
     targetAtStart: CardInGame;
     sourceBeforeDamage: CardInGame;
     targetBeforeDamage: CardInGame;
-    generatedBy: string;
 }
 
 type DealDamageEffect = AttackEffectAction & {

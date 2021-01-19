@@ -10,4 +10,5 @@ export type ResolvePromptType = {
     cards?: CardInGame[];
     target?: CardInGame;
     useEffect?: boolean;
+    replacedBy?: string[];
 }

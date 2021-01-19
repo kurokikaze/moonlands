@@ -1213,7 +1213,7 @@ export const cards = [
                         region: REGION_ARDERIAL,
                     }),
                     effect({
-                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
                         target: '$selected',
                         amount: 2,
                     }),
@@ -1372,7 +1372,7 @@ export const cards = [
                         region: REGION_OROTHE,
                     }),
                     effect({
-                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
                         target: '$selected',
                         amount: 3,
                     }),
@@ -1561,7 +1561,7 @@ export const cards = [
                         creatureType: 'Xyx',
                     }),
                     effect({
-                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
                         target: '$selected',
                         amount: '$roll_result',
                     }),
@@ -1839,7 +1839,7 @@ export const cards = [
                 status: STATUS_BURROWED,
             }),
             effect({
-                effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
                 target: '$selected',
                 amount: 1,
             }),
@@ -2254,7 +2254,7 @@ export const cards = [
                         region: REGION_CALD,
                     }),
                     effect({
-                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
                         target: '$selected',
                         amount: 1,
                     }),
@@ -2362,7 +2362,7 @@ export const cards = [
                         region: REGION_ARDERIAL,
                     }),
                     effect({
-                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
                         target: '$selected',
                         amount: 1,
                     }),
@@ -2431,7 +2431,7 @@ export const cards = [
                                 selector: SELECTOR_OWN_CREATURES,
                             }),
                             effect({
-                                effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                                effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
                                 target: '$selected',
                                 amount: 1,
                             }),
@@ -2890,7 +2890,7 @@ export const cards = [
                         selector: SELECTOR_CREATURES,
                     }),
                     effect({
-                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
                         target: '$selected',
                         amount: 1,
                     }),
@@ -3196,7 +3196,7 @@ export const cards = [
                 region: REGION_OROTHE,
             }),
             effect({
-                effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
                 target: '$selected',
                 amount: 2,
             }),
@@ -3623,7 +3623,7 @@ export const cards = [
                 region: REGION_UNDERNEATH,
             }),
             effect({
-                effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
                 target: '$selected',
                 amount: 1,
             }),
@@ -3641,7 +3641,7 @@ export const cards = [
                 region: REGION_ARDERIAL,
             }),
             effect({
-                effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
                 target: '$selected',
                 amount: 1,
             }),
@@ -3765,6 +3765,39 @@ export const cards = [
                         amount: 1,
                     }),
                 ],
+            },
+        ],
+    }),
+    new Card('Orpus', TYPE_CREATURE, REGION_OROTHE, 3, {
+        replacementEffects: [
+            {
+                name: 'Relic Guard',
+                text: 'If your opponent discards one of your Relics from play, you may discard one energy from Orpus instead of discarding the Relic.',
+                find: {
+                    effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
+                    conditions: [
+                        {
+                            objectOne: 'source',
+                            propertyOne: PROPERTY_CONTROLLER,
+                            comparator: '!=',
+                            objectTwo: 'self',
+                            propertyTwo: PROPERTY_CONTROLLER,
+                        },
+                        {
+                            objectOne: 'target',
+                            propertyOne: PROPERTY_CONTROLLER,
+                            comparator: '=',
+                            objectTwo: 'self',
+                            propertyTwo: PROPERTY_CONTROLLER,
+                        }
+                    ],
+                },
+                replaceWith: {
+                    effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                    target: '%self',
+                    amount: 1,
+                },
+                mayEffect: true,
             },
         ],
     }),

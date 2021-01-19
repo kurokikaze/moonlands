@@ -19,6 +19,7 @@ import {
 	PROMPT_TYPE_SINGLE_CREATURE,
 	PROMPT_TYPE_SINGLE_MAGI,
 	PROMPT_TYPE_NUMBER,
+	PROMPT_TYPE_RELIC,
 	PROMPT_TYPE_MAY_ABILITY,
 
 	RESTRICTION_REGION,
@@ -400,6 +401,133 @@ describe('Arbolit', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(pharan.id).data.energy).toEqual(7, 'Pharan now has less than 7 energy');
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'One card in Player 1 discard');
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Arbolit', 'Card in Player 1 discard is Arbolit');
+	});
+});
+
+describe('Orpus', () => {
+	it('Relic Guard (use effect)', () => {
+		const ACTIVE_PLAYER = 40;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const ebylon = new CardInGame(byName('Ebylon'), ACTIVE_PLAYER).addEnergy(6);
+		const bookOfAges = new CardInGame(byName('Book of Ages'), NON_ACTIVE_PLAYER);
+		const orpus = new CardInGame(byName('Orpus'), NON_ACTIVE_PLAYER).addEnergy(3);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [bookOfAges, orpus], [ebylon]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: ebylon,
+			power: ebylon.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_RELIC);
+		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER);
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: bookOfAges,
+			generatedBy: ebylon.id,
+		};
+
+		gameState.update(targetingAction);
+
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_MAY_ABILITY);
+		expect(gameState.state.promptPlayer).toEqual(NON_ACTIVE_PLAYER);
+
+		const allowReplaceEffect = {
+			type: ACTION_RESOLVE_PROMPT,
+			useEffect: true,
+			generatedBy: orpus.id,
+		};
+
+		gameState.update(allowReplaceEffect);
+
+		expect(gameState.state.prompt).toEqual(false);
+
+		expect(gameState.state.savedActions).toHaveLength(0);
+		expect(gameState.state.mayEffectActions).toHaveLength(0);
+		expect(gameState.state.fallbackActions).toHaveLength(0);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2);
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(0);
+		expect(orpus.data.energy).toEqual(2);
+	});
+
+	it('Relic Guard (do not use effect)', () => {
+		const ACTIVE_PLAYER = 40;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const ebylon = new CardInGame(byName('Ebylon'), ACTIVE_PLAYER).addEnergy(6);
+		const bookOfAges = new CardInGame(byName('Book of Ages'), NON_ACTIVE_PLAYER);
+		const orpus = new CardInGame(byName('Orpus'), NON_ACTIVE_PLAYER).addEnergy(3);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [bookOfAges, orpus], [ebylon]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: ebylon,
+			power: ebylon.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_RELIC);
+		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER);
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: bookOfAges,
+			generatedBy: ebylon.id,
+		};
+
+		gameState.update(targetingAction);
+
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_MAY_ABILITY);
+		expect(gameState.state.promptPlayer).toEqual(NON_ACTIVE_PLAYER);
+
+		const denyReplaceEffect = {
+			type: ACTION_RESOLVE_PROMPT,
+			useEffect: false,
+			generatedBy: orpus.id,
+		};
+
+		gameState.update(denyReplaceEffect);
+
+		expect(gameState.state.prompt).toEqual(false);
+
+		expect(gameState.state.savedActions).toHaveLength(0);
+		expect(gameState.state.mayEffectActions).toHaveLength(0);
+		expect(gameState.state.fallbackActions).toHaveLength(0);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1);
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1);
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Book of Ages');
+		expect(orpus.data.energy).toEqual(3);
 	});
 });
 
@@ -4040,6 +4168,7 @@ describe('Xyx Elder', () => {
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
 		});
+
 		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
