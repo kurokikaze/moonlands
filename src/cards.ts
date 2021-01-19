@@ -1210,6 +1210,7 @@ export const cards = [
 					prompt({
 						promptType: PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 						variable: 'target',
+						source: '%self',
 					}),
 					effect({
 						effectType: EFFECT_TYPE_ATTACK,

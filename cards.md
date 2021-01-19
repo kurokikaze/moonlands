@@ -76,6 +76,7 @@ Done: **133** cards out of **190**
 - Orathan
 - Wellisk
 - Fire Chogo
+- Gum-Gum
 
 # Done, not tested
 
@@ -139,7 +140,6 @@ Done: **133** cards out of **190**
 - Carnivorous Cave
 - Gloves of Crystal
 - Stradus
-- Gum-Gum
 
 # Possible sample decks:
 

@@ -1348,6 +1348,118 @@ describe('Cave Rudwot', () => {
 	});
 });
 
+describe('Gum-Gum', () => {
+	it('Slide (use effect)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER).addEnergy(4);
+		const gumGum = new CardInGame(byName('Gum-Gum'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const mushroomHyren = new CardInGame(byName('Mushroom Hyren'), NON_ACTIVE_PLAYER).addEnergy(7);
+
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([gumGum, weebo, mushroomHyren]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: ACTION_ATTACK,
+			source: weebo,
+			target: gumGum,
+		};
+        
+		gameState.update(attackAction);
+
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_MAY_ABILITY);
+
+		const allowReplaceEffect = {
+			type: ACTION_RESOLVE_PROMPT,
+			useEffect: true,
+			generatedBy: gumGum.id,
+		};
+
+		gameState.update(allowReplaceEffect);
+
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE);
+
+		const slideTargetEffect = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: mushroomHyren,
+			generatedBy: gameState.state.promptGeneratedBy,
+		};
+
+		gameState.update(slideTargetEffect);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2);
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1);
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Weebo');
+		expect(mushroomHyren.data.energy).toEqual(3);
+		expect(gumGum.data.energy).toEqual(2);
+	});
+
+	it('Slide (do not use effect)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER).addEnergy(4);
+		const gumGum = new CardInGame(byName('Gum-Gum'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const mushroomHyren = new CardInGame(byName('Mushroom Hyren'), NON_ACTIVE_PLAYER).addEnergy(7);
+
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([gumGum, weebo, mushroomHyren]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: ACTION_ATTACK,
+			source: weebo,
+			target: gumGum,
+		};
+        
+		gameState.update(attackAction);
+
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_MAY_ABILITY);
+
+		const allowReplaceEffect = {
+			type: ACTION_RESOLVE_PROMPT,
+			useEffect: false,
+			generatedBy: gumGum.id,
+		};
+
+		gameState.update(allowReplaceEffect);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2);
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(0);
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1);
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Gum-Gum');
+		expect(mushroomHyren.data.energy).toEqual(7);
+		expect(weebo.data.energy).toEqual(2);
+	});
+});
+
 describe('Furok', () => {
 	it('Retrieve', () => {
 		const ACTIVE_PLAYER = 0;
