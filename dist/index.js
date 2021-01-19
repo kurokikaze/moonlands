@@ -980,6 +980,7 @@ export class State {
                         appliedReplacerId,
                     ],
                     generatedBy: action.generatedBy,
+                    player: appliedReplacerSelf.data.controller,
                 };
                 // prepare %-values on created action
                 Object.keys(replacementEffect)
