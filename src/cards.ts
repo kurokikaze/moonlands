@@ -3965,6 +3965,34 @@ export const cards = [
 			},
 		],
 	}),
+	new Card('Wellisk', TYPE_CREATURE, REGION_OROTHE, 3, {
+		replacementEffects: [
+			{
+				name: 'Dream Barrier',
+				text: 'Immediately after a Creature is played, you may discard Wellisk from play. If you do so, also discard the Creature played and all energy used to play the Creature.',
+				find: {
+					effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
+					conditions: [
+						{
+							objectOne: 'source',
+							propertyOne: PROPERTY_ID,
+							comparator: '!=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_ID,
+						}
+					],
+				},
+				replaceWith: [{
+					effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+					target: '%self',
+				}, {
+					effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+					target: '%target',
+				}],
+				mayEffect: true,
+			},
+		],
+	}),
 	new Card('Grow', TYPE_SPELL, REGION_NAROOM, 3, {
 		text: 'Roll a die. Choose a Creature. Add energy equal to the die roll to the chosen Creature.',
 		effects: [

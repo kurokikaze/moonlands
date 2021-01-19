@@ -1,4 +1,4 @@
-Done: **131** card out of **190**
+Done: **132** cards out of **190**
 
 # Done, tested
 
@@ -74,6 +74,8 @@ Done: **131** card out of **190**
 - Vellup
 - Orpus
 - Orathan
+- Wellisk
+- Fire Chogo
 
 # Done, not tested
 
@@ -87,7 +89,6 @@ Done: **131** card out of **190**
 - Deep Hyren
 - Ebylon
 - Fire Ball
-- Fire Chogo
 - Fire Flow
 - Fire Grag
 - Giant Korrit
@@ -352,7 +353,6 @@ Done: **131** card out of **190**
 
 - Blu
 - Stradus
-- Wellisk
 - Orthea
 - Relic Mirror
 - Fossik

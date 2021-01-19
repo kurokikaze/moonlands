@@ -966,51 +966,54 @@ export class State {
                 replacementFound = true;
                 appliedReplacerSelf = replacer.self;
                 appliedReplacerId = replacerId;
-                replaceWith = replacer.replaceWith;
+                replaceWith = (replacer.replaceWith instanceof Array) ? replacer.replaceWith : [replacer.replaceWith];
             }
         });
         const previouslyReplacedBy = 'replacedBy' in action ? action.replacedBy : [];
         if (replacementFound) {
-            let resultEffect = {
-                type: ACTION_EFFECT,
-                ...replaceWith,
-                replacedBy: [
-                    ...previouslyReplacedBy,
-                    appliedReplacerId,
-                ],
-                generatedBy: action.generatedBy,
-            };
-            // prepare %-values on created action
-            Object.keys(replaceWith)
-                .filter(key => !['type', 'effectType'].includes(key))
-                .forEach(key => {
-                const value = this.prepareMetaValue(replaceWith[key], action, appliedReplacerSelf, action.generatedBy);
-                resultEffect[key] = value;
+            const resultEffects = replaceWith.map((replacementEffect) => {
+                let resultEffect = {
+                    type: ACTION_EFFECT,
+                    ...replacementEffect,
+                    replacedBy: [
+                        ...previouslyReplacedBy,
+                        appliedReplacerId,
+                    ],
+                    generatedBy: action.generatedBy,
+                };
+                // prepare %-values on created action
+                Object.keys(replacementEffect)
+                    .filter(key => !['type', 'effectType'].includes(key))
+                    .forEach(key => {
+                    const value = this.prepareMetaValue(replacementEffect[key], action, appliedReplacerSelf, action.generatedBy);
+                    resultEffect[key] = value;
+                });
+                return resultEffect;
             });
             if (foundReplacer.mayEffect) {
-                this.state.mayEffectActions = [resultEffect];
+                this.state.mayEffectActions = resultEffects;
                 this.state.fallbackActions = [{
                         ...action,
                         replacedBy: ('replacedBy' in action) ? [...action.replacedBy, appliedReplacerId] : [appliedReplacerId],
                     }];
-                return {
-                    type: ACTION_ENTER_PROMPT,
-                    promptType: PROMPT_TYPE_MAY_ABILITY,
-                    promptParams: {
-                        effect: {
-                            name: foundReplacer.name,
-                            text: foundReplacer.text,
+                return [{
+                        type: ACTION_ENTER_PROMPT,
+                        promptType: PROMPT_TYPE_MAY_ABILITY,
+                        promptParams: {
+                            effect: {
+                                name: foundReplacer.name,
+                                text: foundReplacer.text,
+                            },
                         },
-                    },
-                    generatedBy: appliedReplacerId,
-                    player: appliedReplacerSelf.data.controller,
-                };
+                        generatedBy: appliedReplacerId,
+                        player: appliedReplacerSelf.data.controller,
+                    }];
             }
             else {
-                return resultEffect;
+                return resultEffects;
             }
         }
-        return action;
+        return [action];
     }
     checkCondition(action, self, condition) {
         if (!('objectOne' in condition) ||
@@ -1257,7 +1260,12 @@ export class State {
         this.addActions(initialAction);
         while (this.hasActions()) {
             const rawAction = this.getNextAction();
-            const action = this.replaceByReplacementEffect(rawAction);
+            const replacedActions = this.replaceByReplacementEffect(rawAction);
+            const action = replacedActions[0];
+            if (replacedActions.length > 1) {
+                // Stuff the rest of them into beginning of the action queue
+                this.transformIntoActions(...replacedActions.slice(1));
+            }
             if (this.debug) {
                 showAction(action);
             }

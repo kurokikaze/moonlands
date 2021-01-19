@@ -43,6 +43,7 @@ import {
 	STEP_DRAW,
 	createZones,
 } from './utils';
+import { isRegExp } from 'util';
 /* eslint-enable no-unused-vars */
 
 describe('Vortex of Knowledge', () => {
@@ -1900,6 +1901,114 @@ describe('Rudwot', () => {
 
 		expect(rudwot.data.energy).toEqual(1, 'Rudwot loses 4 energy but gains 2 energy in the attack');
 		expect(caveRudwot.data.energy).toEqual(0, 'Cave Rudwot is toast');
+	});
+});
+
+describe('Wellisk', () => {
+	it('Dream Barrier (use ability)', () => {
+		const ACTIVE_PLAYER = 40;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const ebylon = new CardInGame(byName('Ebylon'), ACTIVE_PLAYER).addEnergy(6);
+		const bwill = new CardInGame(byName('Bwill'), ACTIVE_PLAYER);
+		const wellisk = new CardInGame(byName('Wellisk'), NON_ACTIVE_PLAYER).addEnergy(3);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [wellisk], [ebylon]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_CREATURES,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([bwill]);
+
+		const playAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: bwill,
+				player: ACTIVE_PLAYER,
+			}
+		};
+
+		gameState.update(playAction);
+
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_MAY_ABILITY);
+		expect(gameState.state.promptPlayer).toEqual(NON_ACTIVE_PLAYER);
+
+		const allowReplaceEffect = {
+			type: ACTION_RESOLVE_PROMPT,
+			useEffect: true,
+			generatedBy: wellisk.id,
+		};
+
+		gameState.update(allowReplaceEffect);
+
+		expect(gameState.state.prompt).toEqual(false);
+
+		expect(gameState.state.savedActions).toHaveLength(0);
+		expect(gameState.state.mayEffectActions).toHaveLength(0);
+		expect(gameState.state.fallbackActions).toHaveLength(0);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0);
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1);
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Wellisk');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1);
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Bwill');
+	});
+
+	it('Dream Barrier (do not use ability)', () => {
+		const ACTIVE_PLAYER = 40;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const ebylon = new CardInGame(byName('Ebylon'), ACTIVE_PLAYER).addEnergy(6);
+		const bwill = new CardInGame(byName('Bwill'), ACTIVE_PLAYER);
+		const wellisk = new CardInGame(byName('Wellisk'), NON_ACTIVE_PLAYER).addEnergy(3);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [wellisk], [ebylon]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_CREATURES,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([bwill]);
+
+		const playAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: bwill,
+				player: ACTIVE_PLAYER,
+			}
+		};
+
+		gameState.update(playAction);
+
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_MAY_ABILITY);
+		expect(gameState.state.promptPlayer).toEqual(NON_ACTIVE_PLAYER);
+
+		const forbidReplaceEffect = {
+			type: ACTION_RESOLVE_PROMPT,
+			useEffect: false,
+			generatedBy: wellisk.id,
+		};
+
+		gameState.update(forbidReplaceEffect);
+
+		expect(gameState.state.prompt).toEqual(false);
+
+		expect(gameState.state.savedActions).toHaveLength(0);
+		expect(gameState.state.mayEffectActions).toHaveLength(0);
+		expect(gameState.state.fallbackActions).toHaveLength(0);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2);
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(0);
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(0);
 	});
 });
 
