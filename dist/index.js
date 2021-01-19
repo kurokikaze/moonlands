@@ -1071,23 +1071,26 @@ export class State {
                     });
                     return resultEffect;
                 });
-                if (replacer.mayEffect) {
-                    this.state.mayEffectActions = preparedEffects;
-                    this.transformIntoActions({
-                        type: ACTION_ENTER_PROMPT,
-                        promptType: PROMPT_TYPE_MAY_ABILITY,
-                        promptParams: {
-                            effect: {
-                                name: replacer.name,
-                                text: replacer.text,
+                const allPromptsAreDoable = this.checkPrompts(replacer.self, preparedEffects, false, 0);
+                if (allPromptsAreDoable) {
+                    if (replacer.mayEffect) {
+                        this.state.mayEffectActions = preparedEffects;
+                        this.transformIntoActions({
+                            type: ACTION_ENTER_PROMPT,
+                            promptType: PROMPT_TYPE_MAY_ABILITY,
+                            promptParams: {
+                                effect: {
+                                    name: replacer.name,
+                                    text: replacer.text,
+                                },
                             },
-                        },
-                        generatedBy: replacer.self.id,
-                        player: replacer.self.data.controller,
-                    });
-                }
-                else {
-                    this.transformIntoActions(...preparedEffects);
+                            generatedBy: replacer.self.id,
+                            player: replacer.self.data.controller,
+                        });
+                    }
+                    else {
+                        this.transformIntoActions(...preparedEffects);
+                    }
                 }
                 // @ts-ignore
                 if (replacer.id) {
@@ -1148,6 +1151,80 @@ export class State {
             return baseCost + regionPenalty;
         }
         return null;
+    }
+    checkPrompts(source, preparedActions, isPower = false, powerCost = 0) {
+        // Calculate if prompts are resolvable
+        // If source is Magi, it will not be filtered out, being in another zone
+        const creatureWillSurvive = !isPower || source.data.energy > powerCost;
+        const ourCardsInPlay = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => (creatureWillSurvive ? card.id !== source.id : true) && card.data.controller === source.data.controller);
+        const allCardsInPlay = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => creatureWillSurvive ? card.id !== source.id : true);
+        // powerPromptsDoable
+        const testablePrompts = [
+            PROMPT_TYPE_SINGLE_CREATURE,
+            PROMPT_TYPE_RELIC,
+            PROMPT_TYPE_OWN_SINGLE_CREATURE,
+            PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+            PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
+            PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+        ];
+        const testablePromptFilter = (action) => action.type === ACTION_ENTER_PROMPT && testablePrompts.includes(action.promptType);
+        const allPrompts = preparedActions.filter(testablePromptFilter);
+        const allPromptsAreDoable = allPrompts.every(promptAction => {
+            switch (promptAction.promptType) {
+                case PROMPT_TYPE_SINGLE_CREATURE:
+                    return allCardsInPlay.some(card => card.card.type === TYPE_CREATURE);
+                case PROMPT_TYPE_RELIC:
+                    return allCardsInPlay.some(card => card.card.type === TYPE_RELIC);
+                case PROMPT_TYPE_OWN_SINGLE_CREATURE:
+                    return ourCardsInPlay.some(card => card.card.type === TYPE_CREATURE);
+                case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
+                    return this.getZone(ZONE_TYPE_IN_PLAY).cards.some(card => card.id !== source.id);
+                }
+                case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
+                    if (promptAction.restrictions) {
+                        return this.checkAnyCardForRestrictions(allCardsInPlay, promptAction.restrictions);
+                    }
+                    else if (promptAction.restriction) {
+                        switch (promptAction.restriction) {
+                            case RESTRICTION_OWN_CREATURE: {
+                                return this.checkAnyCardForRestriction(allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE), promptAction.restriction, source.data.controller);
+                            }
+                            case RESTRICTION_OPPONENT_CREATURE: {
+                                return this.checkAnyCardForRestriction(allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE), promptAction.restriction, source.data.controller);
+                            }
+                            default: {
+                                return this.checkAnyCardForRestriction(allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE), promptAction.restriction, promptAction.restrictionValue);
+                            }
+                        }
+                    }
+                    return true;
+                }
+                case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
+                    const zoneOwner = this.getMetaValue(promptAction.zoneOwner, source.id);
+                    const cardsInZone = this.getZone(promptAction.zone, zoneOwner).cards;
+                    if (promptAction.restrictions) {
+                        return this.checkAnyCardForRestrictions(cardsInZone, promptAction.restrictions);
+                    }
+                    else if (promptAction.restriction) {
+                        switch (promptAction.restriction) {
+                            case RESTRICTION_OWN_CREATURE: {
+                                return this.checkAnyCardForRestriction(cardsInZone.filter(card => card.card.type === TYPE_CREATURE), promptAction.restriction, source.data.controller);
+                            }
+                            case RESTRICTION_OPPONENT_CREATURE: {
+                                return this.checkAnyCardForRestriction(cardsInZone.filter(card => card.card.type === TYPE_CREATURE), promptAction.restriction, source.data.controller);
+                            }
+                            default: {
+                                return this.checkAnyCardForRestriction(cardsInZone.filter(card => card.card.type === TYPE_CREATURE), promptAction.restriction, promptAction.restrictionValue);
+                            }
+                        }
+                    }
+                    return true;
+                }
+                default:
+                    return true;
+            }
+        });
+        return allPromptsAreDoable;
     }
     update(initialAction) {
         if (this.hasWinner()) {
@@ -1321,77 +1398,7 @@ export class State {
                             generatedBy: source.id,
                         });
                         const preparedActions = effects.map(enrichAction);
-                        // Calculate if prompts are resolvable
-                        // If source is Magi, it will not be filtered out, being in another zone
-                        const creatureWillSurvive = source.data.energy > powerCost;
-                        const ourCardsInPlay = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => (creatureWillSurvive ? card.id !== action.source.id : true) && card.data.controller === action.source.data.controller);
-                        const allCardsInPlay = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => creatureWillSurvive ? card.id !== action.source.id : true);
-                        // powerPromptsDoable
-                        const testablePrompts = [
-                            PROMPT_TYPE_SINGLE_CREATURE,
-                            PROMPT_TYPE_RELIC,
-                            PROMPT_TYPE_OWN_SINGLE_CREATURE,
-                            PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-                            PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
-                            PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
-                        ];
-                        const testablePromptFilter = (action) => action.type === ACTION_ENTER_PROMPT && testablePrompts.includes(action.promptType);
-                        const allPrompts = preparedActions.filter(testablePromptFilter);
-                        const allPromptsAreDoable = allPrompts.every(promptAction => {
-                            switch (promptAction.promptType) {
-                                case PROMPT_TYPE_SINGLE_CREATURE:
-                                    return allCardsInPlay.some(card => card.card.type === TYPE_CREATURE);
-                                case PROMPT_TYPE_RELIC:
-                                    return allCardsInPlay.some(card => card.card.type === TYPE_RELIC);
-                                case PROMPT_TYPE_OWN_SINGLE_CREATURE:
-                                    return ourCardsInPlay.some(card => card.card.type === TYPE_CREATURE);
-                                case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
-                                    return this.getZone(ZONE_TYPE_IN_PLAY).cards.some(card => card.id !== action.source.id);
-                                }
-                                case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-                                    if (promptAction.restrictions) {
-                                        return this.checkAnyCardForRestrictions(allCardsInPlay, promptAction.restrictions);
-                                    }
-                                    else if (promptAction.restriction) {
-                                        switch (promptAction.restriction) {
-                                            case RESTRICTION_OWN_CREATURE: {
-                                                return this.checkAnyCardForRestriction(allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE), promptAction.restriction, action.source.data.controller);
-                                            }
-                                            case RESTRICTION_OPPONENT_CREATURE: {
-                                                return this.checkAnyCardForRestriction(allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE), promptAction.restriction, action.source.data.controller);
-                                            }
-                                            default: {
-                                                return this.checkAnyCardForRestriction(allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE), promptAction.restriction, promptAction.restrictionValue);
-                                            }
-                                        }
-                                    }
-                                    return true;
-                                }
-                                case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
-                                    const zoneOwner = this.getMetaValue(promptAction.zoneOwner, source.id);
-                                    const cardsInZone = this.getZone(promptAction.zone, zoneOwner).cards;
-                                    if (promptAction.restrictions) {
-                                        return this.checkAnyCardForRestrictions(cardsInZone, promptAction.restrictions);
-                                    }
-                                    else if (promptAction.restriction) {
-                                        switch (promptAction.restriction) {
-                                            case RESTRICTION_OWN_CREATURE: {
-                                                return this.checkAnyCardForRestriction(cardsInZone.filter(card => card.card.type === TYPE_CREATURE), promptAction.restriction, action.source.data.controller);
-                                            }
-                                            case RESTRICTION_OPPONENT_CREATURE: {
-                                                return this.checkAnyCardForRestriction(cardsInZone.filter(card => card.card.type === TYPE_CREATURE), promptAction.restriction, action.source.data.controller);
-                                            }
-                                            default: {
-                                                return this.checkAnyCardForRestriction(cardsInZone.filter(card => card.card.type === TYPE_CREATURE), promptAction.restriction, promptAction.restrictionValue);
-                                            }
-                                        }
-                                    }
-                                    return true;
-                                }
-                                default:
-                                    return true;
-                            }
-                        });
+                        const allPromptsAreDoable = this.checkPrompts(source, preparedActions, true, powerCost);
                         if (allPromptsAreDoable) {
                             let currentPowerMetaData = {
                                 source,

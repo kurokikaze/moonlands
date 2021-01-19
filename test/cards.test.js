@@ -41,6 +41,7 @@ import {
 	STEP_DRAW,
 	createZones,
 } from './utils';
+import { PROMPT_TYPE_MAY_ABILITY } from '../src/const';
 /* eslint-enable no-unused-vars */
 
 describe('Vortex of Knowledge', () => {
@@ -2744,6 +2745,9 @@ describe('Vellup', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1);
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Vellup');
 
+		expect(gameState.state.prompt).toEqual(true); // Game is in prompt state
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_MAY_ABILITY);
+
 		const newVellup = gameState.getZone(ZONE_TYPE_IN_PLAY).card;
 
 		const allowEffect = {
@@ -2819,6 +2823,43 @@ describe('Vellup', () => {
 		expect(gameState.state.prompt).toEqual(false);
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1);
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Vellup');
+	});
+
+	it('Flock (no cards to find)', () => {
+		const ACTIVE_PLAYER = 40;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const jaela = new CardInGame(byName('Jaela'), ACTIVE_PLAYER).addEnergy(6);
+
+		const vellup = new CardInGame(byName('Vellup'), ACTIVE_PLAYER);
+
+		const xyxElder = new CardInGame(byName('Xyx Elder'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [], [jaela]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_CREATURES,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([vellup]);
+		gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).add([xyxElder]);
+
+		const playAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: vellup,
+				player: ACTIVE_PLAYER,
+			}
+		};
+		
+		gameState.update(playAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1);
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Vellup');
+
+		expect(gameState.state.prompt).toEqual(false); // Game is not in prompt state, because you have no Vellups in the deck
 	});
 });
 
