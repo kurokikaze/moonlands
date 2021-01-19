@@ -19,6 +19,7 @@ import {
 	PROMPT_TYPE_SINGLE_CREATURE,
 	PROMPT_TYPE_SINGLE_MAGI,
 	PROMPT_TYPE_NUMBER,
+	PROMPT_TYPE_MAY_ABILITY,
 
 	RESTRICTION_REGION,
 	REGION_OROTHE,
@@ -41,7 +42,6 @@ import {
 	STEP_DRAW,
 	createZones,
 } from './utils';
-import { PROMPT_TYPE_MAY_ABILITY } from '../src/const';
 /* eslint-enable no-unused-vars */
 
 describe('Vortex of Knowledge', () => {
@@ -2811,6 +2811,10 @@ describe('Vellup', () => {
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1);
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Vellup');
+
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptParams.effect.name).toEqual('Flock');
+		expect(gameState.state.promptParams.effect.text).toEqual('When you play Vellup, you may search your deck for another Vellup. Show it to your opponent and put it into your hand. Shuffle the deck.');
 		
 		const denyEffect = {
 			type: ACTION_RESOLVE_PROMPT,

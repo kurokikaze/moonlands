@@ -1950,6 +1950,10 @@ export class State {
 							};
 							break;
 						}
+						case PROMPT_TYPE_MAY_ABILITY: {
+							promptParams = action.promptParams;
+							break;
+						}
 						case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
 							if (action.restriction && action.restrictions) {
 								throw new Error('PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE error: single and multiple restrictions specified');
