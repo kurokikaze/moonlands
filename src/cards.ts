@@ -141,6 +141,7 @@ import {
 	PROPERTY_ABLE_TO_ATTACK,
 	RESTRICTION_STATUS,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
+	EFFECT_TYPE_ATTACK,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -1156,6 +1157,71 @@ export const cards = [
 			},
 		],
 	}),
+	new Card('Stradus', TYPE_MAGI, REGION_ARDERIAL, null, {
+		startingEnergy: 12,
+		energize: 5,
+		startingCards: ['Lightning Hyren', 'Lightning', 'Shooting Star'],
+		triggerEffects: [
+			{
+				name: 'Backlash',
+				text: 'Whenever one of your Creatures is attacked, you may discard one energy from the attacking Creature before energy is removed.',
+				find: {
+					effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+					conditions: [
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_CONTROLLER,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						},
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_TYPE,
+							comparator: '=',
+							objectTwo: TYPE_CREATURE,
+							propertyTwo: null,
+						},
+					],
+				},
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+						target: '%source',
+						amount: 1,
+					}),
+				],
+				mayEffect: true,
+			},
+		],
+	}),
+	new Card('Gum-Gum', TYPE_CREATURE, REGION_UNDERNEATH, 2, {
+		replacementEffects: [
+			{
+				name: 'Slide',
+				text: 'If Gum-Gum is attacked, you may switch it with any other Creature you control before energy is removed.',
+				find: {
+					effectType: EFFECT_TYPE_ATTACK,
+					conditions: [
+						CONDITION_TARGET_IS_SELF,
+					],
+				},
+				replaceWith: [
+					prompt({
+						promptType: PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
+						variable: 'target',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ATTACK,
+						source: '%source',
+						target: '$target',
+						additionalAttackers: '%additionalAttackers',
+					})
+				],
+				mayEffect: true,
+			},
+		],
+	}),
 	new Card('Trug', TYPE_MAGI, REGION_UNDERNEATH, null, {
 		startingEnergy: 9,
 		energize: 5,
@@ -1653,6 +1719,87 @@ export const cards = [
 						amount: 1,
 					}),
 				],
+			},
+		],
+	}),
+	new Card('Gloves of Crystal', TYPE_RELIC, REGION_NAROOM, 0, {
+		triggerEffects: [
+			{
+				name: 'Strenghten',
+				text: 'Whenever you play an Underneath Creature, you may move one additional energy from your Magi to that Creature.',
+				find: {
+					effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
+					conditions: [
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_REGION,
+							comparator: '=',
+							objectTwo: REGION_UNDERNEATH,
+							propertyTwo: null,
+						},
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_CONTROLLER,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						}
+					],
+				},
+				effects: [
+					select({
+						selector: SELECTOR_OWN_MAGI,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_MOVE_ENERGY,
+						source: '$selected',
+						target: '$creature_created',
+						amount: 1,
+					}),
+				],
+				mayEffect: true,
+			},
+			{
+				name: 'Strenghten',
+				text: 'Whenever you play an Underneath Creature and it is a Bisiwog, you may move one additional energy from your Magi to that Creature.',
+				find: {
+					effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
+					conditions: [
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_REGION,
+							comparator: '=',
+							objectTwo: REGION_UNDERNEATH,
+							propertyTwo: null,
+						},
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_CREATURE_TYPES,
+							comparator: 'includes',
+							objectTwo: 'Bisiwog',
+							propertyTwo: null,
+						},
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_CONTROLLER,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						}
+					],
+				},
+				effects: [
+					select({
+						selector: SELECTOR_OWN_MAGI,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_MOVE_ENERGY,
+						source: '$selected',
+						target: '$creature_created',
+						amount: 1,
+					}),
+				],
+				mayEffect: true,
 			},
 		],
 	}),

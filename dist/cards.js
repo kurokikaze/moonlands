@@ -1,7 +1,7 @@
 import Card from './classes/Card';
 import { 
 /* eslint-disable no-unused-vars */
-ACTION_EFFECT, ACTION_SELECT, ACTION_ENTER_PROMPT, ACTION_CALCULATE, ACTION_GET_PROPERTY_VALUE, ACTION_PLAY, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_SET, ACTION_PROPERTY, PROPERTY_ENERGY_COUNT, PROPERTY_CONTROLLER, PROPERTY_TYPE, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ID, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_POWER_COST, PROPERTY_CREATURE_TYPES, PROPERTY_STATUS_DEFEATED_CREATURE, REGION_ARDERIAL, REGION_CALD, REGION_NAROOM, REGION_OROTHE, REGION_UNDERNEATH, REGION_BOGRATH, REGION_UNIVERSAL, TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, SELECTOR_OPPONENT_ID, SELECTOR_MAGI, SELECTOR_OWN_MAGI, SELECTOR_CREATURES, SELECTOR_ENEMY_MAGI, SELECTOR_RELICS, SELECTOR_CREATURES_AND_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_MAGI_OF_REGION, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_OWN_SPELLS_IN_HAND, SELECTOR_OTHER_CREATURES_OF_TYPE, SELECTOR_OWN_CREATURES_WITH_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_NONE, EFFECT_TYPE_DRAW, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY, EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_CONDITIONAL, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DISCARD_CARDS_FROM_HAND, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_OWN_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_RELIC, PROMPT_TYPE_NUMBER, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, RESTRICTION_OWN_CREATURE, RESTRICTION_OPPONENT_CREATURE, RESTRICTION_ENERGY_LESS_THAN_STARTING, RESTRICTION_REGION, RESTRICTION_TYPE, RESTRICTION_CREATURE_TYPE, RESTRICTION_PLAYABLE, RESTRICTION_ENERGY_LESS_THAN, RESTRICTION_CREATURE_WAS_ATTACKED, COST_X, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_DECK, STATUS_BURROWED, PROPERTY_ABLE_TO_ATTACK, RESTRICTION_STATUS, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES, } from './const';
+ACTION_EFFECT, ACTION_SELECT, ACTION_ENTER_PROMPT, ACTION_CALCULATE, ACTION_GET_PROPERTY_VALUE, ACTION_PLAY, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_SET, ACTION_PROPERTY, PROPERTY_ENERGY_COUNT, PROPERTY_CONTROLLER, PROPERTY_TYPE, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ID, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_POWER_COST, PROPERTY_CREATURE_TYPES, PROPERTY_STATUS_DEFEATED_CREATURE, REGION_ARDERIAL, REGION_CALD, REGION_NAROOM, REGION_OROTHE, REGION_UNDERNEATH, REGION_BOGRATH, REGION_UNIVERSAL, TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, SELECTOR_OPPONENT_ID, SELECTOR_MAGI, SELECTOR_OWN_MAGI, SELECTOR_CREATURES, SELECTOR_ENEMY_MAGI, SELECTOR_RELICS, SELECTOR_CREATURES_AND_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_MAGI_OF_REGION, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_OWN_SPELLS_IN_HAND, SELECTOR_OTHER_CREATURES_OF_TYPE, SELECTOR_OWN_CREATURES_WITH_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_NONE, EFFECT_TYPE_DRAW, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY, EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_CONDITIONAL, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DISCARD_CARDS_FROM_HAND, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_OWN_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_RELIC, PROMPT_TYPE_NUMBER, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, RESTRICTION_OWN_CREATURE, RESTRICTION_OPPONENT_CREATURE, RESTRICTION_ENERGY_LESS_THAN_STARTING, RESTRICTION_REGION, RESTRICTION_TYPE, RESTRICTION_CREATURE_TYPE, RESTRICTION_PLAYABLE, RESTRICTION_ENERGY_LESS_THAN, RESTRICTION_CREATURE_WAS_ATTACKED, COST_X, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_DECK, STATUS_BURROWED, PROPERTY_ABLE_TO_ATTACK, RESTRICTION_STATUS, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES, EFFECT_TYPE_ATTACK, } from './const';
 const effect = (data) => ({
     type: ACTION_EFFECT,
     ...data,
@@ -992,6 +992,71 @@ export const cards = [
             },
         ],
     }),
+    new Card('Stradus', TYPE_MAGI, REGION_ARDERIAL, null, {
+        startingEnergy: 12,
+        energize: 5,
+        startingCards: ['Lightning Hyren', 'Lightning', 'Shooting Star'],
+        triggerEffects: [
+            {
+                name: 'Backlash',
+                text: 'Whenever one of your Creatures is attacked, you may discard one energy from the attacking Creature before energy is removed.',
+                find: {
+                    effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+                    conditions: [
+                        {
+                            objectOne: 'target',
+                            propertyOne: PROPERTY_CONTROLLER,
+                            comparator: '=',
+                            objectTwo: 'self',
+                            propertyTwo: PROPERTY_CONTROLLER,
+                        },
+                        {
+                            objectOne: 'target',
+                            propertyOne: PROPERTY_TYPE,
+                            comparator: '=',
+                            objectTwo: TYPE_CREATURE,
+                            propertyTwo: null,
+                        },
+                    ],
+                },
+                effects: [
+                    effect({
+                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+                        target: '%source',
+                        amount: 1,
+                    }),
+                ],
+                mayEffect: true,
+            },
+        ],
+    }),
+    new Card('Gum-Gum', TYPE_CREATURE, REGION_UNDERNEATH, 2, {
+        replacementEffects: [
+            {
+                name: 'Slide',
+                text: 'If Gum-Gum is attacked, you may switch it with any other Creature you control before energy is removed.',
+                find: {
+                    effectType: EFFECT_TYPE_ATTACK,
+                    conditions: [
+                        CONDITION_TARGET_IS_SELF,
+                    ],
+                },
+                replaceWith: [
+                    prompt({
+                        promptType: PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
+                        variable: 'target',
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_ATTACK,
+                        source: '%source',
+                        target: '$target',
+                        additionalAttackers: '%additionalAttackers',
+                    })
+                ],
+                mayEffect: true,
+            },
+        ],
+    }),
     new Card('Trug', TYPE_MAGI, REGION_UNDERNEATH, null, {
         startingEnergy: 9,
         energize: 5,
@@ -1489,6 +1554,87 @@ export const cards = [
                         amount: 1,
                     }),
                 ],
+            },
+        ],
+    }),
+    new Card('Gloves of Crystal', TYPE_RELIC, REGION_NAROOM, 0, {
+        triggerEffects: [
+            {
+                name: 'Strenghten',
+                text: 'Whenever you play an Underneath Creature, you may move one additional energy from your Magi to that Creature.',
+                find: {
+                    effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
+                    conditions: [
+                        {
+                            objectOne: 'target',
+                            propertyOne: PROPERTY_REGION,
+                            comparator: '=',
+                            objectTwo: REGION_UNDERNEATH,
+                            propertyTwo: null,
+                        },
+                        {
+                            objectOne: 'target',
+                            propertyOne: PROPERTY_CONTROLLER,
+                            comparator: '=',
+                            objectTwo: 'self',
+                            propertyTwo: PROPERTY_CONTROLLER,
+                        }
+                    ],
+                },
+                effects: [
+                    select({
+                        selector: SELECTOR_OWN_MAGI,
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_MOVE_ENERGY,
+                        source: '$selected',
+                        target: '$creature_created',
+                        amount: 1,
+                    }),
+                ],
+                mayEffect: true,
+            },
+            {
+                name: 'Strenghten',
+                text: 'Whenever you play an Underneath Creature and it is a Bisiwog, you may move one additional energy from your Magi to that Creature.',
+                find: {
+                    effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
+                    conditions: [
+                        {
+                            objectOne: 'target',
+                            propertyOne: PROPERTY_REGION,
+                            comparator: '=',
+                            objectTwo: REGION_UNDERNEATH,
+                            propertyTwo: null,
+                        },
+                        {
+                            objectOne: 'target',
+                            propertyOne: PROPERTY_CREATURE_TYPES,
+                            comparator: 'includes',
+                            objectTwo: 'Bisiwog',
+                            propertyTwo: null,
+                        },
+                        {
+                            objectOne: 'target',
+                            propertyOne: PROPERTY_CONTROLLER,
+                            comparator: '=',
+                            objectTwo: 'self',
+                            propertyTwo: PROPERTY_CONTROLLER,
+                        }
+                    ],
+                },
+                effects: [
+                    select({
+                        selector: SELECTOR_OWN_MAGI,
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_MOVE_ENERGY,
+                        source: '$selected',
+                        target: '$creature_created',
+                        amount: 1,
+                    }),
+                ],
+                mayEffect: true,
             },
         ],
     }),

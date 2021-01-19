@@ -133,7 +133,7 @@ export type ReplacementEffectType = {
     name?: string;
     text?: string;
     find: FindType;
-    replaceWith: ReplacingEffectType | EffectType | ReplacingEffectType[] | EffectType[];
+    replaceWith: ReplacingEffectType | EffectType | (ReplacingEffectType | EffectType | PromptType)[];
     mayEffect?: boolean;
 }
 

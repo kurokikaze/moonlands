@@ -972,6 +972,7 @@ describe('Losing the game', () => {
 			step: STEP_PRS_FIRST,
 			activePlayer: ACTIVE_PLAYER,
 		});
+
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const discardEnergyAction = {
@@ -1016,7 +1017,7 @@ describe('Losing the game', () => {
 			effectType: EFFECT_TYPE_MOVE_ENERGY,
 			source: grega,
 			target: yaki,
-			amount: 10,
+			amount: 5,
 			generatedBy: grega.id,
 		};
 

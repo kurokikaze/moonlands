@@ -1,4 +1,4 @@
-Done: **132** cards out of **190**
+Done: **133** cards out of **190**
 
 # Done, tested
 
@@ -137,6 +137,9 @@ Done: **132** cards out of **190**
 - Orothean Belt
 - Corf Pearl
 - Carnivorous Cave
+- Gloves of Crystal
+- Stradus
+- Gum-Gum
 
 # Possible sample decks:
 
@@ -228,7 +231,7 @@ Done: **132** cards out of **190**
 - 3 Giant Korrit
 - 3 Mushroom Hyren
 - 3 Cave Rudwot
-- 3 Agovo // 18
+- 3 Agovo
 - 3 Cave In
 - 3 Cave Hyren
 - 3 Ground Breaker
@@ -352,7 +355,6 @@ Done: **132** cards out of **190**
 # May-abilities
 
 - Blu
-- Stradus
 - Orthea
 - Relic Mirror
 - Fossik
@@ -371,10 +373,6 @@ Done: **132** cards out of **190**
 
 - Staff of Korrits (also trigger on fucking banding)
 
-# May-abilities
-
-- Gloves of Crystal
-
 ## Delayed triggers
 
 - Wence (also drawing, showing cards to opponent)
@@ -386,8 +384,6 @@ Done: **132** cards out of **190**
 # Relic stuff (discarding, etc)
 
 - Raxis (also custom prompts, prompting opponent)
-
-# Static ability rework:
 
 ## Continuous effects
 
@@ -423,10 +419,6 @@ Done: **132** cards out of **190**
 ## Control changing
 
 - Abaquist (also continuous effects)
-
-## Changing attack state
-
-- Gum-Gum
 
 ## Protection
 

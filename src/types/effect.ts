@@ -58,10 +58,12 @@ import {
     EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
     EFFECT_TYPE_DEFEAT_MAGI,
     EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC,
+    EFFECT_TYPE_ATTACK,
 } from '../const';
 
 export type EffectTypeType =
-	typeof EFFECT_TYPE_END_OF_TURN |
+    typeof EFFECT_TYPE_END_OF_TURN |
+    typeof EFFECT_TYPE_ATTACK |
 	typeof EFFECT_TYPE_NONE |
 	typeof EFFECT_TYPE_DRAW |
 	typeof EFFECT_TYPE_ROLL_DIE |
@@ -150,6 +152,13 @@ export type MoveCardBetwenZonesEffect = ActionEffect & {
     attack?: boolean;
     sourceZone: ZoneType;
     destinationZone: ZoneType;
+}
+
+type AttackEffect = ActionEffect & {
+    effectType: typeof EFFECT_TYPE_ATTACK;
+    source: CardInGame | string;
+    target: CardInGame | string;
+    additionalAttackers: CardInGame[] | string;
 }
 
 type MoveCardsBetwenZonesEffect = ActionEffect & {
@@ -376,6 +385,7 @@ export type EffectType = ActionEffect & {
 } | MoveCardBetwenZonesEffect |
     MoveCardsBetwenZonesEffect |
     NoneEffect |
+    AttackEffect |
     CardMovedBetweenZonesEffect |
     DiscardEnergyFromCreatureOrMagiEffect |
     DiscardEnergyFromCreaturesEffect |

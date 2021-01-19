@@ -15,8 +15,10 @@ import CardInGame from "../classes/CardInGame";
 
 interface AttackEffectAction {
     type: typeof ACTION_EFFECT;
+    packHuntAttack?: boolean;
     generatedBy: string; // Damage actions are always from something to something, they always has `generatedBy`
     replacedBy?: string[];
+    player?: number;
 }
 
 type AttackType = {
@@ -38,7 +40,7 @@ type CreatureAttacksEffect = AttackEffectAction & {
     targetAtStart: CardInGame,
 }
 
-type BeforeDamageEffect = AttackEffectAction & {
+export type BeforeDamageEffect = AttackEffectAction & {
     effectType: typeof EFFECT_TYPE_BEFORE_DAMAGE;
     source: CardInGame;
     sourceAtStart: CardInGame;

@@ -192,6 +192,7 @@ import {
 	LOG_ENTRY_MAGI_DEFEATED,
 	ACTION_NONE,
 	PROMPT_TYPE_MAY_ABILITY,
+	EFFECT_TYPE_ATTACK,
 } from './const';
 
 import {showAction} from './logAction';
@@ -1768,7 +1769,7 @@ export class State {
 						console.log(`Somehow ${attackSource.card.name} cannot attack`);
 					}
 					const sourceHasAttacksLeft = attackSource.data.attacked < sourceAttacksPerTurn;
-					const additionalAttackersHasAttacksLeft = additionalAttackers.every(card => card.card.data.canPackHunt && card.data.attacked < this.modifyByStaticAbilities(card, PROPERTY_ATTACKS_PER_TURN));
+					const additionalAttackersHasAttacksLeft = additionalAttackers.every((card: CardInGame) => card.card.data.canPackHunt && card.data.attacked < this.modifyByStaticAbilities(card, PROPERTY_ATTACKS_PER_TURN));
 
 					const targetIsMagi = attackTarget.card.type == TYPE_MAGI;
 					const opponentCreatures = this.useSelector(SELECTOR_OWN_CREATURES, attackTarget.owner, null);
@@ -1785,90 +1786,15 @@ export class State {
 					const enoughAttacksLeft = (sourceHasAttacksLeft && (additionalAttackersHasAttacksLeft || additionalAttackers.length === 0));
 
 					if (enoughAttacksLeft && attackApproved && this.getCurrentPriority() == PRIORITY_ATTACK) {
-						let attackSequence: AnyEffectType[] = [
-							{
-								type: ACTION_EFFECT,
-								effectType: EFFECT_TYPE_CREATURE_ATTACKS,
-								source: attackSource,
-								sourceAtStart: attackSource.copy(),
-								target: attackTarget,
-								targetAtStart: attackTarget.copy(),
-								generatedBy: attackSource.id,
-							},
-							{
-								type: ACTION_EFFECT,
-								effectType: EFFECT_TYPE_BEFORE_DAMAGE,
-								source: attackSource,
-								sourceAtStart: attackSource.copy(),
-								target: attackTarget,
-								targetAtStart: attackTarget.copy(),
-								generatedBy: attackSource.id,
-							},
-							{
-								type: ACTION_EFFECT,
-								effectType: EFFECT_TYPE_DAMAGE_STEP,
-								source: attackSource,
-								sourceAtStart: attackSource.copy(),
-								target: attackTarget,
-								packHuntAttack: false,
-								targetAtStart: attackTarget.copy(),
-								generatedBy: attackSource.id,
-							},
-							{
-								type: ACTION_EFFECT,
-								effectType: EFFECT_TYPE_AFTER_DAMAGE,
-								source: attackSource,
-								target: attackTarget,
-								generatedBy: attackSource.id,
-							},
-						];
-
-						if (additionalAttackers) {
-							const preparedEffects: AnyEffectType[] = additionalAttackers.map((card: CardInGame) => [
-								{
-									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_CREATURE_ATTACKS,
-									source: card,
-									sourceAtStart: card.copy(),
-									packHuntAttack: true,
-									target: attackTarget,
-									targetAtStart: attackTarget.copy(),
-									generatedBy: attackSource.id,
-								},
-								{
-									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_BEFORE_DAMAGE,
-									source: card,
-									sourceAtStart: card.copy(),
-									packHuntAttack: true,
-									target: attackTarget,
-									targetAtStart: attackTarget.copy(),
-									generatedBy: attackSource.id,
-								},
-								{
-									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_DAMAGE_STEP,
-									source: card,
-									sourceAtStart: card.copy(),
-									packHuntAttack: true,
-									target: attackTarget,
-									targetAtStart: attackTarget.copy(),
-									generatedBy: attackSource.id,
-								},
-								{
-									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_AFTER_DAMAGE,
-									source: card,
-									packHuntAttack: true,
-									target: attackTarget,
-									generatedBy: attackSource.id,
-								},
-							]).flat();
-
-							attackSequence = [...attackSequence, ...preparedEffects];
-						}
-
-						this.transformIntoActions(...attackSequence);
+						this.transformIntoActions({
+							type: ACTION_EFFECT,
+							effectType: EFFECT_TYPE_ATTACK,
+							source: attackSource,
+							target: attackTarget,
+							additionalAttackers,
+							generatedBy: attackSource.id,
+							player: attackSource.data.controller,
+						});
 					}
 					break;
 				}
@@ -2885,6 +2811,97 @@ export class State {
 							discard.empty();
 							break;
 						}
+						case EFFECT_TYPE_ATTACK: {
+							const source = this.getMetaValue(action.source, action.generatedBy);
+							const target = this.getMetaValue(action.target, action.generatedBy);
+							const additionalAttackers = this.getMetaValue(action.additionalAttackers, action.generatedBy);
+
+							let attackSequence: AnyEffectType[] = [
+								{
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+									source: source,
+									sourceAtStart: source.copy(),
+									target: target,
+									targetAtStart: target.copy(),
+									generatedBy: source.id,
+								},
+								{
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_BEFORE_DAMAGE,
+									source: source,
+									sourceAtStart: source.copy(),
+									target: target,
+									targetAtStart: target.copy(),
+									generatedBy: source.id,
+								},
+								{
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_DAMAGE_STEP,
+									source: source,
+									sourceAtStart: source.copy(),
+									target: target,
+									packHuntAttack: false,
+									targetAtStart: target.copy(),
+									generatedBy: source.id,
+								},
+								{
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_AFTER_DAMAGE,
+									source: source,
+									target: target,
+									generatedBy: source.id,
+								},
+							];
+	
+							if (additionalAttackers) {
+								const preparedEffects: AnyEffectType[] = additionalAttackers.map((card: CardInGame): AnyEffectType[] => [
+									{
+										type: ACTION_EFFECT,
+										effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+										source: card,
+										sourceAtStart: card.copy(),
+										packHuntAttack: true,
+										target: target,
+										targetAtStart: target.copy(),
+										generatedBy: source.id,
+									},
+									{
+										type: ACTION_EFFECT,
+										effectType: EFFECT_TYPE_BEFORE_DAMAGE,
+										source: card,
+										sourceAtStart: card.copy(),
+										packHuntAttack: true,
+										target: target,
+										targetAtStart: target.copy(),
+										generatedBy: source.id,
+									},
+									{
+										type: ACTION_EFFECT,
+										effectType: EFFECT_TYPE_DAMAGE_STEP,
+										source: card,
+										sourceAtStart: card.copy(),
+										packHuntAttack: true,
+										target: target,
+										targetAtStart: target.copy(),
+										generatedBy: source.id,
+									},
+									{
+										type: ACTION_EFFECT,
+										effectType: EFFECT_TYPE_AFTER_DAMAGE,
+										source: card,
+										packHuntAttack: true,
+										target: target,
+										generatedBy: source.id,
+									},
+								]).flat();
+	
+								attackSequence = [...attackSequence, ...preparedEffects];
+							}
+	
+							this.transformIntoActions(...attackSequence);
+							break;
+						}
 						// Attack sequence
 						case EFFECT_TYPE_BEFORE_DAMAGE: {
 							action.source.markAttackDone();
@@ -3169,27 +3186,11 @@ export class State {
 							break;
 						}
 						case EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES: {
-							// we should check if it was the last creature in play and Magi loses
-							/* if (action.sourceZone === ZONE_TYPE_IN_PLAY) {
-								const newCard = this.getMetaValue(action.destinationCard, action.generatedBy);
-								const magi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, newCard.owner).card;
-								const creatures = this.useSelector(SELECTOR_OWN_CREATURES, newCard.owner, null);
-								const numberOfCreatures = (creatures instanceof Array) ? creatures.length : 0;
-
-								if (magi && magi.data.energy === 0 && numberOfCreatures === 0) {
-									this.transformIntoActions({
-										type: ACTION_EFFECT,
-										effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
-										source: null,
-										target: magi,
-										generatedBy: action.generatedBy,
-									});
-								}
-							}*/
 							break;
 						}
-						case EFFECT_TYPE_CREATURE_ENTERS_PLAY:
+						case EFFECT_TYPE_CREATURE_ENTERS_PLAY: {
 							break;
+						}
 						case EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE: {
 							const target = this.getMetaValue(action.target, action.generatedBy);
 							this.transformIntoActions({
@@ -3209,37 +3210,26 @@ export class State {
 							const moveTarget = (moveMultiTarget instanceof Array) ? moveMultiTarget[0] : moveMultiTarget;
 							const amountToMove: number = this.getMetaValue(action.amount, action.generatedBy);
 
-							moveSource.removeEnergy(amountToMove);
-							moveTarget.addEnergy(amountToMove);
-							if (moveSource.data.energy === 0) {
-								switch (moveSource.card.type) {
-									case TYPE_CREATURE: {
-										// Creature goes to discard
-										this.transformIntoActions({
-											type: ACTION_EFFECT,
-											effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-											sourceZone: ZONE_TYPE_IN_PLAY,
-											destinationZone: ZONE_TYPE_DISCARD,
-											bottom: false,
-											target: moveSource,
-											player: action.player,
-											generatedBy: action.generatedBy,
-										});
-										break;
-									}
-									/* case TYPE_MAGI: {
-										const hisCreatures = this.useSelector(SELECTOR_OWN_CREATURES, moveSource.data.controller, null);
-										if (hisCreatures instanceof Array && hisCreatures.length === 0) {
+							if (moveSource.data.energy >= amountToMove) {
+								moveSource.removeEnergy(amountToMove);
+								moveTarget.addEnergy(amountToMove);
+								if (moveSource.data.energy === 0) {
+									switch (moveSource.card.type) {
+										case TYPE_CREATURE: {
+											// Creature goes to discard
 											this.transformIntoActions({
 												type: ACTION_EFFECT,
-												effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
-												source: moveSource,
+												effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+												sourceZone: ZONE_TYPE_IN_PLAY,
+												destinationZone: ZONE_TYPE_DISCARD,
+												bottom: false,
 												target: moveSource,
+												player: action.player,
 												generatedBy: action.generatedBy,
 											});
+											break;
 										}
-										break;
-									} */
+									}
 								}
 							}
 							break;
