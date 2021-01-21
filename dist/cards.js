@@ -1,7 +1,7 @@
 import Card from './classes/Card';
 import { 
 /* eslint-disable no-unused-vars */
-ACTION_EFFECT, ACTION_SELECT, ACTION_ENTER_PROMPT, ACTION_CALCULATE, ACTION_GET_PROPERTY_VALUE, ACTION_PLAY, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_SET, ACTION_PROPERTY, PROPERTY_ENERGY_COUNT, PROPERTY_CONTROLLER, PROPERTY_TYPE, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ID, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_POWER_COST, PROPERTY_CREATURE_TYPES, PROPERTY_STATUS_DEFEATED_CREATURE, REGION_ARDERIAL, REGION_CALD, REGION_NAROOM, REGION_OROTHE, REGION_UNDERNEATH, REGION_BOGRATH, REGION_UNIVERSAL, TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, SELECTOR_OPPONENT_ID, SELECTOR_MAGI, SELECTOR_OWN_MAGI, SELECTOR_CREATURES, SELECTOR_ENEMY_MAGI, SELECTOR_RELICS, SELECTOR_CREATURES_AND_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_MAGI_OF_REGION, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_OWN_SPELLS_IN_HAND, SELECTOR_OTHER_CREATURES_OF_TYPE, SELECTOR_OWN_CREATURES_WITH_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_NONE, EFFECT_TYPE_DRAW, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY, EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_CONDITIONAL, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DISCARD_CARDS_FROM_HAND, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_OWN_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_RELIC, PROMPT_TYPE_NUMBER, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, RESTRICTION_OWN_CREATURE, RESTRICTION_OPPONENT_CREATURE, RESTRICTION_ENERGY_LESS_THAN_STARTING, RESTRICTION_REGION, RESTRICTION_TYPE, RESTRICTION_CREATURE_TYPE, RESTRICTION_PLAYABLE, RESTRICTION_ENERGY_LESS_THAN, RESTRICTION_CREATURE_WAS_ATTACKED, COST_X, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_DECK, STATUS_BURROWED, PROPERTY_ABLE_TO_ATTACK, RESTRICTION_STATUS, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES, EFFECT_TYPE_ATTACK, } from './const';
+ACTION_EFFECT, ACTION_SELECT, ACTION_ENTER_PROMPT, ACTION_CALCULATE, ACTION_GET_PROPERTY_VALUE, ACTION_PLAY, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_SET, ACTION_PROPERTY, PROPERTY_ENERGY_COUNT, PROPERTY_CONTROLLER, PROPERTY_TYPE, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ID, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_POWER_COST, PROPERTY_CREATURE_TYPES, PROPERTY_STATUS_DEFEATED_CREATURE, REGION_ARDERIAL, REGION_CALD, REGION_NAROOM, REGION_OROTHE, REGION_UNDERNEATH, REGION_BOGRATH, REGION_UNIVERSAL, TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, SELECTOR_OPPONENT_ID, SELECTOR_MAGI, SELECTOR_OWN_MAGI, SELECTOR_CREATURES, SELECTOR_ENEMY_MAGI, SELECTOR_RELICS, SELECTOR_CREATURES_AND_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_MAGI_OF_REGION, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_OWN_SPELLS_IN_HAND, SELECTOR_OTHER_CREATURES_OF_TYPE, SELECTOR_OWN_CREATURES_WITH_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_CREATURES_OF_PLAYER, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_NONE, EFFECT_TYPE_DRAW, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY, EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_CONDITIONAL, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DISCARD_CARDS_FROM_HAND, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES, EFFECT_TYPE_ATTACK, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_OWN_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_RELIC, PROMPT_TYPE_NUMBER, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, RESTRICTION_OWN_CREATURE, RESTRICTION_OPPONENT_CREATURE, RESTRICTION_ENERGY_LESS_THAN_STARTING, RESTRICTION_REGION, RESTRICTION_TYPE, RESTRICTION_CREATURE_TYPE, RESTRICTION_PLAYABLE, RESTRICTION_ENERGY_LESS_THAN, RESTRICTION_CREATURE_WAS_ATTACKED, COST_X, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_DECK, STATUS_BURROWED, PROPERTY_ABLE_TO_ATTACK, RESTRICTION_STATUS, EXPIRATION_ANY_TURNS, SELECTOR_ID, PROPERTY_MAGI_NAME, } from './const';
 const effect = (data) => ({
     type: ACTION_EFFECT,
     ...data,
@@ -721,6 +721,70 @@ export const cards = [
                     target: '%target',
                 },
             }],
+    }),
+    new Card('Eclipse', TYPE_SPELL, REGION_ARDERIAL, 5, {
+        effects: [
+            prompt({
+                promptType: PROMPT_TYPE_SINGLE_MAGI,
+            }),
+            getPropertyValue({
+                target: '$targetMagi',
+                property: PROPERTY_CONTROLLER,
+                variable: 'controller',
+            }),
+            effect({
+                effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+                staticAbilities: [
+                    {
+                        name: 'Eclipse',
+                        text: 'Creatures of the chosen Magi cannot attack',
+                        selector: SELECTOR_CREATURES_OF_PLAYER,
+                        selectorParameter: '$controller',
+                        property: PROPERTY_ABLE_TO_ATTACK,
+                        modifier: {
+                            operator: CALCULATION_SET,
+                            operandOne: false,
+                        },
+                    },
+                ],
+                expiration: {
+                    type: EXPIRATION_ANY_TURNS,
+                    turns: 3,
+                },
+            }),
+        ]
+    }),
+    new Card('Platheus', TYPE_CREATURE, REGION_OROTHE, 6, {
+        powers: [{
+                name: 'Soporific',
+                cost: 2,
+                text: 'Choose any one Creature in play. The chosen Creature cannot attack until after your next turn.',
+                effects: [
+                    prompt({
+                        promptType: PROMPT_TYPE_SINGLE_CREATURE,
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+                        staticAbilities: [
+                            {
+                                name: 'Soporific',
+                                text: 'Creature cannot attack until after Platheus\'s controller next turn',
+                                selector: SELECTOR_ID,
+                                selectorParameter: '$target',
+                                property: PROPERTY_ABLE_TO_ATTACK,
+                                modifier: {
+                                    operator: CALCULATION_SET,
+                                    operandOne: false,
+                                },
+                            },
+                        ],
+                        expiration: {
+                            type: EXPIRATION_ANY_TURNS,
+                            turns: 3,
+                        },
+                    }),
+                ]
+            }]
     }),
     new Card('Scroll of Fire', TYPE_RELIC, REGION_CALD, 0, {
         triggerEffects: [
@@ -3065,6 +3129,43 @@ export const cards = [
             },
         ],
     }),
+    new Card('Plith', TYPE_CREATURE, REGION_NAROOM, 3, {
+        triggerEffects: [{
+                find: {
+                    effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+                    conditions: [
+                        CONDITION_TARGET_IS_SELF,
+                    ],
+                },
+                effects: [
+                    effect({
+                        effectType: EFFECT_TYPE_DRAW,
+                    }),
+                    select({
+                        selector: SELECTOR_OWN_MAGI,
+                        variable: 'ownMagi',
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_CONDITIONAL,
+                        ownMagi: '$ownMagi',
+                        conditions: [
+                            {
+                                objectOne: 'ownMagi',
+                                propertyOne: PROPERTY_MAGI_NAME,
+                                comparator: '=',
+                                objectTwo: 'Evu',
+                                propertyTwo: null,
+                            },
+                        ],
+                        thenEffects: [
+                            effect({
+                                effectType: EFFECT_TYPE_DRAW,
+                            }),
+                        ],
+                    }),
+                ],
+            }],
+    }),
     new Card('Evu', TYPE_MAGI, REGION_NAROOM, null, {
         startingEnergy: 15,
         energize: 4,
@@ -3638,6 +3739,30 @@ export const cards = [
                 },
             },
         ],
+    }),
+    new Card('Gogor', TYPE_MAGI, REGION_UNDERNEATH, null, {
+        startingEnergy: 13,
+        energize: 5,
+        startingCards: ['Digging Goggles', 'Crystal Arboll', 'Cave Rudwot'],
+        powers: [{
+                name: 'Gravel Storm',
+                text: 'Roll one die. Discard energy equal to the die roll from each Creature in play. Gravel Storm does not affect burrowed Creatures.',
+                cost: 4,
+                effects: [
+                    effect({
+                        effectType: EFFECT_TYPE_ROLL_DIE,
+                    }),
+                    select({
+                        selector: SELECTOR_CREATURES_WITHOUT_STATUS,
+                        status: STATUS_BURROWED,
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
+                        target: '$selected',
+                        amount: '$roll_result',
+                    }),
+                ],
+            }],
     }),
     new Card('Arboll', TYPE_CREATURE, REGION_NAROOM, 3, {
         powers: [

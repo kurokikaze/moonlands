@@ -37,6 +37,7 @@ import {
     PROMPT_TYPE_MAY_ABILITY,
 
     PROPERTY_MAGI_STARTING_ENERGY,
+    PROPERTY_MAGI_NAME,
     PROPERTY_COST,
     PROPERTY_ABLE_TO_ATTACK,
     PROPERTY_ATTACKS_PER_TURN,
@@ -54,6 +55,10 @@ import {
     PROPERTY_STATUS_WAS_ATTACKED,
     PROPERTY_TYPE,
     ACTION_PROPERTY,
+    EXPIRATION_ANY_TURNS,
+    EXPIRATION_NEVER,
+    EXPIRATION_OPPONENT_TURNS,
+    EXPIRATION_PLAYER_TURNS,
 } from "../const";
 
 export type ZoneType =
@@ -85,6 +90,7 @@ export type PropertyType = typeof PROPERTY_MAGI_STARTING_ENERGY |
     typeof PROPERTY_ENERGY_COUNT |
     typeof PROPERTY_ENERGY_LOSS_THRESHOLD |
     typeof PROPERTY_ID |
+    typeof PROPERTY_MAGI_NAME |
     typeof PROPERTY_POWER_COST |
     typeof PROPERTY_REGION |
     typeof PROPERTY_STATUS |
@@ -117,4 +123,14 @@ export type ConditionType = {
     comparator: '<' | '=' | '>' | '<=' | '>=' | '!=' | 'includes';
     objectTwo: string | number | boolean;
     propertyTwo: PropertyType;
+}
+
+export type ExpirationType = typeof EXPIRATION_OPPONENT_TURNS |
+    typeof EXPIRATION_PLAYER_TURNS |
+    typeof EXPIRATION_ANY_TURNS |
+    typeof EXPIRATION_NEVER;
+
+export type ExpirationObjectType = {
+    type: ExpirationType;
+    turns: number;
 }

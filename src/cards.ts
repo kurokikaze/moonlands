@@ -68,6 +68,7 @@ import {
 	SELECTOR_OTHER_CREATURES_OF_TYPE,
 	SELECTOR_OWN_CREATURES_WITH_STATUS,
 	SELECTOR_CREATURES_WITHOUT_STATUS,
+	SELECTOR_CREATURES_OF_PLAYER,
 
 	EFFECT_TYPE_END_OF_TURN,
 	EFFECT_TYPE_NONE,
@@ -107,6 +108,9 @@ import {
 	EFFECT_TYPE_BEFORE_DAMAGE,
 	EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
 	EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
+	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
+	EFFECT_TYPE_ATTACK,
+	EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
 
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 	PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
@@ -140,8 +144,9 @@ import {
 	STATUS_BURROWED,
 	PROPERTY_ABLE_TO_ATTACK,
 	RESTRICTION_STATUS,
-	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
-	EFFECT_TYPE_ATTACK,
+	EXPIRATION_ANY_TURNS,
+	SELECTOR_ID,
+	PROPERTY_MAGI_NAME,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -886,6 +891,70 @@ export const cards = [
 				target: '%target',
 			},
 		}],
+	}),
+	new Card('Eclipse', TYPE_SPELL, REGION_ARDERIAL, 5, {
+		effects: [
+			prompt({
+				promptType: PROMPT_TYPE_SINGLE_MAGI,
+			}),
+			getPropertyValue({
+				target: '$targetMagi',
+				property: PROPERTY_CONTROLLER,
+				variable: 'controller',
+			}),
+			effect({
+				effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+				staticAbilities: [
+					{
+						name: 'Eclipse',
+						text: 'Creatures of the chosen Magi cannot attack',
+						selector: SELECTOR_CREATURES_OF_PLAYER,
+						selectorParameter: '$controller',
+						property: PROPERTY_ABLE_TO_ATTACK,
+						modifier: {
+							operator: CALCULATION_SET,
+							operandOne: false,
+						},
+					},
+				],
+				expiration: {
+					type: EXPIRATION_ANY_TURNS,
+					turns: 3,
+				},
+			}),
+		]
+	}),
+	new Card('Platheus', TYPE_CREATURE, REGION_OROTHE, 6, {
+		powers: [{
+			name: 'Soporific',
+			cost: 2,
+			text: 'Choose any one Creature in play. The chosen Creature cannot attack until after your next turn.',
+			effects: [
+				prompt({
+					promptType: PROMPT_TYPE_SINGLE_CREATURE,
+				}),
+				effect({
+					effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+					staticAbilities: [
+						{
+							name: 'Soporific',
+							text: 'Creature cannot attack until after Platheus\'s controller next turn',
+							selector: SELECTOR_ID,
+							selectorParameter: '$target',
+							property: PROPERTY_ABLE_TO_ATTACK,
+							modifier: {
+								operator: CALCULATION_SET,
+								operandOne: false,
+							},
+						},
+					],
+					expiration: {
+						type: EXPIRATION_ANY_TURNS,
+						turns: 3,
+					},
+				}),
+			]
+		}]
 	}),
 	new Card('Scroll of Fire', TYPE_RELIC, REGION_CALD, 0, {
 		triggerEffects: [
@@ -3230,6 +3299,44 @@ export const cards = [
 			},
 		],
 	}),
+	new Card('Plith', TYPE_CREATURE, REGION_NAROOM, 3, {
+		triggerEffects:[{
+			find: {
+				effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+				conditions: [
+					CONDITION_TARGET_IS_SELF,
+				],
+			},
+			effects: [
+				effect({
+					effectType: EFFECT_TYPE_DRAW,
+				}),
+				select({
+					selector: SELECTOR_OWN_MAGI,
+					variable: 'ownMagi',
+				}),
+				effect({
+					effectType: EFFECT_TYPE_CONDITIONAL,
+					ownMagi: '$ownMagi',
+					conditions: [
+						{
+							objectOne: 'ownMagi',
+							propertyOne: PROPERTY_MAGI_NAME,
+							comparator: '=',
+							objectTwo: 'Evu',
+							propertyTwo: null,
+						},
+					],
+					thenEffects: [
+						effect({
+							effectType: EFFECT_TYPE_DRAW,
+						}),
+					],
+				}),
+				
+			],
+		}],
+	}),
 	new Card('Evu', TYPE_MAGI, REGION_NAROOM, null, {
 		startingEnergy: 15,
 		energize: 4,
@@ -3803,6 +3910,30 @@ export const cards = [
 				},
 			},
 		],
+	}),
+	new Card('Gogor', TYPE_MAGI, REGION_UNDERNEATH, null, {
+		startingEnergy: 13,
+		energize: 5,
+		startingCards: ['Digging Goggles', 'Crystal Arboll', 'Cave Rudwot'],
+		powers: [{
+			name: 'Gravel Storm',
+			text: 'Roll one die. Discard energy equal to the die roll from each Creature in play. Gravel Storm does not affect burrowed Creatures.',
+			cost: 4,
+			effects: [
+				effect({
+					effectType: EFFECT_TYPE_ROLL_DIE,
+				}),
+				select({
+					selector: SELECTOR_CREATURES_WITHOUT_STATUS,
+					status: STATUS_BURROWED,
+				}),
+				effect({
+					effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
+					target: '$selected',
+					amount: '$roll_result',
+				}),
+			],
+		}],
 	}),
 	new Card('Arboll', TYPE_CREATURE, REGION_NAROOM, 3, {
 		powers: [

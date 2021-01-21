@@ -21,6 +21,7 @@ export const PROPERTY_REGION = 'properties/region';
 export const PROPERTY_COST = 'properties/cost';
 export const PROPERTY_ENERGIZE = 'properties/energize';
 export const PROPERTY_CREATURE_TYPES = 'properties/creature_types';
+export const PROPERTY_MAGI_NAME = 'properties/magi_name';
 export const PROPERTY_MAGI_STARTING_ENERGY = 'properties/magi_starting_energy';
 export const PROPERTY_ATTACKS_PER_TURN = 'properties/attacks_per_turn';
 export const PROPERTY_ABLE_TO_ATTACK = 'properties/able_to_attack';
@@ -34,9 +35,11 @@ export const PROPERTY_STATUS = 'properties/status';
 
 export const SELECTOR_OPPONENT_ID = 'selectors/opponent_id'; // THIS WILL RETURN ID OF PLAYER'S OPPONENT
 export const SELECTOR_CREATURES = 'selectors/creatures';
+export const SELECTOR_CREATURES_OF_PLAYER = 'selectors/creatures_of_player';
 export const SELECTOR_MAGI = 'selectors/magi';
 export const SELECTOR_CREATURES_AND_MAGI = 'selectors/creatures_and_magi';
 export const SELECTOR_OWN_MAGI = 'selectors/own_magi';
+export const SELECTOR_OWN_MAGI_SINGLE = 'selectors/own_magi_single'; // Like SELECTOR_OWN_MAGI, but not array.
 export const SELECTOR_TOP_MAGI_OF_PILE = 'selectors/top_magi_of_pile';
 export const SELECTOR_ENEMY_MAGI = 'selectors/enemy_magi';
 export const SELECTOR_CREATURES_OF_REGION = 'selectors/creatures_of_region';
@@ -57,6 +60,7 @@ export const SELECTOR_OWN_SPELLS_IN_HAND = 'selectors/own_spells_in_hand';
 export const SELECTOR_OWN_CREATURES_WITH_STATUS = 'selectors/own_creatures_with_status';
 export const SELECTOR_CREATURES_WITHOUT_STATUS = 'selectors/creatures_without_status';
 export const SELECTOR_STATUS = 'selectors/status';
+export const SELECTOR_ID = 'selectors/id';
 
 export const STATUS_BURROWED = 'status/burrowed';
 export const STATUS_FROZEN = 'status/frozen';
@@ -141,6 +145,12 @@ export const EFFECT_TYPE_DRAW_REST_OF_CARDS = 'effects/draw_rest_of_cards';
 export const EFFECT_TYPE_DISCARD_CARDS_FROM_HAND = 'effects/discard_cards_from_hand';
 export const EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE = 'effects/forbid_attack_to_creature';
 export const EFFECT_TYPE_ADD_DELAYED_TRIGGER = 'effects/add_delayed_trigger';
+export const EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT = 'effects/create_continuous_effect';
+
+export const EXPIRATION_OPPONENT_TURNS = 'expiration/opponents_turns';
+export const EXPIRATION_PLAYER_TURNS = 'expirations/players_turns';
+export const EXPIRATION_ANY_TURNS = 'expirations/any_turns';
+export const EXPIRATION_NEVER = 'expirations/never';
 
 export const NO_PRIORITY = 0;
 export const PRIORITY_PRS = 1;

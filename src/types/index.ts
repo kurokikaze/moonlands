@@ -39,7 +39,7 @@ import {
 import { ResolvePromptType } from './resolvePrompt';
 import { SelectType } from './select';
 import { EffectTypeType, EffectType } from './effect';
-import { PromptTypeType, PropertyType, ConditionType } from './common';
+import { PromptTypeType, PropertyType, ConditionType, ExpirationObjectType } from './common';
 import { AttackEffect } from './attack';
 
 export { AttackerDealsDamageEffect, DefenderDealsDamageEffect } from './attack';
@@ -77,12 +77,11 @@ type PowerType = {
     effects: AnyEffectType[];
 }
 
-
 export type StaticAbilityType = {
 	name: string,
 	text: string,
     selector: string,
-    selectorParameter?: string, 
+    selectorParameter?: string | number, 
     property: PropertyType,
     subProperty?: string;
 	modifier: {
@@ -247,6 +246,14 @@ type PowerActionType = EnrichedAction & {
     source: CardInGame;
     player: number;
     generatedBy?: string;
+}
+
+export type ContinuousEffectType = {
+    staticAbilities?: StaticAbilityType[];
+    triggerEffects?: TriggerEffectType[];
+    expiration: ExpirationObjectType;
+    player: number;
+    id: string;
 }
 
 export type AnyEffectType = EffectType | PromptType | SelectType | CalculateType | PropertyGetterType | PlayerWinType | PassType | ConcedeType | ResolvePromptType | PlayType | PowerActionType | AttackEffect | NoneType;

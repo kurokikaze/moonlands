@@ -34,6 +34,7 @@ import {
 	SELECTOR_CREATURES,
 	SELECTOR_OWN_CARDS_IN_PLAY,
 	SELECTOR_STATUS,
+	SELECTOR_ID,
 
 	REGION_NAROOM,
 	REGION_CALD,
@@ -61,8 +62,13 @@ import {
 	RESTRICTION_TYPE,
 	RESTRICTION_STATUS,
 
+	CALCULATION_SET,
+
 	EFFECT_TYPE_MOVE_ENERGY,
 	EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
+	EFFECT_TYPE_ATTACK,
+	EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+	EFFECT_TYPE_NONE,
 
 	ZONE_TYPE_ACTIVE_MAGI,
 	ZONE_TYPE_MAGI_PILE,
@@ -76,6 +82,9 @@ import {
 	PROPERTY_STATUS,
 	PROPERTY_ABLE_TO_ATTACK,
 
+	EXPIRATION_ANY_TURNS,
+	EXPIRATION_NEVER,
+	
 	STATUS_BURROWED,
 }  from '../src/const.ts';
 
@@ -90,6 +99,7 @@ import {
 	STEP_DRAW,
 	createZones,
 } from './utils.js';
+import nanoid from 'nanoid';
 
 describe('Updating state with action', () => {
 	it('Pass action', () => {
@@ -3391,6 +3401,442 @@ describe('Debugging roll values', () => {
 		gameState.update(rollAction);
 
 		expect(gameState.state.spellMetaData.test.roll_result).toBeLessThan(7, 'Dice roll action stops using debug value after reset');
+	});
+});
+
+describe('Continuous Effects', () => {
+	it('Creating continuous effect', () => {
+		const PLAYER_ONE = 10;
+		const PLAYER_TWO = 12;
+
+		const gameState = new moonlands.State({
+			step: STEP_PRS_SECOND,
+			activePlayer: PLAYER_ONE,
+		});
+
+		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
+
+		const testTriggerEffect = {
+			find: {
+				effectType: EFFECT_TYPE_ATTACK,
+				conditions: [],
+			},
+			effects: [{
+				type: ACTION_EFFECT,
+				effectType: EFFECT_TYPE_NONE,
+			}]
+		};
+
+		const testStaticAbility = {
+			name: 'Test static ability',
+			text: 'Static ability text',
+			selector: SELECTOR_CREATURES,
+			property: PROPERTY_ABLE_TO_ATTACK,
+			modifier: {
+				operator: CALCULATION_SET,
+				operandOne: false,
+			},
+		};
+
+		const createEffectAction = {
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+			staticAbilities: [testStaticAbility],
+			triggerEffects: [testTriggerEffect],
+			player: PLAYER_ONE,
+			expiration: {
+				type: EXPIRATION_NEVER,
+				turns: 0,
+			},
+			generatedBy: nanoid(),
+		};
+
+		gameState.update(createEffectAction);
+
+		expect(gameState.state.continuousEffects.length).toEqual(1);
+		expect(gameState.state.continuousEffects[0].triggerEffects.length).toEqual(1);
+		expect(gameState.state.continuousEffects[0].triggerEffects[0]).toEqual(testTriggerEffect);
+		expect(gameState.state.continuousEffects[0].staticAbilities.length).toEqual(1);
+		expect(gameState.state.continuousEffects[0].staticAbilities[0]).toEqual(testStaticAbility);
+	});
+
+	it('Ticking down turns on continuous effects', () => {
+		const PLAYER_ONE = 10;
+		const PLAYER_TWO = 12;
+
+		const gameState = new moonlands.State({
+			step: STEP_PRS_SECOND,
+			activePlayer: PLAYER_ONE,
+		});
+
+		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
+
+		const testStaticAbility = {
+			name: 'Test static ability',
+			text: 'Static ability text',
+			selector: SELECTOR_CREATURES,
+			property: PROPERTY_ABLE_TO_ATTACK,
+			modifier: {
+				operator: CALCULATION_SET,
+				operandOne: false,
+			},
+		};
+
+		const createEffectAction = {
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+			staticAbilities: [testStaticAbility],
+			triggerEffects: [],
+			expiration: {
+				type: EXPIRATION_ANY_TURNS,
+				turns: 2,
+			},
+			player: PLAYER_ONE,
+			generatedBy: nanoid(),
+		};
+
+		gameState.update(createEffectAction);
+
+		expect(gameState.state.continuousEffects.length).toEqual(1);
+		expect(gameState.state.continuousEffects[0].staticAbilities.length).toEqual(1);
+		expect(gameState.state.continuousEffects[0].staticAbilities[0]).toEqual(testStaticAbility);
+
+		expect(gameState.state.continuousEffects[0].expiration.turns).toEqual(2);
+
+		const passAction = {
+			type: ACTION_PASS,
+		};
+
+		gameState.update(passAction);
+
+		expect(gameState.state.continuousEffects.length).toEqual(1);
+		expect(gameState.state.continuousEffects[0].expiration.turns).toEqual(1);
+	});
+
+	it('Removing continuous effects when turns run out', () => {
+		const PLAYER_ONE = 10;
+		const PLAYER_TWO = 12;
+
+		const gameState = new moonlands.State({
+			step: STEP_PRS_SECOND,
+			activePlayer: PLAYER_ONE,
+		});
+
+		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
+
+		const testStaticAbility = {
+			name: 'Test static ability',
+			text: 'Static ability text',
+			selector: SELECTOR_CREATURES,
+			property: PROPERTY_ABLE_TO_ATTACK,
+			modifier: {
+				operator: CALCULATION_SET,
+				operandOne: false,
+			},
+		};
+
+		const createEffectAction = {
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+			staticAbilities: [testStaticAbility],
+			triggerEffects: [],
+			expiration: {
+				type: EXPIRATION_ANY_TURNS,
+				turns: 1,
+			},
+			player: PLAYER_ONE,
+			generatedBy: nanoid(),
+		};
+
+		gameState.update(createEffectAction);
+
+		expect(gameState.state.continuousEffects.length).toEqual(1);
+		expect(gameState.state.continuousEffects[0].staticAbilities.length).toEqual(1);
+		expect(gameState.state.continuousEffects[0].staticAbilities[0]).toEqual(testStaticAbility);
+
+		expect(gameState.state.continuousEffects[0].expiration.turns).toEqual(1);
+
+		const passAction = {
+			type: ACTION_PASS,
+		};
+
+		gameState.update(passAction);
+
+		expect(gameState.state.continuousEffects.length).toEqual(0);
+	});
+
+	it('Do not renove continuous effects with EXPIRATION_NEVER when turns run out', () => {
+		const PLAYER_ONE = 10;
+		const PLAYER_TWO = 12;
+
+		const gameState = new moonlands.State({
+			step: STEP_PRS_SECOND,
+			activePlayer: PLAYER_ONE,
+		});
+
+		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
+
+		const testStaticAbility = {
+			name: 'Test static ability',
+			text: 'Static ability text',
+			selector: SELECTOR_CREATURES,
+			property: PROPERTY_ABLE_TO_ATTACK,
+			modifier: {
+				operator: CALCULATION_SET,
+				operandOne: false,
+			},
+		};
+
+		const createEffectAction = {
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+			staticAbilities: [testStaticAbility],
+			triggerEffects: [],
+			expiration: {
+				type: EXPIRATION_NEVER,
+				turns: 1,
+			},
+			player: PLAYER_ONE,
+			generatedBy: nanoid(),
+		};
+
+		gameState.update(createEffectAction);
+
+		expect(gameState.state.continuousEffects.length).toEqual(1);
+		expect(gameState.state.continuousEffects[0].staticAbilities.length).toEqual(1);
+		expect(gameState.state.continuousEffects[0].staticAbilities[0]).toEqual(testStaticAbility);
+
+		expect(gameState.state.continuousEffects[0].expiration.turns).toEqual(1);
+
+		const passAction = {
+			type: ACTION_PASS,
+		};
+
+		gameState.update(passAction);
+
+		expect(gameState.state.continuousEffects.length).toEqual(1);
+	});
+
+	it('Continuous effects set properties', () => {
+		const PLAYER_ONE = 10;
+		const PLAYER_TWO = 12;
+		const ayebaw = new CardInGame(byName('Ayebaw'), PLAYER_ONE).addEnergy(2);
+		const grega = new CardInGame(byName('Grega'), PLAYER_TWO).addEnergy(10);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, PLAYER_ONE),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, PLAYER_TWO),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([ayebaw]),
+			],
+			step: STEP_PRS_SECOND,
+			activePlayer: PLAYER_ONE,
+		});
+
+		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
+
+		const testStaticAbility = {
+			name: 'Test static ability',
+			text: 'Static ability text',
+			selector: SELECTOR_CREATURES,
+			property: PROPERTY_ABLE_TO_ATTACK,
+			modifier: {
+				operator: CALCULATION_SET,
+				operandOne: false,
+			},
+			player: PLAYER_ONE,
+		};
+
+		const createEffectAction = {
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+			staticAbilities: [testStaticAbility],
+			triggerEffects: [],
+			expiration: {
+				type: EXPIRATION_ANY_TURNS,
+				turns: 1,
+			},
+			player: PLAYER_ONE,
+			generatedBy: nanoid(),
+		};
+
+		gameState.update(createEffectAction);
+
+		const creatureAbleToAttack = gameState.modifyByStaticAbilities(ayebaw, PROPERTY_ABLE_TO_ATTACK);
+
+		expect(creatureAbleToAttack).toEqual(false);
+
+		expect(gameState.state.continuousEffects[0].expiration.turns).toEqual(1);
+
+		const passAction = {
+			type: ACTION_PASS,
+		};
+
+		gameState.update(passAction);
+
+		// In the new turn, creatures are finally able to attack
+		const creatureAbleToAttackNow = gameState.modifyByStaticAbilities(ayebaw, PROPERTY_ABLE_TO_ATTACK);
+		expect(creatureAbleToAttackNow).toEqual(true);
+	});
+
+	it('Continuous effects set properties by card id (id)', () => {
+		const PLAYER_ONE = 10;
+		const PLAYER_TWO = 12;
+		const ayebaw = new CardInGame(byName('Ayebaw'), PLAYER_ONE).addEnergy(2);
+		const bwill = new CardInGame(byName('Bwill'), PLAYER_ONE).addEnergy(2);
+		const arboll = new CardInGame(byName('Arboll'), PLAYER_ONE).addEnergy(2);
+
+		const grega = new CardInGame(byName('Grega'), PLAYER_TWO).addEnergy(10);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, PLAYER_ONE),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, PLAYER_TWO),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([ayebaw, bwill, arboll]),
+			],
+			step: STEP_PRS_SECOND,
+			activePlayer: PLAYER_ONE,
+			spellMetaData: {
+				[ayebaw.id]: {
+					targetId: ayebaw.id,
+				},
+			},
+		});
+
+		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
+
+		const testStaticAbility = {
+			name: 'Test static ability',
+			text: 'Static ability text',
+			selector: SELECTOR_ID,
+			selectorParameter: '$targetId',
+			property: PROPERTY_ABLE_TO_ATTACK,
+			modifier: {
+				operator: CALCULATION_SET,
+				operandOne: false,
+			},
+			player: PLAYER_ONE,
+		};
+
+		const createEffectAction = {
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+			staticAbilities: [testStaticAbility],
+			triggerEffects: [],
+			expiration: {
+				type: EXPIRATION_ANY_TURNS,
+				turns: 1,
+			},
+			player: PLAYER_ONE,
+			generatedBy: ayebaw.id,
+		};
+
+		gameState.update(createEffectAction);
+
+		const creatureAbleToAttack = gameState.modifyByStaticAbilities(ayebaw, PROPERTY_ABLE_TO_ATTACK);
+		const bwillAbleToAttack = gameState.modifyByStaticAbilities(bwill, PROPERTY_ABLE_TO_ATTACK);
+		const arbollAbleToAttack = gameState.modifyByStaticAbilities(arboll, PROPERTY_ABLE_TO_ATTACK);
+
+		expect(creatureAbleToAttack).toEqual(false);
+		expect(bwillAbleToAttack).toEqual(true);
+		expect(arbollAbleToAttack).toEqual(true);
+
+		expect(gameState.state.continuousEffects[0].expiration.turns).toEqual(1);
+
+		const passAction = {
+			type: ACTION_PASS,
+		};
+
+		gameState.update(passAction);
+
+		// In the new turn, creatures are finally able to attack
+		const creatureAbleToAttackNow = gameState.modifyByStaticAbilities(ayebaw, PROPERTY_ABLE_TO_ATTACK);
+		expect(creatureAbleToAttackNow).toEqual(true);
+		expect(bwillAbleToAttack).toEqual(true);
+		expect(arbollAbleToAttack).toEqual(true);
+	});
+
+	it('Continuous effects set properties by card id (card)', () => {
+		const PLAYER_ONE = 10;
+		const PLAYER_TWO = 12;
+		const ayebaw = new CardInGame(byName('Ayebaw'), PLAYER_ONE).addEnergy(2);
+		const bwill = new CardInGame(byName('Bwill'), PLAYER_ONE).addEnergy(2);
+		const arboll = new CardInGame(byName('Arboll'), PLAYER_ONE).addEnergy(2);
+
+		const grega = new CardInGame(byName('Grega'), PLAYER_TWO).addEnergy(10);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, PLAYER_ONE),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, PLAYER_TWO),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([ayebaw, bwill, arboll]),
+			],
+			step: STEP_PRS_SECOND,
+			activePlayer: PLAYER_ONE,
+			spellMetaData: {
+				[ayebaw.id]: {
+					targetId: ayebaw,
+				},
+			},
+		});
+
+		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
+
+		const testStaticAbility = {
+			name: 'Test static ability',
+			text: 'Static ability text',
+			selector: SELECTOR_ID,
+			selectorParameter: '$targetId',
+			property: PROPERTY_ABLE_TO_ATTACK,
+			modifier: {
+				operator: CALCULATION_SET,
+				operandOne: false,
+			},
+			player: PLAYER_ONE,
+		};
+
+		const createEffectAction = {
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+			staticAbilities: [testStaticAbility],
+			triggerEffects: [],
+			expiration: {
+				type: EXPIRATION_ANY_TURNS,
+				turns: 1,
+			},
+			player: PLAYER_ONE,
+			generatedBy: ayebaw.id,
+		};
+
+		gameState.update(createEffectAction);
+
+		const creatureAbleToAttack = gameState.modifyByStaticAbilities(ayebaw, PROPERTY_ABLE_TO_ATTACK);
+		const bwillAbleToAttack = gameState.modifyByStaticAbilities(bwill, PROPERTY_ABLE_TO_ATTACK);
+		const arbollAbleToAttack = gameState.modifyByStaticAbilities(arboll, PROPERTY_ABLE_TO_ATTACK);
+
+		expect(creatureAbleToAttack).toEqual(false);
+		expect(bwillAbleToAttack).toEqual(true);
+		expect(arbollAbleToAttack).toEqual(true);
+
+		expect(gameState.state.continuousEffects[0].expiration.turns).toEqual(1);
+
+		const passAction = {
+			type: ACTION_PASS,
+		};
+
+		gameState.update(passAction);
+
+		// In the new turn, creatures are finally able to attack
+		const creatureAbleToAttackNow = gameState.modifyByStaticAbilities(ayebaw, PROPERTY_ABLE_TO_ATTACK);
+		expect(creatureAbleToAttackNow).toEqual(true);
+		expect(bwillAbleToAttack).toEqual(true);
+		expect(arbollAbleToAttack).toEqual(true);
 	});
 });
 

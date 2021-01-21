@@ -1,4 +1,4 @@
-Done: **133** cards out of **190**
+Done: **139** cards out of **190**
 
 # Done, tested
 
@@ -77,6 +77,8 @@ Done: **133** cards out of **190**
 - Wellisk
 - Fire Chogo
 - Gum-Gum
+- Eclipse
+- Plith
 
 # Done, not tested
 
@@ -140,6 +142,8 @@ Done: **133** cards out of **190**
 - Carnivorous Cave
 - Gloves of Crystal
 - Stradus
+- Platheus
+- Gogor
 
 # Possible sample decks:
 
@@ -251,7 +255,6 @@ Done: **133** cards out of **190**
 - Carnivorous Cave
 - Cloud Sceptre
 - Colossus
-- Eclipse
 - Energy Band
 - Entangle
 - Epik
@@ -264,9 +267,6 @@ Done: **133** cards out of **190**
 - Gar
 - Giant Parmalag
 - Giant Vulbor
-- Gloves of Crystal
-- Gogor
-- Gum-Gum
 - Heat Lens
 - Hood of Hiding
 - Hubdra's Spear
@@ -279,8 +279,6 @@ Done: **133** cards out of **190**
 - Orathan Flyer
 - Orish
 - Orlon
-- Orothean Goggles
-- Orpus
 - Orthea
 - Parmalag
 - Platheus
@@ -291,7 +289,6 @@ Done: **133** cards out of **190**
 - Shimmer
 - Spirit of the Flame
 - Staff of Korrits
-- Stradus
 - Syphon Vortex
 - Tap Roots
 - Thunderquake
@@ -314,18 +311,19 @@ Done: **133** cards out of **190**
 
 # Custom prompts
 
-- Lightning
+- Lightning (choosing between two alternatives)
+- Tap Roots (creature not selected in previous prompt)
 - Implosion (discarding specific cards)
+- Raxis (between two alternatives)
 - Mirror Pendant (choosing power on Magi)
 - Thunderquake (choosing any number of creatures)
 - Vulbor (choosing player)
 - Heat Lens (choosing player)
-- Gar (between cards in play)
-- Eye of the Storm (choosing between drawing five or opponent discarding their hand)
+- Gar (between cards in play in case of tie)
+- Eye of the Storm (choosing between alternatives)
 
 # Conditionals
 
-- Plith
 - Shimmer
 
 # Rearranging Energy
@@ -392,9 +390,7 @@ Done: **133** cards out of **190**
 
 ## Statuses
 
-- Burrow
-- Enrich
-- Gogor
+- Burrow (X + 1 cost)
 
 ## Ability to play certain cards
 
@@ -402,9 +398,7 @@ Done: **133** cards out of **190**
 
 ## Ability to attack
 
-- Eclipse
 - Energy Band
-- Platheus
 
 ## Ability to be attacked
 

@@ -1,5 +1,5 @@
-import { AnyEffectType, FindType } from '.';
-import { ConditionType, ZoneType } from './common';
+import { AnyEffectType, FindType, StaticAbilityType, TriggerEffectType } from '.';
+import { ConditionType, ExpirationObjectType, ZoneType } from './common';
 import CardInGame from '../classes/CardInGame'
 
 import {
@@ -45,7 +45,7 @@ import {
 	EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
     EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
     EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
-
+    EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
     EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
     EFFECT_TYPE_START_TURN,
     EFFECT_TYPE_START_STEP,
@@ -83,7 +83,8 @@ export type EffectTypeType =
 	typeof EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI |
 	typeof EFFECT_TYPE_ADD_ENERGY_TO_CREATURE |
 	typeof EFFECT_TYPE_ADD_ENERGY_TO_MAGI |
-	typeof EFFECT_TYPE_ENERGIZE |
+    typeof EFFECT_TYPE_ENERGIZE |
+    typeof EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT |
 	typeof EFFECT_TYPE_CONDITIONAL |
 	typeof EFFECT_TYPE_START_OF_TURN |
 	typeof EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES |
@@ -373,8 +374,15 @@ type DefeatMagiEffect = ActionEffect & {
 
 type MagiIsDefeatedEffect = ActionEffect & {
     effectType: typeof EFFECT_TYPE_MAGI_IS_DEFEATED;
-    source: CardInGame | null,
-    target: CardInGame,
+    source: CardInGame | null;
+    target: CardInGame;
+}
+
+type CreateContinuousEffect = ActionEffect & {
+    effectType: typeof EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT;
+    staticAbilities?: StaticAbilityType[];
+    triggerEffects?: TriggerEffectType[];
+    expiration: ExpirationObjectType;
 }
 
 export type EffectType = ActionEffect & {
@@ -421,4 +429,5 @@ export type EffectType = ActionEffect & {
     RollDieEffect |
     MoveEnergyEffect |
     MagiIsDefeatedEffect |
+    CreateContinuousEffect |
     DefeatMagiEffect;

@@ -76,6 +76,7 @@ import {
 	SELECTOR_STATUS,
 	SELECTOR_OWN_CREATURES_WITH_STATUS,
 	SELECTOR_CREATURES_WITHOUT_STATUS,
+	SELECTOR_ID,
 
 	STATUS_BURROWED,
 
@@ -193,6 +194,12 @@ import {
 	ACTION_NONE,
 	PROMPT_TYPE_MAY_ABILITY,
 	EFFECT_TYPE_ATTACK,
+	EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+	EXPIRATION_ANY_TURNS,
+	EXPIRATION_NEVER,
+	SELECTOR_CREATURES_OF_PLAYER,
+	PROPERTY_MAGI_NAME,
+	SELECTOR_OWN_MAGI_SINGLE,
 } from './const';
 
 import {showAction} from './logAction';
@@ -221,9 +228,11 @@ import {
 	ConditionType,
 	FindType,
 	TriggerEffectType,
-	ReplacementEffectType
+	ReplacementEffectType,
+	ContinuousEffectType
 } from './types';
 import Card from './classes/Card';
+import { appendFileSync } from 'fs';
 
 const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
 	id: cardInGame.id,
@@ -306,6 +315,7 @@ const defaultState: StateShape = {
 	delayedTriggers: [],
 	mayEffectActions: [],
 	fallbackActions: [],
+	continuousEffects: [],
 	activePlayer: 0,
 	prompt: false,
 	promptType: null,
@@ -356,6 +366,7 @@ type StateShape = {
 	savedActions: AnyEffectType[];
 	mayEffectActions: AnyEffectType[]; // Actions to apply if we allow may effect or may effect replacement
 	fallbackActions: AnyEffectType[]; // Actions to apply if we deny may effect replacement
+	continuousEffects: ContinuousEffectType[]; // Continuous effects created by cards
 	spellMetaData: Record<string, MetadataRecord>;
 	delayedTriggers: Record<string, any>[];
 }
@@ -889,6 +900,8 @@ export class State {
 			}
 			case SELECTOR_OWN_MAGI:
 				return this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).cards;
+			// case SELECTOR_OWN_MAGI_SINGLE:
+			// 	return this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card;
 			case SELECTOR_OWN_SPELLS_IN_HAND:
 				return this.getZone(ZONE_TYPE_HAND, player).cards.filter(card => card.card.type == TYPE_SPELL);
 			case SELECTOR_ENEMY_MAGI:
@@ -922,7 +935,7 @@ export class State {
 		}
 	}
 
-	getByProperty(target: CardInGame, property, subProperty = null) {
+	getByProperty(target: CardInGame, property: PropertyType, subProperty = null) {
 		switch(property) {
 			case PROPERTY_ID:
 				return target.id;
@@ -930,6 +943,8 @@ export class State {
 				return target.card.type;
 			case PROPERTY_CREATURE_TYPES:
 				return target.card.name.split(' ');
+			case PROPERTY_MAGI_NAME:
+				return target.card.name;
 			case PROPERTY_CONTROLLER:
 				return target.data.controller;
 			case PROPERTY_ENERGY_COUNT:
@@ -986,10 +1001,22 @@ export class State {
 
 	isCardAffectedByStaticAbility(card: CardInGame, staticAbility: EnrichedStaticAbilityType | GameStaticAbility) {
 		switch (staticAbility.selector) {
+			case SELECTOR_ID: {
+				return card.id === staticAbility.selectorParameter;
+			}
+			case SELECTOR_CREATURES: {
+				return card.card.type === TYPE_CREATURE &&
+				this.getZone(ZONE_TYPE_IN_PLAY).cards.some(({id}) => id === card.id);
+			}
 			case SELECTOR_OWN_CREATURES: {
 				return card.card.type === TYPE_CREATURE &&
 				this.getZone(ZONE_TYPE_IN_PLAY).cards.some(({id}) => id === card.id) &&
 				card.data.controller === staticAbility.player;
+			}
+			case SELECTOR_CREATURES_OF_PLAYER: {
+				return card.card.type === TYPE_CREATURE &&
+				this.getZone(ZONE_TYPE_IN_PLAY).cards.some(({id}) => id === card.id) &&
+				card.data.controller == staticAbility.selectorParameter;
 			}
 			case SELECTOR_OWN_MAGI: {
 				return card.card.type === TYPE_MAGI &&
@@ -1049,6 +1076,10 @@ export class State {
 			...this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO).cards,
 		];
 
+		const continuousStaticAbilities: EnrichedStaticAbilityType[] = this.state.continuousEffects.map(
+			effect => effect.staticAbilities.map(a => ({...a, player: effect.player})) || []
+		).flat();
+
 		const propertyLayers = {
 			[PROPERTY_COST]: 1,
 			[PROPERTY_ENERGIZE]: 2,
@@ -1067,7 +1098,7 @@ export class State {
 			[],
 		);
 
-		const staticAbilities = [...gameStaticAbilities, ...zoneAbilities].sort((a, b) => propertyLayers[a.property] - propertyLayers[b.property]);
+		const staticAbilities = [...gameStaticAbilities, ...zoneAbilities, ...continuousStaticAbilities].sort((a, b) => propertyLayers[a.property] - propertyLayers[b.property]);
 
 		let initialCardData = {
 			card: target.card,
@@ -1421,8 +1452,16 @@ export class State {
 			throw new Error('Missing object field in condition');
 		}
 
-		const objectOne = this.getObjectOrSelf(action, self, condition.objectOne, 'propertyOne' in condition && Boolean(condition.propertyOne));
-		const objectTwo = this.getObjectOrSelf(action, self, condition.objectTwo, 'propertyTwo' in condition && Boolean(condition.propertyTwo));
+		// Sometimes, spellData stores arrays of cards. If we got array to check condition on, use only first item.
+		const multiObjectOne = this.getObjectOrSelf(action, self, condition.objectOne, 'propertyOne' in condition && Boolean(condition.propertyOne));
+		const objectOne = (multiObjectOne instanceof Array) ? multiObjectOne[0] : multiObjectOne; 
+		const multiObjectTwo = this.getObjectOrSelf(action, self, condition.objectTwo, 'propertyTwo' in condition && Boolean(condition.propertyTwo));
+		const objectTwo = (multiObjectTwo instanceof Array) ? multiObjectTwo[0] : multiObjectTwo;
+
+		// So here either objectOne or objectTwo might be an array. 
+		if (objectOne instanceof Array || objectTwo instanceof Array) {
+			throw new Error('Whoops, array in checkCondition');
+		}
 
 		const operandOne = (condition.propertyOne && condition.propertyOne !== ACTION_PROPERTY) ? this.modifyByStaticAbilities(objectOne, condition.propertyOne) : objectOne;
 
@@ -1485,11 +1524,12 @@ export class State {
 
 		type TriggerTypeEnhanced = WithSelf & TriggerEffectType;
 
-		const triggerEffects: TriggerTypeEnhanced[] = [...cardTriggerEffects, ...this.state.delayedTriggers];
+		const continuousEffectTriggers = this.state.continuousEffects.map(effect => effect.triggerEffects.map(triggerEffect => ({...triggerEffect, id: effect.id})) || []).flat();
+		const triggerEffects: TriggerTypeEnhanced[] = [...cardTriggerEffects, ...this.state.delayedTriggers, ...continuousEffectTriggers];
 
 		triggerEffects.forEach(replacer => {
 			// @ts-ignore
-			const triggeredId = replacer.id || replacer.self.id; // Not really, but will work for now
+			const triggeredId = replacer.self.id; // Not really, but will work for now
 			if (this.matchAction(action, replacer.find, replacer.self)) {
 				// Save source to *trigger source* metadata (it's probably empty)
 				// For creatures set creatureSource field (just for convenience)
@@ -1770,7 +1810,8 @@ export class State {
 						console.log(`Somehow ${attackSource.card.name} cannot attack`);
 					}
 					const sourceHasAttacksLeft = attackSource.data.attacked < sourceAttacksPerTurn;
-					const additionalAttackersHasAttacksLeft = additionalAttackers.every((card: CardInGame) => card.card.data.canPackHunt && card.data.attacked < this.modifyByStaticAbilities(card, PROPERTY_ATTACKS_PER_TURN));
+					const additionalAttackersCanAttack = additionalAttackers.every((card: CardInGame) => card.card.data.canPackHunt && this.modifyByStaticAbilities(card, PROPERTY_ABLE_TO_ATTACK));
+					const additionalAttackersHasAttacksLeft = additionalAttackers.every((card: CardInGame) => card.data.attacked < this.modifyByStaticAbilities(card, PROPERTY_ATTACKS_PER_TURN));
 
 					const targetIsMagi = attackTarget.card.type == TYPE_MAGI;
 					const opponentCreatures = this.useSelector(SELECTOR_OWN_CREATURES, attackTarget.owner, null);
@@ -1784,7 +1825,7 @@ export class State {
 						)
 					);
 
-					const enoughAttacksLeft = (sourceHasAttacksLeft && (additionalAttackersHasAttacksLeft || additionalAttackers.length === 0));
+					const enoughAttacksLeft = (sourceHasAttacksLeft && ((additionalAttackersCanAttack && additionalAttackersHasAttacksLeft) || additionalAttackers.length === 0));
 
 					if (enoughAttacksLeft && attackApproved && this.getCurrentPriority() == PRIORITY_ATTACK) {
 						this.transformIntoActions({
@@ -2447,8 +2488,31 @@ export class State {
 								}
 							);
 
+							const updateContinuousEffects = (effect: ContinuousEffectType) => {
+								switch (effect.expiration.type) {
+									case EXPIRATION_ANY_TURNS: {
+										const turnCount = effect.expiration.turns;
+										if (turnCount > 1) {
+											return {
+												...effect,
+												expiration: {
+													type: effect.expiration.type,
+													turns: turnCount - 1,
+												}
+											};
+										} else {
+											return null;
+										}
+									}
+									case EXPIRATION_NEVER: {
+										return effect;
+									}
+								}
+							};
+
 							this.state = {
 								...this.state,
+								continuousEffects: this.state.continuousEffects.map(updateContinuousEffects).filter(Boolean),
 								activePlayer: action.player,
 								step: 0, // this will be rewritten to 0 by EFFECT_TYPE_START_STEP, but no big deal
 							};
@@ -3535,6 +3599,51 @@ export class State {
 								};
 								this.transformIntoActions(effect);
 							});
+							break;
+						}
+						case EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT: {
+							const id = nanoid();
+
+							const staticAbilities = (action.staticAbilities || []).map(ability => {
+								switch (ability.selector) {
+									case SELECTOR_ID: {
+										const selectorParameterMetaValue = this.getMetaValue(ability.selectorParameter, action.generatedBy);
+
+										const selectorParameter = (selectorParameterMetaValue instanceof CardInGame) ? selectorParameterMetaValue.id : selectorParameterMetaValue;
+										return {
+											...ability,
+											selectorParameter,
+										};
+									}
+									case SELECTOR_CREATURES_OF_PLAYER: {
+										const selectorParameter = this.getMetaValue(ability.selectorParameter, action.generatedBy);
+										return {
+											...ability,
+											selectorParameter,
+										};
+									}
+									default: {
+										return ability;
+									}
+								}
+							});
+
+							const continuousEffect: ContinuousEffectType = {
+								triggerEffects: action.triggerEffects || [],
+								staticAbilities,
+								expiration: action.expiration,
+								player: action.player,
+								id,
+							};
+
+							this.state = {
+								...this.state,
+								continuousEffects: [
+									...this.state.continuousEffects,
+									continuousEffect,
+								],
+							};
+
 							break;
 						}
 					}

@@ -22,6 +22,8 @@ import {
 	PROMPT_TYPE_RELIC,
 	PROMPT_TYPE_MAY_ABILITY,
 
+	PROPERTY_ABLE_TO_ATTACK,
+
 	RESTRICTION_REGION,
 	REGION_OROTHE,
 
@@ -5803,6 +5805,272 @@ describe('Korrit', () => {
 		expect(grega.data.energy).toEqual(9, 'Grega has 9 energy left');
 		expect(mushroomHyren.data.energy).toEqual(3, 'Mushroom Hyren has 3 energy');
 		expect(korrit.data.energy).toEqual(3, 'Korrit has 3 energy');
+	});
+
+	it('Pack Hunt (but no attacks left on pack hunter)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		// Naroom/Underneath side
+		const pruitt = new CardInGame(byName('Pruitt'), ACTIVE_PLAYER).addEnergy(10);
+		const korrit = new CardInGame(byName('Korrit'), ACTIVE_PLAYER).addEnergy(3);
+		const mushroomHyren = new CardInGame(byName('Mushroom Hyren'), ACTIVE_PLAYER).addEnergy(3);
+
+		korrit.data.attacked = 1;
+
+		// Cald side
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const kelthet = new CardInGame(byName('Kelthet'), NON_ACTIVE_PLAYER).addEnergy(6);
+
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([pruitt]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([korrit, mushroomHyren, kelthet]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: ACTION_ATTACK,
+			source: mushroomHyren,
+			target: kelthet,
+			additionalAttackers: [korrit],
+		};
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(3, 'Three creatures on the field');
+
+		gameState.update(attackAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(3, 'Three creatures on the field');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(0, 'Active player has no cards in discard');
+	});
+});
+
+describe('Eclipse', () => {
+	it('Target is enemy magi', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		// Naroom/Underneath side
+		const jaela = new CardInGame(byName('Jaela'), ACTIVE_PLAYER).addEnergy(10);
+		const vellup = new CardInGame(byName('Vellup'), ACTIVE_PLAYER).addEnergy(3);
+		const eclipse = new CardInGame(byName('Eclipse'), ACTIVE_PLAYER);
+
+		// Cald side
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const kelthet = new CardInGame(byName('Kelthet'), NON_ACTIVE_PLAYER).addEnergy(6);
+
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([eclipse]),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([jaela]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([vellup, kelthet]),
+			],
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const playAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: eclipse,
+				player: ACTIVE_PLAYER,
+			},
+		};
+
+		gameState.update(playAction);
+		expect(gameState.state.prompt).toEqual(true);
+
+		const targetAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: grega,
+			player: ACTIVE_PLAYER,
+			generatedBy: eclipse.id,
+		};
+
+		gameState.update(targetAction);
+		expect(gameState.state.prompt).toEqual(false);
+
+		const passAction = {
+			type: ACTION_PASS,
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(passAction); // pass to first PRS
+		const kelthetAbleToAttack = gameState.modifyByStaticAbilities(kelthet, PROPERTY_ABLE_TO_ATTACK);
+		expect(kelthetAbleToAttack).toEqual(false);
+	});
+
+	it('Target is own magi', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		// Naroom/Underneath side
+		const jaela = new CardInGame(byName('Jaela'), ACTIVE_PLAYER).addEnergy(10);
+		const vellup = new CardInGame(byName('Vellup'), ACTIVE_PLAYER).addEnergy(3);
+		const eclipse = new CardInGame(byName('Eclipse'), ACTIVE_PLAYER);
+
+		// Cald side
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const kelthet = new CardInGame(byName('Kelthet'), NON_ACTIVE_PLAYER).addEnergy(6);
+
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([eclipse]),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([jaela]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([vellup, kelthet]),
+			],
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const playAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: eclipse,
+				player: ACTIVE_PLAYER,
+			},
+		};
+
+		gameState.update(playAction);
+		expect(gameState.state.prompt).toEqual(true);
+
+		const targetAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: jaela,
+			player: ACTIVE_PLAYER,
+			generatedBy: eclipse.id,
+		};
+
+		gameState.update(targetAction);
+		expect(gameState.state.prompt).toEqual(false);
+
+		const passAction = {
+			type: ACTION_PASS,
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(passAction); // pass to first PRS
+		const kelthetAbleToAttack = gameState.modifyByStaticAbilities(kelthet, PROPERTY_ABLE_TO_ATTACK);
+		expect(kelthetAbleToAttack).toEqual(true);
+		gameState.update(passAction); // pass to attack
+		gameState.update(passAction); // pass to creatures
+		gameState.update(passAction); // pass to second PRS
+		gameState.update(passAction); // pass to our turn
+
+		const vellupAbleToAttack = gameState.modifyByStaticAbilities(vellup, PROPERTY_ABLE_TO_ATTACK);
+		expect(vellupAbleToAttack).toEqual(false);
+	});
+});
+
+describe('Plith', () => {
+	it('Warning (magi is not Evu)', () => {
+		const ACTIVE_PLAYER = 44;
+		const NON_ACTIVE_PLAYER = 21;
+
+		// Naroom/Orothe side
+		const pruitt = new CardInGame(byName('Pruitt'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const plith = new CardInGame(byName('Plith'), NON_ACTIVE_PLAYER).addEnergy(1);
+		const grow = new CardInGame(byName('Grow'), NON_ACTIVE_PLAYER);
+		const arboll = new CardInGame(byName('Arboll'), NON_ACTIVE_PLAYER);
+
+		// Cald side
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(5);
+		const kelthet = new CardInGame(byName('Kelthet'), ACTIVE_PLAYER).addEnergy(6);
+
+		const gameState = new State({
+			zones: [
+				new Zone('NAP Hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+				new Zone('NAP Deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER).add([grow, arboll]),
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([pruitt]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([plith, kelthet]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: ACTION_ATTACK,
+			source: kelthet,
+			target: plith,
+		};
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two creatures on the field');
+
+		gameState.update(attackAction);
+
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1, 'Non-active player has 1 card in discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Plith', 'It is Plith');
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(1, 'Non-active player has drawn 1 card');
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).card.card.name).toEqual('Grow', 'It is Grow');		
+	});
+
+	it('Warning (magi is Evu)', () => {
+		const ACTIVE_PLAYER = 44;
+		const NON_ACTIVE_PLAYER = 21;
+
+		// Naroom/Orothe side
+		const evu = new CardInGame(byName('Evu'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const plith = new CardInGame(byName('Plith'), NON_ACTIVE_PLAYER).addEnergy(1);
+		const grow = new CardInGame(byName('Grow'), NON_ACTIVE_PLAYER);
+		const arboll = new CardInGame(byName('Arboll'), NON_ACTIVE_PLAYER);
+
+		// Cald side
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(5);
+		const kelthet = new CardInGame(byName('Kelthet'), ACTIVE_PLAYER).addEnergy(6);
+
+		const gameState = new State({
+			zones: [
+				new Zone('NAP Hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+				new Zone('NAP Deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER).add([grow, arboll]),
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([evu]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([plith, kelthet]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: ACTION_ATTACK,
+			source: kelthet,
+			target: plith,
+		};
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two creatures on the field');
+
+		gameState.update(attackAction);
+
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1, 'Non-active player has 1 card in discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Plith', 'It is Plith');
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(2, 'Non-active player has drawn 2 cards');
 	});
 });
 
