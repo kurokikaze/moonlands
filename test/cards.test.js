@@ -5170,6 +5170,63 @@ describe('Coral Hyren', () => {
 	});
 });
 
+describe('Deep Hyren', () => {
+	it('Hurricane', () => {
+		const ACTIVE_PLAYER = 411;
+		const NON_ACTIVE_PLAYER = 12;
+
+		// Orothe player
+		const whall = new CardInGame(byName('Whall'), ACTIVE_PLAYER).addEnergy(10);
+		const deepHyren = new CardInGame(byName('Deep Hyren'), ACTIVE_PLAYER).addEnergy(8);
+		const orotheanGloves = new CardInGame(byName('Orothean Gloves'), ACTIVE_PLAYER);
+		const waterOfLife = new CardInGame(byName('Water of Life'), ACTIVE_PLAYER);
+
+		// Naroom player
+		const pruitt = new CardInGame(byName('Pruitt'), ACTIVE_PLAYER).addEnergy(7);
+		const balamant = new CardInGame(byName('Balamant'), ACTIVE_PLAYER).addEnergy(7);
+		const carillion = new CardInGame(byName('Carillion'), ACTIVE_PLAYER).addEnergy(5);
+		const rudwot = new CardInGame(byName('Rudwot'), ACTIVE_PLAYER).addEnergy(4);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [deepHyren, balamant, carillion, rudwot, orotheanGloves, waterOfLife], [whall]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([pruitt]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: deepHyren,
+			power: deepHyren.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true);
+
+		const targetPromptAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: deepHyren,
+			player: ACTIVE_PLAYER,
+			generatedBy: deepHyren.id,
+		};
+
+		gameState.update(targetPromptAction);
+
+		expect(gameState.state.prompt).toEqual(false);
+
+		expect(pruitt.data.energy).toEqual(4);
+		expect(balamant.data.energy).toEqual(4);
+		expect(carillion.data.energy).toEqual(2);
+		expect(rudwot.data.energy).toEqual(1);
+	});
+});
+
 describe('Magam', () => {
 	it('Vitalize', () => {
 		const ACTIVE_PLAYER = 411;
@@ -5481,6 +5538,41 @@ describe('Lava Aq', () => {
 		
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toEqual(2, 'Grega has 2 energy');
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).card.data.energy).toEqual(4, 'Pruitt has 4 energy');
+	});
+
+	it('Firestorm (Lava Aq is the only creature that wont survive the ability)', () => {
+		const ACTIVE_PLAYER = 411;
+		const NON_ACTIVE_PLAYER = 12;
+
+		// Cald player
+		const lavaAq = new CardInGame(byName('Lava Aq'), ACTIVE_PLAYER).addEnergy(2);
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(2);
+
+		// Naroom player
+		const pruitt = new CardInGame(byName('Pruitt'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER).addEnergy(1);
+		const arboll = new CardInGame(byName('Arboll'), NON_ACTIVE_PLAYER).addEnergy(1);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaAq, weebo, arboll], [grega]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([pruitt]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: lavaAq,
+			power: lavaAq.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerAction);
+		expect(gameState.state.prompt).toEqual(false);
 	});
 });
 

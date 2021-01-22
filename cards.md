@@ -17,6 +17,7 @@ Done: **141** cards out of **190**
 - Cave Hyren
 - Cave Rudwot
 - Coral Hyren
+- Deep Hyren
 - Diobor
 - Drakan
 - Eebit
@@ -89,7 +90,6 @@ Done: **141** cards out of **190**
 - Cave In
 - Channeler's Gloves
 - Cyclone Vashp
-- Deep Hyren
 - Ebylon
 - Fire Ball
 - Fire Flow

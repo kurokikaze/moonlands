@@ -1657,7 +1657,7 @@ export const cards = [
 			{
 				name: 'Hurricane',
 				cost: 6,
-				text: 'Choose your Creature. Discard chosen Creature from play. Discard 3 energy from each non-Orothe Creature in play.',
+				text: 'Choose your Creature. Discard chosen Creature from play. Discard 3 energy from each non-Orothe Creature and Magi in play.',
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
