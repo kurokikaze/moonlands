@@ -37,7 +37,7 @@ import {
 } from '../const';
 
 import { ResolvePromptType } from './resolvePrompt';
-import { SelectType } from './select';
+import { SelectorTypeType, SelectType } from './select';
 import { EffectTypeType, EffectType } from './effect';
 import { PromptTypeType, PropertyType, ConditionType, ExpirationObjectType } from './common';
 import { AttackEffect } from './attack';
@@ -80,7 +80,7 @@ type PowerType = {
 export type StaticAbilityType = {
 	name: string,
 	text: string,
-    selector: string,
+    selector: SelectorTypeType,
     selectorParameter?: string | number, 
     property: PropertyType,
     subProperty?: string;

@@ -2038,6 +2038,55 @@ export const cards = [
 			},
 		],
 	}),
+	new Card('Blu', TYPE_MAGI, REGION_OROTHE, null, {
+		triggerEffects: [
+			{
+				name: 'Artifice',
+				text: 'When Blu plays a Relic, he may discard one energy. If he does, draw one card.',
+				mayEffect: true,
+				find: {
+					effectType: EFFECT_TYPE_PLAY_RELIC,
+					conditions: [
+						{
+							objectOne: 'player',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						},
+					],
+				},
+				effects: [
+					select({
+						selector: SELECTOR_OWN_MAGI,
+						variable: 'blu',
+					}),
+					getPropertyValue({
+						property: PROPERTY_ENERGY_COUNT,
+						target: '$blu',
+						variable: '$energy',
+					}),
+					effect({
+						energy: '$energy',
+						conditions: [
+							{
+								objectOne: 'energy',
+								propertyOne: ACTION_PROPERTY,
+								comparator: '>=',
+								objectTwo: 1,
+								propertyTwo: null,
+							}
+						],
+						thenEffects: [
+							effect({
+								effectType: EFFECT_TYPE_DRAW,
+							}),
+						],
+					}),
+				],
+			},
+		],
+	}),
 	new Card('Sphor', TYPE_CREATURE, REGION_OROTHE, 2, {
 		triggerEffects: [
 			{
@@ -2223,6 +2272,17 @@ export const cards = [
 				effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
 				target: '$selected',
 				amount: 1,
+			}),
+		],
+	}),
+	new Card('Flood of Energy', TYPE_SPELL, REGION_NAROOM, 2, {
+		effects: [
+			select({
+				selector: SELECTOR_CARDS_WITH_ENERGIZE_RATE,
+			}),
+			effect({
+				effectType: EFFECT_TYPE_ENERGIZE,
+				target: '$selected',
 			}),
 		],
 	}),

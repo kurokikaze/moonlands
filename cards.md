@@ -1,4 +1,4 @@
-Done: **139** cards out of **190**
+Done: **141** cards out of **190**
 
 # Done, tested
 
@@ -144,6 +144,8 @@ Done: **139** cards out of **190**
 - Stradus
 - Platheus
 - Gogor
+- Blu
+- Flood of Energy
 
 # Possible sample decks:
 
@@ -247,59 +249,52 @@ Done: **139** cards out of **190**
 # Not done yet
 
 - Abaquist
-- Ancestral Flute
-- Barak
-- Bisiwog
-- Blu
-- Burrow
-- Carnivorous Cave
-- Cloud Sceptre
-- Colossus
-- Energy Band
-- Entangle
-- Epik
-- Eye of the Storm
-- Flame Control
-- Flame Hyren
-- Flood of Energy
-- Fog Bank
+- Ancestral Flute (selecting up to N cards)
+- Barak (looking at cards and rearranging them)
+- Bisiwog (overriding game continuous effect)
+- Burrow (cost X + 1)
+- Cloud Sceptre (discarding X cards from hand)
+- Colossus (protection)
+- Energy Band (using only before attack, must attack if able)
+- Entangle ([in]ability to play spells)
+- Epik (choosing up to X cards from opponent hand)
+- Eye of the Storm (choice between two alternatives)
+- Flame Control (rearranging energy)
+- Flame Hyren (distributing energy)
+- Fog Bank (ability to be attacked)
 - Fossik
-- Gar
-- Giant Parmalag
-- Giant Vulbor
-- Heat Lens
-- Hood of Hiding
-- Hubdra's Spear
-- Implosion
-- Karak
-- Lightning
-- Lovian
-- Mask of Abwyn
-- Mirror Pendant
-- Orathan Flyer
-- Orish
-- Orlon
+- Gar (select in case of tie)
+- Giant Parmalag (ability to be attacked)
+- Giant Vulbor (discarding, choice between alternatives)
+- Heat Lens (looking at hand and discarding)
+- Hood of Hiding (ability to be attacked)
+- Hubdra's Spear (select magi with no creatures)
+- Implosion (discarding X orothe cards)
+- Karak (exiling under creature, ability to play named relics)
+- Lightning (select between alternatives)
+- Lovian (protection from non-arderial spells)
+- Mask of Abwyn (looking at hand)
+- Mirror Pendant (choosing power on Magi)
+- Orathan Flyer (paying for creature from creature)
+- Orish (choosing player, discard at random)
+- Orlon (protection)
 - Orthea
 - Parmalag
-- Platheus
-- Plith
-- Raxis
+- Raxis (choice between alternatives)
 - Relic Mirror
-- Rod of Coals
 - Shimmer
-- Spirit of the Flame
+- Spirit of the Flame (discarding X cald creatures from hand)
 - Staff of Korrits
-- Syphon Vortex
-- Tap Roots
-- Thunderquake
-- Tidal Wave
+- Syphon Vortex (Cost X plus 4)
+- Tap Roots (selecting two creatures)
+- Thunderquake (choosing any number of creatures, distributing damage)
+- Tidal Wave (additional cost while spell resolves)
 - Twee
-- Vaal
-- Vinoc
+- Vaal (not losing energy from attack)
+- Vinoc (discarding any number of cards)
 - Vulbor
-- Wellisk
-- Wence
-- Will of Orothe
+- Wence (showing cards to opponent)
+- Will of Orothe (controlling other player)
 
 # Cost reduction/increase
 

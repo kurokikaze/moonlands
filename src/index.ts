@@ -1658,8 +1658,9 @@ export class State {
 		// Calculate if prompts are resolvable
 		// If source is Magi, it will not be filtered out, being in another zone
 		const creatureWillSurvive = !isPower || source.data.energy > powerCost;
-		const ourCardsInPlay = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => (creatureWillSurvive ? card.id !== source.id : true) && card.data.controller === source.data.controller);
-		const allCardsInPlay = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => creatureWillSurvive ? card.id !== source.id : true);
+
+		const ourCardsInPlay = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => (creatureWillSurvive ? true : card.id !== source.id ) && card.data.controller === source.data.controller);
+		const allCardsInPlay = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => creatureWillSurvive ? true : card.id !== source.id);
 
 		// powerPromptsDoable
 		const testablePrompts = [

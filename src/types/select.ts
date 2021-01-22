@@ -151,9 +151,10 @@ type SelectEnemyMagiParams = SelectParams & {
 
 type SelectEnemyMagi = SelectAction & SelectEnemyMagiParams;
 
-type SelectCardsWithEnergizeRate = SelectAction & {
+type SelectCardsWithEnergizeRateParams = {
     selector: typeof SELECTOR_CARDS_WITH_ENERGIZE_RATE;
 }
+type SelectCardsWithEnergizeRate = SelectAction & SelectCardsWithEnergizeRateParams;
 
 type SelectOpponentIdParams = {
     selector: typeof SELECTOR_OPPONENT_ID;
@@ -169,9 +170,10 @@ type SelectCreaturesAndMagiParams = SelectParams & {
 
 type SelectCreaturesAndMagi = SelectAction & SelectCreaturesAndMagiParams;
 
-type SelectOwnCardsWithEnergizeRate = SelectAction & {
+type SelectOwnCardsWithEnergizeRateParams = {
     selector: typeof SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE;
 }
+type SelectOwnCardsWithEnergizeRate = SelectAction & SelectOwnCardsWithEnergizeRateParams;
 
 type SelectCreaturesOfRegionParams = SelectParams & {
     selector: typeof SELECTOR_CREATURES_OF_REGION;
@@ -246,6 +248,8 @@ export type RefinedSelectParams = SelectCreaturesOfTypeParams |
     SelectTopMagiOfPileParams |
     SelectCreaturesNotOfRegionParams |
     SelectCreaturesOfRegionParams |
+    SelectOwnCardsWithEnergizeRateParams |
+    SelectCardsWithEnergizeRateParams |
     SelectCreaturesAndMagiParams;
 
 export type SelectType = SelectCreatures |
