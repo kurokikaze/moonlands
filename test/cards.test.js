@@ -6530,3 +6530,78 @@ describe('Undertow', () => {
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Undertow', 'It is played Undertow');
 	});
 });
+
+describe('Shimmer', () => {
+	it('Creature Bond', () => {
+		const ACTIVE_PLAYER = 411;
+		const NON_ACTIVE_PLAYER = 12;
+
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const lavaArboll = new CardInGame(byName('Lava Arboll'), NON_ACTIVE_PLAYER).addEnergy(3);
+		const kelthet = new CardInGame(byName('Kelthet'), NON_ACTIVE_PLAYER).addEnergy(5);
+		// Arderial player
+		const shimmer = new CardInGame(byName('Shimmer'), ACTIVE_PLAYER);
+
+		const thunderVashp = new CardInGame(byName('Thunder Vashp'), ACTIVE_PLAYER).addEnergy(5);
+		const pharan = new CardInGame(byName('Pharan'), ACTIVE_PLAYER).addEnergy(2);
+
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaArboll, thunderVashp, pharan, kelthet], [shimmer]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		const passAction = {
+			type: ACTION_PASS,
+		};
+
+		gameState.update(passAction);
+
+		expect(lavaArboll.data.energy).toEqual(2, 'Lava Arboll lost 1 energy');
+		expect(kelthet.data.energy).toEqual(4, 'Kelthet lost 1 energy');
+
+		expect(thunderVashp.data.energy).toEqual(5, 'Thunder Vashp has 5 energy');
+		expect(pharan.data.energy).toEqual(2, 'Pharan has 2 energy');
+	});
+
+	it('Creature Bond (energy on Shimmer, doesnt activate)', () => {
+		const ACTIVE_PLAYER = 411;
+		const NON_ACTIVE_PLAYER = 12;
+
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const lavaArboll = new CardInGame(byName('Lava Arboll'), NON_ACTIVE_PLAYER).addEnergy(3);
+		const kelthet = new CardInGame(byName('Kelthet'), NON_ACTIVE_PLAYER).addEnergy(5);
+		// Arderial player
+		const shimmer = new CardInGame(byName('Shimmer'), ACTIVE_PLAYER).addEnergy(5);
+
+		const thunderVashp = new CardInGame(byName('Thunder Vashp'), ACTIVE_PLAYER).addEnergy(5);
+		const pharan = new CardInGame(byName('Pharan'), ACTIVE_PLAYER).addEnergy(2);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaArboll, thunderVashp, pharan, kelthet], [shimmer]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		const passAction = {
+			type: ACTION_PASS,
+		};
+
+		gameState.update(passAction);
+
+		expect(lavaArboll.data.energy).toEqual(3, 'Lava Arboll lost no energy');
+		expect(kelthet.data.energy).toEqual(5, 'Kelthet lost no energy');
+
+		expect(thunderVashp.data.energy).toEqual(5, 'Thunder Vashp has 5 energy');
+		expect(pharan.data.energy).toEqual(2, 'Pharan has 2 energy');
+	});
+});

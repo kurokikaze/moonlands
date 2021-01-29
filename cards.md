@@ -1,4 +1,4 @@
-Done: **143** cards out of **190**
+Done: **147** cards out of **190**
 
 # Done, tested
 
@@ -80,6 +80,8 @@ Done: **143** cards out of **190**
 - Gum-Gum
 - Eclipse
 - Plith
+- Staff of Korrits
+- Shimmer
 
 # Done, not tested
 
@@ -146,6 +148,8 @@ Done: **143** cards out of **190**
 - Gogor
 - Blu
 - Flood of Energy
+- Orthea
+- Relic Mirror
 
 # Possible sample decks:
 
@@ -278,18 +282,14 @@ Done: **143** cards out of **190**
 - Orathan Flyer (paying for creature from creature)
 - Orish (choosing player, discard at random)
 - Orlon (protection)
-- Orthea
 - Parmalag
 - Raxis (choice between alternatives)
-- Relic Mirror
-- Shimmer
 - Spirit of the Flame (discarding X cald creatures from hand)
-- Staff of Korrits
 - Syphon Vortex (Cost X plus 4)
 - Tap Roots (selecting two creatures)
 - Thunderquake (choosing any number of creatures, distributing damage)
 - Tidal Wave (additional cost while spell resolves)
-- Twee
+- Twee (selecting first card of type in zone)
 - Vaal (not losing energy from attack)
 - Vinoc (discarding any number of cards)
 - Vulbor (choosing player)
