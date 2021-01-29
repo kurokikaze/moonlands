@@ -1501,6 +1501,45 @@ export const cards = [
 			},
 		],
 	}),
+	new Card('Staff of Korrits', TYPE_RELIC, REGION_UNDERNEATH, 0, {
+		triggerEffects: [
+			{
+				find: {
+					effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+					conditions: [
+						{
+							objectOne: 'packHuntAttack',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '=',
+							objectTwo: true,
+							propertyTwo: null,
+						},
+						{
+							objectOne: 'source',
+							propertyOne: PROPERTY_CREATURE_TYPES,
+							comparator: 'includes',
+							objectTwo: 'Korrit',
+							propertyTwo: null,
+						},
+						{
+							objectOne: 'source',
+							propertyOne: PROPERTY_CONTROLLER,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						},
+					],
+				},
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						amount: 1,
+						target: '%source',
+					}),
+				],
+			},
+		],
+	}),
 	new Card('Thunder Hyren', TYPE_CREATURE, REGION_ARDERIAL, 7, {
 		powers: [
 			{

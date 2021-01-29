@@ -1,4 +1,4 @@
-Done: **141** cards out of **190**
+Done: **143** cards out of **190**
 
 # Done, tested
 
@@ -292,7 +292,7 @@ Done: **141** cards out of **190**
 - Twee
 - Vaal (not losing energy from attack)
 - Vinoc (discarding any number of cards)
-- Vulbor
+- Vulbor (choosing player)
 - Wence (showing cards to opponent)
 - Will of Orothe (controlling other player)
 

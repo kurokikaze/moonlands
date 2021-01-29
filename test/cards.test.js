@@ -45,7 +45,7 @@ import {
 	STEP_DRAW,
 	createZones,
 } from './utils';
-import { isRegExp } from 'util';
+
 /* eslint-enable no-unused-vars */
 
 describe('Vortex of Knowledge', () => {
@@ -5750,6 +5750,152 @@ describe('Bwill', () => {
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(0, 'Non-active player has 0 card in discard');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One card is on the field');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Kelthet', 'It is Kelthet');
+	});
+});
+
+describe('Staff of Korrits', () => {
+	it('Adding energy to pack hunting Korrit', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		// Naroom/Underneath side
+		const pruitt = new CardInGame(byName('Pruitt'), ACTIVE_PLAYER).addEnergy(10);
+		const korrit = new CardInGame(byName('Korrit'), ACTIVE_PLAYER).addEnergy(3);
+		const staffOfKorrits = new CardInGame(byName('Staff of Korrits'), ACTIVE_PLAYER);
+		const mushroomHyren = new CardInGame(byName('Mushroom Hyren'), ACTIVE_PLAYER).addEnergy(3);
+
+		// Cald side
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const kelthet = new CardInGame(byName('Kelthet'), NON_ACTIVE_PLAYER).addEnergy(6);
+
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([pruitt]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([korrit, mushroomHyren, kelthet, staffOfKorrits]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: ACTION_ATTACK,
+			source: mushroomHyren,
+			target: kelthet,
+			additionalAttackers: [korrit],
+		};
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(4, 'Four cards on the field');
+
+		gameState.update(attackAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two cards on the field');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards.map(card => card.card.name)).toEqual(['Korrit', 'Staff of Korrits'], 'It is Korrit and the Staff');
+		expect(korrit.data.energy).toEqual(4, 'It has 4 energy');		
+
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'Active player has 1 card in discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Mushroom Hyren', 'It is Mushroom Hyren');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1, 'Non-active player has 1 card in discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Kelthet', 'It is Kelthet');
+	});
+
+	it('Not adding energy to Korrit that attacks as usual', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		// Naroom/Underneath side
+		const pruitt = new CardInGame(byName('Pruitt'), ACTIVE_PLAYER).addEnergy(10);
+		const korrit = new CardInGame(byName('Korrit'), ACTIVE_PLAYER).addEnergy(3);
+		const staffOfKorrits = new CardInGame(byName('Staff of Korrits'), ACTIVE_PLAYER);
+
+		// Cald side
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const kelthet = new CardInGame(byName('Kelthet'), NON_ACTIVE_PLAYER).addEnergy(6);
+
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([pruitt]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([korrit, kelthet, staffOfKorrits]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: ACTION_ATTACK,
+			source: korrit,
+			target: kelthet,
+		};
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(3, 'Three cards on the field');
+
+		gameState.update(attackAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two cards on the field');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards.map(card => card.card.name)).toEqual(['Kelthet', 'Staff of Korrits'], 'It is Kelthet and the Staff');
+		expect(kelthet.data.energy).toEqual(3, 'Kelthet has 3 energy');		
+
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'Active player has 1 card in discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Korrit', 'It is Korrit');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(0, 'Non-active player has no cards in discard');
+	});
+
+	it('Not adding energy to enemy pack hunting Korrit', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		// Naroom/Underneath side
+		const pruitt = new CardInGame(byName('Pruitt'), ACTIVE_PLAYER).addEnergy(10);
+		const korrit = new CardInGame(byName('Korrit'), ACTIVE_PLAYER).addEnergy(3);
+		const staffOfKorrits = new CardInGame(byName('Staff of Korrits'), NON_ACTIVE_PLAYER);
+		const mushroomHyren = new CardInGame(byName('Mushroom Hyren'), ACTIVE_PLAYER).addEnergy(3);
+
+		// Cald side
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const kelthet = new CardInGame(byName('Kelthet'), NON_ACTIVE_PLAYER).addEnergy(6);
+
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([pruitt]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([korrit, mushroomHyren, kelthet, staffOfKorrits]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: ACTION_ATTACK,
+			source: mushroomHyren,
+			target: kelthet,
+			additionalAttackers: [korrit],
+		};
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(4, 'Four cards on the field');
+
+		gameState.update(attackAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two cards on the field');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards.map(card => card.card.name)).toEqual(['Korrit', 'Staff of Korrits'], 'It is Korrit and the Staff');
+		expect(korrit.data.energy).toEqual(3, 'It has 3 energy');		
+
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'Active player has 1 card in discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Mushroom Hyren', 'It is Mushroom Hyren');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1, 'Non-active player has 1 card in discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Kelthet', 'It is Kelthet');
 	});
 });
 
