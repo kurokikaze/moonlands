@@ -1331,6 +1331,45 @@ export const cards = [
             },
         ],
     }),
+    new Card('Staff of Korrits', TYPE_RELIC, REGION_UNDERNEATH, 0, {
+        triggerEffects: [
+            {
+                find: {
+                    effectType: EFFECT_TYPE_CREATURE_ATTACKS,
+                    conditions: [
+                        {
+                            objectOne: 'packHuntAttack',
+                            propertyOne: ACTION_PROPERTY,
+                            comparator: '=',
+                            objectTwo: true,
+                            propertyTwo: null,
+                        },
+                        {
+                            objectOne: 'source',
+                            propertyOne: PROPERTY_CREATURE_TYPES,
+                            comparator: 'includes',
+                            objectTwo: 'Korrit',
+                            propertyTwo: null,
+                        },
+                        {
+                            objectOne: 'source',
+                            propertyOne: PROPERTY_CONTROLLER,
+                            comparator: '=',
+                            objectTwo: 'self',
+                            propertyTwo: PROPERTY_CONTROLLER,
+                        },
+                    ],
+                },
+                effects: [
+                    effect({
+                        effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+                        amount: 1,
+                        target: '%source',
+                    }),
+                ],
+            },
+        ],
+    }),
     new Card('Thunder Hyren', TYPE_CREATURE, REGION_ARDERIAL, 7, {
         powers: [
             {
@@ -1446,6 +1485,87 @@ export const cards = [
                 sourceZone: ZONE_TYPE_DISCARD,
                 destinationZone: ZONE_TYPE_DECK,
             }),
+        ],
+    }),
+    new Card('Orthea', TYPE_MAGI, REGION_OROTHE, null, {
+        startingEnergy: 15,
+        startingCards: ['Sphor', 'Paralit', 'Corf'],
+        energize: 5,
+        triggerEffects: [
+            {
+                name: 'Salvage',
+                text: "Whenever an opposing Magi's Spell discards any amount of energy from Orthea, you may add that amount of energy to any one Orothe Creature in play.",
+                find: {
+                    effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+                    conditions: [
+                        CONDITION_TARGET_IS_SELF,
+                        {
+                            objectOne: 'spell',
+                            propertyOne: ACTION_PROPERTY,
+                            comparator: '=',
+                            objectTwo: true,
+                            propertyTwo: null,
+                        },
+                        {
+                            objectOne: 'source',
+                            propertyOne: PROPERTY_CONTROLLER,
+                            comparator: '!=',
+                            objectTwo: 'self',
+                            propertyTwo: PROPERTY_CONTROLLER,
+                        },
+                    ],
+                },
+                effects: [
+                    prompt({
+                        promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+                        restrictions: [{
+                                type: RESTRICTION_CREATURE_TYPE,
+                                value: 'Orothe',
+                            }],
+                    }),
+                ],
+                mayEffect: true,
+            },
+            {
+                name: 'Salvage',
+                text: "Whenever a power of opposing Magi's Relic discards any amount of energy from Orthea, you may add that amount of energy to any one Orothe Creature in play.",
+                find: {
+                    effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+                    conditions: [
+                        CONDITION_TARGET_IS_SELF,
+                        {
+                            objectOne: 'source',
+                            propertyOne: PROPERTY_TYPE,
+                            comparator: '=',
+                            objectTwo: TYPE_RELIC,
+                            propertyTwo: null,
+                        },
+                        {
+                            objectOne: 'source',
+                            propertyOne: PROPERTY_CONTROLLER,
+                            comparator: '!=',
+                            objectTwo: 'self',
+                            propertyTwo: PROPERTY_CONTROLLER,
+                        },
+                    ],
+                },
+                effects: [
+                    prompt({
+                        promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+                        restrictions: [{
+                                type: RESTRICTION_CREATURE_TYPE,
+                                value: 'Orothe',
+                            }],
+                        variable: 'chosenOrotheCreature',
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+                        target: '$chosenOrotheCreature',
+                        amount: 1,
+                    }),
+                ],
+                mayEffect: true,
+            },
         ],
     }),
     new Card('Channeler\'s Gloves', TYPE_RELIC, REGION_UNIVERSAL, 0, {
@@ -2991,6 +3111,58 @@ export const cards = [
             },
         ],
     }),
+    new Card('Shimmer', TYPE_MAGI, REGION_ARDERIAL, null, {
+        startingCards: ['Bwill', 'Wellisk', 'Submerge'],
+        startingEnergy: 16,
+        energize: 5,
+        triggerEffects: [{
+                name: 'Creature Bond',
+                text: 'If there is no energy on Shimmer at the end of your turn, discard one energy from each opposing Creature in play.',
+                find: {
+                    effectType: EFFECT_TYPE_END_OF_TURN,
+                    conditions: [
+                        {
+                            objectOne: 'player',
+                            propertyOne: ACTION_PROPERTY,
+                            comparator: '=',
+                            objectTwo: 'self',
+                            propertyTwo: PROPERTY_CONTROLLER,
+                        },
+                    ],
+                },
+                effects: [
+                    getPropertyValue({
+                        property: PROPERTY_ENERGY_COUNT,
+                        target: '%self',
+                        variable: 'magiEnergy',
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_CONDITIONAL,
+                        magiEnergy: '$magiEnergy',
+                        conditions: [
+                            {
+                                objectOne: 'magiEnergy',
+                                propertyOne: ACTION_PROPERTY,
+                                comparator: '=',
+                                objectTwo: 0,
+                                propertyTwo: null,
+                            },
+                        ],
+                        thenEffects: [
+                            select({
+                                selector: SELECTOR_ENEMY_CREATURES,
+                            }),
+                            effect({
+                                effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
+                                amount: 1,
+                                target: '$selected',
+                            }),
+                        ],
+                    }),
+                ]
+            }],
+    }),
+    new Card('Relic Mirror', TYPE_RELIC, REGION_UNIVERSAL, 0, {}),
     new Card('Mobis', TYPE_MAGI, REGION_OROTHE, null, {
         startingCards: ['Bwill', 'Wellisk', 'Submerge'],
         startingEnergy: 16,
@@ -4128,6 +4300,45 @@ export const cards = [
                     effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
                     target: '%self',
                     amount: 1,
+                },
+                mayEffect: true,
+            },
+        ],
+    }),
+    new Card('Relic Mirror', TYPE_RELIC, REGION_UNIVERSAL, 0, {
+        replacementEffects: [
+            {
+                name: 'Trick Image',
+                text: 'If your opponent discards one of your Relics from play, you may discard Relic Mirror instead.',
+                find: {
+                    effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
+                    conditions: [
+                        {
+                            objectOne: 'source',
+                            propertyOne: PROPERTY_CONTROLLER,
+                            comparator: '!=',
+                            objectTwo: 'self',
+                            propertyTwo: PROPERTY_CONTROLLER,
+                        },
+                        {
+                            objectOne: 'target',
+                            propertyOne: PROPERTY_CONTROLLER,
+                            comparator: '=',
+                            objectTwo: 'self',
+                            propertyTwo: PROPERTY_CONTROLLER,
+                        },
+                        {
+                            objectOne: 'target',
+                            propertyOne: PROPERTY_ID,
+                            comparator: '!=',
+                            objectTwo: 'self',
+                            propertyTwo: PROPERTY_ID,
+                        }
+                    ],
+                },
+                replaceWith: {
+                    effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
+                    target: '%self',
                 },
                 mayEffect: true,
             },
