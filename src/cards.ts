@@ -255,7 +255,7 @@ export const cards = [
 			},
 		}],
 	}),
-	new Card('Amulet of Ombor', TYPE_RELIC, REGION_OROTHE, 0, {
+	new Card('Amulet of Ombor', TYPE_RELIC, REGION_UNDERNEATH, 0, {
 		powers: [
 			{
 				name: 'Energy Boost',
@@ -1912,7 +1912,7 @@ export const cards = [
 			},
 		],
 	}),
-	new Card('Gloves of Crystal', TYPE_RELIC, REGION_NAROOM, 0, {
+	new Card('Gloves of Crystal', TYPE_RELIC, REGION_UNDERNEATH, 0, {
 		triggerEffects: [
 			{
 				name: 'Strenghten',
@@ -3054,7 +3054,7 @@ export const cards = [
 			],
 		}],
 	}),
-	new Card('Corf Pearl', TYPE_RELIC, REGION_CALD, 0, {
+	new Card('Corf Pearl', TYPE_RELIC, REGION_OROTHE, 0, {
 		powers: [{
 			name: 'Wild Fire',
 			cost: 0,
@@ -3200,7 +3200,7 @@ export const cards = [
 			},
 		],
 	}),
-	new Card('Bhatar', TYPE_CREATURE, REGION_CALD, 5, {
+	new Card('Bhatar', TYPE_CREATURE, REGION_NAROOM, 5, {
 		triggerEffects: [{
 			name: 'Charge',
 			text: 'If Bhatar attacks non-Underneath Creature, add one energy to Bhatar before energy is removed.',
