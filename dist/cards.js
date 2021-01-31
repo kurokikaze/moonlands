@@ -3162,7 +3162,6 @@ export const cards = [
                 ]
             }],
     }),
-    new Card('Relic Mirror', TYPE_RELIC, REGION_UNIVERSAL, 0, {}),
     new Card('Mobis', TYPE_MAGI, REGION_OROTHE, null, {
         startingCards: ['Bwill', 'Wellisk', 'Submerge'],
         startingEnergy: 16,
