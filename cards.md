@@ -1,4 +1,4 @@
-Done: **147** cards out of **190**
+Done: **148** cards out of **190**
 
 # Done, tested
 
@@ -82,6 +82,7 @@ Done: **147** cards out of **190**
 - Plith
 - Staff of Korrits
 - Shimmer
+- Lovian
 
 # Done, not tested
 
@@ -276,7 +277,6 @@ Done: **147** cards out of **190**
 - Implosion (discarding X orothe cards)
 - Karak (exiling under creature, ability to play named relics)
 - Lightning (select between alternatives)
-- Lovian (protection from non-arderial spells)
 - Mask of Abwyn (looking at hand)
 - Mirror Pendant (choosing power on Magi)
 - Orathan Flyer (paying for creature from creature)

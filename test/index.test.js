@@ -4580,3 +4580,79 @@ describe('Enrich', () => {
 		expect(protoPylofuf.data.energy).toEqual(7, 'Proto-Pylofuf has 7 energy now');
 	});	
 });
+
+describe('Protection', () => {
+	it('Protection from non-Arderial spells', () => {
+		const ACTIVE_PLAYER = 64;
+		const NON_ACTIVE_PLAYER = 30;
+		
+		const lovian = new CardInGame(byName('Lovian'), ACTIVE_PLAYER).addEnergy(4);
+		const lasada =  new CardInGame(byName('Lasada'), ACTIVE_PLAYER).addEnergy(10);
+		const thermalBlast = new CardInGame(byName('Thermal Blast'), NON_ACTIVE_PLAYER);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([lasada]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([lovian]),
+			],
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		const energyDiscardAction = {
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+			amount: 5,
+			target: lovian,
+			source: thermalBlast,
+			spell: true,
+			generatedBy: thermalBlast.id,
+		};
+
+		gameState.update(energyDiscardAction);
+
+		expect(lovian.data.energy).toEqual(4, 'Lovian is protected from Thermal Blast and lost no energy');
+	});
+
+	it('Protection from non-Arderial spells does not apply against Arderial spells', () => {
+		const ACTIVE_PLAYER = 64;
+		const NON_ACTIVE_PLAYER = 30;
+		
+		const lovian = new CardInGame(byName('Lovian'), ACTIVE_PLAYER).addEnergy(4);
+		const lasada =  new CardInGame(byName('Lasada'), ACTIVE_PLAYER).addEnergy(10);
+		const stormCloud = new CardInGame(byName('Storm Cloud'), NON_ACTIVE_PLAYER);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([lasada]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([lovian]),
+			],
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		const energyDiscardAction = {
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+			amount: 3,
+			target: lovian,
+			source: stormCloud,
+			spell: true,
+			generatedBy: stormCloud.id,
+		};
+
+		gameState.update(energyDiscardAction);
+
+		expect(lovian.data.energy).toEqual(1, 'Lovian is not protected from Storm Cloud');
+	});	
+});

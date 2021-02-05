@@ -87,6 +87,15 @@ export const REGION_BOGRATH = 'regions/bograth';
 // export const REGION_D_RESH = 'regions/d_resh';
 export const REGION_UNIVERSAL = 'regions/universal';
 
+export const PROTECTION_FROM_SPELLS = 'protection/from/spells';
+export const PROTECTION_FROM_EFFECTS = 'protection/from/effects';
+export const PROTECTION_FROM_POWERS = 'protection/from/powers';
+
+export const PROTECTION_TYPE_ENERGY_GAIN = 'protection/type/energy_gain';
+export const PROTECTION_TYPE_ENERGY_LOSS = 'protection/type/energy_loss';
+export const PROTECTION_TYPE_DISCARDING_FROM_PLAY = 'protection/type/discarding_from_play';
+export const PROTECTION_TYPE_GENERAL = 'protection/type/general';
+
 export const EFFECT_TYPE_NONE = 'effects/none';
 export const EFFECT_TYPE_DRAW = 'effects/draw';
 export const EFFECT_TYPE_START_STEP = 'effects/start_step';
@@ -177,6 +186,7 @@ export const RESTRICTION_ENERGY_LESS_THAN = 'restrictions/energy_less_than';
 export const RESTRICTION_OWN_CREATURE = 'restrictions/own_creature';
 export const RESTRICTION_OPPONENT_CREATURE = 'restrictions/opponent_creature';
 export const RESTRICTION_REGION = 'restrictions/region';
+export const RESTRICTION_REGION_IS_NOT = 'restrictions/region_is_not';
 export const RESTRICTION_CREATURE_TYPE = 'restrictions/creature_type';
 export const RESTRICTION_PLAYABLE = 'restrictions/card_playable';
 export const RESTRICTION_CREATURE_WAS_ATTACKED = 'restrictions/creature_was_attacked';

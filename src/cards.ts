@@ -122,6 +122,9 @@ import {
 	PROMPT_TYPE_NUMBER,
 	PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 
+	PROTECTION_FROM_SPELLS,
+	PROTECTION_TYPE_GENERAL,
+
 	RESTRICTION_OWN_CREATURE,
 	RESTRICTION_OPPONENT_CREATURE,
 	RESTRICTION_ENERGY_LESS_THAN_STARTING,
@@ -147,6 +150,7 @@ import {
 	EXPIRATION_ANY_TURNS,
 	SELECTOR_ID,
 	PROPERTY_MAGI_NAME,
+	RESTRICTION_REGION_IS_NOT,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -469,6 +473,18 @@ export const cards = [
 				],
 			},
 		],
+	}),
+	new Card('Lovian', TYPE_CREATURE, REGION_ARDERIAL, 4, {
+		protection: {
+			from: PROTECTION_FROM_SPELLS,
+			type: PROTECTION_TYPE_GENERAL,
+			restrictions: [
+				{
+					type: RESTRICTION_REGION_IS_NOT,
+					value: REGION_ARDERIAL,
+				},
+			],
+		},
 	}),
 	new Card('Relic Stalker', TYPE_RELIC, REGION_UNIVERSAL, 0, {
 		powers: [
@@ -4575,7 +4591,7 @@ export const cards = [
 		],
 	}),
 	new Card('Storm Cloud', TYPE_SPELL, REGION_ARDERIAL, 5, {
-		text: 'Choose an Arderial Creature. Add two energy to the chosen Creature.',
+		text: 'Choose a Creature. Discard all but one energy from the chosen Creature.',
 		effects: [
 			prompt({
 				promptType: PROMPT_TYPE_SINGLE_CREATURE,

@@ -200,6 +200,11 @@ import {
 	SELECTOR_CREATURES_OF_PLAYER,
 	PROPERTY_MAGI_NAME,
 	SELECTOR_OWN_MAGI_SINGLE,
+	PROTECTION_FROM_POWERS,
+	PROTECTION_FROM_SPELLS,
+	PROTECTION_TYPE_DISCARDING_FROM_PLAY,
+	PROTECTION_TYPE_GENERAL,
+	RESTRICTION_REGION_IS_NOT,
 } from './const';
 
 import {showAction} from './logAction';
@@ -229,10 +234,12 @@ import {
 	FindType,
 	TriggerEffectType,
 	ReplacementEffectType,
-	ContinuousEffectType
+	ContinuousEffectType,
+	EffectType
 } from './types';
 import Card from './classes/Card';
 import { appendFileSync } from 'fs';
+import { isSourceFile } from 'typescript';
 
 const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
 	id: cardInGame.id,
@@ -999,6 +1006,34 @@ export class State {
 		}
 	}
 
+	isCardAffectedByEffect(card: CardInGame, effect: EnrichedAction & EffectType) {
+		if (!card.card.data.protection) return true;
+
+		const protection = card.card.data.protection;
+		
+		// Is the `from` right?
+		if (
+			(effect.spell && protection.from === PROTECTION_FROM_SPELLS) ||
+			(effect.power && protection.from === PROTECTION_FROM_POWERS)
+			) {
+			const source = effect.source;
+			if (
+				(effect.effectType === EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY && protection.type === PROTECTION_TYPE_DISCARDING_FROM_PLAY) ||
+				protection.type === PROTECTION_TYPE_GENERAL
+			) {
+				if (protection.restrictions) {
+					const cardFilter = this.makeCardFilter(protection.restrictions);
+
+					return !cardFilter(source);
+				} else {
+					return false;
+				}
+
+			}
+		}
+		return true;
+	}
+
 	isCardAffectedByStaticAbility(card: CardInGame, staticAbility: EnrichedStaticAbilityType | GameStaticAbility) {
 		switch (staticAbility.selector) {
 			case SELECTOR_ID: {
@@ -1300,6 +1335,8 @@ export class State {
 				};
 			case RESTRICTION_REGION:
 				return (card: CardInGame) => card.card.region === restrictionValue;
+			case RESTRICTION_REGION_IS_NOT:
+				return (card: CardInGame) => card.card.region !== restrictionValue;
 			case RESTRICTION_ENERGY_LESS_THAN_STARTING:
 				return (card: CardInGame) => card.card.type === TYPE_CREATURE && card.data.energy < card.card.cost;
 			case RESTRICTION_ENERGY_LESS_THAN:
@@ -3459,27 +3496,29 @@ export class State {
 							oneOrSeveral(
 								multiTarget,
 								target => {
-									var energyToLose = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
-									const energyLossThreshold = this.modifyByStaticAbilities(target, PROPERTY_ENERGY_LOSS_THRESHOLD);
-									const energyLostAlready = target.data.energyLostThisTurn;
+									if (this.isCardAffectedByEffect(target, action)) {
+										var energyToLose = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
+										const energyLossThreshold = this.modifyByStaticAbilities(target, PROPERTY_ENERGY_LOSS_THRESHOLD);
+										const energyLostAlready = target.data.energyLostThisTurn;
 
-									if (energyLossThreshold > 0 && (action.power || action.spell || action.attack)) {
-										const energyCanLoseThisTurn = Math.max(energyLossThreshold - energyLostAlready, 0);
-										energyToLose = Math.min(energyToLose, energyCanLoseThisTurn);
-									}
-									target.removeEnergy(energyToLose);
+										if (energyLossThreshold > 0 && (action.power || action.spell || action.attack)) {
+											const energyCanLoseThisTurn = Math.max(energyLossThreshold - energyLostAlready, 0);
+											energyToLose = Math.min(energyToLose, energyCanLoseThisTurn);
+										}
+										target.removeEnergy(energyToLose);
 
-									if (target.data.energy == 0 && !action.attack) {
-										this.transformIntoActions({
-											type: ACTION_EFFECT,
-											effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-											target,
-											attack: false,
-											sourceZone: ZONE_TYPE_IN_PLAY,
-											destinationZone: ZONE_TYPE_DISCARD,
-											bottom: false,
-											generatedBy: action.generatedBy,
-										});
+										if (target.data.energy == 0 && !action.attack) {
+											this.transformIntoActions({
+												type: ACTION_EFFECT,
+												effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+												target,
+												attack: false,
+												sourceZone: ZONE_TYPE_IN_PLAY,
+												destinationZone: ZONE_TYPE_DISCARD,
+												bottom: false,
+												generatedBy: action.generatedBy,
+											});
+										}
 									}
 								},
 							);

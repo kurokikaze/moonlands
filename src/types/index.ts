@@ -25,12 +25,22 @@ import {
 	RESTRICTION_OPPONENT_CREATURE,
 	RESTRICTION_ENERGY_LESS_THAN_STARTING,
 	RESTRICTION_REGION,
+	RESTRICTION_REGION_IS_NOT,
 	RESTRICTION_TYPE,
     RESTRICTION_CREATURE_TYPE,
     RESTRICTION_PLAYABLE,
 	RESTRICTION_ENERGY_LESS_THAN,
     RESTRICTION_CREATURE_WAS_ATTACKED,
     RESTRICTION_STATUS,
+
+    PROTECTION_FROM_EFFECTS,
+    PROTECTION_FROM_POWERS,
+    PROTECTION_FROM_SPELLS,
+
+    PROTECTION_TYPE_DISCARDING_FROM_PLAY,
+    PROTECTION_TYPE_ENERGY_GAIN,
+    PROTECTION_TYPE_ENERGY_LOSS,
+    PROTECTION_TYPE_GENERAL,
 
     RESTRICTION_MAGI_WITHOUT_CREATURES,
     COST_X,
@@ -47,6 +57,16 @@ export { Region, CardType, PromptTypeType, PropertyType, ConditionType, ZoneType
 export { SelectType, SelectorTypeType, SelectorParams, RefinedSelectParams } from './select';
 export { EffectType, MoveCardBetwenZonesEffect } from './effect';
 export { LogEntryType } from './log';
+
+type ProtectionFromType = typeof PROTECTION_FROM_SPELLS | typeof PROTECTION_FROM_EFFECTS | typeof PROTECTION_FROM_POWERS;
+type ProtectionTypeType = typeof PROTECTION_TYPE_ENERGY_LOSS | typeof PROTECTION_TYPE_ENERGY_GAIN | typeof PROTECTION_TYPE_DISCARDING_FROM_PLAY | typeof PROTECTION_TYPE_GENERAL;
+
+export type ProtectionType = {
+    from: ProtectionFromType;
+    type: ProtectionTypeType;
+    restrictions?: RestrictionObjectType[];
+}
+
 export type CardData = {
     text?: string;
     startingEnergy?: number;
@@ -55,7 +75,8 @@ export type CardData = {
 	attacksPerTurn?: number;
     canAttackMagiDirectly?: boolean;
     canPackHunt?: boolean;
-	powers?: PowerType[];
+    powers?: PowerType[];
+    protection?: ProtectionType;
 	staticAbilities?: StaticAbilityType[];
     effects?: AnyEffectType[];
     triggerEffects?: TriggerEffectType[];
@@ -67,6 +88,8 @@ export type CardData = {
 
 export interface EnrichedAction {
     source?: CardInGame;
+    power?: boolean;
+    spell?: boolean;
     replacedBy?: string[];
 }
 
@@ -141,6 +164,7 @@ export type RestrictionType = typeof RESTRICTION_CREATURE_WAS_ATTACKED |
     typeof RESTRICTION_OPPONENT_CREATURE |
     typeof RESTRICTION_ENERGY_LESS_THAN_STARTING |
     typeof RESTRICTION_REGION |
+    typeof RESTRICTION_REGION_IS_NOT |
     typeof RESTRICTION_TYPE |
     typeof RESTRICTION_CREATURE_TYPE |
     typeof RESTRICTION_PLAYABLE |
