@@ -20,6 +20,7 @@ import {
 	ACTION_ATTACK,
 	ACTION_PLAYER_WINS,
 	ACTION_CONCEDE,
+	ACTION_TIME_NOTIFICATION,
 
 	ACTION_PROPERTY,
 
@@ -199,7 +200,6 @@ import {
 	EXPIRATION_NEVER,
 	SELECTOR_CREATURES_OF_PLAYER,
 	PROPERTY_MAGI_NAME,
-	SELECTOR_OWN_MAGI_SINGLE,
 	PROTECTION_FROM_POWERS,
 	PROTECTION_FROM_SPELLS,
 	PROTECTION_TYPE_DISCARDING_FROM_PLAY,
@@ -221,11 +221,9 @@ import {
 	RestrictionType,
 	SelectorTypeType,
 	LogEntryType,
-	NormalPlayType,
 	PropertyType,
 	PromptType,
 	AttackerDealsDamageEffect,
-	DefenderDealsDamageEffect,
 	MoveCardBetwenZonesEffect,
 	EnrichedAction,
 	StaticAbilityType,
@@ -237,9 +235,6 @@ import {
 	ContinuousEffectType,
 	EffectType
 } from './types';
-import Card from './classes/Card';
-import { appendFileSync } from 'fs';
-import { isSourceFile } from 'typescript';
 
 const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
 	id: cardInGame.id,
@@ -392,8 +387,12 @@ export class State {
 	actionStreamTwo: EventEmitter;
 	logStream: any;
 	commandStream: Writable;
+	turnTimer: number;
+	timerEnabled: boolean;
+	turnTimeout: NodeJS.Timer | null;
+	turnNotifyTimeout: NodeJS.Timer | null;
 
-	constructor(state) {
+	constructor(state: StateShape) {
 		this.state = {
 			...clone(defaultState),
 			spellMetaData: {},
@@ -405,6 +404,9 @@ export class State {
 		this.winner = false;
 		this.debug = false;
 		this.turn = null;
+		this.timerEnabled = false;
+		this.turnTimeout = null;
+		this.turnNotifyTimeout = null;
 
 		this.rollDebugValue = null,
 
@@ -482,7 +484,38 @@ export class State {
 			throw new Error(`Non-existing player: ${player}`);
 		}
 	}
+
+	enableTurnTimer(timer = 75) {
+		this.turnTimer = timer;
+		this.timerEnabled = true;
+	}
 	
+	startTurnTimer() {
+		if (this.turnTimer > 0) {
+			this.turnTimeout = setTimeout(() => {
+				this.endTurn()
+			}, this.turnTimer * 1000);
+
+			if (this.turnTimer > 20) {
+				this.turnNotifyTimeout = setTimeout(() => {
+					this.update({ type: ACTION_TIME_NOTIFICATION, player: this.state.activePlayer });
+				}, 20000);
+			}
+		}
+	}
+
+	stopTurnTimer() {
+		clearTimeout(this.turnTimeout)
+		clearTimeout(this.turnNotifyTimeout)
+	}
+
+	endTurn() {
+		const { activePlayer } = this.state;
+		while (this.state.activePlayer === activePlayer) {
+			this.update({ type: ACTION_PASS, player: activePlayer });
+		}
+	}
+
 	addActionToLog(action: AnyEffectType) {
 		var newLogEntry: LogEntryType | boolean = false;
 
@@ -2736,6 +2769,9 @@ export class State {
 							// if magi is active, reset its actions used too
 							if (this.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).length == 1) {
 								this.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).card.clearActionsUsed();
+							}
+							if (this.timerEnabled) {
+								this.startTurnTimer()
 							}
 							break;
 						}

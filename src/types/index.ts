@@ -44,6 +44,7 @@ import {
 
     RESTRICTION_MAGI_WITHOUT_CREATURES,
     COST_X,
+    ACTION_TIME_NOTIFICATION,
 } from '../const';
 
 import { ResolvePromptType } from './resolvePrompt';
@@ -272,6 +273,12 @@ type PowerActionType = EnrichedAction & {
     generatedBy?: string;
 }
 
+type TimeNotificationAction = EnrichedAction & {
+    type: typeof ACTION_TIME_NOTIFICATION;
+    player: number;
+    generatedBy?: string; // Not really needed
+}
+
 export type ContinuousEffectType = {
     staticAbilities?: StaticAbilityType[];
     triggerEffects?: TriggerEffectType[];
@@ -280,4 +287,4 @@ export type ContinuousEffectType = {
     id: string;
 }
 
-export type AnyEffectType = EffectType | PromptType | SelectType | CalculateType | PropertyGetterType | PlayerWinType | PassType | ConcedeType | ResolvePromptType | PlayType | PowerActionType | AttackEffect | NoneType;
+export type AnyEffectType = EffectType | PromptType | SelectType | CalculateType | PropertyGetterType | PlayerWinType | PassType | ConcedeType | ResolvePromptType | PlayType | PowerActionType | AttackEffect | TimeNotificationAction | NoneType;
