@@ -16,6 +16,7 @@ import {
 	ACTION_ENTER_PROMPT,
 	ACTION_RESOLVE_PROMPT,
 	ACTION_CONCEDE,
+	ACTION_EXIT_PROMPTS,
 
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
@@ -864,6 +865,35 @@ describe('Prompts', () => {
 
 		expect(correctResult).toEqual(true, 'Resolve action with correct cards passes');
 		expect(gameState.state.prompt).toEqual(false, 'Engine is not in prompt state');
+	});
+
+	it('Turn timer action clears the prompt and saved actions', () => {
+		const ACTIVE_PLAYER = 0;
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
+		const zones = [
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
+		];
+
+		const promptAction = {
+			type: moonlands.ACTION_ENTER_PROMPT,
+			player: ACTIVE_PLAYER,
+		};
+
+		const exitPromptsAction = {type: ACTION_EXIT_PROMPTS};
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_ENERGIZE,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.update(promptAction);
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		gameState.update(exitPromptsAction);
+		expect(gameState.state.actions.length).toEqual(0, 'Queue is empty');
+		expect(gameState.state.savedActions.length).toEqual(0, 'No actions saved for later');
+		expect(gameState.state.prompt).toEqual(false);
+		expect(arbolit.data.energy).toEqual(0, 'No energy added to creature');
 	});
 });
 
@@ -3565,7 +3595,7 @@ describe('Continuous Effects', () => {
 		expect(gameState.state.continuousEffects.length).toEqual(0);
 	});
 
-	it('Do not renove continuous effects with EXPIRATION_NEVER when turns run out', () => {
+	it('Do not remove continuous effects with EXPIRATION_NEVER when turns run out', () => {
 		const PLAYER_ONE = 10;
 		const PLAYER_TWO = 12;
 

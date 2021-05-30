@@ -1,4 +1,4 @@
-Done: **148** cards out of **190**
+Done: **149** cards out of **190**
 
 # Done, tested
 
@@ -83,6 +83,8 @@ Done: **148** cards out of **190**
 - Staff of Korrits
 - Shimmer
 - Lovian
+- Shockwave
+- Abaquist
 
 # Done, not tested
 
@@ -114,7 +116,6 @@ Done: **148** cards out of **190**
 - Ring of Secrets
 - Scroll of Fire
 - Sea Barl
-- Shockwave
 - Shooting Star
 - Sphor
 - Storm Cloud
@@ -253,7 +254,6 @@ Done: **148** cards out of **190**
 
 # Not done yet
 
-- Abaquist
 - Ancestral Flute (selecting up to N cards)
 - Barak (looking at cards and rearranging them)
 - Bisiwog (overriding game continuous effect)
@@ -404,10 +404,6 @@ Done: **148** cards out of **190**
 ## Ability to play spells
 
 - Entangle (also continuous effects)
-
-## Control changing
-
-- Abaquist (also continuous effects)
 
 ## Protection
 

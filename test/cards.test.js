@@ -21,7 +21,7 @@ import {
 	PROMPT_TYPE_NUMBER,
 	PROMPT_TYPE_RELIC,
 	PROMPT_TYPE_MAY_ABILITY,
-
+	PROPERTY_CONTROLLER,
 	PROPERTY_ABLE_TO_ATTACK,
 
 	RESTRICTION_REGION,
@@ -42,7 +42,6 @@ import {
 	STEP_ATTACK,
 	STEP_CREATURES,
 	STEP_PRS_SECOND,
-	STEP_DRAW,
 	createZones,
 } from './utils';
 
@@ -103,6 +102,61 @@ describe('Vortex of Knowledge', () => {
 		expect(yaki.data.energy).toEqual(5, 'Yaki has 5 energy');
 		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(2, 'Active player has 2 cards in hand');
 		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(2, 'Non-active player has 2 cards in hand');
+	});
+});
+
+describe('Shockwave', () => {
+	it('Casting Shockwave', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(12);
+		const pruitt = new CardInGame(byName('Pruitt'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const rudwot = new CardInGame(byName('Rudwot'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const arboll = new CardInGame(byName('Arboll'), NON_ACTIVE_PLAYER).addEnergy(1);
+		const seaBarl = new CardInGame(byName('Sea Barl'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const shockwave = new CardInGame(byName('Shockwave'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [rudwot, arboll, seaBarl], [grega]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([shockwave]);
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([pruitt]);
+
+		const playSpellAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: shockwave,
+				player: ACTIVE_PLAYER,
+			},
+		};
+
+		expect(grega.data.energy).toEqual(12, 'Grega has 12 energy');
+
+		gameState.update(playSpellAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: rudwot,
+			generatedBy: shockwave.id,
+		};
+
+		gameState.update(targetingAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+		expect(grega.data.energy).toEqual(6, 'Grega has 6 energy');
+
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1, 'One creature in NAP discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Rudwot', 'It is Rudwot');
 	});
 });
 
@@ -6545,7 +6599,6 @@ describe('Shimmer', () => {
 		const thunderVashp = new CardInGame(byName('Thunder Vashp'), ACTIVE_PLAYER).addEnergy(5);
 		const pharan = new CardInGame(byName('Pharan'), ACTIVE_PLAYER).addEnergy(2);
 
-
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaArboll, thunderVashp, pharan, kelthet], [shimmer]);
 
 		const gameState = new State({
@@ -6603,5 +6656,55 @@ describe('Shimmer', () => {
 
 		expect(thunderVashp.data.energy).toEqual(5, 'Thunder Vashp has 5 energy');
 		expect(pharan.data.energy).toEqual(2, 'Pharan has 2 energy');
+	});
+});
+
+describe('Abaquist', () => {
+	it('Posess', () => {
+		const ACTIVE_PLAYER = 104;
+		const NON_ACTIVE_PLAYER = 12;
+		const nimbulo = new CardInGame(byName('Nimbulo'), ACTIVE_PLAYER).addEnergy(10);
+		const magam = new CardInGame(byName('Magam'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), NON_ACTIVE_PLAYER).addEnergy(3);
+		const abaquist = new CardInGame(byName('Abaquist'), ACTIVE_PLAYER).addEnergy(6);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaBalamant, abaquist], [nimbulo]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([magam]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: abaquist,
+			power: abaquist.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+			generatedBy: abaquist.id,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+
+		const chooseCreatureAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: lavaBalamant,
+			player: ACTIVE_PLAYER,
+			generatedBy: abaquist.id,
+		};
+
+		gameState.update(chooseCreatureAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+
+		expect(gameState.state.continuousEffects).toHaveLength(2, 'Game has 2 continuous effects added');
+
+		expect(gameState.modifyByStaticAbilities(lavaBalamant, PROPERTY_CONTROLLER)).toEqual(ACTIVE_PLAYER, 'Active player controls Lava Balamant now');
 	});
 });

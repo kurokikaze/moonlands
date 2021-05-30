@@ -148,9 +148,11 @@ import {
 	PROPERTY_ABLE_TO_ATTACK,
 	RESTRICTION_STATUS,
 	EXPIRATION_ANY_TURNS,
+	EXPIRATION_CREATURE_LEAVES_PLAY,
 	SELECTOR_ID,
 	PROPERTY_MAGI_NAME,
 	RESTRICTION_REGION_IS_NOT,
+	EXPIRATION_NEVER,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -939,6 +941,77 @@ export const cards = [
 				},
 			}),
 		]
+	}),
+	new Card('Abaquist', TYPE_CREATURE, REGION_ARDERIAL, 1, {
+		powers: [
+			{
+				name: 'Posess',
+				cost: 0,
+				text: 'Choose any one Creature in play with less energy than Abaquist. Discard Abaquist from play. Gain control of the chosen Creature. That Creature may not attack this turn.',
+				effects: [
+					getPropertyValue({
+						property: PROPERTY_ENERGY_COUNT,
+						target: '$sourceCreature',
+						variable: 'abaquistEnergy',
+					}),
+					prompt({
+						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+						restrictions: [{
+							type: RESTRICTION_ENERGY_LESS_THAN,
+							value: '$abaquistEnergy',
+						}],
+					}),
+					getPropertyValue({
+						property: PROPERTY_CONTROLLER,
+						target: '$sourceCreature',
+						variable: 'controller',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+						target: '$sourceCreature',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+						staticAbilities: [
+							{
+								name: 'Abaquist',
+								text: 'Gain control of the creature',
+								selector: SELECTOR_ID,
+								selectorParameter: '$target',
+								property: PROPERTY_CONTROLLER,
+								modifier: {
+									operator: CALCULATION_SET,
+									operandOne: '$controller',
+								},
+							},
+						],
+						expiration: {
+							type: EXPIRATION_NEVER,
+						},
+					}),
+					effect({
+						effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+						staticAbilities: [
+							{
+								name: 'Abaquist',
+								text: 'Chosen creature cannot attack',
+								selector: SELECTOR_ID,
+								selectorParameter: '$target',
+								property: PROPERTY_ABLE_TO_ATTACK,
+								modifier: {
+									operator: CALCULATION_SET,
+									operandOne: false,
+								},
+							},
+						],
+						expiration: {
+							type: EXPIRATION_ANY_TURNS,
+							turns: 1,
+						},
+					}),
+				],
+			},
+		],
 	}),
 	new Card('Platheus', TYPE_CREATURE, REGION_OROTHE, 6, {
 		powers: [{

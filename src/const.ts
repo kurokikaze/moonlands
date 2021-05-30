@@ -12,6 +12,8 @@ export const ACTION_CONCEDE = 'actions/concede';
 export const ACTION_PLAYER_WINS ='actions/player_wins';
 export const ACTION_NONE = 'actions/none';
 export const ACTION_TIME_NOTIFICATION = 'actions/time_notification';
+export const ACTION_EXIT_PROMPTS = 'actions/exit_prompts';
+export const ACTION_CREATE_CONTINOUS_EFFECT = 'actions/create_continuous_effect';
 
 export const ACTION_PROPERTY = 'special_properties/action_property';
 export const PROPERTY_ID = 'properties/id';
@@ -160,6 +162,7 @@ export const EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT = 'effects/create_continuous_e
 export const EXPIRATION_OPPONENT_TURNS = 'expiration/opponents_turns';
 export const EXPIRATION_PLAYER_TURNS = 'expirations/players_turns';
 export const EXPIRATION_ANY_TURNS = 'expirations/any_turns';
+export const EXPIRATION_CREATURE_LEAVES_PLAY = 'expirations/creature_leaves_play';
 export const EXPIRATION_NEVER = 'expirations/never';
 
 export const NO_PRIORITY = 0;

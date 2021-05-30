@@ -31,6 +31,18 @@ describe('Stream of actions', () => {
 			zones,
 			step: null,
 			activePlayer: PLAYER_ONE,
+			prompt: false,
+			promptType: null,
+			promptParams: {},
+			players: [],
+			log: [],
+			actions: [],
+			savedActions: [],
+			mayEffectActions: [],
+			fallbackActions: [],
+			continuousEffects: [],
+			spellMetaData: {},
+			delayedTriggers: [],
 		});
 
 		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
@@ -90,6 +102,18 @@ describe('Stream of actions', () => {
 			zones,
 			step: null,
 			activePlayer: PLAYER_ONE,
+			prompt: false,
+			promptType: null,
+			promptParams: {},
+			players: [],
+			log: [],
+			actions: [],
+			savedActions: [],
+			mayEffectActions: [],
+			fallbackActions: [],
+			continuousEffects: [],
+			spellMetaData: {},
+			delayedTriggers: [],
 		});
 
 		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
@@ -127,6 +151,18 @@ describe('Stream of actions', () => {
 			zones,
 			step: null,
 			activePlayer: PLAYER_ONE,
+			prompt: false,
+			promptType: null,
+			promptParams: {},
+			players: [],
+			log: [],
+			actions: [],
+			savedActions: [],
+			mayEffectActions: [],
+			fallbackActions: [],
+			continuousEffects: [],
+			spellMetaData: {},
+			delayedTriggers: [],
 		});
 
 		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
@@ -163,6 +199,18 @@ describe('Stream of actions', () => {
 			zones,
 			step: null,
 			activePlayer: PLAYER_ONE,
+			prompt: false,
+			promptType: null,
+			promptParams: {},
+			players: [],
+			log: [],
+			actions: [],
+			savedActions: [],
+			mayEffectActions: [],
+			fallbackActions: [],
+			continuousEffects: [],
+			spellMetaData: {},
+			delayedTriggers: [],
 		});
 
 		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
@@ -199,6 +247,18 @@ describe('Stream of actions', () => {
 			zones,
 			step: null,
 			activePlayer: PLAYER_ONE,
+			prompt: false,
+			promptType: null,
+			promptParams: {},
+			players: [],
+			log: [],
+			actions: [],
+			savedActions: [],
+			mayEffectActions: [],
+			fallbackActions: [],
+			continuousEffects: [],
+			spellMetaData: {},
+			delayedTriggers: [],
 		});
 
 		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
