@@ -206,6 +206,8 @@ import {
 	PROTECTION_TYPE_DISCARDING_FROM_PLAY,
 	PROTECTION_TYPE_GENERAL,
 	RESTRICTION_REGION_IS_NOT,
+	PROPERTY_CAN_BE_ATTACKED,
+	EXPIRATION_OPPONENT_TURNS,
 } from './const';
 
 import {showAction} from './logAction';
@@ -339,6 +341,46 @@ const oneOrSeveral = <T>(targets: T | T[], callback: (t:T) => void): void => {
 		}
 	} else {
 		callback(targets);
+	}
+};
+
+const updateContinuousEffects = (player: number) => (effect: ContinuousEffectType) => {
+	switch (effect.expiration.type) {
+		case EXPIRATION_ANY_TURNS: {
+			const turnCount = effect.expiration.turns;
+			if (turnCount > 1) {
+				return {
+					...effect,
+					expiration: {
+						type: effect.expiration.type,
+						turns: turnCount - 1,
+					}
+				};
+			} else {
+				return null;
+			}
+		}
+		case EXPIRATION_OPPONENT_TURNS: {
+			const turnCount = effect.expiration.turns;
+			if (player !== effect.player) {
+				if (turnCount > 0) {
+					return {
+						...effect,
+						expiration: {
+							type: effect.expiration.type,
+							turns: turnCount - 1,
+						}
+					};
+				} else {
+					return null;
+				}	
+			} else {
+				return effect;
+			}
+		}
+		case EXPIRATION_NEVER: {
+			return effect;
+		}
 	}
 };
 
@@ -1021,6 +1063,8 @@ export class State {
 					target.card.data.powers.find(({name}) => name === subProperty).cost;
 			case PROPERTY_STATUS_WAS_ATTACKED:
 				return target.data.wasAttacked || false;
+			case PROPERTY_CAN_BE_ATTACKED:
+				return target.modifiedCard.data.canBeAttacked;
 			case PROPERTY_STATUS_DEFEATED_CREATURE:
 				return target.data.defeatedCreature || false;
 			case PROPERTY_STATUS: {
@@ -1287,6 +1331,23 @@ export class State {
 							data: {
 								...currentCard.modifiedCard.data,
 								ableToAttack: resultValue,
+							},
+						},
+					};
+				}
+				case PROPERTY_CAN_BE_ATTACKED: {
+					const initialValue = this.getByProperty(currentCard, PROPERTY_CAN_BE_ATTACKED);
+					const {operator, operandOne} = staticAbility.modifier;
+
+					const resultValue = (operator === CALCULATION_SET) ? operandOne : initialValue;
+
+					return {
+						...currentCard,
+						modifiedCard: {
+							...currentCard.modifiedCard,
+							data: {
+								...currentCard.modifiedCard.data,
+								canBeAttacked: resultValue,
 							},
 						},
 					};
@@ -1934,6 +1995,12 @@ export class State {
 					if (!attackerCanAttack) {
 						console.log(`Somehow ${attackSource.card.name} cannot attack`);
 					}
+
+					const targetCanBeAttacked = this.modifyByStaticAbilities(attackTarget, PROPERTY_CAN_BE_ATTACKED);
+					if (!targetCanBeAttacked) {
+						console.log(`Somehow ${attackSource.card.name} cannot be attacked`);
+					}
+
 					const sourceHasAttacksLeft = attackSource.data.attacked < sourceAttacksPerTurn;
 					const additionalAttackersCanAttack = additionalAttackers.every((card: CardInGame) => card.card.data.canPackHunt && this.modifyByStaticAbilities(card, PROPERTY_ABLE_TO_ATTACK));
 					const additionalAttackersHasAttacksLeft = additionalAttackers.every((card: CardInGame) => card.data.attacked < this.modifyByStaticAbilities(card, PROPERTY_ATTACKS_PER_TURN));
@@ -2632,31 +2699,9 @@ export class State {
 								}
 							);
 
-							const updateContinuousEffects = (effect: ContinuousEffectType) => {
-								switch (effect.expiration.type) {
-									case EXPIRATION_ANY_TURNS: {
-										const turnCount = effect.expiration.turns;
-										if (turnCount > 1) {
-											return {
-												...effect,
-												expiration: {
-													type: effect.expiration.type,
-													turns: turnCount - 1,
-												}
-											};
-										} else {
-											return null;
-										}
-									}
-									case EXPIRATION_NEVER: {
-										return effect;
-									}
-								}
-							};
-
 							this.state = {
 								...this.state,
-								continuousEffects: this.state.continuousEffects.map(updateContinuousEffects).filter(Boolean),
+								continuousEffects: this.state.continuousEffects.map(updateContinuousEffects(action.player)).filter(Boolean),
 								activePlayer: action.player,
 								step: 0, // this will be rewritten to 0 by EFFECT_TYPE_START_STEP, but no big deal
 							};

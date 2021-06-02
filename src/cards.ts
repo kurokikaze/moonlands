@@ -153,6 +153,8 @@ import {
 	PROPERTY_MAGI_NAME,
 	RESTRICTION_REGION_IS_NOT,
 	EXPIRATION_NEVER,
+	PROPERTY_CAN_BE_ATTACKED,
+	EXPIRATION_OPPONENT_TURNS,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -941,6 +943,65 @@ export const cards = [
 				},
 			}),
 		]
+	}),
+	new Card('Fog Bank', TYPE_SPELL, REGION_ARDERIAL, 3, {
+		text: 'Choose any one Creature in play. The chosen Creature cannot be attacked during your opponents\' next two turns. Place this card on the chosen Creature while Fog Bank is in effect.',
+		effects: [
+			prompt({
+				promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
+			}),
+			effect({
+				effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+				staticAbilities: [
+					{
+						name: 'Fog Bank',
+						text: 'Creature cannot be attacked for next two opponents turns',
+						selector: SELECTOR_ID,
+						selectorParameter: '$target',
+						property: PROPERTY_CAN_BE_ATTACKED,
+						modifier: {
+							operator: CALCULATION_SET,
+							operandOne: false,
+						},
+					},
+				],
+				expiration: {
+					type: EXPIRATION_OPPONENT_TURNS,
+					turns: 2,
+				},
+			}),
+		],
+	}),
+	new Card('Giant Parmalag', TYPE_CREATURE, REGION_UNDERNEATH, 5, {
+		powers: [
+			{
+				name: 'Withdraw',
+				cost: 3,
+				text: 'Giant Parmalag cannot be attacked during your opponents\' next turn.',
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+						staticAbilities: [
+							{
+								name: 'Withdraw',
+								text: 'Giant Parmalag cannot be attacked for next opponents\' turn',
+								selector: SELECTOR_ID,
+								selectorParameter: '$sourceCreature',
+								property: PROPERTY_CAN_BE_ATTACKED,
+								modifier: {
+									operator: CALCULATION_SET,
+									operandOne: false,
+								},
+							},
+						],
+						expiration: {
+							type: EXPIRATION_OPPONENT_TURNS,
+							turns: 1,
+						},
+					}),
+				],
+			}
+		],
 	}),
 	new Card('Abaquist', TYPE_CREATURE, REGION_ARDERIAL, 1, {
 		powers: [

@@ -59,6 +59,7 @@ import {
     EXPIRATION_NEVER,
     EXPIRATION_OPPONENT_TURNS,
     EXPIRATION_PLAYER_TURNS,
+    PROPERTY_CAN_BE_ATTACKED,
 } from "../const";
 
 export type ZoneType =
@@ -97,6 +98,7 @@ export type PropertyType = typeof PROPERTY_MAGI_STARTING_ENERGY |
     typeof PROPERTY_STATUS_DEFEATED_CREATURE |
     typeof PROPERTY_STATUS_WAS_ATTACKED |
     typeof PROPERTY_TYPE |
+    typeof PROPERTY_CAN_BE_ATTACKED |
     typeof ACTION_PROPERTY; // Special case of property getter
 
 export type CardType = typeof TYPE_CREATURE | typeof TYPE_MAGI | typeof TYPE_RELIC | typeof TYPE_SPELL;

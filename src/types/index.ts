@@ -85,6 +85,7 @@ export type CardData = {
     replacementEffects?: ReplacementEffectType[];
     energyLossThreshold?: number;
     ableToAttack?: boolean;
+    canBeAttacked?: boolean;
     burrowed?: boolean;
 }
 

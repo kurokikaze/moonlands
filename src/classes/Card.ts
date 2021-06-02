@@ -43,6 +43,8 @@ export default class Card {
 		this.data = {
 			attacksPerTurn: 1,
 			canAttackMagiDirectly: false,
+			ableToAttack: true,
+			canBeAttacked: true,
 			...data,
 		};
 	}
