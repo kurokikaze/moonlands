@@ -23,6 +23,7 @@ import {
 	PROMPT_TYPE_MAY_ABILITY,
 	PROPERTY_CONTROLLER,
 	PROPERTY_ABLE_TO_ATTACK,
+	PROPERTY_CAN_BE_ATTACKED,
 
 	RESTRICTION_REGION,
 	REGION_OROTHE,
@@ -709,6 +710,113 @@ describe('Arboll', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'Arboll removed from play');
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'One card in Player 1 discard');
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Arboll', 'Card in Player 1 discard is Arboll');
+	});
+});
+
+describe('Fog Bank', () => {
+	it('Prevents creature from being attacked for two opponents turns', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const arboll = new CardInGame(byName('Arboll'), ACTIVE_PLAYER).addEnergy(2);
+		const fogBank = new CardInGame(byName('Fog Bank'), ACTIVE_PLAYER);
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(7);
+		const nimbulo = new CardInGame(byName('Nimbulo'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arboll], [grega]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([fogBank]);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([nimbulo]);
+
+		const castingAction = {
+			type: ACTION_PLAY,
+			payload: {
+				player: ACTIVE_PLAYER,
+				card: fogBank,
+			},
+		};
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_SINGLE_MAGI,
+			target: arboll,
+			generatedBy: fogBank.id,
+		};
+
+		gameState.update(castingAction);
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		gameState.update(targetingAction);
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+
+		expect(grega.data.energy).toEqual(3, 'Grega now has 3 energy');
+		expect(gameState.modifyByStaticAbilities(arboll, PROPERTY_CAN_BE_ATTACKED)).toEqual(false);
+		
+		const activePlayerPassAction = {
+			type: ACTION_PASS,
+			player: ACTIVE_PLAYER,
+		};
+
+		const opponentPassAction = {
+			type: ACTION_PASS,
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(activePlayerPassAction);
+		// Opponents turn
+		expect(gameState.state.activePlayer).toEqual(NON_ACTIVE_PLAYER);
+		// PRS
+		expect(gameState.modifyByStaticAbilities(arboll, PROPERTY_CAN_BE_ATTACKED)).toEqual(false);
+		gameState.update(opponentPassAction);
+		// Attack
+		expect(gameState.modifyByStaticAbilities(arboll, PROPERTY_CAN_BE_ATTACKED)).toEqual(false);
+		gameState.update(opponentPassAction);
+		// Creatures
+		expect(gameState.modifyByStaticAbilities(arboll, PROPERTY_CAN_BE_ATTACKED)).toEqual(false);
+		gameState.update(opponentPassAction);
+		// PRS
+		expect(gameState.modifyByStaticAbilities(arboll, PROPERTY_CAN_BE_ATTACKED)).toEqual(false);
+		gameState.update(opponentPassAction);
+		// Active player turn
+		expect(gameState.state.activePlayer).toEqual(ACTIVE_PLAYER);
+		// PRS
+		gameState.update(activePlayerPassAction);
+		// Attack
+		gameState.update(activePlayerPassAction);
+		// Creatures
+		gameState.update(activePlayerPassAction);
+		// PRS
+		gameState.update(activePlayerPassAction);
+		// Opponents turn
+		expect(gameState.state.activePlayer).toEqual(NON_ACTIVE_PLAYER);
+		// PRS
+		expect(gameState.modifyByStaticAbilities(arboll, PROPERTY_CAN_BE_ATTACKED)).toEqual(false);
+		gameState.update(opponentPassAction);
+		// Attack
+		expect(gameState.modifyByStaticAbilities(arboll, PROPERTY_CAN_BE_ATTACKED)).toEqual(false);
+		gameState.update(opponentPassAction);
+		// Creatures
+		expect(gameState.modifyByStaticAbilities(arboll, PROPERTY_CAN_BE_ATTACKED)).toEqual(false);
+		gameState.update(opponentPassAction);
+		// PRS
+		expect(gameState.modifyByStaticAbilities(arboll, PROPERTY_CAN_BE_ATTACKED)).toEqual(false);
+		gameState.update(opponentPassAction);
+		// Active player turn
+		expect(gameState.state.activePlayer).toEqual(ACTIVE_PLAYER);
+		// PRS
+		gameState.update(activePlayerPassAction);
+		// Attack
+		gameState.update(activePlayerPassAction);
+		// Creatures
+		gameState.update(activePlayerPassAction);
+		// PRS
+		gameState.update(activePlayerPassAction);
+		// Opponents turn
+		expect(gameState.modifyByStaticAbilities(arboll, PROPERTY_CAN_BE_ATTACKED)).toEqual(true);
 	});
 });
 

@@ -1,4 +1,4 @@
-Done: **149** cards out of **190**
+Done: **151** cards out of **190**
 
 # Done, tested
 
@@ -85,6 +85,7 @@ Done: **149** cards out of **190**
 - Lovian
 - Shockwave
 - Abaquist
+- Fog Bank
 
 # Done, not tested
 
@@ -152,6 +153,7 @@ Done: **149** cards out of **190**
 - Flood of Energy
 - Orthea
 - Relic Mirror
+- Giant Parmalag
 
 # Possible sample decks:
 
@@ -266,10 +268,8 @@ Done: **149** cards out of **190**
 - Eye of the Storm (choice between two alternatives)
 - Flame Control (rearranging energy)
 - Flame Hyren (distributing energy)
-- Fog Bank (ability to be attacked)
 - Fossik
 - Gar (select in case of tie)
-- Giant Parmalag (ability to be attacked)
 - Giant Vulbor (discarding, choice between alternatives)
 - Heat Lens (looking at hand and discarding)
 - Hood of Hiding (ability to be attacked)
@@ -316,10 +316,6 @@ Done: **149** cards out of **190**
 - Heat Lens (choosing player)
 - Gar (between cards in play in case of tie)
 - Eye of the Storm (choosing between alternatives)
-
-# Conditionals
-
-- Shimmer
 
 # Rearranging Energy
 
@@ -395,12 +391,6 @@ Done: **149** cards out of **190**
 
 - Energy Band
 
-## Ability to be attacked
-
-- Fog Bank (also continuous effects)
-- Giant Parmalag (also continuous effects)
-- Hood of Hiding (also continuous effects)
-
 ## Ability to play spells
 
 - Entangle (also continuous effects)
@@ -415,6 +405,10 @@ Done: **149** cards out of **190**
 
 - Bisiwog (selector of card itself)
 - Twee (next card in the zone)
+
+# Ability to use certain power
+
+- Hood of Hiding (also continuous effects)
 
 # Controlling another player
 
