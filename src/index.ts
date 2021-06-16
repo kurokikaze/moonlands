@@ -2448,6 +2448,7 @@ export class State {
 						newStep = (this.state.step + 1) % steps.length;
 
 						if (newStep === 0) {
+							this.stopTurnTimer();
 							this.transformIntoActions(
 								{
 									type: ACTION_EFFECT,

@@ -358,10 +358,6 @@ Done: **151** cards out of **190**
 - Epik
 - Mask of Abwyn
 
-# Triggered abilities
-
-- Staff of Korrits (also trigger on fucking banding)
-
 ## Delayed triggers
 
 - Wence (also drawing, showing cards to opponent)

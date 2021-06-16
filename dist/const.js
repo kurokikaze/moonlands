@@ -27,6 +27,7 @@ export const PROPERTY_MAGI_NAME = 'properties/magi_name';
 export const PROPERTY_MAGI_STARTING_ENERGY = 'properties/magi_starting_energy';
 export const PROPERTY_ATTACKS_PER_TURN = 'properties/attacks_per_turn';
 export const PROPERTY_ABLE_TO_ATTACK = 'properties/able_to_attack';
+export const PROPERTY_CAN_BE_ATTACKED = 'properties/can_be_attacked';
 export const PROPERTY_CAN_ATTACK_MAGI_DIRECTLY = 'properties/can_attack_magi_directly';
 export const PROPERTY_POWER_COST = 'properties/power_cost'; // NOT FOR PROPERTY GETTER, ONLY STATIC ABILITIES
 export const PROPERTY_ENERGY_LOSS_THRESHOLD = 'properties/energy_loss_threshold';
