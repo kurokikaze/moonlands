@@ -1332,6 +1332,13 @@ export class State {
         }
         return null;
     }
+    getAvailableCards(player, topMagi) {
+        const deckCards = this.getZone(ZONE_TYPE_DECK, player).cards.map(({ card }) => card.name);
+        const discardCards = this.getZone(ZONE_TYPE_DISCARD, player).cards.map(({ card }) => card.name);
+        const searchableCards = [...deckCards, ...discardCards];
+        const availableCards = topMagi.card.data.startingCards.filter(card => searchableCards.includes(card));
+        return availableCards;
+    }
     checkPrompts(source, preparedActions, isPower = false, powerCost = 0) {
         const testedActions = [...preparedActions];
         // Calculate if prompts are resolvable
@@ -2204,11 +2211,8 @@ export class State {
                             if (this.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).length == 0 &&
                                 this.getZone(ZONE_TYPE_MAGI_PILE, action.player).length > 0) {
                                 const topMagi = this.getZone(ZONE_TYPE_MAGI_PILE, action.player).cards[0];
+                                const availableCards = this.getAvailableCards(action.player, topMagi);
                                 const firstMagi = this.getZone(ZONE_TYPE_DEFEATED_MAGI, action.player).length == 0;
-                                const deckCards = this.getZone(ZONE_TYPE_DECK, action.player).cards.map(({ card }) => card.name);
-                                const discardCards = this.getZone(ZONE_TYPE_DISCARD, action.player).cards.map(({ card }) => card.name);
-                                const searchableCards = [...deckCards, ...discardCards];
-                                const availableCards = topMagi.card.data.startingCards.filter(card => searchableCards.includes(card));
                                 const actionsToTake = [
                                     {
                                         type: ACTION_EFFECT,
