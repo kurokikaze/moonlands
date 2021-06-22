@@ -386,7 +386,7 @@ export const cards = [
             }),
             effect({
                 effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
-                target: '$target',
+                target: '$targetMagi',
                 amount: '$roll_result',
             }),
         ],
@@ -1249,7 +1249,7 @@ export const cards = [
                 },
                 replaceWith: [
                     prompt({
-                        promptType: PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
+                        promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
                         variable: 'target',
                         source: '%self',
                     }),
