@@ -1556,7 +1556,7 @@ describe('Gum-Gum', () => {
 		gameState.update(allowReplaceEffect);
 
 		expect(gameState.state.prompt).toEqual(true);
-		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_OWN_SINGLE_CREATURE);
 
 		const slideTargetEffect = {
 			type: ACTION_RESOLVE_PROMPT,
@@ -5013,7 +5013,7 @@ describe('Timber Hyren', () => {
 
 		const numberPromptAction = {
 			type: ACTION_RESOLVE_PROMPT,
-			number: 4,
+			number: '4',
 			player: ACTIVE_PLAYER,
 			generatedBy: timberHyren.id,
 		};

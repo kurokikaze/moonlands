@@ -5,7 +5,7 @@ export type ResolvePromptType = {
     type: typeof ACTION_RESOLVE_PROMPT;
     generatedBy?: string;
     variable?: string;
-    number?: number;
+    number?: number | string;
     player: number;
     cards?: CardInGame[];
     target?: CardInGame;

@@ -730,7 +730,7 @@ export class State {
 					if (this.state.promptType === PROMPT_TYPE_NUMBER) {
 						newLogEntry = {
 							type: LOG_ENTRY_NUMBER_CHOICE,
-							number: action.number,
+							number: (typeof action.number === 'number') ? action.number : parseInt(action.number, 10),
 							player: action.player,
 						};
 					}
@@ -2293,7 +2293,7 @@ export class State {
 								break;
 							}
 							case PROMPT_TYPE_NUMBER:
-								currentActionMetaData[variable || 'number'] = action.number;
+								currentActionMetaData[variable || 'number'] = (typeof action.number === 'number') ? action.number : parseInt(action.number, 10);
 								break;
 							case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE:
 								if (this.state.promptParams.source.id === action.target.id) {
