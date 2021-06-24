@@ -4084,6 +4084,47 @@ export const cards = [
             },
         ],
     }),
+    new Card('Fossik', TYPE_MAGI, REGION_UNDERNEATH, 0, {
+        replacementEffects: [
+            {
+                name: 'Strengthen',
+                text: 'During your Draw Step, you may choose to add three energy to any one Creature, instead of drawing one of your two cards. Use this Effects only once per turn.',
+                find: {
+                    effectType: EFFECT_TYPE_DRAW,
+                    conditions: [
+                        {
+                            objectOne: 'player',
+                            propertyOne: ACTION_PROPERTY,
+                            comparator: '=',
+                            objectTwo: 'self',
+                            propertyTwo: PROPERTY_CONTROLLER,
+                        },
+                        {
+                            objectOne: 'stepEffect',
+                            propertyOne: ACTION_PROPERTY,
+                            comparator: '=',
+                            objectTwo: true,
+                            propertyTwo: null,
+                        }
+                    ],
+                },
+                replaceWith: [
+                    prompt({
+                        promptType: PROMPT_TYPE_SINGLE_CREATURE,
+                        message: 'Choose a creature to add 3 energy to',
+                        variable: 'creatureToStrengthen',
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+                        amount: 3,
+                        target: '$creatureToStrengthen',
+                    }),
+                ],
+                mayEffect: true,
+                oncePerTurn: true,
+            },
+        ],
+    }),
     new Card('Digging Goggles', TYPE_RELIC, REGION_UNDERNEATH, 0, {
         staticAbilities: [
             {

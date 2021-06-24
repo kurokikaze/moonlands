@@ -310,6 +310,7 @@ const steps: StepType[] = [
 			{
 				type: ACTION_EFFECT,
 				effectType: EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP,
+				numberOfCards: 2,
 			},
 		],
 	},
@@ -1514,7 +1515,9 @@ export class State {
 		const zoneReplacements: ReplacementEffectEnhanced[] = allZonesCards.reduce(
 			(acc, cardInPlay) => cardInPlay.card.data.replacementEffects ? [
 				...acc,
-				...cardInPlay.card.data.replacementEffects.map(effect => ({...effect, self: cardInPlay})),
+				...cardInPlay.card.data.replacementEffects
+					.filter(effect => !effect.oncePerTurn || (effect.oncePerTurn && !cardInPlay.wasActionUsed(effect.name)))
+					.map(effect => ({...effect, self: cardInPlay})),
 			] : acc,
 			[],
 		);
@@ -1566,6 +1569,11 @@ export class State {
 
 				return resultEffect;
 			});
+
+			// If the replacer is one-time, set the action usage
+			if (foundReplacer.oncePerTurn && 'name' in foundReplacer) {
+				appliedReplacerSelf.setActionUsed(foundReplacer.name);
+			}
 
 			if (foundReplacer.mayEffect) {
 				this.state.mayEffectActions = resultEffects;
@@ -2456,32 +2464,34 @@ export class State {
 							generatedBy: nanoid(),
 						});
 					} else {
-						newStep = (this.state.step + 1) % steps.length;
+						if (action.player === this.state.activePlayer) {
+							newStep = (this.state.step + 1) % steps.length;
 
-						if (newStep === 0) {
-							this.stopTurnTimer();
-							this.transformIntoActions(
-								{
+							if (newStep === 0) {
+								this.stopTurnTimer();
+								this.transformIntoActions(
+									{
+										type: ACTION_EFFECT,
+										effectType: EFFECT_TYPE_END_OF_TURN,
+										player: this.state.activePlayer,
+										generatedBy: nanoid(),
+									},
+									{
+										type: ACTION_EFFECT,
+										effectType: EFFECT_TYPE_START_TURN,
+										player: this.getOpponent(this.state.activePlayer),
+										generatedBy: nanoid(),
+									}
+								);
+							} else {
+								this.transformIntoActions({
 									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_END_OF_TURN,
+									effectType: EFFECT_TYPE_START_STEP,
 									player: this.state.activePlayer,
+									step: newStep,
 									generatedBy: nanoid(),
-								},
-								{
-									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_START_TURN,
-									player: this.getOpponent(this.state.activePlayer),
-									generatedBy: nanoid(),
-								}
-							);
-						} else {
-							this.transformIntoActions({
-								type: ACTION_EFFECT,
-								effectType: EFFECT_TYPE_START_STEP,
-								player: this.state.activePlayer,
-								step: newStep,
-								generatedBy: nanoid(),
-							});
+								});
+							}
 						}
 					}
 					
@@ -2786,21 +2796,16 @@ export class State {
 							break;
 						}
 						case EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP: {
+							const numberOfCards = action.numberOfCards;
+							const draws = (new Array(numberOfCards)).fill({
+								type: ACTION_EFFECT,
+								effectType: EFFECT_TYPE_DRAW,
+								stepEffect: true,
+								player: action.player,
+								generatedBy: action.generatedBy,
+							})
 							this.transformIntoActions(
-								{
-									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_DRAW,
-									stepEffect: true,
-									player: action.player,
-									generatedBy: action.generatedBy,
-								},
-								{
-									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_DRAW,
-									stepEffect: true,
-									player: action.player,
-									generatedBy: action.generatedBy,
-								},
+								...draws,
 							);
 							break;
 						}

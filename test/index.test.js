@@ -23,6 +23,7 @@ import {
 	EFFECT_TYPE_ADD_DELAYED_TRIGGER,
 	EFFECT_TYPE_DRAW,
 	EFFECT_TYPE_ROLL_DIE,
+	EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 
 	SELECTOR_MAGI_NOT_OF_REGION,
 	SELECTOR_OWN_CREATURES_OF_TYPE,
@@ -104,9 +105,16 @@ import nanoid from 'nanoid';
 
 describe('Updating state with action', () => {
 	it('Pass action', () => {
-		const gameState = new moonlands.State();
+		const ACTIVE_PLAYER = 367;
+		const gameState = new moonlands.State({
+			activePlayer: ACTIVE_PLAYER,
+			step: STEP_ENERGIZE,
+		});
 
-		const passAction = {type: moonlands.ACTION_PASS};
+		const passAction = {
+			type: ACTION_PASS,
+			player: ACTIVE_PLAYER,
+		};
 
 		expect(gameState.getCurrentStep()).toEqual(STEP_ENERGIZE, 'Intial step is Energize');
 		gameState.update(passAction);
@@ -115,23 +123,39 @@ describe('Updating state with action', () => {
 	});
 
 	it('Pass till second player gets priority', () => {
-		const gameState = new moonlands.State();
-		const passAction = {type: moonlands.ACTION_PASS};
+		const ACTIVE_PLAYER = 33;
+		const NON_ACTIVE_PLAYER = 66;
+		const gameState = new moonlands.State({
+			activePlayer: ACTIVE_PLAYER,
+			step: STEP_PRS_FIRST,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		const passAction = {
+			type: ACTION_PASS,
+			player: ACTIVE_PLAYER,
+		};
 
-		expect(gameState.getCurrentStep()).toEqual(STEP_ENERGIZE, 'Initial step is Energize');
-		expect(gameState.getActivePlayer()).toEqual(0, 'Active player is player 0');
-		gameState.update(passAction); // PRS
+		expect(gameState.getCurrentStep()).toEqual(STEP_PRS_FIRST, 'Initial step is PRS');
+		expect(gameState.getActivePlayer()).toEqual(ACTIVE_PLAYER, 'Active player is player 33');
 		gameState.update(passAction); // Attack
 		gameState.update(passAction); // Creatures
 		gameState.update(passAction); // PRS
 		gameState.update(passAction); // Draw -> Energize -> PRS
 		expect(gameState.getCurrentStep()).toEqual(STEP_PRS_FIRST, 'Initial step is Energize');
-		expect(gameState.getActivePlayer()).toEqual(1, 'Active player is player 1');
+		expect(gameState.getActivePlayer()).toEqual(NON_ACTIVE_PLAYER, 'Active player is player 66');
 	});
 
 	it('Correct playing priority on each step', () => {
-		const gameState = new moonlands.State();
-		const passAction = {type: moonlands.ACTION_PASS};
+		const ACTIVE_PLAYER = 5;
+		const NON_ACTIVE_PLAYER = 7;
+		const gameState = new moonlands.State({
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		const passAction = {
+			type: ACTION_PASS,
+			player: ACTIVE_PLAYER,
+		};
 
 		expect(gameState.getCurrentStep()).toEqual(STEP_ENERGIZE, 'Initial step is Energize');
 		expect(gameState.getCurrentPriority()).toEqual(moonlands.NO_PRIORITY, 'There is no priority at Energize');
@@ -252,7 +276,8 @@ describe('Magi stuff', () => {
 		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(2, 'Two magi in pile');
 
 		gameState.update({
-			type: moonlands.ACTION_PASS,
+			type: ACTION_PASS,
+			player: NON_ACTIVE_PLAYER,
 		});
 
 		expect(gameState.state.prompt).toEqual(true, 'Game waiting for prompt');
@@ -323,7 +348,8 @@ describe('Magi stuff', () => {
 		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(2, 'Two magi in pile');
 
 		gameState.update({
-			type: moonlands.ACTION_PASS,
+			type: ACTION_PASS,
+			player: NON_ACTIVE_PLAYER,
 		});
 
 		expect(gameState.state.prompt).toEqual(true, 'Game waiting for prompt');
@@ -398,7 +424,8 @@ describe('Magi stuff', () => {
 		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(2, 'Two magi in pile');
 
 		gameState.update({
-			type: moonlands.ACTION_PASS,
+			type: ACTION_PASS,
+			player: NON_ACTIVE_PLAYER,
 		});
 
 		expect(gameState.state.prompt).toEqual(true, 'Game waiting for prompt');
@@ -471,14 +498,15 @@ describe('Magi stuff', () => {
 		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(2, 'Two magi in pile');
 
 		gameState.update({
-			type: moonlands.ACTION_PASS,
+			type: ACTION_PASS,
+			player: NON_ACTIVE_PLAYER,
 		});
 
 		expect(gameState.state.prompt).toEqual(true, 'Game waiting for prompt');
 		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_CARDS, 'Game waiting for you to choose starting cards');
 
 		gameState.update({
-			type: moonlands.ACTION_RESOLVE_PROMPT,
+			type: ACTION_RESOLVE_PROMPT,
 			cards: ['Arbolit', 'Quor Pup'],
 			generatedBy: gameState.state.promptGeneratedBy,
 		});
@@ -514,11 +542,9 @@ describe('Prompts', () => {
 		};
 
 		const promptAction = {
-			type: moonlands.ACTION_ENTER_PROMPT,
+			type: ACTION_ENTER_PROMPT,
 			player: ACTIVE_PLAYER,
 		};
-
-		const passAction = {type: moonlands.ACTION_PASS};
 
 		const gameState = new moonlands.State({
 			zones,
@@ -528,6 +554,12 @@ describe('Prompts', () => {
 		});
 
 		expect(gameState.state.actions.length).toEqual(2, 'Two actions in queue');
+
+		const passAction = {
+			type: ACTION_PASS,
+			player: ACTIVE_PLAYER,
+		};
+
 		gameState.update(passAction);
 		expect(gameState.state.actions.length).toEqual(0, 'Queue is empty');
 		expect(gameState.state.savedActions.length).toEqual(2, 'Two actions saved for later');
@@ -543,14 +575,14 @@ describe('Prompts', () => {
 		];
 
 		const addEnergyAction = {
-			type: moonlands.ACTION_EFFECT,
-			effectType: moonlands.EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 			amount: 2,
 			target: arbolit,
 		};
 
 		const promptAction = {
-			type: moonlands.ACTION_ENTER_PROMPT,
+			type: ACTION_ENTER_PROMPT,
 			player: ACTIVE_PLAYER,
 			promptType: moonlands.PROMPT_TYPE_NUMBER,
 		};
@@ -3535,6 +3567,7 @@ describe('Continuous Effects', () => {
 
 		const passAction = {
 			type: ACTION_PASS,
+			player: PLAYER_ONE,
 		};
 
 		gameState.update(passAction);
@@ -3588,6 +3621,7 @@ describe('Continuous Effects', () => {
 
 		const passAction = {
 			type: ACTION_PASS,
+			player: PLAYER_ONE,
 		};
 
 		gameState.update(passAction);
@@ -3640,6 +3674,7 @@ describe('Continuous Effects', () => {
 
 		const passAction = {
 			type: ACTION_PASS,
+			player: PLAYER_ONE,
 		};
 
 		gameState.update(passAction);
@@ -3702,6 +3737,7 @@ describe('Continuous Effects', () => {
 
 		const passAction = {
 			type: ACTION_PASS,
+			player: PLAYER_ONE,
 		};
 
 		gameState.update(passAction);
@@ -3779,6 +3815,7 @@ describe('Continuous Effects', () => {
 
 		const passAction = {
 			type: ACTION_PASS,
+			player: PLAYER_ONE,
 		};
 
 		gameState.update(passAction);
@@ -3858,6 +3895,7 @@ describe('Continuous Effects', () => {
 
 		const passAction = {
 			type: ACTION_PASS,
+			player: PLAYER_ONE,
 		};
 
 		gameState.update(passAction);

@@ -160,6 +160,7 @@ export type ReplacementEffectType = {
     find: FindType;
     replaceWith: ReplacingEffectType | EffectType | (ReplacingEffectType | EffectType | PromptType)[];
     mayEffect?: boolean;
+    oncePerTurn?: boolean; 
 }
 
 export type RestrictionType = typeof RESTRICTION_CREATURE_WAS_ATTACKED | 

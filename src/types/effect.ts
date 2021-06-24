@@ -105,10 +105,10 @@ export type EffectTypeType =
     typeof EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES |
     typeof EFFECT_TYPE_PAYING_ENERGY_FOR_POWER |
     typeof EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI |
-    typeof EFFECT_TYPE_MAGI_FLIPPED;
+    typeof EFFECT_TYPE_MAGI_FLIPPED |
+    typeof EFFECT_TYPE_START_STEP;
 
-type EffectTypeStillInUse = typeof EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP |
-    typeof EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY |
+type EffectTypeStillInUse = typeof EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY |
     typeof EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY |
     typeof EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY |
     typeof EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY |
@@ -130,6 +130,11 @@ type PayingEnergyForPowerEffect = ActionEffect & {
     effectType: typeof EFFECT_TYPE_PAYING_ENERGY_FOR_POWER;
     target: CardInGame;
     amount: string | number;
+}
+
+type DrawCardsInDrawStepType = ActionEffect & {
+    effectType: typeof EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP
+    numberOfCards: number
 }
 
 type NoneEffect = ActionEffect & {
@@ -395,6 +400,7 @@ export type EffectType = ActionEffect & {
     NoneEffect |
     AttackEffect |
     CardMovedBetweenZonesEffect |
+    DrawCardsInDrawStepType |
     DiscardEnergyFromCreatureOrMagiEffect |
     DiscardEnergyFromCreaturesEffect |
     DiscardEnergyFromCreatureEffect |

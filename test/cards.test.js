@@ -763,15 +763,18 @@ describe('Fog Bank', () => {
 
 		const opponentPassAction = {
 			type: ACTION_PASS,
-			player: ACTIVE_PLAYER,
+			player: NON_ACTIVE_PLAYER,
 		};
 
+		expect(gameState.state.activePlayer).toEqual(ACTIVE_PLAYER);
 		gameState.update(activePlayerPassAction);
 		// Opponents turn
 		expect(gameState.state.activePlayer).toEqual(NON_ACTIVE_PLAYER);
+		expect(gameState.state.step).toEqual(STEP_PRS_FIRST);
 		// PRS
 		expect(gameState.modifyByStaticAbilities(arboll, PROPERTY_CAN_BE_ATTACKED)).toEqual(false);
 		gameState.update(opponentPassAction);
+		expect(gameState.state.step).toEqual(STEP_ATTACK);
 		// Attack
 		expect(gameState.modifyByStaticAbilities(arboll, PROPERTY_CAN_BE_ATTACKED)).toEqual(false);
 		gameState.update(opponentPassAction);
@@ -780,6 +783,8 @@ describe('Fog Bank', () => {
 		gameState.update(opponentPassAction);
 		// PRS
 		expect(gameState.modifyByStaticAbilities(arboll, PROPERTY_CAN_BE_ATTACKED)).toEqual(false);
+		expect(gameState.state.activePlayer).toEqual(NON_ACTIVE_PLAYER);
+
 		gameState.update(opponentPassAction);
 		// Active player turn
 		expect(gameState.state.activePlayer).toEqual(ACTIVE_PLAYER);
@@ -6638,11 +6643,105 @@ describe('Evu', () => {
 
 		const passAction = {
 			type: ACTION_PASS,
+			player: ACTIVE_PLAYER,
 		};
 
 		gameState.update(passAction);
 
 		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(3, 'Active player drawn 3 cards');
+	});
+});
+
+describe('Fossik', () => {
+	it('Strengthen', () => {
+		const ACTIVE_PLAYER = 411;
+		const NON_ACTIVE_PLAYER = 12;
+
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(10);
+		// Underneath player
+		const fossik = new CardInGame(byName('Fossik'), ACTIVE_PLAYER).addEnergy(5);
+
+		const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
+		const furok = new CardInGame(byName('Furok'), ACTIVE_PLAYER);
+		const arboll = new CardInGame(byName('Arboll'), ACTIVE_PLAYER);
+
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [], [fossik]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).add([weebo, furok, arboll]);
+		gameState.getZone(ZONE_TYPE_DECK, NON_ACTIVE_PLAYER).add([arbolit]);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		const passAction = {
+			type: ACTION_PASS,
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(passAction);
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_MAY_ABILITY, 'Game is asking to use may ability');
+
+		const allowReplaceEffect = {
+			type: ACTION_RESOLVE_PROMPT,
+			useEffect: true,
+			generatedBy: gameState.state.promptGeneratedBy,
+		};
+
+		gameState.update(allowReplaceEffect);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_SINGLE_CREATURE, 'Game is asking to choose a creature');
+
+		const chooseCreatureAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_SINGLE_CREATURE,
+			target: furok,
+			player: ACTIVE_PLAYER,
+			generatedBy: gameState.state.promptGeneratedBy,
+		};
+
+		gameState.update(chooseCreatureAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+
+		const napPassAction = {
+			type: ACTION_PASS,
+			player: NON_ACTIVE_PLAYER,
+		};
+
+		// PRS
+		gameState.update(napPassAction);
+		// Attack
+		gameState.update(napPassAction);
+		// Creatures
+		gameState.update(napPassAction);
+		// PRS
+		gameState.update(napPassAction);
+
+		expect(gameState.state.activePlayer).toEqual(ACTIVE_PLAYER);
+
+		// PRS
+		expect(gameState.state.step).toEqual(STEP_PRS_FIRST);
+		gameState.update(passAction);
+		// Attack
+		gameState.update(passAction);
+		// Creatures
+		gameState.update(passAction);
+		// PRS
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+		gameState.update(passAction);
+
+		gameState.update(passAction);
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_MAY_ABILITY, 'Game is asking to use may ability');
 	});
 });
 
@@ -6719,6 +6818,7 @@ describe('Shimmer', () => {
 
 		const passAction = {
 			type: ACTION_PASS,
+			player: ACTIVE_PLAYER,
 		};
 
 		gameState.update(passAction);
@@ -6755,6 +6855,7 @@ describe('Shimmer', () => {
 
 		const passAction = {
 			type: ACTION_PASS,
+			player: ACTIVE_PLAYER,
 		};
 
 		gameState.update(passAction);

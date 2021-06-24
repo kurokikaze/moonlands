@@ -155,6 +155,7 @@ import {
 	EXPIRATION_NEVER,
 	PROPERTY_CAN_BE_ATTACKED,
 	EXPIRATION_OPPONENT_TURNS,
+	EFFECT_TYPE_START_STEP,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -4260,6 +4261,47 @@ export const cards = [
 					operator: CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE,
 					operandOne: 1,
 				},
+			},
+		],
+	}),
+	new Card('Fossik', TYPE_MAGI, REGION_UNDERNEATH, 0, {
+		replacementEffects: [
+			{
+				name: 'Strengthen',
+				text: 'During your Draw Step, you may choose to add three energy to any one Creature, instead of drawing one of your two cards. Use this Effects only once per turn.',
+				find: {
+					effectType: EFFECT_TYPE_DRAW,
+					conditions: [
+						{
+							objectOne: 'player',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						},
+						{
+							objectOne: 'stepEffect',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '=',
+							objectTwo: true,
+							propertyTwo: null,
+						}
+					],
+				},
+				replaceWith: [
+					prompt({
+						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+						message: 'Choose a creature to add 3 energy to',
+						variable: 'creatureToStrengthen',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						amount: 3,
+						target: '$creatureToStrengthen',
+					}),
+				],
+				mayEffect: true,
+				oncePerTurn: true,
 			},
 		],
 	}),
