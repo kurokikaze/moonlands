@@ -21,6 +21,8 @@ import {
 	PROMPT_TYPE_NUMBER,
 	PROMPT_TYPE_RELIC,
 	PROMPT_TYPE_MAY_ABILITY,
+	PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
+
 	PROPERTY_CONTROLLER,
 	PROPERTY_ABLE_TO_ATTACK,
 	PROPERTY_CAN_BE_ATTACKED,
@@ -3224,6 +3226,81 @@ describe('Scroll of Fire', () => {
 		gameState.update(targetingAction);
 
 		expect(orathan.data.energy).toEqual(4);
+	});
+});
+
+describe('Hubdra\'s Spear', () => {
+	it('Stab', () => {
+		const ACTIVE_PLAYER = 432;
+		const NON_ACTIVE_PLAYER = 710;
+
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(12);
+
+		const hubdrasSpear = new CardInGame(byName('Hubdra\'s Spear'), ACTIVE_PLAYER);
+		const mobis = new CardInGame(byName('Mobis'), NON_ACTIVE_PLAYER).addEnergy(10);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [hubdrasSpear], [mobis]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: hubdrasSpear,
+			power: hubdrasSpear.card.data.powers[0],
+		};
+
+		gameState.update(powerAction);
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_MAGI_WITHOUT_CREATURES);
+
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: grega,
+			generatedBy: hubdrasSpear.id,
+		};
+
+		gameState.update(targetingAction);
+
+		expect(grega.data.energy).toEqual(1);
+	});
+
+	it('Stab (cannot stab Magi with creatures)', () => {
+		const ACTIVE_PLAYER = 432;
+		const NON_ACTIVE_PLAYER = 710;
+
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(12);
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const hubdrasSpear = new CardInGame(byName('Hubdra\'s Spear'), ACTIVE_PLAYER);
+		const mobis = new CardInGame(byName('Mobis'), NON_ACTIVE_PLAYER).addEnergy(10);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [hubdrasSpear, arbolit], [mobis]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: hubdrasSpear,
+			power: hubdrasSpear.card.data.powers[0],
+		};
+
+		gameState.update(powerAction);
+		expect(gameState.state.prompt).toEqual(false);
+		expect(grega.data.energy).toEqual(12);
 	});
 });
 

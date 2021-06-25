@@ -208,6 +208,7 @@ import {
 	RESTRICTION_REGION_IS_NOT,
 	PROPERTY_CAN_BE_ATTACKED,
 	EXPIRATION_OPPONENT_TURNS,
+	PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
 } from './const';
 
 import {showAction} from './logAction';
@@ -949,7 +950,7 @@ export class State {
 		}
 	}
 
-	useSelector(selector: SelectorTypeType, player: number, argument: any): CardInGame[] | number {
+	useSelector(selector: SelectorTypeType, player: number, argument?: any): CardInGame[] | number {
 		switch (selector) {
 			case SELECTOR_OWN_CARDS_IN_PLAY: {
 				return this.getZone(ZONE_TYPE_IN_PLAY).cards
@@ -1858,6 +1859,7 @@ export class State {
 			PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
 			PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 			PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+			PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
 		];
 
 		const testablePromptFilter = (action: AnyEffectType): action is PromptType => 
@@ -1869,6 +1871,10 @@ export class State {
 			switch (promptAction.promptType) {
 				case PROMPT_TYPE_SINGLE_CREATURE:
 					return allCardsInPlay.some(card => card.card.type === TYPE_CREATURE);
+				case PROMPT_TYPE_MAGI_WITHOUT_CREATURES:
+					const opponent = this.getOpponent(source.data.controller);
+					const magi = [...this.getZone(ZONE_TYPE_ACTIVE_MAGI, source.data.controller).cards, ...this.getZone(ZONE_TYPE_ACTIVE_MAGI, opponent).cards];
+					return magi.some(magi => !allCardsInPlay.some(card => card.data.controller === magi.data.controller && card.card.type === TYPE_CREATURE));
 				case PROMPT_TYPE_RELIC:
 					return allCardsInPlay.some(card => card.card.type === TYPE_RELIC);
 				case PROMPT_TYPE_OWN_SINGLE_CREATURE:
@@ -2327,6 +2333,12 @@ export class State {
 								currentActionMetaData[variable || 'target'] = action.target;
 								break;
 							}
+							case PROMPT_TYPE_MAGI_WITHOUT_CREATURES: {
+								if (action.target.card.type === TYPE_MAGI && this.useSelector(SELECTOR_CREATURES_OF_PLAYER, action.target.data.controller)) {
+									currentActionMetaData[variable || 'target'] = action.target;
+									break;
+								}
+							}
 							case PROMPT_TYPE_SINGLE_CREATURE:
 								currentActionMetaData[variable || 'target'] = action.target;
 								break;
@@ -2360,7 +2372,7 @@ export class State {
 					break;
 				}
 				case ACTION_SELECT: {
-					let result;
+					let result: any;
 					switch (action.selector) {
 						case SELECTOR_OWN_CARDS_IN_PLAY: {
 							result = this.useSelector(SELECTOR_OWN_CARDS_IN_PLAY, action.player, null);

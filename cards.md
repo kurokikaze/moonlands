@@ -1,4 +1,4 @@
-Done: **151** cards out of **190**
+Done: **153** cards out of **190**
 
 # Done, tested
 
@@ -86,6 +86,8 @@ Done: **151** cards out of **190**
 - Shockwave
 - Abaquist
 - Fog Bank
+- Fossik
+- Hubdra's Spear
 
 # Done, not tested
 
@@ -268,12 +270,10 @@ Done: **151** cards out of **190**
 - Eye of the Storm (choice between two alternatives)
 - Flame Control (rearranging energy)
 - Flame Hyren (distributing energy)
-- Fossik
 - Gar (select in case of tie)
 - Giant Vulbor (discarding, choice between alternatives)
 - Heat Lens (looking at hand and discarding)
 - Hood of Hiding (ability to be attacked)
-- Hubdra's Spear (select magi with no creatures)
 - Implosion (discarding X orothe cards)
 - Karak (exiling under creature, ability to play named relics)
 - Lightning (select between alternatives)

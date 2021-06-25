@@ -156,6 +156,8 @@ import {
 	PROPERTY_CAN_BE_ATTACKED,
 	EXPIRATION_OPPONENT_TURNS,
 	EFFECT_TYPE_START_STEP,
+	PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
+	CALCULATION_MAX,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -642,6 +644,47 @@ export const cards = [
 					target: '$target',
 				}),
 			],	
+		}],
+	}),
+	new Card('Hubdra\'s Spear', TYPE_RELIC, REGION_OROTHE, 0, {
+		powers: [{
+			name: 'Stab',
+			text: 'Choose any one Magi with no Creatures in play. Discard Hubdra\'s Spear from play. Discard all but one energy from the chosen Magi.',
+			cost: 4,
+			effects: [
+				prompt({
+					promptType: PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
+					variable: 'targetMagi',
+				}),
+				getPropertyValue({
+					target: '$targetMagi',
+					property: PROPERTY_ENERGY_COUNT,
+					variable: 'magiEnergy',
+				}),
+				calculate({
+					operandOne: '$magiEnergy',
+					operandTwo: 1,
+					operator: CALCULATION_SUBTRACT,
+					variable: 'rawAmount',
+				}),
+				calculate({
+					operandOne: '$rawAmount',
+					propertyOne: null,
+					operandTwo: 0,
+					propertyTwo: null,
+					operator: CALCULATION_MAX,
+					variable: 'amountToDiscard',
+				}),
+				effect({
+					effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+					target: '$targetMagi',
+					amount: '$amountToDiscard',
+				}),
+				effect({
+					effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
+					target: '$source',
+				})
+			],
 		}],
 	}),
 	new Card('Thunder Vashp', TYPE_CREATURE, REGION_ARDERIAL, 2, {
