@@ -46,12 +46,15 @@ import {
 
     RESTRICTION_MAGI_WITHOUT_CREATURES,
     COST_X,
+
+    PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
+    PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
 } from '../const';
 
 import { ResolvePromptType } from './resolvePrompt';
 import { SelectorTypeType, SelectType } from './select';
 import { EffectTypeType, EffectType } from './effect';
-import { PromptTypeType, PropertyType, ConditionType, ExpirationObjectType } from './common';
+import { PromptTypeType, GenericPromptType, PropertyType, ConditionType, ExpirationObjectType } from './common';
 import { AttackEffect } from './attack';
 
 export { AttackerDealsDamageEffect, DefenderDealsDamageEffect } from './attack';
@@ -117,7 +120,7 @@ export type StaticAbilityType = {
 }
 
 export type PromptParams = {
-	promptType: PromptTypeType;
+	promptType: GenericPromptType;
     zone?: string;
     message?: string;
     source?: string;
@@ -132,14 +135,33 @@ export type PromptParams = {
 	variable?: string;
 }
 
-export type PromptType = PromptParams & {
+interface PromptInteface {
     type: typeof ACTION_ENTER_PROMPT;
-    promptParams?: {
-
-    },
+    message?: string;
+    player?: number;
+    variable?: string;
     generatedBy?: string;
     replacedBy?: string[];
 }
+
+export type PromptTypeDistributeEnergy = PromptInteface & {
+    promptType: typeof PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES;
+    amount: string | number;
+}
+
+export type PromptTypeRearrangeEnergy = PromptInteface & {
+    promptType: typeof PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES;
+}
+
+type GeneralPromptType = PromptParams & {
+    type: typeof ACTION_ENTER_PROMPT;
+    promptType: GenericPromptType;
+    promptParams?: any;
+    generatedBy?: string;
+    replacedBy?: string[];
+}
+
+export type PromptType = GeneralPromptType | PromptTypeRearrangeEnergy | PromptTypeDistributeEnergy;
 
 export type FindType = {
     effectType: EffectTypeType;

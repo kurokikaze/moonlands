@@ -24,6 +24,8 @@ import {
 	EFFECT_TYPE_DRAW,
 	EFFECT_TYPE_ROLL_DIE,
 	EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+	EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
+	EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
 
 	SELECTOR_MAGI_NOT_OF_REGION,
 	SELECTOR_OWN_CREATURES_OF_TYPE,
@@ -1491,7 +1493,180 @@ describe('Effects', () => {
 			gameState.getZone(ZONE_TYPE_MAGI_PILE).card.id,
 			'New card meta data points no new card',
 		);
-	});    
+	});
+
+	it('Rearranging energy on creatures [EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES]', () => {
+		const activePlayer = 0;
+
+		const grega = new CardInGame(byName('Grega'), activePlayer).addEnergy(10);
+		const arbolit = new CardInGame(byName('Arbolit'), activePlayer).addEnergy(5);
+		const fireGrag = new CardInGame(byName('Fire Grag'), activePlayer).addEnergy(4);
+		const quorPup = new CardInGame(byName('Quor Pup'), activePlayer).addEnergy(6);
+		const diobor = new CardInGame(byName('Diobor'), activePlayer).addEnergy(10);
+
+		const zones = [
+			new Zone('Player 1 hand', ZONE_TYPE_HAND, activePlayer),
+			new Zone('Player 1 discard', ZONE_TYPE_DISCARD, activePlayer),
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, activePlayer).add([grega]),
+			new Zone('Player 1 magi pile', ZONE_TYPE_MAGI_PILE, activePlayer),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit, fireGrag, quorPup, diobor]),            
+		];
+
+		const rearrangeEnergyEffect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
+			energyOnCreatures: {
+				[fireGrag.id]: 2,
+				[arbolit.id]: 1,
+				[quorPup.id]: 15,
+				[diobor.id]: 7,
+			},
+			player: activePlayer,
+			generatedBy: 'testMoveEffect',
+		};
+
+		const gameState = new moonlands.State({
+			zones,
+			activePlayer,
+		});
+
+		gameState.update(rearrangeEnergyEffect);
+
+		expect(arbolit.data.energy).toEqual(1, 'Arbolit has 1 energy');
+		expect(fireGrag.data.energy).toEqual(2, 'Fire Grag has 2 energy');
+		expect(quorPup.data.energy).toEqual(15, 'Quor Pup has 15 energy');
+		expect(diobor.data.energy).toEqual(7, 'Diobor has 7 energy');
+	});
+
+	it('Creatures with 0 energy go to discard [EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES]', () => {
+		const activePlayer = 0;
+
+		const grega = new CardInGame(byName('Grega'), activePlayer).addEnergy(10);
+		const arbolit = new CardInGame(byName('Arbolit'), activePlayer).addEnergy(5);
+		const fireGrag = new CardInGame(byName('Fire Grag'), activePlayer).addEnergy(4);
+		const quorPup = new CardInGame(byName('Quor Pup'), activePlayer).addEnergy(6);
+		const diobor = new CardInGame(byName('Diobor'), activePlayer).addEnergy(10);
+
+		const zones = [
+			new Zone('Player 1 hand', ZONE_TYPE_HAND, activePlayer),
+			new Zone('Player 1 discard', ZONE_TYPE_DISCARD, activePlayer),
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, activePlayer).add([grega]),
+			new Zone('Player 1 magi pile', ZONE_TYPE_MAGI_PILE, activePlayer),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit, fireGrag, quorPup, diobor]),            
+		];
+
+		const rearrangeEnergyEffect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
+			energyOnCreatures: {
+				[fireGrag.id]: 0,
+				[arbolit.id]: 0,
+				[quorPup.id]: 15,
+				[diobor.id]: 10,
+			},
+			player: activePlayer,
+			generatedBy: 'testMoveEffect',
+		};
+
+		const gameState = new moonlands.State({
+			zones,
+			activePlayer,
+		});
+
+		gameState.update(rearrangeEnergyEffect);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards).toHaveLength(2);
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, activePlayer).cards).toHaveLength(2);
+
+		expect(quorPup.data.energy).toEqual(15, 'Quor Pup has 15 energy');
+		expect(diobor.data.energy).toEqual(10, 'Diobor has 7 energy');
+	});
+
+	it('Do nothing if the old total is not equal to the new total [EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES]', () => {
+		const activePlayer = 0;
+
+		const grega = new CardInGame(byName('Grega'), activePlayer).addEnergy(10);
+		const arbolit = new CardInGame(byName('Arbolit'), activePlayer).addEnergy(5);
+		const fireGrag = new CardInGame(byName('Fire Grag'), activePlayer).addEnergy(4);
+		const quorPup = new CardInGame(byName('Quor Pup'), activePlayer).addEnergy(6);
+		const diobor = new CardInGame(byName('Diobor'), activePlayer).addEnergy(10);
+
+		const zones = [
+			new Zone('Player 1 hand', ZONE_TYPE_HAND, activePlayer),
+			new Zone('Player 1 discard', ZONE_TYPE_DISCARD, activePlayer),
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, activePlayer).add([grega]),
+			new Zone('Player 1 magi pile', ZONE_TYPE_MAGI_PILE, activePlayer),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit, fireGrag, quorPup, diobor]),            
+		];
+
+		const rearrangeEnergyEffect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
+			energyOnCreatures: {
+				[fireGrag.id]: 2,
+				[arbolit.id]: 2,
+				[quorPup.id]: 15,
+				[diobor.id]: 7,
+			},
+			player: activePlayer,
+			generatedBy: 'testMoveEffect',
+		};
+
+		const gameState = new moonlands.State({
+			zones,
+			activePlayer,
+		});
+
+		gameState.update(rearrangeEnergyEffect);
+
+		expect(arbolit.data.energy).toEqual(5, 'Arbolit has 5 energy');
+		expect(fireGrag.data.energy).toEqual(4, 'Fire Grag has 4 energy');
+		expect(quorPup.data.energy).toEqual(6, 'Quor Pup has 6 energy');
+		expect(diobor.data.energy).toEqual(10, 'Diobor has 10 energy');
+	});
+
+	it('Distributing energy among creatures [EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES]', () => {
+		const activePlayer = 0;
+
+		const grega = new CardInGame(byName('Grega'), activePlayer).addEnergy(10);
+		const arbolit = new CardInGame(byName('Arbolit'), activePlayer).addEnergy(5);
+		const fireGrag = new CardInGame(byName('Fire Grag'), activePlayer).addEnergy(4);
+		const quorPup = new CardInGame(byName('Quor Pup'), activePlayer).addEnergy(6);
+		const diobor = new CardInGame(byName('Diobor'), activePlayer).addEnergy(10);
+
+		const zones = [
+			new Zone('Player 1 hand', ZONE_TYPE_HAND, activePlayer),
+			new Zone('Player 1 discard', ZONE_TYPE_DISCARD, activePlayer),
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, activePlayer).add([grega]),
+			new Zone('Player 1 magi pile', ZONE_TYPE_MAGI_PILE, activePlayer),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit, fireGrag, quorPup, diobor]),            
+		];
+
+		const rearrangeEnergyEffect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
+			energyOnCreatures: {
+				[arbolit.id]: 3,
+				[fireGrag.id]: 1,
+				[quorPup.id]: 2,
+				[diobor.id]: 4,
+			},
+			player: activePlayer,
+			generatedBy: 'testMoveEffect',
+		};
+
+		const gameState = new moonlands.State({
+			zones,
+			activePlayer,
+		});
+
+		gameState.update(rearrangeEnergyEffect);
+
+		expect(arbolit.data.energy).toEqual(8);
+		expect(fireGrag.data.energy).toEqual(5);
+		expect(quorPup.data.energy).toEqual(8);
+		expect(diobor.data.energy).toEqual(14);
+	});
 });
 
 describe('Match actions', () => {

@@ -59,6 +59,8 @@ import {
     EFFECT_TYPE_DEFEAT_MAGI,
     EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC,
     EFFECT_TYPE_ATTACK,
+    EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
+    EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
 } from '../const';
 
 export type EffectTypeType =
@@ -390,6 +392,16 @@ type CreateContinuousEffect = ActionEffect & {
     expiration: ExpirationObjectType;
 }
 
+type RearrangeEnergyEffect = ActionEffect & {
+    effectType: typeof EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES;
+    energyOnCreatures: string | Record<string, number>;
+}
+
+type DistributeEnergyEffect = ActionEffect & {
+    effectType: typeof EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES;
+    energyOnCreatures: string | Record<string, number>;
+}
+
 export type EffectType = ActionEffect & {
     effectType: EffectTypeStillInUse;
     generatedBy?: string;
@@ -436,4 +448,6 @@ export type EffectType = ActionEffect & {
     MoveEnergyEffect |
     MagiIsDefeatedEffect |
     CreateContinuousEffect |
-    DefeatMagiEffect;
+    DefeatMagiEffect |
+    RearrangeEnergyEffect |
+    DistributeEnergyEffect;

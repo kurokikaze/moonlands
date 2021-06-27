@@ -1,4 +1,4 @@
-Done: **153** cards out of **190**
+Done: **155** cards out of **190**
 
 # Done, tested
 
@@ -88,6 +88,7 @@ Done: **153** cards out of **190**
 - Fog Bank
 - Fossik
 - Hubdra's Spear
+- Flame Control
 
 # Done, not tested
 
@@ -156,6 +157,7 @@ Done: **153** cards out of **190**
 - Orthea
 - Relic Mirror
 - Giant Parmalag
+- Flame Hyren
 
 # Possible sample decks:
 
@@ -268,8 +270,6 @@ Done: **153** cards out of **190**
 - Entangle ([in]ability to play spells)
 - Epik (choosing up to X cards from opponent hand)
 - Eye of the Storm (choice between two alternatives)
-- Flame Control (rearranging energy)
-- Flame Hyren (distributing energy)
 - Gar (select in case of tie)
 - Giant Vulbor (discarding, choice between alternatives)
 - Heat Lens (looking at hand and discarding)
@@ -316,14 +316,6 @@ Done: **153** cards out of **190**
 - Heat Lens (choosing player)
 - Gar (between cards in play in case of tie)
 - Eye of the Storm (choosing between alternatives)
-
-# Rearranging Energy
-
-- Flame Control
-
-## Distributing energy
-
-- Flame Hyren
 
 # Searching decks
 

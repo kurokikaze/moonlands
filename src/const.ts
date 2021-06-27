@@ -159,6 +159,8 @@ export const EFFECT_TYPE_DISCARD_CARDS_FROM_HAND = 'effects/discard_cards_from_h
 export const EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE = 'effects/forbid_attack_to_creature';
 export const EFFECT_TYPE_ADD_DELAYED_TRIGGER = 'effects/add_delayed_trigger';
 export const EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT = 'effects/create_continuous_effect';
+export const EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES = 'effects/rearrange_energy_on_creatures';
+export const EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES = 'effects/distribute_energy_on_creatures';
 
 export const EXPIRATION_OPPONENT_TURNS = 'expiration/opponents_turns';
 export const EXPIRATION_PLAYER_TURNS = 'expirations/players_turns';
@@ -185,6 +187,8 @@ export const PROMPT_TYPE_RELIC = 'prompt/relic';
 export const PROMPT_TYPE_NUMBER = 'prompt/number';
 export const PROMPT_TYPE_MAY_ABILITY = 'prompt/may_ability';
 export const PROMPT_TYPE_MAGI_WITHOUT_CREATURES = 'prompt/magi_without_creatures';
+export const PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES = 'prompt/rearrange_energy_on_creatures';
+export const PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES = 'prompt/distribute_energy_on_creatures';
 
 export const RESTRICTION_TYPE ='restrictions/type';
 export const RESTRICTION_ENERGY_LESS_THAN_STARTING = 'restrictions/energy_less_than_starting';

@@ -111,6 +111,7 @@ import {
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
 	EFFECT_TYPE_ATTACK,
 	EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+	EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
 
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 	PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
@@ -121,6 +122,7 @@ import {
 	PROMPT_TYPE_RELIC,
 	PROMPT_TYPE_NUMBER,
 	PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+	PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
 
 	PROTECTION_FROM_SPELLS,
 	PROTECTION_TYPE_GENERAL,
@@ -158,6 +160,8 @@ import {
 	EFFECT_TYPE_START_STEP,
 	PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
 	CALCULATION_MAX,
+	PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
+	EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -190,10 +194,36 @@ const getPropertyValue = (data: PropertyGetterParams): PropertyGetterType => ({
 	...data,
 });
 
-const prompt = (data: PromptParams): PromptType => ({
-	type: ACTION_ENTER_PROMPT,
-	...data,
-});
+type RearrangeEnergyPromptParams = {
+	promptType: typeof PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES;
+	variable?: string;
+}
+
+type DistributeEnergyPromptParams = {
+	promptType: typeof PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES;
+	amount: string | number;
+	message?: string;
+	variable?: string;
+}
+
+const prompt = (data: PromptParams | DistributeEnergyPromptParams | RearrangeEnergyPromptParams): PromptType => {
+	switch (data.promptType) {
+		case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES:
+			return {
+				type: ACTION_ENTER_PROMPT,
+				...data,
+			};
+		case PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES:
+			return {
+				type: ACTION_ENTER_PROMPT,
+				...data,
+			};
+	}
+	return ({
+		type: ACTION_ENTER_PROMPT,
+		...data,
+	});
+};
 
 const calculate = (data: CalculateParams): CalculateType => ({
 	type: ACTION_CALCULATE,
@@ -4894,6 +4924,47 @@ export const cards = [
 			},
 		],
 	}),
+	new Card('Flame Control', TYPE_SPELL, REGION_CALD, 1, {
+		text: 'Rearrange the energy on your creatures as you wish',
+		effects: [
+			prompt({
+				promptType: PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
+			}),
+			effect({
+				effectType: EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
+				energyOnCreatures: '$energyOnCreatures',
+			}),
+		],
+	}),
+	new Card('Flame Hyren', TYPE_CREATURE, REGION_CALD, 9, {
+		powers: [
+			{
+				name: 'Energy Transfer',
+				text: 'Distribute Flame Hyren\'s energy among any number of creatures. Discard Flame Hyren from play.',
+				cost: 0,
+				effects: [
+					getPropertyValue({
+						property: PROPERTY_ENERGY_COUNT,
+						target: '$source',
+						variable: 'flameHyrenEnergy'
+					}),
+					prompt({
+						promptType: PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
+						message: 'Distribute Flame Hyren\'s energy among any number of creatures. After this Flame Hyren will be discarded.',
+						amount: '$flameHyrenEnergy',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
+						energyOnCreatures: '$energyOnCreatures', 
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+						target: '$source',
+					}),
+				],
+			},
+		],
+	}),
 ];
 
-export const byName = name => cards.find(card => card.name === name);
+export const byName = (name: string) => cards.find(card => card.name === name);

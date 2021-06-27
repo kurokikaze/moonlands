@@ -27,6 +27,11 @@ export default class CardInGame {
         this.data.energy -= amountToRemove;
         this.data.energyLostThisTurn += amountToRemove;
     }
+    setEnergy(amount) {
+        const amountToRemove = Math.max(this.data.energy - amount, 0);
+        this.data.energyLostThisTurn += amountToRemove;
+        this.data.energy = amount;
+    }
     markAttackDone() {
         this.data.hasAttacked = true;
         this.data.attacked += 1;

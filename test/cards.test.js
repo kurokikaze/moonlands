@@ -22,6 +22,7 @@ import {
 	PROMPT_TYPE_RELIC,
 	PROMPT_TYPE_MAY_ABILITY,
 	PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
+	PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
 
 	PROPERTY_CONTROLLER,
 	PROPERTY_ABLE_TO_ATTACK,
@@ -3623,7 +3624,7 @@ describe('O\'Qua', () => {
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'One card is in play');
 		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).length).toEqual(2, 'Deck has 2 cards left');
-		// expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Deep Hyren', 'Card is Deep Hyren');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toEqual(6, 'O\'Qua has 6 energy left');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards.find(card => card.card.name === 'Deep Hyren').data.energy).toEqual(5, 'Deep Hyren has 5 energy (4 from ability and 1 from Staff of Hyren)');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards.find(card => card.card.name === 'Deep Hyren').data.attacked).toEqual(100, 'Deep Hyren will not be able to attack this turn');
 	});
@@ -4077,6 +4078,64 @@ describe('Adis', () => {
 			zoneOwner: NON_ACTIVE_PLAYER,
 			numberOfCards: 3,
 		}, 'Game prompt params are right');
+	});
+});
+
+describe('Flame Control', () => {
+	it('Rearranges energy on creatures', () => {
+		const ACTIVE_PLAYER = 212;
+		const NON_ACTIVE_PLAYER = 510;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(15);
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER).addEnergy(5);
+		const fireGrag = new CardInGame(byName('Fire Grag'), ACTIVE_PLAYER).addEnergy(4);
+		const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER).addEnergy(6);
+		const diobor = new CardInGame(byName('Diobor'), ACTIVE_PLAYER).addEnergy(10);
+		const flameControl = new CardInGame(byName('Flame Control'), ACTIVE_PLAYER);
+
+		const adis = new CardInGame(byName('Adis'), NON_ACTIVE_PLAYER).addEnergy(3);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arbolit, fireGrag, quorPup, diobor], [grega]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([adis]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([flameControl]);
+
+		const playAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: flameControl,
+				player: ACTIVE_PLAYER,
+			},
+		};
+
+		gameState.update(playAction);
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES);
+
+		const resolvePromptAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			energyOnCreatures: {
+				[arbolit.id]: 1,
+				[fireGrag.id]: 5,
+				[quorPup.id]: 10,
+				[diobor.id]: 9,
+			},
+			player: ACTIVE_PLAYER,
+			generatedBy: flameControl.id,
+		};
+
+		gameState.update(resolvePromptAction);
+
+		expect(arbolit.data.energy).toEqual(1);
+		expect(fireGrag.data.energy).toEqual(5);
+		expect(quorPup.data.energy).toEqual(10);
+		expect(diobor.data.energy).toEqual(9);
 	});
 });
 
