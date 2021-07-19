@@ -247,7 +247,6 @@ import {
 	EffectType,
 	PropertyGetterType
 } from './types';
-import { forEachChild } from 'typescript';
 
 const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
 	id: cardInGame.id,
@@ -817,8 +816,7 @@ export class State {
 			opponentActiveMagi: this.getZone(ZONE_TYPE_ACTIVE_MAGI, opponentId).serialize(),
 			playerMagiPile: this.getZone(ZONE_TYPE_MAGI_PILE, playerId).serialize(true),
 			opponentMagiPile: this.getZone(ZONE_TYPE_MAGI_PILE, opponentId).serialize(),
-			playerInPlay: this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(c => c.data.controller == playerId).map(c => c.serialize()),
-			opponentInPlay: this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(c => c.data.controller == opponentId).map(c => c.serialize()),
+			inPlay: this.getZone(ZONE_TYPE_IN_PLAY).cards.map(c => c.serialize()),
 			playerDefeatedMagi: this.getZone(ZONE_TYPE_DEFEATED_MAGI, playerId).serialize(),
 			opponentDefeatedMagi: this.getZone(ZONE_TYPE_DEFEATED_MAGI, opponentId).serialize(),
 			playerDiscard: this.getZone(ZONE_TYPE_DISCARD, playerId).serialize(),
