@@ -2220,10 +2220,23 @@ export class State {
 							break;
 						}
 						case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-							promptParams = {
-								restriction: action.restriction,
-								restrictionValue: action.restrictionValue,
-							};
+							if (action.restrictions) {
+								const restrictionsWithValues = action.restrictions.map(({ type, value }: RestrictionObjectType) => ({
+									type,
+									value: this.getMetaValue(value, action.generatedBy),
+								}));
+
+								promptParams = {
+									restrictions: restrictionsWithValues,
+								};
+							} else {
+								promptParams = {
+									restriction: action.restriction,
+									restrictionValue: this.getMetaValue(action.restrictionValue, action.generatedBy),
+								};
+	
+							}
+	
 							break;
 						}
 						case PROMPT_TYPE_CHOOSE_CARDS: {

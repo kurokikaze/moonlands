@@ -2434,6 +2434,8 @@ export const cards = [
 	new Card('Sphor', TYPE_CREATURE, REGION_OROTHE, 2, {
 		triggerEffects: [
 			{
+				name: 'Scavenge',
+				text: 'Each time a Creature you control is discarded from play, add one energy to Sphor.',
 				find: {
 					effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
 					conditions: [
@@ -3563,6 +3565,7 @@ export const cards = [
 		triggerEffects: [
 			{
 				name: 'Legacy',
+				text: 'If Mobis is defeated, add three energy to your next Magi when he or she is revealed.',
 				find: {
 					effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
 					conditions: [
@@ -3574,6 +3577,7 @@ export const cards = [
 						effectType: EFFECT_TYPE_ADD_DELAYED_TRIGGER,
 						delayedTrigger: {
 							name: 'Legacy',
+							text: 'If Mobis is defeated, add three energy to your next Magi when he or she is revealed.',
 							find: {
 								effectType: EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI,
 								conditions: [

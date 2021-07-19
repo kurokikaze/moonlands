@@ -29,6 +29,8 @@ import {
 	PROPERTY_CAN_BE_ATTACKED,
 
 	RESTRICTION_REGION,
+	RESTRICTION_ENERGY_LESS_THAN,
+
 	REGION_OROTHE,
 
 	ZONE_TYPE_ACTIVE_MAGI,
@@ -7036,6 +7038,9 @@ describe('Abaquist', () => {
 		gameState.update(powerAction);
 
 		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptParams.restrictions).toHaveLength(1);
+		expect(gameState.state.promptParams.restrictions[0].type).toEqual(RESTRICTION_ENERGY_LESS_THAN);
+		expect(gameState.state.promptParams.restrictions[0].value).toEqual(6);
 
 		const chooseCreatureAction = {
 			type: ACTION_RESOLVE_PROMPT,
