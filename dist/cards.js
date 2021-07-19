@@ -880,7 +880,7 @@ export const cards = [
             }
         ],
     }),
-    new Card('Abaquist', TYPE_CREATURE, REGION_ARDERIAL, 1, {
+    new Card('Abaquist', TYPE_CREATURE, REGION_OROTHE, 1, {
         powers: [
             {
                 name: 'Posess',
@@ -2237,6 +2237,8 @@ export const cards = [
     new Card('Sphor', TYPE_CREATURE, REGION_OROTHE, 2, {
         triggerEffects: [
             {
+                name: 'Scavenge',
+                text: 'Each time a Creature you control is discarded from play, add one energy to Sphor.',
                 find: {
                     effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
                     conditions: [
@@ -2990,7 +2992,7 @@ export const cards = [
                         target: '$target',
                     }),
                 ],
-            }
+            },
         ],
     }),
     new Card('Gorgle\'s Ring', TYPE_RELIC, REGION_CALD, 0, {
@@ -3130,7 +3132,7 @@ export const cards = [
                                 comparator: '<=',
                                 objectTwo: 5,
                                 propertyTwo: null,
-                            }
+                            },
                         ],
                         thenEffects: [
                             prompt({
@@ -3366,6 +3368,7 @@ export const cards = [
         triggerEffects: [
             {
                 name: 'Legacy',
+                text: 'If Mobis is defeated, add three energy to your next Magi when he or she is revealed.',
                 find: {
                     effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
                     conditions: [
@@ -3377,6 +3380,7 @@ export const cards = [
                         effectType: EFFECT_TYPE_ADD_DELAYED_TRIGGER,
                         delayedTrigger: {
                             name: 'Legacy',
+                            text: 'If Mobis is defeated, add three energy to your next Magi when he or she is revealed.',
                             find: {
                                 effectType: EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI,
                                 conditions: [
