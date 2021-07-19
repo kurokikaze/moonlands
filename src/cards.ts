@@ -1077,7 +1077,7 @@ export const cards = [
 			}
 		],
 	}),
-	new Card('Abaquist', TYPE_CREATURE, REGION_ARDERIAL, 1, {
+	new Card('Abaquist', TYPE_CREATURE, REGION_OROTHE, 1, {
 		powers: [
 			{
 				name: 'Posess',
@@ -3187,7 +3187,7 @@ export const cards = [
 						target: '$target',
 					}),
 				],
-			}
+			},
 		],
 	}),
 	new Card('Gorgle\'s Ring', TYPE_RELIC, REGION_CALD, 0, {
@@ -3327,7 +3327,7 @@ export const cards = [
 							comparator: '<=',
 							objectTwo: 5,
 							propertyTwo: null,
-						}
+						},
 					],
 					thenEffects: [
 						prompt({

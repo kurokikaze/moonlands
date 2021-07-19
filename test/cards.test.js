@@ -7008,12 +7008,12 @@ describe('Abaquist', () => {
 	it('Posess', () => {
 		const ACTIVE_PLAYER = 104;
 		const NON_ACTIVE_PLAYER = 12;
-		const nimbulo = new CardInGame(byName('Nimbulo'), ACTIVE_PLAYER).addEnergy(10);
+		const whall = new CardInGame(byName('Whall'), ACTIVE_PLAYER).addEnergy(10);
 		const magam = new CardInGame(byName('Magam'), NON_ACTIVE_PLAYER).addEnergy(10);
 		const lavaBalamant = new CardInGame(byName('Lava Balamant'), NON_ACTIVE_PLAYER).addEnergy(3);
 		const abaquist = new CardInGame(byName('Abaquist'), ACTIVE_PLAYER).addEnergy(6);
 
-		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaBalamant, abaquist], [nimbulo]);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaBalamant, abaquist], [whall]);
 
 		const gameState = new State({
 			zones,
