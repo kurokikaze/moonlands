@@ -530,6 +530,23 @@ export class State {
 				}
 				return action;
 			}
+			case ACTION_EFFECT: {
+				switch (action.effectType) {
+					case EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT: {
+						return {
+							...action,
+							staticAbilities: action.staticAbilities.map(ability => ({
+								...ability,
+								modifier: {
+									operandOne: this.getMetaValue(ability.modifier.operandOne, action.generatedBy),
+									operator: ability.modifier.operator,
+								},
+								selectorParameter: ability.selectorParameter ? this.getMetaValue(ability.selectorParameter, action.generatedBy)?.id : null,
+							})),
+						}
+					}
+				}
+			}
 			default:
 				return action;
 		}

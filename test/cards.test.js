@@ -10,6 +10,7 @@ import {
 	ACTION_POWER,
 	ACTION_RESOLVE_PROMPT,
 	ACTION_PASS,
+	ACTION_EFFECT,
 
 	PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
@@ -23,6 +24,8 @@ import {
 	PROMPT_TYPE_MAY_ABILITY,
 	PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
 	PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
+
+	EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
 
 	PROPERTY_CONTROLLER,
 	PROPERTY_ABLE_TO_ATTACK,
@@ -7066,6 +7069,14 @@ describe('Abaquist', () => {
 		expect(gameState.state.continuousEffects).toHaveLength(2, 'Game has 2 continuous effects added');
 
 		expect(gameState.modifyByStaticAbilities(lavaBalamant, PROPERTY_CONTROLLER)).toEqual(ACTIVE_PLAYER, 'Active player controls Lava Balamant now');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).cards.length).toEqual(1, 'Active player has 1 card in discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Abaquist', 'It is Abaquist');
+
+		const staticAbilityAction = seenActions.find(a => a.type === ACTION_EFFECT && a.effectType === EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT);
+		expect(staticAbilityAction).not.toBeNull();
+		expect(staticAbilityAction.staticAbilities).toHaveLength(1);
+		expect(staticAbilityAction.staticAbilities[0].modifier.operandOne).toEqual(ACTIVE_PLAYER);
+		expect(staticAbilityAction.staticAbilities[0].selectorParameter).toEqual(lavaBalamant.id);
 	});
 
 	it('Activating ability of a posessed creature', () => {
