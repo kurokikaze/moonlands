@@ -7035,12 +7035,22 @@ describe('Abaquist', () => {
 			generatedBy: abaquist.id,
 		};
 
+		const seenActions = [];
+
+		gameState.actionStreamTwo.on('action', function(action) {
+			seenActions.push(action);
+		});
+
 		gameState.update(powerAction);
+
 
 		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
 		expect(gameState.state.promptParams.restrictions).toHaveLength(1);
 		expect(gameState.state.promptParams.restrictions[0].type).toEqual(RESTRICTION_ENERGY_LESS_THAN);
 		expect(gameState.state.promptParams.restrictions[0].value).toEqual(6);
+
+		expect(seenActions[1].restrictions[0].type).toEqual(RESTRICTION_ENERGY_LESS_THAN);
+		expect(seenActions[1].restrictions[0].value).toEqual(6);
 
 		const chooseCreatureAction = {
 			type: ACTION_RESOLVE_PROMPT,
@@ -7056,5 +7066,69 @@ describe('Abaquist', () => {
 		expect(gameState.state.continuousEffects).toHaveLength(2, 'Game has 2 continuous effects added');
 
 		expect(gameState.modifyByStaticAbilities(lavaBalamant, PROPERTY_CONTROLLER)).toEqual(ACTIVE_PLAYER, 'Active player controls Lava Balamant now');
+	});
+
+	it('Activating ability of a posessed creature', () => {
+		const ACTIVE_PLAYER = 104;
+		const NON_ACTIVE_PLAYER = 12;
+		const whall = new CardInGame(byName('Whall'), ACTIVE_PLAYER).addEnergy(10);
+		const magam = new CardInGame(byName('Magam'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(3);
+		const abaquist = new CardInGame(byName('Abaquist'), ACTIVE_PLAYER).addEnergy(6);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arbolit, abaquist], [whall]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([magam]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: abaquist,
+			power: abaquist.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+			generatedBy: abaquist.id,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptParams.restrictions).toHaveLength(1);
+		expect(gameState.state.promptParams.restrictions[0].type).toEqual(RESTRICTION_ENERGY_LESS_THAN);
+		expect(gameState.state.promptParams.restrictions[0].value).toEqual(6);
+
+		const chooseCreatureAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: arbolit,
+			player: ACTIVE_PLAYER,
+			generatedBy: abaquist.id,
+		};
+
+		gameState.update(chooseCreatureAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+
+		expect(gameState.state.continuousEffects).toHaveLength(2, 'Game has 2 continuous effects added');
+
+		expect(gameState.modifyByStaticAbilities(arbolit, PROPERTY_CONTROLLER)).toEqual(ACTIVE_PLAYER, 'Active player controls Lava Balamant now');
+
+		const arbolitPowerAction = {
+			type: ACTION_POWER,
+			source: arbolit,
+			power: arbolit.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+			generatedBy: abaquist.id,
+		};
+
+		gameState.update(arbolitPowerAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game is prompting active player');		
 	});
 });

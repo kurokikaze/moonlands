@@ -175,12 +175,43 @@ export class State {
         this.commandStream.destroy();
     }
     addActionToStream(action) {
+        const actionWithValues = this.addValuesToAction(action);
         // Do not send outside CALCULATE, SELECT and so on
         if (![ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE].includes(action.type)) {
-            this.actionStreamOne.emit('action', action);
-            this.actionStreamTwo.emit('action', action);
+            this.actionStreamOne.emit('action', actionWithValues);
+            this.actionStreamTwo.emit('action', actionWithValues);
         }
-        this.logStream.emit('action', action);
+        this.logStream.emit('action', actionWithValues);
+    }
+    addValuesToAction(action) {
+        switch (action.type) {
+            case ACTION_ENTER_PROMPT: {
+                switch (action.promptType) {
+                    case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
+                        if ('restrictions' in action) {
+                            const restrictionsWithValues = action.restrictions.map(({ type, value }) => ({
+                                type,
+                                value: this.getMetaValue(value, action.generatedBy),
+                            }));
+                            return {
+                                ...action,
+                                restrictions: restrictionsWithValues,
+                            };
+                        }
+                        else {
+                            return {
+                                ...action,
+                                restrictionValue: this.getMetaValue(action.restrictionValue, action.generatedBy),
+                            };
+                        }
+                        break;
+                    }
+                }
+                return action;
+            }
+            default:
+                return action;
+        }
     }
     enableDebug() {
         this.debug = true;
@@ -1551,9 +1582,10 @@ export class State {
                         const source = action.source;
                         const sourcePower = action.power;
                         const effects = action.power.effects;
+                        const sourceController = this.modifyByStaticAbilities(source, PROPERTY_CONTROLLER);
                         const enrichAction = (effect) => ({
                             source,
-                            player: source.data.controller,
+                            player: sourceController,
                             ...effect,
                             power: true,
                             generatedBy: source.id,
@@ -1572,7 +1604,7 @@ export class State {
                                 this.addActions({
                                     type: ACTION_ENTER_PROMPT,
                                     promptType: PROMPT_TYPE_NUMBER,
-                                    player: action.player,
+                                    player: sourceController,
                                     generatedBy: source.id,
                                     min: 1,
                                     max: action.source.data.energy,
