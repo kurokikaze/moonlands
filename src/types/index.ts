@@ -148,6 +148,7 @@ interface PromptInteface {
 export type PromptTypeDistributeEnergy = PromptInteface & {
     promptType: typeof PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES;
     amount: string | number;
+    restriction?: RestrictionType;
 }
 
 export type PromptTypeRearrangeEnergy = PromptInteface & {

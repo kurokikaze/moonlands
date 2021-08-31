@@ -1729,6 +1729,7 @@ export class State {
                         case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
                             promptParams = {
                                 amount: this.getMetaValue(action.amount, action.generatedBy),
+                                restriction: action.restriction,
                             };
                             break;
                         }
