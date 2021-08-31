@@ -89,6 +89,7 @@ Done: **155** cards out of **190**
 - Fossik
 - Hubdra's Spear
 - Flame Control
+- Flame Hyren
 
 # Done, not tested
 
@@ -157,7 +158,6 @@ Done: **155** cards out of **190**
 - Orthea
 - Relic Mirror
 - Giant Parmalag
-- Flame Hyren
 
 # Possible sample decks:
 

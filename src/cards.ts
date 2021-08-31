@@ -162,6 +162,7 @@ import {
 	CALCULATION_MAX,
 	PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
 	EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
+	RESTRICTION_EXCEPT_SOURCE,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -176,7 +177,7 @@ import {
 	PropertyGetterParams,
 	SelectType,
 	RefinedSelectParams,
-	OperatorType
+	RestrictionType,
 } from './types';
 
 const effect = (data: any): EffectType => ({
@@ -196,6 +197,7 @@ const getPropertyValue = (data: PropertyGetterParams): PropertyGetterType => ({
 
 type RearrangeEnergyPromptParams = {
 	promptType: typeof PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES;
+	message?: string;
 	variable?: string;
 }
 
@@ -203,6 +205,7 @@ type DistributeEnergyPromptParams = {
 	promptType: typeof PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES;
 	amount: string | number;
 	message?: string;
+	restriction?: RestrictionType;
 	variable?: string;
 }
 
@@ -4933,6 +4936,7 @@ export const cards = [
 		effects: [
 			prompt({
 				promptType: PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
+				message: 'Rearrange the energy on your creatures as you wish',
 			}),
 			effect({
 				effectType: EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
@@ -4955,6 +4959,7 @@ export const cards = [
 					prompt({
 						promptType: PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
 						message: 'Distribute Flame Hyren\'s energy among any number of creatures. After this Flame Hyren will be discarded.',
+						restriction: RESTRICTION_EXCEPT_SOURCE,
 						amount: '$flameHyrenEnergy',
 					}),
 					effect({

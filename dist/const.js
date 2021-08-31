@@ -190,6 +190,7 @@ export const RESTRICTION_PLAYABLE = 'restrictions/card_playable';
 export const RESTRICTION_CREATURE_WAS_ATTACKED = 'restrictions/creature_was_attacked';
 export const RESTRICTION_MAGI_WITHOUT_CREATURES = 'restrictions/magi_without_creatures';
 export const RESTRICTION_STATUS = 'restrictions/status';
+export const RESTRICTION_EXCEPT_SOURCE = 'restrictions/except_source';
 export const TYPE_CREATURE = 'types/creature';
 export const TYPE_MAGI = 'types/magi';
 export const TYPE_RELIC = 'types/relic';

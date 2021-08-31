@@ -24,6 +24,7 @@ import {
 	PROMPT_TYPE_MAY_ABILITY,
 	PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
 	PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
+	PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
 
 	EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
 
@@ -4141,6 +4142,63 @@ describe('Flame Control', () => {
 		expect(fireGrag.data.energy).toEqual(5);
 		expect(quorPup.data.energy).toEqual(10);
 		expect(diobor.data.energy).toEqual(9);
+	});
+});
+
+describe('Flame Hyren', () => {
+	it('Distributes energy among creatures', () => {
+		const ACTIVE_PLAYER = 212;
+		const NON_ACTIVE_PLAYER = 510;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(15);
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER).addEnergy(5);
+		const fireGrag = new CardInGame(byName('Fire Grag'), ACTIVE_PLAYER).addEnergy(4);
+		const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER).addEnergy(6);
+		const diobor = new CardInGame(byName('Diobor'), ACTIVE_PLAYER).addEnergy(10);
+		const flameHyren = new CardInGame(byName('Flame Hyren'), ACTIVE_PLAYER).addEnergy(15);
+
+		const adis = new CardInGame(byName('Adis'), NON_ACTIVE_PLAYER).addEnergy(3);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arbolit, fireGrag, quorPup, diobor, flameHyren], [grega]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([adis]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: flameHyren,
+			power: flameHyren.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES);
+
+		const resolvePromptAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			energyOnCreatures: {
+				[arbolit.id]: 0,
+				[fireGrag.id]: 5,
+				[quorPup.id]: 10,
+				[diobor.id]: 0,
+			},
+			player: ACTIVE_PLAYER,
+			generatedBy: flameHyren.id,
+		};
+
+		gameState.update(resolvePromptAction);
+
+		expect(arbolit.data.energy).toEqual(5);
+		expect(fireGrag.data.energy).toEqual(9);
+		expect(quorPup.data.energy).toEqual(16);
+		expect(diobor.data.energy).toEqual(10);
 	});
 });
 

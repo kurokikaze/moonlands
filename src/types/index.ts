@@ -49,6 +49,7 @@ import {
 
     PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
     PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
+    RESTRICTION_EXCEPT_SOURCE,
 } from '../const';
 
 import { ResolvePromptType } from './resolvePrompt';
@@ -196,7 +197,8 @@ export type RestrictionType = typeof RESTRICTION_CREATURE_WAS_ATTACKED |
     typeof RESTRICTION_PLAYABLE |
     typeof RESTRICTION_ENERGY_LESS_THAN | 
     typeof RESTRICTION_STATUS |
-    typeof RESTRICTION_MAGI_WITHOUT_CREATURES;
+    typeof RESTRICTION_MAGI_WITHOUT_CREATURES |
+    typeof RESTRICTION_EXCEPT_SOURCE;
 
 
 export type RestrictionObjectType = {
