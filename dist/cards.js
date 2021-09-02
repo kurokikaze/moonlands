@@ -1,7 +1,7 @@
 import Card from './classes/Card';
 import { 
 /* eslint-disable no-unused-vars */
-ACTION_EFFECT, ACTION_SELECT, ACTION_ENTER_PROMPT, ACTION_CALCULATE, ACTION_GET_PROPERTY_VALUE, ACTION_PLAY, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_SET, ACTION_PROPERTY, PROPERTY_ENERGY_COUNT, PROPERTY_CONTROLLER, PROPERTY_TYPE, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ID, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_POWER_COST, PROPERTY_CREATURE_TYPES, PROPERTY_STATUS_DEFEATED_CREATURE, REGION_ARDERIAL, REGION_CALD, REGION_NAROOM, REGION_OROTHE, REGION_UNDERNEATH, REGION_BOGRATH, REGION_UNIVERSAL, TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, SELECTOR_OPPONENT_ID, SELECTOR_MAGI, SELECTOR_OWN_MAGI, SELECTOR_CREATURES, SELECTOR_ENEMY_MAGI, SELECTOR_RELICS, SELECTOR_CREATURES_AND_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_MAGI_OF_REGION, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_OWN_SPELLS_IN_HAND, SELECTOR_OTHER_CREATURES_OF_TYPE, SELECTOR_OWN_CREATURES_WITH_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_CREATURES_OF_PLAYER, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_NONE, EFFECT_TYPE_DRAW, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY, EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_CONDITIONAL, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DISCARD_CARDS_FROM_HAND, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES, EFFECT_TYPE_ATTACK, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_OWN_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_RELIC, PROMPT_TYPE_NUMBER, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROTECTION_FROM_SPELLS, PROTECTION_TYPE_GENERAL, RESTRICTION_OWN_CREATURE, RESTRICTION_OPPONENT_CREATURE, RESTRICTION_ENERGY_LESS_THAN_STARTING, RESTRICTION_REGION, RESTRICTION_TYPE, RESTRICTION_CREATURE_TYPE, RESTRICTION_PLAYABLE, RESTRICTION_ENERGY_LESS_THAN, RESTRICTION_CREATURE_WAS_ATTACKED, COST_X, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_DECK, STATUS_BURROWED, PROPERTY_ABLE_TO_ATTACK, RESTRICTION_STATUS, EXPIRATION_ANY_TURNS, SELECTOR_ID, PROPERTY_MAGI_NAME, RESTRICTION_REGION_IS_NOT, EXPIRATION_NEVER, PROPERTY_CAN_BE_ATTACKED, EXPIRATION_OPPONENT_TURNS, PROMPT_TYPE_MAGI_WITHOUT_CREATURES, CALCULATION_MAX, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, RESTRICTION_EXCEPT_SOURCE, } from './const';
+ACTION_EFFECT, ACTION_SELECT, ACTION_ENTER_PROMPT, ACTION_CALCULATE, ACTION_GET_PROPERTY_VALUE, ACTION_PLAY, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_SET, ACTION_PROPERTY, PROPERTY_ENERGY_COUNT, PROPERTY_CONTROLLER, PROPERTY_TYPE, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ID, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_POWER_COST, PROPERTY_CREATURE_TYPES, PROPERTY_STATUS_DEFEATED_CREATURE, REGION_ARDERIAL, REGION_CALD, REGION_NAROOM, REGION_OROTHE, REGION_UNDERNEATH, REGION_BOGRATH, REGION_UNIVERSAL, TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, SELECTOR_OPPONENT_ID, SELECTOR_MAGI, SELECTOR_OWN_MAGI, SELECTOR_CREATURES, SELECTOR_ENEMY_MAGI, SELECTOR_RELICS, SELECTOR_CREATURES_AND_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_MAGI_OF_REGION, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_OWN_SPELLS_IN_HAND, SELECTOR_OTHER_CREATURES_OF_TYPE, SELECTOR_OWN_CREATURES_WITH_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_CREATURES_OF_PLAYER, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_NONE, EFFECT_TYPE_DRAW, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY, EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_CONDITIONAL, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DISCARD_CARDS_FROM_HAND, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES, EFFECT_TYPE_ATTACK, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_OWN_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_RELIC, PROMPT_TYPE_NUMBER, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROTECTION_FROM_SPELLS, PROTECTION_TYPE_GENERAL, RESTRICTION_OWN_CREATURE, RESTRICTION_OPPONENT_CREATURE, RESTRICTION_ENERGY_LESS_THAN_STARTING, RESTRICTION_REGION, RESTRICTION_TYPE, RESTRICTION_CREATURE_TYPE, RESTRICTION_PLAYABLE, RESTRICTION_ENERGY_LESS_THAN, RESTRICTION_CREATURE_WAS_ATTACKED, COST_X, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_DECK, STATUS_BURROWED, PROPERTY_ABLE_TO_ATTACK, RESTRICTION_STATUS, EXPIRATION_ANY_TURNS, SELECTOR_ID, PROPERTY_MAGI_NAME, RESTRICTION_REGION_IS_NOT, EXPIRATION_NEVER, PROPERTY_CAN_BE_ATTACKED, EXPIRATION_OPPONENT_TURNS, PROMPT_TYPE_MAGI_WITHOUT_CREATURES, CALCULATION_MAX, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, RESTRICTION_EXCEPT_SOURCE, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, CARD_COUNT, EFFECT_TYPE_DRAW_N_CARDS, EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, } from './const';
 const effect = (data) => ({
     type: ACTION_EFFECT,
     ...data,
@@ -248,6 +248,42 @@ export const cards = [
             }),
         ],
     }),
+    new Card('Ancestral Flute', TYPE_RELIC, REGION_UNIVERSAL, 0, {
+        powers: [{
+                name: 'Song of the Family',
+                text: 'Choose any one Creature in play. Discard Ancestral Flute from play. Search your deck for up to two copies of the chosen Creature. Show the cards to your opponents, and put them into your hand. Shuffle your deck.',
+                cost: 2,
+                effects: [
+                    prompt({
+                        promptType: PROMPT_TYPE_SINGLE_CREATURE,
+                    }),
+                    getPropertyValue({
+                        target: '$target',
+                        property: PROPERTY_CREATURE_TYPES,
+                        variable: 'creatureType',
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
+                        target: '$source',
+                    }),
+                    prompt({
+                        promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+                        zone: ZONE_TYPE_DECK,
+                        restriction: RESTRICTION_CREATURE_TYPE,
+                        restrictionValue: '$creatureType',
+                        zoneOwner: '$player',
+                        numberOfCards: 2,
+                        variable: 'chosenCards',
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+                        sourceZone: ZONE_TYPE_DECK,
+                        destinationZone: ZONE_TYPE_HAND,
+                        target: '$chosenCards',
+                    }),
+                ],
+            }],
+    }),
     new Card('O\'Qua', TYPE_MAGI, REGION_OROTHE, null, {
         startingEnergy: 11,
         energize: 4,
@@ -293,6 +329,144 @@ export const cards = [
                 ],
             },
         ],
+    }),
+    new Card('Implosion', TYPE_SPELL, REGION_OROTHE, 1, {
+        text: 'Choose any one Creature or Magi in play. Discard X Orothe cards from your hand. Discard X energy from the chosen Creature or Magi.',
+        effects: [
+            prompt({
+                promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+            }),
+            getPropertyValue({
+                target: '$target',
+                property: PROPERTY_ENERGY_COUNT,
+                variable: 'targetEnergy',
+            }),
+            prompt({
+                promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+                restriction: RESTRICTION_REGION,
+                restrictionValue: REGION_OROTHE,
+                zone: ZONE_TYPE_HAND,
+                zoneOwner: '$player',
+                numberOfCards: '$targetEnergy',
+            }),
+            getPropertyValue({
+                target: '$chosenCards',
+                property: CARD_COUNT,
+                variable: 'energyToDiscard',
+            }),
+            effect({
+                effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+                target: '$chosenCards',
+                sourceZone: ZONE_TYPE_HAND,
+                destinationZone: ZONE_TYPE_DISCARD,
+            }),
+            effect({
+                effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
+                target: '$target',
+                amount: '$energyToDiscard',
+            }),
+        ],
+    }),
+    new Card('Spirit of the Flame', TYPE_SPELL, REGION_CALD, 1, {
+        text: 'Choose any one Creature in play. Discard X Cald Creatures from your hand. Add X energy to the chosen Creature.',
+        effects: [
+            prompt({
+                promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+            }),
+            prompt({
+                promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+                restrictions: [
+                    {
+                        type: RESTRICTION_REGION,
+                        value: REGION_OROTHE,
+                    },
+                    {
+                        type: RESTRICTION_TYPE,
+                        value: TYPE_CREATURE,
+                    },
+                ],
+                zone: ZONE_TYPE_HAND,
+                zoneOwner: '$player',
+                numberOfCards: 100,
+            }),
+            getPropertyValue({
+                target: '$chosenCards',
+                property: CARD_COUNT,
+                variable: 'energyToAdd',
+            }),
+            effect({
+                effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+                target: '$chosenCards',
+                sourceZone: ZONE_TYPE_HAND,
+                destinationZone: ZONE_TYPE_DISCARD,
+            }),
+            effect({
+                effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+                target: '$target',
+                amount: '$energyToAdd',
+            }),
+        ],
+    }),
+    new Card('Cloud Sceptre', TYPE_RELIC, REGION_ARDERIAL, 0, {
+        powers: [{
+                name: 'Mindwinds',
+                text: 'Discard up to five cards from your hand to draw the same number of cards.',
+                cost: 1,
+                effects: [
+                    prompt({
+                        promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+                        zone: ZONE_TYPE_HAND,
+                        zoneOwner: '$player',
+                        numberOfCards: 5,
+                    }),
+                    getPropertyValue({
+                        target: '$chosenCards',
+                        property: CARD_COUNT,
+                        variable: 'cardsToDraw',
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+                        target: '$chosenCards',
+                        sourceZone: ZONE_TYPE_HAND,
+                        destinationZone: ZONE_TYPE_DISCARD,
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_DRAW_N_CARDS,
+                        numberOfCards: '$cardsToDraw',
+                    }),
+                ],
+            }],
+    }),
+    new Card('Vinoc', TYPE_CREATURE, REGION_NAROOM, 3, {
+        powers: [{
+                name: 'Generate',
+                text: 'Discard any number of cards from your hand. For each card discarded, add one energy to Vinoc.',
+                cost: 0,
+                effects: [
+                    prompt({
+                        promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+                        zone: ZONE_TYPE_HAND,
+                        zoneOwner: '$player',
+                        numberOfCards: 100,
+                    }),
+                    getPropertyValue({
+                        target: '$chosenCards',
+                        property: CARD_COUNT,
+                        variable: 'energyToAdd',
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+                        target: '$chosenCards',
+                        sourceZone: ZONE_TYPE_HAND,
+                        destinationZone: ZONE_TYPE_DISCARD,
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+                        target: '$source',
+                        amount: '$energyToAdd',
+                    }),
+                ],
+            }],
     }),
     new Card('Ebylon', TYPE_MAGI, REGION_OROTHE, null, {
         startingEnergy: 13,
@@ -4336,6 +4510,21 @@ export const cards = [
                 ],
             },
         ],
+    }),
+    new Card('Thunderquake', TYPE_SPELL, REGION_UNDERNEATH, COST_X, {
+        text: 'Choose any number of Creatures in play. Discard a total of X energy in any combination from the chosen Creatures. X cannot be more than 10.',
+        effects: [
+            prompt({
+                promptType: PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
+                amount: '$chosen_cost',
+                message: 'Distribute damage among any number of creatures'
+            }),
+            effect({
+                effectType: EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
+                damageOnCreatures: '$damageOnCreatures',
+            })
+        ],
+        maxCostX: 10,
     }),
     new Card('Drakan', TYPE_CREATURE, REGION_CALD, 6, {
         powers: [

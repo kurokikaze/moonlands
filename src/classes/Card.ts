@@ -11,6 +11,7 @@ import {
 	REGION_UNDERNEATH,
 	REGION_UNIVERSAL,
 	REGION_BOGRATH,
+	COST_X,
 } from '../const';
 
 import {Region, CardType, CardData} from '../types';
@@ -19,9 +20,9 @@ export default class Card {
 	name: string;
 	type: CardType;
 	region: any;
-	cost: number;
+	cost: number | typeof COST_X;
 	data: CardData;
-	constructor(name: string, type, region: Region, cost: number, data: CardData = {}) {
+	constructor(name: string, type, region: Region, cost: number | typeof COST_X, data: CardData = {}) {
 		if (![TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL].includes(type)) {
 			throw new Error(`Unknown card type: "${type}" for card ${name}`);
 		}

@@ -18,8 +18,12 @@ export type ResolveDistributeEnergyPrompt = ResolvePromptInterface & {
     energyOnCreatures: Record<string, number>;
 };
 
+export type ResolveDistributeDamagePrompt = ResolvePromptInterface & {
+    damageOnCreatures: Record<string, number>;
+};
+
 export type ResolvePromptType = ResolvePromptInterface & {
     number?: number | string;
     cards?: CardInGame[];
     target?: CardInGame;
-} | ResolveRearrangeEnergyPrompt | ResolveDistributeEnergyPrompt;
+} | ResolveRearrangeEnergyPrompt | ResolveDistributeEnergyPrompt | ResolveDistributeDamagePrompt;

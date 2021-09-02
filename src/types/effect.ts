@@ -7,7 +7,7 @@ import {
 
     EFFECT_TYPE_END_OF_TURN,
 	EFFECT_TYPE_NONE,
-	EFFECT_TYPE_DRAW,
+    EFFECT_TYPE_DRAW,
 	EFFECT_TYPE_ROLL_DIE,
 	EFFECT_TYPE_PLAY_CREATURE,
 	EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP,
@@ -61,6 +61,8 @@ import {
     EFFECT_TYPE_ATTACK,
     EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
     EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
+    EFFECT_TYPE_DRAW_N_CARDS,
+    EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
 } from '../const';
 
 export type EffectTypeType =
@@ -331,7 +333,7 @@ type PlaySpellEffect = ActionEffect & {
 type PayingEnergyForSpellEffect = ActionEffect & {
     effectType: typeof EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL;
     from: CardInGame;
-    amount: number;
+    amount: number | string;
 }
 
 type ConditionalEffect = ActionEffect & {
@@ -402,6 +404,17 @@ type DistributeEnergyEffect = ActionEffect & {
     energyOnCreatures: string | Record<string, number>;
 }
 
+type DistributeDamageEffect = ActionEffect & {
+    effectType: typeof EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES;
+    source?: CardInGame;
+    damageOnCreatures: string | Record<string, number>;
+}
+
+type DrawNCardsEffect = ActionEffect & {
+    effectType: typeof EFFECT_TYPE_DRAW_N_CARDS;
+    numberOfCards: number | string;
+}
+
 export type EffectType = ActionEffect & {
     effectType: EffectTypeStillInUse;
     generatedBy?: string;
@@ -413,6 +426,7 @@ export type EffectType = ActionEffect & {
     AttackEffect |
     CardMovedBetweenZonesEffect |
     DrawCardsInDrawStepType |
+    DrawNCardsEffect |
     DiscardEnergyFromCreatureOrMagiEffect |
     DiscardEnergyFromCreaturesEffect |
     DiscardEnergyFromCreatureEffect |
@@ -450,4 +464,5 @@ export type EffectType = ActionEffect & {
     CreateContinuousEffect |
     DefeatMagiEffect |
     RearrangeEnergyEffect |
-    DistributeEnergyEffect;
+    DistributeEnergyEffect |
+    DistributeDamageEffect;

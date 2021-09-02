@@ -1,7 +1,6 @@
 import CardInGame from '../classes/CardInGame';
 import {
     ACTION_CALCULATE,
-    ACTION_ENTER_PROMPT,
     ACTION_PLAY,
     ACTION_POWER,
     ACTION_NONE,
@@ -23,18 +22,6 @@ import {
     
     ACTION_GET_PROPERTY_VALUE,
 
-    RESTRICTION_OWN_CREATURE,
-	RESTRICTION_OPPONENT_CREATURE,
-	RESTRICTION_ENERGY_LESS_THAN_STARTING,
-	RESTRICTION_REGION,
-	RESTRICTION_REGION_IS_NOT,
-	RESTRICTION_TYPE,
-    RESTRICTION_CREATURE_TYPE,
-    RESTRICTION_PLAYABLE,
-	RESTRICTION_ENERGY_LESS_THAN,
-    RESTRICTION_CREATURE_WAS_ATTACKED,
-    RESTRICTION_STATUS,
-
     PROTECTION_FROM_EFFECTS,
     PROTECTION_FROM_POWERS,
     PROTECTION_FROM_SPELLS,
@@ -44,24 +31,21 @@ import {
     PROTECTION_TYPE_ENERGY_LOSS,
     PROTECTION_TYPE_GENERAL,
 
-    RESTRICTION_MAGI_WITHOUT_CREATURES,
     COST_X,
-
-    PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
-    PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
-    RESTRICTION_EXCEPT_SOURCE,
 } from '../const';
 
 import { ResolvePromptType } from './resolvePrompt';
 import { SelectorTypeType, SelectType } from './select';
 import { EffectTypeType, EffectType } from './effect';
-import { PromptTypeType, GenericPromptType, PropertyType, ConditionType, ExpirationObjectType } from './common';
+import { PromptType } from './prompt';
+import { PropertyType, ConditionType, ExpirationObjectType, RestrictionObjectType } from './common';
 import { AttackEffect } from './attack';
 
 export { AttackerDealsDamageEffect, DefenderDealsDamageEffect } from './attack';
-export { Region, CardType, PromptTypeType, PropertyType, ConditionType, ZoneType } from './common';
+export { Region, CardType, PromptTypeType, PropertyType, ConditionType, ZoneType, RestrictionType, RestrictionObjectType } from './common';
 export { SelectType, SelectorTypeType, SelectorParams, RefinedSelectParams } from './select';
 export { EffectType, MoveCardBetwenZonesEffect } from './effect';
+export { PromptType, PromptParams } from './prompt';
 export { LogEntryType } from './log';
 
 type ProtectionFromType = typeof PROTECTION_FROM_SPELLS | typeof PROTECTION_FROM_EFFECTS | typeof PROTECTION_FROM_POWERS;
@@ -91,6 +75,7 @@ export type CardData = {
     ableToAttack?: boolean;
     canBeAttacked?: boolean;
     burrowed?: boolean;
+    maxCostX?: number;
 }
 
 export interface EnrichedAction {
@@ -120,51 +105,6 @@ export type StaticAbilityType = {
 	},
 }
 
-export type PromptParams = {
-	promptType: GenericPromptType;
-    zone?: string;
-    message?: string;
-    source?: string;
-    player?: number | string;
-    min?: number | string;
-    max?: number | string; 
-    zoneOwner?: string;
-    restriction?: RestrictionType;
-    restrictionValue?: string | number | boolean;
-	restrictions?: RestrictionObjectType[];
-	numberOfCards?: number;
-	variable?: string;
-}
-
-interface PromptInteface {
-    type: typeof ACTION_ENTER_PROMPT;
-    message?: string;
-    player?: number;
-    variable?: string;
-    generatedBy?: string;
-    replacedBy?: string[];
-}
-
-export type PromptTypeDistributeEnergy = PromptInteface & {
-    promptType: typeof PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES;
-    amount: string | number;
-    restriction?: RestrictionType;
-}
-
-export type PromptTypeRearrangeEnergy = PromptInteface & {
-    promptType: typeof PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES;
-}
-
-type GeneralPromptType = PromptParams & {
-    type: typeof ACTION_ENTER_PROMPT;
-    promptType: GenericPromptType;
-    promptParams?: any;
-    generatedBy?: string;
-    replacedBy?: string[];
-}
-
-export type PromptType = GeneralPromptType | PromptTypeRearrangeEnergy | PromptTypeDistributeEnergy;
-
 export type FindType = {
     effectType: EffectTypeType;
     conditions: ConditionType[];
@@ -186,26 +126,6 @@ export type ReplacementEffectType = {
     mayEffect?: boolean;
     oncePerTurn?: boolean; 
 }
-
-export type RestrictionType = typeof RESTRICTION_CREATURE_WAS_ATTACKED | 
-    typeof RESTRICTION_OWN_CREATURE |
-    typeof RESTRICTION_OPPONENT_CREATURE |
-    typeof RESTRICTION_ENERGY_LESS_THAN_STARTING |
-    typeof RESTRICTION_REGION |
-    typeof RESTRICTION_REGION_IS_NOT |
-    typeof RESTRICTION_TYPE |
-    typeof RESTRICTION_CREATURE_TYPE |
-    typeof RESTRICTION_PLAYABLE |
-    typeof RESTRICTION_ENERGY_LESS_THAN | 
-    typeof RESTRICTION_STATUS |
-    typeof RESTRICTION_MAGI_WITHOUT_CREATURES |
-    typeof RESTRICTION_EXCEPT_SOURCE;
-
-
-export type RestrictionObjectType = {
-	type: RestrictionType;
-	value: string;
-} | { type: typeof RESTRICTION_PLAYABLE; value?: string; }
 
 type ReplacingEffectType = {
     effectType: EffectTypeType;

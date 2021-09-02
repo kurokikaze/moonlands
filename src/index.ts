@@ -95,6 +95,7 @@ import {
 	PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
 	PROMPT_TYPE_CHOOSE_CARDS,
 	PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+	PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
 	PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
 	PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
 	PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
@@ -216,6 +217,10 @@ import {
 	PROTECTION_FROM_SPELLS,
 	PROTECTION_TYPE_DISCARDING_FROM_PLAY,
 	PROTECTION_TYPE_GENERAL,
+	CARD_COUNT,
+	EFFECT_TYPE_DRAW_N_CARDS,
+	EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
+	PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
 } from './const';
 
 import {showAction} from './logAction';
@@ -1490,6 +1495,9 @@ export class State {
 	makeChecker(restriction: RestrictionType, restrictionValue: any): (card: CardInGame) => boolean {
 		switch (restriction) {
 			case RESTRICTION_CREATURE_TYPE:
+				if (restrictionValue instanceof Array) {
+					return (card: CardInGame) => card.card.name.split(' ').some(type => restrictionValue.includes(type));
+				}
 				return (card: CardInGame) => card.card.name.split(' ').includes(restrictionValue);
 			case RESTRICTION_TYPE:
 				return (card: CardInGame) => card.card.type === restrictionValue;
@@ -2019,6 +2027,38 @@ export class State {
 					}
 					return true;
 				}
+				case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
+					const zoneOwner = this.getMetaValue(promptAction.zoneOwner, source.id);
+					const cardsInZone = this.getZone(promptAction.zone, zoneOwner).cards;
+					if (promptAction.restrictions) {
+						return this.checkAnyCardForRestrictions(cardsInZone, promptAction.restrictions);
+					} else if (promptAction.restriction) {
+						switch (promptAction.restriction) {
+							case RESTRICTION_OWN_CREATURE: {
+								return this.checkAnyCardForRestriction(
+									cardsInZone.filter(card => card.card.type === TYPE_CREATURE), 
+									promptAction.restriction, 
+									source.data.controller,
+								); 
+							}
+							case RESTRICTION_OPPONENT_CREATURE: {
+								return this.checkAnyCardForRestriction(
+									cardsInZone.filter(card => card.card.type === TYPE_CREATURE), 
+									promptAction.restriction, 
+									source.data.controller,
+								);
+							}
+							default: {
+								return this.checkAnyCardForRestriction(
+									cardsInZone.filter(card => card.card.type === TYPE_CREATURE), 
+									promptAction.restriction, 
+									promptAction.restrictionValue,
+								); 
+							}
+						}
+					}
+					return true;
+				}
 				default:
 					return true;
 			}
@@ -2118,15 +2158,24 @@ export class State {
 				}
 				case ACTION_GET_PROPERTY_VALUE: {
 					const multiTarget = this.getMetaValue(action.target, action.generatedBy);
-					// Sometimes we can only pass here results of a selector. 
-					// If so, work on first element of result.
-					const target = (multiTarget instanceof Array) ? multiTarget[0] : multiTarget;
 					const property = this.getMetaValue(action.property, action.generatedBy);
 
-					const modifiedResult = this.modifyByStaticAbilities(target, property);
+					if (property === CARD_COUNT) {
+						const result = (multiTarget instanceof Array) ? multiTarget.length : 0;
 
-					const variable = action.variable || 'result';
-					this.setSpellMetaDataField(variable, modifiedResult, action.generatedBy);
+						const variable = action.variable || 'result';
+						this.setSpellMetaDataField(variable, result, action.generatedBy);
+					} else {
+						// Sometimes we can only pass here results of a selector.
+						// If so, work on first element of result.
+						const target = (multiTarget instanceof Array) ? multiTarget[0] : multiTarget;
+
+						const modifiedResult = this.modifyByStaticAbilities(target, property);
+	
+						const variable = action.variable || 'result';
+						this.setSpellMetaDataField(variable, modifiedResult, action.generatedBy);
+	
+					}
 					break;
 				}
 				case ACTION_CALCULATE: {
@@ -2268,6 +2317,34 @@ export class State {
 							};
 							break;
 						}
+						case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
+							if (action.restriction && action.restrictions) {
+								throw new Error('PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE error: single and multiple restrictions specified');
+							}
+							const restrictions = action.restrictions || (action.restriction ? [
+								{
+									type: this.getMetaValue(action.restriction, action.generatedBy),
+									value: this.getMetaValue(action.restrictionValue, action.generatedBy),
+								},
+							] : null);
+
+							const zone = this.getMetaValue(action.zone, action.generatedBy);
+							const zoneOwner = this.getMetaValue(action.zoneOwner, action.generatedBy);
+							const numberOfCards = this.getMetaValue(action.numberOfCards, action.generatedBy);
+
+							const cardFilter = this.makeCardFilter(restrictions || []);
+							const zoneContent = this.getZone(zone, zoneOwner).cards;
+							const cards = restrictions ? zoneContent.filter(cardFilter) : zoneContent;
+
+							promptParams = {
+								zone,
+								zoneOwner,
+								restrictions,
+								numberOfCards,
+								cards: cards.map(convertCard),
+							};
+							break;
+						}
 						case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
 							if (action.restrictions) {
 								const restrictionsWithValues = action.restrictions.map(({ type, value }: RestrictionObjectType) => ({
@@ -2303,6 +2380,15 @@ export class State {
 							promptParams = {
 								amount: this.getMetaValue(action.amount, action.generatedBy),
 								restriction: action.restriction,
+								restrictionValue: this.getMetaValue(action.amount, action.generatedBy),
+							};
+							break;
+						}
+						case PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES: {
+							promptParams = {
+								amount: this.getMetaValue(action.amount, action.generatedBy),
+								restriction: action.restriction,
+								restrictionValue: this.getMetaValue(action.amount, action.generatedBy),
 							};
 							break;
 						}
@@ -2388,6 +2474,23 @@ export class State {
 								}
 								break;
 							}
+							case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
+								if ('cards' in action) {
+									if (this.state.promptParams.numberOfCards < action.cards.length) {
+										return false;
+									}
+									if (this.state.promptParams.restrictions) {
+										const checkResult = this.state.promptParams.restrictions.every(({type, value}) => 
+											this.checkCardsForRestriction(action.cards, type, value)
+										);
+										if (!checkResult) {
+											return false;
+										}
+									}
+									currentActionMetaData[variable || 'targetCards'] = action.cards;
+								}
+								break;
+							}
 							case PROMPT_TYPE_NUMBER:
 								if ('number' in action) {
 									currentActionMetaData[variable || 'number'] = (typeof action.number === 'number') ? action.number : parseInt(action.number, 10);
@@ -2456,7 +2559,7 @@ export class State {
 									currentActionMetaData[variable || 'energyOnCreatures'] = action.energyOnCreatures || [];
 								}
 								break;
-							case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES:
+							case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
 								if ('energyOnCreatures' in action) {
 									const totalEnergy = Object.values(action.energyOnCreatures).reduce((a, b) => a + b, 0);
 									if (totalEnergy === this.state.promptParams.amount) {
@@ -2465,6 +2568,16 @@ export class State {
 								}
 								break;
 							}
+							case PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES: {
+								if ('damageOnCreatures' in action) {
+									const totalDamage = Object.values(action.damageOnCreatures).reduce((a, b) => a + b, 0);
+									if (totalDamage === this.state.promptParams.amount) {
+										currentActionMetaData[variable || 'damageOnCreatures'] = action.damageOnCreatures || [];
+									}
+								}
+								break;
+							}
+						}
 						const actions = this.state.savedActions || [];
 						this.state = {
 							...this.state,
@@ -2676,7 +2789,7 @@ export class State {
 												effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
 												target: '$creature_created',
 												player: player,
-												amount: baseCard.cost,
+												amount: baseCard.cost === COST_X ? 0 : baseCard.cost,
 												generatedBy: cardItself.id,
 											}
 										);
@@ -2770,19 +2883,47 @@ export class State {
 										});
 
 										if (allPromptsAreDoable) {
-											this.transformIntoActions(
+											const regionPenalty = (activeMagi.card.region == baseCard.region || baseCard.region == REGION_UNIVERSAL) ? 0 : 1;
+											const maxCost = baseCard.data.maxCostX || Infinity;
+											const payEffects: AnyEffectType[] = (baseCard.cost === COST_X) ? [
 												{
-													type: ACTION_EFFECT,
-													effectType: EFFECT_TYPE_PLAY_SPELL,
-													card: cardItself,
-													player: player,
-													generatedBy: cardItself.id,
+													type: ACTION_ENTER_PROMPT,
+													promptType: PROMPT_TYPE_NUMBER,
+													player: action.player,
+													generatedBy: action.generatedBy,
+													min: 1,
+													max: Math.min(activeMagi.data.energy, maxCost) - regionPenalty,
+													variable: 'chosen_cost',
+												},
+												{
+													type: ACTION_CALCULATE,
+													operandOne: 'chosen_cost',
+													operandTwo: regionPenalty,
+													operator: CALCULATION_ADD,
+													variable: 'totalCost',
 												},
 												{
 													type: ACTION_EFFECT,
 													effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
 													from: activeMagi,
+													amount: '$totalCost',
+													player: player,
+													generatedBy: cardItself.id,
+												}] : [{
+													type: ACTION_EFFECT,
+													effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
+													from: activeMagi,
 													amount: totalCost,
+													player: player,
+													generatedBy: cardItself.id,
+												}
+											];
+
+											this.transformIntoActions(
+												{
+													type: ACTION_EFFECT,
+													effectType: EFFECT_TYPE_PLAY_SPELL,
+													card: cardItself,
 													player: player,
 													generatedBy: cardItself.id,
 												},
@@ -2793,6 +2934,7 @@ export class State {
 													variable: 'player',
 													generatedBy: cardItself.id,
 												},
+												...payEffects,
 												{
 													type: ACTION_EFFECT,
 													effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
@@ -3169,6 +3311,18 @@ export class State {
 									generatedBy: action.generatedBy,
 								}
 							);
+							break;
+						}
+						case EFFECT_TYPE_DRAW_N_CARDS: {
+							const numberOfCards = this.getMetaValue(action.numberOfCards, action.generatedBy) || 0;
+							for (let i = 0; i < numberOfCards; i++) { 
+								this.transformIntoActions({
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_DRAW,
+									player: action.player,
+									generatedBy: action.generatedBy,
+								});
+							}
 							break;
 						}
 						case EFFECT_TYPE_DRAW: {
@@ -4028,6 +4182,26 @@ export class State {
 								if (card.card.type === TYPE_CREATURE && card.id in energyArrangement) {
 									const energyAmount = energyArrangement[card.id];
 									card.addEnergy(energyAmount);
+								}
+							});
+							break;
+						}
+						case EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES: {
+							const damageArrangement: Record<string, number> = this.getMetaValue(action.damageOnCreatures, action.generatedBy);
+
+							this.getZone(ZONE_TYPE_IN_PLAY).cards.forEach(card => {
+								if (card.card.type === TYPE_CREATURE && card.id in damageArrangement) {
+									const damageAmount = damageArrangement[card.id];
+									if (damageAmount > 0) {
+										this.transformIntoActions({
+											type: ACTION_EFFECT,
+											effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+											source: action.source,
+											target: card,
+											amount: damageAmount,
+											generatedBy: action.generatedBy,
+										});
+									}
 								}
 							});
 							break;

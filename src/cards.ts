@@ -163,6 +163,12 @@ import {
 	PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
 	EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
 	RESTRICTION_EXCEPT_SOURCE,
+	EFFECT_TYPE_FIND_STARTING_CARDS,
+	PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+	CARD_COUNT,
+	EFFECT_TYPE_DRAW_N_CARDS,
+	EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
+	PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -178,6 +184,8 @@ import {
 	SelectType,
 	RefinedSelectParams,
 	RestrictionType,
+	RestrictionObjectType,
+	ZoneType,
 } from './types';
 
 const effect = (data: any): EffectType => ({
@@ -195,6 +203,17 @@ const getPropertyValue = (data: PropertyGetterParams): PropertyGetterType => ({
 	...data,
 });
 
+type UpToNCardsPromptParams = {
+	promptType: typeof PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE;
+    zone: ZoneType;
+    zoneOwner: string;
+    numberOfCards: number | string;
+    restriction?: RestrictionType;
+    restrictionValue?: string | number | boolean;
+	restrictions?: RestrictionObjectType[];
+	variable?: string;
+}
+
 type RearrangeEnergyPromptParams = {
 	promptType: typeof PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES;
 	message?: string;
@@ -209,7 +228,17 @@ type DistributeEnergyPromptParams = {
 	variable?: string;
 }
 
-const prompt = (data: PromptParams | DistributeEnergyPromptParams | RearrangeEnergyPromptParams): PromptType => {
+type DistributeDamagePromptParams = {
+	promptType: typeof PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES;
+	amount: string | number;
+	message?: string;
+	restriction?: RestrictionType;
+	variable?: string;
+}
+
+type PromptParamsType = PromptParams | DistributeEnergyPromptParams | RearrangeEnergyPromptParams | UpToNCardsPromptParams | DistributeDamagePromptParams;
+
+const prompt = (data: PromptParamsType): PromptType => {
 	switch (data.promptType) {
 		case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES:
 			return {
@@ -447,6 +476,42 @@ export const cards = [
 			}),
 		],
 	}),
+	new Card('Ancestral Flute', TYPE_RELIC, REGION_UNIVERSAL, 0, {
+		powers: [{
+			name: 'Song of the Family',
+			text: 'Choose any one Creature in play. Discard Ancestral Flute from play. Search your deck for up to two copies of the chosen Creature. Show the cards to your opponents, and put them into your hand. Shuffle your deck.',
+			cost: 2,
+			effects: [
+				prompt({
+					promptType: PROMPT_TYPE_SINGLE_CREATURE,
+				}),
+				getPropertyValue({
+					target: '$target',
+					property: PROPERTY_CREATURE_TYPES,
+					variable: 'creatureType',
+				}),
+				effect({
+					effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
+					target: '$source',
+				}),
+				prompt({
+					promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+					zone: ZONE_TYPE_DECK,
+					restriction: RESTRICTION_CREATURE_TYPE,
+					restrictionValue: '$creatureType',
+					zoneOwner: '$player',
+					numberOfCards: 2,
+					variable: 'chosenCards',
+				}),
+				effect({
+					effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+					sourceZone: ZONE_TYPE_DECK,
+					destinationZone: ZONE_TYPE_HAND,
+					target: '$chosenCards',
+				}),
+			],
+		}],
+	}),
 	new Card('O\'Qua', TYPE_MAGI, REGION_OROTHE, null, {
 		startingEnergy: 11,
 		energize: 4,
@@ -492,6 +557,144 @@ export const cards = [
 				],
 			},
 		],
+	}),
+	new Card('Implosion', TYPE_SPELL, REGION_OROTHE, 1, {
+		text: 'Choose any one Creature or Magi in play. Discard X Orothe cards from your hand. Discard X energy from the chosen Creature or Magi.',
+		effects: [
+			prompt({
+				promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+			}),
+			getPropertyValue({
+				target: '$target',
+				property: PROPERTY_ENERGY_COUNT,
+				variable: 'targetEnergy',
+			}),
+			prompt({
+				promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+				restriction: RESTRICTION_REGION,
+				restrictionValue: REGION_OROTHE,
+				zone: ZONE_TYPE_HAND,
+				zoneOwner: '$player',
+				numberOfCards: '$targetEnergy',
+			}),
+			getPropertyValue({
+				target: '$chosenCards',
+				property: CARD_COUNT,
+				variable: 'energyToDiscard',
+			}),
+			effect({
+				effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+				target: '$chosenCards',
+				sourceZone: ZONE_TYPE_HAND,
+				destinationZone: ZONE_TYPE_DISCARD,
+			}),
+			effect({
+				effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
+				target: '$target',
+				amount: '$energyToDiscard',
+			}),
+		],
+	}),
+	new Card('Spirit of the Flame', TYPE_SPELL, REGION_CALD, 1, {
+		text: 'Choose any one Creature in play. Discard X Cald Creatures from your hand. Add X energy to the chosen Creature.',
+		effects: [
+			prompt({
+				promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+			}),
+			prompt({
+				promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+				restrictions: [
+					{
+						type: RESTRICTION_REGION,
+						value: REGION_OROTHE,
+					},
+					{
+						type: RESTRICTION_TYPE,
+						value: TYPE_CREATURE,
+					},
+				],
+				zone: ZONE_TYPE_HAND,
+				zoneOwner: '$player',
+				numberOfCards: 100,
+			}),
+			getPropertyValue({
+				target: '$chosenCards',
+				property: CARD_COUNT,
+				variable: 'energyToAdd',
+			}),
+			effect({
+				effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+				target: '$chosenCards',
+				sourceZone: ZONE_TYPE_HAND,
+				destinationZone: ZONE_TYPE_DISCARD,
+			}),
+			effect({
+				effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+				target: '$target',
+				amount: '$energyToAdd',
+			}),
+		],
+	}),
+	new Card('Cloud Sceptre', TYPE_RELIC, REGION_ARDERIAL, 0, {
+		powers: [{
+			name: 'Mindwinds',
+			text: 'Discard up to five cards from your hand to draw the same number of cards.',
+			cost: 1,
+			effects: [
+				prompt({
+					promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+					zone: ZONE_TYPE_HAND,
+					zoneOwner: '$player',
+					numberOfCards: 5,
+				}),
+				getPropertyValue({
+					target: '$chosenCards',
+					property: CARD_COUNT,
+					variable: 'cardsToDraw',
+				}),
+				effect({
+					effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+					target: '$chosenCards',
+					sourceZone: ZONE_TYPE_HAND,
+					destinationZone: ZONE_TYPE_DISCARD,
+				}),
+				effect({
+					effectType: EFFECT_TYPE_DRAW_N_CARDS,
+					numberOfCards: '$cardsToDraw',
+				}),
+			],
+		}],
+	}),
+	new Card('Vinoc', TYPE_CREATURE, REGION_NAROOM, 3, {
+		powers: [{
+			name: 'Generate',
+			text: 'Discard any number of cards from your hand. For each card discarded, add one energy to Vinoc.',
+			cost: 0,
+			effects: [
+				prompt({
+					promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+					zone: ZONE_TYPE_HAND,
+					zoneOwner: '$player',
+					numberOfCards: 100,
+				}),
+				getPropertyValue({
+					target: '$chosenCards',
+					property: CARD_COUNT,
+					variable: 'energyToAdd',
+				}),
+				effect({
+					effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+					target: '$chosenCards',
+					sourceZone: ZONE_TYPE_HAND,
+					destinationZone: ZONE_TYPE_DISCARD,
+				}),
+				effect({
+					effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+					target: '$source',
+					amount: '$energyToAdd',
+				}),
+			],
+		}],
 	}),
 	new Card('Ebylon', TYPE_MAGI, REGION_OROTHE, null, {
 		startingEnergy: 13,
@@ -4537,6 +4740,21 @@ export const cards = [
 				],
 			},
 		],
+	}),
+	new Card('Thunderquake', TYPE_SPELL, REGION_UNDERNEATH, COST_X, {
+		text: 'Choose any number of Creatures in play. Discard a total of X energy in any combination from the chosen Creatures. X cannot be more than 10.',
+		effects: [
+			prompt({
+				promptType: PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
+				amount: '$chosen_cost',
+				message: 'Distribute damage among any number of creatures'
+			}),
+			effect({
+				effectType: EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
+				damageOnCreatures: '$damageOnCreatures',
+			})
+		],
+		maxCostX: 10,
 	}),
 	new Card('Drakan', TYPE_CREATURE, REGION_CALD, 6, {
 		powers: [

@@ -25,6 +25,7 @@ import {
 	PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
 	PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
 	PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
+	PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
 
 	EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
 
@@ -3466,6 +3467,149 @@ describe('Vellup', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Vellup');
 
 		expect(gameState.state.prompt).toEqual(false); // Game is not in prompt state, because you have no Vellups in the deck
+	});
+});
+
+describe('Ancestral Flute', () => {
+	it('Song of the Family', () => {
+		const ACTIVE_PLAYER = 40;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const jaela = new CardInGame(byName('Jaela'), ACTIVE_PLAYER).addEnergy(6);
+
+		const flute = new CardInGame(byName('Ancestral Flute'), ACTIVE_PLAYER);
+
+		const pharan = new CardInGame(byName('Pharan'), ACTIVE_PLAYER).addEnergy(4);
+		const pharanTwo = new CardInGame(byName('Pharan'), ACTIVE_PLAYER);
+		const pharanThree = new CardInGame(byName('Pharan'), ACTIVE_PLAYER);
+
+		const xyxElder = new CardInGame(byName('Xyx Elder'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [flute, pharan], [jaela]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).add([pharanTwo, pharanThree, xyxElder]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: flute,
+			power: flute.card.data.powers[0],
+			generatedBy: flute.id,
+		};
+		
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true); // Game is in prompt state
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_SINGLE_CREATURE);
+
+		const creatureChoiceAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: pharan,
+			player: ACTIVE_PLAYER,
+			generatedBy: flute.id,
+		};
+
+		gameState.update(creatureChoiceAction);
+
+		expect(gameState.state.prompt).toEqual(true); // Game is in prompt state
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE);
+		expect(gameState.state.promptParams.cards.length).toEqual(2);
+		expect(gameState.state.promptParams.cards.map(c => c.card)).toEqual(['Pharan', 'Pharan']);
+
+		const cardsChoiceAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			cards: [pharanTwo, pharanThree],
+			player: ACTIVE_PLAYER,
+			generatedBy: flute.id,
+		};
+
+		gameState.update(cardsChoiceAction);
+
+		expect(gameState.state.prompt).toEqual(false); // Game is in prompt state
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).length).toEqual(1);
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(2);
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1);
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Ancestral Flute');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1);
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Pharan');
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).cards.map(c => c.card.name)).toEqual(['Pharan', 'Pharan']);
+	});
+
+	it('Song of the Family (Only one card chosen)', () => {
+		const ACTIVE_PLAYER = 40;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const jaela = new CardInGame(byName('Jaela'), ACTIVE_PLAYER).addEnergy(6);
+
+		const flute = new CardInGame(byName('Ancestral Flute'), ACTIVE_PLAYER);
+
+		const pharan = new CardInGame(byName('Pharan'), ACTIVE_PLAYER).addEnergy(4);
+		const pharanTwo = new CardInGame(byName('Pharan'), ACTIVE_PLAYER);
+		const pharanThree = new CardInGame(byName('Pharan'), ACTIVE_PLAYER);
+
+		const xyxElder = new CardInGame(byName('Xyx Elder'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [flute, pharan], [jaela]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).add([pharanTwo, pharanThree, xyxElder]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: flute,
+			power: flute.card.data.powers[0],
+			generatedBy: flute.id,
+		};
+		
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true); // Game is in prompt state
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_SINGLE_CREATURE);
+
+		const creatureChoiceAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: pharan,
+			player: ACTIVE_PLAYER,
+			generatedBy: flute.id,
+		};
+
+		gameState.update(creatureChoiceAction);
+
+		expect(gameState.state.prompt).toEqual(true); // Game is in prompt state
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE);
+		expect(gameState.state.promptParams.cards.length).toEqual(2);
+		expect(gameState.state.promptParams.cards.map(c => c.card)).toEqual(['Pharan', 'Pharan']);
+
+		const cardsChoiceAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			cards: [pharanTwo],
+			player: ACTIVE_PLAYER,
+			generatedBy: flute.id,
+		};
+
+		gameState.update(cardsChoiceAction);
+
+		expect(gameState.state.prompt).toEqual(false); // Game is in prompt state
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).length).toEqual(2);
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(1);
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).card.card.name).toEqual('Pharan');
+
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1);
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Ancestral Flute');
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1);
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Pharan');
 	});
 });
 

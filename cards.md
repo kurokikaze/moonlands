@@ -1,4 +1,4 @@
-Done: **155** cards out of **190**
+Done: **161** cards out of **190**
 
 # Done, tested
 
@@ -90,6 +90,7 @@ Done: **155** cards out of **190**
 - Hubdra's Spear
 - Flame Control
 - Flame Hyren
+- Ancestral Flute
 
 # Done, not tested
 
@@ -158,6 +159,11 @@ Done: **155** cards out of **190**
 - Orthea
 - Relic Mirror
 - Giant Parmalag
+- Implosion
+- Spirit of the Flame
+- Cloud Sceptre
+- Vinoc
+- Thunderquake
 
 # Possible sample decks:
 
@@ -260,7 +266,6 @@ Done: **155** cards out of **190**
 
 # Not done yet
 
-- Ancestral Flute (selecting up to N cards)
 - Barak (looking at cards and rearranging them)
 - Bisiwog (overriding game continuous effect)
 - Burrow (cost X + 1)
@@ -268,13 +273,12 @@ Done: **155** cards out of **190**
 - Colossus (protection)
 - Energy Band (using only before attack, must attack if able)
 - Entangle ([in]ability to play spells)
-- Epik (choosing up to X cards from opponent hand)
+- Epik (choosing between players)
 - Eye of the Storm (choice between two alternatives)
 - Gar (select in case of tie)
 - Giant Vulbor (discarding, choice between alternatives)
-- Heat Lens (looking at hand and discarding)
+- Heat Lens (choosing between players)
 - Hood of Hiding (ability to be attacked)
-- Implosion (discarding X orothe cards)
 - Karak (exiling under creature, ability to play named relics)
 - Lightning (select between alternatives)
 - Mask of Abwyn (looking at hand)
@@ -284,14 +288,12 @@ Done: **155** cards out of **190**
 - Orlon (protection)
 - Parmalag
 - Raxis (choice between alternatives)
-- Spirit of the Flame (discarding X cald creatures from hand)
 - Syphon Vortex (Cost X plus 4)
 - Tap Roots (selecting two creatures)
 - Thunderquake (choosing any number of creatures, distributing damage)
 - Tidal Wave (additional cost while spell resolves)
 - Twee (selecting first card of type in zone)
 - Vaal (not losing energy from attack)
-- Vinoc (discarding any number of cards)
 - Vulbor (choosing player)
 - Wence (showing cards to opponent)
 - Will of Orothe (controlling other player)
@@ -308,22 +310,12 @@ Done: **155** cards out of **190**
 
 - Lightning (choosing between two alternatives)
 - Tap Roots (creature not selected in previous prompt)
-- Implosion (discarding specific cards)
 - Raxis (between two alternatives)
 - Mirror Pendant (choosing power on Magi)
-- Thunderquake (choosing any number of creatures)
 - Vulbor (choosing player)
 - Heat Lens (choosing player)
 - Gar (between cards in play in case of tie)
 - Eye of the Storm (choosing between alternatives)
-
-# Searching decks
-
-- Ancestral Flute (seaching by name, choosing up to N creatures)
-
-# More selectors
-
-- Hubdra's Spear (magi w/o creatures)
 
 # Discarding from hand
 
@@ -335,9 +327,6 @@ Done: **155** cards out of **190**
 
 # May-abilities
 
-- Blu
-- Orthea
-- Relic Mirror
 - Fossik
 
 # Looking at library, rearranging
