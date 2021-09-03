@@ -1,4 +1,4 @@
-Done: **162** cards out of **190**
+Done: **164** cards out of **190**
 
 # Done, tested
 
@@ -92,6 +92,8 @@ Done: **162** cards out of **190**
 - Flame Hyren
 - Ancestral Flute
 - Orlon
+- Parmalag
+- Thunderquake
 
 # Done, not tested
 
@@ -164,7 +166,6 @@ Done: **162** cards out of **190**
 - Spirit of the Flame
 - Cloud Sceptre
 - Vinoc
-- Thunderquake
 
 # Possible sample decks:
 
@@ -286,7 +287,6 @@ Done: **162** cards out of **190**
 - Mirror Pendant (choosing power on Magi)
 - Orathan Flyer (paying for creature from creature)
 - Orish (choosing player, discard at random)
-- Parmalag
 - Raxis (choice between alternatives)
 - Syphon Vortex (Cost X plus 4)
 - Tap Roots (selecting two creatures)
@@ -374,7 +374,6 @@ Done: **162** cards out of **190**
 ## Protection
 
 - Colossus
-- Lovian
 
 ## Additional selectors
 

@@ -2880,10 +2880,10 @@ export class State {
 									break;
 								}
 								case TYPE_SPELL: {
-									if (activeMagi.data.energy >= totalCost) {
+									if (activeMagi.data.energy >= totalCost || baseCard.cost === COST_X) {
 										const enrichAction = <T>(effect: T): T & EnrichedAction => ({
 											source: cardItself,
-											player: player, // Spell can rewrite this to make opponent do something - draw a card, for example
+											player, // Spell can rewrite this to make opponent do something - draw a card, for example
 											...effect,
 											spell: true,
 											generatedBy: cardItself.id,
@@ -2937,11 +2937,11 @@ export class State {
 												{
 													type: ACTION_ENTER_PROMPT,
 													promptType: PROMPT_TYPE_NUMBER,
-													player: action.player,
-													generatedBy: action.generatedBy,
+													player,
 													min: 1,
 													max: Math.min(activeMagi.data.energy, maxCost) - regionPenalty,
 													variable: 'chosen_cost',
+													generatedBy: cardItself.id,
 												},
 												{
 													type: ACTION_CALCULATE,
@@ -2949,6 +2949,7 @@ export class State {
 													operandTwo: regionPenalty,
 													operator: CALCULATION_ADD,
 													variable: 'totalCost',
+													generatedBy: cardItself.id,
 												},
 												{
 													type: ACTION_EFFECT,
@@ -3005,10 +3006,10 @@ export class State {
 								}
 							}
 						} else {
-							console.log(`Wrong Priority: current is ${currentPriority} (step ${this.getCurrentStep()}, type is ${cardType})`);
+							console.error(`Wrong Priority: current is ${currentPriority} (step ${this.getCurrentStep()}, type is ${cardType})`);
 						}
 					} else {
-						console.log('No card to play');
+						console.error('No card to play');
 					}
 					break;
 				}

@@ -1173,3 +1173,150 @@ describe('Fossik', () => {
 		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_MAY_ABILITY, 'Game is asking to use may ability');
 	});
 });
+
+describe('Parmalag', () => {
+	it('Shield', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const parmalag = new CardInGame(byName('Parmalag'), ACTIVE_PLAYER).addEnergy(3);
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const ulk = new CardInGame(byName('Ulk'), ACTIVE_PLAYER).addEnergy(5);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(5);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [parmalag, arbolit], [ulk]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: parmalag,
+			power: parmalag.card.data.powers[0],
+			generatedBy: parmalag.id,
+		};
+
+		gameState.update(powerAction);
+		expect(parmalag.data.energy).toEqual(2, 'Parmalag uses Shield ability');
+
+		const passAction = {
+			type: ACTION_PASS,
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(passAction);
+
+		const attackAction = {
+			type: ACTION_ATTACK,
+			source: parmalag,
+			target: arbolit,
+		};
+		
+		gameState.update(attackAction);
+
+		expect(parmalag.data.energy).toEqual(2, 'Parmalag loses no energy in attack');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1, 'One card in opponents discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1, 'One card in opponents discard');
+	});
+
+	it('Attack without Shield', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const parmalag = new CardInGame(byName('Parmalag'), ACTIVE_PLAYER).addEnergy(3);
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const ulk = new CardInGame(byName('Ulk'), ACTIVE_PLAYER).addEnergy(5);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(5);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [parmalag, arbolit], [ulk]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		const attackAction = {
+			type: ACTION_ATTACK,
+			source: parmalag,
+			target: arbolit,
+		};
+		
+		gameState.update(attackAction);
+
+		expect(parmalag.data.energy).toEqual(1, 'Parmalag loses 2 energy in attack');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1, 'One card in opponents discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Arbolit');
+	});
+});
+
+describe('Thunderquake', () => {
+	it('Casting', () => {
+		const ACTIVE_PLAYER = 212;
+		const NON_ACTIVE_PLAYER = 510;
+
+		const ulk = new CardInGame(byName('Ulk'), ACTIVE_PLAYER).addEnergy(15);
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER).addEnergy(5);
+		const thunderquake = new CardInGame(byName('Thunderquake'), ACTIVE_PLAYER);
+		const fireGrag = new CardInGame(byName('Fire Grag'), ACTIVE_PLAYER).addEnergy(4);
+		const flameHyren = new CardInGame(byName('Flame Hyren'), ACTIVE_PLAYER).addEnergy(15);
+
+		const adis = new CardInGame(byName('Adis'), NON_ACTIVE_PLAYER).addEnergy(3);
+		const quorPup = new CardInGame(byName('Quor Pup'), NON_ACTIVE_PLAYER).addEnergy(6);
+		const diobor = new CardInGame(byName('Diobor'), NON_ACTIVE_PLAYER).addEnergy(10);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arbolit, fireGrag, quorPup, diobor, flameHyren], [ulk]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([thunderquake]);
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([adis]);
+
+		const spellAction = {
+			type: ACTION_PLAY,
+			payload: {
+				player: ACTIVE_PLAYER,
+				card: thunderquake,
+			},
+		};
+
+		gameState.update(spellAction);
+
+		const choosingCostAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			number: 5,
+			generatedBy: thunderquake.id,            
+		};
+
+		gameState.update(choosingCostAction);
+
+		const distributeDamageAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			damageOnCreatures: {
+				[quorPup.id]: 1,
+				[diobor.id]: 4,
+				[flameHyren.id]: 0,
+			},
+			generatedBy: thunderquake.id,
+		};
+
+		gameState.update(distributeDamageAction);
+
+		expect(quorPup.data.energy).toEqual(5);
+		expect(diobor.data.energy).toEqual(6);
+	});
+});
