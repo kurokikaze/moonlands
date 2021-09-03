@@ -222,6 +222,7 @@ import {
 	EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
 	PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
 	PROPERTY_PROTECTION,
+	PROTECTION_FROM_ATTACKS,
 } from './const';
 
 import {showAction} from './logAction';
@@ -1167,11 +1168,25 @@ export class State {
 		// Is the `from` right?
 		if (
 			(effect.spell && protection.from === PROTECTION_FROM_SPELLS) ||
-			(effect.power && protection.from === PROTECTION_FROM_POWERS)
+			(effect.power && protection.from === PROTECTION_FROM_POWERS) ||
+			(effect.attack && protection.from === PROTECTION_FROM_ATTACKS)
 			) {
 			const source = effect.source;
 			if (
 				(effect.effectType === EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY && protection.type === PROTECTION_TYPE_DISCARDING_FROM_PLAY) ||
+				protection.type === PROTECTION_TYPE_GENERAL
+			) {
+				if (protection.restrictions) {
+					const cardFilter = this.makeCardFilter(protection.restrictions);
+
+					return !cardFilter(source);
+				} else {
+					return false;
+				}
+			}
+
+			if (
+				(effect.effectType === EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE) ||
 				protection.type === PROTECTION_TYPE_GENERAL
 			) {
 				if (protection.restrictions) {
@@ -3305,36 +3320,8 @@ export class State {
 						}
 						case EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY: {
 							const card = this.getMetaValue(action.target, action.generatedBy);
-							this.transformIntoActions({
-								type: ACTION_EFFECT,
-								effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-								sourceZone: ZONE_TYPE_IN_PLAY,
-								destinationZone: ZONE_TYPE_HAND,
-								bottom: false,
-								target: card,
-								generatedBy: action.generatedBy,
-							});
-							break;
-						}
-						case EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY: {
-							const card = this.getMetaValue(action.target, action.generatedBy);
-							const ownersMagi = this.useSelector(SELECTOR_OWN_MAGI, card.owner, null)[0];
-							this.transformIntoActions(
-								{
-									type: ACTION_GET_PROPERTY_VALUE,
-									property: PROPERTY_ENERGY_COUNT,
-									target: card,
-									variable: 'creatureEnergyToRefund',
-									generatedBy: action.generatedBy,
-								},
-								{
-									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
-									target: ownersMagi,
-									amount: '$creatureEnergyToRefund',
-									generatedBy: action.generatedBy,
-								},
-								{
+							if (this.isCardAffectedByEffect(card, action)) {
+								this.transformIntoActions({
 									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
 									sourceZone: ZONE_TYPE_IN_PLAY,
@@ -3342,8 +3329,40 @@ export class State {
 									bottom: false,
 									target: card,
 									generatedBy: action.generatedBy,
-								}
-							);
+								});
+							}
+							break;
+						}
+						case EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY: {
+							const card = this.getMetaValue(action.target, action.generatedBy);
+							if (this.isCardAffectedByEffect(card, action)) {
+								const ownersMagi = this.useSelector(SELECTOR_OWN_MAGI, card.owner, null)[0];
+								this.transformIntoActions(
+									{
+										type: ACTION_GET_PROPERTY_VALUE,
+										property: PROPERTY_ENERGY_COUNT,
+										target: card,
+										variable: 'creatureEnergyToRefund',
+										generatedBy: action.generatedBy,
+									},
+									{
+										type: ACTION_EFFECT,
+										effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+										target: ownersMagi,
+										amount: '$creatureEnergyToRefund',
+										generatedBy: action.generatedBy,
+									},
+									{
+										type: ACTION_EFFECT,
+										effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+										sourceZone: ZONE_TYPE_IN_PLAY,
+										destinationZone: ZONE_TYPE_HAND,
+										bottom: false,
+										target: card,
+										generatedBy: action.generatedBy,
+									}
+								);
+							}
 							break;
 						}
 						case EFFECT_TYPE_DRAW_N_CARDS: {
@@ -3871,6 +3890,7 @@ export class State {
 											effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
 											source: action.source,
 											amount: action.amount,
+											attack: action.attack || false,
 											target,
 											generatedBy: action.generatedBy,
 										});
@@ -4112,16 +4132,18 @@ export class State {
 							const creatureDiscardTarget: CardInGame | CardInGame[] = this.getMetaValue(action.target, action.generatedBy);
 
 							oneOrSeveral(creatureDiscardTarget, creature => {
-								const effect: MoveCardBetwenZonesEffect = {
-									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-									target: creature,
-									sourceZone: ZONE_TYPE_IN_PLAY,
-									destinationZone: ZONE_TYPE_DISCARD,
-									bottom: false,
-									generatedBy: action.generatedBy,
-								};
-								this.transformIntoActions(effect);
+								if (this.isCardAffectedByEffect(creature, action)) {
+									const effect: MoveCardBetwenZonesEffect = {
+										type: ACTION_EFFECT,
+										effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+										target: creature,
+										sourceZone: ZONE_TYPE_IN_PLAY,
+										destinationZone: ZONE_TYPE_DISCARD,
+										bottom: false,
+										generatedBy: action.generatedBy,
+									};
+									this.transformIntoActions(effect);
+								}
 							});
 							break;
 						}

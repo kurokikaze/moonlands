@@ -82,6 +82,7 @@ export interface EnrichedAction {
     source?: CardInGame;
     power?: boolean;
     spell?: boolean;
+    attack?: boolean;
     replacedBy?: string[];
 }
 

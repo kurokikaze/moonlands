@@ -97,6 +97,7 @@ export const REGION_UNIVERSAL = 'regions/universal';
 export const PROTECTION_FROM_SPELLS = 'protection/from/spells';
 export const PROTECTION_FROM_EFFECTS = 'protection/from/effects';
 export const PROTECTION_FROM_POWERS = 'protection/from/powers';
+export const PROTECTION_FROM_ATTACKS = 'protection/from/attacks';
 
 export const PROTECTION_TYPE_ENERGY_GAIN = 'protection/type/energy_gain';
 export const PROTECTION_TYPE_ENERGY_LOSS = 'protection/type/energy_loss';
