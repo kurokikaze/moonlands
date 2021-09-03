@@ -221,6 +221,7 @@ import {
 	EFFECT_TYPE_DRAW_N_CARDS,
 	EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
 	PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
+	PROPERTY_PROTECTION,
 } from './const';
 
 import {showAction} from './logAction';
@@ -1134,6 +1135,10 @@ export class State {
 				return target.modifiedCard.data.canBeAttacked;
 			case PROPERTY_STATUS_DEFEATED_CREATURE:
 				return target.data.defeatedCreature || false;
+			case PROPERTY_PROTECTION:
+				return target.modifiedCard ?
+				target.modifiedCard.data.protection :
+				target.card.data.protection;
 			case PROPERTY_STATUS: {
 				switch (subProperty) {
 					case STATUS_BURROWED:
@@ -1155,10 +1160,10 @@ export class State {
 	}
 
 	isCardAffectedByEffect(card: CardInGame, effect: EnrichedAction & EffectType) {
-		if (!card.card.data.protection) return true;
+		const protection = this.modifyByStaticAbilities(card, PROPERTY_PROTECTION);
 
-		const protection = card.card.data.protection;
-		
+		if (!protection) return true;
+
 		// Is the `from` right?
 		if (
 			(effect.spell && protection.from === PROTECTION_FROM_SPELLS) ||
@@ -1176,7 +1181,6 @@ export class State {
 				} else {
 					return false;
 				}
-
 			}
 		}
 		return true;
@@ -1195,6 +1199,12 @@ export class State {
 				return card.card.type === TYPE_CREATURE &&
 				this.getZone(ZONE_TYPE_IN_PLAY).cards.some(({id}) => id === card.id) &&
 				card.data.controller === staticAbility.player;
+			}
+			case SELECTOR_OWN_CREATURES_OF_TYPE: {
+				return card.card.type === TYPE_CREATURE &&
+				this.getZone(ZONE_TYPE_IN_PLAY).cards.some(({id}) => id === card.id) &&
+				card.data.controller === staticAbility.player &&
+				card.card.name.split(' ').includes(staticAbility.selectorParameter.toString());
 			}
 			case SELECTOR_CREATURES_OF_PLAYER: {
 				return card.card.type === TYPE_CREATURE &&
@@ -1215,6 +1225,10 @@ export class State {
 			}
 			case SELECTOR_OWN_SPELLS_IN_HAND: {
 				return this.getZone(ZONE_TYPE_HAND, staticAbility.player).cards.some(({id}) => id === card.id);
+			}
+			default: {
+				console.error(`Unknown static ability selector: ${staticAbility.selector}`)
+				return false;
 			}
 		}
 	}
@@ -1272,6 +1286,7 @@ export class State {
 			[PROPERTY_CAN_ATTACK_MAGI_DIRECTLY]: 5,
 			[PROPERTY_ENERGY_LOSS_THRESHOLD]: 6,
 			[PROPERTY_ABLE_TO_ATTACK]: 7,
+			[PROPERTY_PROTECTION]: 8,
 		};
  
 		const zoneAbilities: EnrichedStaticAbilityType[] = allZonesCards.reduce(
@@ -1289,6 +1304,7 @@ export class State {
 			modifiedCard: {
 				...target.card,
 				data: {
+					protection: null,
 					...target.card.data,
 					energyLossThreshold: 0,
 					ableToAttack: true,
@@ -1452,6 +1468,23 @@ export class State {
 							return currentCard;
 						}
 					}
+				}
+				case PROPERTY_PROTECTION: {
+					const initialValue = this.getByProperty(currentCard, PROPERTY_PROTECTION);
+					const {operator, operandOne} = staticAbility.modifier;
+
+					const resultValue = (operator === CALCULATION_SET) ? operandOne : initialValue;
+
+					return {
+						...currentCard,
+						modifiedCard: {
+ 							...currentCard.modifiedCard,
+							 data: {
+								...currentCard.modifiedCard.data,
+								protection: resultValue,
+							},
+						}
+					};
 				}
 				case PROPERTY_POWER_COST: {
 					if (currentCard.modifiedCard.data.powers) {

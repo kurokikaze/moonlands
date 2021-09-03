@@ -79,6 +79,7 @@ import {
     PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
     CARD_COUNT,
     PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
+    PROPERTY_PROTECTION,
 } from "../const";
 
 export type ZoneType =
@@ -118,6 +119,7 @@ export type PropertyType = typeof PROPERTY_MAGI_STARTING_ENERGY |
     typeof PROPERTY_STATUS_WAS_ATTACKED |
     typeof PROPERTY_TYPE |
     typeof PROPERTY_CAN_BE_ATTACKED |
+    typeof PROPERTY_PROTECTION |
     typeof CARD_COUNT | // Special case of property getter
     typeof ACTION_PROPERTY; // Special case of property getter
 

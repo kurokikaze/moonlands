@@ -169,6 +169,9 @@ import {
 	EFFECT_TYPE_DRAW_N_CARDS,
 	EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
 	PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
+	EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
+	PROMPT_TYPE_MAY_ABILITY,
+	PROPERTY_PROTECTION,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -5192,6 +5195,87 @@ export const cards = [
 			},
 		],
 	}),
+	new Card('Tidal Wave', TYPE_SPELL, REGION_OROTHE, 6, {
+		text: 'Choose any one Creature in play. Discard the chosen Creature from play. For an additional four energy you may choose and discard a second Creature from play.',
+		effects: [
+			prompt({
+				promptType: PROMPT_TYPE_SINGLE_CREATURE,
+			}),
+			effect({
+				effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+				target: '$target',
+			}),
+			select({
+				selector: SELECTOR_OWN_MAGI,
+				variable: 'ownMagi'
+			}),
+			getPropertyValue({
+				property: PROPERTY_ENERGY_COUNT,
+				target: '$ownMagi',
+				variable: 'magiEnergy'
+			}),
+			effect({
+				effectType: EFFECT_TYPE_CONDITIONAL,
+				magiEnergy: '$magiEnergy',
+				conditions: [
+					{
+						objectOne: 'magiEnergy',
+						propertyOne: ACTION_PROPERTY,
+						comparator: '>=',
+						objectTwo: 4,
+						propertyTwo: null,
+					}
+				],
+				thenEffects: [
+					effect({
+						effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
+						amount: 4,
+					}),
+					prompt({
+						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+						target: '$target',
+					}),
+				],
+			}),
+		],
+	}),
+	new Card('Orlon', TYPE_MAGI, REGION_OROTHE, null, {
+		energize: 6,
+		startingEnergy: 10,
+		staticAbilities: [
+			{
+				name: 'Anti-Magic (Barls)',
+				text: 'Any Barl controlled by Orlon cannot be affected by any opposing Spells.',
+				selector: SELECTOR_OWN_CREATURES_OF_TYPE,
+				selectorParameter: 'Barl',
+				property: PROPERTY_PROTECTION,
+				modifier: {
+					operator: CALCULATION_SET,
+					operandOne: {
+						type: PROTECTION_TYPE_GENERAL,
+						from: PROTECTION_FROM_SPELLS,
+					},
+				},
+			},
+			{
+				name: 'Anti-Magic (Wellisk)',
+				text: 'Any Wellisk controlled by Orlon cannot be affected by any opposing Spells.',
+				selector: SELECTOR_OWN_CREATURES_OF_TYPE,
+				selectorParameter: 'Wellisk',
+				property: PROPERTY_PROTECTION,
+				modifier: {
+					operator: CALCULATION_SET,
+					operandOne: {
+						type: PROTECTION_TYPE_GENERAL,
+						from: PROTECTION_FROM_SPELLS,
+					},
+				},
+			}
+		],
+	})
 ];
 
 export const byName = (name: string) => cards.find(card => card.name === name);

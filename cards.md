@@ -1,4 +1,4 @@
-Done: **161** cards out of **190**
+Done: **162** cards out of **190**
 
 # Done, tested
 
@@ -91,6 +91,7 @@ Done: **161** cards out of **190**
 - Flame Control
 - Flame Hyren
 - Ancestral Flute
+- Orlon
 
 # Done, not tested
 
@@ -285,12 +286,10 @@ Done: **161** cards out of **190**
 - Mirror Pendant (choosing power on Magi)
 - Orathan Flyer (paying for creature from creature)
 - Orish (choosing player, discard at random)
-- Orlon (protection)
 - Parmalag
 - Raxis (choice between alternatives)
 - Syphon Vortex (Cost X plus 4)
 - Tap Roots (selecting two creatures)
-- Thunderquake (choosing any number of creatures, distributing damage)
 - Tidal Wave (additional cost while spell resolves)
 - Twee (selecting first card of type in zone)
 - Vaal (not losing energy from attack)
@@ -376,7 +375,6 @@ Done: **161** cards out of **190**
 
 - Colossus
 - Lovian
-- Orlon
 
 ## Additional selectors
 

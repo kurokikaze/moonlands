@@ -34,6 +34,7 @@ export const PROPERTY_CAN_BE_ATTACKED = 'properties/can_be_attacked';
 export const PROPERTY_CAN_ATTACK_MAGI_DIRECTLY = 'properties/can_attack_magi_directly';
 export const PROPERTY_POWER_COST = 'properties/power_cost'; // NOT FOR PROPERTY GETTER, ONLY STATIC ABILITIES
 export const PROPERTY_ENERGY_LOSS_THRESHOLD = 'properties/energy_loss_threshold';
+export const PROPERTY_PROTECTION = 'properties/protection';
 // Maybe make statuses into separate category
 export const PROPERTY_STATUS_DEFEATED_CREATURE = 'properties/status/defeated_creature';
 export const PROPERTY_STATUS_WAS_ATTACKED = 'properties/status/was_attacked';

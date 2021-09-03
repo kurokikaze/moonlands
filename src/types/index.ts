@@ -101,7 +101,7 @@ export type StaticAbilityType = {
     subProperty?: string;
 	modifier: {
 		operator: OperatorType,
-		operandOne: number | boolean,
+		operandOne: number | boolean | Record<string, any>,
 	},
 }
 
