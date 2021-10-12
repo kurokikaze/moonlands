@@ -94,6 +94,7 @@ Done: **164** cards out of **190**
 - Orlon
 - Parmalag
 - Thunderquake
+- Orthea
 
 # Done, not tested
 
@@ -159,7 +160,6 @@ Done: **164** cards out of **190**
 - Gogor
 - Blu
 - Flood of Energy
-- Orthea
 - Relic Mirror
 - Giant Parmalag
 - Implosion
