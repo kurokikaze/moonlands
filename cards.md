@@ -95,6 +95,7 @@ Done: **164** cards out of **190**
 - Parmalag
 - Thunderquake
 - Orthea
+- Storm Ring
 
 # Done, not tested
 
@@ -129,7 +130,6 @@ Done: **164** cards out of **190**
 - Shooting Star
 - Sphor
 - Storm Cloud
-- Storm Ring
 - Submerge
 - Syphon Stone
 - Thermal Blast

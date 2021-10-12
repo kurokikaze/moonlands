@@ -342,6 +342,47 @@ describe('Ayebaw', () => {
 	});
 });
 
+describe('Storm Ring', () => {
+	it('adds energy to attacking creature', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+		const ayebaw = new CardInGame(byName('Ayebaw'), ACTIVE_PLAYER).addEnergy(2);
+		const stormRing = new CardInGame(byName('Storm Ring'), ACTIVE_PLAYER);
+
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER);
+		grega.addEnergy(10);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [ayebaw, stormRing], [grega]);
+		const gameState = new State({
+			zones,
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: ACTION_ATTACK,
+			source: ayebaw,
+			target: grega,
+		};
+
+		gameState.update(attackAction);
+
+		expect(ayebaw.data.energy).toEqual(3, 'Ayebaw has 3 energy now');
+		expect(grega.data.energy).toEqual(7, 'Grega has 7 energy left');
+
+		gameState.update(attackAction);
+
+		expect(ayebaw.data.energy).toEqual(4, 'Ayebaw has 4 energy');
+		expect(grega.data.energy).toEqual(3, 'Grega has 3 energy left (second attack connected)');
+
+		gameState.update(attackAction);
+
+		expect(ayebaw.data.energy).toEqual(4, 'Ayebaw still has 4 energy');
+		expect(grega.data.energy).toEqual(3, 'Grega has 3 energy left (third attack did not happen)');
+	});
+});
+
 describe('Ora', () => {
 	it('Strengthen', () => {
 		const activePlayer = 0;
