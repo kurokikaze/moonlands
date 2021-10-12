@@ -1924,9 +1924,15 @@ export const cards = [
                     prompt({
                         promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
                         restrictions: [{
-                                type: RESTRICTION_CREATURE_TYPE,
-                                value: 'Orothe',
+                                type: RESTRICTION_REGION,
+                                value: REGION_OROTHE,
                             }],
+                        variable: 'chosenOrotheCreature',
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+                        target: '$chosenOrotheCreature',
+                        amount: '%amount',
                     }),
                 ],
                 mayEffect: true,
@@ -1958,15 +1964,15 @@ export const cards = [
                     prompt({
                         promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
                         restrictions: [{
-                                type: RESTRICTION_CREATURE_TYPE,
-                                value: 'Orothe',
+                                type: RESTRICTION_REGION,
+                                value: REGION_OROTHE,
                             }],
                         variable: 'chosenOrotheCreature',
                     }),
                     effect({
                         effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
                         target: '$chosenOrotheCreature',
-                        amount: 1,
+                        amount: '%amount',
                     }),
                 ],
                 mayEffect: true,

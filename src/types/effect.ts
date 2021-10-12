@@ -219,6 +219,9 @@ type DiscardEnergyFromCreatureOrMagiEffect = ActionEffect & {
     effectType: typeof EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI;
     target: CardInGame | CardInGame[];
     source?: CardInGame;
+    spell?: boolean;
+    relic?: boolean;
+    power?: boolean;
     amount: number;
     attack: boolean;
 }
@@ -233,13 +236,14 @@ type DiscardEnergyFromCreaturesEffect = ActionEffect & {
     amount: number;
 }
 
-type DiscardEnergyFromCreatureEffect = ActionEffect & {
+export type DiscardEnergyFromCreatureEffect = ActionEffect & {
     effectType: typeof EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE;
     target: CardInGame | CardInGame[];
     source: CardInGame;
     power?: boolean;
     attack?: boolean;
     spell?: boolean;
+    relic?: boolean;
     amount: number;
 }
 
@@ -248,6 +252,8 @@ type DiscardEnergyFromMagiEffect = ActionEffect & {
     target: CardInGame | CardInGame[];
     source: CardInGame;
     attack?: boolean;
+    relic?: boolean;
+    spell?: boolean;
     amount: number;
 }
 

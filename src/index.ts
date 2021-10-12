@@ -254,6 +254,7 @@ import {
 	EffectType,
 	PropertyGetterType
 } from './types';
+import { DiscardEnergyFromCreatureEffect } from './types/effect';
 
 const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
 	id: cardInGame.id,
@@ -1840,7 +1841,6 @@ export class State {
 				});
 
 				const allPromptsAreDoable = this.checkPrompts(replacer.self, preparedEffects, false, 0);
-				
 				if (allPromptsAreDoable) {
 					if (replacer.mayEffect) {
 						this.state.mayEffectActions = preparedEffects;
@@ -2010,7 +2010,7 @@ export class State {
 								value: restrictionValue,
 							};
 						});
-						return this.checkAnyCardForRestrictions(allCardsInPlay, restrictionsWithValues);
+						return this.checkAnyCardForRestrictions(allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE), restrictionsWithValues);
 					} else if (promptAction.restriction) {
 						switch (promptAction.restriction) {
 							case RESTRICTION_OWN_CREATURE: {
@@ -3880,10 +3880,12 @@ export class State {
 											effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
 											amount: action.amount,
 											attack: action.attack || false,
+											spell: action.spell || false,
+											relic: action.relic || false,
 											source: action.source,
 											target,
 											generatedBy: action.generatedBy,
-										});
+										} as DiscardEnergyFromCreatureEffect);
 										break;
 									case TYPE_MAGI:
 										this.transformIntoActions({
@@ -3892,6 +3894,8 @@ export class State {
 											source: action.source,
 											amount: action.amount,
 											attack: action.attack || false,
+											spell: action.spell || false,
+											relic: action.relic || false,
 											target,
 											generatedBy: action.generatedBy,
 										});

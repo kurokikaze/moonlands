@@ -1496,7 +1496,7 @@ export class State {
                                 value: restrictionValue,
                             };
                         });
-                        return this.checkAnyCardForRestrictions(allCardsInPlay, restrictionsWithValues);
+                        return this.checkAnyCardForRestrictions(allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE), restrictionsWithValues);
                     }
                     else if (promptAction.restriction) {
                         switch (promptAction.restriction) {
@@ -3178,6 +3178,8 @@ export class State {
                                             effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
                                             amount: action.amount,
                                             attack: action.attack || false,
+                                            spell: action.spell || false,
+                                            relic: action.relic || false,
                                             source: action.source,
                                             target,
                                             generatedBy: action.generatedBy,
@@ -3190,6 +3192,8 @@ export class State {
                                             source: action.source,
                                             amount: action.amount,
                                             attack: action.attack || false,
+                                            spell: action.spell || false,
+                                            relic: action.relic || false,
                                             target,
                                             generatedBy: action.generatedBy,
                                         });

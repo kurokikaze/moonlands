@@ -1786,3 +1786,118 @@ describe('Orlon', () => {
 		expect(gameState.modifyByStaticAbilities(bwill, PROPERTY_PROTECTION)).toEqual(null);
 	});
 });
+
+describe('Orthea', () => {
+	it('Spell (Fireball)', () => {
+		const ACTIVE_PLAYER = 432;
+		const NON_ACTIVE_PLAYER = 710;
+
+		const orthea = new CardInGame(byName('Orthea'), NON_ACTIVE_PLAYER).addEnergy(12);
+		const orathan = new CardInGame(byName('Orathan'), NON_ACTIVE_PLAYER).addEnergy(5);
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(4);
+		const fireBall = new CardInGame(byName('Fire Ball'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [orathan], [grega]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([orthea]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([fireBall]);
+
+		const spellAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: fireBall,
+				player: ACTIVE_PLAYER,
+			},
+		};
+
+		gameState.update(spellAction);
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: orthea,
+			generatedBy: fireBall.id,
+		};
+
+		gameState.update(targetingAction);
+
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptPlayer).toEqual(NON_ACTIVE_PLAYER);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_MAY_ABILITY);
+		expect(gameState.state.promptGeneratedBy).toEqual(orthea.id);
+
+		const allowTriggerEffect = {
+			type: ACTION_RESOLVE_PROMPT,
+			useEffect: true,
+			generatedBy: gameState.state.promptGeneratedBy,
+		};
+
+		gameState.update(allowTriggerEffect);
+
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptPlayer).toEqual(NON_ACTIVE_PLAYER);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_SINGLE_CREATURE_FILTERED);
+		expect(gameState.state.promptGeneratedBy).toEqual(fireBall.id);
+
+		const chooseOrathanAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: orathan,
+			generatedBy: fireBall.id,
+		};
+
+		gameState.update(chooseOrathanAction);
+
+		expect(orathan.data.energy).toEqual(7); // Orathan has 7 energy: 5 starting and 2 from fireball
+		expect(orthea.data.energy).toEqual(10); // Orthea still loses energy
+	});
+
+	it('Power (Shouldnt trigger)', () => {
+		const ACTIVE_PLAYER = 432;
+		const NON_ACTIVE_PLAYER = 710;
+
+		const orthea = new CardInGame(byName('Orthea'), NON_ACTIVE_PLAYER).addEnergy(12);
+		const orathan = new CardInGame(byName('Orathan'), NON_ACTIVE_PLAYER).addEnergy(5);
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(6);
+		const fireBall = new CardInGame(byName('Fire Ball'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [orathan], [grega]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([orthea]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([fireBall]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: grega,
+			power: grega.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerAction);
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: orthea,
+			generatedBy: grega.id,
+		};
+
+		gameState.update(targetingAction);
+
+		expect(gameState.state.prompt).toEqual(false);
+		expect(orthea.data.energy).toBeLessThan(12); // Orthea still loses energy
+	});
+});
