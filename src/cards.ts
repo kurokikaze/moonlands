@@ -175,6 +175,8 @@ import {
 	EXPIRATION_CREATURE_LEAVES_PLAY,
 	EXPIRATION_NEVER,
 	EXPIRATION_OPPONENT_TURNS,
+	PROPERTY_STATUS,
+	COST_X_PLUS_ONE,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -624,13 +626,13 @@ export const cards = [
 				numberOfCards: 100,
 			}),
 			getPropertyValue({
-				target: '$chosenCards',
+				target: '$targetCards',
 				property: CARD_COUNT,
 				variable: 'energyToAdd',
 			}),
 			effect({
 				effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
-				target: '$chosenCards',
+				target: '$targetCards',
 				sourceZone: ZONE_TYPE_HAND,
 				destinationZone: ZONE_TYPE_DISCARD,
 			}),
@@ -654,13 +656,13 @@ export const cards = [
 					numberOfCards: 5,
 				}),
 				getPropertyValue({
-					target: '$chosenCards',
+					target: '$targetCards',
 					property: CARD_COUNT,
 					variable: 'cardsToDraw',
 				}),
 				effect({
 					effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
-					target: '$chosenCards',
+					target: '$targetCards',
 					sourceZone: ZONE_TYPE_HAND,
 					destinationZone: ZONE_TYPE_DISCARD,
 				}),
@@ -684,13 +686,13 @@ export const cards = [
 					numberOfCards: 100,
 				}),
 				getPropertyValue({
-					target: '$chosenCards',
+					target: '$targetCards',
 					property: CARD_COUNT,
 					variable: 'energyToAdd',
 				}),
 				effect({
 					effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
-					target: '$chosenCards',
+					target: '$targetCards',
 					sourceZone: ZONE_TYPE_HAND,
 					destinationZone: ZONE_TYPE_DISCARD,
 				}),
@@ -1254,6 +1256,34 @@ export const cards = [
 				expiration: {
 					type: EXPIRATION_OPPONENT_TURNS,
 					turns: 2,
+				},
+			}),
+		],
+	}),
+	new Card('Burrow', TYPE_SPELL, REGION_UNDERNEATH, COST_X_PLUS_ONE, {
+		effects: [
+			prompt({
+				promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
+			}),
+			effect({
+				effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+				staticAbilities: [
+					{
+						name: 'Burrow',
+						text: 'Creature is considered Burrowed for X turns',
+						selector: SELECTOR_ID,
+						selectorParameter: '$target',
+						property: PROPERTY_STATUS,
+						subProperty: STATUS_BURROWED,
+						modifier: {
+							operator: CALCULATION_SET,
+							operandOne: true,
+						},
+					},
+				],
+				expiration: {
+					type: EXPIRATION_ANY_TURNS,
+					turns: '$chosen_cost',
 				},
 			}),
 		],

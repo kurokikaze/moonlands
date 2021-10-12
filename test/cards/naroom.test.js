@@ -619,6 +619,61 @@ describe('Robe of Vines', () => {
 	});
 });
 
+describe('Vinoc', () => {
+	it('Generate', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const evu = new CardInGame(byName('Evu'), ACTIVE_PLAYER).addEnergy(10);
+
+		const vinoc = new CardInGame(byName('Vinoc'), ACTIVE_PLAYER).addEnergy(5);
+
+		const rudwot = new CardInGame(byName('Rudwot'), ACTIVE_PLAYER);
+		const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER);
+		const leafHyren = new CardInGame(byName('Leaf Hyren'), NON_ACTIVE_PLAYER);
+
+		const gameState = new State({
+			zones: [
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+				new Zone('NAP Hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).add([rudwot, weebo, leafHyren]),
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([evu]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([vinoc]),
+			],
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: vinoc,
+			power: vinoc.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+        
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE);
+
+		const chooseCardsAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			cards: [rudwot, leafHyren, weebo],
+			generatedBy: vinoc.id,
+		};
+
+		gameState.update(chooseCardsAction);
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(0);
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(3);
+		expect(vinoc.data.energy).toEqual(8);
+	});
+});
+
 describe('Rudwot', () => {
 	it('Trample', () => {
 		const ACTIVE_PLAYER = 0;

@@ -1,4 +1,4 @@
-Done: **164** cards out of **190**
+Done: **166** cards out of **190**
 
 # Done, tested
 
@@ -96,6 +96,7 @@ Done: **164** cards out of **190**
 - Thunderquake
 - Orthea
 - Storm Ring
+- Vinoc
 
 # Done, not tested
 
@@ -165,7 +166,7 @@ Done: **164** cards out of **190**
 - Implosion
 - Spirit of the Flame
 - Cloud Sceptre
-- Vinoc
+- Burrow
 
 # Possible sample decks:
 
@@ -270,7 +271,6 @@ Done: **164** cards out of **190**
 
 - Barak (looking at cards and rearranging them)
 - Bisiwog (overriding game continuous effect)
-- Burrow (cost X + 1)
 - Cloud Sceptre (discarding X cards from hand)
 - Colossus (protection)
 - Energy Band (using only before attack, must attack if able)

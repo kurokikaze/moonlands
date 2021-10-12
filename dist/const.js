@@ -203,6 +203,7 @@ export const TYPE_MAGI = 'types/magi';
 export const TYPE_RELIC = 'types/relic';
 export const TYPE_SPELL = 'types/spell';
 export const COST_X = 'X';
+export const COST_X_PLUS_ONE = 'X_PLUS_ONE';
 export const ZONE_TYPE_ACTIVE_MAGI = 'zones/active_magi';
 export const ZONE_TYPE_MAGI_PILE = 'zones/magi_pile';
 export const ZONE_TYPE_DEFEATED_MAGI = 'zones/defeated_magi';

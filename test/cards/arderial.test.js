@@ -1219,3 +1219,65 @@ describe('Shimmer', () => {
 		expect(pharan.data.energy).toEqual(2, 'Pharan has 2 energy');
 	});
 });
+
+describe('Cloud Sceptre', () => {
+	it('Generate', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const jaela = new CardInGame(byName('Jaela'), ACTIVE_PLAYER).addEnergy(10);
+
+		const cloudSceptre = new CardInGame(byName('Cloud Sceptre'), ACTIVE_PLAYER).addEnergy(5);
+
+		const pharanOne = new CardInGame(byName('Pharan'), ACTIVE_PLAYER);
+		const pharanTwo = new CardInGame(byName('Pharan'), ACTIVE_PLAYER);
+		const pharanThree = new CardInGame(byName('Pharan'), ACTIVE_PLAYER);
+
+		const xyxOne = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
+		const xyxTwo = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
+		const xyxThree = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
+
+
+		const gameState = new State({
+			zones: [
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([pharanOne, pharanTwo, pharanThree]),
+				new Zone('NAP Hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+				new Zone('AP Deck', ZONE_TYPE_DECK, ACTIVE_PLAYER).add([xyxOne, xyxTwo, xyxThree]),
+				new Zone('NAP Deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([jaela]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([cloudSceptre]),
+			],
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: cloudSceptre,
+			power: cloudSceptre.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE);
+
+		const chooseCardsAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			cards: [pharanOne, pharanTwo, pharanThree],
+			generatedBy: cloudSceptre.id,
+		};
+
+		gameState.update(chooseCardsAction);
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(3);
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).length).toEqual(0);
+		expect(jaela.data.energy).toEqual(9);
+	});
+});

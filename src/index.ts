@@ -183,6 +183,7 @@ import {
 	RESTRICTION_REGION_IS_NOT,
 
 	COST_X,
+	COST_X_PLUS_ONE,
 	
 	ZONE_TYPE_HAND,
 	ZONE_TYPE_IN_PLAY,
@@ -2837,7 +2838,7 @@ export class State {
 												effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
 												target: '$creature_created',
 												player: player,
-												amount: baseCard.cost === COST_X ? 0 : baseCard.cost,
+												amount: (baseCard.cost === COST_X || baseCard.cost === COST_X_PLUS_ONE) ? 0 : baseCard.cost,
 												generatedBy: cardItself.id,
 											}
 										);
@@ -2880,7 +2881,7 @@ export class State {
 									break;
 								}
 								case TYPE_SPELL: {
-									if (activeMagi.data.energy >= totalCost || baseCard.cost === COST_X) {
+									if (activeMagi.data.energy >= totalCost || baseCard.cost === COST_X || baseCard.cost === COST_X_PLUS_ONE ) {
 										const enrichAction = <T>(effect: T): T & EnrichedAction => ({
 											source: cardItself,
 											player, // Spell can rewrite this to make opponent do something - draw a card, for example
@@ -2933,20 +2934,20 @@ export class State {
 										if (allPromptsAreDoable) {
 											const regionPenalty = (activeMagi.card.region == baseCard.region || baseCard.region == REGION_UNIVERSAL) ? 0 : 1;
 											const maxCost = baseCard.data.maxCostX || Infinity;
-											const payEffects: AnyEffectType[] = (baseCard.cost === COST_X) ? [
+											const payEffects: AnyEffectType[] = (baseCard.cost === COST_X || baseCard.cost === COST_X_PLUS_ONE) ? [
 												{
 													type: ACTION_ENTER_PROMPT,
 													promptType: PROMPT_TYPE_NUMBER,
 													player,
 													min: 1,
-													max: Math.min(activeMagi.data.energy, maxCost) - regionPenalty,
+													max: Math.min(activeMagi.data.energy, maxCost) - regionPenalty - (baseCard.cost === COST_X_PLUS_ONE ? 1 : 0),
 													variable: 'chosen_cost',
 													generatedBy: cardItself.id,
 												},
 												{
 													type: ACTION_CALCULATE,
 													operandOne: 'chosen_cost',
-													operandTwo: regionPenalty,
+													operandTwo: regionPenalty + (baseCard.cost === COST_X_PLUS_ONE ? 1 : 0),
 													operator: CALCULATION_ADD,
 													variable: 'totalCost',
 													generatedBy: cardItself.id,
@@ -4418,6 +4419,7 @@ export {
 	REGION_UNIVERSAL,
 
 	COST_X,
+	COST_X_PLUS_ONE,
 	
 	ZONE_TYPE_HAND,
 	ZONE_TYPE_IN_PLAY,
