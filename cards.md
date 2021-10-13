@@ -271,7 +271,6 @@ Done: **166** cards out of **190**
 
 - Barak (looking at cards and rearranging them)
 - Bisiwog (overriding game continuous effect)
-- Cloud Sceptre (discarding X cards from hand)
 - Colossus (protection)
 - Energy Band (using only before attack, must attack if able)
 - Entangle ([in]ability to play spells)
@@ -280,7 +279,7 @@ Done: **166** cards out of **190**
 - Gar (select in case of tie)
 - Giant Vulbor (discarding, choice between alternatives)
 - Heat Lens (choosing between players)
-- Hood of Hiding (ability to be attacked)
+- Hood of Hiding (ability to use power)
 - Karak (exiling under creature, ability to play named relics)
 - Lightning (select between alternatives)
 - Mask of Abwyn (looking at hand)
