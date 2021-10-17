@@ -1542,6 +1542,7 @@ export const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+						message: 'Search your deck for another Vellup',
 						zone: ZONE_TYPE_DECK,
 						zoneOwner: '$player',
 						restrictions: [{
@@ -1652,6 +1653,7 @@ export const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+						message: 'Choose a Creature to add one energy to',
 					}),
 					effect({
 						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
@@ -2089,6 +2091,7 @@ export const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+						message: 'Choose a Creature in play to add 1 energy to.',
 					}),
 					effect({
 						effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
