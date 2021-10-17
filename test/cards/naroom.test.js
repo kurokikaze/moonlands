@@ -629,8 +629,8 @@ describe('Vinoc', () => {
 		const vinoc = new CardInGame(byName('Vinoc'), ACTIVE_PLAYER).addEnergy(5);
 
 		const rudwot = new CardInGame(byName('Rudwot'), ACTIVE_PLAYER);
-		const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER);
-		const leafHyren = new CardInGame(byName('Leaf Hyren'), NON_ACTIVE_PLAYER);
+		const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
+		const leafHyren = new CardInGame(byName('Leaf Hyren'), ACTIVE_PLAYER);
 
 		const gameState = new State({
 			zones: [
