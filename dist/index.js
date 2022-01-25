@@ -166,12 +166,9 @@ export class State {
         });
     }
     closeStreams() {
-        // typescript does not understand destroying streams
-        // @ts-ignore
-        this.actionStreamOne.destroy();
-        // @ts-ignore
-        this.actionStreamTwo.destroy();
-        this.logStream.destroy();
+        this.actionStreamOne.removeAllListeners();
+        this.actionStreamTwo.removeAllListeners();
+        this.logStream.removeAllListeners();
         this.commandStream.destroy();
     }
     addActionToStream(action) {

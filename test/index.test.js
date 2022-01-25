@@ -2305,6 +2305,7 @@ describe('Calculation actions', () => {
 		});
 
 		expect(gameState.state.spellMetaData.test.newResult).toEqual(9, 'Addition result saved in "newResult" metadata field');
+		gameState.closeStreams();
 	});
 
 	it('Addition - values [CALCULATION_ADD]', () => {
@@ -2319,6 +2320,7 @@ describe('Calculation actions', () => {
 		});
 
 		expect(gameState.state.spellMetaData.test.result).toEqual(323, 'Addition result saved in "result" metadata field');
+		gameState.closeStreams();
 	});
 
 	it('Subtraction - variables [CALCULATION_SUBTRACT]', () => {
@@ -2341,6 +2343,7 @@ describe('Calculation actions', () => {
 		});
 
 		expect(gameState.state.spellMetaData.test.newResult).toEqual(4, 'Subtraction result saved in "newResult" metadata field');
+		gameState.closeStreams();
 	});
 
 	it('Subtraction - values [CALCULATION_SUBTRACT]', () => {
@@ -2355,6 +2358,7 @@ describe('Calculation actions', () => {
 		});
 
 		expect(gameState.state.spellMetaData.test.result).toEqual(111, 'Addition result saved in "result" metadata field');
+		gameState.closeStreams();
 	});
 
 	it('Doubling - variables [CALCULATION_DOUBLE]', () => {
@@ -2375,6 +2379,7 @@ describe('Calculation actions', () => {
 		});
 
 		expect(gameState.state.spellMetaData.test.newResult).toEqual(26, 'Double result saved in "newResult" metadata field');
+		gameState.closeStreams();
 	});
 
 	it('Doubling - values [CALCULATION_DOUBLE]', () => {
@@ -2388,6 +2393,7 @@ describe('Calculation actions', () => {
 		});
 
 		expect(gameState.state.spellMetaData.test.result).toEqual(70, 'Doubling result saved in "result" metadata field');
+		gameState.closeStreams();
 	});
 
 	it('Halve round up [CALCULATION_HALVE_ROUND_UP]', () => {
@@ -2401,6 +2407,7 @@ describe('Calculation actions', () => {
 		});
 
 		expect(gameState.state.spellMetaData.test.result).toEqual(6, 'Halving 11 rounding up yields 6');
+		gameState.closeStreams();
 	});
 
 	it('Halve round down [CALCULATION_HALVE_ROUND_DOWN]', () => {
@@ -2414,6 +2421,7 @@ describe('Calculation actions', () => {
 		});
 
 		expect(gameState.state.spellMetaData.test.result).toEqual(5, 'Halving 11 rounding up yields 5');
+		gameState.closeStreams();
 	});
 
 	it('Maximum [CALCULATION_MAX]', () => {
@@ -2428,6 +2436,7 @@ describe('Calculation actions', () => {
 		});
 
 		expect(gameState.state.spellMetaData.test.result).toEqual(102, 'Max operator works');
+		gameState.closeStreams();
 	});
 
 	it('Minimum [CALCULATION_MIN]', () => {
@@ -2442,6 +2451,7 @@ describe('Calculation actions', () => {
 		});
 
 		expect(gameState.state.spellMetaData.test.result).toEqual(49, 'Min operator works');
+		gameState.closeStreams();
 	});
 });
 
@@ -2486,6 +2496,7 @@ describe('Activating power', () => {
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'One creature in discard');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Quor Pup', 'Creature is Quor Pup');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(2, 'Quor Pup has 2 energy');
+		gameState.closeStreams();
 	});
 
 	it('Simple power with prompting and cost', () => {
@@ -2528,6 +2539,7 @@ describe('Activating power', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two creatures in play');
 		expect(weebo.data.energy).toEqual(1, 'Weebo has 2 energy');
 		expect(quorPup.data.energy).toEqual(2, 'Quor Pup has 2 energy');
+		gameState.closeStreams();
 	});
 
 	it('Simple power with X in cost', () => {
@@ -2571,6 +2583,7 @@ describe('Activating power', () => {
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
 		expect(grega.data.energy).toEqual(15, 'Grega now have 15 energy');
+		gameState.closeStreams();
 	});
 
 	it('Simple power auto-targeting a magi', () => {
@@ -2614,6 +2627,7 @@ describe('Activating power', () => {
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
 		expect(grega.data.energy).toEqual(15, 'Grega now have 15 energy');
+		gameState.closeStreams();
 	});
 
 	it('Simple power targeting a magi', () => {
@@ -2661,6 +2675,7 @@ describe('Activating power', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'No creatures in play');
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'One creature in discard');
 		expect(grega.data.energy).toEqual(19, 'Grega has 19 energy');
+		gameState.closeStreams();
 	});
 });
 
@@ -2688,6 +2703,7 @@ describe('Static abilities', () => {
 
 		const result = gameState.modifyByStaticAbilities(grega, PROPERTY_ENERGIZE);
 		expect(result).toEqual(6, 'Grega\'s energize rate is increased by one');
+		gameState.closeStreams();
 	});
 
 	it('Simple modifier of attribute (two source)', () => {
@@ -2715,6 +2731,7 @@ describe('Static abilities', () => {
 
 		const result = gameState.modifyByStaticAbilities(grega, PROPERTY_ENERGIZE);
 		expect(result).toEqual(7, 'Grega\'s energize rate is increased by two');
+		gameState.closeStreams();
 	});
 
 	it('Simple modifier of attribute (our source, enemy source)', () => {
@@ -2741,6 +2758,7 @@ describe('Static abilities', () => {
 
 		const result = gameState.modifyByStaticAbilities(grega, PROPERTY_ENERGIZE);
 		expect(result).toEqual(6, 'Grega\'s energize rate is increased by one');
+		gameState.closeStreams();
 	});
 });
 
@@ -2784,6 +2802,7 @@ describe('Deck drawing', () => {
 		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(1, 'We now have 1 card in hand');
 		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).length).toEqual(2, 'We now have 2 cards in deck');
 		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).card.card.name).toEqual('Arbolit', 'We have drawn first card of the deck');
+		gameState.closeStreams();
 	});
 
 	it('Draw with discard reshuffle', () => {
@@ -2827,6 +2846,7 @@ describe('Deck drawing', () => {
 		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).length).toEqual(2, 'We now have 2 cards in deck');
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(0, 'We now have no cards in deck');
 		expect(['Arbolit', 'Flame Geyser', 'Water of Life']).toContain(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).card.card.name, 'We have drawn one of the discard cards');
+		gameState.closeStreams();
 	});
 
 	it('Simple draw (non-active player)', () => {
@@ -2868,6 +2888,7 @@ describe('Deck drawing', () => {
 		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(1, 'We now have 1 card in hand');
 		expect(gameState.getZone(ZONE_TYPE_DECK, NON_ACTIVE_PLAYER).length).toEqual(2, 'We now have 2 cards in deck');
 		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).card.card.name).toEqual('Arbolit', 'We have drawn first card of the deck');
+		gameState.closeStreams();
 	});
 
 	it('Draw with discard reshuffle (non-active player)', () => {
@@ -2912,6 +2933,7 @@ describe('Deck drawing', () => {
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(0, 'We now have no cards in deck');
 		expect(['Arbolit', 'Flame Geyser', 'Water of Life'])
 			.toContain(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).card.card.name, 'We have drawn one of the discard cards');
+		gameState.closeStreams();
 	});
 });
 
@@ -2942,6 +2964,7 @@ describe('Casting things', () => {
 		expect(gameState.getZone(ZONE_TYPE_DECK, 0).length).toEqual(0);
 		expect(gameState.getZone(ZONE_TYPE_DECK, 0).length).toEqual(0);
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, 0).length).toEqual(1);
+		gameState.closeStreams();
 	});
 
 	it('Cast creature from hand (not enough energy)', () => {
@@ -2982,6 +3005,7 @@ describe('Casting things', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'In play is empty after');
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(2, 'Grega\'s Energy is still 2');
 		expect(gameState.getZone(ZONE_TYPE_HAND, activePlayer).length).toEqual(1, 'One card in hand');
+		gameState.closeStreams();
 	});
 
 	it('Cast creature from hand', () => {
@@ -3024,6 +3048,7 @@ describe('Casting things', () => {
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(14, 'Grega\'s energy is 14');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].data.energy).toEqual(1, 'Arbolit\'s energy is 1');
 		expect(gameState.getZone(ZONE_TYPE_HAND, activePlayer).length).toEqual(0, 'No cards in hand now');
+		gameState.closeStreams();
 	});
 
 	it('Cast relic from hand (no energy)', () => {
@@ -3062,11 +3087,11 @@ describe('Casting things', () => {
 			},
 		});
 
-		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'In play has one card');
-		// expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].card.name).toEqual('Water of Life', 'It is Water of Life');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'In play has two cards');
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(0, 'Grega\'s energy is 0');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].data.energy).toEqual(0, 'Water of Life\'s energy is 0');
 		expect(gameState.getZone(ZONE_TYPE_HAND, activePlayer).length).toEqual(0, 'No cards in hand now');
+		gameState.closeStreams();
 	});
 
 
@@ -3111,6 +3136,7 @@ describe('Casting things', () => {
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(15, 'Grega\'s energy is 15');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].data.energy).toEqual(0, 'Water of Life\'s energy is 2');
 		expect(gameState.getZone(ZONE_TYPE_HAND, activePlayer).length).toEqual(0, 'No cards in hand now');
+		gameState.closeStreams();
 	});
 
 	it('Cast relic from hand (another one in play)', () => {
@@ -3154,6 +3180,7 @@ describe('Casting things', () => {
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(15, 'Grega\'s energy is 15');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].data.energy).toEqual(0, 'Water of Life\'s energy is 0');
 		expect(gameState.getZone(ZONE_TYPE_HAND, activePlayer).length).toEqual(1, 'Water of Life is still in hand');
+		gameState.closeStreams();
 	});
 
 	it('Cast from hand (region penalty)', () => {
@@ -3193,6 +3220,7 @@ describe('Casting things', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].card.name).toEqual('Arbolit', 'It is Arbolit');
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(13, 'Yaki\'s energy is 13');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards[0].data.energy).toEqual(1, 'Arbolit\'s energy is 1');
+		gameState.closeStreams();
 	});
 });
 
@@ -3228,6 +3256,7 @@ describe('Attacking', () => {
 
 		expect(weebo.data.energy).toEqual(0, 'Weebo has 0 energy');
 		expect(quorPup.data.energy).toEqual(1, 'Quor Pup has 1 energy');
+		gameState.closeStreams();
 	});
 
 	it('Simple attack from creature to creature (large to small)', () => {
@@ -3261,6 +3290,7 @@ describe('Attacking', () => {
 
 		expect(leafHyren.data.energy).toEqual(3, 'Leaf Hyren has 3 energy');
 		expect(arbolit.data.energy).toEqual(0, 'Arbolit has 0 energy');
+		gameState.closeStreams();
 	});
 
 	it('Simple attack from creature to magi', () => {
@@ -3295,6 +3325,7 @@ describe('Attacking', () => {
 
 		expect(leafHyren.data.energy).toEqual(5, 'Leaf Hyren still has 5 energy');
 		expect(grega.data.energy).toEqual(5, 'Grega has 5 energy left');
+		gameState.closeStreams();
 	});
 
 	it('Most creatures can attack only once', () => {
@@ -3334,6 +3365,7 @@ describe('Attacking', () => {
 
 		expect(leafHyren.data.energy).toEqual(5, 'Leaf Hyren still has 5 energy');
 		expect(grega.data.energy).toEqual(5, 'Grega has 5 energy left (second attack wasnt made)');
+		gameState.closeStreams();
 	});
 });
 
@@ -3384,6 +3416,7 @@ describe('Initializing game from set of decks', () => {
 			gameState.state.goesFirst == PLAYER_ONE || gameState.state.goesFirst == PLAYER_TWO,
 		).toEqual(true, 'One of the players goes first');
 		expect(gameState.state.activePlayer).toEqual(gameState.state.goesFirst, 'First turn, player who goes first is active');
+		gameState.closeStreams();
 	});
 
 	it('Initialization (internal zones creation)', () => {
@@ -3417,6 +3450,7 @@ describe('Initializing game from set of decks', () => {
 			gameState.state.goesFirst == PLAYER_ONE || gameState.state.goesFirst == PLAYER_TWO,
 		).toEqual(true, 'One of the players goes first');
 		expect(gameState.state.activePlayer).toEqual(gameState.state.goesFirst, 'First turn, player who goes first is active');
+		gameState.closeStreams();
 	});
 });
 
@@ -3496,6 +3530,7 @@ describe('Delayed Triggers', () => {
 		expect(gameState.state.delayedTriggers[0].name).toEqual('Lore', 'Trigger name saved');
 		expect(gameState.state.delayedTriggers[0].id).toEqual(expect.any(String), 'Trigger has id');
 		expect(gameState.state.delayedTriggers[0].self.id).toEqual(leafHyren.id, 'Source is assigned from spell metadata');
+		gameState.closeStreams();
 	});
 
 	it('Delayed trigger triggers on conditions', () => {
@@ -3565,6 +3600,7 @@ describe('Delayed Triggers', () => {
 		expect(gameState.getZone(ZONE_TYPE_HAND, PLAYER_ONE)).toHaveLength(3, 'Three cards drawn');
 		expect(gameState.getZone(ZONE_TYPE_DECK, PLAYER_ONE)).toHaveLength(0, 'Deck is empty');
 		expect(gameState.state.delayedTriggers).toHaveLength(0, 'Delayed trigger expires after matching');
+		gameState.closeStreams();
 	});
 });
 
@@ -3590,6 +3626,7 @@ describe('Debugging roll values', () => {
 		gameState.update(rollAction);
 
 		expect(gameState.state.spellMetaData.test.roll_result).toEqual(10, 'Dice roll action uses action result value');
+		gameState.closeStreams();
 	});
 
 	it('Resetting roll value', () => {
@@ -3614,6 +3651,7 @@ describe('Debugging roll values', () => {
 		gameState.update(rollAction);
 
 		expect(gameState.state.spellMetaData.test.roll_result).toEqual(7, 'Dice roll action uses debug value');
+		gameState.closeStreams();
 	});
 
 	it('Setting roll value', () => {
@@ -3638,6 +3676,7 @@ describe('Debugging roll values', () => {
 		gameState.update(rollAction);
 
 		expect(gameState.state.spellMetaData.test.roll_result).toBeLessThan(7, 'Dice roll action stops using debug value after reset');
+		gameState.closeStreams();
 	});
 });
 
@@ -3695,6 +3734,7 @@ describe('Continuous Effects', () => {
 		expect(gameState.state.continuousEffects[0].triggerEffects[0]).toEqual(testTriggerEffect);
 		expect(gameState.state.continuousEffects[0].staticAbilities.length).toEqual(1);
 		expect(gameState.state.continuousEffects[0].staticAbilities[0]).toEqual(testStaticAbility);
+		gameState.closeStreams();
 	});
 
 	it('Ticking down turns on continuous effects', () => {
@@ -3749,6 +3789,7 @@ describe('Continuous Effects', () => {
 
 		expect(gameState.state.continuousEffects.length).toEqual(1);
 		expect(gameState.state.continuousEffects[0].expiration.turns).toEqual(1);
+		gameState.closeStreams();
 	});
 
 	it('Removing continuous effects when turns run out', () => {
@@ -3802,6 +3843,7 @@ describe('Continuous Effects', () => {
 		gameState.update(passAction);
 
 		expect(gameState.state.continuousEffects.length).toEqual(0);
+		gameState.closeStreams();
 	});
 
 	it('Do not remove continuous effects with EXPIRATION_NEVER when turns run out', () => {
@@ -3855,6 +3897,7 @@ describe('Continuous Effects', () => {
 		gameState.update(passAction);
 
 		expect(gameState.state.continuousEffects.length).toEqual(1);
+		gameState.closeStreams();
 	});
 
 	it('Continuous effects set properties', () => {
@@ -3920,6 +3963,7 @@ describe('Continuous Effects', () => {
 		// In the new turn, creatures are finally able to attack
 		const creatureAbleToAttackNow = gameState.modifyByStaticAbilities(ayebaw, PROPERTY_ABLE_TO_ATTACK);
 		expect(creatureAbleToAttackNow).toEqual(true);
+		gameState.closeStreams();
 	});
 
 	it('Continuous effects set properties by card id (id)', () => {
@@ -4000,6 +4044,7 @@ describe('Continuous Effects', () => {
 		expect(creatureAbleToAttackNow).toEqual(true);
 		expect(bwillAbleToAttack).toEqual(true);
 		expect(arbollAbleToAttack).toEqual(true);
+		gameState.closeStreams();
 	});
 
 	it('Continuous effects set properties by card id (card)', () => {
@@ -4080,6 +4125,7 @@ describe('Continuous Effects', () => {
 		expect(creatureAbleToAttackNow).toEqual(true);
 		expect(bwillAbleToAttack).toEqual(true);
 		expect(arbollAbleToAttack).toEqual(true);
+		gameState.closeStreams();
 	});
 });
 
@@ -4114,6 +4160,7 @@ describe('Not entering prompts when spell being cast will lead to inescapable pr
 		gameState.update(spellAction);
 
 		expect(gameState.state.prompt).toEqual(false, 'No cards to cast Grow on, so the cast does not happen');
+		gameState.closeStreams();
 	});
 
 	it('Have creatures on the field [PROMPT_TYPE_SINGLE_CREATURE]', () => {
@@ -4147,6 +4194,7 @@ describe('Not entering prompts when spell being cast will lead to inescapable pr
 		gameState.update(spellAction);
 
 		expect(gameState.state.prompt).toEqual(true, 'One creature is present, can cast');
+		gameState.closeStreams();
 	});
 
 	it('No own creatures on the field [PROMPT_TYPE_OWN_SINGLE_CREATURE]', () => {
@@ -4180,6 +4228,7 @@ describe('Not entering prompts when spell being cast will lead to inescapable pr
 		gameState.update(spellAction);
 
 		expect(gameState.state.prompt).toEqual(false, 'No cards to cast Updraft on, so the cast does not happen');
+		gameState.closeStreams();
 	});
 
 	
@@ -4214,6 +4263,7 @@ describe('Not entering prompts when spell being cast will lead to inescapable pr
 		gameState.update(spellAction);
 
 		expect(gameState.state.prompt).toEqual(true, 'Have creature to cast Updraft on, so the cast does happen');
+		gameState.closeStreams();
 	});
 
 	it('No creatures on the field satisfying the restriction [PROMPT_TYPE_OWN_SINGLE_CREATURE]', () => {
@@ -4248,6 +4298,7 @@ describe('Not entering prompts when spell being cast will lead to inescapable pr
 		gameState.update(spellAction);
 
 		expect(gameState.state.prompt).toEqual(false, 'No cards to cast Shooting Star on, so the cast does not happen');
+		gameState.closeStreams();
 	});
 
 	it('Creatures on the field satisfying the restriction [PROMPT_TYPE_OWN_SINGLE_CREATURE]', () => {
@@ -4282,6 +4333,7 @@ describe('Not entering prompts when spell being cast will lead to inescapable pr
 		gameState.update(spellAction);
 
 		expect(gameState.state.prompt).toEqual(true, 'No cards to cast Shooting Star on, so the cast does not happen');
+		gameState.closeStreams();
 	});
 });
 
@@ -4316,6 +4368,7 @@ describe('Conceding the game', () => {
 		gameState.update(concedeAction);
 		expect(gameState.hasWinner()).toEqual(true, 'Game has winner after active player concedes');
 		expect(gameState.winner).toEqual(NON_ACTIVE_PLAYER, 'Active player has conceded, so the winner is Non-active player');
+		gameState.closeStreams();
 	});
 });
 
@@ -4351,6 +4404,7 @@ describe('Not entering prompts when activating power will lead to inescapable pr
 		gameState.update(powerAction);
 
 		expect(gameState.state.prompt).toEqual(false, 'Pruitt cannot activate power as no creatures are present');
+		gameState.closeStreams();
 	});
 
 	it('No relics on battlefield [PROMPT_TYPE_RELIC]', () => {
@@ -4384,6 +4438,7 @@ describe('Not entering prompts when activating power will lead to inescapable pr
 		gameState.update(powerAction);
 
 		expect(gameState.state.prompt).toEqual(false, 'Ebylon cannot activate power as no relic is present');
+		gameState.closeStreams();
 	});
 
 	it('No own creatures on battlefield [PROMPT_TYPE_SINGLE_OWN_CREATURE]', () => {
@@ -4418,6 +4473,7 @@ describe('Not entering prompts when activating power will lead to inescapable pr
 		gameState.update(powerAction);
 
 		expect(gameState.state.prompt).toEqual(false, 'Whall cannot activate power as he controls no creatures');
+		gameState.closeStreams();
 	});
 
 	it('No creatures matching restriction on battlefield [PROMPT_TYPE_SINGLE_CREATURE_FILTERED]', () => {
@@ -4453,6 +4509,7 @@ describe('Not entering prompts when activating power will lead to inescapable pr
 		gameState.update(powerAction);
 
 		expect(gameState.state.prompt).toEqual(false, 'Magam cannot activate power as he controls no creatures with less than starting energy');
+		gameState.closeStreams();
 	});
 
 	it('Cannot activate power that references "other creature" if no other creatures are present', () => {
@@ -4486,6 +4543,7 @@ describe('Not entering prompts when activating power will lead to inescapable pr
 		gameState.update(healingFlameAction);
 
 		expect(gameState.state.prompt).toEqual(false, 'Power is not activated');
+		gameState.closeStreams();
 	});
 });
 
@@ -4533,6 +4591,7 @@ describe('Burrowed status', () => {
 
 		expect(protoPylofuf.data.energy).toEqual(2, 'Proto-Pylofuf lost no energy due to being Burrowed and already losing his limit of 2 energy');
 		expect(protoPylofuf.data.energyLostThisTurn).toEqual(2, 'Proto-Pylofuf still has energy loss marked');
+		gameState.closeStreams();
 	});
     
 	it('Digging Goggles allow attacking by Burrowed creatures', () => {
@@ -4579,6 +4638,7 @@ describe('Burrowed status', () => {
 
 		expect(protoPylofuf.data.energy).toEqual(2, 'Proto-Pylofuf lost no energy due to being Burrowed and already losing his limit of 2 energy');
 		expect(protoPylofuf.data.energyLostThisTurn).toEqual(2, 'Proto-Pylofuf still has energy loss marked');
+		gameState.closeStreams();
 	});
     
 	it('Opponents Digging Goggles do not affect our Burrowed creatures', () => {
@@ -4625,6 +4685,7 @@ describe('Burrowed status', () => {
 
 		expect(protoPylofuf.data.energy).toEqual(2, 'Proto-Pylofuf lost no energy due to being Burrowed and already losing his limit of 2 energy');
 		expect(protoPylofuf.data.energyLostThisTurn).toEqual(2, 'Proto-Pylofuf still has energy loss marked');
+		gameState.closeStreams();
 	});
     
 	it('Burrowed status limits energy loss from attacks', () => {
@@ -4672,6 +4733,7 @@ describe('Burrowed status', () => {
 
 		expect(protoPylofuf.data.energy).toEqual(2, 'Proto-Pylofuf lost no energy due to being Burrowed and already losing his limit of 2 energy');
 		expect(protoPylofuf.data.energyLostThisTurn).toEqual(2, 'Proto-Pylofuf still has energy loss marked');
+		gameState.closeStreams();
 	});
 
 	it('Burrowed status limits energy loss from enemy powers', () => {
@@ -4719,6 +4781,7 @@ describe('Burrowed status', () => {
 
 		expect(protoPylofuf.data.energy).toEqual(2, 'Proto-Pylofuf lost no energy due to being Burrowed and already losing his limit of 2 energy');
 		expect(protoPylofuf.data.energyLostThisTurn).toEqual(2, 'Proto-Pylofuf still has energy loss marked');
+		gameState.closeStreams();
 	});
 
 	it('Burrowed status limits energy loss from enemy spells', () => {
@@ -4766,6 +4829,7 @@ describe('Burrowed status', () => {
 
 		expect(protoPylofuf.data.energy).toEqual(2, 'Proto-Pylofuf lost no energy due to being Burrowed and already losing his limit of 2 energy');
 		expect(protoPylofuf.data.energyLostThisTurn).toEqual(2, 'Proto-Pylofuf still has energy loss marked');
+		gameState.closeStreams();
 	});
 });
 
@@ -4821,6 +4885,7 @@ describe('Enrich', () => {
 
 		expect(gameState.state.prompt).toEqual(false, 'Game is not in Prompt state');
 		expect(protoPylofuf.data.energy).toEqual(7, 'Proto-Pylofuf has 7 energy now');
+		gameState.closeStreams();
 	});	
 });
 
@@ -4860,6 +4925,7 @@ describe('Protection', () => {
 		gameState.update(energyDiscardAction);
 
 		expect(lovian.data.energy).toEqual(4, 'Lovian is protected from Thermal Blast and lost no energy');
+		gameState.closeStreams();
 	});
 
 	it('Protection from non-Arderial spells does not apply against Arderial spells', () => {
@@ -4897,5 +4963,6 @@ describe('Protection', () => {
 		gameState.update(energyDiscardAction);
 
 		expect(lovian.data.energy).toEqual(1, 'Lovian is not protected from Storm Cloud');
+		gameState.closeStreams();
 	});	
 });

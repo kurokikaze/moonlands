@@ -90,6 +90,7 @@ describe('Stream of actions', () => {
 		expect(seenActions.length).toBeGreaterThan(0);
 		// Pass actions are sent as is
 		expect(seenActions[0]).toEqual({type: ACTION_PASS});
+		gameState.closeStreams();
 	});
 
 	it('Streams skipping calculations', () => {
