@@ -141,6 +141,7 @@ import {
 	PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
 	PROMPT_TYPE_MAY_ABILITY,
 	PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
+	PROMPT_TYPE_PLAYER,
 
 	PROTECTION_FROM_SPELLS,
 	PROTECTION_TYPE_GENERAL,
@@ -177,6 +178,7 @@ import {
 	EXPIRATION_OPPONENT_TURNS,
 	PROPERTY_STATUS,
 	COST_X_PLUS_ONE,
+	CALCULATION_MULTIPLY,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -213,7 +215,9 @@ const getPropertyValue = (data: PropertyGetterParams): PropertyGetterType => ({
 
 type UpToNCardsPromptParams = {
 	promptType: typeof PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE;
-    zone: ZoneType;
+	zone: ZoneType;
+	message?: string;
+	player?: number | string;
     zoneOwner: string;
     numberOfCards: number | string;
     restriction?: RestrictionType;
@@ -857,6 +861,141 @@ export const cards = [
 				],
 			},
 		],
+	}),
+	new Card('Epik', TYPE_CREATURE, REGION_ARDERIAL, 4, {
+		powers: [{
+			name: 'Dream Feast',
+			text: 'Choose any one player. Discard Epik from play. Look at the chosen player\'s hand and choose up to two Creature cards there. The player discards the chosen cards.',
+			cost: 1,
+			effects: [
+				prompt({
+					promptType: PROMPT_TYPE_PLAYER,
+					message: 'Choose a player who will discard the cards',
+				}),
+				effect({
+					effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+					target: '$source',
+				}),
+				prompt({
+					promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+					message: 'Choose up to two creature cards to be discarded',
+					zone: ZONE_TYPE_HAND,
+					restriction: RESTRICTION_TYPE,
+					restrictionValue: TYPE_CREATURE,
+					zoneOwner: '$targetPlayer',
+					numberOfCards: 2,
+				}),
+				effect({
+					effectType: EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
+					target: '$targetCards',
+				}),
+			],
+		}],
+	}),
+	new Card('Heat Lens', TYPE_RELIC, REGION_CALD, 0, {
+		powers: [{
+			name: 'Mind Burn',
+			text: 'Choose any one player. Look at the chosen player\'s hand and choose up to one card there. The player discards the chosen card.',
+			cost: 2,
+			effects: [
+				prompt({
+					promptType: PROMPT_TYPE_PLAYER,
+					message: 'Choose a player who will discard the cards',
+				}),
+				effect({
+					effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+					target: '$source',
+				}),
+				prompt({
+					promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+					message: 'Choose up to one card to be discarded',
+					zone: ZONE_TYPE_HAND,
+					zoneOwner: '$targetPlayer',
+					numberOfCards: 1,
+				}),
+				effect({
+					effectType: EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
+					target: '$targetCards',
+				}),
+			],
+		}],
+	}),
+	new Card('Vulbor', TYPE_CREATURE, REGION_UNDERNEATH, 3, {
+		powers: [{
+			name: 'Mind Shock',
+			text: 'Choose any one player. The chosen player must discard two cards of his or her choice from his or her hand.',
+			cost: 3,
+			effects: [
+				prompt({
+					promptType: PROMPT_TYPE_PLAYER,
+					message: 'Choose a player who will discard the cards',
+				}),
+				prompt({
+					promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+					message: 'Choose two cards to be discarded',
+					zone: ZONE_TYPE_HAND,
+					zoneOwner: '$targetPlayer',
+					player: '$targetPlayer',
+					numberOfCards: 2,
+				}),
+				effect({
+					effectType: EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
+					target: '$targetCards',
+				}),
+			],
+		}],
+	}),
+	new Card('Giant Vulbor', TYPE_CREATURE, REGION_UNDERNEATH, 4, {
+		powers: [{
+			name: 'Mind Shock',
+			text: 'Remove four energy from any one Creature. That Creature\'s Magi may discard up to two cards. For each card discarded, remove two less energy.',
+			cost: 2,
+			effects: [
+				prompt({
+					promptType: PROMPT_TYPE_SINGLE_CREATURE,
+					message: 'Choose a creature to discard 4 energy from',
+				}),
+				getPropertyValue({
+					property: PROPERTY_CONTROLLER,
+					target: '$target',
+					variable: 'creatureController', 
+				}),
+				prompt({
+					promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+					message: 'Choose up to two cards to be discarded. For each discarded card Giant Vulbor will remove two less energy.',
+					zone: ZONE_TYPE_HAND,
+					zoneOwner: '$creatureController',
+					player: '$creatureController',
+					numberOfCards: 2,
+				}),
+				effect({
+					effectType: EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
+					target: '$targetCards',
+				}),
+				getPropertyValue({
+					property: CARD_COUNT,
+					target: '$targetCards',
+					variable: '$numberDiscarded',
+				}),
+				calculate({
+					operandOne: '$numberDiscarded',
+					operandTwo: 2,
+					operator: CALCULATION_MULTIPLY,
+					variable: '$damageReduction',
+				}),
+				calculate({
+					operandOne: 4,
+					operandTwo: '$damageReduction',
+					operator: CALCULATION_SUBTRACT,
+					variable: '$vulborDamage',
+				}),
+				effect({
+					effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+					amount: '$vulborDamage',
+					target: '$target',
+				})
+			],
+		}],
 	}),
 	new Card('Bottomless Pit', TYPE_SPELL, REGION_UNDERNEATH, 3, {
 		text: 'Choose a Creature in play with less than five energy. Discard the chosen Creature.',

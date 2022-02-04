@@ -61,6 +61,7 @@ import {
 	PROMPT_TYPE_CHOOSE_CARDS,
 	PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 	PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+	PROMPT_TYPE_PLAYER,
 
 	RESTRICTION_REGION,
 	RESTRICTION_TYPE,
@@ -928,6 +929,48 @@ describe('Prompts', () => {
 		expect(gameState.state.savedActions.length).toEqual(0, 'No actions saved for later');
 		expect(gameState.state.prompt).toEqual(false);
 		expect(arbolit.data.energy).toEqual(0, 'No energy added to creature');
+	});
+
+	it('PROMPT_TYPE_PLAYER', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 44;
+		const newId = nanoid();
+
+		const zones = [
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null),
+		];
+
+		const promptAction = {
+			type: moonlands.ACTION_ENTER_PROMPT,
+			promptType: PROMPT_TYPE_PLAYER,
+			player: ACTIVE_PLAYER,
+			generatedBy: newId,
+		};
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_ENERGIZE,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.update(promptAction);
+
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_PLAYER);
+		expect(gameState.state.promptGeneratedBy).toEqual(newId);
+
+		const resolvePromptAction = {
+			type: moonlands.ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_PLAYER,
+			targetPlayer: NON_ACTIVE_PLAYER,
+		};
+
+		gameState.update(resolvePromptAction);
+
+		expect(gameState.state.prompt).toEqual(false);
+		expect(gameState.getSpellMetadata(newId).targetPlayer).toEqual(NON_ACTIVE_PLAYER);
 	});
 });
 

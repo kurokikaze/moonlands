@@ -224,6 +224,8 @@ import {
 	PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
 	PROPERTY_PROTECTION,
 	PROTECTION_FROM_ATTACKS,
+	PROMPT_TYPE_PLAYER,
+	CALCULATION_MULTIPLY,
 } from './const';
 
 import {showAction} from './logAction';
@@ -1900,6 +1902,10 @@ export class State {
 				result = Math.ceil(operandOne / 2);
 				break;
 			}
+			case CALCULATION_MULTIPLY: {
+				result = operandOne * operandTwo;
+				break;
+			}
 			case CALCULATION_MIN: {
 				result = Math.min(operandOne, operandTwo);
 				break;
@@ -2317,7 +2323,7 @@ export class State {
 					break;
 				}
 				case ACTION_ENTER_PROMPT: {
-					if (!Object.prototype.hasOwnProperty.call(action, 'player')) {
+					if (!('player' in action)) {
 						throw new Error('Prompt without player!');
 					}
 					const savedActions = this.state.actions;
@@ -2620,6 +2626,18 @@ export class State {
 									if (totalDamage === this.state.promptParams.amount) {
 										currentActionMetaData[variable || 'damageOnCreatures'] = action.damageOnCreatures || [];
 									}
+								}
+								break;
+							}
+							case PROMPT_TYPE_PLAYER: {
+								if ('targetPlayer' in action) {
+									if (this.players.includes(action.targetPlayer)) {
+										currentActionMetaData[variable || 'targetPlayer'] = action.targetPlayer;
+									} else {
+										console.error(`Unknown player: ${action.targetPlayer} in PROMPT_TYPE_PLAYER prompt resolution`);
+									}
+								} else {
+									console.error('No player in PROMPT_TYPE_PLAYER prompt resolution');
 								}
 								break;
 							}
@@ -4344,6 +4362,7 @@ export {
 	CALCULATION_HALVE_ROUND_UP,
 	CALCULATION_MIN,
 	CALCULATION_MAX,
+	CALCULATION_MULTIPLY,
 
 	SELECTOR_CREATURES,
 	SELECTOR_CREATURES_AND_MAGI,

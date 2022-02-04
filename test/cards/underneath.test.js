@@ -22,6 +22,7 @@ import {
 	PROMPT_TYPE_SINGLE_MAGI,
 	PROMPT_TYPE_NUMBER,
 	PROMPT_TYPE_RELIC,
+	PROMPT_TYPE_PLAYER,
 	PROMPT_TYPE_MAY_ABILITY,
 	PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
 	PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
@@ -1318,5 +1319,74 @@ describe('Thunderquake', () => {
 
 		expect(quorPup.data.energy).toEqual(5);
 		expect(diobor.data.energy).toEqual(6);
+	});
+});
+
+describe('Vulbor', () => {
+	it('Mind Shock', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const adis = new CardInGame(byName('Adis'), ACTIVE_PLAYER).addEnergy(2);
+
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), NON_ACTIVE_PLAYER);
+		const lavaArboll = new CardInGame(byName('Lava Arboll'), NON_ACTIVE_PLAYER);
+		const balamantPup = new CardInGame(byName('Balamant Pup'), NON_ACTIVE_PLAYER);
+		const eclipse = new CardInGame(byName('Eclipse'), NON_ACTIVE_PLAYER);
+		const lavaBalamantInPlay = new CardInGame(byName('Lava Balamant'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const vulbor = new CardInGame(byName('Vulbor'), ACTIVE_PLAYER).addEnergy(4);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaBalamantInPlay, vulbor], [adis]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+		gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).add([lavaBalamant, lavaArboll, balamantPup, eclipse]);
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: vulbor,
+			power: vulbor.card.data.powers[0],
+			generatedBy: vulbor.id,
+		};
+		
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_PLAYER, 'Game is in player prompt state');
+		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game is prompting active player');
+
+		const choosePlayerAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			targetPlayer: NON_ACTIVE_PLAYER,
+			generatedBy: vulbor.id,
+		};
+
+		gameState.update(choosePlayerAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, 'Game is in cards prompt state');
+		expect(gameState.state.promptPlayer).toEqual(NON_ACTIVE_PLAYER, 'Game is prompting active player');
+		expect(gameState.state.promptParams.cards).toHaveLength(4);
+		expect(gameState.state.promptParams.numberOfCards).toEqual(2);
+		expect(gameState.state.promptParams.cards.map(({ card }) => card)).toEqual(['Lava Balamant', 'Lava Arboll', 'Balamant Pup', 'Eclipse']);
+
+		const chooseCardsAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			cards: [lavaBalamant, lavaArboll],
+			generatedBy: vulbor.id,
+		};
+
+		gameState.update(chooseCardsAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(2);
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(2);
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).cards.map(({ card }) => card.name)).toEqual(['Lava Balamant', 'Lava Arboll']);
 	});
 });

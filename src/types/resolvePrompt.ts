@@ -22,8 +22,12 @@ export type ResolveDistributeDamagePrompt = ResolvePromptInterface & {
     damageOnCreatures: Record<string, number>;
 };
 
+export type ResolvePlayerPrompt = ResolvePromptInterface & {
+    targetPlayer: number;
+};
+
 export type ResolvePromptType = ResolvePromptInterface & {
     number?: number | string;
     cards?: CardInGame[];
     target?: CardInGame;
-} | ResolveRearrangeEnergyPrompt | ResolveDistributeEnergyPrompt | ResolveDistributeDamagePrompt;
+} | ResolveRearrangeEnergyPrompt | ResolveDistributeEnergyPrompt | ResolveDistributeDamagePrompt | ResolvePlayerPrompt;

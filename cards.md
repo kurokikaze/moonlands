@@ -1,4 +1,4 @@
-Done: **166** cards out of **190**
+Done: **169** cards out of **190**
 
 # Done, tested
 
@@ -97,6 +97,9 @@ Done: **166** cards out of **190**
 - Orthea
 - Storm Ring
 - Vinoc
+- Heat Lens
+- Epik
+- Vulbor
 
 # Done, not tested
 
@@ -167,6 +170,7 @@ Done: **166** cards out of **190**
 - Spirit of the Flame
 - Cloud Sceptre
 - Burrow
+- Giant Vulbor
 
 # Possible sample decks:
 
@@ -274,11 +278,8 @@ Done: **166** cards out of **190**
 - Colossus (protection)
 - Energy Band (using only before attack, must attack if able)
 - Entangle ([in]ability to play spells)
-- Epik (choosing between players)
 - Eye of the Storm (choice between two alternatives)
 - Gar (select in case of tie)
-- Giant Vulbor (discarding, choice between alternatives)
-- Heat Lens (choosing between players)
 - Hood of Hiding (ability to use power)
 - Karak (exiling under creature, ability to play named relics)
 - Lightning (select between alternatives)
@@ -292,7 +293,6 @@ Done: **166** cards out of **190**
 - Tidal Wave (additional cost while spell resolves)
 - Twee (selecting first card of type in zone)
 - Vaal (not losing energy from attack)
-- Vulbor (choosing player)
 - Wence (showing cards to opponent)
 - Will of Orothe (controlling other player)
 
@@ -307,13 +307,11 @@ Done: **166** cards out of **190**
 # Custom prompts
 
 - Lightning (choosing between two alternatives)
-- Tap Roots (creature not selected in previous prompt)
-- Raxis (between two alternatives)
-- Mirror Pendant (choosing power on Magi)
-- Vulbor (choosing player)
-- Heat Lens (choosing player)
-- Gar (between cards in play in case of tie)
+- Raxis (choosing between two alternatives)
 - Eye of the Storm (choosing between alternatives)
+- Tap Roots (creature not selected in previous prompt)
+- Mirror Pendant (choosing power on Magi)
+- Gar (between cards in play in case of tie)
 
 # Discarding from hand
 
@@ -321,7 +319,6 @@ Done: **166** cards out of **190**
 - Orish
 - Spirit of the Flame
 - Vinoc
-- Giant Vulbor (Choosing up to N cards)
 
 # May-abilities
 
@@ -334,7 +331,6 @@ Done: **166** cards out of **190**
 
 # Looking at hands
 
-- Epik
 - Mask of Abwyn
 
 ## Delayed triggers
