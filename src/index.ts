@@ -82,6 +82,7 @@ import {
 	SELECTOR_CREATURES_WITHOUT_STATUS,
 	SELECTOR_ID,
 	SELECTOR_CREATURES_OF_PLAYER,
+  SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY,
 
 	STATUS_BURROWED,
 
@@ -100,6 +101,8 @@ import {
 	PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
 	PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
 	PROMPT_TYPE_MAY_ABILITY,
+	PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
+	PROMPT_TYPE_PLAYER,
 
 	NO_PRIORITY,
 	PRIORITY_PRS,
@@ -181,6 +184,7 @@ import {
 	RESTRICTION_MAGI_WITHOUT_CREATURES,
 	RESTRICTION_STATUS,
 	RESTRICTION_REGION_IS_NOT,
+  RESTRICTION_ENERGY_EQUALS,
 
 	COST_X,
 	COST_X_PLUS_ONE,
@@ -221,11 +225,10 @@ import {
 	CARD_COUNT,
 	EFFECT_TYPE_DRAW_N_CARDS,
 	EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
-	PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
 	PROPERTY_PROTECTION,
 	PROTECTION_FROM_ATTACKS,
-	PROMPT_TYPE_PLAYER,
 	CALCULATION_MULTIPLY,
+  EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP,
 } from './const';
 
 import {showAction} from './logAction';
@@ -326,6 +329,10 @@ const steps: StepType[] = [
 		priority: NO_PRIORITY,
 		automatic: true,
 		effects: [
+      {
+        type: ACTION_EFFECT,
+        effectType: EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP,
+      },
 			{
 				type: ACTION_EFFECT,
 				effectType: EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP,
@@ -533,7 +540,6 @@ export class State {
 								restrictionValue: this.getMetaValue(action.restrictionValue, action.generatedBy),
 							};
 						}
-						break;
 					}
 				}
 				return action;
@@ -1088,7 +1094,8 @@ export class State {
 				return this.getZone(ZONE_TYPE_IN_PLAY).cards
 					.filter(card => card.card.type == TYPE_CREATURE)
 					.filter(card => !this.modifyByStaticAbilities(card, PROPERTY_STATUS, argument));
-		}
+
+    }
 	}
 
 	getByProperty(target: CardInGame, property: PropertyType, subProperty = null) {
@@ -1581,6 +1588,8 @@ export class State {
 				return (card: CardInGame) => card.data.controller !== restrictionValue;
 			case RESTRICTION_STATUS:
 				return (card: CardInGame) => this.modifyByStaticAbilities(card, PROPERTY_STATUS, restrictionValue);
+      case RESTRICTION_ENERGY_EQUALS:
+				return (card: CardInGame) => card.card.type === TYPE_CREATURE && card.data.energy === restrictionValue;
 			default:
 				return () => true;
 		}
@@ -2746,6 +2755,48 @@ export class State {
 							result = this.useSelector(action.selector, action.player, action.status);
 							break;
 						}
+            // This selector is special
+            // If there are more than one creature with the same (least) energy, it transforms into the corresponding prompt
+            case SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY: {
+              const creatures = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card =>
+                this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == action.player &&
+                card.card.type == TYPE_CREATURE
+              );
+              if (creatures.length) {
+                const energies: Record<number, CardInGame[]> = {}
+                let minEnergy = Infinity
+                for (let creature of creatures) {
+                  const energy = creature.data.energy
+                  if (!(energy in energies)) {
+                    energies[energy] = []
+                  }
+                  energies[energy].push(creature)
+                  if (creature.data.energy < minEnergy) {
+                    minEnergy = creature.data.energy
+                  }
+                }
+                if (energies[minEnergy].length == 1) {
+                  result = energies[minEnergy]
+                } else {
+                  result = []
+                  this.transformIntoActions({
+                    type: ACTION_ENTER_PROMPT,
+                    promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+                    restrictions: [{
+                      type: RESTRICTION_OWN_CREATURE,
+                      value: '',
+                    }, {
+                      type: RESTRICTION_ENERGY_EQUALS,
+                      value: minEnergy,
+                    }],
+                    variable: action.variable || 'selected',
+                    generatedBy: action.generatedBy,
+                    player: action.player,
+                  })
+                }
+              }
+              break;
+            }
 						default: {
 							result = this.useSelector(action.selector, action.player, null);
 						}

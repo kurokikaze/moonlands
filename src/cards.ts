@@ -179,6 +179,8 @@ import {
 	PROPERTY_STATUS,
 	COST_X_PLUS_ONE,
 	CALCULATION_MULTIPLY,
+  EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP,
+  SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -4321,7 +4323,7 @@ export const cards = [
 			{
 				name: 'Recall',
 				cost: 2,
-				text: 'Add one energy to each of your Creatures',
+				text: 'Take any one card from your discard pile and place it in your hand. Do not draw any cards during your Draw Step this turn. Cards are only affected by Recall once per game.',
 				effects: [
 					getPropertyValue({
 						property: PROPERTY_CONTROLLER,
@@ -4339,10 +4341,10 @@ export const cards = [
 						effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
 						target: '$selectedCard',
 						sourceZone: ZONE_TYPE_DISCARD,
-						destinationZone: ZONE_TYPE_DECK,
+						destinationZone: ZONE_TYPE_HAND,
 					}),
 					effect({
-						effectType: EFFECT_TYPE_ADD_DELAYED_TRIGGER,
+						effectType: EFFECT_TYPE_ADD_DELAYED_TRIGGER, // Shouldn't this be a delayed replacement effect? static effect till end of turn?
 						delayedTrigger: {
 							find: {
 								effectType: EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP,
@@ -5460,6 +5462,7 @@ export const cards = [
 	new Card('Orlon', TYPE_MAGI, REGION_OROTHE, null, {
 		energize: 6,
 		startingEnergy: 10,
+    startingCards: ['Abaquist', 'Sea Barl', 'Submerge'],
 		staticAbilities: [
 			{
 				name: 'Anti-Magic (Barls)',
@@ -5489,6 +5492,40 @@ export const cards = [
 					},
 				},
 			}
+		],
+	}),
+	new Card('Gar', TYPE_MAGI, REGION_OROTHE, null, {
+		energize: 5,
+		startingEnergy: 14,
+    startingCards: ['Lava Balamant', 'Fireball', 'Magma Armor'],
+		triggerEffects: [
+			{
+				name: 'Anti-Magic (Barls)',
+				text: 'Any Barl controlled by Orlon cannot be affected by any opposing Spells.',
+        find: {
+          effectType: EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP,
+          conditions: [
+            {
+              objectOne: 'player',
+              propertyOne: ACTION_PROPERTY,
+              comparator: '=',
+              objectTwo: 'self',
+              propertyTwo: PROPERTY_CONTROLLER,
+            },
+          ],
+        },
+        effects: [
+          select({
+            selector: SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY,
+            variable: 'creatureWithLeastEnergy',
+          }),
+          effect({
+            effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+            target: '$creatureWithLeastEnergy',
+            amount: 2,
+          }),
+        ]
+			},
 		],
 	}),
 ];

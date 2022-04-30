@@ -63,6 +63,7 @@ import {
     EXPIRATION_OPPONENT_TURNS,
     EXPIRATION_PLAYER_TURNS,
     PROPERTY_CAN_BE_ATTACKED,
+
     RESTRICTION_CREATURE_TYPE,
     RESTRICTION_CREATURE_WAS_ATTACKED,
     RESTRICTION_ENERGY_LESS_THAN,
@@ -76,6 +77,8 @@ import {
     RESTRICTION_REGION_IS_NOT,
     RESTRICTION_STATUS,
     RESTRICTION_TYPE,
+    RESTRICTION_ENERGY_EQUALS,
+
     PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
     CARD_COUNT,
     PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
@@ -194,11 +197,21 @@ export type RestrictionType = typeof RESTRICTION_CREATURE_WAS_ATTACKED |
     typeof RESTRICTION_ENERGY_LESS_THAN | 
     typeof RESTRICTION_STATUS |
     typeof RESTRICTION_MAGI_WITHOUT_CREATURES |
-    typeof RESTRICTION_EXCEPT_SOURCE;
+    typeof RESTRICTION_EXCEPT_SOURCE |
+    typeof RESTRICTION_ENERGY_EQUALS;
 
 
 export type RestrictionObjectType = {
 	type: RestrictionType;
 	value: string;
-} | { type: typeof RESTRICTION_CREATURE_TYPE; value: string | string[] } | { type: typeof RESTRICTION_PLAYABLE; value?: string; }
+} | {
+  type: typeof RESTRICTION_CREATURE_TYPE;
+  value: string | string[]
+} | {
+  type: typeof RESTRICTION_PLAYABLE;
+  value?: string;
+} | {
+  type: typeof RESTRICTION_ENERGY_EQUALS,
+  value: number,
+}
 

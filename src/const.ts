@@ -68,6 +68,7 @@ export const SELECTOR_OWN_CREATURES_WITH_STATUS = 'selectors/own_creatures_with_
 export const SELECTOR_CREATURES_WITHOUT_STATUS = 'selectors/creatures_without_status';
 export const SELECTOR_STATUS = 'selectors/status';
 export const SELECTOR_ID = 'selectors/id';
+export const SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY = 'selectors/own_creature_with_least_energy';
 
 export const STATUS_BURROWED = 'status/burrowed';
 export const STATUS_FROZEN = 'status/frozen';
@@ -155,6 +156,7 @@ export const EFFECT_TYPE_PAYING_ENERGY_FOR_POWER = 'effects/paying_energy_for_po
 export const EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY = 'effects/discard_relic_from_play';
 export const EFFECT_TYPE_CREATURE_ATTACKS = 'effects/creature_attacks';
 export const EFFECT_TYPE_CREATURE_IS_ATTACKED = 'effects/creature_is_attacked';
+export const EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP = 'effects/before_drawing_cards_in_draw_step';
 export const EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP = 'effects/draw_cards_in_draw_step';
 export const EFFECT_TYPE_START_OF_TURN = 'effects/start_of_turn';
 export const EFFECT_TYPE_END_OF_TURN = 'effects/end_of_turn';
@@ -213,6 +215,7 @@ export const RESTRICTION_CREATURE_WAS_ATTACKED = 'restrictions/creature_was_atta
 export const RESTRICTION_MAGI_WITHOUT_CREATURES = 'restrictions/magi_without_creatures';
 export const RESTRICTION_STATUS = 'restrictions/status';
 export const RESTRICTION_EXCEPT_SOURCE = 'restrictions/except_source';
+export const RESTRICTION_ENERGY_EQUALS = 'restrictions/energy_equals';
 
 export const TYPE_CREATURE = 'types/creature';
 export const TYPE_MAGI = 'types/magi';

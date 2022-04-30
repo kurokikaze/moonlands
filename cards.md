@@ -1,4 +1,4 @@
-Done: **169** cards out of **190**
+Done: **170** cards out of **190**
 
 # Done, tested
 
@@ -171,6 +171,7 @@ Done: **169** cards out of **190**
 - Cloud Sceptre
 - Burrow
 - Giant Vulbor
+- Gar
 
 # Possible sample decks:
 
@@ -279,7 +280,6 @@ Done: **169** cards out of **190**
 - Energy Band (using only before attack, must attack if able)
 - Entangle ([in]ability to play spells)
 - Eye of the Storm (choice between two alternatives)
-- Gar (select in case of tie)
 - Hood of Hiding (ability to use power)
 - Karak (exiling under creature, ability to play named relics)
 - Lightning (select between alternatives)
@@ -311,7 +311,6 @@ Done: **169** cards out of **190**
 - Eye of the Storm (choosing between alternatives)
 - Tap Roots (creature not selected in previous prompt)
 - Mirror Pendant (choosing power on Magi)
-- Gar (between cards in play in case of tie)
 
 # Discarding from hand
 

@@ -2,67 +2,67 @@ import { ACTION_ENTER_PROMPT, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT
 import { GenericPromptType, RestrictionType, RestrictionObjectType, ZoneType } from './common'
 
 export type PromptParams = {
-	promptType: GenericPromptType;
-    zone?: string;
-    message?: string;
-    source?: string;
-    player?: number | string;
-    min?: number | string;
-    max?: number | string;
-    zoneOwner?: string;
-    restriction?: RestrictionType;
-    restrictionValue?: string | number | boolean;
-	restrictions?: RestrictionObjectType[];
-	numberOfCards?: number;
-	variable?: string;
+  promptType: GenericPromptType;
+  zone?: string;
+  message?: string;
+  source?: string;
+  player?: number | string;
+  min?: number | string;
+  max?: number | string;
+  zoneOwner?: string;
+  restriction?: RestrictionType;
+  restrictionValue?: string | number | boolean;
+  restrictions?: RestrictionObjectType[];
+  numberOfCards?: number;
+  variable?: string;
 }
 
 interface PromptInteface {
-    type: typeof ACTION_ENTER_PROMPT;
-    message?: string;
-    player?: number | string;
-    variable?: string;
-    generatedBy?: string;
-    replacedBy?: string[];
+  type: typeof ACTION_ENTER_PROMPT;
+  message?: string;
+  player?: number | string;
+  variable?: string;
+  generatedBy?: string;
+  replacedBy?: string[];
 }
 
 export type PromptTypeDistributeEnergy = PromptInteface & {
-    promptType: typeof PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES;
-    amount: string | number;
-    restriction?: RestrictionType;
-    restrictionValue?: any;
+  promptType: typeof PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES;
+  amount: string | number;
+  restriction?: RestrictionType;
+  restrictionValue?: any;
 }
 
 export type PromptTypeDistributeDamage = PromptInteface & {
-    promptType: typeof PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES;
-    amount: string | number;
-    restriction?: RestrictionType;
+  promptType: typeof PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES;
+  amount: string | number;
+  restriction?: RestrictionType;
 }
 
 export type PromptTypeRearrangeEnergy = PromptInteface & {
-    promptType: typeof PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES;
+  promptType: typeof PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES;
 }
 
 export type PromptTypeChooseUpToNCardsFromZone = PromptInteface & {
-    promptType: typeof PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE;
-    zone: ZoneType;
-    zoneOwner: string;
-    numberOfCards: number | string;
-    restriction?: RestrictionType;
-    restrictionValue?: string | number | boolean;
-	restrictions?: RestrictionObjectType[];
+  promptType: typeof PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE;
+  zone: ZoneType;
+  zoneOwner: string;
+  numberOfCards: number | string;
+  restriction?: RestrictionType;
+  restrictionValue?: string | number | boolean;
+  restrictions?: RestrictionObjectType[];
 }
 
 export type PromptTypePlayer = PromptInteface & {
-    promptType: typeof PROMPT_TYPE_PLAYER;
+  promptType: typeof PROMPT_TYPE_PLAYER;
 }
 
 type GeneralPromptType = PromptParams & {
-    type: typeof ACTION_ENTER_PROMPT;
-    promptType: GenericPromptType;
-    promptParams?: any;
-    generatedBy?: string;
-    replacedBy?: string[];
+  type: typeof ACTION_ENTER_PROMPT;
+  promptType: GenericPromptType;
+  promptParams?: any;
+  generatedBy?: string;
+  replacedBy?: string[];
 }
 
 export type PromptType = GeneralPromptType | PromptTypeRearrangeEnergy | PromptTypeDistributeEnergy | PromptTypeChooseUpToNCardsFromZone | PromptTypeDistributeDamage | PromptTypePlayer;
