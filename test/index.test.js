@@ -67,6 +67,8 @@ import {
 	RESTRICTION_REGION,
 	RESTRICTION_TYPE,
 	RESTRICTION_STATUS,
+	RESTRICTION_ENERGY_EQUALS,
+	RESTRICTION_OWN_CREATURE,
 
 	CALCULATION_SET,
 
@@ -106,7 +108,7 @@ import {
 	createZones,
 } from './utils.js';
 import nanoid from 'nanoid';
-import { RESTRICTION_ENERGY_EQUALS, RESTRICTION_OWN_CREATURE } from '../src/const';
+import {  } from '../src/const.ts';
 
 describe('Updating state with action', () => {
 	it('Pass action', () => {
