@@ -10,37 +10,16 @@ import {
 	ACTION_ATTACK,
 	ACTION_POWER,
 	ACTION_RESOLVE_PROMPT,
-	ACTION_PASS,
-	ACTION_EFFECT,
 
 	PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
-	PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 	PROMPT_TYPE_OWN_SINGLE_CREATURE,
-	PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
 	PROMPT_TYPE_SINGLE_CREATURE,
-	PROMPT_TYPE_SINGLE_MAGI,
 	PROMPT_TYPE_NUMBER,
-	PROMPT_TYPE_RELIC,
-	PROMPT_TYPE_MAY_ABILITY,
-	PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
 	PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
 	PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
-	PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
-
-	EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
-
-	PROPERTY_CONTROLLER,
-	PROPERTY_ABLE_TO_ATTACK,
-	PROPERTY_CAN_BE_ATTACKED,
-
-	RESTRICTION_REGION,
-	RESTRICTION_ENERGY_LESS_THAN,
-
-	REGION_OROTHE,
 
 	ZONE_TYPE_ACTIVE_MAGI,
-	ZONE_TYPE_MAGI_PILE,
 	ZONE_TYPE_DECK,
 	ZONE_TYPE_IN_PLAY,
 	ZONE_TYPE_DISCARD,
@@ -48,10 +27,8 @@ import {
 } from '../../src/const.ts';
 
 import {
-	STEP_ENERGIZE,
 	STEP_PRS_FIRST,
 	STEP_ATTACK,
-	STEP_CREATURES,
 	STEP_PRS_SECOND,
 	createZones,
 } from '../utils';
@@ -690,15 +667,16 @@ describe('Scroll of Fire', () => {
 	it('Fire Chogo', () => {
 		const ACTIVE_PLAYER = 432;
 		const NON_ACTIVE_PLAYER = 710;
+		const STARTING_ENERGY = 5;
 
 		const mobis = new CardInGame(byName('Mobis'), NON_ACTIVE_PLAYER).addEnergy(12);
-		const orathan = new CardInGame(byName('Orathan'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const orathan = new CardInGame(byName('Orathan'), NON_ACTIVE_PLAYER).addEnergy(STARTING_ENERGY);
 
 		const scrollOfFire = new CardInGame(byName('Scroll of Fire'), ACTIVE_PLAYER);
 		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(4);
 		const fireChogo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER).addEnergy(2);
-		const lavaArboll = new CardInGame(byName('Lava Arboll'), ACTIVE_PLAYER).addEnergy(5);
-		const balamantPup = new CardInGame(byName('Balamant Pup'), ACTIVE_PLAYER).addEnergy(5);
+		const lavaArboll = new CardInGame(byName('Lava Arboll'), ACTIVE_PLAYER).addEnergy(STARTING_ENERGY);
+		const balamantPup = new CardInGame(byName('Balamant Pup'), ACTIVE_PLAYER).addEnergy(STARTING_ENERGY);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [fireChogo, scrollOfFire, orathan, balamantPup, lavaArboll], [grega]);
 
 		const gameState = new State({
@@ -717,9 +695,9 @@ describe('Scroll of Fire', () => {
 
 		gameState.update(powerAction);
 
-		expect(orathan.data.energy).toEqual(3);
-		expect(balamantPup.data.energy).toEqual(3);
-		expect(lavaArboll.data.energy).toEqual(5);
+		expect(orathan.data.energy).toEqual(STARTING_ENERGY - 2);
+		expect(balamantPup.data.energy).toEqual(STARTING_ENERGY - 2);
+		expect(lavaArboll.data.energy).toEqual(STARTING_ENERGY);
 	});
 
 	it('Syphon Stone (should not be affected by the Scroll)', () => {

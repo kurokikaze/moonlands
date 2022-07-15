@@ -33,5 +33,8 @@ export default class Card {
     getCost() {
         return this.cost;
     }
+    toJSON() {
+        return this.name;
+    }
 }
 //# sourceMappingURL=Card.js.map
