@@ -5494,14 +5494,14 @@ export const cards = [
 			}
 		],
 	}),
-	new Card('Gar', TYPE_MAGI, REGION_OROTHE, null, {
+	new Card('Gar', TYPE_MAGI, REGION_CALD, null, {
 		energize: 5,
 		startingEnergy: 14,
     startingCards: ['Lava Balamant', 'Fireball', 'Magma Armor'],
 		triggerEffects: [
 			{
-				name: 'Anti-Magic (Barls)',
-				text: 'Any Barl controlled by Orlon cannot be affected by any opposing Spells.',
+				name: 'Strengthen',
+				text: 'Before you draw your cards during your Draw Step, add two energy to your Creature with the least energy. If there is a tie, you choose which Creature the energy gets placed on.',
         find: {
           effectType: EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP,
           conditions: [

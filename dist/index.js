@@ -3411,6 +3411,8 @@ export class State {
                         }
                         case EFFECT_TYPE_ADD_ENERGY_TO_CREATURE: {
                             const addTargets = this.getMetaValue(action.target, action.generatedBy);
+                            console.log('addTargets');
+                            console.dir(addTargets);
                             oneOrSeveral(addTargets, addTarget => addTarget.addEnergy(parseInt(this.getMetaValue(action.amount, action.generatedBy), 10)));
                             break;
                         }
@@ -3615,7 +3617,7 @@ export class State {
                             effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
                             source: null,
                             target: magi,
-                            generatedBy: nanoid(),
+                            generatedBy: 'thegame',
                             player,
                         });
                     }

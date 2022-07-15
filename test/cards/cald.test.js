@@ -6,6 +6,7 @@ import Zone from '../../src/classes/Zone.ts';
 
 /* eslint-disable no-unused-vars */
 import {
+	ACTION_PASS,
 	ACTION_PLAY,
 	ACTION_ATTACK,
 	ACTION_POWER,
@@ -738,6 +739,78 @@ describe('Scroll of Fire', () => {
 		gameState.update(targetingAction);
 
 		expect(orathan.data.energy).toEqual(4);
+	});
+});
+
+describe.only('Gar', () => {
+	it('Strengthen (no ties)', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const gar = new CardInGame(byName('Gar'), ACTIVE_PLAYER).addEnergy(4);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const lavaArboll = new CardInGame(byName('Lava Arboll'), ACTIVE_PLAYER).addEnergy(4);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER).addEnergy(5);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaArboll, lavaBalamant], [gar]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const passAction = {
+			type: ACTION_PASS,
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(passAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(lavaArboll.id).data.energy).toEqual(6, 'Lava Arboll now has 6 energy');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(lavaBalamant.id).data.energy).toEqual(4, 'Lava Balamant still has 4 energy');
+	});
+
+	it.only('Strengthen (a tie)', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const gar = new CardInGame(byName('Gar'), ACTIVE_PLAYER).addEnergy(4);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const lavaArboll = new CardInGame(byName('Lava Arboll'), ACTIVE_PLAYER).addEnergy(4);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER).addEnergy(4);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaArboll, lavaBalamant], [gar]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const passAction = {
+			type: ACTION_PASS,
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(passAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in the prompt state');
+		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game is in prompting the active player');
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: lavaBalamant,
+			generatedBy: gameState.state.promptGeneratedBy,
+		};
+
+		gameState.update(targetingAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(lavaBalamant.id).data.energy).toEqual(6, 'Lava Balamant now has 6 energy');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(lavaArboll.id).data.energy).toEqual(4, 'Lava Arboll still has 4 energy');
 	});
 });
 

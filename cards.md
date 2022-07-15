@@ -100,6 +100,7 @@ Done: **170** cards out of **190**
 - Heat Lens
 - Epik
 - Vulbor
+- Gar
 
 # Done, not tested
 
@@ -171,7 +172,6 @@ Done: **170** cards out of **190**
 - Cloud Sceptre
 - Burrow
 - Giant Vulbor
-- Gar
 
 # Possible sample decks:
 
