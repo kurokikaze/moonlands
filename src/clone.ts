@@ -28,15 +28,7 @@ export default function clone(item) {
 			} else if (!item.prototype) { // check that this is a literal
 				if (item instanceof Date) {
 					result = new Date(item);
-				} else {
-					// it is an object literal
-					result = {};
-					for (var i in item) {
-						result[i] = clone( item[i] );
-					}
-				}
-			} else {
-        if (item instanceof Zone) {
+				} else if (item instanceof Zone) {
           result = new Zone(item.name, item.type, item.player, item.ordered)
           result.add(item.cards.map(clone))
         } else if (item instanceof CardInGame) {
@@ -47,15 +39,21 @@ export default function clone(item) {
             ...item.data
           }
         } else {
-          // depending what you would like here,
-          // just keep the reference, or create new object
-          // if (false && item.constructor) {
-          // 	// would not advice to do that, reason? Read below
-          // 	result = new item.constructor();
-          // } else {
-          result = item;
-          // }
-        }
+					// it is an object literal
+					result = {};
+					for (var i in item) {
+						result[i] = clone( item[i] );
+					}
+				}
+			} else {
+        // depending what you would like here,
+        // just keep the reference, or create new object
+        // if (false && item.constructor) {
+        // 	// would not advice to do that, reason? Read below
+        // 	result = new item.constructor();
+        // } else {
+        result = item;
+        // }
 			}
 		} else {
 			result = item;
