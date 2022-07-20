@@ -5181,3 +5181,53 @@ describe('Protection', () => {
 		gameState.closeStreams();
 	});
 });
+
+describe.only('Cloning the game state', () => {
+	it('Flipping Magi on beginning of Energize step (not your first Magi, has cards in hand)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+		const ashgar = new CardInGame(byName('Ashgar'), ACTIVE_PLAYER);
+
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
+		const lavaArboll = new CardInGame(byName('Lava Arboll'), ACTIVE_PLAYER).addEnergy(2);
+		const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER);
+
+		const quorOne = new CardInGame(byName('Quor'), ACTIVE_PLAYER);
+		const quorTwo = new CardInGame(byName('Quor'), ACTIVE_PLAYER);
+		const fireChogoOne = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER);
+		const fireChogoTwo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER);
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([grega, sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER).add([ashgar]),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([quorOne, fireChogoOne]),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER).add([
+				arbolit,
+				quorTwo,
+				fireChogoTwo,
+			]),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER).add([quorPup]),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY).add([lavaArboll]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_DRAW,
+			activePlayer: NON_ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.state.turn = 1;
+
+		const newState = gameState.clone();
+
+		console.dir(newState.state.zones[7].cards[0]);
+		lavaArboll.addEnergy(2);
+		console.dir(newState.state.zones[7].cards[0]);
+	});
+});

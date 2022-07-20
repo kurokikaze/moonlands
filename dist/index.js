@@ -245,6 +245,14 @@ export class State {
     hasWinner() {
         return this.winner !== false;
     }
+    clone() {
+        const newObject = new State(clone(this.state));
+        newObject.winner = this.winner;
+        newObject.rollDebugValue = this.rollDebugValue;
+        newObject.players = this.players;
+        newObject.decks = this.decks;
+        return newObject;
+    }
     setPlayers(player1, player2) {
         this.players = [player1, player2];
         return this;

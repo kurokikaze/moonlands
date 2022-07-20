@@ -586,6 +586,15 @@ export class State {
 		return this.winner !== false;
 	}
 
+  clone(): State {
+    const newObject = new State(clone(this.state))
+    newObject.winner = this.winner
+    newObject.rollDebugValue = this.rollDebugValue
+    newObject.players = this.players
+    newObject.decks = this.decks
+    return newObject
+  }
+
 	setPlayers(player1: number, player2: number) {
 		this.players = [player1, player2];
 

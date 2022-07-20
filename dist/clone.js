@@ -1,3 +1,6 @@
+import { byName } from "./cards";
+import CardInGame from "./classes/CardInGame";
+import Zone from "./classes/Zone";
 export default function clone(item) {
     if (!item) {
         return item;
@@ -34,14 +37,28 @@ export default function clone(item) {
                 }
             }
             else {
-                // depending what you would like here,
-                // just keep the reference, or create new object
-                // if (false && item.constructor) {
-                // 	// would not advice to do that, reason? Read below
-                // 	result = new item.constructor();
-                // } else {
-                result = item;
-                // }
+                if (item instanceof Zone) {
+                    result = new Zone(item.name, item.type, item.player, item.ordered);
+                    result.add(item.cards.map(clone));
+                }
+                else if (item instanceof CardInGame) {
+                    result = new CardInGame(byName(item.card.name), item.owner);
+                    result.id = item.id;
+                    result.modifiedCard = item.modifiedCard;
+                    result.data = {
+                        ...item.data
+                    };
+                }
+                else {
+                    // depending what you would like here,
+                    // just keep the reference, or create new object
+                    // if (false && item.constructor) {
+                    // 	// would not advice to do that, reason? Read below
+                    // 	result = new item.constructor();
+                    // } else {
+                    result = item;
+                    // }
+                }
             }
         }
         else {
