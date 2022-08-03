@@ -1,7 +1,7 @@
 import CardInGame from "./CardInGame";
-import { ZoneType } from "../types";
+import {ZoneType} from "../types";
 
-function shuffle(array) {
+function shuffle<T>(array: T[]): T[] {
 	var currentIndex = array.length, temporaryValue, randomIndex;
 
 	// While there remain elements to shuffle...
@@ -57,27 +57,27 @@ export default class Zone {
 		return this.cards.length;
 	}
 
-	add(cards) {
+	add(cards: CardInGame[]) {
 		this.cards = [...this.cards, ...cards];
 
 		return this;
 	}
 
-	addToTop(cards) {
+	addToTop(cards: CardInGame[]) {
 		this.cards = [...cards, ...this.cards];
 
 		return this;        
 	}
 
-	byId(id) {
+	byId(id: string) {
 		return this.cards.find(card => card.id === id);
 	}
 
-	containsId(id) {
+	containsId(id: string) {
 		return this.cards.some(card => card.id === id);
 	}
 
-	removeById(id) {
+	removeById(id: string) {
 		this.cards = this.cards.filter(card => card.id != id);
 	}
 

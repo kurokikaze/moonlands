@@ -124,7 +124,7 @@ type EffectTypeStillInUse = typeof EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY |
 
 interface ActionEffect {
 	type: typeof ACTION_EFFECT;
-	generatedBy?: string;
+	generatedBy: string;
 	player?: number;
 	spell?: boolean;
 	triggerSource?: CardInGame;

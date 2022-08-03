@@ -5,7 +5,7 @@ type InGameData = {
 	energy: number;
 	controller: number;
 	attacked: number;
-	actionsUsed: any[];
+	actionsUsed: string[];
 	energyLostThisTurn: number;
 	defeatedCreature: boolean;
 	hasAttacked: boolean;
@@ -83,11 +83,11 @@ export default class CardInGame {
 	}
 
 	// In future, refer to actions by ID, not name
-	wasActionUsed(actionName) {
+	wasActionUsed(actionName: string) {
 		return this.data.actionsUsed.includes(actionName);
 	}
 
-	setActionUsed(actionName) {
+	setActionUsed(actionName: string) {
 		this.data.actionsUsed.push(actionName);
 	}
 

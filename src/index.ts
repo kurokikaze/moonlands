@@ -258,7 +258,8 @@ import {
 	ReplacementEffectType,
 	ContinuousEffectType,
 	EffectType,
-	PropertyGetterType
+	PropertyGetterType,
+  ZoneType,
 } from './types';
 import { DiscardEnergyFromCreatureEffect } from './types/effect';
 
@@ -421,7 +422,7 @@ type StateShape = {
 	turn?: number;
 	prompt: boolean;
 	players: number[];
-	promptType: PromptTypeType;
+	promptType: PromptTypeType | null;
 	promptMessage?: string;
 	promptPlayer?: number;
 	promptGeneratedBy?: string;
@@ -446,21 +447,26 @@ type StateShape = {
 	delayedTriggers: Record<string, any>[];
 }
 
+type DeckType = {
+  player: number,
+  deck: CardInGame[]
+}
+
 export class State {
 	state: StateShape;
-	players: number[];
-	decks: any[];
+	players: number[] = [0, 1];
+	decks: DeckType[];
 	winner: boolean | number;
 	debug: boolean;
-	turn: number;
-	rollDebugValue: number;
+	turn: number | null;
+	rollDebugValue: number | null;
 	actionsOne: any[];
 	actionsTwo: any[];
 	actionStreamOne: EventEmitter;
 	actionStreamTwo: EventEmitter;
 	logStream: EventEmitter;
 	commandStream: Writable;
-	turnTimer: number;
+	turnTimer: number | null;
 	timerEnabled: boolean;
 	turnTimeout: NodeJS.Timer | null;
 	turnNotifyTimeout: NodeJS.Timer | null;
@@ -472,7 +478,6 @@ export class State {
 			...state,
 		};
 
-		this.players = [0, 1]; // For simple testing
 		this.decks = [];
 		this.winner = false;
 		this.debug = false;
@@ -524,7 +529,7 @@ export class State {
 			case ACTION_ENTER_PROMPT: {
 				switch (action.promptType) {
 					case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-						if ('restrictions' in action) {
+						if (Object.hasOwn(action, 'restrictions') && action.restrictions) {
 							const restrictionsWithValues = action.restrictions.map(({ type, value }: RestrictionObjectType) => ({
 								type,
 								value: this.getMetaValue(value, action.generatedBy),
@@ -603,7 +608,13 @@ export class State {
 
 	setDeck(player: number, cardNames: string[]) {
 		if (this.players.includes(player)) {
-			const deck = cardNames.map(card => new CardInGame(byName(card), player));
+			const deck = cardNames.map(card => {
+        const cardObject = byName(card)
+        if (!cardObject) {
+          throw new Error(`Unknown card in deck: ${card}`)
+        }
+        return new CardInGame(cardObject, player)
+      });
 			this.decks.push({
 				player,
 				deck,
@@ -619,7 +630,7 @@ export class State {
 	}
 	
 	startTurnTimer() {
-		if (this.turnTimer > 0) {
+		if (this.turnTimer && this.turnTimer > 0) {
 			this.turnTimeout = setTimeout(() => {
 				this.endTurn()
 			}, this.turnTimer * 1000);
@@ -633,8 +644,12 @@ export class State {
 	}
 
 	stopTurnTimer() {
-		clearTimeout(this.turnTimeout)
-		clearTimeout(this.turnNotifyTimeout)
+    if (this.turnTimeout) {
+		  clearTimeout(this.turnTimeout)
+    }
+    if (this.turnNotifyTimeout) {
+	  	clearTimeout(this.turnNotifyTimeout)
+    }
 	}
 
 	endTurn() {
@@ -664,7 +679,7 @@ export class State {
 						newLogEntry = {
 							type: LOG_ENTRY_PLAY,
 							card: metaCard.card.name,
-							player: action.player,
+							player: Number(action.player),
 						};
 					}
 					break;
@@ -933,7 +948,7 @@ export class State {
 		return this.players.find(pl => pl != player);
 	}
 
-	getZone(type, player = null): Zone {
+	getZone(type: ZoneType, player: number | null = null): Zone {
 		return this.state.zones.find(zone => zone.type === type && (zone.player == player || player == null)) || new Zone('Empty zone', ZONE_TYPE_DECK);
 	}
 
@@ -946,7 +961,7 @@ export class State {
 	}
 
 	getCurrentPriority(): PriorityType {
-		return steps[this.state.step].priority;
+		return this.state.step === null ? 0 : steps[this.state.step].priority;
 	}
 
 	addActions(...args: AnyEffectType[]) {
@@ -957,7 +972,7 @@ export class State {
 		this.state.actions.unshift(...args);
 	}
 
-	removeDelayedTrigger(triggerId) {
+	removeDelayedTrigger(triggerId: number) {
 		this.state.delayedTriggers = this.state.delayedTriggers.filter(({id}) => id != triggerId);
 	}
 
@@ -1022,11 +1037,11 @@ export class State {
 			const variableName = value.slice(1);
 
 			// %-variables first refer to action's properties
-			if (action[variableName]) return action[variableName];
+			if (Object.hasOwn(action, variableName)) return action[variableName];
 
 			// if not, we use spellMetaData
 			const spellMetaData = this.getSpellMetadata(spellId);
-			return Object.prototype.hasOwnProperty.call(spellMetaData, variableName) ? spellMetaData[variableName] : null;
+			return Object.hasOwn(spellMetaData, variableName) ? spellMetaData[variableName] : null;
 		} else {
 			return value;
 		}
@@ -1057,7 +1072,7 @@ export class State {
 				];
 			}
 			case SELECTOR_OPPONENT_ID:
-				return this.players.find(id => id != argument);
+				return this.players.find(id => id != argument) || 999;
 			case SELECTOR_CREATURES:
 				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.type == TYPE_CREATURE);
 			case SELECTOR_MAGI:
@@ -1103,7 +1118,8 @@ export class State {
 				return this.getZone(ZONE_TYPE_IN_PLAY).cards
 					.filter(card => card.card.type == TYPE_CREATURE)
 					.filter(card => !this.modifyByStaticAbilities(card, PROPERTY_STATUS, argument));
-
+      default:
+        return []
     }
 	}
 
@@ -4126,15 +4142,19 @@ export class State {
 							break;
 						}
 						case EFFECT_TYPE_PAYING_ENERGY_FOR_POWER: {
-							const payingTarget = this.getMetaValue(action.target, action.generatedBy);
-							const payingAmount = this.getMetaValue(action.amount, action.generatedBy);
+							const payingTarget: CardInGame | CardInGame[] = this.getMetaValue(action.target, action.generatedBy);
+							const payingAmount = Number(this.getMetaValue(action.amount, action.generatedBy));
 
 							if (payingAmount > 0) {
 								this.transformIntoActions({
 									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
 									target: payingTarget,
-									source: null,
+									source: ('length' in payingTarget) ? payingTarget[0] : payingTarget,
+                  power: false,
+                  attack: false,
+                  relic: false,
+                  spell: false,
 									amount: payingAmount,
 									player: action.player,
 									generatedBy: action.generatedBy,
@@ -4145,8 +4165,6 @@ export class State {
 						case EFFECT_TYPE_ADD_ENERGY_TO_CREATURE: {
 							const addTargets = this.getMetaValue(action.target, action.generatedBy);
 
-              console.log('addTargets')
-              console.dir(addTargets)
 							oneOrSeveral(addTargets, addTarget =>
 								addTarget.addEnergy(parseInt(this.getMetaValue(action.amount, action.generatedBy), 10)),
 							);

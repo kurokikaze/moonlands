@@ -108,8 +108,6 @@ import {
 	createZones,
 } from './utils.js';
 import nanoid from 'nanoid';
-import {  } from '../src/const.ts';
-import { assert } from 'console';
 
 describe('Updating state with action', () => {
 	it('Pass action', () => {
@@ -5183,7 +5181,7 @@ describe('Protection', () => {
 	});
 });
 
-describe.only('Cloning the game state', () => {
+describe('Cloning the game state', () => {
 	it('Cloning', () => {
 		const ACTIVE_PLAYER = 0;
 		const NON_ACTIVE_PLAYER = 2;
@@ -5227,12 +5225,9 @@ describe.only('Cloning the game state', () => {
 
 		const newState = gameState.clone();
 
-		console.dir(newState.state.zones[7]);
-		assert(newState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(2);
+		expect(newState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1);
+		expect(newState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(2);
 		lavaArboll.addEnergy(2);
-		assert(newState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(2);
-		console.dir(newState.state.zones[7]._type);
-		console.dir(newState.state.zones[7].type);
-		console.dir(newState.getZone(ZONE_TYPE_IN_PLAY).cards[0]);
+		expect(newState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(2);
 	});
 });
