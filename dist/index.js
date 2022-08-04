@@ -157,7 +157,8 @@ var State = /** @class */ (function () {
     function State(state) {
         var _this = this;
         this.players = [0, 1];
-        this.state = __assign(__assign(__assign({}, clone(defaultState)), { spellMetaData: {} }), state);
+        this.turnTimer = null;
+        this.state = __assign(__assign({}, clone(defaultState)), state);
         this.decks = [];
         this.winner = false;
         this.debug = false;
@@ -197,6 +198,7 @@ var State = /** @class */ (function () {
     };
     State.prototype.addValuesToAction = function (action) {
         var _this = this;
+        var _a;
         switch (action.type) {
             case ACTION_ENTER_PROMPT: {
                 switch (action.promptType) {
@@ -221,7 +223,7 @@ var State = /** @class */ (function () {
             case ACTION_EFFECT: {
                 switch (action.effectType) {
                     case EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT: {
-                        return __assign(__assign({}, action), { staticAbilities: action.staticAbilities.map(function (ability) {
+                        return __assign(__assign({}, action), { staticAbilities: (_a = action.staticAbilities) === null || _a === void 0 ? void 0 : _a.map(function (ability) {
                                 var _a;
                                 return (__assign(__assign({}, ability), { modifier: {
                                         operandOne: _this.getMetaValue(ability.modifier.operandOne, action.generatedBy),

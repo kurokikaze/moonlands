@@ -280,11 +280,36 @@ type GameStaticAbility = StaticAbilityType & {
 
 type PriorityType = typeof NO_PRIORITY | typeof PRIORITY_PRS | typeof PRIORITY_ATTACK | typeof PRIORITY_CREATURES;
 
+type ProtoSelectEffect = {
+  type: typeof ACTION_SELECT,
+  selector: SelectorTypeType,
+  variable: string, 
+}
+
+type ProtoEnergizeEffect = {
+  type: typeof ACTION_EFFECT,
+  effectType: typeof EFFECT_TYPE_ENERGIZE,
+  target: string,
+}
+
+type ProtoBeforeDrawEffect = {
+  type: typeof ACTION_EFFECT,
+  effectType: typeof EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP,
+}
+
+type ProtoDrawEffect = {
+  type: typeof ACTION_EFFECT,
+  effectType: typeof EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP,
+  numberOfCards: 2,
+}
+
+type ProtoEffectType = ProtoSelectEffect | ProtoEnergizeEffect | ProtoBeforeDrawEffect | ProtoDrawEffect
+
 type StepType = {
 	name: string,
 	priority: PriorityType;
 	automatic: boolean;
-	effects?: AnyEffectType[]
+	effects?: ProtoEffectType[]
 }
 
 const steps: StepType[] = [
@@ -466,7 +491,7 @@ export class State {
 	actionStreamTwo: EventEmitter;
 	logStream: EventEmitter;
 	commandStream: Writable;
-	turnTimer: number | null;
+	turnTimer: number | null = null;
 	timerEnabled: boolean;
 	turnTimeout: NodeJS.Timer | null;
 	turnNotifyTimeout: NodeJS.Timer | null;
@@ -474,7 +499,6 @@ export class State {
 	constructor(state: StateShape) {
 		this.state = {
 			...clone(defaultState),
-			spellMetaData: {},
 			...state,
 		};
 
@@ -554,7 +578,7 @@ export class State {
 					case EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT: {
 						return {
 							...action,
-							staticAbilities: action.staticAbilities.map(ability => ({
+							staticAbilities: action.staticAbilities?.map(ability => ({
 								...ability,
 								modifier: {
 									operandOne: this.getMetaValue(ability.modifier.operandOne, action.generatedBy),

@@ -35,9 +35,7 @@ export default function clone(item) {
           result = new CardInGame(byName(item.card.name), item.owner)
           result.id = item.id
           result.modifiedCard = item.modifiedCard
-          result.data = {
-            ...item.data
-          }
+          result.data = clone(item.data)
         } else {
 					// it is an object literal
 					result = {};
