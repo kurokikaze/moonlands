@@ -926,8 +926,8 @@ export class State {
 			opponentDeck: this.getZone(ZONE_TYPE_DECK, opponentId).serialize(true),
 			playerActiveMagi: this.getZone(ZONE_TYPE_ACTIVE_MAGI, playerId).serialize(),
 			opponentActiveMagi: this.getZone(ZONE_TYPE_ACTIVE_MAGI, opponentId).serialize(),
-			playerMagiPile: this.getZone(ZONE_TYPE_MAGI_PILE, playerId).serialize(true),
-			opponentMagiPile: this.getZone(ZONE_TYPE_MAGI_PILE, opponentId).serialize(),
+			playerMagiPile: this.getZone(ZONE_TYPE_MAGI_PILE, playerId).serialize(),
+			opponentMagiPile: this.getZone(ZONE_TYPE_MAGI_PILE, opponentId).serialize(true),
 			inPlay: this.getZone(ZONE_TYPE_IN_PLAY).cards.map(c => c.serialize()),
 			playerDefeatedMagi: this.getZone(ZONE_TYPE_DEFEATED_MAGI, playerId).serialize(),
 			opponentDefeatedMagi: this.getZone(ZONE_TYPE_DEFEATED_MAGI, opponentId).serialize(),
@@ -1698,7 +1698,7 @@ export class State {
 		);
 
 		let replacementFound = false;
-		let appliedReplacerId = null;
+		let appliedReplacerId: string | null = null;
 		let appliedReplacerSelf = null;
 		let replaceWith = null;
 		let foundReplacer: ReplacementEffectEnhanced;
