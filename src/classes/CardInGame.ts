@@ -1,4 +1,5 @@
 import nanoid from 'nanoid';
+import clone from '../clone';
 import Card from './Card';
 
 type InGameData = { 
@@ -22,6 +23,13 @@ export type ConvertedCard = {
 	data: InGameData;
 }
 
+export type HiddenConvertedCard = {
+	id: string;
+	card: null;
+	owner: number;
+	data: {};
+}
+
 export default class CardInGame {
 	private _card: Card;
 	id: string;
@@ -30,6 +38,7 @@ export default class CardInGame {
 	modifiedCard: Card;
 	constructor(card: Card, owner: number) {
 		this._card = card;
+    this.modifiedCard = clone(card)
 		this.id = nanoid();
 		this.data = {
 			energy: 0,
@@ -111,10 +120,16 @@ export default class CardInGame {
 		return newCard;
 	}
 
-	serialize(hidden = false) {
-		return {
-			card: hidden ? null : this.card.name,
-			data: hidden ? {} : this.data,
+	serialize(hidden = false): ConvertedCard | HiddenConvertedCard {
+		return hidden ? {
+      card: null,
+      data: {},
+      owner: this.owner,
+			id: this.id,
+    } : {
+			card: this.card.name,
+			data: this.data,
+      owner: this.owner,
 			id: this.id,
 		};
 	}

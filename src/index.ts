@@ -442,6 +442,19 @@ type MetadataRecord = {
 	new_card?: CardInGame;
 }
 
+type PromptParamsType = {
+  cards?: ConvertedCard[];
+  source?: CardInGame;
+  availableCards?: CardInGame[];
+  numberOfCards?: number;
+  restrictions?: RestrictionObjectType[] | null;
+  amount?: number;
+  zone?: ZoneType;
+  zoneOwner?: number;
+  min?: number;
+  max?: number;
+}
+
 type StateShape = {
 	step: number | null;
 	turn?: number;
@@ -452,13 +465,7 @@ type StateShape = {
 	promptPlayer?: number;
 	promptGeneratedBy?: string;
 	promptVariable?: string;
-	promptParams: {
-		source?: CardInGame;
-		availableCards?: CardInGame[];
-		numberOfCards?: number;
-		restrictions?: RestrictionObjectType[];
-		amount?: number;
-	};
+	promptParams: PromptParamsType;
 	activePlayer: number;
 	goesFirst?: number;
 	zones: Zone[];
@@ -968,8 +975,9 @@ export class State {
 		};
 	}
 
-	getOpponent(player: number) {
-		return this.players.find(pl => pl != player);
+	getOpponent(player: number): number {
+    const opponent = this.players.find(pl => pl != player)
+		return opponent || 0
 	}
 
 	getZone(type: ZoneType, player: number | null = null): Zone {
@@ -2183,7 +2191,7 @@ export class State {
 		}
 		this.addActions(initialAction);
 		while (this.hasActions()) {
-			const rawAction = this.getNextAction();
+			const rawAction = this.getNextAction() as AnyEffectType;
 			const replacedActions: AnyEffectType[] = this.replaceByReplacementEffect(rawAction);
 			const action = replacedActions[0];
 			if (replacedActions.length > 1) {
@@ -2218,10 +2226,10 @@ export class State {
 				}
 
 				case ACTION_ATTACK: {
-					const attackSource: CardInGame = this.getMetaValue(action.source, action.generatedBy);
-					const attackTarget: CardInGame = this.getMetaValue(action.target, action.generatedBy);
+					const attackSource: CardInGame = action.generatedBy ? this.getMetaValue(action.source, action.generatedBy) : action.source;
+					const attackTarget: CardInGame = action.generatedBy ? this.getMetaValue(action.target, action.generatedBy) : action.target;
 
-					const additionalAttackers = this.getMetaValue(action.additionalAttackers, action.generatedBy) || [];
+					const additionalAttackers = (action.generatedBy ? this.getMetaValue(action.additionalAttackers, action.generatedBy) : action.additionalAttackers) || [];
 
 					const sourceAttacksPerTurn = this.modifyByStaticAbilities(attackSource, PROPERTY_ATTACKS_PER_TURN);
 
@@ -2385,7 +2393,7 @@ export class State {
 						throw new Error('Prompt without player!');
 					}
 					const savedActions = this.state.actions;
-					let promptParams = {};
+					let promptParams: PromptParamsType = {};
 					const promptPlayer = this.getMetaValue(action.player, action.generatedBy);
 
 					switch (action.promptType) {
@@ -2410,7 +2418,7 @@ export class State {
 								},
 							] : null);
 
-							const zone = this.getMetaValue(action.zone, action.generatedBy);
+							const zone = this.getMetaValue(action.zone, action.generatedBy) as ZoneType;
 							const zoneOwner = this.getMetaValue(action.zoneOwner, action.generatedBy);
 							const numberOfCards = this.getMetaValue(action.numberOfCards, action.generatedBy);
 
@@ -2459,7 +2467,7 @@ export class State {
 							if (action.restrictions) {
 								const restrictionsWithValues = action.restrictions.map(({ type, value }: RestrictionObjectType) => ({
 									type,
-									value: this.getMetaValue(value, action.generatedBy),
+									value: this.getMetaValue(value, action.generatedBy as string),
 								}));
 
 								promptParams = {
@@ -2481,8 +2489,8 @@ export class State {
 						}
 						case PROMPT_TYPE_NUMBER: {
 							promptParams = {
-								min: this.getMetaValue(action.min, action.generatedBy),
-								max: this.getMetaValue(action.max, action.generatedBy),
+								min: this.getMetaValue(action.min, action.generatedBy as string),
+								max: this.getMetaValue(action.max, action.generatedBy as string),
 							};
 							break;
 						}
