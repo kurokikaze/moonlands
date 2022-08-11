@@ -487,7 +487,7 @@ type MetadataRecord = {
 type PromptParamsType = {
   cards?: ConvertedCard[];
   source?: CardInGame;
-  availableCards?: CardInGame[];
+  availableCards?: string[];
   numberOfCards?: number;
   restrictions?: RestrictionObjectType[] | null;
   restriction?: RestrictionType;
