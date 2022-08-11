@@ -120,17 +120,17 @@ export default class CardInGame {
 		return newCard;
 	}
 
-	serialize(hidden = false): ConvertedCard | HiddenConvertedCard {
+	serialize<T extends boolean>(hidden: T = false as T): T extends true ? HiddenConvertedCard : ConvertedCard  {
 		return hidden ? {
       card: null,
       data: {},
       owner: this.owner,
 			id: this.id,
-    } : {
+    } as any : {
 			card: this.card.name,
 			data: this.data,
       owner: this.owner,
 			id: this.id,
-		};
+		} as ConvertedCard;
 	}
 }
