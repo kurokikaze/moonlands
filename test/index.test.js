@@ -5086,8 +5086,9 @@ describe('Enrich', () => {
 
 		expect(gameState.state.prompt).toEqual(true, 'Game is in Prompt state');
 		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_SINGLE_CREATURE_FILTERED, 'Prompt is of correct type');
-		expect(gameState.state.promptParams.restriction).toEqual(RESTRICTION_STATUS, 'Prompt is restricted by status');
-		expect(gameState.state.promptParams.restrictionValue).toEqual(STATUS_BURROWED, 'Status is Burrowed');
+		expect(gameState.state.promptParams.restrictions).toHaveLength(1, 'Prompt is restricted by status');
+		expect(gameState.state.promptParams.restrictions[0].type).toEqual(RESTRICTION_STATUS, 'Prompt is restricted by status');
+		expect(gameState.state.promptParams.restrictions[0].value).toEqual(STATUS_BURROWED, 'Status is Burrowed');
 
 		const targetingAction = {
 			type: ACTION_RESOLVE_PROMPT,
