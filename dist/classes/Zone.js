@@ -93,7 +93,7 @@ var Zone = /** @class */ (function () {
     };
     Zone.prototype.serialize = function (hidden) {
         if (hidden === void 0) { hidden = false; }
-        return this.cards.map(function (card) { return card.serialize(hidden); });
+        return hidden ? this.cards.map(function (card) { return card.serialize(true); }) : this.cards.map(function (card) { return card.serialize(false); });
     };
     return Zone;
 }());

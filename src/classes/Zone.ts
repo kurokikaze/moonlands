@@ -1,4 +1,4 @@
-import CardInGame from "./CardInGame";
+import CardInGame, { ConvertedCard, HiddenConvertedCard } from "./CardInGame";
 import {ZoneType} from "../types";
 
 function shuffle<T>(array: T[]): T[] {
@@ -89,7 +89,10 @@ export default class Zone {
 		this.cards = [];
 	}
 
-	serialize(hidden = false) {
-		return this.cards.map(card => card.serialize(hidden));
+  serialize(hidden: true): HiddenConvertedCard[]
+  serialize(hidden: false): ConvertedCard[]
+  serialize(): ConvertedCard[]
+	serialize(hidden = false): HiddenConvertedCard[] | ConvertedCard[] {
+    return hidden ? this.cards.map(card => card.serialize(true)) as unknown as HiddenConvertedCard[] : this.cards.map(card => card.serialize(false)) as unknown as ConvertedCard[];
 	}
 }
