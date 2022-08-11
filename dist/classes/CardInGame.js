@@ -10,9 +10,11 @@ var __assign = (this && this.__assign) || function () {
     return __assign.apply(this, arguments);
 };
 import nanoid from 'nanoid';
+import clone from '../clone';
 var CardInGame = /** @class */ (function () {
     function CardInGame(card, owner) {
         this._card = card;
+        this.modifiedCard = clone(card);
         this.id = nanoid();
         this.data = {
             energy: 0,
@@ -87,9 +89,15 @@ var CardInGame = /** @class */ (function () {
     };
     CardInGame.prototype.serialize = function (hidden) {
         if (hidden === void 0) { hidden = false; }
-        return {
-            card: hidden ? null : this.card.name,
-            data: hidden ? {} : this.data,
+        return hidden ? {
+            card: null,
+            data: {},
+            owner: this.owner,
+            id: this.id,
+        } : {
+            card: this.card.name,
+            data: this.data,
+            owner: this.owner,
             id: this.id,
         };
     };

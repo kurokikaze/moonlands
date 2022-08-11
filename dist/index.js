@@ -580,7 +580,8 @@ var State = /** @class */ (function () {
         this.state = __assign(__assign({}, this.state), { zones: zones, step: null, turn: 1, goesFirst: goesFirst, activePlayer: goesFirst });
     };
     State.prototype.getOpponent = function (player) {
-        return this.players.find(function (pl) { return pl != player; });
+        var opponent = this.players.find(function (pl) { return pl != player; });
+        return opponent || 0;
     };
     State.prototype.getZone = function (type, player) {
         if (player === void 0) { player = null; }
@@ -1556,9 +1557,9 @@ var State = /** @class */ (function () {
                     break;
                 }
                 case ACTION_ATTACK: {
-                    var attackSource = this_1.getMetaValue(action.source, action.generatedBy);
-                    var attackTarget = this_1.getMetaValue(action.target, action.generatedBy);
-                    var additionalAttackers = this_1.getMetaValue(action.additionalAttackers, action.generatedBy) || [];
+                    var attackSource = action.generatedBy ? this_1.getMetaValue(action.source, action.generatedBy) : action.source;
+                    var attackTarget = action.generatedBy ? this_1.getMetaValue(action.target, action.generatedBy) : action.target;
+                    var additionalAttackers = (action.generatedBy ? this_1.getMetaValue(action.additionalAttackers, action.generatedBy) : action.additionalAttackers) || [];
                     var sourceAttacksPerTurn = this_1.modifyByStaticAbilities(attackSource, PROPERTY_ATTACKS_PER_TURN);
                     var attackerCanAttack = this_1.modifyByStaticAbilities(attackSource, PROPERTY_ABLE_TO_ATTACK);
                     if (!attackerCanAttack) {
@@ -1763,8 +1764,12 @@ var State = /** @class */ (function () {
                             }
                             else {
                                 promptParams = {
-                                    restriction: action.restriction,
-                                    restrictionValue: this_1.getMetaValue(action.restrictionValue, action.generatedBy),
+                                    restrictions: [
+                                        {
+                                            type: action.restriction,
+                                            value: this_1.getMetaValue(action.restrictionValue, action.generatedBy),
+                                        }
+                                    ],
                                 };
                             }
                             break;
@@ -1783,16 +1788,24 @@ var State = /** @class */ (function () {
                         case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
                             promptParams = {
                                 amount: this_1.getMetaValue(action.amount, action.generatedBy),
-                                restriction: action.restriction,
-                                restrictionValue: this_1.getMetaValue(action.amount, action.generatedBy),
+                                restrictions: [
+                                    {
+                                        type: action.restriction,
+                                        value: this_1.getMetaValue(action.amount, action.generatedBy),
+                                    },
+                                ],
                             };
                             break;
                         }
                         case PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES: {
                             promptParams = {
                                 amount: this_1.getMetaValue(action.amount, action.generatedBy),
-                                restriction: action.restriction,
-                                restrictionValue: this_1.getMetaValue(action.amount, action.generatedBy),
+                                restrictions: [
+                                    {
+                                        type: action.restriction,
+                                        value: this_1.getMetaValue(action.amount, action.generatedBy),
+                                    },
+                                ],
                             };
                             break;
                         }
@@ -2662,6 +2675,7 @@ var State = /** @class */ (function () {
                                     type: ACTION_EFFECT,
                                     effectType: EFFECT_TYPE_RESHUFFLE_DISCARD,
                                     player: player,
+                                    generatedBy: action.generatedBy,
                                 }, action);
                             }
                             break;

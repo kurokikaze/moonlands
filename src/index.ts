@@ -303,7 +303,49 @@ type ProtoDrawEffect = {
   numberOfCards: 2,
 }
 
-type ProtoEffectType = ProtoSelectEffect | ProtoEnergizeEffect | ProtoBeforeDrawEffect | ProtoDrawEffect
+type ProtoMagiFlippedEffect = {
+  type: typeof ACTION_EFFECT,
+  effectType: typeof EFFECT_TYPE_MAGI_FLIPPED,
+  target: CardInGame,
+}
+
+type ProtoAddStartingEnergyEffect = {
+  type: typeof ACTION_EFFECT,
+  effectType: typeof EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI,
+  target: string,
+}
+
+type ProtoChooseCardsPrompt = {
+  type: typeof ACTION_ENTER_PROMPT,
+  promptType: typeof PROMPT_TYPE_CHOOSE_CARDS,
+  promptParams: {
+    cards: string[],
+    availableCards: string[],
+  },
+  variable: string,
+}
+
+type ProtoFindStartingCardsEffect = {
+  type: typeof ACTION_EFFECT,
+  effectType: typeof EFFECT_TYPE_FIND_STARTING_CARDS,
+  cards: string,
+}
+
+type ProtoDrawRestOfCardsEffect = {
+  type: typeof ACTION_EFFECT,
+  effectType: typeof EFFECT_TYPE_DRAW_REST_OF_CARDS,
+  drawnCards: string,
+}
+
+type ProtoEffectType = ProtoSelectEffect |
+  ProtoEnergizeEffect |
+  ProtoBeforeDrawEffect |
+  ProtoDrawEffect |
+  ProtoMagiFlippedEffect |
+  ProtoAddStartingEnergyEffect |
+  ProtoChooseCardsPrompt |
+  ProtoFindStartingCardsEffect |
+  ProtoDrawRestOfCardsEffect
 
 type StepType = {
 	name: string,
@@ -448,6 +490,7 @@ type PromptParamsType = {
   availableCards?: CardInGame[];
   numberOfCards?: number;
   restrictions?: RestrictionObjectType[] | null;
+  restriction?: RestrictionType;
   amount?: number;
   zone?: ZoneType;
   zoneOwner?: number;
@@ -2115,7 +2158,7 @@ export class State {
 				}
 				case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
 					const zoneOwner = this.getMetaValue(promptAction.zoneOwner, source.id);
-					const cardsInZone = this.getZone(promptAction.zone, zoneOwner).cards;
+					const cardsInZone = this.getZone(promptAction.zone as ZoneType, zoneOwner).cards;
 					if (promptAction.restrictions) {
 						return this.checkAnyCardForRestrictions(cardsInZone, promptAction.restrictions);
 					} else if (promptAction.restriction) {
@@ -2475,10 +2518,13 @@ export class State {
 								};
 							} else {
 								promptParams = {
-									restriction: action.restriction,
-									restrictionValue: this.getMetaValue(action.restrictionValue, action.generatedBy),
+                  restrictions: [
+                    {
+                      type: action.restriction,
+                      value: this.getMetaValue(action.restrictionValue, action.generatedBy),
+                    }
+                  ],
 								};
-	
 							}
 	
 							break;
@@ -2497,16 +2543,24 @@ export class State {
 						case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
 							promptParams = {
 								amount: this.getMetaValue(action.amount, action.generatedBy),
-								restriction: action.restriction,
-								restrictionValue: this.getMetaValue(action.amount, action.generatedBy),
+								restrictions: [
+                  {
+                    type: action.restriction,
+                    value: this.getMetaValue(action.amount, action.generatedBy),
+                  },
+                ],
 							};
 							break;
 						}
 						case PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES: {
 							promptParams = {
 								amount: this.getMetaValue(action.amount, action.generatedBy),
-								restriction: action.restriction,
-								restrictionValue: this.getMetaValue(action.amount, action.generatedBy),
+								restrictions: [
+                  {
+                    type: action.restriction,
+                    value: this.getMetaValue(action.amount, action.generatedBy),
+                  },
+                ],
 							};
 							break;
 						}
@@ -3176,12 +3230,12 @@ export class State {
 								action.step === 0;
 
 							if (steps[action.step].effects && !isFirstEnergize) {
-								const transformedActions = steps[action.step].effects.map(effect =>
+								const transformedActions: AnyEffectType[] = steps[action.step].effects.map(effect =>
 									({
 										...effect,
 										player: action.player, 
 										generatedBy: action.generatedBy,
-									}),
+									} as AnyEffectType),
 								);
 								this.addActions(...transformedActions);
 							}
@@ -3278,7 +3332,7 @@ export class State {
 
 								const firstMagi = this.getZone(ZONE_TYPE_DEFEATED_MAGI, action.player).length == 0;
 
-								const actionsToTake: AnyEffectType[] = [
+								const actionsToTake: ProtoEffectType[] = [
 									{
 										type: ACTION_EFFECT,
 										effectType: EFFECT_TYPE_MAGI_FLIPPED,
@@ -3318,11 +3372,11 @@ export class State {
 									});
 								}
 
-								const actions = actionsToTake.map(preAction => ({
+								const actions: AnyEffectType[] = actionsToTake.map(preAction => ({
 									...preAction,
 									player: action.player,
 									generatedBy: action.generatedBy,
-								}));
+								} as AnyEffectType));
 
 								this.transformIntoActions(...actions);
 							}
@@ -3526,6 +3580,7 @@ export class State {
 									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_RESHUFFLE_DISCARD,
 									player: player,
+                  generatedBy: action.generatedBy,
 								},
 								action);
 							}
