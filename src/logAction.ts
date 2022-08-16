@@ -1,4 +1,5 @@
 import CardInGame from './classes/CardInGame';
+import { AnyEffectType } from './types';
 
 const FgRed = '\x1b[31m';
 const FgGreen = '\x1b[32m';
@@ -22,7 +23,7 @@ export const color = {
 
 const showCard = (card: CardInGame | string) => (card instanceof CardInGame) ? `<${color.blue(card.card.name)} [${card.id}]>` : card;
 
-export const showAction = action => {
+export const showAction = (action: AnyEffectType) => {
 	const fields = Object.keys(action).filter(f => f != 'type').map(field => {
 		return `\t${field}: ${showCard(action[field])}`;
 	});

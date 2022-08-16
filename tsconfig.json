@@ -1,15 +1,15 @@
 {
-    "compilerOptions": {
-        "target": "es5",
-        "lib": ["es6", "es2022"],
-        "module": "ESNext",
-        "esModuleInterop": true,
-        "moduleResolution": "node",
-        "strict": false,
-        "forceConsistentCasingInFileNames": true,
-        "sourceMap": true,
-        "outDir": "dist"
-    },
-    "exclude": ["test/*"],
-    "lib": ["es2015"]
-  }
+  "compilerOptions": {
+      "target": "es5",
+      "lib": ["es6", "es2022"],
+      "module": "CommonJS",
+      "esModuleInterop": true,
+      "moduleResolution": "node",
+      "strict": false,
+      "forceConsistentCasingInFileNames": true,
+      "sourceMap": true,
+      "outDir": "dist",
+  },
+  "exclude": ["test/*", "dist/*"],
+  "lib": ["es2015"]
+}

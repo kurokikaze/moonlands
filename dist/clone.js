@@ -1,7 +1,12 @@
-import { byName } from "./cards";
-import CardInGame from "./classes/CardInGame";
-import Zone from "./classes/Zone";
-export default function clone(item) {
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var cards_1 = require("./cards");
+var CardInGame_1 = __importDefault(require("./classes/CardInGame"));
+var Zone_1 = __importDefault(require("./classes/Zone"));
+function clone(item) {
     if (!item) {
         return item;
     } // null, undefined values check
@@ -14,6 +19,7 @@ export default function clone(item) {
     });
     if (typeof result == 'undefined') {
         if (Object.prototype.toString.call(item) === '[object Array]') {
+            console.log("Cloning array");
             result = [];
             item.forEach(function (child, index) {
                 result[index] = clone(child);
@@ -25,20 +31,25 @@ export default function clone(item) {
                 result = item.cloneNode(true);
             }
             else if (!item.prototype) { // check that this is a literal
+                console.log("Cloning literal");
+                console.log("Is it a zone? ".concat(item instanceof Zone_1.default));
                 if (item instanceof Date) {
                     result = new Date(item);
                 }
-                else if (item instanceof Zone) {
-                    result = new Zone(item.name, item.type, item.player, item.ordered);
+                else if (item instanceof Zone_1.default) {
+                    console.log("Cloning zone ".concat(item.name));
+                    result = new Zone_1.default(item.name, item.type, item.player, item.ordered);
                     result.add(item.cards.map(clone));
                 }
-                else if (item instanceof CardInGame) {
-                    result = new CardInGame(byName(item.card.name), item.owner);
+                else if (item instanceof CardInGame_1.default) {
+                    console.log("Cloning card in game ".concat(item.card.name));
+                    result = new CardInGame_1.default((0, cards_1.byName)(item.card.name), item.owner);
                     result.id = item.id;
                     result.modifiedCard = item.modifiedCard;
                     result.data = clone(item.data);
                 }
                 else {
+                    console.log("Cloning object literal");
                     // it is an object literal
                     result = {};
                     for (var i in item) {
@@ -47,6 +58,7 @@ export default function clone(item) {
                 }
             }
             else {
+                console.log("Cloning unknown type");
                 // depending what you would like here,
                 // just keep the reference, or create new object
                 // if (false && item.constructor) {
@@ -63,4 +75,5 @@ export default function clone(item) {
     }
     return result;
 }
+exports.default = clone;
 //# sourceMappingURL=clone.js.map

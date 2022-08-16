@@ -586,7 +586,7 @@ export class State {
 		this.commandStream.destroy();
 	}
 
-	addActionToStream(action: AnyEffectType) {
+	addActionToStream(action: AnyEffectType): void {
 		const actionWithValues = this.addValuesToAction(action);
 
 		// Do not send outside CALCULATE, SELECT and so on
@@ -598,7 +598,7 @@ export class State {
 		this.logStream.emit('action', actionWithValues);
 	}
 
-	addValuesToAction(action: AnyEffectType) {
+	addValuesToAction(action: AnyEffectType): AnyEffectType {
 		switch (action.type) {
 			case ACTION_ENTER_PROMPT: {
 				switch (action.promptType) {
@@ -666,6 +666,7 @@ export class State {
 	}
 
   clone(): State {
+    console.log('Cloning')
     const newObject = new State(clone(this.state))
     newObject.winner = this.winner
     newObject.rollDebugValue = this.rollDebugValue
@@ -1069,7 +1070,7 @@ export class State {
 		};
 	}
 
-	getSpellMetadata(spellId: string): MetadataRecord | {} {
+	getSpellMetadata(spellId: string): MetadataRecord | Record<string, any> {
 		return this.state.spellMetaData[spellId] ? this.state.spellMetaData[spellId] : {};
 	}
 
@@ -3408,7 +3409,7 @@ export class State {
 						case EFFECT_TYPE_FIND_STARTING_CARDS: {
 							const cardsToFind: string[] = this.getMetaValue(action.cards, action.generatedBy);
 
-							let foundCards = [];
+							let foundCards: string[] = [];
 							if (cardsToFind.length) {
 								const deck = this.getZone(ZONE_TYPE_DECK, action.player);
 								const discard = this.getZone(ZONE_TYPE_DISCARD, action.player);
@@ -3912,7 +3913,7 @@ export class State {
 							const sourceZone = this.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
 							const destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
 							const destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
-							const newCards = [];
+							const newCards: CardInGame[] = [];
 
 							oneOrSeveral(zoneChangingTargets, zoneChangingCard => {
 								const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner);

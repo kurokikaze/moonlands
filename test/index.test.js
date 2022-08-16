@@ -108,6 +108,7 @@ import {
 	createZones,
 } from './utils.js';
 import nanoid from 'nanoid';
+import clone from '../src/clone';
 
 describe('Updating state with action', () => {
 	it('Pass action', () => {
@@ -5183,7 +5184,7 @@ describe('Protection', () => {
 });
 
 describe('Cloning the game state', () => {
-	it('Cloning', () => {
+	it.only('Cloning', () => {
 		const ACTIVE_PLAYER = 0;
 		const NON_ACTIVE_PLAYER = 2;
 
@@ -5221,6 +5222,8 @@ describe('Cloning the game state', () => {
 			activePlayer: NON_ACTIVE_PLAYER,
 		});
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1);
 
 		gameState.state.turn = 1;
 
