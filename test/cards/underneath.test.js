@@ -1193,6 +1193,7 @@ describe('Parmalag', () => {
 			step: STEP_PRS_FIRST,
 			activePlayer: ACTIVE_PLAYER,
 		});
+
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
 

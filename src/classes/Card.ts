@@ -17,7 +17,7 @@ import {
 
 import {Region, CardType, CardData} from '../types';
 
-type CostType = number | typeof COST_X | typeof COST_X_PLUS_ONE | null
+export type CostType = number | typeof COST_X | typeof COST_X_PLUS_ONE | null
 
 export default class Card {
 	name: string;

@@ -546,7 +546,7 @@ var State = /** @class */ (function () {
                         case const_1.EFFECT_TYPE_FIND_STARTING_CARDS: {
                             newLogEntry = {
                                 type: const_1.LOG_ENTRY_CHOOSES_STARTING_CARDS,
-                                player: action.player,
+                                player: action.player || 0,
                             };
                             break;
                         }
@@ -854,6 +854,7 @@ var State = /** @class */ (function () {
         }
     };
     State.prototype.getByProperty = function (target, property, subProperty) {
+        var _a, _b;
         if (subProperty === void 0) { subProperty = null; }
         switch (property) {
             case const_1.PROPERTY_ID:
@@ -891,15 +892,11 @@ var State = /** @class */ (function () {
                     target.modifiedCard.data.startingEnergy :
                     target.card.data.startingEnergy;
             case const_1.PROPERTY_POWER_COST:
-                return target.modifiedCard ?
-                    target.modifiedCard.data.powers.find(function (_a) {
-                        var name = _a.name;
-                        return name === subProperty;
-                    }).cost :
-                    target.card.data.powers.find(function (_a) {
-                        var name = _a.name;
-                        return name === subProperty;
-                    }).cost;
+                var powers = target.modifiedCard ? (_a = target.modifiedCard.data) === null || _a === void 0 ? void 0 : _a.powers : target.card.data.powers;
+                return (powers && powers.length) ? (_b = powers.find(function (_a) {
+                    var name = _a.name;
+                    return name === subProperty;
+                })) === null || _b === void 0 ? void 0 : _b.cost : 0;
             case const_1.PROPERTY_STATUS_WAS_ATTACKED:
                 return target.data.wasAttacked || false;
             case const_1.PROPERTY_CAN_BE_ATTACKED:
@@ -937,9 +934,9 @@ var State = /** @class */ (function () {
         if ((effect.spell && protection.from === const_1.PROTECTION_FROM_SPELLS) ||
             (effect.power && protection.from === const_1.PROTECTION_FROM_POWERS) ||
             (effect.attack && protection.from === const_1.PROTECTION_FROM_ATTACKS)) {
-            var source = effect.source;
-            if ((effect.effectType === const_1.EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY && protection.type === const_1.PROTECTION_TYPE_DISCARDING_FROM_PLAY) ||
-                protection.type === const_1.PROTECTION_TYPE_GENERAL) {
+            if (effect.effectType === const_1.EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE &&
+                protection.type === const_1.PROTECTION_TYPE_ENERGY_LOSS) {
+                var source = effect.source;
                 if (protection.restrictions) {
                     var cardFilter = this.makeCardFilter(protection.restrictions);
                     return !cardFilter(source);
@@ -948,9 +945,24 @@ var State = /** @class */ (function () {
                     return false;
                 }
             }
-            if ((effect.effectType === const_1.EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE) ||
+            if ((effect.effectType === const_1.EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY && protection.type === const_1.PROTECTION_TYPE_DISCARDING_FROM_PLAY) ||
                 protection.type === const_1.PROTECTION_TYPE_GENERAL) {
+                var source = effect.source;
+                if (!source)
+                    return false;
                 if (protection.restrictions) {
+                    var cardFilter = this.makeCardFilter(protection.restrictions);
+                    return !cardFilter(source);
+                }
+                else {
+                    return false;
+                }
+            }
+            if (protection.type === const_1.PROTECTION_TYPE_GENERAL) {
+                if (protection.restrictions) {
+                    var source = effect.source;
+                    if (!source)
+                        return false;
                     var cardFilter = this.makeCardFilter(protection.restrictions);
                     return !cardFilter(source);
                 }
@@ -962,7 +974,7 @@ var State = /** @class */ (function () {
         return true;
     };
     State.prototype.isCardAffectedByStaticAbility = function (card, staticAbility) {
-        var _a, _b;
+        var _a, _b, _c;
         switch (staticAbility.selector) {
             case const_1.SELECTOR_ID: {
                 return card.id === staticAbility.selectorParameter;
@@ -989,7 +1001,7 @@ var State = /** @class */ (function () {
                         return id === card.id;
                     }) &&
                     card.data.controller === staticAbility.player &&
-                    card.card.name.split(' ').includes(staticAbility.selectorParameter.toString());
+                    card.card.name.split(' ').includes(((_a = staticAbility === null || staticAbility === void 0 ? void 0 : staticAbility.selectorParameter) === null || _a === void 0 ? void 0 : _a.toString()) || 'no matches');
             }
             case const_1.SELECTOR_CREATURES_OF_PLAYER: {
                 return card.card.type === const_1.TYPE_CREATURE &&
@@ -1002,7 +1014,7 @@ var State = /** @class */ (function () {
             case const_1.SELECTOR_OWN_MAGI: {
                 return card.card.type === const_1.TYPE_MAGI &&
                     this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, staticAbility.player).cards.length === 1 &&
-                    ((_b = (_a = this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, staticAbility.player)) === null || _a === void 0 ? void 0 : _a.card) === null || _b === void 0 ? void 0 : _b.id) === card.id;
+                    ((_c = (_b = this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, staticAbility.player)) === null || _b === void 0 ? void 0 : _b.card) === null || _c === void 0 ? void 0 : _c.id) === card.id;
             }
             case const_1.SELECTOR_STATUS: {
                 return this.getByProperty(card, const_1.PROPERTY_STATUS, staticAbility.selectorParameter);
@@ -1091,6 +1103,9 @@ var State = /** @class */ (function () {
                 case const_1.PROPERTY_COST: {
                     var initialValue = this.getByProperty(currentCard, const_1.PROPERTY_COST);
                     var _a = staticAbility.modifier, operator = _a.operator, operandOne = _a.operandOne;
+                    if (typeof initialValue !== 'number') {
+                        return __assign(__assign({}, currentCard), { modifiedCard: __assign(__assign({}, currentCard.modifiedCard), { cost: initialValue }) });
+                    }
                     var resultValue = (operator === const_1.CALCULATION_SUBTRACT || operator === const_1.CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
                         this.performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
                         this.performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
@@ -1206,7 +1221,7 @@ var State = /** @class */ (function () {
             case const_1.RESTRICTION_REGION_IS_NOT:
                 return function (card) { return card.card.region !== restrictionValue; };
             case const_1.RESTRICTION_ENERGY_LESS_THAN_STARTING:
-                return function (card) { return card.card.type === const_1.TYPE_CREATURE && card.data.energy < card.card.cost; };
+                return function (card) { return Boolean(card.card.type === const_1.TYPE_CREATURE && card.card.cost && card.data.energy < card.card.cost); };
             case const_1.RESTRICTION_ENERGY_LESS_THAN:
                 return function (card) { return card.card.type === const_1.TYPE_CREATURE && card.data.energy < restrictionValue; };
             case const_1.RESTRICTION_CREATURE_WAS_ATTACKED:
@@ -1691,7 +1706,7 @@ var State = /** @class */ (function () {
                     var additionalAttackersCanAttack = additionalAttackers.every(function (card) { return card.card.data.canPackHunt && _this.modifyByStaticAbilities(card, const_1.PROPERTY_ABLE_TO_ATTACK); });
                     var additionalAttackersHasAttacksLeft = additionalAttackers.every(function (card) { return card.data.attacked < _this.modifyByStaticAbilities(card, const_1.PROPERTY_ATTACKS_PER_TURN); });
                     var targetIsMagi = attackTarget.card.type == const_1.TYPE_MAGI;
-                    var opponentCreatures = this_1.useSelector(const_1.SELECTOR_OWN_CREATURES, attackTarget.owner, null);
+                    var opponentCreatures = this_1.useSelector(const_1.SELECTOR_OWN_CREATURES, attackTarget.owner);
                     var magiHasCreatures = opponentCreatures instanceof Array && opponentCreatures.length > 0;
                     var attackApproved = attackerCanAttack &&
                         !targetIsMagi || ( // Either we attack a creature
@@ -1744,7 +1759,8 @@ var State = /** @class */ (function () {
                     var payingCard = (action.source.card.type === const_1.TYPE_RELIC) ?
                         this_1.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, action.source.owner).card :
                         action.source;
-                    if (!action.source.wasActionUsed(action.power.name) &&
+                    if (payingCard &&
+                        !action.source.wasActionUsed(action.power.name) &&
                         (payingCard.data.energy >= powerCost ||
                             (payingCard.data.energy > 0 && powerCost === const_1.COST_X))) {
                         var source_1 = action.source;
@@ -1932,7 +1948,7 @@ var State = /** @class */ (function () {
                     break;
                 }
                 case const_1.ACTION_EXIT_PROMPTS: {
-                    this_1.state = __assign(__assign({}, this_1.state), { actions: [], savedActions: [], mayEffectActions: [], fallbackActions: [], prompt: false, promptType: null, promptMessage: null, promptGeneratedBy: null, promptVariable: null, promptParams: {}, spellMetaData: __assign({}, this_1.state.spellMetaData) });
+                    this_1.state = __assign(__assign({}, this_1.state), { actions: [], savedActions: [], mayEffectActions: [], fallbackActions: [], prompt: false, promptType: null, promptMessage: undefined, promptGeneratedBy: undefined, promptVariable: undefined, promptParams: {}, spellMetaData: __assign({}, this_1.state.spellMetaData) });
                     break;
                 }
                 case const_1.ACTION_RESOLVE_PROMPT: {
@@ -1991,7 +2007,7 @@ var State = /** @class */ (function () {
                                 }
                                 break;
                             case const_1.PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE:
-                                if ('target' in action && ((_d = (_c = this_1.state) === null || _c === void 0 ? void 0 : _c.promptParams) === null || _d === void 0 ? void 0 : _d.source)) {
+                                if ('target' in action && action.target && ((_d = (_c = this_1.state) === null || _c === void 0 ? void 0 : _c.promptParams) === null || _d === void 0 ? void 0 : _d.source)) {
                                     if (this_1.state.promptParams.source.id === ((_e = action.target) === null || _e === void 0 ? void 0 : _e.id)) {
                                         throw new Error('Got forbidden target on prompt');
                                     }
@@ -2095,11 +2111,11 @@ var State = /** @class */ (function () {
                     var result = void 0;
                     switch (action.selector) {
                         case const_1.SELECTOR_OWN_CARDS_IN_PLAY: {
-                            result = this_1.useSelector(const_1.SELECTOR_OWN_CARDS_IN_PLAY, action.player, null);
+                            result = this_1.useSelector(const_1.SELECTOR_OWN_CARDS_IN_PLAY, action.player || 0);
                             break;
                         }
                         case const_1.SELECTOR_OWN_CREATURES_OF_TYPE: {
-                            result = this_1.useSelector(const_1.SELECTOR_OWN_CREATURES_OF_TYPE, action.player, this_1.getMetaValue(action.creatureType, action.generatedBy));
+                            result = this_1.useSelector(const_1.SELECTOR_OWN_CREATURES_OF_TYPE, action.player || 0, this_1.getMetaValue(action.creatureType, action.generatedBy));
                             break;
                         }
                         case const_1.SELECTOR_CREATURES_OF_TYPE: {
@@ -2111,11 +2127,11 @@ var State = /** @class */ (function () {
                             break;
                         }
                         case const_1.SELECTOR_CARDS_WITH_ENERGIZE_RATE: {
-                            result = this_1.useSelector(const_1.SELECTOR_CARDS_WITH_ENERGIZE_RATE, action.player, null);
+                            result = this_1.useSelector(const_1.SELECTOR_CARDS_WITH_ENERGIZE_RATE, null);
                             break;
                         }
                         case const_1.SELECTOR_OPPONENT_ID: {
-                            result = this_1.useSelector(const_1.SELECTOR_OPPONENT_ID, action.player, this_1.getMetaValue(action.opponentOf || action.player, action.generatedBy));
+                            result = this_1.useSelector(const_1.SELECTOR_OPPONENT_ID, action.player || 0, this_1.getMetaValue(action.opponentOf || action.player, action.generatedBy));
                             break;
                         }
                         case const_1.SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE: {
@@ -2143,23 +2159,23 @@ var State = /** @class */ (function () {
                             break;
                         }
                         case const_1.SELECTOR_MAGI_OF_REGION: {
-                            var ownMagi = this_1.useSelector(const_1.SELECTOR_OWN_MAGI, action.player, null);
-                            var enemyMagi = this_1.useSelector(const_1.SELECTOR_ENEMY_MAGI, action.player, null);
+                            var ownMagi = this_1.useSelector(const_1.SELECTOR_OWN_MAGI, action.player || 0);
+                            var enemyMagi = this_1.useSelector(const_1.SELECTOR_ENEMY_MAGI, action.player || 0);
                             result = __spreadArray(__spreadArray([], (ownMagi instanceof Array ? ownMagi : []), true), (enemyMagi instanceof Array ? enemyMagi : []), true).filter(function (magi) { return _this.modifyByStaticAbilities(magi, const_1.PROPERTY_REGION) === action.region; });
                             break;
                         }
                         case const_1.SELECTOR_MAGI_NOT_OF_REGION: {
-                            var ownMagi = this_1.useSelector(const_1.SELECTOR_OWN_MAGI, action.player, null);
-                            var enemyMagi = this_1.useSelector(const_1.SELECTOR_ENEMY_MAGI, action.player, null);
+                            var ownMagi = this_1.useSelector(const_1.SELECTOR_OWN_MAGI, action.player || 0);
+                            var enemyMagi = this_1.useSelector(const_1.SELECTOR_ENEMY_MAGI, action.player || 0);
                             result = __spreadArray(__spreadArray([], (ownMagi instanceof Array ? ownMagi : []), true), (enemyMagi instanceof Array ? enemyMagi : []), true).filter(function (magi) { return _this.modifyByStaticAbilities(magi, const_1.PROPERTY_REGION) != action.region; });
                             break;
                         }
                         case const_1.SELECTOR_STATUS: {
-                            result = this_1.useSelector(action.selector, action.player, action.status);
+                            result = this_1.useSelector(const_1.SELECTOR_STATUS, null, action.status);
                             break;
                         }
                         case const_1.SELECTOR_CREATURES_WITHOUT_STATUS: {
-                            result = this_1.useSelector(action.selector, action.player, action.status);
+                            result = this_1.useSelector(const_1.SELECTOR_CREATURES_WITHOUT_STATUS, null, action.status);
                             break;
                         }
                         // This selector is special
@@ -2207,7 +2223,8 @@ var State = /** @class */ (function () {
                             break;
                         }
                         default: {
-                            result = this_1.useSelector(action.selector, action.player, null);
+                            // @ts-ignore
+                            result = this_1.useSelector(action.selector, action.player);
                         }
                     }
                     var variable = action.variable || 'selected';
@@ -2259,6 +2276,9 @@ var State = /** @class */ (function () {
                     var castCard = castCards ? (castCards.length ? castCards[0] : castCards) : null;
                     var player_1 = ('payload' in action) ? action.payload.player : action.player;
                     var cardItself_1 = ('payload' in action) ? action.payload.card : castCard;
+                    if (!cardItself_1) {
+                        throw new Error('No card itself found');
+                    }
                     var playerHand = this_1.getZone(const_1.ZONE_TYPE_HAND, player_1);
                     var cardInHand = playerHand.containsId((cardItself_1 === null || cardItself_1 === void 0 ? void 0 : cardItself_1.id) || '');
                     // baseCard is "abstract" card, CardInPlay is concrete instance
