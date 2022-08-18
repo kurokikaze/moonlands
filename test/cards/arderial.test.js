@@ -700,7 +700,6 @@ describe('Epik', () => {
 			step: STEP_PRS_FIRST,
 			activePlayer: ACTIVE_PLAYER,
 		});
-
 		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
 		gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).add([lavaBalamant, lavaArboll, balamantPup, eclipse]);
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
@@ -994,6 +993,7 @@ describe('Updraft', () => {
 			step: STEP_PRS_FIRST,
 			activePlayer: ACTIVE_PLAYER,
 		});
+
 		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([updraft]);
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 

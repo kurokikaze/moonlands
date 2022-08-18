@@ -1,6 +1,6 @@
 {
   "name": "moonlands",
-  "version": "v0.10.6",
+  "version": "v0.11.1",
   "description": "Magi-Nation Duel engine",
   "type": "module",
   "repository": {
@@ -23,11 +23,11 @@
   "author": "kurokikaze@yandex.ru",
   "license": "MIT",
   "devDependencies": {
+    "babel-jest": "^26.3.0",
     "eslint": "^6.8.0",
     "eslint-plugin-import": "^2.22.0",
     "jest": "^24.9.0",
-    "ts-jest": "^26.4.4",
-    "babel-jest": "^26.3.0"
+    "ts-jest": "^26.4.4"
   },
   "dependencies": {
     "@babel/preset-env": "^7.11.5",

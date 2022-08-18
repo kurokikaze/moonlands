@@ -19,7 +19,6 @@ function clone(item) {
     });
     if (typeof result == 'undefined') {
         if (Object.prototype.toString.call(item) === '[object Array]') {
-            console.log("Cloning array");
             result = [];
             item.forEach(function (child, index) {
                 result[index] = clone(child);
@@ -31,25 +30,20 @@ function clone(item) {
                 result = item.cloneNode(true);
             }
             else if (!item.prototype) { // check that this is a literal
-                console.log("Cloning literal");
-                console.log("Is it a zone? ".concat(item instanceof Zone_1.default));
                 if (item instanceof Date) {
                     result = new Date(item);
                 }
                 else if (item instanceof Zone_1.default) {
-                    console.log("Cloning zone ".concat(item.name));
                     result = new Zone_1.default(item.name, item.type, item.player, item.ordered);
                     result.add(item.cards.map(clone));
                 }
                 else if (item instanceof CardInGame_1.default) {
-                    console.log("Cloning card in game ".concat(item.card.name));
                     result = new CardInGame_1.default((0, cards_1.byName)(item.card.name), item.owner);
                     result.id = item.id;
                     result.modifiedCard = item.modifiedCard;
                     result.data = clone(item.data);
                 }
                 else {
-                    console.log("Cloning object literal");
                     // it is an object literal
                     result = {};
                     for (var i in item) {
@@ -58,7 +52,6 @@ function clone(item) {
                 }
             }
             else {
-                console.log("Cloning unknown type");
                 // depending what you would like here,
                 // just keep the reference, or create new object
                 // if (false && item.constructor) {

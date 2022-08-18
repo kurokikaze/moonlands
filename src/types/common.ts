@@ -168,10 +168,10 @@ export type StatusType = typeof STATUS_BURROWED;
 
 export type ConditionType = {
     objectOne: string,
-    propertyOne: PropertyType;
+    propertyOne: PropertyType | null;
     comparator: '<' | '=' | '>' | '<=' | '>=' | '!=' | 'includes';
     objectTwo: string | number | boolean;
-    propertyTwo: PropertyType;
+    propertyTwo: PropertyType | null;
 }
 
 export type ExpirationType = typeof EXPIRATION_OPPONENT_TURNS |

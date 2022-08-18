@@ -5184,7 +5184,7 @@ describe('Protection', () => {
 });
 
 describe('Cloning the game state', () => {
-	it.only('Cloning', () => {
+	it('Cloning', () => {
 		const ACTIVE_PLAYER = 0;
 		const NON_ACTIVE_PLAYER = 2;
 

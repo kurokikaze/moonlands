@@ -26,7 +26,7 @@ export default class Zone {
 	_type: ZoneType;
 	ordered: boolean;
 	cards: CardInGame[];
-	constructor(name: string, type: ZoneType, player = null, ordered = false) {
+	constructor(name: string, type: ZoneType, player: number | null = null, ordered = false) {
 		this._name = name;
 		this._player = player;
 		this._type = type;

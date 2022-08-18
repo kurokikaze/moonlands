@@ -114,10 +114,7 @@ export type EffectTypeType =
 	typeof EFFECT_TYPE_MAGI_FLIPPED |
 	typeof EFFECT_TYPE_START_STEP;
 
-type EffectTypeStillInUse = typeof EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY |
-	typeof EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY |
-	typeof EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY |
-	typeof EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY |
+type EffectTypeStillInUse = typeof EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY |
 	typeof EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY |
 	typeof EFFECT_TYPE_DISCARD_CARDS_FROM_HAND |
 	typeof EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE;
@@ -391,12 +388,14 @@ type DiscardCreatureOrRelicFromPlay = ActionEffect & {
 type DefeatMagiEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_DEFEAT_MAGI;
 	target: CardInGame;
+  player: number;
 }
 
-type MagiIsDefeatedEffect = ActionEffect & {
+export type MagiIsDefeatedEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_MAGI_IS_DEFEATED;
 	source: CardInGame | null;
 	target: CardInGame;
+  player: number;
 }
 
 type CreateContinuousEffect = ActionEffect & {
@@ -425,6 +424,23 @@ type DistributeDamageEffect = ActionEffect & {
 type DrawNCardsEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_DRAW_N_CARDS;
 	numberOfCards: number | string;
+}
+
+export type DiscardCreatureFromPlayEffect = ActionEffect & {
+  effectType: typeof EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY;
+  target: CardInGame | string;
+  player: number;
+}
+
+type DiscardRelicFromPlayEffect = ActionEffect & {
+  effectType: typeof EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY;
+  target: CardInGame | string;
+  player: number;
+}
+
+type ReturnCreatureReturningEnergyEffect = ActionEffect & {
+  effectType: typeof EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY;
+  target: string | CardInGame;
 }
 
 export type EffectType = ActionEffect & {
@@ -478,4 +494,7 @@ export type EffectType = ActionEffect & {
 	DefeatMagiEffect |
 	RearrangeEnergyEffect |
 	DistributeEnergyEffect |
-	DistributeDamageEffect;
+	DistributeDamageEffect |
+  DiscardRelicFromPlayEffect |
+  ReturnCreatureReturningEnergyEffect |
+  DiscardCreatureFromPlayEffect;

@@ -367,7 +367,6 @@ var State = /** @class */ (function () {
         return this.winner !== false;
     };
     State.prototype.clone = function () {
-        console.log('Cloning');
         var newObject = new State((0, clone_1.default)(this.state));
         newObject.winner = this.winner;
         newObject.rollDebugValue = this.rollDebugValue;
@@ -756,10 +755,11 @@ var State = /** @class */ (function () {
     };
     State.prototype.getMetaValue = function (value, spellId) {
         if (typeof value == 'string' &&
-            value[0] == '$') {
+            value[0] == '$' &&
+            spellId) {
             var variableName = value.slice(1);
             var spellMetaData = this.getSpellMetadata(spellId);
-            return Object.prototype.hasOwnProperty.call(spellMetaData, variableName) ? spellMetaData[variableName] : null;
+            return (variableName in spellMetaData) ? spellMetaData[variableName] : null;
         }
         else {
             return value;
@@ -822,7 +822,7 @@ var State = /** @class */ (function () {
             case const_1.SELECTOR_OWN_SPELLS_IN_HAND:
                 return this.getZone(const_1.ZONE_TYPE_HAND, player).cards.filter(function (card) { return card.card.type == const_1.TYPE_SPELL; });
             case const_1.SELECTOR_ENEMY_MAGI:
-                return this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, this.getOpponent(player)).cards;
+                return this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, this.getOpponent(player || 0)).cards;
             case const_1.SELECTOR_OWN_CREATURES:
                 return this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.filter(function (card) { return _this.modifyByStaticAbilities(card, const_1.PROPERTY_CONTROLLER) == player && card.card.type == const_1.TYPE_CREATURE; });
             case const_1.SELECTOR_ENEMY_CREATURES:
@@ -962,6 +962,7 @@ var State = /** @class */ (function () {
         return true;
     };
     State.prototype.isCardAffectedByStaticAbility = function (card, staticAbility) {
+        var _a, _b;
         switch (staticAbility.selector) {
             case const_1.SELECTOR_ID: {
                 return card.id === staticAbility.selectorParameter;
@@ -1001,7 +1002,7 @@ var State = /** @class */ (function () {
             case const_1.SELECTOR_OWN_MAGI: {
                 return card.card.type === const_1.TYPE_MAGI &&
                     this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, staticAbility.player).cards.length === 1 &&
-                    this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, staticAbility.player).card.id === card.id;
+                    ((_b = (_a = this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, staticAbility.player)) === null || _a === void 0 ? void 0 : _a.card) === null || _b === void 0 ? void 0 : _b.id) === card.id;
             }
             case const_1.SELECTOR_STATUS: {
                 return this.getByProperty(card, const_1.PROPERTY_STATUS, staticAbility.selectorParameter);
@@ -1056,7 +1057,7 @@ var State = /** @class */ (function () {
         ];
         // gathering static abilities from the field, adding players Magi to them
         var allZonesCards = __spreadArray(__spreadArray(__spreadArray([], this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards, true), this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE).cards, true), this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO).cards, true);
-        var continuousStaticAbilities = this.state.continuousEffects.map(function (effect) { return effect.staticAbilities.map(function (a) { return (__assign(__assign({}, a), { player: effect.player })); }) || []; }).flat();
+        var continuousStaticAbilities = this.state.continuousEffects.map(function (effect) { var _a; return ((_a = effect.staticAbilities) === null || _a === void 0 ? void 0 : _a.map(function (a) { return (__assign(__assign({}, a), { player: effect.player })); })) || []; }).flat();
         var propertyLayers = (_a = {},
             _a[const_1.PROPERTY_CONTROLLER] = 0,
             _a[const_1.PROPERTY_COST] = 1,
@@ -1189,7 +1190,7 @@ var State = /** @class */ (function () {
                 return function (card) { return card.card.type === restrictionValue; };
             case const_1.RESTRICTION_PLAYABLE:
                 return function (card) {
-                    var magi = _this.useSelector(const_1.SELECTOR_OWN_MAGI, card.owner, null)[0];
+                    var magi = _this.useSelector(const_1.SELECTOR_OWN_MAGI, card.owner)[0];
                     var cardCost = _this.calculateTotalCost(card);
                     return magi.data.energy >= cardCost;
                 };
@@ -1197,8 +1198,8 @@ var State = /** @class */ (function () {
                 return function (card) {
                     if (card.card.type !== const_1.TYPE_MAGI)
                         return false;
-                    var creatures = _this.useSelector(const_1.SELECTOR_OWN_CREATURES, card.owner, null);
-                    return (creatures instanceof Array && creatures.length === 0);
+                    var creatures = _this.useSelector(const_1.SELECTOR_OWN_CREATURES, card.owner);
+                    return (creatures && creatures instanceof Array && creatures.length === 0);
                 };
             case const_1.RESTRICTION_REGION:
                 return function (card) { return card.card.region === restrictionValue; };
@@ -1483,16 +1484,17 @@ var State = /** @class */ (function () {
         return result;
     };
     State.prototype.calculateTotalCost = function (card) {
-        var activeMagiSelected = this.useSelector(const_1.SELECTOR_OWN_MAGI, card.owner, null);
+        var activeMagiSelected = this.useSelector(const_1.SELECTOR_OWN_MAGI, card.owner);
         if (activeMagiSelected instanceof Array && activeMagiSelected.length) {
             var activeMagi = activeMagiSelected[0];
             var baseCost = this.modifyByStaticAbilities(card, const_1.PROPERTY_COST);
             var regionPenalty = (activeMagi.card.region == card.card.region || card.card.region == const_1.REGION_UNIVERSAL) ? 0 : 1;
             return baseCost + regionPenalty;
         }
-        return null;
+        return 0;
     };
     State.prototype.getAvailableCards = function (player, topMagi) {
+        var _a, _b;
         var deckCards = this.getZone(const_1.ZONE_TYPE_DECK, player).cards.map(function (_a) {
             var card = _a.card;
             return card.name;
@@ -1502,7 +1504,7 @@ var State = /** @class */ (function () {
             return card.name;
         });
         var searchableCards = __spreadArray(__spreadArray([], deckCards, true), discardCards, true);
-        var availableCards = topMagi.card.data.startingCards.filter(function (card) { return searchableCards.includes(card); });
+        var availableCards = ((_b = (_a = topMagi.card.data) === null || _a === void 0 ? void 0 : _a.startingCards) === null || _b === void 0 ? void 0 : _b.filter(function (card) { return searchableCards.includes(card); })) || [];
         return availableCards;
     };
     State.prototype.checkPrompts = function (source, preparedActions, isPower, powerCost) {
@@ -1638,12 +1640,13 @@ var State = /** @class */ (function () {
     };
     State.prototype.update = function (initialAction) {
         var _this = this;
+        var _a, _b, _c, _d, _e, _f, _g, _h;
         if (this.hasWinner()) {
             return false;
         }
         this.addActions(initialAction);
         var _loop_1 = function () {
-            var _a;
+            var _j;
             var rawAction = this_1.getNextAction();
             var replacedActions = this_1.replaceByReplacementEffect(rawAction);
             var action = replacedActions[0];
@@ -1938,15 +1941,15 @@ var State = /** @class */ (function () {
                         var fallbackActions = this_1.state.fallbackActions || [];
                         var savedActions = this_1.state.savedActions || [];
                         var actions = action.useEffect ? __spreadArray(__spreadArray([], mayEffectActions, true), savedActions, true) : __spreadArray(__spreadArray([], fallbackActions, true), savedActions, true);
-                        this_1.state = __assign(__assign({}, this_1.state), { actions: actions, savedActions: [], mayEffectActions: [], fallbackActions: [], prompt: false, promptType: null, promptMessage: null, promptGeneratedBy: null, promptVariable: null, promptParams: {}, spellMetaData: __assign({}, this_1.state.spellMetaData) });
+                        this_1.state = __assign(__assign({}, this_1.state), { actions: actions, savedActions: [], mayEffectActions: [], fallbackActions: [], prompt: false, promptType: null, promptMessage: undefined, promptGeneratedBy: undefined, promptVariable: undefined, promptParams: {}, spellMetaData: __assign({}, this_1.state.spellMetaData) });
                     }
                     else {
-                        var generatedBy = action.generatedBy || this_1.state.promptGeneratedBy;
+                        var generatedBy = action.generatedBy || this_1.state.promptGeneratedBy || (0, nanoid_1.default)();
                         var variable = action.variable || this_1.state.promptVariable;
                         var currentActionMetaData = this_1.state.spellMetaData[generatedBy] || {};
                         switch (this_1.state.promptType) {
                             case const_1.PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
-                                if ('cards' in action) {
+                                if ('cards' in action && action.cards) {
                                     if (this_1.state.promptParams.numberOfCards !== action.cards.length) {
                                         return { value: false };
                                     }
@@ -1964,8 +1967,9 @@ var State = /** @class */ (function () {
                                 break;
                             }
                             case const_1.PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
-                                if ('cards' in action) {
-                                    if (this_1.state.promptParams.numberOfCards < action.cards.length) {
+                                if ('cards' in action && action.cards) {
+                                    var expectedNumber = ((_b = (_a = this_1.state) === null || _a === void 0 ? void 0 : _a.promptParams) === null || _b === void 0 ? void 0 : _b.numberOfCards) || 0;
+                                    if (action.cards.length > expectedNumber) {
                                         return { value: false };
                                     }
                                     if (this_1.state.promptParams.restrictions) {
@@ -1987,8 +1991,8 @@ var State = /** @class */ (function () {
                                 }
                                 break;
                             case const_1.PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE:
-                                if ('target' in action) {
-                                    if (this_1.state.promptParams.source.id === action.target.id) {
+                                if ('target' in action && ((_d = (_c = this_1.state) === null || _c === void 0 ? void 0 : _c.promptParams) === null || _d === void 0 ? void 0 : _d.source)) {
+                                    if (this_1.state.promptParams.source.id === ((_e = action.target) === null || _e === void 0 ? void 0 : _e.id)) {
                                         throw new Error('Got forbidden target on prompt');
                                     }
                                     currentActionMetaData[variable || 'target'] = action.target;
@@ -1996,7 +2000,7 @@ var State = /** @class */ (function () {
                                 break;
                             case const_1.PROMPT_TYPE_RELIC: {
                                 if ('target' in action) {
-                                    if (action.target.card.type !== const_1.TYPE_RELIC) {
+                                    if (((_f = action.target) === null || _f === void 0 ? void 0 : _f.card.type) !== const_1.TYPE_RELIC) {
                                         throw new Error('Got forbidden target on prompt');
                                     }
                                     currentActionMetaData[variable || 'target'] = action.target;
@@ -2004,8 +2008,8 @@ var State = /** @class */ (function () {
                                 break;
                             }
                             case const_1.PROMPT_TYPE_OWN_SINGLE_CREATURE: {
-                                if ('target' in action) {
-                                    if (this_1.state.promptPlayer !== action.target.data.controller) {
+                                if ('target' in action && action.target) {
+                                    if (this_1.state.promptPlayer !== ((_g = action.target) === null || _g === void 0 ? void 0 : _g.data.controller)) {
                                         throw new Error('Not-controlled creature supplied to Own Creatures prompt');
                                     }
                                     currentActionMetaData[variable || 'target'] = action.target;
@@ -2013,29 +2017,29 @@ var State = /** @class */ (function () {
                                 break;
                             }
                             case const_1.PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-                                if ('target' in action) {
+                                if ('target' in action && action.target) {
                                     currentActionMetaData[variable || 'target'] = action.target;
                                 }
                                 break;
                             }
                             case const_1.PROMPT_TYPE_MAGI_WITHOUT_CREATURES: {
-                                if ('target' in action && action.target.card.type === const_1.TYPE_MAGI && this_1.useSelector(const_1.SELECTOR_CREATURES_OF_PLAYER, action.target.data.controller)) {
+                                if ('target' in action && ((_h = action.target) === null || _h === void 0 ? void 0 : _h.card.type) === const_1.TYPE_MAGI && this_1.useSelector(const_1.SELECTOR_CREATURES_OF_PLAYER, action.target.data.controller)) {
                                     currentActionMetaData[variable || 'target'] = action.target;
                                     break;
                                 }
                             }
                             case const_1.PROMPT_TYPE_SINGLE_CREATURE:
-                                if ('target' in action) {
+                                if ('target' in action && action.target) {
                                     currentActionMetaData[variable || 'target'] = action.target;
                                 }
                                 break;
                             case const_1.PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI:
-                                if ('target' in action) {
+                                if ('target' in action && action.target) {
                                     currentActionMetaData[variable || 'target'] = action.target;
                                 }
                                 break;
                             case const_1.PROMPT_TYPE_SINGLE_MAGI:
-                                if ('target' in action) {
+                                if ('target' in action && action.target) {
                                     currentActionMetaData[variable || 'targetMagi'] = action.target;
                                 }
                                 break;
@@ -2045,12 +2049,12 @@ var State = /** @class */ (function () {
                                 }
                                 break;
                             case const_1.PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES:
-                                if ('energyOnCreatures' in action) {
+                                if ('energyOnCreatures' in action && action.energyOnCreatures) {
                                     currentActionMetaData[variable || 'energyOnCreatures'] = action.energyOnCreatures || [];
                                 }
                                 break;
                             case const_1.PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
-                                if ('energyOnCreatures' in action) {
+                                if ('energyOnCreatures' in action && action.energyOnCreatures) {
                                     var totalEnergy = Object.values(action.energyOnCreatures).reduce(function (a, b) { return a + b; }, 0);
                                     if (totalEnergy === this_1.state.promptParams.amount) {
                                         currentActionMetaData[variable || 'energyOnCreatures'] = action.energyOnCreatures || [];
@@ -2083,7 +2087,7 @@ var State = /** @class */ (function () {
                             }
                         }
                         var actions = this_1.state.savedActions || [];
-                        this_1.state = __assign(__assign({}, this_1.state), { actions: actions, savedActions: [], prompt: false, promptType: null, promptMessage: null, promptGeneratedBy: null, promptVariable: null, promptParams: {}, spellMetaData: __assign(__assign({}, this_1.state.spellMetaData), (_a = {}, _a[generatedBy] = currentActionMetaData, _a)) });
+                        this_1.state = __assign(__assign({}, this_1.state), { actions: actions, savedActions: [], prompt: false, promptType: null, promptMessage: undefined, promptGeneratedBy: undefined, promptVariable: undefined, promptParams: {}, spellMetaData: __assign(__assign({}, this_1.state.spellMetaData), (_j = {}, _j[generatedBy] = currentActionMetaData, _j)) });
                     }
                     break;
                 }
@@ -2115,22 +2119,22 @@ var State = /** @class */ (function () {
                             break;
                         }
                         case const_1.SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE: {
-                            result = this_1.useSelector(const_1.SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, action.player, null);
+                            result = this_1.useSelector(const_1.SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, action.player || 0);
                             break;
                         }
                         case const_1.SELECTOR_CREATURES_AND_MAGI: {
-                            var ownMagi = this_1.useSelector(const_1.SELECTOR_OWN_MAGI, action.player, null);
-                            var enemyMagi = this_1.useSelector(const_1.SELECTOR_ENEMY_MAGI, action.player, null);
-                            var creatures = this_1.useSelector(const_1.SELECTOR_CREATURES, null, null);
+                            var ownMagi = this_1.useSelector(const_1.SELECTOR_OWN_MAGI, action.player || 0);
+                            var enemyMagi = this_1.useSelector(const_1.SELECTOR_ENEMY_MAGI, action.player || 0);
+                            var creatures = this_1.useSelector(const_1.SELECTOR_CREATURES, null);
                             result = __spreadArray(__spreadArray(__spreadArray([], (ownMagi instanceof Array ? ownMagi : []), true), (enemyMagi instanceof Array ? enemyMagi : []), true), (creatures instanceof Array ? creatures : []), true);
                             break;
                         }
                         case const_1.SELECTOR_CREATURES_OF_REGION: {
-                            result = this_1.useSelector(const_1.SELECTOR_CREATURES_OF_REGION, action.player, action.region);
+                            result = this_1.useSelector(const_1.SELECTOR_CREATURES_OF_REGION, action.player || 0, action.region);
                             break;
                         }
                         case const_1.SELECTOR_CREATURES_NOT_OF_REGION: {
-                            result = this_1.useSelector(const_1.SELECTOR_CREATURES_NOT_OF_REGION, action.player, action.region);
+                            result = this_1.useSelector(const_1.SELECTOR_CREATURES_NOT_OF_REGION, action.player || 0, action.region);
                             break;
                         }
                         case const_1.SELECTOR_OTHER_CREATURES_OF_TYPE: {
@@ -2256,10 +2260,10 @@ var State = /** @class */ (function () {
                     var player_1 = ('payload' in action) ? action.payload.player : action.player;
                     var cardItself_1 = ('payload' in action) ? action.payload.card : castCard;
                     var playerHand = this_1.getZone(const_1.ZONE_TYPE_HAND, player_1);
-                    var cardInHand = playerHand.containsId(cardItself_1.id);
-                    if (cardInHand) {
-                        // baseCard is "abstract" card, CardInPlay is concrete instance
-                        var baseCard_1 = ('payload' in action) ? action.payload.card.card : castCard.card;
+                    var cardInHand = playerHand.containsId((cardItself_1 === null || cardItself_1 === void 0 ? void 0 : cardItself_1.id) || '');
+                    // baseCard is "abstract" card, CardInPlay is concrete instance
+                    var baseCard_1 = ('payload' in action) ? action.payload.card.card : castCard === null || castCard === void 0 ? void 0 : castCard.card;
+                    if (cardInHand && baseCard_1) {
                         var currentPriority = this_1.getCurrentPriority();
                         var cardType = baseCard_1.type;
                         if ((cardType == const_1.TYPE_CREATURE && currentPriority == const_1.PRIORITY_CREATURES) ||
@@ -2267,6 +2271,9 @@ var State = /** @class */ (function () {
                             (cardType == const_1.TYPE_SPELL && currentPriority == const_1.PRIORITY_PRS) ||
                             action.forcePriority) {
                             var activeMagi = this_1.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, player_1).card;
+                            if (!activeMagi) {
+                                throw new Error('Trying to play a card without Magi');
+                            }
                             var totalCost = this_1.calculateTotalCost(cardItself_1);
                             switch (cardType) {
                                 case const_1.TYPE_CREATURE: {
@@ -2731,7 +2738,7 @@ var State = /** @class */ (function () {
                         case const_1.EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY: {
                             var card = this_1.getMetaValue(action.target, action.generatedBy);
                             if (this_1.isCardAffectedByEffect(card, action)) {
-                                var ownersMagi = this_1.useSelector(const_1.SELECTOR_OWN_MAGI, card.owner, null)[0];
+                                var ownersMagi = this_1.useSelector(const_1.SELECTOR_OWN_MAGI, card.owner)[0];
                                 this_1.transformIntoActions({
                                     type: const_1.ACTION_GET_PROPERTY_VALUE,
                                     property: const_1.PROPERTY_ENERGY_COUNT,
@@ -3277,7 +3284,7 @@ var State = /** @class */ (function () {
                         case const_1.EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI: {
                             oneOrSeveral(this_1.getMetaValue(action.target, action.generatedBy), function (target) {
                                 target.removeEnergy(_this.getMetaValue(action.amount, action.generatedBy));
-                                var hisCreatures = _this.useSelector(const_1.SELECTOR_OWN_CREATURES, target.data.controller, null);
+                                // const hisCreatures = this.useSelector(SELECTOR_OWN_CREATURES, target.data.controller, null);
                                 /* if (target.data.energy === 0 && hisCreatures instanceof Array && hisCreatures.length === 0) {
                                     this.transformIntoActions({
                                         type: ACTION_EFFECT,
@@ -3298,6 +3305,7 @@ var State = /** @class */ (function () {
                                     effectType: const_1.EFFECT_TYPE_MAGI_IS_DEFEATED,
                                     target: target,
                                     source: null,
+                                    player: action.player,
                                     generatedBy: action.generatedBy,
                                 });
                             });
@@ -3460,6 +3468,7 @@ var State = /** @class */ (function () {
                                         effectType: const_1.EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
                                         target: target,
                                         generatedBy: action.generatedBy,
+                                        player: action.player || 0,
                                     });
                                 }
                                 else if (targetType === const_1.TYPE_RELIC) {
@@ -3468,6 +3477,7 @@ var State = /** @class */ (function () {
                                         effectType: const_1.EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
                                         target: target,
                                         generatedBy: action.generatedBy,
+                                        player: action.player || 0,
                                     });
                                 }
                             });
@@ -3545,7 +3555,7 @@ var State = /** @class */ (function () {
                         }
                         case const_1.EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES: {
                             var energyArrangement_1 = this_1.getMetaValue(action.energyOnCreatures, action.generatedBy);
-                            var ownCreatures = this_1.useSelector(const_1.SELECTOR_OWN_CREATURES, action.player);
+                            var ownCreatures = this_1.useSelector(const_1.SELECTOR_OWN_CREATURES, action.player || 0);
                             var totalEnergyOnCreatures = (ownCreatures instanceof Array) ? ownCreatures.map(function (card) { return card.data.energy; }).reduce(function (a, b) { return a + b; }, 0) : 0;
                             var newEnergyTotal = Object.values(energyArrangement_1).reduce(function (a, b) { return a + b; }, 0);
                             if (newEnergyTotal === totalEnergyOnCreatures) {
@@ -3588,14 +3598,16 @@ var State = /** @class */ (function () {
                             this_1.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.forEach(function (card) {
                                 if (card.card.type === const_1.TYPE_CREATURE && card.id in damageArrangement_1) {
                                     var damageAmount = damageArrangement_1[card.id];
-                                    if (damageAmount > 0) {
+                                    var source = action.source;
+                                    if (damageAmount > 0 && source) {
                                         _this.transformIntoActions({
                                             type: const_1.ACTION_EFFECT,
                                             effectType: const_1.EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
-                                            source: action.source,
+                                            source: source,
                                             target: card,
                                             amount: damageAmount,
                                             generatedBy: action.generatedBy,
+                                            player: action.player,
                                         });
                                     }
                                 }
@@ -3619,7 +3631,10 @@ var State = /** @class */ (function () {
             this.players.forEach(function (player) {
                 if (_this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, player).length === 1) {
                     var magi = _this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, player).card;
-                    var creatures = _this.useSelector(const_1.SELECTOR_OWN_CREATURES, player, null);
+                    if (!magi) {
+                        throw new Error('Trying to defeat missing Magi');
+                    }
+                    var creatures = _this.useSelector(const_1.SELECTOR_OWN_CREATURES, player);
                     if (magi.data.energy === 0 && creatures instanceof Array && creatures.length === 0) {
                         sbActions_1.push({
                             type: const_1.ACTION_EFFECT,

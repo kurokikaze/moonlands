@@ -33,6 +33,7 @@ import {
     PROTECTION_TYPE_GENERAL,
 
     COST_X,
+    STATUS_BURROWED,
 } from '../const';
 
 import { ResolvePromptType } from './resolvePrompt';
@@ -100,7 +101,7 @@ export type StaticAbilityType = {
     selector: SelectorTypeType,
     selectorParameter?: string | number, 
     property: PropertyType,
-    subProperty?: string;
+    subProperty?: string | typeof STATUS_BURROWED;
 	modifier: {
 		operator: OperatorType,
 		operandOne: number | boolean | Record<string, any>,

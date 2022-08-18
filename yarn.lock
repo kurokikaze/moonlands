@@ -1139,7 +1139,7 @@
 
 "@types/nanoid@^3.0.0":
   version "3.0.0"
-  resolved "https://registry.npmjs.org/@types/nanoid/-/nanoid-3.0.0.tgz"
+  resolved "https://registry.yarnpkg.com/@types/nanoid/-/nanoid-3.0.0.tgz#c757b20f343f3a1dd76e80a9a431b6290fc20f35"
   integrity sha512-UXitWSmXCwhDmAKe7D3hNQtQaHeHt5L8LO1CB8GF8jlYVzOv5cBWDNqiJ+oPEWrWei3i3dkZtHY/bUtd0R/uOQ==
   dependencies:
     nanoid "*"
