@@ -25,7 +25,9 @@ const showCard = (card: CardInGame | string) => (card instanceof CardInGame) ? `
 
 export const showAction = (action: AnyEffectType) => {
 	const fields = Object.keys(action).filter(f => f != 'type').map(field => {
-		return `\t${field}: ${showCard(action[field])}`;
+    const card = action[field as keyof typeof action]
+    const cardToShow = (card instanceof Array) ? card[0] : card
+		return `\t${field}: ${showCard(cardToShow)}`;
 	});
 	console.log(`
 {
