@@ -64,12 +64,12 @@ export type CardData = {
     startingEnergy?: number;
     energize?: number;
     startingCards?: string[];
-	attacksPerTurn?: number;
+  	attacksPerTurn?: number;
     canAttackMagiDirectly?: boolean;
     canPackHunt?: boolean;
     powers?: PowerType[];
     protection?: ProtectionType;
-	staticAbilities?: StaticAbilityType[];
+  	staticAbilities?: StaticAbilityType[];
     effects?: AnyEffectType[];
     triggerEffects?: TriggerEffectType[];
     replacementEffects?: ReplacementEffectType[];
@@ -98,14 +98,14 @@ type PowerType = {
 export type StaticAbilityType = {
 	name: string,
 	text: string,
-    selector: SelectorTypeType,
-    selectorParameter?: string | number, 
-    property: PropertyType,
-    subProperty?: string | typeof STATUS_BURROWED;
-	modifier: {
-		operator: OperatorType,
-		operandOne: number | boolean | Record<string, any>,
-	},
+  selector: SelectorTypeType,
+  selectorParameter?: string | number, 
+  property: PropertyType,
+  subProperty?: string | typeof STATUS_BURROWED;
+  modifier: {
+    operator: OperatorType,
+    operandOne: number | boolean | Record<string, any> | ProtectionType,
+  },
 }
 
 export type FindType = {
@@ -130,7 +130,7 @@ export type ReplacementEffectType = {
     oncePerTurn?: boolean; 
 }
 
-type ReplacingEffectType = {
+export type ReplacingEffectType = {
     effectType: EffectTypeType;
     target?: string;
 }

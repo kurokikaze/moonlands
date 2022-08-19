@@ -237,8 +237,8 @@ import {showAction} from './logAction';
 import clone from './clone';
 
 import {byName} from './cards';
-import CardInGame, { ConvertedCard } from './classes/CardInGame';
-import Card, {CostType} from './classes/Card';
+import CardInGame, { ConvertedCard, InGameData } from './classes/CardInGame';
+import Card, {CostType, ModifiedCardType} from './classes/Card';
 import Zone from './classes/Zone';
 import { 
 	AnyEffectType,
@@ -264,9 +264,12 @@ import {
   ZoneType,
   Region,
   ProtectionType,
+  ReplacingEffectType,
+  CardData,
 } from './types';
-import { DiscardEnergyFromCreatureEffect } from './types/effect';
+import { DiscardEnergyFromCreatureEffect, EnhancedDelayedTriggerType, StartingEnergyOnCreatureEffect } from './types/effect';
 import { CardType, StatusType } from './types/common';
+import { PromptTypeMayAbility } from './types/prompt';
 
 const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
 	id: cardInGame.id,
@@ -357,6 +360,14 @@ type StepType = {
 	priority: PriorityType;
 	automatic: boolean;
 	effects?: ProtoEffectType[]
+}
+
+type CardWithModification = {
+  card: Card;
+  data: InGameData;
+  modifiedCard: ModifiedCardType;
+  id: string;
+  owner: number;
 }
 
 const steps: StepType[] = [
@@ -521,7 +532,7 @@ type StateShape = {
 	fallbackActions: AnyEffectType[]; // Actions to apply if we deny may effect replacement
 	continuousEffects: ContinuousEffectType[]; // Continuous effects created by cards
 	spellMetaData: Record<string, MetaDataRecord>;
-	delayedTriggers: Record<string, any>[];
+	delayedTriggers: EnhancedDelayedTriggerType[];
 }
 
 type DeckType = {
@@ -899,14 +910,14 @@ export class State {
 					) {
 						newLogEntry = {
 							type: LOG_ENTRY_TARGETING,
-							card: action.target.card.name,
+							card: action.target?.card?.name || 'unknown card',
 							player: action.player,
 						};
 					}
 					if (this.state.promptType === PROMPT_TYPE_NUMBER && 'number' in action) {
 						newLogEntry = {
 							type: LOG_ENTRY_NUMBER_CHOICE,
-							number: (typeof action.number === 'number') ? action.number : parseInt(action.number, 10),
+							number: (typeof action.number === 'number') ? action.number : parseInt(action.number || '0', 10),
 							player: action.player,
 						};
 					}
@@ -1049,7 +1060,7 @@ export class State {
 		this.state.actions.unshift(...args);
 	}
 
-	removeDelayedTrigger(triggerId: number) {
+	removeDelayedTrigger(triggerId: string) {
 		this.state.delayedTriggers = this.state.delayedTriggers.filter(({id}) => id != triggerId);
 	}
 
@@ -1219,21 +1230,21 @@ export class State {
     }
 	}
 
-  getByProperty(target: CardInGame, property: typeof PROPERTY_ABLE_TO_ATTACK): boolean
-  getByProperty(target: CardInGame, property: typeof PROPERTY_CAN_ATTACK_MAGI_DIRECTLY): boolean
-  getByProperty(target: CardInGame, property: typeof PROPERTY_CAN_BE_ATTACKED): boolean
-  getByProperty(target: CardInGame, property: typeof PROPERTY_ATTACKS_PER_TURN): number
-  getByProperty(target: CardInGame, property: typeof PROPERTY_ENERGIZE): number
-  getByProperty(target: CardInGame, property: typeof PROPERTY_ENERGY_COUNT): number
-  getByProperty(target: CardInGame, property: typeof PROPERTY_POWER_COST, subProperty: string): number
-  getByProperty(target: CardInGame, property: typeof PROPERTY_CONTROLLER): number
-  getByProperty(target: CardInGame, property: typeof PROPERTY_PROTECTION): ProtectionType[]
-  getByProperty(target: CardInGame, property: typeof PROPERTY_MAGI_NAME): string
-  getByProperty(target: CardInGame, property: typeof PROPERTY_TYPE): CardType
-  getByProperty(target: CardInGame, property: typeof PROPERTY_CREATURE_TYPES): string[]
-  getByProperty(target: CardInGame, property: typeof PROPERTY_COST): CostType
-  getByProperty(target: CardInGame, property: typeof PROPERTY_STATUS, subProperty: typeof STATUS_BURROWED): boolean
-	getByProperty(target: CardInGame, property: PropertyType, subProperty: null | typeof STATUS_BURROWED = null) {
+  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_ABLE_TO_ATTACK): boolean
+  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CAN_ATTACK_MAGI_DIRECTLY): boolean
+  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CAN_BE_ATTACKED): boolean
+  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_ATTACKS_PER_TURN): number
+  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_ENERGIZE): number
+  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_ENERGY_COUNT): number
+  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_POWER_COST, subProperty: string): number
+  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CONTROLLER): number
+  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_PROTECTION): ProtectionType | undefined
+  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_MAGI_NAME): string
+  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_TYPE): CardType
+  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CREATURE_TYPES): string[]
+  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_COST): CostType
+  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_STATUS, subProperty: typeof STATUS_BURROWED): boolean
+	getByProperty(target: CardInGame | CardWithModification, property: PropertyType, subProperty: null | typeof STATUS_BURROWED | string = null): any {
 		switch(property) {
 			case PROPERTY_ID:
 				return target.id;
@@ -1364,7 +1375,7 @@ export class State {
 		return true;
 	}
 
-	isCardAffectedByStaticAbility(card: CardInGame, staticAbility: EnrichedStaticAbilityType | GameStaticAbility) {
+	isCardAffectedByStaticAbility(card: CardInGame | CardWithModification, staticAbility: EnrichedStaticAbilityType | GameStaticAbility) {
 		switch (staticAbility.selector) {
 			case SELECTOR_ID: {
 				return card.id === staticAbility.selectorParameter;
@@ -1411,7 +1422,7 @@ export class State {
 		}
 	}
 
-	modifyByStaticAbilities(target: CardInGame, property: PropertyType, subProperty = null): any {
+	modifyByStaticAbilities(target: CardInGame, property: PropertyType, subProperty: string | null | undefined = null): any {
 		if (!target) {
 			return null;
 		}
@@ -1475,14 +1486,14 @@ export class State {
 			[],
 		);
 
-		const staticAbilities = [...gameStaticAbilities, ...zoneAbilities, ...continuousStaticAbilities].sort((a, b) => propertyLayers[a.property] - propertyLayers[b.property]);
+		const staticAbilities = [...gameStaticAbilities, ...zoneAbilities, ...continuousStaticAbilities].sort((a, b) => propertyLayers[a.property as keyof typeof propertyLayers] - propertyLayers[b.property as keyof typeof propertyLayers]);
 
-		let initialCardData = {
+		let initialCardData: CardWithModification = {
 			card: target.card,
 			modifiedCard: {
 				...target.card,
 				data: {
-					protection: null,
+					protection: undefined,
 					...target.card.data,
 					energyLossThreshold: 0,
 					ableToAttack: true,
@@ -1497,13 +1508,13 @@ export class State {
 	
 		// Okay, sooner or later this should be rewritten
 		// Here we should construct new CardInGame object containing new Card object (both with new values)
-		const modifiedCardData = staticAbilities.reduce(this.layeredDataReducer.bind(this), initialCardData);
+		const modifiedCardData: CardWithModification = staticAbilities.reduce<CardWithModification>(this.layeredDataReducer.bind(this), initialCardData);
 
 		// @ts-ignore
 		return this.getByProperty(modifiedCardData, property, subProperty);
 	}
 
-	layeredDataReducer(currentCard: CardInGame, staticAbility: EnrichedStaticAbilityType | GameStaticAbility) {
+  layeredDataReducer(currentCard: CardWithModification, staticAbility: EnrichedStaticAbilityType | GameStaticAbility): CardWithModification {
 		if (this.isCardAffectedByStaticAbility(currentCard, staticAbility)) {
 			switch (staticAbility.property) {
 				case PROPERTY_COST: {
@@ -1594,16 +1605,20 @@ export class State {
 
 					const resultValue = (operator === CALCULATION_SET) ? operandOne : initialValue;
 
-					return {
-						...currentCard,
-						modifiedCard: {
-							...currentCard.modifiedCard,
-							data: {
-								...currentCard.modifiedCard.data,
-								ableToAttack: resultValue,
-							},
-						},
-					};
+          if (typeof resultValue == 'boolean') {
+            return {
+              ...currentCard,
+              modifiedCard: {
+                ...currentCard.modifiedCard,
+                data: {
+                  ...currentCard.modifiedCard.data,
+                  ableToAttack: resultValue,
+                },
+              },
+            };
+          } else {
+            return {...currentCard}
+          }
 				}
 				case PROPERTY_CAN_BE_ATTACKED: {
 					const initialValue = this.getByProperty(currentCard, PROPERTY_CAN_BE_ATTACKED);
@@ -1611,29 +1626,39 @@ export class State {
 
 					const resultValue = (operator === CALCULATION_SET) ? operandOne : initialValue;
 
-					return {
-						...currentCard,
-						modifiedCard: {
-							...currentCard.modifiedCard,
-							data: {
-								...currentCard.modifiedCard.data,
-								canBeAttacked: resultValue,
-							},
-						},
-					};
+          if (typeof resultValue == 'boolean') {
+            return {
+              ...currentCard,
+              modifiedCard: {
+                ...currentCard.modifiedCard,
+                data: {
+                  ...currentCard.modifiedCard.data,
+                  canBeAttacked: resultValue,
+                },
+              },
+            };  
+          } else {
+            return {
+              ...currentCard,
+            };
+          }
 				}
 				case PROPERTY_CONTROLLER: {
 					const initialValue = this.getByProperty(currentCard, PROPERTY_CONTROLLER);
 					const {operator, operandOne} = staticAbility.modifier;
 					const resultValue = (operator === CALCULATION_SET) ? operandOne : initialValue;
 
-					return {
-						...currentCard,
-						data: {
-							...currentCard.modifiedCard.data,
-							controller: resultValue,
-						},
-					};
+          if (typeof resultValue == 'number') {
+            return {
+              ...currentCard,
+              data: {
+                ...currentCard.data,
+                controller: resultValue,
+              },
+            };
+          } else {
+            return {...currentCard}
+          }
 				}
 				case PROPERTY_STATUS: {
 					const initialValue = this.getByProperty(currentCard, PROPERTY_STATUS, staticAbility.subProperty as StatusType);
@@ -1641,37 +1666,47 @@ export class State {
 
 					const resultValue = (operator === CALCULATION_SET) ? operandOne : initialValue;
 
-					switch (staticAbility.subProperty) {
-						case STATUS_BURROWED: {
-							return {
-								...currentCard,
-								data: {
-									...currentCard.data,
-									burrowed: resultValue,
-								},
-							};
-						}
-						default: {
-							return currentCard;
-						}
-					}
+          if (typeof resultValue == 'boolean') {
+            switch (staticAbility.subProperty) {
+              case STATUS_BURROWED: {
+                return {
+                  ...currentCard,
+                  data: {
+                    ...currentCard.data,
+                    burrowed: resultValue,
+                  },
+                };
+              }
+              default: {
+                return currentCard;
+              }
+            }
+          } else {
+            return {...currentCard}
+          }
 				}
 				case PROPERTY_PROTECTION: {
 					const initialValue = this.getByProperty(currentCard, PROPERTY_PROTECTION);
 					const {operator, operandOne} = staticAbility.modifier;
 
-					const resultValue = (operator === CALCULATION_SET) ? operandOne : initialValue;
+					const resultValue = (operator === CALCULATION_SET) ? operandOne as ProtectionType[] : initialValue;
 
-					return {
-						...currentCard,
-						modifiedCard: {
- 							...currentCard.modifiedCard,
-							 data: {
-								...currentCard.modifiedCard.data,
-								protection: resultValue,
-							},
-						}
-					};
+          if (typeof resultValue == 'object' && 'from' in resultValue) {
+            return {
+              ...currentCard,
+              modifiedCard: {
+                ...currentCard.modifiedCard,
+                  data: {
+                  ...currentCard.modifiedCard.data,
+                  protection: resultValue,
+                },
+              }
+            };
+          } else {
+            return {
+              ...currentCard,
+            }
+          }
 				}
 				case PROPERTY_POWER_COST: {
 					if (currentCard.modifiedCard.data.powers) {
@@ -1802,27 +1837,27 @@ export class State {
 		}
 
 		type ReplacementEffectEnhanced = ReplacementEffectType & WithSelf;
-		const zoneReplacements: ReplacementEffectEnhanced[] = allZonesCards.reduce(
+		const zoneReplacements: ReplacementEffectEnhanced[] = allZonesCards.reduce<ReplacementEffectEnhanced[]>(
 			(acc, cardInPlay) => cardInPlay.card.data.replacementEffects ? [
 				...acc,
 				...cardInPlay.card.data.replacementEffects
-					.filter(effect => !effect.oncePerTurn || (effect.oncePerTurn && !cardInPlay.wasActionUsed(effect.name)))
+					.filter(effect => !effect.oncePerTurn || (effect.oncePerTurn && !cardInPlay.wasActionUsed(effect.name || 'unknown effect')))
 					.map(effect => ({...effect, self: cardInPlay})),
 			] : acc,
 			[],
 		);
 
-		let replacementFound = false;
+		let replacementFound: boolean = false;
 		let appliedReplacerId: string | null = null;
-		let appliedReplacerSelf = null;
-		let replaceWith = null;
-		let foundReplacer: ReplacementEffectEnhanced;
+		let appliedReplacerSelf: CardInGame | null = null;
+		let replaceWith: (ReplacingEffectType | EffectType | PromptType)[] | null = null;
+		let foundReplacer: ReplacementEffectEnhanced | null = null;
 
-		zoneReplacements.forEach(replacer => {
+    for (let replacer of zoneReplacements) {
 			const replacerId = replacer.self.id; // Not really, but will work for now
-            
-			if ('replacedBy' in action && action.replacedBy.includes(replacerId)) {
-				return false;
+
+			if ('replacedBy' in action && action.replacedBy?.includes(replacerId)) {
+				break;
 			}
 
 			if (this.matchAction(action, replacer.find, replacer.self)) {
@@ -1832,12 +1867,35 @@ export class State {
 				appliedReplacerId = replacerId;
 				replaceWith = (replacer.replaceWith instanceof Array) ? replacer.replaceWith : [replacer.replaceWith];
 			}
-		});
+    }
 
-		const previouslyReplacedBy = 'replacedBy' in action ? action.replacedBy : [];
+		const previouslyReplacedBy = ('replacedBy' in action && action.replacedBy) ? action.replacedBy : [];
 
-		if (replacementFound) {
-			const resultEffects = replaceWith.map((replacementEffect: AnyEffectType) => {
+		if (replacementFound && replaceWith) {
+
+			const resultEffects = appliedReplacerSelf ? replaceWith.map(((appliedReplacerSelf: CardInGame) => (replacementEffect: ReplacingEffectType | EffectType | PromptType) => {
+        if (!('type' in replacementEffect)) {
+          // @ts-ignore
+          const resultEffect: AnyEffectType = {
+            type: ACTION_EFFECT,
+            ...replacementEffect,
+            replacedBy: [
+              ...previouslyReplacedBy,
+              appliedReplacerId,
+            ],
+            generatedBy: action.generatedBy || nanoid(),
+            player: appliedReplacerSelf.data.controller,
+          }
+
+          Object.keys(replacementEffect)
+					.filter(key => !['type', 'effectType'].includes(key))
+					.forEach(key => {
+						const value = this.prepareMetaValue(replacementEffect[key as keyof typeof replacementEffect], action, appliedReplacerSelf, action.generatedBy);
+						resultEffect[key as keyof AnyEffectType] = value;
+					});
+
+          return resultEffect
+        }
 				let resultEffect = {
 					type: ACTION_EFFECT,
 					...replacementEffect,
@@ -1845,7 +1903,7 @@ export class State {
 						...previouslyReplacedBy,
 						appliedReplacerId,
 					],
-					generatedBy: action.generatedBy,
+					generatedBy: action.generatedBy || nanoid(),
 					player: appliedReplacerSelf.data.controller,
 				};
 	
@@ -1853,23 +1911,23 @@ export class State {
 				Object.keys(replacementEffect)
 					.filter(key => !['type', 'effectType'].includes(key))
 					.forEach(key => {
-						const value = this.prepareMetaValue(replacementEffect[key], action, appliedReplacerSelf, action.generatedBy);
-						resultEffect[key] = value;
+						const value = this.prepareMetaValue(replacementEffect[key as keyof typeof replacementEffect], action, appliedReplacerSelf, action.generatedBy);
+						resultEffect[key as keyof AnyEffectType] = value;
 					});
 
 				return resultEffect;
-			});
+			})(appliedReplacerSelf)) : [];
 
 			// If the replacer is one-time, set the action usage
-			if (foundReplacer.oncePerTurn && 'name' in foundReplacer) {
+			if (foundReplacer && foundReplacer.oncePerTurn && foundReplacer.name) {
 				appliedReplacerSelf.setActionUsed(foundReplacer.name);
 			}
 
-			if (foundReplacer.mayEffect) {
+			if (foundReplacer && foundReplacer.mayEffect) {
 				this.state.mayEffectActions = resultEffects;
 				this.state.fallbackActions = [{
 					...action,
-					replacedBy:	('replacedBy' in action) ? [...action.replacedBy, appliedReplacerId] : [appliedReplacerId],
+					replacedBy:	('replacedBy' in action && action.replacedBy) ? [...action.replacedBy, appliedReplacerId] : [appliedReplacerId],
 				}];
 
 				return [{
@@ -1883,7 +1941,7 @@ export class State {
 					},
 					generatedBy: appliedReplacerId,
 					player: appliedReplacerSelf.data.controller,
-				}];
+				} as PromptTypeMayAbility];
 			} else {
 				return resultEffects;
 			}
@@ -1958,7 +2016,9 @@ export class State {
 			...(this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO) || {cards: []}).cards,
 		];
 
-		const cardTriggerEffects = allZonesCards.reduce(
+		type TriggerTypeEnhanced = WithSelf & TriggerEffectType;
+
+		const cardTriggerEffects = allZonesCards.reduce<TriggerTypeEnhanced[]>(
 			(acc, cardInPlay) => cardInPlay.card.data.triggerEffects ? [
 				...acc,
 				...cardInPlay.card.data.triggerEffects.map(effect => ({...effect, self: cardInPlay})),
@@ -1970,10 +2030,8 @@ export class State {
 			self: CardInGame;
 		}
 
-		type TriggerTypeEnhanced = WithSelf & TriggerEffectType;
-
-		const continuousEffectTriggers = this.state.continuousEffects.map(effect => effect.triggerEffects.map(triggerEffect => ({...triggerEffect, id: effect.id})) || []).flat();
-		const triggerEffects: TriggerTypeEnhanced[] = [...cardTriggerEffects, ...this.state.delayedTriggers, ...continuousEffectTriggers];
+		// const continuousEffectTriggers = this.state.continuousEffects.map(effect => effect.triggerEffects.map(triggerEffect => ({...triggerEffect, id: effect.id})) || []).flat();
+		const triggerEffects: TriggerTypeEnhanced[] = [...cardTriggerEffects, ...this.state.delayedTriggers, /* ...continuousEffectTriggers*/];
 
 		triggerEffects.forEach(replacer => {
 			// @ts-ignore
@@ -2006,8 +2064,8 @@ export class State {
 					Object.keys(effect)
 						.filter(key => !['type', 'effectType'].includes(key))
 						.forEach(key => {
-							const value = this.prepareMetaValue(effect[key], action, replacer.self, action.generatedBy);
-							resultEffect[key] = value;
+							const value = this.prepareMetaValue(effect[key as keyof typeof effect], action, replacer.self, action.generatedBy || nanoid());
+							resultEffect[key as keyof typeof effect] = value;
 						});
                     
 					return resultEffect;
@@ -2389,7 +2447,9 @@ export class State {
 						const result = (multiTarget instanceof Array) ? multiTarget.length : 0;
 
 						const variable = action.variable || 'result';
-						this.setSpellMetaDataField(variable, result, action.generatedBy);
+            if (action.generatedBy) {
+						  this.setSpellMetaDataField(variable, result, action.generatedBy);
+            }
 					} else {
 						// Sometimes we can only pass here results of a selector.
 						// If so, work on first element of result.
@@ -2398,8 +2458,9 @@ export class State {
 						const modifiedResult = this.modifyByStaticAbilities(target, property);
 	
 						const variable = action.variable || 'result';
-						this.setSpellMetaDataField(variable, modifiedResult, action.generatedBy);
-	
+            if (action.generatedBy) {
+  						this.setSpellMetaDataField(variable, modifiedResult, action.generatedBy);
+            }
 					}
 					break;
 				}
@@ -2409,11 +2470,13 @@ export class State {
 					const result = this.performCalculation(action.operator, operandOne, operandTwo);
 
 					const variable = action.variable || 'result';
-					this.setSpellMetaDataField(variable, result, action.generatedBy);
+          if (action.generatedBy) {
+					  this.setSpellMetaDataField(variable, result, action.generatedBy);
+          }
 					break;
 				}
 				case ACTION_POWER: {
-					const powerCost = this.modifyByStaticAbilities(action.source, PROPERTY_POWER_COST, action.power.name);
+					const powerCost = this.modifyByStaticAbilities(action.source, PROPERTY_POWER_COST, action.power.name || '');
 
 					const payingCard = (action.source.card.type === TYPE_RELIC) ?
 						this.getZone(ZONE_TYPE_ACTIVE_MAGI, action.source.owner).card :
@@ -2581,7 +2644,7 @@ export class State {
 								promptParams = {
 									restrictions: restrictionsWithValues,
 								};
-							} else {
+							} else if (action.restriction) {
 								promptParams = {
                   restrictions: [
                     {
@@ -2606,27 +2669,39 @@ export class State {
 							break;
 						}
 						case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
-							promptParams = {
-								amount: this.getMetaValue(action.amount, action.generatedBy),
-								restrictions: [
-                  {
-                    type: action.restriction,
-                    value: this.getMetaValue(action.amount, action.generatedBy),
-                  },
-                ],
-							};
+              if (action.restriction) {
+                promptParams = {
+                  amount: this.getMetaValue(action.amount, action.generatedBy),
+                  restrictions: [
+                    {
+                      type: action.restriction,
+                      value: this.getMetaValue(action.amount, action.generatedBy),
+                    },
+                  ],
+                };
+              } else {
+                promptParams = {
+                  amount: this.getMetaValue(action.amount, action.generatedBy),
+                };
+              }
 							break;
 						}
 						case PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES: {
-							promptParams = {
-								amount: this.getMetaValue(action.amount, action.generatedBy),
-								restrictions: [
-                  {
-                    type: action.restriction,
-                    value: this.getMetaValue(action.amount, action.generatedBy),
-                  },
-                ],
-							};
+              if (action.restriction) {
+                promptParams = {
+                  amount: this.getMetaValue(action.amount, action.generatedBy),
+                  restrictions: [
+                    {
+                      type: action.restriction,
+                      value: this.getMetaValue(action.amount, action.generatedBy),
+                    },
+                  ],
+                };
+              } else {
+                promptParams = {
+                  amount: this.getMetaValue(action.amount, action.generatedBy),
+                }
+              }
 							break;
 						}
 					}
@@ -2731,7 +2806,7 @@ export class State {
 							}
 							case PROMPT_TYPE_NUMBER:
 								if ('number' in action) {
-									currentActionMetaData[variable || 'number'] = (typeof action.number === 'number') ? action.number : parseInt(action.number, 10);
+									currentActionMetaData[variable || 'number'] = (typeof action.number === 'number') ? action.number : parseInt(action.number || '0', 10);
 								}
 								break;
 							case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE:
@@ -2981,7 +3056,7 @@ export class State {
 
 					}
 					const variable = action.variable || 'selected';
-					this.setSpellMetaDataField(variable, result, action.generatedBy);
+					this.setSpellMetaDataField(variable, result, action.generatedBy || nanoid());
 					break;
 				}
 				case ACTION_PASS: {
@@ -3031,7 +3106,7 @@ export class State {
 				case ACTION_PLAY: {
 					const castCards = ('card' in action) ? this.getMetaValue(action.card, action.generatedBy) : null;
 					const castCard: CardInGame | null = castCards ? (castCards.length ? castCards[0] : castCards) : null;
-					const player = ('payload' in action) ? action.payload.player : action.player;
+					const player = ('payload' in action) ? action.payload.player : action.player || 0;
 					const cardItself = ('payload' in action) ? action.payload.card : castCard;
 
           if (!cardItself) {
@@ -3087,9 +3162,9 @@ export class State {
 												effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
 												target: '$creature_created',
 												player: player,
-												amount: (baseCard.cost === COST_X || baseCard.cost === COST_X_PLUS_ONE) ? 0 : baseCard.cost,
+												amount: (baseCard.cost === COST_X || baseCard.cost === COST_X_PLUS_ONE || baseCard.cost === null) ? 0 : baseCard.cost,
 												generatedBy: cardItself.id,
-											}
+											} as StartingEnergyOnCreatureEffect,
 										);
 									}
 									break;
@@ -3101,7 +3176,7 @@ export class State {
 									const magiRegion = activeMagi.card.region;
 									const regionAllows = relicRegion === magiRegion || relicRegion === REGION_UNIVERSAL;
 
-									if (!alreadyHasOne && regionAllows && activeMagi.data.energy >= baseCard.cost) {
+									if (!alreadyHasOne && regionAllows && typeof baseCard.cost == 'number' && activeMagi.data.energy >= baseCard.cost) {
 										this.transformIntoActions(
 											{
 												type: ACTION_EFFECT,
@@ -3138,8 +3213,7 @@ export class State {
 											spell: true,
 											generatedBy: cardItself.id,
 										});
-										const preparedEffects: AnyEffectType[] = baseCard.data.effects
-											.map(enrichAction);
+										const preparedEffects: AnyEffectType[] = baseCard.data?.effects?.map(enrichAction) || [];
 
 										const testablePrompts = [
 											PROMPT_TYPE_SINGLE_CREATURE,
@@ -3289,7 +3363,7 @@ export class State {
 
 							this.state = {
 								...this.state,
-								continuousEffects: this.state.continuousEffects.map(updateContinuousEffects(action.player)).filter(Boolean),
+								continuousEffects: this.state.continuousEffects.map(updateContinuousEffects(action.player)).filter(Boolean) as ContinuousEffectType[],
 								activePlayer: action.player,
 								step: 0, // this will be rewritten to 0 by EFFECT_TYPE_START_STEP, but no big deal
 							};
@@ -3302,13 +3376,13 @@ export class State {
 								action.step === 0;
 
 							if (steps[action.step].effects && !isFirstEnergize) {
-								const transformedActions: AnyEffectType[] = steps[action.step].effects.map(effect =>
+								const transformedActions: AnyEffectType[] = steps[action.step]?.effects?.map(effect =>
 									({
 										...effect,
 										player: action.player, 
 										generatedBy: action.generatedBy,
 									} as AnyEffectType),
-								);
+								) || [];
 								this.addActions(...transformedActions);
 							}
 
@@ -3333,6 +3407,10 @@ export class State {
 							const metaData: {source?: CardInGame, new_card?: CardInGame} = this.getSpellMetadata(action.generatedBy);
 							// "new_card" fallback is for "defeated" triggers
 							const self = metaData.source || metaData.new_card || action.triggerSource;
+
+              if (!self) {
+                break;
+              }
 
 							// checkCondition(action, self, condition)
 							const results = action.conditions.map(condition =>
@@ -3379,7 +3457,7 @@ export class State {
 							const metaData = this.getSpellMetadata(action.generatedBy);
 							// "new_card" fallback is for "defeated" triggers
 							if ('source' in metaData || 'new_card' in metaData) {
-								const self = metaData.source || metaData.new_card;
+								const self = metaData.source as CardInGame || metaData.new_card as CardInGame;
 								this.state = {
 									...this.state,
 									delayedTriggers: [
@@ -3424,7 +3502,7 @@ export class State {
 										type: ACTION_ENTER_PROMPT,
 										promptType: PROMPT_TYPE_CHOOSE_CARDS,
 										promptParams: {
-											cards: topMagi.card.data.startingCards,
+											cards: topMagi.card.data.startingCards || [],
 											availableCards,
 										},
 										variable: 'startingCards',
@@ -3472,7 +3550,7 @@ export class State {
 
 							// if magi is active, reset its actions used too
 							if (this.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).length == 1) {
-								this.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).card.clearActionsUsed();
+								this.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player)?.card?.clearActionsUsed();
 							}
 
 							break;
@@ -3489,7 +3567,12 @@ export class State {
 								cardsToFind.forEach(cardName => {
 									if (discard.cards.some(({ card }) => card.name == cardName)) {
 										const card = discard.cards.find(({ card }) => card.name == cardName);
-										const newCard = new CardInGame(card.card, action.player);
+
+                    if (!card) {
+                      return true;
+                    }
+
+                    const newCard = new CardInGame(card.card, action.player || 0);
 										hand.add([newCard]);
 										discard.removeById(card.id);
 										foundCards.push(cardName);
@@ -3505,7 +3588,12 @@ export class State {
 										});
 									} else if (deck.cards.some(({ card }) => card.name == cardName)) {
 										const card = deck.cards.find(({ card }) => card.name == cardName);
-										const newCard = new CardInGame(card.card, action.player);
+                    
+                    if (!card) {
+                      return true;
+                    }
+
+										const newCard = new CardInGame(card.card, action.player || 0);
 										hand.add([newCard]);
 										deck.removeById(card.id);
 										foundCards.push(cardName);
@@ -3840,6 +3928,7 @@ export class State {
 								type: ACTION_EFFECT,
 								effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
 								target: action.target,
+                source: action.source,
 								amount: action.amount,
 								attack: true,
 								generatedBy: action.generatedBy,
@@ -4123,6 +4212,10 @@ export class State {
 						case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI: {
 							const discardMiltiTarget = this.getMetaValue(action.target, action.generatedBy);
 
+              const source = action.source
+              if (!source) {
+                break
+              }
 							oneOrSeveral(discardMiltiTarget, target => {
 								switch (target.card.type) {
 									case TYPE_CREATURE:
@@ -4142,7 +4235,7 @@ export class State {
 										this.transformIntoActions({
 											type: ACTION_EFFECT,
 											effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
-											source: action.source,
+											source,
 											amount: action.amount,
 											attack: action.attack || false,
 											spell: action.spell || false,
@@ -4450,7 +4543,7 @@ export class State {
 								triggerEffects: action.triggerEffects || [],
 								staticAbilities,
 								expiration: action.expiration,
-								player: action.player,
+								player: action.player || 0,
 								id,
 							};
 

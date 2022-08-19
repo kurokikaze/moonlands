@@ -2,7 +2,7 @@ import nanoid from 'nanoid';
 import clone from '../clone';
 import Card from './Card';
 
-type InGameData = { 
+export type InGameData = { 
 	energy: number;
 	controller: number;
 	attacked: number;

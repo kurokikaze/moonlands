@@ -2,7 +2,7 @@ import { byName } from "./cards";
 import CardInGame from "./classes/CardInGame";
 import Zone from "./classes/Zone";
 
-export default function clone<T extends any>(item: T): T {
+export default function clone(item) {
 	if (!item) { return item; } // null, undefined values check
 
 	var types = [ Number, String, Boolean ], 

@@ -430,7 +430,7 @@ var State = /** @class */ (function () {
         }
     };
     State.prototype.addActionToLog = function (action) {
-        var _a;
+        var _a, _b, _c;
         var newLogEntry = false;
         try {
             switch (action.type) {
@@ -592,14 +592,14 @@ var State = /** @class */ (function () {
                         this.state.promptType === const_1.PROMPT_TYPE_SINGLE_MAGI) && 'target' in action) {
                         newLogEntry = {
                             type: const_1.LOG_ENTRY_TARGETING,
-                            card: action.target.card.name,
+                            card: ((_c = (_b = action.target) === null || _b === void 0 ? void 0 : _b.card) === null || _c === void 0 ? void 0 : _c.name) || 'unknown card',
                             player: action.player,
                         };
                     }
                     if (this.state.promptType === const_1.PROMPT_TYPE_NUMBER && 'number' in action) {
                         newLogEntry = {
                             type: const_1.LOG_ENTRY_NUMBER_CHOICE,
-                            number: (typeof action.number === 'number') ? action.number : parseInt(action.number, 10),
+                            number: (typeof action.number === 'number') ? action.number : parseInt(action.number || '0', 10),
                             player: action.player,
                         };
                     }
@@ -1085,7 +1085,7 @@ var State = /** @class */ (function () {
         var staticAbilities = __spreadArray(__spreadArray(__spreadArray([], gameStaticAbilities, true), zoneAbilities, true), continuousStaticAbilities, true).sort(function (a, b) { return propertyLayers[a.property] - propertyLayers[b.property]; });
         var initialCardData = {
             card: target.card,
-            modifiedCard: __assign(__assign({}, target.card), { data: __assign(__assign({ protection: null }, target.card.data), { energyLossThreshold: 0, ableToAttack: true }) }),
+            modifiedCard: __assign(__assign({}, target.card), { data: __assign(__assign({ protection: undefined }, target.card.data), { energyLossThreshold: 0, ableToAttack: true }) }),
             data: __assign({}, target.data),
             id: target.id,
             owner: target.owner,
@@ -1139,38 +1139,63 @@ var State = /** @class */ (function () {
                     var initialValue = this.getByProperty(currentCard, const_1.PROPERTY_ABLE_TO_ATTACK);
                     var _e = staticAbility.modifier, operator = _e.operator, operandOne = _e.operandOne;
                     var resultValue = (operator === const_1.CALCULATION_SET) ? operandOne : initialValue;
-                    return __assign(__assign({}, currentCard), { modifiedCard: __assign(__assign({}, currentCard.modifiedCard), { data: __assign(__assign({}, currentCard.modifiedCard.data), { ableToAttack: resultValue }) }) });
+                    if (typeof resultValue == 'boolean') {
+                        return __assign(__assign({}, currentCard), { modifiedCard: __assign(__assign({}, currentCard.modifiedCard), { data: __assign(__assign({}, currentCard.modifiedCard.data), { ableToAttack: resultValue }) }) });
+                    }
+                    else {
+                        return __assign({}, currentCard);
+                    }
                 }
                 case const_1.PROPERTY_CAN_BE_ATTACKED: {
                     var initialValue = this.getByProperty(currentCard, const_1.PROPERTY_CAN_BE_ATTACKED);
                     var _f = staticAbility.modifier, operator = _f.operator, operandOne = _f.operandOne;
                     var resultValue = (operator === const_1.CALCULATION_SET) ? operandOne : initialValue;
-                    return __assign(__assign({}, currentCard), { modifiedCard: __assign(__assign({}, currentCard.modifiedCard), { data: __assign(__assign({}, currentCard.modifiedCard.data), { canBeAttacked: resultValue }) }) });
+                    if (typeof resultValue == 'boolean') {
+                        return __assign(__assign({}, currentCard), { modifiedCard: __assign(__assign({}, currentCard.modifiedCard), { data: __assign(__assign({}, currentCard.modifiedCard.data), { canBeAttacked: resultValue }) }) });
+                    }
+                    else {
+                        return __assign({}, currentCard);
+                    }
                 }
                 case const_1.PROPERTY_CONTROLLER: {
                     var initialValue = this.getByProperty(currentCard, const_1.PROPERTY_CONTROLLER);
                     var _g = staticAbility.modifier, operator = _g.operator, operandOne = _g.operandOne;
                     var resultValue = (operator === const_1.CALCULATION_SET) ? operandOne : initialValue;
-                    return __assign(__assign({}, currentCard), { data: __assign(__assign({}, currentCard.modifiedCard.data), { controller: resultValue }) });
+                    if (typeof resultValue == 'number') {
+                        return __assign(__assign({}, currentCard), { data: __assign(__assign({}, currentCard.data), { controller: resultValue }) });
+                    }
+                    else {
+                        return __assign({}, currentCard);
+                    }
                 }
                 case const_1.PROPERTY_STATUS: {
                     var initialValue = this.getByProperty(currentCard, const_1.PROPERTY_STATUS, staticAbility.subProperty);
                     var _h = staticAbility.modifier, operator = _h.operator, operandOne = _h.operandOne;
                     var resultValue = (operator === const_1.CALCULATION_SET) ? operandOne : initialValue;
-                    switch (staticAbility.subProperty) {
-                        case const_1.STATUS_BURROWED: {
-                            return __assign(__assign({}, currentCard), { data: __assign(__assign({}, currentCard.data), { burrowed: resultValue }) });
+                    if (typeof resultValue == 'boolean') {
+                        switch (staticAbility.subProperty) {
+                            case const_1.STATUS_BURROWED: {
+                                return __assign(__assign({}, currentCard), { data: __assign(__assign({}, currentCard.data), { burrowed: resultValue }) });
+                            }
+                            default: {
+                                return currentCard;
+                            }
                         }
-                        default: {
-                            return currentCard;
-                        }
+                    }
+                    else {
+                        return __assign({}, currentCard);
                     }
                 }
                 case const_1.PROPERTY_PROTECTION: {
                     var initialValue = this.getByProperty(currentCard, const_1.PROPERTY_PROTECTION);
                     var _j = staticAbility.modifier, operator = _j.operator, operandOne = _j.operandOne;
                     var resultValue = (operator === const_1.CALCULATION_SET) ? operandOne : initialValue;
-                    return __assign(__assign({}, currentCard), { modifiedCard: __assign(__assign({}, currentCard.modifiedCard), { data: __assign(__assign({}, currentCard.modifiedCard.data), { protection: resultValue }) }) });
+                    if (typeof resultValue == 'object' && 'from' in resultValue) {
+                        return __assign(__assign({}, currentCard), { modifiedCard: __assign(__assign({}, currentCard.modifiedCard), { data: __assign(__assign({}, currentCard.modifiedCard.data), { protection: resultValue }) }) });
+                    }
+                    else {
+                        return __assign({}, currentCard);
+                    }
                 }
                 case const_1.PROPERTY_POWER_COST: {
                     if (currentCard.modifiedCard.data.powers) {
@@ -1270,36 +1295,51 @@ var State = /** @class */ (function () {
     };
     State.prototype.replaceByReplacementEffect = function (action) {
         var _this = this;
+        var _a;
         var PLAYER_ONE = this.players[0];
         var PLAYER_TWO = this.players[1];
         var allZonesCards = __spreadArray(__spreadArray(__spreadArray([], (this.getZone(const_1.ZONE_TYPE_IN_PLAY) || { cards: [] }).cards, true), (this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE)).cards, true), (this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO)).cards, true);
         var zoneReplacements = allZonesCards.reduce(function (acc, cardInPlay) { return cardInPlay.card.data.replacementEffects ? __spreadArray(__spreadArray([], acc, true), cardInPlay.card.data.replacementEffects
-            .filter(function (effect) { return !effect.oncePerTurn || (effect.oncePerTurn && !cardInPlay.wasActionUsed(effect.name)); })
+            .filter(function (effect) { return !effect.oncePerTurn || (effect.oncePerTurn && !cardInPlay.wasActionUsed(effect.name || 'unknown effect')); })
             .map(function (effect) { return (__assign(__assign({}, effect), { self: cardInPlay })); }), true) : acc; }, []);
         var replacementFound = false;
         var appliedReplacerId = null;
         var appliedReplacerSelf = null;
         var replaceWith = null;
-        var foundReplacer;
-        zoneReplacements.forEach(function (replacer) {
+        var foundReplacer = null;
+        for (var _i = 0, zoneReplacements_1 = zoneReplacements; _i < zoneReplacements_1.length; _i++) {
+            var replacer = zoneReplacements_1[_i];
             var replacerId = replacer.self.id; // Not really, but will work for now
-            if ('replacedBy' in action && action.replacedBy.includes(replacerId)) {
-                return false;
+            if ('replacedBy' in action && ((_a = action.replacedBy) === null || _a === void 0 ? void 0 : _a.includes(replacerId))) {
+                break;
             }
-            if (_this.matchAction(action, replacer.find, replacer.self)) {
+            if (this.matchAction(action, replacer.find, replacer.self)) {
                 foundReplacer = replacer;
                 replacementFound = true;
                 appliedReplacerSelf = replacer.self;
                 appliedReplacerId = replacerId;
                 replaceWith = (replacer.replaceWith instanceof Array) ? replacer.replaceWith : [replacer.replaceWith];
             }
-        });
-        var previouslyReplacedBy = 'replacedBy' in action ? action.replacedBy : [];
-        if (replacementFound) {
-            var resultEffects = replaceWith.map(function (replacementEffect) {
+        }
+        var previouslyReplacedBy = ('replacedBy' in action && action.replacedBy) ? action.replacedBy : [];
+        if (replacementFound && replaceWith) {
+            var resultEffects = appliedReplacerSelf ? replaceWith.map((function (appliedReplacerSelf) { return function (replacementEffect) {
+                if (!('type' in replacementEffect)) {
+                    // @ts-ignore
+                    var resultEffect_1 = __assign(__assign({ type: const_1.ACTION_EFFECT }, replacementEffect), { replacedBy: __spreadArray(__spreadArray([], previouslyReplacedBy, true), [
+                            appliedReplacerId,
+                        ], false), generatedBy: action.generatedBy || (0, nanoid_1.default)(), player: appliedReplacerSelf.data.controller });
+                    Object.keys(replacementEffect)
+                        .filter(function (key) { return !['type', 'effectType'].includes(key); })
+                        .forEach(function (key) {
+                        var value = _this.prepareMetaValue(replacementEffect[key], action, appliedReplacerSelf, action.generatedBy);
+                        resultEffect_1[key] = value;
+                    });
+                    return resultEffect_1;
+                }
                 var resultEffect = __assign(__assign({ type: const_1.ACTION_EFFECT }, replacementEffect), { replacedBy: __spreadArray(__spreadArray([], previouslyReplacedBy, true), [
                         appliedReplacerId,
-                    ], false), generatedBy: action.generatedBy, player: appliedReplacerSelf.data.controller });
+                    ], false), generatedBy: action.generatedBy || (0, nanoid_1.default)(), player: appliedReplacerSelf.data.controller });
                 // prepare %-values on created action
                 Object.keys(replacementEffect)
                     .filter(function (key) { return !['type', 'effectType'].includes(key); })
@@ -1308,14 +1348,14 @@ var State = /** @class */ (function () {
                     resultEffect[key] = value;
                 });
                 return resultEffect;
-            });
+            }; })(appliedReplacerSelf)) : [];
             // If the replacer is one-time, set the action usage
-            if (foundReplacer.oncePerTurn && 'name' in foundReplacer) {
+            if (foundReplacer && foundReplacer.oncePerTurn && foundReplacer.name) {
                 appliedReplacerSelf.setActionUsed(foundReplacer.name);
             }
-            if (foundReplacer.mayEffect) {
+            if (foundReplacer && foundReplacer.mayEffect) {
                 this.state.mayEffectActions = resultEffects;
-                this.state.fallbackActions = [__assign(__assign({}, action), { replacedBy: ('replacedBy' in action) ? __spreadArray(__spreadArray([], action.replacedBy, true), [appliedReplacerId], false) : [appliedReplacerId] })];
+                this.state.fallbackActions = [__assign(__assign({}, action), { replacedBy: ('replacedBy' in action && action.replacedBy) ? __spreadArray(__spreadArray([], action.replacedBy, true), [appliedReplacerId], false) : [appliedReplacerId] })];
                 return [{
                         type: const_1.ACTION_ENTER_PROMPT,
                         promptType: const_1.PROMPT_TYPE_MAY_ABILITY,
@@ -1387,8 +1427,8 @@ var State = /** @class */ (function () {
         var PLAYER_TWO = this.players[1];
         var allZonesCards = __spreadArray(__spreadArray(__spreadArray([], (this.getZone(const_1.ZONE_TYPE_IN_PLAY) || { cards: [] }).cards, true), (this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE) || { cards: [] }).cards, true), (this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO) || { cards: [] }).cards, true);
         var cardTriggerEffects = allZonesCards.reduce(function (acc, cardInPlay) { return cardInPlay.card.data.triggerEffects ? __spreadArray(__spreadArray([], acc, true), cardInPlay.card.data.triggerEffects.map(function (effect) { return (__assign(__assign({}, effect), { self: cardInPlay })); }), true) : acc; }, []);
-        var continuousEffectTriggers = this.state.continuousEffects.map(function (effect) { return effect.triggerEffects.map(function (triggerEffect) { return (__assign(__assign({}, triggerEffect), { id: effect.id })); }) || []; }).flat();
-        var triggerEffects = __spreadArray(__spreadArray(__spreadArray([], cardTriggerEffects, true), this.state.delayedTriggers, true), continuousEffectTriggers, true);
+        // const continuousEffectTriggers = this.state.continuousEffects.map(effect => effect.triggerEffects.map(triggerEffect => ({...triggerEffect, id: effect.id})) || []).flat();
+        var triggerEffects = __spreadArray(__spreadArray([], cardTriggerEffects, true), this.state.delayedTriggers, true);
         triggerEffects.forEach(function (replacer) {
             // @ts-ignore
             var triggeredId = replacer.self.id; // Not really, but will work for now
@@ -1418,7 +1458,7 @@ var State = /** @class */ (function () {
                     Object.keys(effect)
                         .filter(function (key) { return !['type', 'effectType'].includes(key); })
                         .forEach(function (key) {
-                        var value = _this.prepareMetaValue(effect[key], action, replacer.self, action.generatedBy);
+                        var value = _this.prepareMetaValue(effect[key], action, replacer.self, action.generatedBy || (0, nanoid_1.default)());
                         resultEffect[key] = value;
                     });
                     return resultEffect;
@@ -1655,13 +1695,13 @@ var State = /** @class */ (function () {
     };
     State.prototype.update = function (initialAction) {
         var _this = this;
-        var _a, _b, _c, _d, _e, _f, _g, _h;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
         if (this.hasWinner()) {
             return false;
         }
         this.addActions(initialAction);
         var _loop_1 = function () {
-            var _j;
+            var _q;
             var rawAction = this_1.getNextAction();
             var replacedActions = this_1.replaceByReplacementEffect(rawAction);
             var action = replacedActions[0];
@@ -1734,7 +1774,9 @@ var State = /** @class */ (function () {
                     if (property === const_1.CARD_COUNT) {
                         var result = (multiTarget instanceof Array) ? multiTarget.length : 0;
                         var variable = action.variable || 'result';
-                        this_1.setSpellMetaDataField(variable, result, action.generatedBy);
+                        if (action.generatedBy) {
+                            this_1.setSpellMetaDataField(variable, result, action.generatedBy);
+                        }
                     }
                     else {
                         // Sometimes we can only pass here results of a selector.
@@ -1742,7 +1784,9 @@ var State = /** @class */ (function () {
                         var target = (multiTarget instanceof Array) ? multiTarget[0] : multiTarget;
                         var modifiedResult = this_1.modifyByStaticAbilities(target, property);
                         var variable = action.variable || 'result';
-                        this_1.setSpellMetaDataField(variable, modifiedResult, action.generatedBy);
+                        if (action.generatedBy) {
+                            this_1.setSpellMetaDataField(variable, modifiedResult, action.generatedBy);
+                        }
                     }
                     break;
                 }
@@ -1751,11 +1795,13 @@ var State = /** @class */ (function () {
                     var operandTwo = this_1.getMetaValue(action.operandTwo, action.generatedBy);
                     var result = this_1.performCalculation(action.operator, operandOne, operandTwo);
                     var variable = action.variable || 'result';
-                    this_1.setSpellMetaDataField(variable, result, action.generatedBy);
+                    if (action.generatedBy) {
+                        this_1.setSpellMetaDataField(variable, result, action.generatedBy);
+                    }
                     break;
                 }
                 case const_1.ACTION_POWER: {
-                    var powerCost = this_1.modifyByStaticAbilities(action.source, const_1.PROPERTY_POWER_COST, action.power.name);
+                    var powerCost = this_1.modifyByStaticAbilities(action.source, const_1.PROPERTY_POWER_COST, action.power.name || '');
                     var payingCard = (action.source.card.type === const_1.TYPE_RELIC) ?
                         this_1.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, action.source.owner).card :
                         action.source;
@@ -1896,7 +1942,7 @@ var State = /** @class */ (function () {
                                     restrictions: restrictionsWithValues,
                                 };
                             }
-                            else {
+                            else if (action.restriction) {
                                 promptParams = {
                                     restrictions: [
                                         {
@@ -1920,27 +1966,41 @@ var State = /** @class */ (function () {
                             break;
                         }
                         case const_1.PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
-                            promptParams = {
-                                amount: this_1.getMetaValue(action.amount, action.generatedBy),
-                                restrictions: [
-                                    {
-                                        type: action.restriction,
-                                        value: this_1.getMetaValue(action.amount, action.generatedBy),
-                                    },
-                                ],
-                            };
+                            if (action.restriction) {
+                                promptParams = {
+                                    amount: this_1.getMetaValue(action.amount, action.generatedBy),
+                                    restrictions: [
+                                        {
+                                            type: action.restriction,
+                                            value: this_1.getMetaValue(action.amount, action.generatedBy),
+                                        },
+                                    ],
+                                };
+                            }
+                            else {
+                                promptParams = {
+                                    amount: this_1.getMetaValue(action.amount, action.generatedBy),
+                                };
+                            }
                             break;
                         }
                         case const_1.PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES: {
-                            promptParams = {
-                                amount: this_1.getMetaValue(action.amount, action.generatedBy),
-                                restrictions: [
-                                    {
-                                        type: action.restriction,
-                                        value: this_1.getMetaValue(action.amount, action.generatedBy),
-                                    },
-                                ],
-                            };
+                            if (action.restriction) {
+                                promptParams = {
+                                    amount: this_1.getMetaValue(action.amount, action.generatedBy),
+                                    restrictions: [
+                                        {
+                                            type: action.restriction,
+                                            value: this_1.getMetaValue(action.amount, action.generatedBy),
+                                        },
+                                    ],
+                                };
+                            }
+                            else {
+                                promptParams = {
+                                    amount: this_1.getMetaValue(action.amount, action.generatedBy),
+                                };
+                            }
                             break;
                         }
                     }
@@ -2003,7 +2063,7 @@ var State = /** @class */ (function () {
                             }
                             case const_1.PROMPT_TYPE_NUMBER:
                                 if ('number' in action) {
-                                    currentActionMetaData[variable || 'number'] = (typeof action.number === 'number') ? action.number : parseInt(action.number, 10);
+                                    currentActionMetaData[variable || 'number'] = (typeof action.number === 'number') ? action.number : parseInt(action.number || '0', 10);
                                 }
                                 break;
                             case const_1.PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE:
@@ -2103,7 +2163,7 @@ var State = /** @class */ (function () {
                             }
                         }
                         var actions = this_1.state.savedActions || [];
-                        this_1.state = __assign(__assign({}, this_1.state), { actions: actions, savedActions: [], prompt: false, promptType: null, promptMessage: undefined, promptGeneratedBy: undefined, promptVariable: undefined, promptParams: {}, spellMetaData: __assign(__assign({}, this_1.state.spellMetaData), (_j = {}, _j[generatedBy] = currentActionMetaData, _j)) });
+                        this_1.state = __assign(__assign({}, this_1.state), { actions: actions, savedActions: [], prompt: false, promptType: null, promptMessage: undefined, promptGeneratedBy: undefined, promptVariable: undefined, promptParams: {}, spellMetaData: __assign(__assign({}, this_1.state.spellMetaData), (_q = {}, _q[generatedBy] = currentActionMetaData, _q)) });
                     }
                     break;
                 }
@@ -2228,7 +2288,7 @@ var State = /** @class */ (function () {
                         }
                     }
                     var variable = action.variable || 'selected';
-                    this_1.setSpellMetaDataField(variable, result, action.generatedBy);
+                    this_1.setSpellMetaDataField(variable, result, action.generatedBy || (0, nanoid_1.default)());
                     break;
                 }
                 case const_1.ACTION_PASS: {
@@ -2274,7 +2334,7 @@ var State = /** @class */ (function () {
                 case const_1.ACTION_PLAY: {
                     var castCards = ('card' in action) ? this_1.getMetaValue(action.card, action.generatedBy) : null;
                     var castCard = castCards ? (castCards.length ? castCards[0] : castCards) : null;
-                    var player_1 = ('payload' in action) ? action.payload.player : action.player;
+                    var player_1 = ('payload' in action) ? action.payload.player : action.player || 0;
                     var cardItself_1 = ('payload' in action) ? action.payload.card : castCard;
                     if (!cardItself_1) {
                         throw new Error('No card itself found');
@@ -2322,7 +2382,7 @@ var State = /** @class */ (function () {
                                             effectType: const_1.EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
                                             target: '$creature_created',
                                             player: player_1,
-                                            amount: (baseCard_1.cost === const_1.COST_X || baseCard_1.cost === const_1.COST_X_PLUS_ONE) ? 0 : baseCard_1.cost,
+                                            amount: (baseCard_1.cost === const_1.COST_X || baseCard_1.cost === const_1.COST_X_PLUS_ONE || baseCard_1.cost === null) ? 0 : baseCard_1.cost,
                                             generatedBy: cardItself_1.id,
                                         });
                                     }
@@ -2334,7 +2394,7 @@ var State = /** @class */ (function () {
                                     var relicRegion = baseCard_1.region;
                                     var magiRegion = activeMagi.card.region;
                                     var regionAllows = relicRegion === magiRegion || relicRegion === const_1.REGION_UNIVERSAL;
-                                    if (!alreadyHasOne && regionAllows && activeMagi.data.energy >= baseCard_1.cost) {
+                                    if (!alreadyHasOne && regionAllows && typeof baseCard_1.cost == 'number' && activeMagi.data.energy >= baseCard_1.cost) {
                                         this_1.transformIntoActions({
                                             type: const_1.ACTION_EFFECT,
                                             effectType: const_1.EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC,
@@ -2361,8 +2421,7 @@ var State = /** @class */ (function () {
                                 case const_1.TYPE_SPELL: {
                                     if (activeMagi.data.energy >= totalCost || baseCard_1.cost === const_1.COST_X || baseCard_1.cost === const_1.COST_X_PLUS_ONE) {
                                         var enrichAction = function (effect) { return (__assign(__assign({ source: cardItself_1, player: player_1 }, effect), { spell: true, generatedBy: cardItself_1.id })); };
-                                        var preparedEffects = baseCard_1.data.effects
-                                            .map(enrichAction);
+                                        var preparedEffects = ((_k = (_j = baseCard_1.data) === null || _j === void 0 ? void 0 : _j.effects) === null || _k === void 0 ? void 0 : _k.map(enrichAction)) || [];
                                         var testablePrompts_1 = [
                                             const_1.PROMPT_TYPE_SINGLE_CREATURE,
                                             const_1.PROMPT_TYPE_RELIC,
@@ -2507,9 +2566,9 @@ var State = /** @class */ (function () {
                                 action.player === this_1.state.goesFirst &&
                                 action.step === 0;
                             if (steps[action.step].effects && !isFirstEnergize) {
-                                var transformedActions = steps[action.step].effects.map(function (effect) {
+                                var transformedActions = ((_m = (_l = steps[action.step]) === null || _l === void 0 ? void 0 : _l.effects) === null || _m === void 0 ? void 0 : _m.map(function (effect) {
                                     return (__assign(__assign({}, effect), { player: action.player, generatedBy: action.generatedBy }));
-                                });
+                                })) || [];
                                 this_1.addActions.apply(this_1, transformedActions);
                             }
                             if (steps[action.step].automatic) {
@@ -2528,6 +2587,9 @@ var State = /** @class */ (function () {
                             var metaData = this_1.getSpellMetadata(action.generatedBy);
                             // "new_card" fallback is for "defeated" triggers
                             var self_1 = metaData.source || metaData.new_card || action.triggerSource;
+                            if (!self_1) {
+                                break;
+                            }
                             // checkCondition(action, self, condition)
                             var results = action.conditions.map(function (condition) {
                                 return _this.checkCondition(action, self_1, condition);
@@ -2598,7 +2660,7 @@ var State = /** @class */ (function () {
                                         type: const_1.ACTION_ENTER_PROMPT,
                                         promptType: const_1.PROMPT_TYPE_CHOOSE_CARDS,
                                         promptParams: {
-                                            cards: topMagi.card.data.startingCards,
+                                            cards: topMagi.card.data.startingCards || [],
                                             availableCards: availableCards,
                                         },
                                         variable: 'startingCards',
@@ -2636,7 +2698,7 @@ var State = /** @class */ (function () {
                             }
                             // if magi is active, reset its actions used too
                             if (this_1.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, action.player).length == 1) {
-                                this_1.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, action.player).card.clearActionsUsed();
+                                (_p = (_o = this_1.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, action.player)) === null || _o === void 0 ? void 0 : _o.card) === null || _p === void 0 ? void 0 : _p.clearActionsUsed();
                             }
                             break;
                         }
@@ -2656,7 +2718,10 @@ var State = /** @class */ (function () {
                                             var card = _a.card;
                                             return card.name == cardName;
                                         });
-                                        var newCard = new CardInGame_1.default(card.card, action.player);
+                                        if (!card) {
+                                            return true;
+                                        }
+                                        var newCard = new CardInGame_1.default(card.card, action.player || 0);
                                         hand_1.add([newCard]);
                                         discard_1.removeById(card.id);
                                         foundCards_1.push(cardName);
@@ -2678,7 +2743,10 @@ var State = /** @class */ (function () {
                                             var card = _a.card;
                                             return card.name == cardName;
                                         });
-                                        var newCard = new CardInGame_1.default(card.card, action.player);
+                                        if (!card) {
+                                            return true;
+                                        }
+                                        var newCard = new CardInGame_1.default(card.card, action.player || 0);
                                         hand_1.add([newCard]);
                                         deck_1.removeById(card.id);
                                         foundCards_1.push(cardName);
@@ -2995,6 +3063,7 @@ var State = /** @class */ (function () {
                                 type: const_1.ACTION_EFFECT,
                                 effectType: const_1.EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
                                 target: action.target,
+                                source: action.source,
                                 amount: action.amount,
                                 attack: true,
                                 generatedBy: action.generatedBy,
@@ -3269,6 +3338,10 @@ var State = /** @class */ (function () {
                         }
                         case const_1.EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI: {
                             var discardMiltiTarget = this_1.getMetaValue(action.target, action.generatedBy);
+                            var source_3 = action.source;
+                            if (!source_3) {
+                                break;
+                            }
                             oneOrSeveral(discardMiltiTarget, function (target) {
                                 switch (target.card.type) {
                                     case const_1.TYPE_CREATURE:
@@ -3288,7 +3361,7 @@ var State = /** @class */ (function () {
                                         _this.transformIntoActions({
                                             type: const_1.ACTION_EFFECT,
                                             effectType: const_1.EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
-                                            source: action.source,
+                                            source: source_3,
                                             amount: action.amount,
                                             attack: action.attack || false,
                                             spell: action.spell || false,
@@ -3565,7 +3638,7 @@ var State = /** @class */ (function () {
                                 triggerEffects: action.triggerEffects || [],
                                 staticAbilities: staticAbilities,
                                 expiration: action.expiration,
-                                player: action.player,
+                                player: action.player || 0,
                                 id: id,
                             };
                             this_1.state = __assign(__assign({}, this_1.state), { continuousEffects: __spreadArray(__spreadArray([], this_1.state.continuousEffects, true), [

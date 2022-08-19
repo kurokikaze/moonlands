@@ -312,7 +312,7 @@ type CreatureEntersPlayEffect = ActionEffect & {
 	target: string;
 }
 
-type StartingEnergyOnCreatureEffect = ActionEffect & {
+export type StartingEnergyOnCreatureEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
 	target: string,
 	amount: number,
@@ -356,6 +356,11 @@ type DelayedTriggerType = {
 	name: string;
 	find: FindType;
 	effects: AnyEffectType[];
+}
+
+export type EnhancedDelayedTriggerType  = DelayedTriggerType & {
+  self: CardInGame
+  id: string
 }
 
 type AddDelayedTriggerEffect = ActionEffect & {

@@ -1790,7 +1790,7 @@ describe('Orlon', () => {
 			from: PROTECTION_FROM_SPELLS,
 		});
 
-		expect(gameState.modifyByStaticAbilities(bwill, PROPERTY_PROTECTION)).toEqual(null);
+		expect(gameState.modifyByStaticAbilities(bwill, PROPERTY_PROTECTION)).toEqual(undefined);
 	});
 });
 
