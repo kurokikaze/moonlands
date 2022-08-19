@@ -1819,7 +1819,7 @@ export class State {
 		if (object === 'self') {
 			return self;
 		}
-		return property ? this.getMetaValue(action[object], action.generatedBy) : object;
+		return property ? this.getMetaValue(action[object as keyof typeof action], action.generatedBy) : object;
 	}
 
 	replaceByReplacementEffect(action: AnyEffectType): AnyEffectType[] {
