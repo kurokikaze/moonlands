@@ -87,15 +87,16 @@ type MagiIsDefeatedEntry = {
 }
 
 type RelicDiscadedFromPlayEntry = {
-    type: typeof LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY;
-    card: string;
-    player: number;
+  type: typeof LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY;
+  card: string;
+  player: number;
 }
 
 type AttackEntry = {
-        type: typeof LOG_ENTRY_ATTACK,
-        source: string;
-        target: string;
+  type: typeof LOG_ENTRY_ATTACK,
+  source: string;
+  target: string;
+  packHuntAttack: boolean;
 }
 
 export type LogEntryType = CreatureEnergyLossEntry |

@@ -1,12 +1,7 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var cards_1 = require("./cards");
-var CardInGame_1 = __importDefault(require("./classes/CardInGame"));
-var Zone_1 = __importDefault(require("./classes/Zone"));
-function clone(item) {
+import { byName } from "./cards";
+import CardInGame from "./classes/CardInGame";
+import Zone from "./classes/Zone";
+export default function clone(item) {
     if (!item) {
         return item;
     } // null, undefined values check
@@ -33,12 +28,12 @@ function clone(item) {
                 if (item instanceof Date) {
                     result = new Date(item);
                 }
-                else if (item instanceof Zone_1.default) {
-                    result = new Zone_1.default(item.name, item.type, item.player, item.ordered);
+                else if (item instanceof Zone) {
+                    result = new Zone(item.name, item.type, item.player, item.ordered);
                     result.add(item.cards.map(clone));
                 }
-                else if (item instanceof CardInGame_1.default) {
-                    result = new CardInGame_1.default((0, cards_1.byName)(item.card.name), item.owner);
+                else if (item instanceof CardInGame) {
+                    result = new CardInGame(byName(item.card.name), item.owner);
                     result.id = item.id;
                     result.modifiedCard = item.modifiedCard;
                     result.data = clone(item.data);
@@ -68,5 +63,4 @@ function clone(item) {
     }
     return result;
 }
-exports.default = clone;
 //# sourceMappingURL=clone.js.map

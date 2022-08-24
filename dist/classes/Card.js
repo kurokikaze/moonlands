@@ -1,4 +1,3 @@
-"use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -10,22 +9,21 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-Object.defineProperty(exports, "__esModule", { value: true });
-var const_1 = require("../const");
+import { TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, REGION_CALD, REGION_NAROOM, REGION_OROTHE, REGION_ARDERIAL, REGION_UNDERNEATH, REGION_UNIVERSAL, REGION_BOGRATH, } from '../const';
 var Card = /** @class */ (function () {
     function Card(name, type, region, cost, data) {
         if (data === void 0) { data = {}; }
-        if (![const_1.TYPE_CREATURE, const_1.TYPE_MAGI, const_1.TYPE_RELIC, const_1.TYPE_SPELL].includes(type)) {
+        if (![TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL].includes(type)) {
             throw new Error("Unknown card type: \"".concat(type, "\" for card ").concat(name));
         }
         if (![
-            const_1.REGION_CALD,
-            const_1.REGION_NAROOM,
-            const_1.REGION_OROTHE,
-            const_1.REGION_ARDERIAL,
-            const_1.REGION_UNDERNEATH,
-            const_1.REGION_UNIVERSAL,
-            const_1.REGION_BOGRATH,
+            REGION_CALD,
+            REGION_NAROOM,
+            REGION_OROTHE,
+            REGION_ARDERIAL,
+            REGION_UNDERNEATH,
+            REGION_UNIVERSAL,
+            REGION_BOGRATH,
         ].includes(region)) {
             throw new Error("Unknown card region: \"".concat(region, "\" for card ").concat(name));
         }
@@ -46,5 +44,5 @@ var Card = /** @class */ (function () {
     };
     return Card;
 }());
-exports.default = Card;
+export default Card;
 //# sourceMappingURL=Card.js.map

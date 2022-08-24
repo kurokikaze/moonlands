@@ -893,6 +893,7 @@ export class State {
 								type: LOG_ENTRY_ATTACK,
 								source: this.getMetaValue(action.source, action.generatedBy).card.name,
 								target: this.getMetaValue(action.target, action.generatedBy).card.name,
+                packHuntAttack: Boolean(action.packHuntAttack),
 							};
 						}
 					}

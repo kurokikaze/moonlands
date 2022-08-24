@@ -1,4 +1,3 @@
-"use strict";
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -10,17 +9,13 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-var nanoid_1 = __importDefault(require("nanoid"));
-var clone_1 = __importDefault(require("../clone"));
+import nanoid from 'nanoid';
+import clone from '../clone';
 var CardInGame = /** @class */ (function () {
     function CardInGame(card, owner) {
         this._card = card;
-        this.modifiedCard = (0, clone_1.default)(card);
-        this.id = (0, nanoid_1.default)();
+        this.modifiedCard = clone(card);
+        this.id = nanoid();
         this.data = {
             energy: 0,
             controller: owner,
@@ -108,5 +103,5 @@ var CardInGame = /** @class */ (function () {
     };
     return CardInGame;
 }());
-exports.default = CardInGame;
+export default CardInGame;
 //# sourceMappingURL=CardInGame.js.map
