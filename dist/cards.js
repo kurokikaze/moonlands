@@ -1606,6 +1606,13 @@ export var cards = [
                             objectTwo: 'self',
                             propertyTwo: PROPERTY_CONTROLLER,
                         },
+                        {
+                            objectOne: 'target',
+                            propertyOne: PROPERTY_TYPE,
+                            comparator: '=',
+                            objectTwo: TYPE_CREATURE,
+                            propertyTwo: null,
+                        },
                     ],
                 },
                 effects: [

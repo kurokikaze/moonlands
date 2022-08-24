@@ -482,6 +482,37 @@ describe('Strag', () => {
 		expect(thunderVashp.data.energy).toEqual(0, 'Thunder Vashp loses 2 energy, dies');
 		expect(mushroomHyren.data.energy).toEqual(1, 'Mushroom Hyren gains 1 energy, loses 2, survives');
 	});
+	it('Defense (does not apply to Strag)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+	
+		const strag = new CardInGame(byName('Strag'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const thunderVashp = new CardInGame(byName('Thunder Vashp'), ACTIVE_PLAYER).addEnergy(2);
+	
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([strag]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([thunderVashp]),
+			],
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+	
+		const attackAction = {
+			type: ACTION_ATTACK,
+			source: thunderVashp,
+			target: strag,
+		};
+			
+		gameState.update(attackAction);
+	
+		expect(thunderVashp.data.energy).toEqual(2, 'Thunder Vashp loses no energy');
+		expect(strag.data.energy).toEqual(3, 'Strag loses 2, gains no energy in process');
+	});
 });
 
 describe('Amulet of Ombor', () => {
