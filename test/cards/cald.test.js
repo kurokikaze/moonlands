@@ -747,8 +747,8 @@ describe('Gar', () => {
 		const ACTIVE_PLAYER = 422;
 		const NON_ACTIVE_PLAYER = 1310;
 
-    const ARBOLL_ENERGY = 4;
-    const BALAMANT_ENERGY = 5;
+		const ARBOLL_ENERGY = 4;
+		const BALAMANT_ENERGY = 5;
 		const gar = new CardInGame(byName('Gar'), ACTIVE_PLAYER).addEnergy(4);
 		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(4);
 		const lavaArboll = new CardInGame(byName('Lava Arboll'), ACTIVE_PLAYER).addEnergy(ARBOLL_ENERGY);
@@ -1387,5 +1387,112 @@ describe('Lava Aq', () => {
 
 		gameState.update(powerAction);
 		expect(gameState.state.prompt).toEqual(false);
+	});
+});
+
+describe('Barak', () => {
+	it('Rearranging the cards', () => {
+		const ACTIVE_PLAYER = 411;
+		const NON_ACTIVE_PLAYER = 12;
+
+		// Cald player
+		const lavaAq = new CardInGame(byName('Lava Aq'), ACTIVE_PLAYER).addEnergy(2);
+		const barak = new CardInGame(byName('Barak'), ACTIVE_PLAYER).addEnergy(2);
+
+		const lavaArboll = new CardInGame(byName('Lava Arboll'), ACTIVE_PLAYER);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER);
+		const flameGeyser = new CardInGame(byName('Flame Geyser'), ACTIVE_PLAYER);
+		const flameHyren = new CardInGame(byName('Flame Hyren'), ACTIVE_PLAYER);
+		const fireChogo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER);
+
+		// Naroom player
+		const pruitt = new CardInGame(byName('Pruitt'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER).addEnergy(1);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaAq, weebo], [barak]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([pruitt]);
+		gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).add([lavaArboll, lavaBalamant, flameGeyser, flameHyren, fireChogo]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: barak,
+			power: barak.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerAction);
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptParams.cards).toHaveLength(4);
+
+		const resolveAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			cards: [flameHyren.id, flameGeyser.id, lavaBalamant.id, lavaArboll.id],
+			generatedBy: barak.id,
+		};
+
+		gameState.update(resolveAction);
+		expect(gameState.state.prompt).toEqual(false);
+		expect(gameState.state.spellMetaData[barak.id].rearrangedCards).toEqual([flameHyren.id, flameGeyser.id, lavaBalamant.id, lavaArboll.id]);
+		// Make sure first 4 cards are rearranged in reverse, just as we chose
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).cards.map(card => card.card.name)).toEqual(['Flame Hyren', 'Flame Geyser', 'Lava Balamant', 'Lava Arboll', 'Fire Chogo']);
+	});
+
+	it('Rearranging the cards (only two left in the deck)', () => {
+		const ACTIVE_PLAYER = 411;
+		const NON_ACTIVE_PLAYER = 12;
+
+		// Cald player
+		const lavaAq = new CardInGame(byName('Lava Aq'), ACTIVE_PLAYER).addEnergy(2);
+		const barak = new CardInGame(byName('Barak'), ACTIVE_PLAYER).addEnergy(2);
+
+		const lavaArboll = new CardInGame(byName('Lava Arboll'), ACTIVE_PLAYER);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER);
+
+		// Naroom player
+		const pruitt = new CardInGame(byName('Pruitt'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER).addEnergy(1);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaAq, weebo], [barak]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([pruitt]);
+		gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).add([lavaArboll, lavaBalamant]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: barak,
+			power: barak.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerAction);
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptParams.cards).toHaveLength(2);
+
+		const resolveAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			cards: [lavaBalamant.id, lavaArboll.id],
+			generatedBy: barak.id,
+		};
+
+		gameState.update(resolveAction);
+		expect(gameState.state.prompt).toEqual(false);
+		expect(gameState.state.spellMetaData[barak.id].rearrangedCards).toEqual([lavaBalamant.id, lavaArboll.id]);
+		// Make sure first 4 cards are rearranged in reverse, just as we chose
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).cards.map(card => card.card.name)).toEqual(['Lava Balamant', 'Lava Arboll']);
 	});
 });

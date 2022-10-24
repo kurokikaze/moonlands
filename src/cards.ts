@@ -181,6 +181,8 @@ import {
 	CALCULATION_MULTIPLY,
   EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP,
   SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY,
+  PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
+  EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -199,6 +201,7 @@ import {
 	RestrictionObjectType,
 	ZoneType,
 } from './types';
+import { PromptTypeRearrangeCardsOfZone } from './types/prompt';
 
 const effect = (data: any): EffectType => ({
 	type: ACTION_EFFECT,
@@ -250,7 +253,17 @@ type DistributeDamagePromptParams = {
 	variable?: string;
 }
 
-type PromptParamsType = PromptParams | DistributeEnergyPromptParams | RearrangeEnergyPromptParams | UpToNCardsPromptParams | DistributeDamagePromptParams;
+type RearrangeCardsPromptParams = {
+  promptType: typeof PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE;
+  promptParams: {
+    zone: ZoneType | string;
+    zoneOwner: number | string;
+    numberOfCards: number | string;
+  };
+  variable?: string;
+}
+
+type PromptParamsType = PromptParams | DistributeEnergyPromptParams | RearrangeEnergyPromptParams | UpToNCardsPromptParams | DistributeDamagePromptParams | RearrangeCardsPromptParams;
 
 const prompt = (data: PromptParamsType): PromptType => {
 	switch (data.promptType) {
@@ -264,6 +277,11 @@ const prompt = (data: PromptParamsType): PromptType => {
 				type: ACTION_ENTER_PROMPT,
 				...data,
 			};
+    case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE:
+      return {
+        type: ACTION_ENTER_PROMPT,
+        ...data,
+      }
 	}
 	return ({
 		type: ACTION_ENTER_PROMPT,
@@ -5530,6 +5548,35 @@ export const cards = [
             effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
             target: '$creatureWithLeastEnergy',
             amount: 2,
+          }),
+        ]
+			},
+		],
+	}),
+  new Card('Barak', TYPE_MAGI, REGION_CALD, null, {
+		energize: 5,
+		startingEnergy: 17,
+    startingCards: ['Arbolit', 'Lava Balamant', 'Thermal Blast'],
+		powers: [
+			{
+				name: 'Prophecy',
+        cost: 0,
+				text: 'Look at the top four cards of your deck. Replace them in any order you wish.',
+        effects: [
+          prompt({
+            promptType: PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
+            promptParams: {
+              zone: ZONE_TYPE_DECK,
+              zoneOwner: '$player',
+              numberOfCards: 4,
+            },
+            variable: 'rearrangedCards',
+          }),
+          effect({
+            effectType: EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
+            zone: ZONE_TYPE_DECK,
+            zoneOwner: '$player',
+            cards: '$rearrangedCards',
           }),
         ]
 			},

@@ -230,6 +230,8 @@ import {
 	CALCULATION_MULTIPLY,
   EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP,
   PROTECTION_TYPE_ENERGY_LOSS,
+  PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
+  EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
 } from './const';
 
 import {showAction} from './logAction';
@@ -2635,6 +2637,20 @@ export class State {
 							};
 							break;
 						}
+            case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {
+              const zone = this.getMetaValue(action.promptParams.zone, action.generatedBy);
+							const zoneOwner = this.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
+							const numberOfCards = this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
+              const zoneContent = this.getZone(zone, zoneOwner).cards;
+              const cards = zoneContent.slice(0, numberOfCards);
+              promptParams = {
+								zone,
+								zoneOwner,
+								numberOfCards,
+								cards: cards.map(convertCard),
+							};
+              break;
+            }
 						case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
 							if (action.restrictions) {
 								const restrictionsWithValues = action.restrictions.map(({ type, value }: RestrictionObjectType) => ({
@@ -2787,6 +2803,16 @@ export class State {
 								}
 								break;
 							}
+              case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {
+                if ('cards' in action && action.cards) {
+									if (this.state.promptParams.cards.length !== action.cards.length) {
+                    console.error('Number of cards is wrong')
+										return false;
+									}
+                  currentActionMetaData[variable || 'cardsOrder'] = action.cards;
+                }
+                break;
+              }
 							case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
 								if ('cards' in action && action.cards) {
                   const expectedNumber = this.state?.promptParams?.numberOfCards || 0
@@ -4620,6 +4646,28 @@ export class State {
 							});
 							break;
 						}
+            case EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE: {
+              const zone = this.getMetaValue(action.zone, action.generatedBy);
+							const zoneOwner = this.getMetaValue(action.zoneOwner, action.generatedBy);
+							// const numberOfCards = this.getMetaValue(action.numberOfCards, action.generatedBy);
+              const zoneContent = this.getZone(zone, zoneOwner).cards;
+
+              const cardsOrder: string[] = this.getMetaValue(action.cards, action.generatedBy);
+              const cardsToRearrange: Record<string, CardInGame> = {}
+
+              for (let i = 0; i < cardsOrder.length; i++) {
+                if (i >= zoneContent.length) break;
+                const currentCard = zoneContent[i]
+                cardsToRearrange[currentCard.id] = currentCard;
+              }
+              const newZoneContent = [
+                ...cardsOrder.map(id => cardsToRearrange[id]),
+                ...zoneContent.slice(cardsOrder.length),
+              ]
+
+              this.getZone(zone, zoneOwner).cards = newZoneContent;
+              break;
+            }
 					}
 					break;
 				}

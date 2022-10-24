@@ -26,8 +26,12 @@ export type ResolvePlayerPrompt = ResolvePromptInterface & {
     targetPlayer: number;
 };
 
+export type ResolveRearrangeCardsPrompt = ResolvePromptInterface & {
+  cardsOrder: string[];
+};
+
 export type ResolvePromptType = ResolvePromptInterface & {
     number?: number | string;
     cards?: CardInGame[];
     target?: CardInGame;
-} | ResolveRearrangeEnergyPrompt | ResolveDistributeEnergyPrompt | ResolveDistributeDamagePrompt | ResolvePlayerPrompt;
+} | ResolveRearrangeEnergyPrompt | ResolveDistributeEnergyPrompt | ResolveDistributeDamagePrompt | ResolvePlayerPrompt | ResolveRearrangeCardsPrompt;

@@ -108,7 +108,6 @@ import {
 	createZones,
 } from './utils.js';
 import nanoid from 'nanoid';
-import clone from '../src/clone';
 
 describe('Updating state with action', () => {
 	it('Pass action', () => {

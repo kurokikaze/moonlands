@@ -1360,13 +1360,13 @@ describe('Coral Hyren', () => {
 		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_SINGLE_CREATURE_FILTERED, 'Engine waits for Creature with specified parameters');
 		expect(gameState.state.promptParams).toEqual(
 			{
-        restrictions: [
-          {
-            type: RESTRICTION_REGION,
-            value: REGION_OROTHE,
-          }
-        ],
-      },
+				restrictions: [
+					{
+						type: RESTRICTION_REGION,
+						value: REGION_OROTHE,
+					}
+				],
+			},
 			'Engine wants us to choose specifically Orothe creature',
 		);
 

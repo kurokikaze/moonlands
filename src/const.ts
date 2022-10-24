@@ -170,6 +170,7 @@ export const EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT = 'effects/create_continuous_e
 export const EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES = 'effects/rearrange_energy_on_creatures';
 export const EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES = 'effects/distribute_energy_on_creatures';
 export const EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES = 'effects/distribute_damage_on_creatures';
+export const EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE = 'effects/rearrange_cards_of_zone';
 
 export const EXPIRATION_OPPONENT_TURNS = 'expiration/opponents_turns';
 export const EXPIRATION_PLAYER_TURNS = 'expirations/players_turns';
@@ -201,6 +202,7 @@ export const PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES = 'prompt/rearrange_energ
 export const PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES = 'prompt/distribute_energy_on_creatures';
 export const PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES = 'prompt/distribute_damage_on_creatures';
 export const PROMPT_TYPE_PLAYER = 'prompt/player';
+export const PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE = 'prompt/rearrange_cards_of_zone';
 
 export const RESTRICTION_TYPE ='restrictions/type';
 export const RESTRICTION_ENERGY_LESS_THAN_STARTING = 'restrictions/energy_less_than_starting';

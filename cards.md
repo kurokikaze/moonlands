@@ -101,6 +101,7 @@ Done: **170** cards out of **190**
 - Epik
 - Vulbor
 - Gar
+- Barak
 
 # Done, not tested
 
@@ -274,7 +275,6 @@ Done: **170** cards out of **190**
 
 # Not done yet
 
-- Barak (looking at cards and rearranging them)
 - Bisiwog (overriding game continuous effect)
 - Colossus (protection)
 - Energy Band (using only before attack, must attack if able)

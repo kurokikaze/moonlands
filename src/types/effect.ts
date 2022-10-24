@@ -64,6 +64,7 @@ import {
 	EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
 	EFFECT_TYPE_DRAW_N_CARDS,
 	EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
+  EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
 } from '../const';
 
 export type EffectTypeType =
@@ -448,6 +449,14 @@ type ReturnCreatureReturningEnergyEffect = ActionEffect & {
   target: string | CardInGame;
 }
 
+type RearrangeCardsOfZoneEffect = ActionEffect & {
+  effectType: typeof EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE;
+  zone: ZoneType | string;
+  zoneOwner: number | string;
+  numberOfCards: number | string;
+  cards: string[] | string;
+}
+
 export type EffectType = ActionEffect & {
 	effectType: EffectTypeStillInUse;
 	generatedBy?: string;
@@ -502,4 +511,5 @@ export type EffectType = ActionEffect & {
 	DistributeDamageEffect |
   DiscardRelicFromPlayEffect |
   ReturnCreatureReturningEnergyEffect |
-  DiscardCreatureFromPlayEffect;
+  DiscardCreatureFromPlayEffect |
+  RearrangeCardsOfZoneEffect;
