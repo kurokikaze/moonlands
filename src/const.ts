@@ -69,6 +69,7 @@ export const SELECTOR_CREATURES_WITHOUT_STATUS = 'selectors/creatures_without_st
 export const SELECTOR_STATUS = 'selectors/status';
 export const SELECTOR_ID = 'selectors/id';
 export const SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY = 'selectors/own_creature_with_least_energy';
+export const SELECTOR_NTH_CARD_OF_ZONE = 'selectors/nth_card_of_zone';
 
 export const STATUS_BURROWED = 'status/burrowed';
 export const STATUS_FROZEN = 'status/frozen';

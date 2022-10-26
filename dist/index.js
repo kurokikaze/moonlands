@@ -22,7 +22,7 @@ import { Writable } from 'stream';
 import EventEmitter from 'events';
 import nanoid from 'nanoid';
 import { TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, ACTION_PASS, ACTION_PLAY, ACTION_POWER, ACTION_EFFECT, ACTION_SELECT, ACTION_CALCULATE, ACTION_ENTER_PROMPT, ACTION_RESOLVE_PROMPT, ACTION_GET_PROPERTY_VALUE, ACTION_ATTACK, ACTION_PLAYER_WINS, ACTION_CONCEDE, ACTION_TIME_NOTIFICATION, ACTION_EXIT_PROMPTS, ACTION_PROPERTY, PROPERTY_ID, PROPERTY_TYPE, PROPERTY_CONTROLLER, PROPERTY_ENERGY_COUNT, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, PROPERTY_POWER_COST, PROPERTY_CREATURE_TYPES, PROPERTY_STATUS_WAS_ATTACKED, PROPERTY_STATUS_DEFEATED_CREATURE, PROPERTY_ENERGY_LOSS_THRESHOLD, PROPERTY_STATUS, PROPERTY_ABLE_TO_ATTACK, PROPERTY_MAGI_NAME, PROPERTY_CAN_BE_ATTACKED, CALCULATION_SET, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, CALCULATION_HALVE_ROUND_DOWN, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_MAX, SELECTOR_CREATURES, SELECTOR_MAGI, SELECTOR_CREATURES_AND_MAGI, SELECTOR_RELICS, SELECTOR_OWN_MAGI, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_MAGI_OF_REGION, SELECTOR_OPPONENT_ID, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_OWN_SPELLS_IN_HAND, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, SELECTOR_CREATURES_OF_TYPE, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_OTHER_CREATURES_OF_TYPE, SELECTOR_STATUS, SELECTOR_OWN_CREATURES_WITH_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_ID, SELECTOR_CREATURES_OF_PLAYER, SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY, STATUS_BURROWED, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_RELIC, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_OWN_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_CHOOSE_CARDS, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_MAGI_WITHOUT_CREATURES, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_PLAYER, NO_PRIORITY, PRIORITY_PRS, PRIORITY_ATTACK, PRIORITY_CREATURES, EFFECT_TYPE_START_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_DRAW, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_PLAY_CREATURE, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_DAMAGE_STEP, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_RELIC_ENTERS_PLAY, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE, EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC, EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_DEFEAT_MAGI, EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY, EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_PAYING_ENERGY_FOR_POWER, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_CREATURE_IS_DEFEATED, // Possibly redundant
-EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_ATTACKER_DEALS_DAMAGE, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_IS_ATTACKED, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_DRAW_REST_OF_CARDS, EFFECT_TYPE_DISCARD_CARDS_FROM_HAND, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_CONDITIONAL, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_ATTACK, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, REGION_UNIVERSAL, RESTRICTION_TYPE, RESTRICTION_REGION, RESTRICTION_ENERGY_LESS_THAN_STARTING, RESTRICTION_ENERGY_LESS_THAN, RESTRICTION_CREATURE_TYPE, RESTRICTION_OWN_CREATURE, RESTRICTION_OPPONENT_CREATURE, RESTRICTION_PLAYABLE, RESTRICTION_CREATURE_WAS_ATTACKED, RESTRICTION_MAGI_WITHOUT_CREATURES, RESTRICTION_STATUS, RESTRICTION_REGION_IS_NOT, RESTRICTION_ENERGY_EQUALS, COST_X, COST_X_PLUS_ONE, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, LOG_ENTRY_PLAY, LOG_ENTRY_DRAW, LOG_ENTRY_CHOOSES_STARTING_CARDS, LOG_ENTRY_POWER_ACTIVATION, LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY, LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY, LOG_ENTRY_TARGETING, LOG_ENTRY_NUMBER_CHOICE, LOG_ENTRY_ATTACK, LOG_ENTRY_CREATURE_ENERGY_LOSS, LOG_ENTRY_MAGI_ENERGY_LOSS, LOG_ENTRY_CREATURE_ENERGY_GAIN, LOG_ENTRY_MAGI_ENERGY_GAIN, LOG_ENTRY_MAGI_DEFEATED, ACTION_NONE, EXPIRATION_ANY_TURNS, EXPIRATION_NEVER, EXPIRATION_OPPONENT_TURNS, PROTECTION_FROM_POWERS, PROTECTION_FROM_SPELLS, PROTECTION_TYPE_DISCARDING_FROM_PLAY, PROTECTION_TYPE_GENERAL, CARD_COUNT, EFFECT_TYPE_DRAW_N_CARDS, EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROPERTY_PROTECTION, PROTECTION_FROM_ATTACKS, CALCULATION_MULTIPLY, EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP, PROTECTION_TYPE_ENERGY_LOSS, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, } from './const';
+EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_ATTACKER_DEALS_DAMAGE, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_IS_ATTACKED, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_DRAW_REST_OF_CARDS, EFFECT_TYPE_DISCARD_CARDS_FROM_HAND, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_CONDITIONAL, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_ATTACK, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, REGION_UNIVERSAL, RESTRICTION_TYPE, RESTRICTION_REGION, RESTRICTION_ENERGY_LESS_THAN_STARTING, RESTRICTION_ENERGY_LESS_THAN, RESTRICTION_CREATURE_TYPE, RESTRICTION_OWN_CREATURE, RESTRICTION_OPPONENT_CREATURE, RESTRICTION_PLAYABLE, RESTRICTION_CREATURE_WAS_ATTACKED, RESTRICTION_MAGI_WITHOUT_CREATURES, RESTRICTION_STATUS, RESTRICTION_REGION_IS_NOT, RESTRICTION_ENERGY_EQUALS, COST_X, COST_X_PLUS_ONE, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, LOG_ENTRY_PLAY, LOG_ENTRY_DRAW, LOG_ENTRY_CHOOSES_STARTING_CARDS, LOG_ENTRY_POWER_ACTIVATION, LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY, LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY, LOG_ENTRY_TARGETING, LOG_ENTRY_NUMBER_CHOICE, LOG_ENTRY_ATTACK, LOG_ENTRY_CREATURE_ENERGY_LOSS, LOG_ENTRY_MAGI_ENERGY_LOSS, LOG_ENTRY_CREATURE_ENERGY_GAIN, LOG_ENTRY_MAGI_ENERGY_GAIN, LOG_ENTRY_MAGI_DEFEATED, ACTION_NONE, EXPIRATION_ANY_TURNS, EXPIRATION_NEVER, EXPIRATION_OPPONENT_TURNS, PROTECTION_FROM_POWERS, PROTECTION_FROM_SPELLS, PROTECTION_TYPE_DISCARDING_FROM_PLAY, PROTECTION_TYPE_GENERAL, CARD_COUNT, EFFECT_TYPE_DRAW_N_CARDS, EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROPERTY_PROTECTION, PROTECTION_FROM_ATTACKS, CALCULATION_MULTIPLY, EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP, PROTECTION_TYPE_ENERGY_LOSS, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, SELECTOR_NTH_CARD_OF_ZONE, } from './const';
 import { showAction } from './logAction';
 import clone from './clone';
 import { byName } from './cards';
@@ -674,6 +674,17 @@ var State = /** @class */ (function () {
             return value;
         }
     };
+    State.prototype.selectNthCardOfZone = function (player, zoneType, cardNumber, restrictions) {
+        var zoneCards = this.getZone(zoneType, player).cards;
+        var filteredCards = (restrictions && restrictions.length) ? zoneCards.filter(this.makeCardFilter(restrictions)) : zoneCards;
+        var index = cardNumber - 1; // 1-based indexing, for better card data readability
+        if (filteredCards.length < index + 1) {
+            return [];
+        }
+        else {
+            return [filteredCards[index]];
+        }
+    };
     State.prototype.useSelector = function (selector, player, argument) {
         var _this = this;
         switch (selector) {
@@ -1304,7 +1315,15 @@ var State = /** @class */ (function () {
             return false;
         }
         var conditions = find.conditions.map(function (condition) {
-            return _this.checkCondition(action, self, condition);
+            var result = false;
+            try {
+                result = _this.checkCondition(action, self, condition);
+            }
+            catch (e) {
+                console.log('Failure checking condition');
+                console.dir(condition);
+            }
+            return result;
         });
         return conditions.every(function (result) { return result === true; });
     };
@@ -2147,6 +2166,13 @@ var State = /** @class */ (function () {
                         }
                         case SELECTOR_CREATURES_WITHOUT_STATUS: {
                             result = this_1.useSelector(SELECTOR_CREATURES_WITHOUT_STATUS, null, action.status);
+                            break;
+                        }
+                        case SELECTOR_NTH_CARD_OF_ZONE: {
+                            var zoneOwner = this_1.getMetaValue(action.zoneOwner, action.generatedBy);
+                            var zoneType = this_1.getMetaValue(action.zone, action.generatedBy);
+                            var cardNumber = this_1.getMetaValue(action.cardNumber, action.generatedBy);
+                            result = this_1.selectNthCardOfZone(zoneOwner, zoneType, cardNumber, action.restrictions);
                             break;
                         }
                         // This selector is special
@@ -3111,34 +3137,36 @@ var State = /** @class */ (function () {
                                 throw new Error('Invalid params for EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
                             }
                             var zoneChangingTargets = this_1.getMetaValue(action.target, action.generatedBy);
-                            // We assume all cards changing zones are in one zone intially
-                            var zoneOwner = zoneChangingTargets[0].owner;
-                            var sourceZoneType_1 = this_1.getMetaValue(action.sourceZone, action.generatedBy);
-                            var sourceZone_1 = this_1.getZone(sourceZoneType_1, sourceZoneType_1 === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
-                            var destinationZoneType_1 = this_1.getMetaValue(action.destinationZone, action.generatedBy);
-                            var destinationZone_1 = this_1.getZone(destinationZoneType_1, destinationZoneType_1 === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
-                            var newCards_1 = [];
-                            oneOrSeveral(zoneChangingTargets, function (zoneChangingCard) {
-                                var newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner);
-                                if (action.bottom) {
-                                    destinationZone_1.add([newObject]);
-                                }
-                                else {
-                                    destinationZone_1.addToTop([newObject]);
-                                }
-                                sourceZone_1.removeById(zoneChangingCard.id);
-                                newCards_1.push(newObject);
-                                _this.transformIntoActions({
-                                    type: ACTION_EFFECT,
-                                    effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
-                                    sourceCard: zoneChangingCard,
-                                    sourceZone: sourceZoneType_1,
-                                    destinationCard: newObject,
-                                    destinationZone: destinationZoneType_1,
-                                    generatedBy: action.generatedBy,
+                            if (zoneChangingTargets.length) {
+                                // We assume all cards changing zones are in one zone initially
+                                var zoneOwner = zoneChangingTargets[0].owner;
+                                var sourceZoneType_1 = this_1.getMetaValue(action.sourceZone, action.generatedBy);
+                                var sourceZone_1 = this_1.getZone(sourceZoneType_1, sourceZoneType_1 === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
+                                var destinationZoneType_1 = this_1.getMetaValue(action.destinationZone, action.generatedBy);
+                                var destinationZone_1 = this_1.getZone(destinationZoneType_1, destinationZoneType_1 === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
+                                var newCards_1 = [];
+                                oneOrSeveral(zoneChangingTargets, function (zoneChangingCard) {
+                                    var newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner);
+                                    if (action.bottom) {
+                                        destinationZone_1.add([newObject]);
+                                    }
+                                    else {
+                                        destinationZone_1.addToTop([newObject]);
+                                    }
+                                    sourceZone_1.removeById(zoneChangingCard.id);
+                                    newCards_1.push(newObject);
+                                    _this.transformIntoActions({
+                                        type: ACTION_EFFECT,
+                                        effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
+                                        sourceCard: zoneChangingCard,
+                                        sourceZone: sourceZoneType_1,
+                                        destinationCard: newObject,
+                                        destinationZone: destinationZoneType_1,
+                                        generatedBy: action.generatedBy,
+                                    });
                                 });
-                            });
-                            this_1.setSpellMetaDataField('new_cards', newCards_1, action.generatedBy);
+                                this_1.setSpellMetaDataField('new_cards', newCards_1, action.generatedBy);
+                            }
                             break;
                         }
                         case EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES: {
@@ -3148,28 +3176,30 @@ var State = /** @class */ (function () {
                             }
                             var zoneChangingTarget = this_1.getMetaValue(action.target, action.generatedBy);
                             var zoneChangingCard = (zoneChangingTarget instanceof Array) ? zoneChangingTarget[0] : zoneChangingTarget;
-                            var sourceZoneType = this_1.getMetaValue(action.sourceZone, action.generatedBy);
-                            var destinationZoneType = this_1.getMetaValue(action.destinationZone, action.generatedBy);
-                            var destinationZone = this_1.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
-                            var sourceZone = this_1.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
-                            var newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner);
-                            if (action.bottom) {
-                                destinationZone.add([newObject]);
+                            if (zoneChangingCard) {
+                                var sourceZoneType = this_1.getMetaValue(action.sourceZone, action.generatedBy);
+                                var destinationZoneType = this_1.getMetaValue(action.destinationZone, action.generatedBy);
+                                var destinationZone = this_1.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
+                                var sourceZone = this_1.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
+                                var newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner);
+                                if (action.bottom) {
+                                    destinationZone.add([newObject]);
+                                }
+                                else {
+                                    destinationZone.addToTop([newObject]);
+                                }
+                                sourceZone.removeById(zoneChangingCard.id);
+                                this_1.setSpellMetaDataField('new_card', newObject, action.generatedBy);
+                                this_1.transformIntoActions({
+                                    type: ACTION_EFFECT,
+                                    effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
+                                    sourceCard: zoneChangingCard,
+                                    sourceZone: sourceZoneType,
+                                    destinationCard: newObject,
+                                    destinationZone: destinationZoneType,
+                                    generatedBy: action.generatedBy,
+                                });
                             }
-                            else {
-                                destinationZone.addToTop([newObject]);
-                            }
-                            sourceZone.removeById(zoneChangingCard.id);
-                            this_1.setSpellMetaDataField('new_card', newObject, action.generatedBy);
-                            this_1.transformIntoActions({
-                                type: ACTION_EFFECT,
-                                effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
-                                sourceCard: zoneChangingCard,
-                                sourceZone: sourceZoneType,
-                                destinationCard: newObject,
-                                destinationZone: destinationZoneType,
-                                generatedBy: action.generatedBy,
-                            });
                             break;
                         }
                         case EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES: {
@@ -3248,12 +3278,12 @@ var State = /** @class */ (function () {
                             break;
                         }
                         case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI: {
-                            var discardMiltiTarget = this_1.getMetaValue(action.target, action.generatedBy);
+                            var discardMultiTarget = this_1.getMetaValue(action.target, action.generatedBy);
                             var source_3 = action.source;
                             if (!source_3) {
                                 break;
                             }
-                            oneOrSeveral(discardMiltiTarget, function (target) {
+                            oneOrSeveral(discardMultiTarget, function (target) {
                                 switch (target.card.type) {
                                     case TYPE_CREATURE:
                                         _this.transformIntoActions({

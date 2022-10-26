@@ -66,6 +66,7 @@ export var SELECTOR_CREATURES_WITHOUT_STATUS = 'selectors/creatures_without_stat
 export var SELECTOR_STATUS = 'selectors/status';
 export var SELECTOR_ID = 'selectors/id';
 export var SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY = 'selectors/own_creature_with_least_energy';
+export var SELECTOR_NTH_CARD_OF_ZONE = 'selectors/nth_card_of_zone';
 export var STATUS_BURROWED = 'status/burrowed';
 export var STATUS_FROZEN = 'status/frozen';
 export var CALCULATION_SET = 'calculations/set';

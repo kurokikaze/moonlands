@@ -1,4 +1,4 @@
-import { Region, StatusType } from "./common";
+import { Region, RestrictionObjectType, StatusType, ZoneType } from "./common";
 import { 
     ACTION_SELECT,
 
@@ -31,6 +31,7 @@ import {
     SELECTOR_CREATURES_WITHOUT_STATUS,
     SELECTOR_STATUS,
     SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY,
+    SELECTOR_NTH_CARD_OF_ZONE,
 } from "../const";
 
 export type SelectorParams = {
@@ -238,6 +239,16 @@ type SelectOwnCreatureOfLeastEnergyParams = {
 
 type SelectOwnCreatureOfLeastEnergy = SelectAction & SelectOwnCreatureOfLeastEnergyParams;
 
+type SelectNthCardParams = {
+  selector: typeof SELECTOR_NTH_CARD_OF_ZONE;
+  zone: ZoneType | string;
+  zoneOwner: number | string;
+  cardNumber: number | string;
+  restrictions?: RestrictionObjectType[];
+}
+
+type SelectNthCard = SelectAction & SelectNthCardParams;
+
 export type RefinedSelectParams = SelectCreaturesOfTypeParams |
     SelectOtherCreaturesOfTypeParams |
     SelectCreaturesNotOfTypeParams |
@@ -260,7 +271,8 @@ export type RefinedSelectParams = SelectCreaturesOfTypeParams |
     SelectOwnCardsWithEnergizeRateParams |
     SelectCardsWithEnergizeRateParams |
     SelectCreaturesAndMagiParams |
-    SelectOwnCreatureOfLeastEnergyParams;
+    SelectOwnCreatureOfLeastEnergyParams |
+    SelectNthCardParams;
 
 export type SelectType = SelectCreatures |
     SelectMagi |
@@ -285,4 +297,5 @@ export type SelectType = SelectCreatures |
     SelectEnemyCreatures |
     SelectOwnMagi |
     SelectEnemyMagi |
-    SelectOwnCreatureOfLeastEnergy;
+    SelectOwnCreatureOfLeastEnergy |
+    SelectNthCard;

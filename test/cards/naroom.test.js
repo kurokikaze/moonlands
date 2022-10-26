@@ -1506,3 +1506,88 @@ describe('Evu', () => {
 		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(3, 'Active player drawn 3 cards');
 	});
 });
+
+describe('Twee', () => {
+	it('Regrow', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const greatCarillion = new CardInGame(byName('Giant Carillion'), ACTIVE_PLAYER).addEnergy(8);
+		const twee = new CardInGame(byName('Twee'), NON_ACTIVE_PLAYER).addEnergy(2);
+		const arboll = new CardInGame(byName('Arboll'), NON_ACTIVE_PLAYER);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [greatCarillion, twee]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).add([arboll]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: greatCarillion,
+			power: greatCarillion.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_SINGLE_CREATURE,
+			target: twee,
+			generatedBy: greatCarillion.id,
+		};
+
+		gameState.update(powerAction);
+		gameState.update(targetingAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'Only one creature in play');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Giant Carillion', 'It is Giant Carillion');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1, 'One card in Player 2 discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Twee', 'It is Twee');
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(1, 'One card in Player 2 hand');
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).card.card.name).toEqual('Arboll', 'It is Arboll');
+	});
+
+	it('Regrow (no cards to regrow)', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const greatCarillion = new CardInGame(byName('Giant Carillion'), ACTIVE_PLAYER).addEnergy(8);
+		const twee = new CardInGame(byName('Twee'), NON_ACTIVE_PLAYER).addEnergy(2);
+		const arboll = new CardInGame(byName('Arboll'), NON_ACTIVE_PLAYER);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [greatCarillion, twee]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).add([]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: greatCarillion,
+			power: greatCarillion.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_SINGLE_CREATURE,
+			target: twee,
+			generatedBy: greatCarillion.id,
+		};
+
+		gameState.update(powerAction);
+		gameState.update(targetingAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'Only one creature in play');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Giant Carillion', 'It is Giant Carillion');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1, 'One card in Player 2 discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Twee', 'It is Twee');
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(0, 'No cards in Player 2 hand');
+	});
+});

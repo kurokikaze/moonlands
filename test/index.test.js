@@ -40,6 +40,7 @@ import {
 	SELECTOR_STATUS,
 	SELECTOR_ID,
 	SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY,
+	SELECTOR_NTH_CARD_OF_ZONE,
 
 	REGION_NAROOM,
 	REGION_CALD,
@@ -2485,6 +2486,179 @@ describe('Selector actions', () => {
 
 		const selectedCreature = gameState.state.spellMetaData[GENERATED_BY].leastEnergy;
 		expect(selectedCreature.card.name).toEqual('Lava Balamant', 'Creature selector returns only Lava Balamant');
+	});
+
+	it('SELECTOR_NTH_CARD_OF_ZONE', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+		const GENERATED_BY = 123;
+
+		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
+		const xyxElder = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER);
+		const opponentsXyx = new CardInGame(byName('Xyx'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const zones = [
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In Play', ZONE_TYPE_IN_PLAY, null).add([opponentsXyx]),
+			new Zone('Player 1 Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER).add([xyx, xyxElder, lavaBalamant]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const selectNthCardAction = {
+			type: ACTION_SELECT,
+			selector: SELECTOR_NTH_CARD_OF_ZONE,
+			zone: ZONE_TYPE_DISCARD,
+			zoneOwner: ACTIVE_PLAYER,
+			cardNumber: 1,
+			player: ACTIVE_PLAYER,
+			generatedBy: GENERATED_BY,
+		};
+
+		gameState.update(selectNthCardAction);
+
+		const selectedCreatures = gameState.state.spellMetaData[GENERATED_BY].selected;
+
+		expect(selectedCreatures).toHaveLength(1, 'Selector returns only one creature');
+		expect(selectedCreatures[0].card.name).toEqual('Xyx', 'Selector returns only Xyx');
+	});
+
+	it('SELECTOR_NTH_CARD_OF_ZONE (3rd card)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+		const GENERATED_BY = 123;
+
+		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
+		const xyxElder = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER);
+		const opponentsXyx = new CardInGame(byName('Xyx'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const zones = [
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In Play', ZONE_TYPE_IN_PLAY, null).add([opponentsXyx]),
+			new Zone('Player 1 Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER).add([xyx, xyxElder, lavaBalamant]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const selectNthCardAction = {
+			type: ACTION_SELECT,
+			selector: SELECTOR_NTH_CARD_OF_ZONE,
+			zone: ZONE_TYPE_DISCARD,
+			zoneOwner: ACTIVE_PLAYER,
+			cardNumber: 3,
+			player: ACTIVE_PLAYER,
+			generatedBy: GENERATED_BY,
+		};
+
+		gameState.update(selectNthCardAction);
+
+		const selectedCreatures = gameState.state.spellMetaData[GENERATED_BY].selected;
+
+		expect(selectedCreatures).toHaveLength(1, 'Selector returns only one creature');
+		expect(selectedCreatures[0].card.name).toEqual('Lava Balamant', 'Selector returns only Lava Balamant');
+	});
+
+	it('SELECTOR_NTH_CARD_OF_ZONE (no such card)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+		const GENERATED_BY = 123;
+
+		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
+		const xyxElder = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER).addEnergy(3);
+		const opponentsXyx = new CardInGame(byName('Xyx'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const zones = [
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In Play', ZONE_TYPE_IN_PLAY, null).add([lavaBalamant, opponentsXyx]),
+			new Zone('Player 1 Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER).add([xyx, xyxElder]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const selectNthCardAction = {
+			type: ACTION_SELECT,
+			selector: SELECTOR_NTH_CARD_OF_ZONE,
+			zone: ZONE_TYPE_DISCARD,
+			zoneOwner: ACTIVE_PLAYER,
+			cardNumber: 3,
+			player: ACTIVE_PLAYER,
+			generatedBy: GENERATED_BY,
+		};
+
+		gameState.update(selectNthCardAction);
+
+		const selectedCreatures = gameState.state.spellMetaData[GENERATED_BY].selected;
+
+		expect(selectedCreatures).toHaveLength(0, 'Selector returns no cards');
+	});
+
+	it('SELECTOR_NTH_CARD_OF_ZONE (restriction)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+		const GENERATED_BY = 123;
+
+		const flameGeyser = new CardInGame(byName('Flame Geyser'), ACTIVE_PLAYER);
+		const flameControl = new CardInGame(byName('Flame Control'), ACTIVE_PLAYER);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER);
+		const opponentsXyx = new CardInGame(byName('Xyx'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const zones = [
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In Play', ZONE_TYPE_IN_PLAY, null).add([opponentsXyx, lavaBalamant]),
+			new Zone('Player 1 Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER).add([flameGeyser, lavaBalamant, flameControl]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const selectNthCardAction = {
+			type: ACTION_SELECT,
+			selector: SELECTOR_NTH_CARD_OF_ZONE,
+			zone: ZONE_TYPE_DISCARD,
+			zoneOwner: ACTIVE_PLAYER,
+			restrictions: [
+				{
+					type: RESTRICTION_TYPE,
+					value: TYPE_CREATURE,
+				},
+			],
+			cardNumber: 1,
+			player: ACTIVE_PLAYER,
+			generatedBy: GENERATED_BY,
+		};
+
+		gameState.update(selectNthCardAction);
+
+		const selectedCreatures = gameState.state.spellMetaData[GENERATED_BY].selected;
+
+		expect(selectedCreatures).toHaveLength(1, 'Selector returns only one card');
+		expect(selectedCreatures[0].card.name).toEqual('Lava Balamant', 'Selector returns only Lava Balamant');
 	});
 });
 

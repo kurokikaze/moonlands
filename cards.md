@@ -1,4 +1,4 @@
-Done: **170** cards out of **190**
+Done: **171** card out of **190**
 
 # Done, tested
 
@@ -102,6 +102,7 @@ Done: **170** cards out of **190**
 - Vulbor
 - Gar
 - Barak
+- Twee
 
 # Done, not tested
 
@@ -291,7 +292,6 @@ Done: **170** cards out of **190**
 - Syphon Vortex (Cost X plus 4)
 - Tap Roots (selecting two creatures)
 - Tidal Wave (additional cost while spell resolves)
-- Twee (selecting first card of type in zone)
 - Vaal (not losing energy from attack)
 - Wence (showing cards to opponent)
 - Will of Orothe (controlling other player)

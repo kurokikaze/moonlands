@@ -183,6 +183,7 @@ import {
   SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY,
   PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
   EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
+  SELECTOR_NTH_CARD_OF_ZONE,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -4189,6 +4190,57 @@ export const cards = [
 			},
 		],
 	}),
+  new Card('Twee', TYPE_CREATURE, REGION_CALD, 1, {
+    triggerEffects: [
+      {
+        name: 'Regrow',
+        text: 'If Twee is put into your discard pile from play, move the first Creature card under Twee into your hand',
+        find: {
+          effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+          conditions: [
+            CONDITION_TARGET_IS_SELF,
+            {
+              objectOne: 'sourceZone',
+              propertyOne: ACTION_PROPERTY,
+              comparator: '=',
+              objectTwo: ZONE_TYPE_IN_PLAY,
+              propertyTwo: null,
+            },
+            {
+              objectOne: 'destinationZone',
+              propertyOne: ACTION_PROPERTY,
+              comparator: '=',
+              objectTwo: ZONE_TYPE_DISCARD,
+              propertyTwo: null,
+            },
+          ],
+        },
+        effects: [
+          getPropertyValue({
+            target: '%target',
+            property: PROPERTY_CONTROLLER,
+            variable: 'twee_controller'
+          }),
+          select({
+            selector: SELECTOR_NTH_CARD_OF_ZONE,
+            zone: ZONE_TYPE_DISCARD,
+            zoneOwner: '$twee_controller',
+            cardNumber: 2, // It will be a second card, because first is Twee itself (the triggered ability happens after the fact)
+            restrictions: [{
+              type: RESTRICTION_TYPE,
+              value: TYPE_CREATURE,
+            }],
+          }),
+          effect({
+            effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+            sourceZone: ZONE_TYPE_DISCARD,
+            destinationZone: ZONE_TYPE_HAND,
+            target: '$selected',
+          }),
+        ],
+      }
+    ]
+  }),
 	new Card('Bwill', TYPE_CREATURE, REGION_OROTHE, 1, {
 		triggerEffects: [
 			{

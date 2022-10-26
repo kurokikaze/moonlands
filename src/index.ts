@@ -232,6 +232,7 @@ import {
   PROTECTION_TYPE_ENERGY_LOSS,
   PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
   EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
+  SELECTOR_NTH_CARD_OF_ZONE,
 } from './const';
 
 import {showAction} from './logAction';
@@ -1139,6 +1140,18 @@ export class State {
 		}
 	}
 
+  selectNthCardOfZone(player: number, zoneType: ZoneType, cardNumber: number, restrictions?: RestrictionObjectType[]): CardInGame[] {
+    const zoneCards = this.getZone(zoneType, player).cards;
+    const filteredCards = (restrictions && restrictions.length) ? zoneCards.filter(this.makeCardFilter(restrictions)) : zoneCards;
+    const index = cardNumber - 1; // 1-based indexing, for better card data readability
+
+    if (filteredCards.length < index + 1) {
+      return []
+    } else {
+      return [filteredCards[index]];
+    }
+  }
+
   useSelector(selector: typeof SELECTOR_STATUS, player: null, argument: StatusType): CardInGame[]
   useSelector(selector: typeof SELECTOR_CREATURES_WITHOUT_STATUS, player: null, argument: StatusType): CardInGame[]
   useSelector(selector: typeof SELECTOR_CREATURES, player: null): CardInGame[]
@@ -2003,9 +2016,16 @@ export class State {
 			return false;
 		}
 
-		const conditions = find.conditions.map(condition =>
-			this.checkCondition(action, self, condition),
-		);
+		const conditions = find.conditions.map(condition => {
+      let result = false;
+      try {
+			  result = this.checkCondition(action, self, condition);
+      } catch (e) {
+        console.log('Failure checking condition');
+        console.dir(condition);
+      }
+      return result;
+    });
 
 		return conditions.every(result => result === true);
 	}
@@ -3034,6 +3054,13 @@ export class State {
 							result = this.useSelector(SELECTOR_CREATURES_WITHOUT_STATUS, null, action.status);
 							break;
 						}
+						case SELECTOR_NTH_CARD_OF_ZONE: {
+              const zoneOwner = this.getMetaValue<number>(action.zoneOwner, action.generatedBy);
+              const zoneType = this.getMetaValue<ZoneType>(action.zone, action.generatedBy);
+              const cardNumber = this.getMetaValue<number>(action.cardNumber, action.generatedBy);
+							result = this.selectNthCardOfZone(zoneOwner, zoneType, cardNumber, action.restrictions);
+							break;
+						}
             // This selector is special
             // If there are more than one creature with the same (least) energy, it transforms into the corresponding prompt
             case SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY: {
@@ -3080,7 +3107,6 @@ export class State {
               // @ts-ignore
 							result = this.useSelector(action.selector, action.player);
 						}
-
 					}
 					const variable = action.variable || 'selected';
 					this.setSpellMetaDataField(variable, result, action.generatedBy || nanoid());
@@ -4093,38 +4119,39 @@ export class State {
 								throw new Error('Invalid params for EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
 							}
 							const zoneChangingTargets = this.getMetaValue(action.target, action.generatedBy);
-							// We assume all cards changing zones are in one zone intially
-							const zoneOwner = zoneChangingTargets[0].owner;
+              if (zoneChangingTargets.length) {
+                // We assume all cards changing zones are in one zone initially
+                const zoneOwner = zoneChangingTargets[0].owner;
 
-							const sourceZoneType = this.getMetaValue(action.sourceZone, action.generatedBy);
-							const sourceZone = this.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
-							const destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
-							const destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
-							const newCards: CardInGame[] = [];
+                const sourceZoneType = this.getMetaValue(action.sourceZone, action.generatedBy);
+                const sourceZone = this.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
+                const destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
+                const destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
+                const newCards: CardInGame[] = [];
 
-							oneOrSeveral(zoneChangingTargets, zoneChangingCard => {
-								const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner);
-								if (action.bottom) {
-									destinationZone.add([newObject]);
-								} else {
-									destinationZone.addToTop([newObject]);
-								}
-								sourceZone.removeById(zoneChangingCard.id);
+                oneOrSeveral(zoneChangingTargets, zoneChangingCard => {
+                  const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner);
+                  if (action.bottom) {
+                    destinationZone.add([newObject]);
+                  } else {
+                    destinationZone.addToTop([newObject]);
+                  }
+                  sourceZone.removeById(zoneChangingCard.id);
 
-								newCards.push(newObject);
+                  newCards.push(newObject);
 
-								this.transformIntoActions({
-									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
-									sourceCard: zoneChangingCard,
-									sourceZone: sourceZoneType,
-									destinationCard: newObject,
-									destinationZone: destinationZoneType,
-									generatedBy: action.generatedBy,
-								});
-							});
-							this.setSpellMetaDataField('new_cards', newCards, action.generatedBy);
-
+                  this.transformIntoActions({
+                    type: ACTION_EFFECT,
+                    effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
+                    sourceCard: zoneChangingCard,
+                    sourceZone: sourceZoneType,
+                    destinationCard: newObject,
+                    destinationZone: destinationZoneType,
+                    generatedBy: action.generatedBy,
+                  });
+                });
+                this.setSpellMetaDataField('new_cards', newCards, action.generatedBy);
+              }
 							break;
 						}
 						case EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES: {
@@ -4134,29 +4161,31 @@ export class State {
 							}
 							const zoneChangingTarget = this.getMetaValue(action.target, action.generatedBy);
 							const zoneChangingCard = (zoneChangingTarget instanceof Array) ? zoneChangingTarget[0] : zoneChangingTarget;
-							const sourceZoneType = this.getMetaValue(action.sourceZone, action.generatedBy);
-							const destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
-							const destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
-							const sourceZone = this.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
-							const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner);
-							if (action.bottom) {
-								destinationZone.add([newObject]);
-							} else {
-								destinationZone.addToTop([newObject]);
-							}
+              if (zoneChangingCard) {
+                const sourceZoneType = this.getMetaValue(action.sourceZone, action.generatedBy);
+                const destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
+                const destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
+                const sourceZone = this.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
+                const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner);
+                if (action.bottom) {
+                  destinationZone.add([newObject]);
+                } else {
+                  destinationZone.addToTop([newObject]);
+                }
 
-							sourceZone.removeById(zoneChangingCard.id);
+                sourceZone.removeById(zoneChangingCard.id);
 
-							this.setSpellMetaDataField('new_card', newObject, action.generatedBy);
-							this.transformIntoActions({
-								type: ACTION_EFFECT,
-								effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
-								sourceCard: zoneChangingCard,
-								sourceZone: sourceZoneType,
-								destinationCard: newObject,
-								destinationZone: destinationZoneType,
-								generatedBy: action.generatedBy,
-							});
+                this.setSpellMetaDataField('new_card', newObject, action.generatedBy);
+                this.transformIntoActions({
+                  type: ACTION_EFFECT,
+                  effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
+                  sourceCard: zoneChangingCard,
+                  sourceZone: sourceZoneType,
+                  destinationCard: newObject,
+                  destinationZone: destinationZoneType,
+                  generatedBy: action.generatedBy,
+                });
+              }
 							break;
 						}
 						case EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES: {
@@ -4237,13 +4266,13 @@ export class State {
 							break;
 						}
 						case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI: {
-							const discardMiltiTarget = this.getMetaValue(action.target, action.generatedBy);
+							const discardMultiTarget = this.getMetaValue(action.target, action.generatedBy);
 
               const source = action.source
               if (!source) {
                 break
               }
-							oneOrSeveral(discardMiltiTarget, target => {
+							oneOrSeveral(discardMultiTarget, target => {
 								switch (target.card.type) {
 									case TYPE_CREATURE:
 										this.transformIntoActions({
