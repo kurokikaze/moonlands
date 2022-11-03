@@ -359,7 +359,7 @@ var State = /** @class */ (function () {
                         }
                         case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
                             var target = this.getMetaValue(action.target, action.generatedBy);
-                            if (Array.isArray(target)) {
+                            if (Array.isArray(target) && target.length) {
                                 newLogEntry = {
                                     type: LOG_ENTRY_CREATURE_ENERGY_LOSS,
                                     card: target[0].card.name,
@@ -377,7 +377,7 @@ var State = /** @class */ (function () {
                         }
                         case EFFECT_TYPE_ADD_ENERGY_TO_CREATURE: {
                             var target = this.getMetaValue(action.target, action.generatedBy);
-                            if (Array.isArray(target)) {
+                            if (Array.isArray(target) && target.length) {
                                 newLogEntry = {
                                     type: LOG_ENTRY_CREATURE_ENERGY_GAIN,
                                     card: target[0].card.name,
@@ -395,7 +395,7 @@ var State = /** @class */ (function () {
                         }
                         case EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI: {
                             var target = this.getMetaValue(action.target, action.generatedBy);
-                            if (Array.isArray(target)) {
+                            if (Array.isArray(target) && target.length) {
                                 newLogEntry = {
                                     type: LOG_ENTRY_MAGI_ENERGY_LOSS,
                                     card: target[0].card.name,
@@ -413,7 +413,7 @@ var State = /** @class */ (function () {
                         }
                         case EFFECT_TYPE_ADD_ENERGY_TO_MAGI: {
                             var target = this.getMetaValue(action.target, action.generatedBy);
-                            if (Array.isArray(target)) {
+                            if (Array.isArray(target) && target.length) {
                                 newLogEntry = {
                                     type: LOG_ENTRY_MAGI_ENERGY_GAIN,
                                     card: target[0].card.name,
@@ -448,11 +448,21 @@ var State = /** @class */ (function () {
                             break;
                         }
                         case EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY: {
-                            newLogEntry = {
-                                type: LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,
-                                card: this.getMetaValue(action.target, action.generatedBy).card.name,
-                                player: action.player,
-                            };
+                            var target = this.getMetaValue(action.target, action.generatedBy);
+                            if (Array.isArray(target) && target.length) {
+                                newLogEntry = {
+                                    type: LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,
+                                    card: target[0].card.name,
+                                    player: action.player,
+                                };
+                            }
+                            else {
+                                newLogEntry = {
+                                    type: LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,
+                                    card: target.card.name,
+                                    player: action.player,
+                                };
+                            }
                             break;
                         }
                         case EFFECT_TYPE_MAGI_IS_DEFEATED: {
