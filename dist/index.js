@@ -316,7 +316,7 @@ var State = /** @class */ (function () {
         }
     };
     State.prototype.addActionToLog = function (action) {
-        var _a, _b, _c;
+        var _a, _b;
         var newLogEntry = false;
         try {
             switch (action.type) {
@@ -437,11 +437,14 @@ var State = /** @class */ (function () {
                             break;
                         }
                         case EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY: {
-                            newLogEntry = {
-                                type: LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY,
-                                card: ((_a = this.getMetaValue(action.target, action.generatedBy)) === null || _a === void 0 ? void 0 : _a.card.name) || 'Unknown creature',
-                                player: action.player,
-                            };
+                            var target = this.getMetaValue(action.target, action.generatedBy);
+                            if (!Array.isArray(target)) {
+                                newLogEntry = {
+                                    type: LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY,
+                                    card: target.card.name,
+                                    player: action.player,
+                                };
+                            }
                             break;
                         }
                         case EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY: {
@@ -479,7 +482,7 @@ var State = /** @class */ (function () {
                         this.state.promptType === PROMPT_TYPE_SINGLE_MAGI) && 'target' in action) {
                         newLogEntry = {
                             type: LOG_ENTRY_TARGETING,
-                            card: ((_c = (_b = action.target) === null || _b === void 0 ? void 0 : _b.card) === null || _c === void 0 ? void 0 : _c.name) || 'unknown card',
+                            card: ((_b = (_a = action.target) === null || _a === void 0 ? void 0 : _a.card) === null || _b === void 0 ? void 0 : _b.name) || 'unknown card',
                             player: action.player,
                         };
                     }

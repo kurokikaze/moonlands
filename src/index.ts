@@ -868,11 +868,14 @@ export class State {
 							break;
 						}
 						case EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY: {
-							newLogEntry = {
-								type: LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY,
-								card: this.getMetaValue(action.target, action.generatedBy)?.card.name || 'Unknown creature',
-								player: action.player,
-							};
+              const target = this.getMetaValue(action.target, action.generatedBy);
+							if (!Array.isArray(target)) {
+                newLogEntry = {
+                  type: LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY,
+                  card: target.card.name,
+                  player: action.player,
+                };
+              }
 							break;
 						}
 						case EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY: {
