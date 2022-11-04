@@ -65,6 +65,7 @@ import {
 	EFFECT_TYPE_DRAW_N_CARDS,
 	EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
   EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
+  EFFECT_TYPE_DISCARD_RESHUFFLED,
 } from '../const';
 
 export type EffectTypeType =
@@ -274,6 +275,12 @@ type FindStartingCardsEffect = ActionEffect & {
 type ReshuffleDiscardEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_RESHUFFLE_DISCARD,
 	player: number;
+}
+
+type DiscardReshuffledEffect = ActionEffect & {
+	effectType: typeof EFFECT_TYPE_DISCARD_RESHUFFLED,
+	player: number;
+  cards: string[];
 }
 
 type AddEnergyToCreatureOrMagiEffect = ActionEffect & {
@@ -491,6 +498,7 @@ export type EffectType = ActionEffect & {
 	DiscardCreatureOrRelicFromPlay |
 	PayingEnergyForCreatureEffect |
 	PlayCreatureEffect |
+  DiscardReshuffledEffect |
 	CreatureEntersPlayEffect |
 	StartingEnergyOnCreatureEffect |
 	PayingEnergyForRelicEffect |

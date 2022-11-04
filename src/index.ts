@@ -233,6 +233,7 @@ import {
   PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
   EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
   SELECTOR_NTH_CARD_OF_ZONE,
+  EFFECT_TYPE_DISCARD_RESHUFFLED,
 } from './const';
 
 import {showAction} from './logAction';
@@ -3830,8 +3831,18 @@ export class State {
 							deck.add(newCards);
 							deck.shuffle();
 							discard.empty();
+              this.transformIntoActions({
+                type: ACTION_EFFECT,
+                effectType: EFFECT_TYPE_DISCARD_RESHUFFLED,
+                cards: newCards.map(({id}) => id),
+                player: player,
+                generatedBy: action.generatedBy,
+              });
 							break;
 						}
+            case EFFECT_TYPE_DISCARD_RESHUFFLED: {
+              break;
+            }
 						case EFFECT_TYPE_ATTACK: {
 							const source = this.getMetaValue(action.source, action.generatedBy);
 							const target = this.getMetaValue(action.target, action.generatedBy);

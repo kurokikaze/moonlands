@@ -19,9 +19,8 @@ export var color = {
 var showCard = function (card) { return (card instanceof CardInGame) ? "<".concat(color.blue(card.card.name), " [").concat(card.id, "]>") : card; };
 export var showAction = function (action) {
     var fields = Object.keys(action).filter(function (f) { return f != 'type'; }).map(function (field) {
-        var card = action[field];
-        var cardToShow = (card instanceof Array) ? card[0] : card;
-        return "\t".concat(field, ": ").concat(showCard(cardToShow));
+        var cards = action[field];
+        return "\t".concat(field, ": ").concat((cards instanceof Array) ? cards.map(function (c) { return showCard(c); }).join(' ') : showCard(cards));
     });
     console.log("\n{\n\t".concat(color.yellow(action.type), "\n").concat(fields.join('\n'), "\n}"));
 };

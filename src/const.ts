@@ -113,6 +113,7 @@ export const EFFECT_TYPE_DRAW_N_CARDS = 'effects/draw_n_cards';
 export const EFFECT_TYPE_START_STEP = 'effects/start_step';
 export const EFFECT_TYPE_START_TURN = 'effects/start_turn';
 export const EFFECT_TYPE_RESHUFFLE_DISCARD = 'effects/reshuffle_discard';
+export const EFFECT_TYPE_DISCARD_RESHUFFLED = 'effects/discard_reshuffled';
 export const EFFECT_TYPE_ATTACK = 'effects/attack';
 export const EFFECT_TYPE_BEFORE_DAMAGE = 'effects/before_damage';
 export const EFFECT_TYPE_ATTACKER_DEALS_DAMAGE = 'effects/attacker_deals_damage';
