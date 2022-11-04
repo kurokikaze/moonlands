@@ -1,5 +1,5 @@
 /* global expect, describe, it */
-import nanoid from 'nanoid';
+import {nanoid} from 'nanoid';
 import * as moonlands from '../src/index';
 
 import {

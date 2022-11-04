@@ -1,4 +1,4 @@
-import nanoid from 'nanoid';
+import {nanoid} from 'nanoid';
 import clone from '../clone';
 import Card from './Card';
 

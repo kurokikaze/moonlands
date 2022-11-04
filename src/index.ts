@@ -1,6 +1,6 @@
 import {Writable} from 'stream';
 import EventEmitter from 'events';
-import nanoid from 'nanoid';
+import {nanoid} from 'nanoid';
 
 import {
 	TYPE_CREATURE,

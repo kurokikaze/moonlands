@@ -108,7 +108,7 @@ import {
 	STEP_DRAW,
 	createZones,
 } from './utils.js';
-import nanoid from 'nanoid';
+import {nanoid} from 'nanoid';
 
 describe('Updating state with action', () => {
 	it('Pass action', () => {

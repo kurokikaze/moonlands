@@ -9,7 +9,7 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-import nanoid from 'nanoid';
+import { nanoid } from 'nanoid';
 import clone from '../clone';
 var CardInGame = /** @class */ (function () {
     function CardInGame(card, owner) {
