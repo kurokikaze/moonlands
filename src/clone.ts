@@ -1,8 +1,9 @@
+import { Node } from "typescript";
 import { byName } from "./cards";
 import CardInGame from "./classes/CardInGame";
 import Zone from "./classes/Zone";
 
-export default function clone(item) {
+export default function clone<T extends (Object|Object[])>(item: T): T {
 	if (!item) { return item; } // null, undefined values check
 
 	var types = [ Number, String, Boolean ], 
@@ -18,14 +19,14 @@ export default function clone(item) {
 	if (typeof result == 'undefined') {
 		if (Object.prototype.toString.call( item ) === '[object Array]') {
 			result = [];
-			item.forEach(function(child, index) { 
+			(item as Object[]).forEach(function(child, index) { 
 				result[index] = clone( child );
 			});
 		} else if (typeof item == 'object') {
 			// testing that this is DOM
-			if (item.nodeType && typeof item.cloneNode == 'function') {
+			/*if ('nodeType' in item && item.nodeType && typeof item.cloneNode == 'function') {
 				result = item.cloneNode( true );    
-			} else if (!item.prototype) { // check that this is a literal
+			} else */if (!('prototype' in item)) { // check that this is a literal
 				if (item instanceof Date) {
 					result = new Date(item);
 				} else if (item instanceof Zone) {
