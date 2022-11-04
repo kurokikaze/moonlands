@@ -19,6 +19,7 @@ import {
 } from '../src/const';
 
 import {caldDeck, naroomDeck} from './testData';
+import { AnyEffectType } from '../src/types';
 
 describe('Stream of actions', () => {
 	it('Streams actions', () => {
@@ -73,9 +74,9 @@ describe('Stream of actions', () => {
 		// First turn, player who goes first is active
 		expect(gameState.state.activePlayer).toEqual(gameState.state.goesFirst);
 
-		const seenActions = [];
+		const seenActions: AnyEffectType[] = [];
 
-		gameState.actionStreamOne.on('action', function(action) {
+		gameState.actionStreamOne.on('action', function(action: AnyEffectType) {
 			seenActions.push(action);
 		});
 
@@ -124,9 +125,9 @@ describe('Stream of actions', () => {
 
 		gameState.setup();
 
-		const seenActions = [];
+		const seenActions: AnyEffectType[] = [];
 
-		gameState.actionStreamOne.on('action', function(action) {
+		gameState.actionStreamOne.on('action', function(action: AnyEffectType) {
 			seenActions.push(action);
 		});
 
@@ -173,9 +174,9 @@ describe('Stream of actions', () => {
 
 		gameState.setup();
 
-		const seenActions = [];
+		const seenActions: AnyEffectType[] = [];
 
-		gameState.actionStreamOne.on('action', function(action) {
+		gameState.actionStreamOne.on('action', function(action: AnyEffectType) {
 			seenActions.push(action);
 		});
 
@@ -221,9 +222,9 @@ describe('Stream of actions', () => {
 
 		gameState.setup();
 
-		const seenActions = [];
+		const seenActions: AnyEffectType[] = [];
 
-		gameState.actionStreamOne.on('action', function(action) {
+		gameState.actionStreamOne.on('action', function(action: AnyEffectType) {
 			seenActions.push(action);
 		});
 
@@ -269,9 +270,9 @@ describe('Stream of actions', () => {
 
 		gameState.setup();
 
-		const seenActions = [];
+		const seenActions: AnyEffectType[] = [];
 
-		gameState.actionStreamOne.on('action', function(action) {
+		gameState.actionStreamOne.on('action', function(action: AnyEffectType) {
 			seenActions.push(action);
 		});
 
