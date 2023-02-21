@@ -545,10 +545,11 @@ var State = /** @class */ (function () {
             new Zone('In play', ZONE_TYPE_IN_PLAY, null),
         ];
     };
-    State.prototype.serializeData = function (playerId) {
+    State.prototype.serializeData = function (playerId, hideZones) {
+        if (hideZones === void 0) { hideZones = true; }
         var gameEnded = !(this.winner === false);
         return {
-            zones: this.serializeZones(playerId),
+            zones: this.serializeZones(playerId, hideZones),
             continuousEffects: this.state.continuousEffects,
             step: this.state.step,
             turn: this.state.turn,

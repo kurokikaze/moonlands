@@ -985,11 +985,11 @@ export class State {
 		];		
 	}
 
-	serializeData(playerId: number) {
+	serializeData(playerId: number, hideZones = true) {
 		const gameEnded = !(this.winner === false);
 
 		return {
-			zones: this.serializeZones(playerId),
+			zones: this.serializeZones(playerId, hideZones),
 			continuousEffects: this.state.continuousEffects,
 			step: this.state.step,
 			turn: this.state.turn,
