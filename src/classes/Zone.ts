@@ -89,6 +89,7 @@ export default class Zone {
 		this.cards = [];
 	}
 
+  serialize(hidden: Boolean): HiddenConvertedCard[] | ConvertedCard[]
   serialize(hidden: true): HiddenConvertedCard[]
   serialize(hidden: false): ConvertedCard[]
   serialize(): ConvertedCard[]

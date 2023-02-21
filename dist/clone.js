@@ -21,10 +21,9 @@ export default function clone(item) {
         }
         else if (typeof item == 'object') {
             // testing that this is DOM
-            if (item.nodeType && typeof item.cloneNode == 'function') {
-                result = item.cloneNode(true);
-            }
-            else if (!item.prototype) { // check that this is a literal
+            /*if ('nodeType' in item && item.nodeType && typeof item.cloneNode == 'function') {
+                result = item.cloneNode( true );
+            } else */ if (!('prototype' in item)) { // check that this is a literal
                 if (item instanceof Date) {
                     result = new Date(item);
                 }
