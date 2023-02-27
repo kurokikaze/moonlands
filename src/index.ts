@@ -1,5 +1,5 @@
 import {Writable} from 'stream';
-import EventEmitter from 'events';
+// import EventEmitter from 'events';
 import {nanoid} from 'nanoid';
 
 import {
@@ -554,9 +554,10 @@ export class State {
 	rollDebugValue: number | null;
 	actionsOne: any[];
 	actionsTwo: any[];
-	actionStreamOne: EventEmitter;
-	actionStreamTwo: EventEmitter;
-	logStream: EventEmitter;
+	// actionStreamOne: EventEmitter;
+	// actionStreamTwo: EventEmitter;
+  onAction: Function;
+	// logStream: EventEmitter;
 	commandStream: Writable;
 	turnTimer: number | null = null;
 	timerEnabled: boolean;
@@ -582,37 +583,42 @@ export class State {
 		this.actionsOne = [];
 		this.actionsTwo = [];
 
-		this.actionStreamOne = new EventEmitter();
-		this.actionStreamTwo = new EventEmitter();
-		this.logStream =  new EventEmitter();
+		// this.actionStreamOne = new EventEmitter();
+		// this.actionStreamTwo = new EventEmitter();
+		// this.logStream =  new EventEmitter();
 
-		this.commandStream = new Writable({
-			objectMode: true,
-			write: (command: AnyEffectType) => {
-				if (Object.prototype.hasOwnProperty.call(command, 'type')) {
-					this.update(command);
-				}
-			},
-		});
+		// this.commandStream = new Writable({
+		// 	objectMode: true,
+		// 	write: (command: AnyEffectType) => {
+		// 		if (Object.prototype.hasOwnProperty.call(command, 'type')) {
+		// 			this.update(command);
+		// 		}
+		// 	},
+		// });
 	}
 
 	closeStreams() {
-		this.actionStreamOne.removeAllListeners();
-		this.actionStreamTwo.removeAllListeners();
-		this.logStream.removeAllListeners();
-		this.commandStream.destroy();
+		// this.actionStreamOne.removeAllListeners();
+		// this.actionStreamTwo.removeAllListeners();
+		// this.logStream.removeAllListeners();
+		// this.commandStream.destroy();
 	}
 
+  setOnAction(callback: (e: AnyEffectType) => void) {
+    this.onAction = callback
+  }
+  
 	addActionToStream(action: AnyEffectType): void {
 		const actionWithValues = this.addValuesToAction(action);
 
 		// Do not send outside CALCULATE, SELECT and so on
-		if (![ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE].includes(action.type)) {
-			this.actionStreamOne.emit('action', actionWithValues);
-			this.actionStreamTwo.emit('action', actionWithValues);
+		if (![ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE].includes(action.type) && this.onAction) {
+      this.onAction(actionWithValues);
+			// this.actionStreamOne.emit('action', actionWithValues);
+			// this.actionStreamTwo.emit('action', actionWithValues);
 		}
 
-		this.logStream.emit('action', actionWithValues);
+		// this.logStream.emit('action', actionWithValues);
 	}
 
 	addValuesToAction(action: AnyEffectType): AnyEffectType {

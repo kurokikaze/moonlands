@@ -76,13 +76,14 @@ describe('Stream of actions', () => {
 
 		const seenActions: AnyEffectType[] = [];
 
-		gameState.actionStreamOne.on('action', function(action: AnyEffectType) {
+    gameState.setOnAction(function(action: AnyEffectType) {
 			seenActions.push(action);
-		});
+		})
 
 		// This initial action will change step to 0 while keeping current active player
-		gameState.commandStream.write({
+		gameState.update({
 			type: ACTION_PASS,
+      player: 1,
 		});
 
 		// Step is 0 (STEP_ENERGIZE)
@@ -90,7 +91,7 @@ describe('Stream of actions', () => {
 		// Actions are coming via events
 		expect(seenActions.length).toBeGreaterThan(0);
 		// Pass actions are sent as is
-		expect(seenActions[0]).toEqual({type: ACTION_PASS});
+		expect(seenActions[0]).toEqual({type: ACTION_PASS, player: 1});
 		gameState.closeStreams();
 	});
 
@@ -127,11 +128,11 @@ describe('Stream of actions', () => {
 
 		const seenActions: AnyEffectType[] = [];
 
-		gameState.actionStreamOne.on('action', function(action: AnyEffectType) {
+    gameState.setOnAction(function(action: AnyEffectType) {
 			seenActions.push(action);
 		});
 
-		gameState.commandStream.write({
+		gameState.update({
 			type: ACTION_CALCULATE,
 			operator: CALCULATION_SET,
 			operandOne: 14,
@@ -176,11 +177,11 @@ describe('Stream of actions', () => {
 
 		const seenActions: AnyEffectType[] = [];
 
-		gameState.actionStreamOne.on('action', function(action: AnyEffectType) {
+    gameState.setOnAction(function(action: AnyEffectType) {
 			seenActions.push(action);
-		});
+		})
 
-		gameState.commandStream.write({
+		gameState.update({
 			type: ACTION_SELECT,
 			selector: SELECTOR_OWN_MAGI,
 			player: PLAYER_ONE,
@@ -224,11 +225,11 @@ describe('Stream of actions', () => {
 
 		const seenActions: AnyEffectType[] = [];
 
-		gameState.actionStreamOne.on('action', function(action: AnyEffectType) {
+    gameState.setOnAction(function(action: AnyEffectType) {
 			seenActions.push(action);
 		});
 
-		gameState.commandStream.write({
+		gameState.update({
 			type: ACTION_RESOLVE_PROMPT,
 			number: 12,
 			player: PLAYER_ONE,
@@ -272,13 +273,13 @@ describe('Stream of actions', () => {
 
 		const seenActions: AnyEffectType[] = [];
 
-		gameState.actionStreamOne.on('action', function(action: AnyEffectType) {
+    gameState.setOnAction(function(action: AnyEffectType) {
 			seenActions.push(action);
 		});
 
 		const spellId = nanoid();
 
-		gameState.commandStream.write({
+		gameState.update({
 			type: ACTION_SELECT,
 			selector: SELECTOR_OWN_MAGI,
 			player: PLAYER_ONE,
@@ -286,7 +287,7 @@ describe('Stream of actions', () => {
 			generatedBy: spellId,
 		});
 
-		gameState.commandStream.write({
+		gameState.update({
 			type: ACTION_GET_PROPERTY_VALUE,
 			property: PROPERTY_ENERGIZE,
 			target: '$our_magi',

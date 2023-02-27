@@ -1654,7 +1654,7 @@ describe('Abaquist', () => {
 
 		const seenActions = [];
 
-		gameState.actionStreamTwo.on('action', function(action) {
+		gameState.setOnAction(function(action) {
 			seenActions.push(action);
 		});
 
