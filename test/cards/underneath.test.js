@@ -1203,7 +1203,7 @@ describe('Fossik', () => {
 		};
 
 		gameState.update(chooseCreatureAction);
-
+    
 		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
 
 		const napPassAction = {
@@ -1219,20 +1219,21 @@ describe('Fossik', () => {
 		gameState.update(napPassAction);
 		// PRS
 		gameState.update(napPassAction);
-
 		expect(gameState.state.activePlayer).toEqual(ACTIVE_PLAYER);
 
 		// PRS
 		expect(gameState.state.step).toEqual(STEP_PRS_FIRST);
 		gameState.update(passAction);
 		// Attack
+		expect(gameState.state.step).toEqual(STEP_ATTACK);
 		gameState.update(passAction);
 		// Creatures
+		expect(gameState.state.step).toEqual(STEP_CREATURES);
 		gameState.update(passAction);
 		// PRS
 
+		expect(gameState.state.step).toEqual(STEP_PRS_SECOND);
 		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
-		gameState.update(passAction);
 
 		gameState.update(passAction);
 		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');

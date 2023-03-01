@@ -2416,6 +2416,11 @@ export class State {
 				this.transformIntoActions(...replacedActions.slice(1));
 			}
 
+      if (this.state.prompt && !(action.type === ACTION_RESOLVE_PROMPT || action.type === ACTION_CONCEDE)) {
+        showAction(action);
+        throw new Error('Non-prompt action in the prompt state')
+      }
+
 			if (this.debug) {
 				showAction(action);
 			}
@@ -4763,7 +4768,9 @@ export class State {
 							player,
 						});
 					}
-				}
+				} else {
+          // console.log('No active Magi already. How did we got here?');
+        }
 			});
 			if (sbActions.length > 0) {
 				this.addActions(...sbActions);

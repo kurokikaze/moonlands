@@ -57,6 +57,7 @@ import {
 	CALCULATION_MAX,
 
 	ACTION_PROPERTY,
+  ACTION_ATTACK,
 
 	PROPERTY_ENERGIZE,
 
@@ -1032,7 +1033,7 @@ describe('Serializing the state', () => {
 });
 
 describe('Losing the game', () => {
-	it('Losing your last creature while having 0 energy (AP)', () => {
+	it.only('Losing your last creature while having 0 energy (AP)', () => {
 		const ACTIVE_PLAYER = 12;
 		const NON_ACTIVE_PLAYER = 44;
 
@@ -1068,6 +1069,43 @@ describe('Losing the game', () => {
 
 		gameState.update(discardEnergyAction);
 		expect(gameState.winner).toEqual(NON_ACTIVE_PLAYER);
+	});
+
+	it.only('Losing your last creature while having 0 energy (AP, combat)', () => {
+		const ACTIVE_PLAYER = 12;
+		const NON_ACTIVE_PLAYER = 44;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(2);
+		const motash = new CardInGame(byName('Motash'), NON_ACTIVE_PLAYER);
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER).addEnergy(5);
+		const weebo = new CardInGame(byName('Weebo'), NON_ACTIVE_PLAYER).addEnergy(2);
+		const gloves = new CardInGame(byName('Gloves of Crystal'), NON_ACTIVE_PLAYER).addEnergy(5);
+
+		const zones = [
+			new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([motash]),
+			new Zone('AP Magi Grave', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('NAP Magi Grave', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit, weebo, gloves]),
+			new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: ACTION_ATTACK,
+			source: arbolit,
+			target: weebo,
+		};
+
+		gameState.update(attackAction);
+		expect(gameState.winner).toEqual(ACTIVE_PLAYER);
 	});
 
 	it('Losing all energy on your Magi while having no creatures (AP)', () => {
