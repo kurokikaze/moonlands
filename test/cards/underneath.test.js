@@ -30,6 +30,7 @@ import {
 	PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
 
 	EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+	EFFECT_TYPE_START_TURN,
 
 	PROPERTY_CONTROLLER,
 	PROPERTY_ABLE_TO_ATTACK,
@@ -1455,5 +1456,83 @@ describe('Vulbor', () => {
 		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(2);
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(2);
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).cards.map(({ card }) => card.name)).toEqual(['Lava Balamant', 'Lava Arboll']);
+	});
+});
+
+describe('Ulk', () => {
+	it('Strengthen', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const korrit = new CardInGame(byName('Korrit'), ACTIVE_PLAYER).addEnergy(3);
+		const mushroomHyren = new CardInGame(byName('Mushroom Hyren'), ACTIVE_PLAYER).addEnergy(2);
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const ulk = new CardInGame(byName('Ulk'), ACTIVE_PLAYER).addEnergy(5);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(5);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [korrit, arbolit, mushroomHyren], [ulk]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: NON_ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		const passAction = {
+			type: ACTION_PASS,
+			player: NON_ACTIVE_PLAYER,
+		};
+
+		gameState.update(passAction);
+		expect(gameState.state.activePlayer).toEqual(ACTIVE_PLAYER, 'New turn has started');
+
+		expect(korrit.data.energy).toEqual(4, 'Korrit got 1 energy');
+		expect(mushroomHyren.data.energy).toEqual(2, 'Hyren got no energy');
+	});
+
+	it('Strengthen (no korrits)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const mushroomHyren = new CardInGame(byName('Mushroom Hyren'), ACTIVE_PLAYER).addEnergy(2);
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const ulk = new CardInGame(byName('Ulk'), ACTIVE_PLAYER).addEnergy(5);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(5);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arbolit, mushroomHyren], [ulk]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: NON_ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		const passAction = {
+			type: ACTION_PASS,
+			player: NON_ACTIVE_PLAYER,
+		};
+
+		var startTurnId = 'testId';
+
+		gameState.setOnAction((action) => {
+			if (action.type === ACTION_EFFECT && action.effectType === EFFECT_TYPE_START_TURN) {
+				startTurnId = action.generatedBy;
+			}
+		});
+		gameState.update(passAction);
+		expect(gameState.state.activePlayer).toEqual(ACTIVE_PLAYER, 'New turn has started');
+
+		const metaData = gameState.getSpellMetadata(startTurnId);
+		expect(metaData.selected).toBeInstanceOf(Array);
+		expect(metaData.selected).toHaveLength(0);
+		expect(mushroomHyren.data.energy).toEqual(2, 'Hyren got no energy');
 	});
 });

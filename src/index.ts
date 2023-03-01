@@ -2416,7 +2416,7 @@ export class State {
 				this.transformIntoActions(...replacedActions.slice(1));
 			}
 
-      if (this.state.prompt && !(action.type === ACTION_RESOLVE_PROMPT || action.type === ACTION_CONCEDE)) {
+      if (this.state.prompt && !(action.type === ACTION_RESOLVE_PROMPT || action.type === ACTION_CONCEDE || action.type === ACTION_EXIT_PROMPTS)) {
         showAction(action);
         throw new Error('Non-prompt action in the prompt state')
       }

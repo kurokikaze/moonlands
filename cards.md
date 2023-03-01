@@ -103,6 +103,7 @@ Done: **171** card out of **190**
 - Gar
 - Barak
 - Twee
+- Ulk
 
 # Done, not tested
 
@@ -145,7 +146,6 @@ Done: **171** card out of **190**
 - Trug
 - Tryn
 - Typhoon
-- Ulk
 - Water of Life
 - Orwin
 - Lightning Hyren

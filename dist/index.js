@@ -1642,7 +1642,7 @@ var State = /** @class */ (function () {
                 // Stuff the rest of them into beginning of the action queue
                 this_1.transformIntoActions.apply(this_1, replacedActions.slice(1));
             }
-            if (this_1.state.prompt && !(action.type === ACTION_RESOLVE_PROMPT || action.type === ACTION_CONCEDE)) {
+            if (this_1.state.prompt && !(action.type === ACTION_RESOLVE_PROMPT || action.type === ACTION_CONCEDE || action.type === ACTION_EXIT_PROMPTS)) {
                 showAction(action);
                 throw new Error('Non-prompt action in the prompt state');
             }

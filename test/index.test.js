@@ -1033,7 +1033,7 @@ describe('Serializing the state', () => {
 });
 
 describe('Losing the game', () => {
-	it.only('Losing your last creature while having 0 energy (AP)', () => {
+	it('Losing your last creature while having 0 energy (AP)', () => {
 		const ACTIVE_PLAYER = 12;
 		const NON_ACTIVE_PLAYER = 44;
 
@@ -1071,7 +1071,7 @@ describe('Losing the game', () => {
 		expect(gameState.winner).toEqual(NON_ACTIVE_PLAYER);
 	});
 
-	it.only('Losing your last creature while having 0 energy (AP, combat)', () => {
+	it('Losing your last creature while having 0 energy (AP, combat)', () => {
 		const ACTIVE_PLAYER = 12;
 		const NON_ACTIVE_PLAYER = 44;
 
