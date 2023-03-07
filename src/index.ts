@@ -4105,15 +4105,51 @@ export class State {
 							break;
 						}
 						case EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC: {
-							action.from.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
+              const payingTarget: CardInGame = this.getMetaValue(action.from, action.generatedBy);
+							const payingAmount = Number(this.getMetaValue(action.amount, action.generatedBy));
+
+							if (payingAmount > 0) {
+                this.transformIntoActions({
+                  type: ACTION_EFFECT,
+                  effectType: EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
+                  target: payingTarget,
+                  amount: payingAmount,
+                  player: action.player,
+                  generatedBy: action.generatedBy,
+                });
+              }
 							break;
 						}
 						case EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL: {
-							action.from.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
+              const payingTarget: CardInGame = this.getMetaValue(action.from, action.generatedBy);
+							const payingAmount = Number(this.getMetaValue(action.amount, action.generatedBy));
+
+              if (payingAmount > 0) {
+                this.transformIntoActions({
+                  type: ACTION_EFFECT,
+                  effectType: EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
+                  target: payingTarget,
+                  amount: payingAmount,
+                  player: action.player,
+                  generatedBy: action.generatedBy,
+                });
+              }
 							break;
 						}
 						case EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE: {
-							action.from.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
+              const payingTarget: CardInGame = this.getMetaValue(action.from, action.generatedBy);
+							const payingAmount = Number(this.getMetaValue(action.amount, action.generatedBy));
+
+              if (payingAmount > 0) {
+                this.transformIntoActions({
+                  type: ACTION_EFFECT,
+                  effectType: EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
+                  target: payingTarget,
+                  amount: payingAmount,
+                  player: action.player,
+                  generatedBy: action.generatedBy,
+                });
+              }
 							break;
 						}
 						case EFFECT_TYPE_PLAY_RELIC: {
