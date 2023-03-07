@@ -2925,11 +2925,9 @@ describe('Activating power', () => {
 
 	it('Simple power with prompting and cost', () => {
 		const ACTIVE_PLAYER = 0;
-		const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER);
-		weebo.addEnergy(3);
-		const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER);
-		quorPup.addEnergy(1);
-
+		const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER).addEnergy(3);
+		const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER).addEnergy(1);
+	
 		const gameState = new moonlands.State({
 			zones: [
 				new Zone('Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
@@ -2953,6 +2951,7 @@ describe('Activating power', () => {
 			generatedBy: weebo.id,
 		};
 
+		expect(weebo.data.energy).toEqual(3, 'Weebo has 3 energy');
 		gameState.update(powerAction);
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two creatures in play');
@@ -2961,7 +2960,7 @@ describe('Activating power', () => {
 		gameState.update(targetingAction);
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two creatures in play');
-		expect(weebo.data.energy).toEqual(1, 'Weebo has 2 energy');
+		expect(weebo.data.energy).toEqual(1, 'Weebo has 1 energy');
 		expect(quorPup.data.energy).toEqual(2, 'Quor Pup has 2 energy');
 		gameState.closeStreams();
 	});

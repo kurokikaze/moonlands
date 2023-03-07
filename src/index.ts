@@ -234,6 +234,8 @@ import {
   EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
   SELECTOR_NTH_CARD_OF_ZONE,
   EFFECT_TYPE_DISCARD_RESHUFFLED,
+  EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
+  EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
 } from './const';
 
 import {showAction} from './logAction';
@@ -4478,6 +4480,37 @@ export class State {
 							);
 							break;
 						}
+            case EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE: {
+							const target: CardInGame = this.getMetaValue(action.target, action.generatedBy);
+              const energyToLose = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
+              if (target.card.type === TYPE_CREATURE) {
+                target.removeEnergy(energyToLose);
+
+                if (target.data.energy === 0) {
+                  this.transformIntoActions({
+                    type: ACTION_EFFECT,
+                    effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+                    target,
+                    attack: false,
+                    sourceZone: ZONE_TYPE_IN_PLAY,
+                    destinationZone: ZONE_TYPE_DISCARD,
+                    bottom: false,
+                    generatedBy: action.generatedBy,
+                  });
+                }
+              } else {
+                console.log('Wrong card type')
+              }
+							break;
+						}
+            case EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI: {
+							const target: CardInGame = this.getMetaValue(action.target, action.generatedBy);
+              const energyToLose = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
+              if (target.card.type === TYPE_MAGI) {
+                target.removeEnergy(energyToLose);
+              }
+							break;
+						}
 						case EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY: {
 							const restoreTarget = this.getMetaValue(action.target, action.generatedBy);
 							const restoreAmount = restoreTarget.card.cost - restoreTarget.data.energy;
@@ -4495,26 +4528,37 @@ export class State {
 							break;
 						}
 						case EFFECT_TYPE_PAYING_ENERGY_FOR_POWER: {
-							const payingTarget: CardInGame | CardInGame[] = this.getMetaValue(action.target, action.generatedBy);
+							const payingTarget: CardInGame = this.getMetaValue(action.target, action.generatedBy);
 							const payingAmount = Number(this.getMetaValue(action.amount, action.generatedBy));
 
 							if (payingAmount > 0) {
-								this.transformIntoActions({
-									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
-									target: payingTarget,
-									source: ('length' in payingTarget) ? payingTarget[0] : payingTarget,
-                  power: false,
-                  attack: false,
-                  relic: false,
-                  spell: false,
-									amount: payingAmount,
-									player: action.player,
-									generatedBy: action.generatedBy,
-								});
-							}
-							break;
-						}
+                switch (payingTarget.card.type) {
+                  case TYPE_CREATURE: {
+                    this.transformIntoActions({
+                      type: ACTION_EFFECT,
+                      effectType: EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
+                      target: payingTarget,
+                      amount: payingAmount,
+                      player: action.player,
+                      generatedBy: action.generatedBy,
+                    });
+                    break;
+                  }
+                  case TYPE_MAGI: {
+                    this.transformIntoActions({
+                      type: ACTION_EFFECT,
+                      effectType: EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
+                      target: payingTarget,
+                      amount: payingAmount,
+                      player: action.player,
+                      generatedBy: action.generatedBy,
+                    });
+                    break;
+                  }
+                }
+              }
+              break;
+            }
 						case EFFECT_TYPE_ADD_ENERGY_TO_CREATURE: {
 							const addTargets = this.getMetaValue(action.target, action.generatedBy);
 

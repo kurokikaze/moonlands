@@ -66,6 +66,8 @@ import {
 	EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
   EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
   EFFECT_TYPE_DISCARD_RESHUFFLED,
+  EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
+  EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
 } from '../const';
 
 export type EffectTypeType =
@@ -261,6 +263,19 @@ type DiscardEnergyFromMagiEffect = ActionEffect & {
 	spell?: boolean;
 	amount: number;
 }
+
+export type RemoveEnergyFromCreatureEffect = ActionEffect & {
+	effectType: typeof EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE;
+	target: CardInGame | CardInGame[];
+	amount: number;
+}
+
+export type RemoveEnergyFromMagiEffect = ActionEffect & {
+	effectType: typeof EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI;
+	target: CardInGame | CardInGame[];
+	amount: number;
+}
+
 
 type AddStartingEnergyToMagi = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI;
@@ -481,6 +496,8 @@ export type EffectType = ActionEffect & {
 	DiscardEnergyFromCreaturesEffect |
 	DiscardEnergyFromCreatureEffect |
 	DiscardEnergyFromMagiEffect |
+  RemoveEnergyFromCreatureEffect |
+  RemoveEnergyFromMagiEffect |
 	PayingEnergyForPowerEffect |
 	StartTurnEffect |
 	StartOfTurnEffect |
