@@ -1,13 +1,14 @@
 /// <reference types="node" />
 /// <reference types="node" />
-/// <reference types="node" />
 import { Writable } from 'stream';
-import EventEmitter from 'events';
-import { TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, ACTION_PASS, ACTION_PLAY, ACTION_POWER, ACTION_EFFECT, ACTION_SELECT, ACTION_CALCULATE, ACTION_ENTER_PROMPT, ACTION_RESOLVE_PROMPT, ACTION_GET_PROPERTY_VALUE, ACTION_ATTACK, ACTION_PLAYER_WINS, PROPERTY_ID, PROPERTY_TYPE, PROPERTY_CONTROLLER, PROPERTY_ENERGY_COUNT, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, CALCULATION_SET, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_HALVE_ROUND_DOWN, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_MAX, SELECTOR_CREATURES, SELECTOR_CREATURES_AND_MAGI, SELECTOR_OWN_MAGI, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_MAGI_OF_REGION, SELECTOR_OPPONENT_ID, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, SELECTOR_STATUS, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_CHOOSE_CARDS, NO_PRIORITY, PRIORITY_PRS, PRIORITY_ATTACK, PRIORITY_CREATURES, EFFECT_TYPE_DRAW, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_PLAY_CREATURE, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_RELIC_ENTERS_PLAY, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE, EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC, EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_PAYING_ENERGY_FOR_POWER, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_CREATURE_IS_DEFEATED, // Possibly redundant
-EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_IS_ATTACKED, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_DRAW_REST_OF_CARDS, REGION_UNIVERSAL, COST_X, COST_X_PLUS_ONE, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, CALCULATION_MULTIPLY } from './const';
-import CardInGame, { ConvertedCard } from './classes/CardInGame';
+import { TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, ACTION_PASS, ACTION_PLAY, ACTION_POWER, ACTION_EFFECT, ACTION_SELECT, ACTION_CALCULATE, ACTION_ENTER_PROMPT, ACTION_RESOLVE_PROMPT, ACTION_GET_PROPERTY_VALUE, ACTION_ATTACK, ACTION_PLAYER_WINS, PROPERTY_ID, PROPERTY_TYPE, PROPERTY_CONTROLLER, PROPERTY_ENERGY_COUNT, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, PROPERTY_POWER_COST, PROPERTY_CREATURE_TYPES, PROPERTY_STATUS, PROPERTY_ABLE_TO_ATTACK, PROPERTY_MAGI_NAME, PROPERTY_CAN_BE_ATTACKED, CALCULATION_SET, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_HALVE_ROUND_DOWN, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_MAX, SELECTOR_CREATURES, SELECTOR_CREATURES_AND_MAGI, SELECTOR_RELICS, SELECTOR_OWN_MAGI, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_MAGI_OF_REGION, SELECTOR_OPPONENT_ID, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, SELECTOR_CREATURES_OF_TYPE, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_CREATURES_OF_PLAYER, STATUS_BURROWED, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_CHOOSE_CARDS, NO_PRIORITY, PRIORITY_PRS, PRIORITY_ATTACK, PRIORITY_CREATURES, EFFECT_TYPE_DRAW, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_PLAY_CREATURE, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_RELIC_ENTERS_PLAY, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE, EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC, EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_PAYING_ENERGY_FOR_POWER, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_CREATURE_IS_DEFEATED, // Possibly redundant
+EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_IS_ATTACKED, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_DRAW_REST_OF_CARDS, REGION_UNIVERSAL, COST_X, COST_X_PLUS_ONE, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, PROPERTY_PROTECTION, CALCULATION_MULTIPLY } from './const';
+import CardInGame, { ConvertedCard, InGameData } from './classes/CardInGame';
+import Card, { CostType, ModifiedCardType } from './classes/Card';
 import Zone from './classes/Zone';
-import { AnyEffectType, PromptTypeType, RestrictionObjectType, RestrictionType, SelectorTypeType, LogEntryType, PropertyType, EnrichedAction, StaticAbilityType, OperatorType, ConditionType, FindType, TriggerEffectType, ReplacementEffectType, ContinuousEffectType, EffectType, ZoneType } from './types';
+import { AnyEffectType, PromptTypeType, RestrictionObjectType, RestrictionType, LogEntryType, PropertyType, EnrichedAction, StaticAbilityType, OperatorType, ConditionType, FindType, ContinuousEffectType, EffectType, ZoneType, Region, ProtectionType } from './types';
+import { EnhancedDelayedTriggerType } from './types/effect';
+import { CardType, StatusType } from './types/common';
 declare type EnrichedStaticAbilityType = StaticAbilityType & {
     player: number;
 };
@@ -15,9 +16,12 @@ declare type GameStaticAbility = StaticAbilityType & {
     selector: typeof SELECTOR_STATUS;
 };
 declare type PriorityType = typeof NO_PRIORITY | typeof PRIORITY_PRS | typeof PRIORITY_ATTACK | typeof PRIORITY_CREATURES;
-declare type MetadataRecord = {
-    source?: CardInGame;
-    new_card?: CardInGame;
+declare type CardWithModification = {
+    card: Card;
+    data: InGameData;
+    modifiedCard: ModifiedCardType;
+    id: string;
+    owner: number;
 };
 declare type PromptParamsType = {
     cards?: ConvertedCard[];
@@ -32,6 +36,8 @@ declare type PromptParamsType = {
     min?: number;
     max?: number;
 };
+export declare type MetaDataValue = CardInGame | CardInGame[] | Region | number | Record<string, number>;
+export declare type MetaDataRecord = Record<string, MetaDataValue>;
 declare type StateShape = {
     step: number | null;
     turn?: number;
@@ -52,8 +58,8 @@ declare type StateShape = {
     mayEffectActions: AnyEffectType[];
     fallbackActions: AnyEffectType[];
     continuousEffects: ContinuousEffectType[];
-    spellMetaData: Record<string, MetadataRecord>;
-    delayedTriggers: Record<string, any>[];
+    spellMetaData: Record<string, MetaDataRecord>;
+    delayedTriggers: EnhancedDelayedTriggerType[];
 };
 declare type DeckType = {
     player: number;
@@ -69,9 +75,7 @@ export declare class State {
     rollDebugValue: number | null;
     actionsOne: any[];
     actionsTwo: any[];
-    actionStreamOne: EventEmitter;
-    actionStreamTwo: EventEmitter;
-    logStream: EventEmitter;
+    onAction: Function;
     commandStream: Writable;
     turnTimer: number | null;
     timerEnabled: boolean;
@@ -79,6 +83,7 @@ export declare class State {
     turnNotifyTimeout: NodeJS.Timer | null;
     constructor(state: StateShape);
     closeStreams(): void;
+    setOnAction(callback: (e: AnyEffectType) => void): void;
     addActionToStream(action: AnyEffectType): void;
     addValuesToAction(action: AnyEffectType): AnyEffectType;
     enableDebug(): void;
@@ -95,16 +100,16 @@ export declare class State {
     endTurn(): void;
     addActionToLog(action: AnyEffectType): void;
     createZones(): Zone[];
-    serializeData(playerId: number): {
+    serializeData(playerId: number, hideZones?: boolean): {
         zones: {
             playerHand: ConvertedCard[];
-            opponentHand: import("./classes/CardInGame").HiddenConvertedCard[];
-            playerDeck: import("./classes/CardInGame").HiddenConvertedCard[];
-            opponentDeck: import("./classes/CardInGame").HiddenConvertedCard[];
+            opponentHand: import("./classes/CardInGame").HiddenConvertedCard[] | ConvertedCard[];
+            playerDeck: import("./classes/CardInGame").HiddenConvertedCard[] | ConvertedCard[];
+            opponentDeck: import("./classes/CardInGame").HiddenConvertedCard[] | ConvertedCard[];
             playerActiveMagi: ConvertedCard[];
             opponentActiveMagi: ConvertedCard[];
             playerMagiPile: ConvertedCard[];
-            opponentMagiPile: import("./classes/CardInGame").HiddenConvertedCard[];
+            opponentMagiPile: import("./classes/CardInGame").HiddenConvertedCard[] | ConvertedCard[];
             inPlay: (import("./classes/CardInGame").HiddenConvertedCard | ConvertedCard)[];
             playerDefeatedMagi: ConvertedCard[];
             opponentDefeatedMagi: ConvertedCard[];
@@ -126,15 +131,15 @@ export declare class State {
         gameEnded: boolean;
         winner: number | boolean;
     };
-    serializeZones(playerId: number): {
+    serializeZones(playerId: number, hideZones?: boolean): {
         playerHand: ConvertedCard[];
-        opponentHand: import("./classes/CardInGame").HiddenConvertedCard[];
-        playerDeck: import("./classes/CardInGame").HiddenConvertedCard[];
-        opponentDeck: import("./classes/CardInGame").HiddenConvertedCard[];
+        opponentHand: import("./classes/CardInGame").HiddenConvertedCard[] | ConvertedCard[];
+        playerDeck: import("./classes/CardInGame").HiddenConvertedCard[] | ConvertedCard[];
+        opponentDeck: import("./classes/CardInGame").HiddenConvertedCard[] | ConvertedCard[];
         playerActiveMagi: ConvertedCard[];
         opponentActiveMagi: ConvertedCard[];
         playerMagiPile: ConvertedCard[];
-        opponentMagiPile: import("./classes/CardInGame").HiddenConvertedCard[];
+        opponentMagiPile: import("./classes/CardInGame").HiddenConvertedCard[] | ConvertedCard[];
         inPlay: (import("./classes/CardInGame").HiddenConvertedCard | ConvertedCard)[];
         playerDefeatedMagi: ConvertedCard[];
         opponentDefeatedMagi: ConvertedCard[];
@@ -149,424 +154,56 @@ export declare class State {
     getCurrentPriority(): PriorityType;
     addActions(...args: AnyEffectType[]): void;
     transformIntoActions(...args: AnyEffectType[]): void;
-    removeDelayedTrigger(triggerId: number): void;
-    getNextAction(): AnyEffectType;
+    removeDelayedTrigger(triggerId: string): void;
+    private getNextAction;
     hasActions(): boolean;
     setSpellMetadata(metadata: any, spellId: string): void;
-    getSpellMetadata(spellId: string): MetadataRecord | Record<string, any>;
+    getSpellMetadata(spellId: string): MetaDataRecord;
     setSpellMetaDataField(field: string, value: any, spellId: string): void;
-    getMetaValue<T>(value: string | T, spellId: string): T | any;
+    getMetaValue<T>(value: string | T, spellId: string | undefined): T | any;
     /**
      * Same as getMetaValue, but instead of $-variables it uses %-variables
      * $-variables are kept intact, we probably need them
      * %-variables include usual "self": link to trigger source
      */
     prepareMetaValue<T>(value: string | T, action: AnyEffectType, self: CardInGame, spellId: string): T | any;
-    useSelector(selector: SelectorTypeType, player: number, argument?: any): CardInGame[] | number;
-    getByProperty(target: CardInGame, property: PropertyType, subProperty?: any): any;
+    selectNthCardOfZone(player: number, zoneType: ZoneType, cardNumber: number, restrictions?: RestrictionObjectType[]): CardInGame[];
+    useSelector(selector: typeof SELECTOR_STATUS, player: null, argument: StatusType): CardInGame[];
+    useSelector(selector: typeof SELECTOR_CREATURES_WITHOUT_STATUS, player: null, argument: StatusType): CardInGame[];
+    useSelector(selector: typeof SELECTOR_CREATURES, player: null): CardInGame[];
+    useSelector(selector: typeof SELECTOR_OWN_CREATURES_OF_TYPE, player: number, argument: string): CardInGame[];
+    useSelector(selector: typeof SELECTOR_CREATURES_OF_TYPE, player: null, argument: string): CardInGame[];
+    useSelector(selector: typeof SELECTOR_CREATURES_NOT_OF_TYPE, player: null, argument: string): CardInGame[];
+    useSelector(selector: typeof SELECTOR_CREATURES_NOT_OF_REGION, player: number, argument: Region): CardInGame[];
+    useSelector(selector: typeof SELECTOR_CREATURES_OF_REGION, player: number, argument: Region): CardInGame[];
+    useSelector(selector: typeof SELECTOR_OPPONENT_ID, player: number | null, argument: number): number;
+    useSelector(selector: typeof SELECTOR_TOP_MAGI_OF_PILE, player: number): CardInGame[];
+    useSelector(selector: typeof SELECTOR_OWN_MAGI, player: number): CardInGame[];
+    useSelector(selector: typeof SELECTOR_ENEMY_MAGI, player: number): CardInGame[];
+    useSelector(selector: typeof SELECTOR_OWN_CREATURES, player: number): CardInGame[];
+    useSelector(selector: typeof SELECTOR_CREATURES_OF_PLAYER, player: number): CardInGame[];
+    useSelector(selector: typeof SELECTOR_OWN_CARDS_IN_PLAY, player: number): CardInGame[];
+    useSelector(selector: typeof SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, player: number): CardInGame[];
+    useSelector(selector: typeof SELECTOR_CARDS_WITH_ENERGIZE_RATE, player: null): CardInGame[];
+    useSelector(selector: typeof SELECTOR_RELICS, player: null): CardInGame[];
+    getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_ABLE_TO_ATTACK): boolean;
+    getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CAN_ATTACK_MAGI_DIRECTLY): boolean;
+    getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CAN_BE_ATTACKED): boolean;
+    getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_ATTACKS_PER_TURN): number;
+    getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_ENERGIZE): number;
+    getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_ENERGY_COUNT): number;
+    getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_POWER_COST, subProperty: string): number;
+    getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CONTROLLER): number;
+    getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_PROTECTION): ProtectionType | undefined;
+    getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_MAGI_NAME): string;
+    getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_TYPE): CardType;
+    getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CREATURE_TYPES): string[];
+    getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_COST): CostType;
+    getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_STATUS, subProperty: typeof STATUS_BURROWED): boolean;
     isCardAffectedByEffect(card: CardInGame, effect: EnrichedAction & EffectType): boolean;
-    isCardAffectedByStaticAbility(card: CardInGame, staticAbility: EnrichedStaticAbilityType | GameStaticAbility): any;
-    modifyByStaticAbilities(target: CardInGame, property: PropertyType, subProperty?: any): any;
-    layeredDataReducer(currentCard: CardInGame, staticAbility: EnrichedStaticAbilityType | GameStaticAbility): CardInGame | {
-        modifiedCard: {
-            cost: number;
-            name: string;
-            type: import("./types").CardType;
-            region: any;
-            data: import("./types").CardData;
-        };
-        id: string;
-        data: {
-            energy: number;
-            controller: number;
-            attacked: number;
-            actionsUsed: string[];
-            energyLostThisTurn: number;
-            defeatedCreature: boolean;
-            hasAttacked: boolean;
-            wasAttacked: boolean;
-            burrowed?: boolean;
-            ableToAttack?: boolean;
-            energyLossThreshold?: number;
-        };
-        owner: number;
-    } | {
-        modifiedCard: {
-            data: {
-                energize: number;
-                text?: string;
-                startingEnergy?: number;
-                startingCards?: string[];
-                attacksPerTurn?: number;
-                canAttackMagiDirectly?: boolean;
-                canPackHunt?: boolean;
-                powers?: {
-                    name: string;
-                    text: string;
-                    cost: number | "X";
-                    effects: AnyEffectType[];
-                }[];
-                protection?: import("./types").ProtectionType;
-                staticAbilities?: StaticAbilityType[];
-                effects?: AnyEffectType[];
-                triggerEffects?: TriggerEffectType[];
-                replacementEffects?: ReplacementEffectType[];
-                energyLossThreshold?: number;
-                ableToAttack?: boolean;
-                canBeAttacked?: boolean;
-                burrowed?: boolean;
-                maxCostX?: number;
-            };
-            name: string;
-            type: import("./types").CardType;
-            region: any;
-            cost: number | "X" | "X_PLUS_ONE";
-        };
-        id: string;
-        data: {
-            energy: number;
-            controller: number;
-            attacked: number;
-            actionsUsed: string[];
-            energyLostThisTurn: number;
-            defeatedCreature: boolean;
-            hasAttacked: boolean;
-            wasAttacked: boolean;
-            burrowed?: boolean;
-            ableToAttack?: boolean;
-            energyLossThreshold?: number;
-        };
-        owner: number;
-    } | {
-        modifiedCard: {
-            data: {
-                attacksPerTurn: number;
-                text?: string;
-                startingEnergy?: number;
-                energize?: number;
-                startingCards?: string[];
-                canAttackMagiDirectly?: boolean;
-                canPackHunt?: boolean;
-                powers?: {
-                    name: string;
-                    text: string;
-                    cost: number | "X";
-                    effects: AnyEffectType[];
-                }[];
-                protection?: import("./types").ProtectionType;
-                staticAbilities?: StaticAbilityType[];
-                effects?: AnyEffectType[];
-                triggerEffects?: TriggerEffectType[];
-                replacementEffects?: ReplacementEffectType[];
-                energyLossThreshold?: number;
-                ableToAttack?: boolean;
-                canBeAttacked?: boolean;
-                burrowed?: boolean;
-                maxCostX?: number;
-            };
-            name: string;
-            type: import("./types").CardType;
-            region: any;
-            cost: number | "X" | "X_PLUS_ONE";
-        };
-        id: string;
-        data: {
-            energy: number;
-            controller: number;
-            attacked: number;
-            actionsUsed: string[];
-            energyLostThisTurn: number;
-            defeatedCreature: boolean;
-            hasAttacked: boolean;
-            wasAttacked: boolean;
-            burrowed?: boolean;
-            ableToAttack?: boolean;
-            energyLossThreshold?: number;
-        };
-        owner: number;
-    } | {
-        modifiedCard: {
-            data: {
-                energyLossThreshold: number;
-                text?: string;
-                startingEnergy?: number;
-                energize?: number;
-                startingCards?: string[];
-                attacksPerTurn?: number;
-                canAttackMagiDirectly?: boolean;
-                canPackHunt?: boolean;
-                powers?: {
-                    name: string;
-                    text: string;
-                    cost: number | "X";
-                    effects: AnyEffectType[];
-                }[];
-                protection?: import("./types").ProtectionType;
-                staticAbilities?: StaticAbilityType[];
-                effects?: AnyEffectType[];
-                triggerEffects?: TriggerEffectType[];
-                replacementEffects?: ReplacementEffectType[];
-                ableToAttack?: boolean;
-                canBeAttacked?: boolean;
-                burrowed?: boolean;
-                maxCostX?: number;
-            };
-            name: string;
-            type: import("./types").CardType;
-            region: any;
-            cost: number | "X" | "X_PLUS_ONE";
-        };
-        id: string;
-        data: {
-            energy: number;
-            controller: number;
-            attacked: number;
-            actionsUsed: string[];
-            energyLostThisTurn: number;
-            defeatedCreature: boolean;
-            hasAttacked: boolean;
-            wasAttacked: boolean;
-            burrowed?: boolean;
-            ableToAttack?: boolean;
-            energyLossThreshold?: number;
-        };
-        owner: number;
-    } | {
-        modifiedCard: {
-            data: {
-                ableToAttack: any;
-                text?: string;
-                startingEnergy?: number;
-                energize?: number;
-                startingCards?: string[];
-                attacksPerTurn?: number;
-                canAttackMagiDirectly?: boolean;
-                canPackHunt?: boolean;
-                powers?: {
-                    name: string;
-                    text: string;
-                    cost: number | "X";
-                    effects: AnyEffectType[];
-                }[];
-                protection?: import("./types").ProtectionType;
-                staticAbilities?: StaticAbilityType[];
-                effects?: AnyEffectType[];
-                triggerEffects?: TriggerEffectType[];
-                replacementEffects?: ReplacementEffectType[];
-                energyLossThreshold?: number;
-                canBeAttacked?: boolean;
-                burrowed?: boolean;
-                maxCostX?: number;
-            };
-            name: string;
-            type: import("./types").CardType;
-            region: any;
-            cost: number | "X" | "X_PLUS_ONE";
-        };
-        id: string;
-        data: {
-            energy: number;
-            controller: number;
-            attacked: number;
-            actionsUsed: string[];
-            energyLostThisTurn: number;
-            defeatedCreature: boolean;
-            hasAttacked: boolean;
-            wasAttacked: boolean;
-            burrowed?: boolean;
-            ableToAttack?: boolean;
-            energyLossThreshold?: number;
-        };
-        owner: number;
-    } | {
-        modifiedCard: {
-            data: {
-                canBeAttacked: any;
-                text?: string;
-                startingEnergy?: number;
-                energize?: number;
-                startingCards?: string[];
-                attacksPerTurn?: number;
-                canAttackMagiDirectly?: boolean;
-                canPackHunt?: boolean;
-                powers?: {
-                    name: string;
-                    text: string;
-                    cost: number | "X";
-                    effects: AnyEffectType[];
-                }[];
-                protection?: import("./types").ProtectionType;
-                staticAbilities?: StaticAbilityType[];
-                effects?: AnyEffectType[];
-                triggerEffects?: TriggerEffectType[];
-                replacementEffects?: ReplacementEffectType[];
-                energyLossThreshold?: number;
-                ableToAttack?: boolean;
-                burrowed?: boolean;
-                maxCostX?: number;
-            };
-            name: string;
-            type: import("./types").CardType;
-            region: any;
-            cost: number | "X" | "X_PLUS_ONE";
-        };
-        id: string;
-        data: {
-            energy: number;
-            controller: number;
-            attacked: number;
-            actionsUsed: string[];
-            energyLostThisTurn: number;
-            defeatedCreature: boolean;
-            hasAttacked: boolean;
-            wasAttacked: boolean;
-            burrowed?: boolean;
-            ableToAttack?: boolean;
-            energyLossThreshold?: number;
-        };
-        owner: number;
-    } | {
-        data: {
-            controller: any;
-            text?: string;
-            startingEnergy?: number;
-            energize?: number;
-            startingCards?: string[];
-            attacksPerTurn?: number;
-            canAttackMagiDirectly?: boolean;
-            canPackHunt?: boolean;
-            powers?: {
-                name: string;
-                text: string;
-                cost: number | "X";
-                effects: AnyEffectType[];
-            }[];
-            protection?: import("./types").ProtectionType;
-            staticAbilities?: StaticAbilityType[];
-            effects?: AnyEffectType[];
-            triggerEffects?: TriggerEffectType[];
-            replacementEffects?: ReplacementEffectType[];
-            energyLossThreshold?: number;
-            ableToAttack?: boolean;
-            canBeAttacked?: boolean;
-            burrowed?: boolean;
-            maxCostX?: number;
-        };
-        id: string;
-        owner: number;
-        modifiedCard: import("./classes/Card").default;
-    } | {
-        data: {
-            burrowed: any;
-            energy: number;
-            controller: number;
-            attacked: number;
-            actionsUsed: string[];
-            energyLostThisTurn: number;
-            defeatedCreature: boolean;
-            hasAttacked: boolean;
-            wasAttacked: boolean;
-            ableToAttack?: boolean;
-            energyLossThreshold?: number;
-        };
-        id: string;
-        owner: number;
-        modifiedCard: import("./classes/Card").default;
-    } | {
-        modifiedCard: {
-            data: {
-                protection: any;
-                text?: string;
-                startingEnergy?: number;
-                energize?: number;
-                startingCards?: string[];
-                attacksPerTurn?: number;
-                canAttackMagiDirectly?: boolean;
-                canPackHunt?: boolean;
-                powers?: {
-                    name: string;
-                    text: string;
-                    cost: number | "X";
-                    effects: AnyEffectType[];
-                }[];
-                staticAbilities?: StaticAbilityType[];
-                effects?: AnyEffectType[];
-                triggerEffects?: TriggerEffectType[];
-                replacementEffects?: ReplacementEffectType[];
-                energyLossThreshold?: number;
-                ableToAttack?: boolean;
-                canBeAttacked?: boolean;
-                burrowed?: boolean;
-                maxCostX?: number;
-            };
-            name: string;
-            type: import("./types").CardType;
-            region: any;
-            cost: number | "X" | "X_PLUS_ONE";
-        };
-        id: string;
-        data: {
-            energy: number;
-            controller: number;
-            attacked: number;
-            actionsUsed: string[];
-            energyLostThisTurn: number;
-            defeatedCreature: boolean;
-            hasAttacked: boolean;
-            wasAttacked: boolean;
-            burrowed?: boolean;
-            ableToAttack?: boolean;
-            energyLossThreshold?: number;
-        };
-        owner: number;
-    } | {
-        modifiedCard: {
-            data: {
-                powers: {
-                    cost: number;
-                    name: string;
-                    text: string;
-                    effects: AnyEffectType[];
-                }[];
-                text?: string;
-                startingEnergy?: number;
-                energize?: number;
-                startingCards?: string[];
-                attacksPerTurn?: number;
-                canAttackMagiDirectly?: boolean;
-                canPackHunt?: boolean;
-                protection?: import("./types").ProtectionType;
-                staticAbilities?: StaticAbilityType[];
-                effects?: AnyEffectType[];
-                triggerEffects?: TriggerEffectType[];
-                replacementEffects?: ReplacementEffectType[];
-                energyLossThreshold?: number;
-                ableToAttack?: boolean;
-                canBeAttacked?: boolean;
-                burrowed?: boolean;
-                maxCostX?: number;
-            };
-            name: string;
-            type: import("./types").CardType;
-            region: any;
-            cost: number | "X" | "X_PLUS_ONE";
-        };
-        id: string;
-        data: {
-            energy: number;
-            controller: number;
-            attacked: number;
-            actionsUsed: string[];
-            energyLostThisTurn: number;
-            defeatedCreature: boolean;
-            hasAttacked: boolean;
-            wasAttacked: boolean;
-            burrowed?: boolean;
-            ableToAttack?: boolean;
-            energyLossThreshold?: number;
-        };
-        owner: number;
-    };
+    isCardAffectedByStaticAbility(card: CardInGame | CardWithModification, staticAbility: EnrichedStaticAbilityType | GameStaticAbility): boolean;
+    modifyByStaticAbilities(target: CardInGame, property: PropertyType, subProperty?: string | null | undefined): any;
+    layeredDataReducer(currentCard: CardWithModification, staticAbility: EnrichedStaticAbilityType | GameStaticAbility): CardWithModification;
     makeChecker(restriction: RestrictionType, restrictionValue: any): (card: CardInGame) => boolean;
     checkAnyCardForRestriction(cards: CardInGame[], restriction: RestrictionType, restrictionValue: any): boolean;
     checkAnyCardForRestrictions(cards: CardInGame[], restrictions: RestrictionObjectType[]): boolean;
@@ -578,7 +215,7 @@ export declare class State {
     matchAction(action: AnyEffectType, find: FindType, self: CardInGame): boolean;
     triggerAbilities(action: AnyEffectType): void;
     performCalculation(operator: OperatorType, operandOne: number, operandTwo: number): number;
-    calculateTotalCost(card: CardInGame): number | null;
+    calculateTotalCost(card: CardInGame): number;
     getAvailableCards(player: number, topMagi: CardInGame): string[];
     checkPrompts(source: CardInGame, preparedActions: AnyEffectType[], isPower?: boolean, powerCost?: number): boolean;
     update(initialAction: AnyEffectType): boolean;

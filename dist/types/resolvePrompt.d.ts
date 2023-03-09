@@ -20,9 +20,12 @@ export declare type ResolveDistributeDamagePrompt = ResolvePromptInterface & {
 export declare type ResolvePlayerPrompt = ResolvePromptInterface & {
     targetPlayer: number;
 };
+export declare type ResolveRearrangeCardsPrompt = ResolvePromptInterface & {
+    cardsOrder: string[];
+};
 export declare type ResolvePromptType = ResolvePromptInterface & {
     number?: number | string;
     cards?: CardInGame[];
     target?: CardInGame;
-} | ResolveRearrangeEnergyPrompt | ResolveDistributeEnergyPrompt | ResolveDistributeDamagePrompt | ResolvePlayerPrompt;
+} | ResolveRearrangeEnergyPrompt | ResolveDistributeEnergyPrompt | ResolveDistributeDamagePrompt | ResolvePlayerPrompt | ResolveRearrangeCardsPrompt;
 export {};

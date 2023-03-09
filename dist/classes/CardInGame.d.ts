@@ -1,5 +1,5 @@
 import Card from './Card';
-declare type InGameData = {
+export declare type InGameData = {
     energy: number;
     controller: number;
     attacked: number;
@@ -46,4 +46,3 @@ export default class CardInGame {
     copy(): CardInGame;
     serialize<T extends boolean>(hidden?: T): T extends true ? HiddenConvertedCard : ConvertedCard;
 }
-export {};

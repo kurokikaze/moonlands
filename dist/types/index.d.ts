@@ -1,17 +1,17 @@
 import CardInGame from '../classes/CardInGame';
-import { ACTION_CALCULATE, ACTION_PLAY, ACTION_POWER, ACTION_NONE, ACTION_PLAYER_WINS, ACTION_PASS, ACTION_CONCEDE, ACTION_TIME_NOTIFICATION, ACTION_EXIT_PROMPTS, CALCULATION_SET, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, CALCULATION_MULTIPLY, CALCULATION_HALVE_ROUND_DOWN, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_MAX, ACTION_GET_PROPERTY_VALUE, PROTECTION_FROM_EFFECTS, PROTECTION_FROM_POWERS, PROTECTION_FROM_SPELLS, PROTECTION_TYPE_DISCARDING_FROM_PLAY, PROTECTION_TYPE_ENERGY_GAIN, PROTECTION_TYPE_ENERGY_LOSS, PROTECTION_TYPE_GENERAL, COST_X } from '../const';
+import { ACTION_CALCULATE, ACTION_PLAY, ACTION_POWER, ACTION_NONE, ACTION_PLAYER_WINS, ACTION_PASS, ACTION_CONCEDE, ACTION_TIME_NOTIFICATION, ACTION_EXIT_PROMPTS, CALCULATION_SET, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, CALCULATION_MULTIPLY, CALCULATION_HALVE_ROUND_DOWN, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_MAX, ACTION_GET_PROPERTY_VALUE, PROTECTION_FROM_EFFECTS, PROTECTION_FROM_POWERS, PROTECTION_FROM_SPELLS, PROTECTION_TYPE_DISCARDING_FROM_PLAY, PROTECTION_TYPE_ENERGY_GAIN, PROTECTION_TYPE_ENERGY_LOSS, PROTECTION_TYPE_GENERAL, COST_X, STATUS_BURROWED } from '../const';
 import { ResolvePromptType } from './resolvePrompt';
 import { SelectorTypeType, SelectType } from './select';
 import { EffectTypeType, EffectType } from './effect';
 import { PromptType } from './prompt';
 import { PropertyType, ConditionType, ExpirationObjectType, RestrictionObjectType } from './common';
 import { AttackEffect } from './attack';
-export { AttackerDealsDamageEffect, DefenderDealsDamageEffect } from './attack';
-export { Region, CardType, PromptTypeType, PropertyType, ConditionType, ZoneType, RestrictionType, RestrictionObjectType } from './common';
-export { SelectType, SelectorTypeType, SelectorParams, RefinedSelectParams } from './select';
-export { EffectType, MoveCardBetwenZonesEffect } from './effect';
-export { PromptType, PromptParams } from './prompt';
-export { LogEntryType } from './log';
+export { type AttackerDealsDamageEffect, type DefenderDealsDamageEffect } from './attack';
+export { type Region, type CardType, type PromptTypeType, type PropertyType, type ConditionType, type ZoneType, type RestrictionType, type RestrictionObjectType } from './common';
+export { type SelectType, type SelectorTypeType, type SelectorParams, type RefinedSelectParams } from './select';
+export { type EffectType, type MoveCardBetwenZonesEffect } from './effect';
+export { type PromptType, type PromptParams } from './prompt';
+export { type LogEntryType } from './log';
 declare type ProtectionFromType = typeof PROTECTION_FROM_SPELLS | typeof PROTECTION_FROM_EFFECTS | typeof PROTECTION_FROM_POWERS;
 declare type ProtectionTypeType = typeof PROTECTION_TYPE_ENERGY_LOSS | typeof PROTECTION_TYPE_ENERGY_GAIN | typeof PROTECTION_TYPE_DISCARDING_FROM_PLAY | typeof PROTECTION_TYPE_GENERAL;
 export declare type ProtectionType = {
@@ -58,10 +58,10 @@ export declare type StaticAbilityType = {
     selector: SelectorTypeType;
     selectorParameter?: string | number;
     property: PropertyType;
-    subProperty?: string;
+    subProperty?: string | typeof STATUS_BURROWED;
     modifier: {
         operator: OperatorType;
-        operandOne: number | boolean | Record<string, any>;
+        operandOne: number | boolean | Record<string, any> | ProtectionType;
     };
 };
 export declare type FindType = {
@@ -83,7 +83,7 @@ export declare type ReplacementEffectType = {
     mayEffect?: boolean;
     oncePerTurn?: boolean;
 };
-declare type ReplacingEffectType = {
+export declare type ReplacingEffectType = {
     effectType: EffectTypeType;
     target?: string;
 };

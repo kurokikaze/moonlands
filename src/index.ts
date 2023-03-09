@@ -556,10 +556,7 @@ export class State {
 	rollDebugValue: number | null;
 	actionsOne: any[];
 	actionsTwo: any[];
-	// actionStreamOne: EventEmitter;
-	// actionStreamTwo: EventEmitter;
   onAction: Function;
-	// logStream: EventEmitter;
 	commandStream: Writable;
 	turnTimer: number | null = null;
 	timerEnabled: boolean;
@@ -1099,7 +1096,7 @@ export class State {
 		this.state.delayedTriggers = this.state.delayedTriggers.filter(({id}) => id != triggerId);
 	}
 
-	getNextAction() {
+	private getNextAction() {
 		return this.state.actions.shift();
 	}
     

@@ -43,12 +43,12 @@ import { PromptType } from './prompt';
 import { PropertyType, ConditionType, ExpirationObjectType, RestrictionObjectType } from './common';
 import { AttackEffect } from './attack';
 
-export { AttackerDealsDamageEffect, DefenderDealsDamageEffect } from './attack';
-export { Region, CardType, PromptTypeType, PropertyType, ConditionType, ZoneType, RestrictionType, RestrictionObjectType } from './common';
-export { SelectType, SelectorTypeType, SelectorParams, RefinedSelectParams } from './select';
-export { EffectType, MoveCardBetwenZonesEffect } from './effect';
-export { PromptType, PromptParams } from './prompt';
-export { LogEntryType } from './log';
+export { type AttackerDealsDamageEffect, type DefenderDealsDamageEffect } from './attack';
+export { type Region, type CardType, type PromptTypeType, type PropertyType, type ConditionType, type ZoneType, type RestrictionType, type RestrictionObjectType } from './common';
+export { type SelectType, type SelectorTypeType, type SelectorParams, type RefinedSelectParams } from './select';
+export { type EffectType, type MoveCardBetwenZonesEffect } from './effect';
+export { type PromptType, type PromptParams } from './prompt';
+export { type LogEntryType } from './log';
 
 type ProtectionFromType = typeof PROTECTION_FROM_SPELLS | typeof PROTECTION_FROM_EFFECTS | typeof PROTECTION_FROM_POWERS;
 type ProtectionTypeType = typeof PROTECTION_TYPE_ENERGY_LOSS | typeof PROTECTION_TYPE_ENERGY_GAIN | typeof PROTECTION_TYPE_DISCARDING_FROM_PLAY | typeof PROTECTION_TYPE_GENERAL;

@@ -67,6 +67,7 @@ declare type AttackEntry = {
     type: typeof LOG_ENTRY_ATTACK;
     source: string;
     target: string;
+    packHuntAttack: boolean;
 };
 export declare type LogEntryType = CreatureEnergyLossEntry | CreatureEnergyGainEntry | PlayEntry | PowerActivationEntry | DrawEntry | NumberChoiceEntry | TargetingEntry | ChoosesStartingCards | CreatureDiscardedFromPlay | MagiEnergyGainEntry | MagiEnergyLossEntry | MagiIsDefeatedEntry | RelicDiscadedFromPlayEntry | AttackEntry;
 export {};
