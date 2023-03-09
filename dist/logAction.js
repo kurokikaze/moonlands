@@ -20,6 +20,8 @@ var showCard = function (card) { return (card instanceof CardInGame) ? "<".conca
 export var showAction = function (action) {
     var fields = Object.keys(action).filter(function (f) { return f != 'type'; }).map(function (field) {
         var cards = action[field];
+        if (!cards)
+            return "\t".concat(field, ": Empty card encountered");
         return "\t".concat(field, ": ").concat((cards instanceof Array) ? cards.map(function (c) { return showCard(c); }).join(' ') : showCard(cards));
     });
     console.log("\n{\n\t".concat(color.yellow(action.type), "\n").concat(fields.join('\n'), "\n}"));

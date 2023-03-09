@@ -155,6 +155,7 @@ var updateContinuousEffects = function (player) { return function (effect) {
 var State = /** @class */ (function () {
     function State(state) {
         this.players = [0, 1];
+        this.onAction = null;
         this.turnTimer = null;
         this.state = __assign(__assign({}, clone(defaultState)), state);
         this.decks = [];
@@ -1251,36 +1252,40 @@ var State = /** @class */ (function () {
             var resultEffects = appliedReplacerSelf ? replaceWith.map((function (appliedReplacerSelf) { return function (replacementEffect) {
                 if (!('type' in replacementEffect)) {
                     // @ts-ignore
-                    var resultEffect_1 = __assign(__assign({ type: ACTION_EFFECT }, replacementEffect), { replacedBy: __spreadArray(__spreadArray([], previouslyReplacedBy, true), [
+                    var resultEffect_1 = __assign(__assign({ type: ACTION_EFFECT }, replacementEffect), { replacedBy: appliedReplacerId ? __spreadArray(__spreadArray([], previouslyReplacedBy, true), [
                             appliedReplacerId,
-                        ], false), generatedBy: action.generatedBy || nanoid(), player: appliedReplacerSelf.data.controller });
+                        ], false) : previouslyReplacedBy, generatedBy: action.generatedBy || nanoid(), player: appliedReplacerSelf.data.controller });
                     Object.keys(replacementEffect)
                         .filter(function (key) { return !['type', 'effectType'].includes(key); })
                         .forEach(function (key) {
-                        var value = _this.prepareMetaValue(replacementEffect[key], action, appliedReplacerSelf, action.generatedBy);
+                        var value = _this.prepareMetaValue(replacementEffect[key], action, appliedReplacerSelf, action.generatedBy || 'thegame');
                         resultEffect_1[key] = value;
                     });
                     return resultEffect_1;
                 }
-                var resultEffect = __assign(__assign({ type: ACTION_EFFECT }, replacementEffect), { replacedBy: __spreadArray(__spreadArray([], previouslyReplacedBy, true), [
+                var resultEffect = __assign(__assign({}, replacementEffect), { replacedBy: appliedReplacerId ? __spreadArray(__spreadArray([], previouslyReplacedBy, true), [
                         appliedReplacerId,
-                    ], false), generatedBy: action.generatedBy || nanoid(), player: appliedReplacerSelf.data.controller });
+                    ], false) : previouslyReplacedBy, generatedBy: action.generatedBy || nanoid(), player: appliedReplacerSelf.data.controller });
                 // prepare %-values on created action
                 Object.keys(replacementEffect)
                     .filter(function (key) { return !['type', 'effectType'].includes(key); })
                     .forEach(function (key) {
-                    var value = _this.prepareMetaValue(replacementEffect[key], action, appliedReplacerSelf, action.generatedBy);
+                    var value = _this.prepareMetaValue(replacementEffect[key], action, appliedReplacerSelf, action.generatedBy || 'thegame');
                     resultEffect[key] = value;
                 });
                 return resultEffect;
             }; })(appliedReplacerSelf)) : [];
             // If the replacer is one-time, set the action usage
-            if (foundReplacer && foundReplacer.oncePerTurn && foundReplacer.name) {
+            if (appliedReplacerSelf && foundReplacer && foundReplacer.oncePerTurn && foundReplacer.name) {
                 appliedReplacerSelf.setActionUsed(foundReplacer.name);
             }
             if (foundReplacer && foundReplacer.mayEffect) {
+                var replacedBy = ('replacedBy' in action && action.replacedBy) ? __spreadArray([], action.replacedBy, true) : [];
+                if (appliedReplacerId) {
+                    replacedBy.push(appliedReplacerId);
+                }
                 this.state.mayEffectActions = resultEffects;
-                this.state.fallbackActions = [__assign(__assign({}, action), { replacedBy: ('replacedBy' in action && action.replacedBy) ? __spreadArray(__spreadArray([], action.replacedBy, true), [appliedReplacerId], false) : [appliedReplacerId] })];
+                this.state.fallbackActions = [__assign(__assign({}, action), { replacedBy: replacedBy })];
                 return [{
                         type: ACTION_ENTER_PROMPT,
                         promptType: PROMPT_TYPE_MAY_ABILITY,
@@ -1291,7 +1296,7 @@ var State = /** @class */ (function () {
                             },
                         },
                         generatedBy: appliedReplacerId,
-                        player: appliedReplacerSelf.data.controller,
+                        player: appliedReplacerSelf ? appliedReplacerSelf.data.controller : 0, // This is strange @todo check if appliedReplacerSelf can be null
                     }];
             }
             else {
@@ -1995,7 +2000,7 @@ var State = /** @class */ (function () {
                             }
                             case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {
                                 if ('cards' in action && action.cards) {
-                                    if (this_1.state.promptParams.cards.length !== action.cards.length) {
+                                    if (this_1.state.promptParams && this_1.state.promptParams.cards && this_1.state.promptParams.cards.length !== action.cards.length) {
                                         console.error('Number of cards is wrong');
                                         return { value: false };
                                     }

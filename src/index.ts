@@ -556,8 +556,7 @@ export class State {
 	rollDebugValue: number | null;
 	actionsOne: any[];
 	actionsTwo: any[];
-  onAction: Function;
-	commandStream: Writable;
+  onAction: Function | null = null;
 	turnTimer: number | null = null;
 	timerEnabled: boolean;
 	turnTimeout: NodeJS.Timer | null;
@@ -1923,10 +1922,10 @@ export class State {
           const resultEffect: AnyEffectType = {
             type: ACTION_EFFECT,
             ...replacementEffect,
-            replacedBy: [
+            replacedBy: appliedReplacerId ? [
               ...previouslyReplacedBy,
               appliedReplacerId,
-            ],
+            ] : previouslyReplacedBy,
             generatedBy: action.generatedBy || nanoid(),
             player: appliedReplacerSelf.data.controller,
           }
@@ -1934,19 +1933,18 @@ export class State {
           Object.keys(replacementEffect)
 					.filter(key => !['type', 'effectType'].includes(key))
 					.forEach(key => {
-						const value = this.prepareMetaValue(replacementEffect[key as keyof typeof replacementEffect], action, appliedReplacerSelf, action.generatedBy);
+						const value = this.prepareMetaValue(replacementEffect[key as keyof typeof replacementEffect], action, appliedReplacerSelf, action.generatedBy || 'thegame');
 						resultEffect[key as keyof AnyEffectType] = value;
 					});
 
           return resultEffect
         }
 				let resultEffect = {
-					type: ACTION_EFFECT,
 					...replacementEffect,
-					replacedBy: [
-						...previouslyReplacedBy,
-						appliedReplacerId,
-					],
+					replacedBy: appliedReplacerId ? [
+            ...previouslyReplacedBy,
+            appliedReplacerId,
+          ] : previouslyReplacedBy,
 					generatedBy: action.generatedBy || nanoid(),
 					player: appliedReplacerSelf.data.controller,
 				};
@@ -1955,7 +1953,7 @@ export class State {
 				Object.keys(replacementEffect)
 					.filter(key => !['type', 'effectType'].includes(key))
 					.forEach(key => {
-						const value = this.prepareMetaValue(replacementEffect[key as keyof typeof replacementEffect], action, appliedReplacerSelf, action.generatedBy);
+						const value = this.prepareMetaValue(replacementEffect[key as keyof typeof replacementEffect], action, appliedReplacerSelf, action.generatedBy || 'thegame');
 						resultEffect[key as keyof AnyEffectType] = value;
 					});
 
@@ -1963,15 +1961,19 @@ export class State {
 			})(appliedReplacerSelf)) : [];
 
 			// If the replacer is one-time, set the action usage
-			if (foundReplacer && foundReplacer.oncePerTurn && foundReplacer.name) {
+			if (appliedReplacerSelf && foundReplacer && foundReplacer.oncePerTurn && foundReplacer.name) {
 				appliedReplacerSelf.setActionUsed(foundReplacer.name);
 			}
 
 			if (foundReplacer && foundReplacer.mayEffect) {
+        const replacedBy = ('replacedBy' in action && action.replacedBy) ? [...action.replacedBy] : []
+        if (appliedReplacerId) {
+          replacedBy.push(appliedReplacerId);
+        }
 				this.state.mayEffectActions = resultEffects;
 				this.state.fallbackActions = [{
 					...action,
-					replacedBy:	('replacedBy' in action && action.replacedBy) ? [...action.replacedBy, appliedReplacerId] : [appliedReplacerId],
+					replacedBy, // :	('replacedBy' in action && action.replacedBy) ? [...action.replacedBy, appliedReplacerId] : [appliedReplacerId],
 				}];
 
 				return [{
@@ -1984,7 +1986,7 @@ export class State {
 						},
 					},
 					generatedBy: appliedReplacerId,
-					player: appliedReplacerSelf.data.controller,
+					player: appliedReplacerSelf ? appliedReplacerSelf.data.controller : 0, // This is strange @todo check if appliedReplacerSelf can be null
 				} as PromptTypeMayAbility];
 			} else {
 				return resultEffects;
@@ -2858,7 +2860,7 @@ export class State {
 							}
               case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {
                 if ('cards' in action && action.cards) {
-									if (this.state.promptParams.cards.length !== action.cards.length) {
+									if (this.state.promptParams && this.state.promptParams.cards && this.state.promptParams.cards.length !== action.cards.length) {
                     console.error('Number of cards is wrong')
 										return false;
 									}

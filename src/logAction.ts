@@ -26,6 +26,7 @@ const showCard = (card: CardInGame | string) => (card instanceof CardInGame) ? `
 export const showAction = (action: AnyEffectType) => {
 	const fields = Object.keys(action).filter(f => f != 'type').map(field => {
     const cards = action[field as keyof typeof action]
+    if (!cards) return `\t${field}: Empty card encountered`;
 		return `\t${field}: ${(cards instanceof Array) ? cards.map(c => showCard(c)).join(' ') : showCard(cards)}`;
 	});
 	console.log(`

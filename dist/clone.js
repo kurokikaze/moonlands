@@ -9,33 +9,40 @@ export default function clone(item) {
     // normalizing primitives if someone did new String('aaa'), or new Number('444');
     types.forEach(function (type) {
         if (item instanceof type) {
-            result = type(item);
+            return type(item);
         }
     });
     if (typeof result == 'undefined') {
         if (Object.prototype.toString.call(item) === '[object Array]') {
-            result = [];
+            var result_1 = [];
             item.forEach(function (child, index) {
-                result[index] = clone(child);
+                result_1[index] = clone(child);
             });
+            return result_1;
         }
         else if (typeof item == 'object') {
             // testing that this is DOM
-            /*if ('nodeType' in item && item.nodeType && typeof item.cloneNode == 'function') {
-                result = item.cloneNode( true );
-            } else */ if (!('prototype' in item)) { // check that this is a literal
+            if (!('prototype' in item)) { // check that this is a literal
                 if (item instanceof Date) {
-                    result = new Date(item);
+                    return new Date(item);
                 }
                 else if (item instanceof Zone) {
                     result = new Zone(item.name, item.type, item.player, item.ordered);
                     result.add(item.cards.map(clone));
+                    return result;
                 }
                 else if (item instanceof CardInGame) {
-                    result = new CardInGame(byName(item.card.name), item.owner);
-                    result.id = item.id;
-                    result.modifiedCard = item.modifiedCard;
-                    result.data = clone(item.data);
+                    var card = byName(item.card.name);
+                    if (card) {
+                        result = new CardInGame(card, item.owner);
+                        result.id = item.id;
+                        result.modifiedCard = item.modifiedCard;
+                        result.data = clone(item.data);
+                        return result;
+                    }
+                    else {
+                        return {};
+                    }
                 }
                 else {
                     // it is an object literal

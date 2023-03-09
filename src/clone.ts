@@ -2,7 +2,7 @@ import { byName } from "./cards";
 import CardInGame from "./classes/CardInGame";
 import Zone from "./classes/Zone";
 
-export default function clone<T extends (Object|Object[]|Date|CardInGame|Zone)>(item: T): T {
+export default function clone<T extends (any|any[]|Date|CardInGame|Zone)>(item: T): T {
 	if (!item) { return item; } // null, undefined values check
 
 	var types = [ Number, String, Boolean ], 
@@ -11,34 +11,40 @@ export default function clone<T extends (Object|Object[]|Date|CardInGame|Zone)>(
 	// normalizing primitives if someone did new String('aaa'), or new Number('444');
 	types.forEach(function(type) {
 		if (item instanceof type) {
-			result = type( item );
+			return type( item );
 		}
 	});
 
 	if (typeof result == 'undefined') {
 		if (Object.prototype.toString.call( item ) === '[object Array]') {
-			result = [];
+			const result: any[] = [];
 			(item as Object[]).forEach(function(child, index) { 
 				result[index] = clone( child );
 			});
+      return result as T;
 		} else if (typeof item == 'object') {
 			// testing that this is DOM
-			/*if ('nodeType' in item && item.nodeType && typeof item.cloneNode == 'function') {
-				result = item.cloneNode( true );    
-			} else */if (!('prototype' in item)) { // check that this is a literal
+			if (!('prototype' in (item as Object))) { // check that this is a literal
 				if (item instanceof Date) {
-					result = new Date(item);
+					return new Date(item) as T;
 				} else if (item instanceof Zone) {
           result = new Zone(item.name, item.type, item.player, item.ordered)
           result.add(item.cards.map(clone))
+          return result as T;
         } else if (item instanceof CardInGame) {
-          result = new CardInGame(byName(item.card.name), item.owner)
-          result.id = item.id
-          result.modifiedCard = item.modifiedCard
-          result.data = clone(item.data)
+          const card = byName(item.card.name);
+          if (card) {
+            result = new CardInGame(card, item.owner)
+            result.id = item.id
+            result.modifiedCard = item.modifiedCard
+            result.data = clone(item.data);
+            return result as T;
+          } else {
+            return {} as T;
+          }
         } else {
 					// it is an object literal
-					result = {};
+					result = {} as Record<string, any>;
 					for (var i in item) {
 						result[i] = clone( item[i] );
 					}
@@ -58,5 +64,5 @@ export default function clone<T extends (Object|Object[]|Date|CardInGame|Zone)>(
 		}
 	}
 
-	return result;
+	return result as T;
 }
