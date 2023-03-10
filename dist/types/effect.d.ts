@@ -60,9 +60,9 @@ declare type MoveCardsBetwenZonesEffect = ActionEffect & {
 };
 declare type CardMovedBetweenZonesEffect = ActionEffect & {
     effectType: typeof EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES;
-    sourceCard: any;
+    sourceCard: CardInGame;
     sourceZone: ZoneType;
-    destinationCard: any;
+    destinationCard: CardInGame;
     destinationZone: ZoneType;
 };
 declare type StartTurnEffect = ActionEffect & {
