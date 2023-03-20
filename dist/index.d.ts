@@ -25,6 +25,7 @@ declare type PromptParamsType = {
     cards?: ConvertedCard[];
     source?: CardInGame;
     availableCards?: string[];
+    startingCards?: string[];
     numberOfCards?: number;
     restrictions?: RestrictionObjectType[] | null;
     restriction?: RestrictionType;

@@ -54,6 +54,7 @@ export declare type ChooseCardsPromptType = PromptInteface & {
     promptType: typeof PROMPT_TYPE_CHOOSE_CARDS;
     promptParams: {
         availableCards: string[];
+        startingCards: string[];
     };
 };
 export declare type PromptTypeMayAbility = PromptInteface & {

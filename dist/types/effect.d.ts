@@ -283,7 +283,9 @@ declare type DrawNCardsEffect = ActionEffect & {
 };
 export declare type DiscardCreatureFromPlayEffect = ActionEffect & {
     effectType: typeof EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY;
+    source: CardInGame;
     target: CardInGame | string;
+    attack: boolean;
     player: number;
 };
 declare type DiscardRelicFromPlayEffect = ActionEffect & {
