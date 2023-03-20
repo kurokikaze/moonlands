@@ -2087,6 +2087,7 @@ var State = /** @class */ (function () {
                                 break;
                             case PROMPT_TYPE_CHOOSE_CARDS:
                                 if ('cards' in action) {
+                                    // Should be a check against promptParams.availableCards
                                     currentActionMetaData[variable || 'selectedCards'] = action.cards || [];
                                 }
                                 break;
@@ -2633,7 +2634,7 @@ var State = /** @class */ (function () {
                                         type: ACTION_ENTER_PROMPT,
                                         promptType: PROMPT_TYPE_CHOOSE_CARDS,
                                         promptParams: {
-                                            cards: topMagi.card.data.startingCards || [],
+                                            startingCards: topMagi.card.data.startingCards || [],
                                             availableCards: availableCards,
                                         },
                                         variable: 'startingCards',
@@ -3624,6 +3625,7 @@ var State = /** @class */ (function () {
                                     _this.transformIntoActions({
                                         type: ACTION_EFFECT,
                                         effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+                                        attack: false,
                                         target: target,
                                         generatedBy: action.generatedBy,
                                         player: action.player || 0,

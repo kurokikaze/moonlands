@@ -61,7 +61,8 @@ export type PromptTypePlayer = PromptInteface & {
 export type ChooseCardsPromptType = PromptInteface & {
   promptType: typeof PROMPT_TYPE_CHOOSE_CARDS;
   promptParams: {
-    availableCards: string[]
+    availableCards: string[];
+    startingCards: string[];
   }
 }
 

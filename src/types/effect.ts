@@ -456,7 +456,9 @@ type DrawNCardsEffect = ActionEffect & {
 
 export type DiscardCreatureFromPlayEffect = ActionEffect & {
   effectType: typeof EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY;
+  source: CardInGame;
   target: CardInGame | string;
+  attack: boolean;
   player: number;
 }
 

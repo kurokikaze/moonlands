@@ -273,9 +273,9 @@ import {
   ReplacingEffectType,
   CardData,
 } from './types';
-import { DiscardEnergyFromCreatureEffect, EnhancedDelayedTriggerType, StartingEnergyOnCreatureEffect } from './types/effect';
+import { DiscardCreatureFromPlayEffect, DiscardEnergyFromCreatureEffect, EnhancedDelayedTriggerType, StartingEnergyOnCreatureEffect } from './types/effect';
 import { CardType, StatusType } from './types/common';
-import { PromptTypeMayAbility } from './types/prompt';
+import { ChooseCardsPromptType, PromptTypeMayAbility } from './types/prompt';
 
 const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
 	id: cardInGame.id,
@@ -333,10 +333,10 @@ type ProtoChooseCardsPrompt = {
   type: typeof ACTION_ENTER_PROMPT,
   promptType: typeof PROMPT_TYPE_CHOOSE_CARDS,
   promptParams: {
-    cards: string[],
+    startingCards: string[],
     availableCards: string[],
   },
-  variable: string,
+  variable?: string,
 }
 
 type ProtoFindStartingCardsEffect = {
@@ -505,6 +505,7 @@ type PromptParamsType = {
   cards?: ConvertedCard[];
   source?: CardInGame;
   availableCards?: string[];
+  startingCards?: string[];
   numberOfCards?: number;
   restrictions?: RestrictionObjectType[] | null;
   restriction?: RestrictionType;
@@ -2946,6 +2947,7 @@ export class State {
 								break;
 							case PROMPT_TYPE_CHOOSE_CARDS:
 								if ('cards' in action) {
+                  // Should be a check against promptParams.availableCards
 									currentActionMetaData[variable || 'selectedCards'] = action.cards || [];
 								}
 								break;
@@ -3590,11 +3592,11 @@ export class State {
 										type: ACTION_ENTER_PROMPT,
 										promptType: PROMPT_TYPE_CHOOSE_CARDS,
 										promptParams: {
-											cards: topMagi.card.data.startingCards || [],
+											startingCards: topMagi.card.data.startingCards || [],
 											availableCards,
 										},
 										variable: 'startingCards',
-									},
+									} as ProtoChooseCardsPrompt,
 									{
 										type: ACTION_EFFECT,
 										effectType: EFFECT_TYPE_FIND_STARTING_CARDS,
@@ -4631,10 +4633,11 @@ export class State {
                   this.transformIntoActions({
 										type: ACTION_EFFECT,
 										effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+                    attack: false,
 										target,
 										generatedBy: action.generatedBy,
                     player: action.player || 0,
-									});
+									} as DiscardCreatureFromPlayEffect);
 								} else if (targetType === TYPE_RELIC) {
 									this.transformIntoActions({
 										type: ACTION_EFFECT,
