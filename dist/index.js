@@ -3093,14 +3093,23 @@ var State = /** @class */ (function () {
                                 action.source.markDefeatedCreature();
                                 this_1.transformIntoActions({
                                     type: ACTION_EFFECT,
-                                    effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+                                    effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+                                    source: action.source,
                                     target: action.target,
-                                    bottom: false,
-                                    sourceZone: ZONE_TYPE_IN_PLAY,
-                                    destinationZone: ZONE_TYPE_DISCARD,
                                     attack: true,
+                                    player: action.player,
                                     generatedBy: action.generatedBy,
                                 });
+                                // this.transformIntoActions({
+                                // 	type: ACTION_EFFECT,
+                                // 	effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+                                // 	target: action.target,
+                                // 	bottom: false,
+                                // 	sourceZone: ZONE_TYPE_IN_PLAY,
+                                // 	destinationZone: ZONE_TYPE_DISCARD,
+                                // 	attack: true,
+                                // 	generatedBy: action.generatedBy,
+                                // });
                             }
                             break;
                         }
@@ -3500,14 +3509,23 @@ var State = /** @class */ (function () {
                                     if (target.data.energy == 0 && !action.attack) {
                                         _this.transformIntoActions({
                                             type: ACTION_EFFECT,
-                                            effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+                                            effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+                                            source: action.source,
                                             target: target,
-                                            attack: false,
-                                            sourceZone: ZONE_TYPE_IN_PLAY,
-                                            destinationZone: ZONE_TYPE_DISCARD,
-                                            bottom: false,
+                                            attack: action.attack,
+                                            player: action.player,
                                             generatedBy: action.generatedBy,
                                         });
+                                        // this.transformIntoActions({
+                                        // 	type: ACTION_EFFECT,
+                                        // 	effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+                                        // 	target,
+                                        // 	attack: false,
+                                        // 	sourceZone: ZONE_TYPE_IN_PLAY,
+                                        // 	destinationZone: ZONE_TYPE_DISCARD,
+                                        // 	bottom: false,
+                                        // 	generatedBy: action.generatedBy,
+                                        // });
                                     }
                                 }
                             });
@@ -3666,6 +3684,7 @@ var State = /** @class */ (function () {
                                         type: ACTION_EFFECT,
                                         effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
                                         target: creature,
+                                        attack: action.attack,
                                         sourceZone: ZONE_TYPE_IN_PLAY,
                                         destinationZone: ZONE_TYPE_DISCARD,
                                         bottom: false,

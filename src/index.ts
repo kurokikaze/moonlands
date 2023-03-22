@@ -4069,16 +4069,25 @@ export class State {
 						case EFFECT_TYPE_CREATURE_DEFEATS_CREATURE: {
 							if (action.target.data.energy === 0) {
 								action.source.markDefeatedCreature();
-								this.transformIntoActions({
-									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-									target: action.target,
-									bottom: false,
-									sourceZone: ZONE_TYPE_IN_PLAY,
-									destinationZone: ZONE_TYPE_DISCARD,
-									attack: true,
-									generatedBy: action.generatedBy,
-								});
+                this.transformIntoActions({
+                  type: ACTION_EFFECT,
+                  effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+                  source: action.source,
+                  target: action.target,
+                  attack: true,
+                  player: action.player,
+                  generatedBy: action.generatedBy,
+                } as DiscardCreatureFromPlayEffect);
+								// this.transformIntoActions({
+								// 	type: ACTION_EFFECT,
+								// 	effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+								// 	target: action.target,
+								// 	bottom: false,
+								// 	sourceZone: ZONE_TYPE_IN_PLAY,
+								// 	destinationZone: ZONE_TYPE_DISCARD,
+								// 	attack: true,
+								// 	generatedBy: action.generatedBy,
+								// });
 							}
 							break;
 						}
@@ -4501,16 +4510,25 @@ export class State {
 										target.removeEnergy(energyToLose);
 
 										if (target.data.energy == 0 && !action.attack) {
-											this.transformIntoActions({
+                      this.transformIntoActions({
 												type: ACTION_EFFECT,
-												effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-												target,
-												attack: false,
-												sourceZone: ZONE_TYPE_IN_PLAY,
-												destinationZone: ZONE_TYPE_DISCARD,
-												bottom: false,
+												effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+												source: action.source,
+                        target,
+												attack: action.attack,
+                        player: action.player,
 												generatedBy: action.generatedBy,
-											});
+											} as DiscardCreatureFromPlayEffect);
+											// this.transformIntoActions({
+											// 	type: ACTION_EFFECT,
+											// 	effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+											// 	target,
+											// 	attack: false,
+											// 	sourceZone: ZONE_TYPE_IN_PLAY,
+											// 	destinationZone: ZONE_TYPE_DISCARD,
+											// 	bottom: false,
+											// 	generatedBy: action.generatedBy,
+											// });
 										}
 									}
 								},
@@ -4675,6 +4693,7 @@ export class State {
 										type: ACTION_EFFECT,
 										effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
 										target: creature,
+                    attack: action.attack,
 										sourceZone: ZONE_TYPE_IN_PLAY,
 										destinationZone: ZONE_TYPE_DISCARD,
 										bottom: false,
