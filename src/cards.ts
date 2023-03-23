@@ -3931,6 +3931,7 @@ export const cards = [
 		triggerEffects: [
 			{
 				name: 'Feed',
+        text: 'Add one energy to Megathan at the end of any turn in which Megathan defeated one or more Creatures.',
 				find: {
 					effectType: EFFECT_TYPE_END_OF_TURN,
 					conditions: [],

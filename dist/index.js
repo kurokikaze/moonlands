@@ -521,7 +521,7 @@ var State = /** @class */ (function () {
             }
         }
         catch (e) {
-            console.log('Log entry creation failed');
+            console.error('Log entry creation failed');
             console.dir(e);
         }
         if (newLogEntry) {
@@ -1352,7 +1352,7 @@ var State = /** @class */ (function () {
                 result = _this.checkCondition(action, self, condition);
             }
             catch (e) {
-                console.log('Failure checking condition');
+                console.error('Failure checking condition');
                 console.dir(condition);
             }
             return result;
@@ -1508,7 +1508,7 @@ var State = /** @class */ (function () {
         // Calculate if prompts are resolvable
         // If source is Magi, it will not be filtered out, being in another zone
         var creatureWillSurvive = !isPower || source.data.energy > powerCost;
-        var ourCardsInPlay = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(function (card) { return (creatureWillSurvive ? true : card.id !== source.id) && card.data.controller === source.data.controller; });
+        var ourCardsInPlay = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(function (card) { return (creatureWillSurvive ? true : card.id !== source.id) && _this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === source.data.controller; });
         var allCardsInPlay = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(function (card) { return creatureWillSurvive ? true : card.id !== source.id; });
         var metaValues = {
             '$source': source,
@@ -1633,13 +1633,13 @@ var State = /** @class */ (function () {
     };
     State.prototype.update = function (initialAction) {
         var _this = this;
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
         if (this.hasWinner()) {
             return false;
         }
         this.addActions(initialAction);
         var _loop_1 = function () {
-            var _q;
+            var _p;
             var rawAction = this_1.getNextAction();
             var replacedActions = this_1.replaceByReplacementEffect(rawAction);
             var action = replacedActions[0];
@@ -1678,11 +1678,11 @@ var State = /** @class */ (function () {
                     var sourceAttacksPerTurn = this_1.modifyByStaticAbilities(attackSource, PROPERTY_ATTACKS_PER_TURN);
                     var attackerCanAttack = this_1.modifyByStaticAbilities(attackSource, PROPERTY_ABLE_TO_ATTACK);
                     if (!attackerCanAttack) {
-                        console.log("Somehow ".concat(attackSource.card.name, " cannot attack"));
+                        console.error("Somehow ".concat(attackSource.card.name, " cannot attack"));
                     }
                     var targetCanBeAttacked = this_1.modifyByStaticAbilities(attackTarget, PROPERTY_CAN_BE_ATTACKED);
                     if (!targetCanBeAttacked) {
-                        console.log("Somehow ".concat(attackSource.card.name, " cannot be attacked"));
+                        console.error("Somehow ".concat(attackSource.card.name, " cannot be attacked"));
                     }
                     var sourceHasAttacksLeft = attackSource.data.attacked < sourceAttacksPerTurn;
                     var additionalAttackersCanAttack = additionalAttackers.every(function (card) { return card.card.data.canPackHunt && _this.modifyByStaticAbilities(card, PROPERTY_ABLE_TO_ATTACK); });
@@ -2051,7 +2051,8 @@ var State = /** @class */ (function () {
                             }
                             case PROMPT_TYPE_OWN_SINGLE_CREATURE: {
                                 if ('target' in action && action.target) {
-                                    if (this_1.state.promptPlayer !== ((_g = action.target) === null || _g === void 0 ? void 0 : _g.data.controller)) {
+                                    var targetController = this_1.modifyByStaticAbilities(action.target, PROPERTY_CONTROLLER);
+                                    if (this_1.state.promptPlayer !== targetController) {
                                         throw new Error('Not-controlled creature supplied to Own Creatures prompt');
                                     }
                                     currentActionMetaData[variable || 'target'] = action.target;
@@ -2065,7 +2066,7 @@ var State = /** @class */ (function () {
                                 break;
                             }
                             case PROMPT_TYPE_MAGI_WITHOUT_CREATURES: {
-                                if ('target' in action && ((_h = action.target) === null || _h === void 0 ? void 0 : _h.card.type) === TYPE_MAGI && this_1.useSelector(SELECTOR_CREATURES_OF_PLAYER, action.target.data.controller)) {
+                                if ('target' in action && ((_g = action.target) === null || _g === void 0 ? void 0 : _g.card.type) === TYPE_MAGI && this_1.useSelector(SELECTOR_CREATURES_OF_PLAYER, action.target.data.controller)) {
                                     currentActionMetaData[variable || 'target'] = action.target;
                                     break;
                                 }
@@ -2130,7 +2131,7 @@ var State = /** @class */ (function () {
                             }
                         }
                         var actions = this_1.state.savedActions || [];
-                        this_1.state = __assign(__assign({}, this_1.state), { actions: actions, savedActions: [], prompt: false, promptType: null, promptMessage: undefined, promptGeneratedBy: undefined, promptVariable: undefined, promptParams: {}, spellMetaData: __assign(__assign({}, this_1.state.spellMetaData), (_q = {}, _q[generatedBy] = currentActionMetaData, _q)) });
+                        this_1.state = __assign(__assign({}, this_1.state), { actions: actions, savedActions: [], prompt: false, promptType: null, promptMessage: undefined, promptGeneratedBy: undefined, promptVariable: undefined, promptParams: {}, spellMetaData: __assign(__assign({}, this_1.state.spellMetaData), (_p = {}, _p[generatedBy] = currentActionMetaData, _p)) });
                     }
                     break;
                 }
@@ -2395,7 +2396,7 @@ var State = /** @class */ (function () {
                                 case TYPE_SPELL: {
                                     if (activeMagi.data.energy >= totalCost || baseCard_1.cost === COST_X || baseCard_1.cost === COST_X_PLUS_ONE) {
                                         var enrichAction = function (effect) { return (__assign(__assign({ source: cardItself_1, player: player_1 }, effect), { spell: true, generatedBy: cardItself_1.id })); };
-                                        var preparedEffects = ((_k = (_j = baseCard_1.data) === null || _j === void 0 ? void 0 : _j.effects) === null || _k === void 0 ? void 0 : _k.map(enrichAction)) || [];
+                                        var preparedEffects = ((_j = (_h = baseCard_1.data) === null || _h === void 0 ? void 0 : _h.effects) === null || _j === void 0 ? void 0 : _j.map(enrichAction)) || [];
                                         var testablePrompts_1 = [
                                             PROMPT_TYPE_SINGLE_CREATURE,
                                             PROMPT_TYPE_RELIC,
@@ -2413,7 +2414,7 @@ var State = /** @class */ (function () {
                                                 case PROMPT_TYPE_RELIC:
                                                     return _this.getZone(ZONE_TYPE_IN_PLAY).cards.some(function (card) { return card.card.type === TYPE_RELIC; });
                                                 case PROMPT_TYPE_OWN_SINGLE_CREATURE:
-                                                    return _this.getZone(ZONE_TYPE_IN_PLAY).cards.some(function (card) { return card.data.controller === promptAction.player; });
+                                                    return _this.getZone(ZONE_TYPE_IN_PLAY).cards.some(function (card) { return _this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === promptAction.player; });
                                                 case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
                                                     if (promptAction.restrictions) {
                                                         return promptAction.restrictions.every(function (_a) {
@@ -2540,7 +2541,7 @@ var State = /** @class */ (function () {
                                 action.player === this_1.state.goesFirst &&
                                 action.step === 0;
                             if (steps[action.step].effects && !isFirstEnergize) {
-                                var transformedActions = ((_m = (_l = steps[action.step]) === null || _l === void 0 ? void 0 : _l.effects) === null || _m === void 0 ? void 0 : _m.map(function (effect) {
+                                var transformedActions = ((_l = (_k = steps[action.step]) === null || _k === void 0 ? void 0 : _k.effects) === null || _l === void 0 ? void 0 : _l.map(function (effect) {
                                     return (__assign(__assign({}, effect), { player: action.player, generatedBy: action.generatedBy }));
                                 })) || [];
                                 this_1.addActions.apply(this_1, transformedActions);
@@ -2672,7 +2673,7 @@ var State = /** @class */ (function () {
                             }
                             // if magi is active, reset its actions used too
                             if (this_1.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).length == 1) {
-                                (_p = (_o = this_1.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player)) === null || _o === void 0 ? void 0 : _o.card) === null || _p === void 0 ? void 0 : _p.clearActionsUsed();
+                                (_o = (_m = this_1.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player)) === null || _m === void 0 ? void 0 : _m.card) === null || _o === void 0 ? void 0 : _o.clearActionsUsed();
                             }
                             break;
                         }
@@ -3225,7 +3226,7 @@ var State = /** @class */ (function () {
                         }
                         case EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES: {
                             if (!action.sourceZone || !action.destinationZone) {
-                                console.log('Source zone or destination zone invalid');
+                                console.error('Source zone or destination zone invalid');
                                 throw new Error('Invalid params for EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
                             }
                             var zoneChangingTargets = this_1.getMetaValue(action.target, action.generatedBy);
@@ -3263,7 +3264,7 @@ var State = /** @class */ (function () {
                         }
                         case EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES: {
                             if (!action.sourceZone || !action.destinationZone) {
-                                console.log('Source zone or destination zone invalid');
+                                console.error('Source zone or destination zone invalid');
                                 throw new Error('Invalid params for EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
                             }
                             var zoneChangingTarget = this_1.getMetaValue(action.target, action.generatedBy);
@@ -3550,7 +3551,7 @@ var State = /** @class */ (function () {
                                 }
                             }
                             else {
-                                console.log('Wrong card type');
+                                console.error('Wrong card type');
                             }
                             break;
                         }
@@ -3758,7 +3759,7 @@ var State = /** @class */ (function () {
                                 });
                             }
                             else if (this_1.debug) {
-                                console.log("Cannot rearrange energy because new total ".concat(newEnergyTotal, " is not equal to old total ").concat(totalEnergyOnCreatures));
+                                console.error("Cannot rearrange energy because new total ".concat(newEnergyTotal, " is not equal to old total ").concat(totalEnergyOnCreatures));
                             }
                             break;
                         }
@@ -3842,8 +3843,8 @@ var State = /** @class */ (function () {
                         });
                     }
                 }
-                else {
-                    // console.log('No active Magi already. How did we got here?');
+                else if (_this.debug) {
+                    console.error('No active Magi already. How did we got here?');
                 }
             });
             if (sbActions_1.length > 0) {

@@ -957,7 +957,7 @@ export class State {
 				}
 			}
 		} catch(e) {
-			console.log('Log entry creation failed');
+			console.error('Log entry creation failed');
 			console.dir(e);
 		}
 
@@ -2052,7 +2052,7 @@ export class State {
       try {
 			  result = this.checkCondition(action, self, condition);
       } catch (e) {
-        console.log('Failure checking condition');
+        console.error('Failure checking condition');
         console.dir(condition);
       }
       return result;
@@ -2233,7 +2233,7 @@ export class State {
 		// If source is Magi, it will not be filtered out, being in another zone
 		const creatureWillSurvive = !isPower || source.data.energy > powerCost;
 
-		const ourCardsInPlay = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => (creatureWillSurvive ? true : card.id !== source.id ) && card.data.controller === source.data.controller);
+		const ourCardsInPlay = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => (creatureWillSurvive ? true : card.id !== source.id ) && this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === source.data.controller);
 		const allCardsInPlay = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => creatureWillSurvive ? true : card.id !== source.id);
 
 		const metaValues: MetaDataRecord = {
@@ -2459,12 +2459,12 @@ export class State {
 
 					const attackerCanAttack = this.modifyByStaticAbilities(attackSource, PROPERTY_ABLE_TO_ATTACK);
 					if (!attackerCanAttack) {
-						console.log(`Somehow ${attackSource.card.name} cannot attack`);
+						console.error(`Somehow ${attackSource.card.name} cannot attack`);
 					}
 
 					const targetCanBeAttacked = this.modifyByStaticAbilities(attackTarget, PROPERTY_CAN_BE_ATTACKED);
 					if (!targetCanBeAttacked) {
-						console.log(`Somehow ${attackSource.card.name} cannot be attacked`);
+						console.error(`Somehow ${attackSource.card.name} cannot be attacked`);
 					}
 
 					const sourceHasAttacksLeft = attackSource.data.attacked < sourceAttacksPerTurn;
@@ -2911,7 +2911,8 @@ export class State {
 							}
 							case PROMPT_TYPE_OWN_SINGLE_CREATURE: {
 								if ('target' in action && action.target) {
-									if (this.state.promptPlayer !== action.target?.data.controller) {
+                  const targetController = this.modifyByStaticAbilities(action.target, PROPERTY_CONTROLLER);
+									if (this.state.promptPlayer !== targetController) {
 										throw new Error('Not-controlled creature supplied to Own Creatures prompt');
 									}
 									currentActionMetaData[variable || 'target'] = action.target;
@@ -3324,7 +3325,7 @@ export class State {
 												case PROMPT_TYPE_RELIC:
 													return this.getZone(ZONE_TYPE_IN_PLAY).cards.some(card => card.card.type === TYPE_RELIC);
 												case PROMPT_TYPE_OWN_SINGLE_CREATURE:
-													return this.getZone(ZONE_TYPE_IN_PLAY).cards.some(card => card.data.controller === promptAction.player);
+													return this.getZone(ZONE_TYPE_IN_PLAY).cards.some(card => this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === promptAction.player);
 												case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
 													if (promptAction.restrictions) {
 														return promptAction.restrictions.every(({type, value}) => 
@@ -4207,7 +4208,7 @@ export class State {
 						}
 						case EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES: {
 							if (!action.sourceZone || !action.destinationZone) {
-								console.log('Source zone or destination zone invalid');
+								console.error('Source zone or destination zone invalid');
 								throw new Error('Invalid params for EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
 							}
 							const zoneChangingTargets = this.getMetaValue(action.target, action.generatedBy);
@@ -4248,7 +4249,7 @@ export class State {
 						}
 						case EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES: {
 							if (!action.sourceZone || !action.destinationZone) {
-								console.log('Source zone or destination zone invalid');
+								console.error('Source zone or destination zone invalid');
 								throw new Error('Invalid params for EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
 							}
 							const zoneChangingTarget = this.getMetaValue(action.target, action.generatedBy);
@@ -4554,7 +4555,7 @@ export class State {
                   });
                 }
               } else {
-                console.log('Wrong card type')
+                console.error('Wrong card type')
               }
 							break;
 						}
@@ -4783,7 +4784,7 @@ export class State {
 									}
 								});
 							} else if (this.debug) {
-								console.log(`Cannot rearrange energy because new total ${newEnergyTotal} is not equal to old total ${totalEnergyOnCreatures}`);
+								console.error(`Cannot rearrange energy because new total ${newEnergyTotal} is not equal to old total ${totalEnergyOnCreatures}`);
 							}
 							break;
 						}
@@ -4869,8 +4870,8 @@ export class State {
 							player,
 						});
 					}
-				} else {
-          // console.log('No active Magi already. How did we got here?');
+				} else if (this.debug) {
+          console.error('No active Magi already. How did we got here?');
         }
 			});
 			if (sbActions.length > 0) {

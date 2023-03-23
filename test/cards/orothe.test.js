@@ -1756,6 +1756,110 @@ describe('Abaquist', () => {
 		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
 		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game is prompting active player');		
 	});
+
+	it('Choosing posessed creature as your own', () => {
+		const ACTIVE_PLAYER = 104;
+		const NON_ACTIVE_PLAYER = 12;
+		const whall = new CardInGame(byName('Whall'), ACTIVE_PLAYER).addEnergy(10);
+		const giantParathin = new CardInGame(byName('Giant Parathin'), ACTIVE_PLAYER);
+		const magam = new CardInGame(byName('Magam'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), NON_ACTIVE_PLAYER).addEnergy(3);
+		const abaquist = new CardInGame(byName('Abaquist'), ACTIVE_PLAYER).addEnergy(6);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaBalamant, abaquist], [whall]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([magam]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([giantParathin]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: abaquist,
+			power: abaquist.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+			generatedBy: abaquist.id,
+		};
+
+		const seenActions = [];
+
+		gameState.setOnAction(function(action) {
+			seenActions.push(action);
+		});
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptParams.restrictions).toHaveLength(1);
+		expect(gameState.state.promptParams.restrictions[0].type).toEqual(RESTRICTION_ENERGY_LESS_THAN);
+		expect(gameState.state.promptParams.restrictions[0].value).toEqual(6);
+
+		expect(seenActions[1].restrictions[0].type).toEqual(RESTRICTION_ENERGY_LESS_THAN);
+		expect(seenActions[1].restrictions[0].value).toEqual(6);
+
+		const chooseCreatureAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: lavaBalamant,
+			player: ACTIVE_PLAYER,
+			generatedBy: abaquist.id,
+		};
+
+		gameState.update(chooseCreatureAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+
+		expect(gameState.state.continuousEffects).toHaveLength(2, 'Game has 2 continuous effects added');
+
+		expect(gameState.modifyByStaticAbilities(lavaBalamant, PROPERTY_CONTROLLER)).toEqual(ACTIVE_PLAYER, 'Active player controls Lava Balamant now');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).cards.length).toEqual(1, 'Active player has 1 card in discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Abaquist', 'It is Abaquist');
+
+		const staticAbilityAction = seenActions.find(a => a.type === ACTION_EFFECT && a.effectType === EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT);
+		expect(staticAbilityAction).not.toBeNull();
+		expect(staticAbilityAction.staticAbilities).toHaveLength(1);
+		expect(staticAbilityAction.staticAbilities[0].modifier.operandOne).toEqual(ACTIVE_PLAYER);
+		expect(staticAbilityAction.staticAbilities[0].selectorParameter).toEqual(lavaBalamant.id);
+
+		const whallPowerAction = {
+			type: ACTION_POWER,
+			source: whall,
+			power: whall.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+			generatedBy: whall.id,
+		};
+
+		// gameState.enableDebug(true);
+		gameState.update(whallPowerAction);
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+
+		const chooseBalamantAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: lavaBalamant,
+			player: ACTIVE_PLAYER,
+			generatedBy: whall.id,
+		};
+
+		gameState.update(chooseBalamantAction);
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, 'Game is waiting for a card from hand');
+
+		const chooseCardAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: giantParathin,
+			player: ACTIVE_PLAYER,
+			generatedBy: whall.id,
+		};
+
+		gameState.update(chooseCardAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+	});
 });
 
 describe('Orlon', () => {
