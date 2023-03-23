@@ -1905,6 +1905,8 @@ export var cards = [
     new Card('Staff of Korrits', TYPE_RELIC, REGION_UNDERNEATH, 0, {
         triggerEffects: [
             {
+                name: 'Korrit Charge',
+                text: 'Whenever a Korrit you control Pack Hunts with another Creature, add one energy to that Korrit before energy is removed.',
                 find: {
                     effectType: EFFECT_TYPE_CREATURE_ATTACKS,
                     conditions: [
@@ -2540,6 +2542,8 @@ export var cards = [
     new Card('Ring of Secrets', TYPE_RELIC, REGION_UNIVERSAL, 0, {
         triggerEffects: [
             {
+                name: 'Tinker',
+                text: 'Whenever you play a Relic, choose any one Creature in play. Add one enery to the chosen Creature.',
                 find: {
                     effectType: EFFECT_TYPE_PLAY_RELIC,
                     conditions: [
@@ -2645,6 +2649,8 @@ export var cards = [
     new Card('Storm Ring', TYPE_RELIC, REGION_ARDERIAL, 0, {
         triggerEffects: [
             {
+                name: 'Thunder Charge',
+                text: 'Whenever one of your Creatures attacks, add one energy to that Creature before energy is removed. If that Creature is a hyren, add one additional energy.',
                 find: {
                     effectType: EFFECT_TYPE_CREATURE_ATTACKS,
                     conditions: [
@@ -2701,6 +2707,8 @@ export var cards = [
         startingCards: ['Arbolit', 'Quor', 'Flame Geyser'],
         triggerEffects: [
             {
+                name: 'Nerve',
+                text: 'If a Creature attacks Ashgar directly, draw a card before energy is removed.',
                 find: {
                     effectType: EFFECT_TYPE_BEFORE_DAMAGE,
                     conditions: [
@@ -3996,6 +4004,8 @@ export var cards = [
     }),
     new Card('Plith', TYPE_CREATURE, REGION_NAROOM, 3, {
         triggerEffects: [{
+                name: 'Warning',
+                text: 'If Plith is attacked, draw one card. If Evu is your Magi when Plith is attacked, draw one additional card.',
                 find: {
                     effectType: EFFECT_TYPE_CREATURE_ATTACKS,
                     conditions: [
