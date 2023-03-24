@@ -306,7 +306,7 @@ export var cards = [
                         variable: 'orotheCreature',
                     }),
                     effect({
-                        effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+                        effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
                         sourceZone: ZONE_TYPE_DECK,
                         destinationZone: ZONE_TYPE_IN_PLAY,
                         target: '$orotheCreature',
