@@ -4870,9 +4870,7 @@ export class State {
 							player,
 						});
 					}
-				} else if (this.debug) {
-          console.error('No active Magi already. How did we got here?');
-        }
+				}
 			});
 			if (sbActions.length > 0) {
 				this.addActions(...sbActions);

@@ -3843,9 +3843,6 @@ var State = /** @class */ (function () {
                         });
                     }
                 }
-                else if (_this.debug) {
-                    console.error('No active Magi already. How did we got here?');
-                }
             });
             if (sbActions_1.length > 0) {
                 this.addActions.apply(this, sbActions_1);
