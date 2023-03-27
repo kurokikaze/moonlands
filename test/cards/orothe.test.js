@@ -574,7 +574,7 @@ describe('Hubdra\'s Spear', () => {
 		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(12);
 
 		const hubdrasSpear = new CardInGame(byName('Hubdra\'s Spear'), ACTIVE_PLAYER);
-		const mobis = new CardInGame(byName('Mobis'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const mobis = new CardInGame(byName('Mobis'), ACTIVE_PLAYER).addEnergy(10);
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [hubdrasSpear], [mobis]);
 
@@ -616,9 +616,10 @@ describe('Hubdra\'s Spear', () => {
 		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(2);
 
 		const hubdrasSpear = new CardInGame(byName('Hubdra\'s Spear'), ACTIVE_PLAYER);
-		const mobis = new CardInGame(byName('Mobis'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const platheus = new CardInGame(byName('Platheus'), ACTIVE_PLAYER).addEnergy(2);
+		const mobis = new CardInGame(byName('Mobis'), ACTIVE_PLAYER).addEnergy(10);
 
-		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [hubdrasSpear, arbolit], [mobis]);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [hubdrasSpear, arbolit, platheus], [mobis]);
 
 		const gameState = new State({
 			zones,
@@ -638,6 +639,73 @@ describe('Hubdra\'s Spear', () => {
 		gameState.update(powerAction);
 		expect(gameState.state.prompt).toEqual(false);
 		expect(grega.data.energy).toEqual(12);
+	});
+
+	it('Stab (opponent Magi have creature stolen)', () => {
+		const ACTIVE_PLAYER = 432;
+		const NON_ACTIVE_PLAYER = 710;
+
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(12);
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const hubdrasSpear = new CardInGame(byName('Hubdra\'s Spear'), ACTIVE_PLAYER);
+		const mobis = new CardInGame(byName('Mobis'), ACTIVE_PLAYER).addEnergy(10);
+		const abaquist = new CardInGame(byName('Abaquist'), ACTIVE_PLAYER).addEnergy(10);
+		const platheus = new CardInGame(byName('Platheus'), ACTIVE_PLAYER).addEnergy(2);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [hubdrasSpear, arbolit, abaquist, platheus], [mobis]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		// Abaquist
+		const abaquistPowerAction = {
+			type: ACTION_POWER,
+			source: abaquist,
+			player: ACTIVE_PLAYER,
+			power: abaquist.card.data.powers[0],
+		};
+
+		// gameState.enableDebug();
+		gameState.update(abaquistPowerAction);
+
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_SINGLE_CREATURE_FILTERED);
+
+		const targetAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: arbolit,
+			generatedBy: abaquist.id,
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(targetAction);
+		expect(gameState.state.prompt).toEqual(false);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: hubdrasSpear,
+			power: hubdrasSpear.card.data.powers[0],
+		};
+
+		gameState.update(powerAction);
+		expect(gameState.state.prompt).toEqual(true);
+
+		const spearTargetAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: grega,
+			generatedBy: hubdrasSpear.id,
+			player: ACTIVE_PLAYER,
+		};
+		gameState.update(spearTargetAction);
+		expect(gameState.state.prompt).toEqual(false);
+		expect(grega.data.energy).toEqual(1);
 	});
 });
 

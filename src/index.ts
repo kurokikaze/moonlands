@@ -2278,7 +2278,7 @@ export class State {
 				case PROMPT_TYPE_MAGI_WITHOUT_CREATURES:
 					const opponent = this.getOpponent(source.data.controller);
 					const magi = [...this.getZone(ZONE_TYPE_ACTIVE_MAGI, source.data.controller).cards, ...this.getZone(ZONE_TYPE_ACTIVE_MAGI, opponent).cards];
-					return magi.some(magi => !allCardsInPlay.some(card => card.data.controller === magi.data.controller && card.card.type === TYPE_CREATURE));
+					return magi.some(magi => !allCardsInPlay.some(card => card.card.type === TYPE_CREATURE && this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === magi.data.controller));
 				case PROMPT_TYPE_RELIC:
 					return allCardsInPlay.some(card => card.card.type === TYPE_RELIC);
 				case PROMPT_TYPE_OWN_SINGLE_CREATURE:
@@ -2567,7 +2567,6 @@ export class State {
 						const preparedActions: AnyEffectType[] = effects.map(enrichAction);
 
 						const allPromptsAreDoable = this.checkPrompts(source, preparedActions, true, powerCost);
-
 						if (allPromptsAreDoable) {
 							let currentPowerMetaData = {
 								source,

@@ -1545,7 +1545,7 @@ var State = /** @class */ (function () {
                 case PROMPT_TYPE_MAGI_WITHOUT_CREATURES:
                     var opponent = _this.getOpponent(source.data.controller);
                     var magi = __spreadArray(__spreadArray([], _this.getZone(ZONE_TYPE_ACTIVE_MAGI, source.data.controller).cards, true), _this.getZone(ZONE_TYPE_ACTIVE_MAGI, opponent).cards, true);
-                    return magi.some(function (magi) { return !allCardsInPlay.some(function (card) { return card.data.controller === magi.data.controller && card.card.type === TYPE_CREATURE; }); });
+                    return magi.some(function (magi) { return !allCardsInPlay.some(function (card) { return card.card.type === TYPE_CREATURE && _this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === magi.data.controller; }); });
                 case PROMPT_TYPE_RELIC:
                     return allCardsInPlay.some(function (card) { return card.card.type === TYPE_RELIC; });
                 case PROMPT_TYPE_OWN_SINGLE_CREATURE:
