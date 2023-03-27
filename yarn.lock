@@ -2361,10 +2361,6 @@ is-potential-custom-element-name@^1.0.1:
   version "1.0.1"
   resolved "https://registry.npmjs.org/is-potential-custom-element-name/-/is-potential-custom-element-name-1.0.1.tgz"
 
-is-promise@^2.1.0:
-  version "2.2.2"
-  resolved "https://registry.npmjs.org/is-promise/-/is-promise-2.2.2.tgz"
-
 is-regex@^1.1.1:
   version "1.1.1"
   resolved "https://registry.npmjs.org/is-regex/-/is-regex-1.1.1.tgz"
