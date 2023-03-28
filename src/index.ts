@@ -2617,12 +2617,13 @@ export class State {
 					}
 					break;
 				}
-				case ACTION_ENTER_PROMPT: {
+        case ACTION_ENTER_PROMPT: {
 					if (!('player' in action)) {
 						throw new Error('Prompt without player!');
 					}
 					const savedActions = this.state.actions;
 					let promptParams: PromptParamsType = {};
+          let skipPrompt = false;
 					const promptPlayer = this.getMetaValue(action.player, action.generatedBy);
 
 					switch (action.promptType) {
@@ -2651,17 +2652,21 @@ export class State {
 							const zoneOwner = this.getMetaValue(action.zoneOwner, action.generatedBy);
 							const numberOfCards = this.getMetaValue(action.numberOfCards, action.generatedBy);
 
-							const cardFilter = this.makeCardFilter(restrictions || []);
-							const zoneContent = this.getZone(zone, zoneOwner).cards;
-							const cards = restrictions ? zoneContent.filter(cardFilter) : zoneContent;
+							const zoneContent = (zone === ZONE_TYPE_IN_PLAY) ? this.getZone(zone, null).cards : this.getZone(zone, zoneOwner).cards;
+							const cards = restrictions ? zoneContent.filter(this.makeCardFilter(restrictions)) : zoneContent;
 
-							promptParams = {
-								zone,
-								zoneOwner,
-								restrictions,
-								numberOfCards,
-								cards: cards.map(convertCard),
-							};
+              const maxNumberOfCards = Math.min(numberOfCards, cards.length);
+              if (maxNumberOfCards > 0) {
+                promptParams = {
+                  zone,
+                  zoneOwner,
+                  restrictions,
+                  numberOfCards: maxNumberOfCards,
+                  cards: cards.map(convertCard),
+                };
+              } else {
+                skipPrompt = true;
+              }
 							break;
 						}
 						case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
@@ -2679,17 +2684,22 @@ export class State {
 							const zoneOwner = this.getMetaValue(action.zoneOwner, action.generatedBy);
 							const numberOfCards = this.getMetaValue(action.numberOfCards, action.generatedBy);
 
-							const cardFilter = this.makeCardFilter(restrictions || []);
-							const zoneContent = this.getZone(zone, zoneOwner).cards;
-							const cards = restrictions ? zoneContent.filter(cardFilter) : zoneContent;
+							const zoneContent = (zone === ZONE_TYPE_IN_PLAY) ? this.getZone(zone, null).cards : this.getZone(zone, zoneOwner).cards;
+							const cards = restrictions ? zoneContent.filter(this.makeCardFilter(restrictions)) : zoneContent;
 
-							promptParams = {
-								zone,
-								zoneOwner,
-								restrictions,
-								numberOfCards,
-								cards: cards.map(convertCard),
-							};
+              const maxNumberOfCards = Math.min(numberOfCards, cards.length);
+
+              if (maxNumberOfCards > 0) {
+                promptParams = {
+                  zone,
+                  zoneOwner,
+                  restrictions,
+                  numberOfCards: maxNumberOfCards,
+                  cards: cards.map(convertCard),
+                };
+              } else {
+                skipPrompt = true;
+              }
 							break;
 						}
             case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {
@@ -2778,18 +2788,20 @@ export class State {
 						}
 					}
 
-					this.state = {
-						...this.state,
-						actions: [],
-						savedActions,
-						prompt: true,
-						promptMessage: ('message' in action) ? action.message : '',
-						promptPlayer,
-						promptType: action.promptType,
-						promptVariable: action.variable,
-						promptGeneratedBy: action.generatedBy,
-						promptParams,
-					};
+          if (!skipPrompt) {
+            this.state = {
+              ...this.state,
+              actions: [],
+              savedActions,
+              prompt: true,
+              promptMessage: ('message' in action) ? action.message : '',
+              promptPlayer,
+              promptType: action.promptType,
+              promptVariable: action.variable,
+              promptGeneratedBy: action.generatedBy,
+              promptParams,
+            };
+          }
 					break;
 				}
 				case ACTION_EXIT_PROMPTS: {
@@ -4210,7 +4222,11 @@ export class State {
 								console.error('Source zone or destination zone invalid');
 								throw new Error('Invalid params for EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
 							}
-							const zoneChangingTargets = this.getMetaValue(action.target, action.generatedBy);
+							const zoneChangingTargets = this.getMetaValue(action.target, action.generatedBy) || [];
+              if (!zoneChangingTargets) {
+                console.dir(zoneChangingTargets);
+                console.dir(this.getSpellMetadata(action.generatedBy));
+              }
               if (zoneChangingTargets.length) {
                 // We assume all cards changing zones are in one zone initially
                 const zoneOwner = zoneChangingTargets[0].owner;

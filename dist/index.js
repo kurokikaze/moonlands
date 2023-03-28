@@ -1809,6 +1809,7 @@ var State = /** @class */ (function () {
                     }
                     var savedActions = this_1.state.actions;
                     var promptParams = {};
+                    var skipPrompt = false;
                     var promptPlayer = this_1.getMetaValue(action.player, action.generatedBy);
                     switch (action.promptType) {
                         case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
@@ -1834,16 +1835,21 @@ var State = /** @class */ (function () {
                             var zone = this_1.getMetaValue(action.zone, action.generatedBy);
                             var zoneOwner = this_1.getMetaValue(action.zoneOwner, action.generatedBy);
                             var numberOfCards = this_1.getMetaValue(action.numberOfCards, action.generatedBy);
-                            var cardFilter = this_1.makeCardFilter(restrictions || []);
-                            var zoneContent = this_1.getZone(zone, zoneOwner).cards;
-                            var cards = restrictions ? zoneContent.filter(cardFilter) : zoneContent;
-                            promptParams = {
-                                zone: zone,
-                                zoneOwner: zoneOwner,
-                                restrictions: restrictions,
-                                numberOfCards: numberOfCards,
-                                cards: cards.map(convertCard),
-                            };
+                            var zoneContent = (zone === ZONE_TYPE_IN_PLAY) ? this_1.getZone(zone, null).cards : this_1.getZone(zone, zoneOwner).cards;
+                            var cards = restrictions ? zoneContent.filter(this_1.makeCardFilter(restrictions)) : zoneContent;
+                            var maxNumberOfCards = Math.min(numberOfCards, cards.length);
+                            if (maxNumberOfCards > 0) {
+                                promptParams = {
+                                    zone: zone,
+                                    zoneOwner: zoneOwner,
+                                    restrictions: restrictions,
+                                    numberOfCards: maxNumberOfCards,
+                                    cards: cards.map(convertCard),
+                                };
+                            }
+                            else {
+                                skipPrompt = true;
+                            }
                             break;
                         }
                         case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
@@ -1859,16 +1865,21 @@ var State = /** @class */ (function () {
                             var zone = this_1.getMetaValue(action.zone, action.generatedBy);
                             var zoneOwner = this_1.getMetaValue(action.zoneOwner, action.generatedBy);
                             var numberOfCards = this_1.getMetaValue(action.numberOfCards, action.generatedBy);
-                            var cardFilter = this_1.makeCardFilter(restrictions || []);
-                            var zoneContent = this_1.getZone(zone, zoneOwner).cards;
-                            var cards = restrictions ? zoneContent.filter(cardFilter) : zoneContent;
-                            promptParams = {
-                                zone: zone,
-                                zoneOwner: zoneOwner,
-                                restrictions: restrictions,
-                                numberOfCards: numberOfCards,
-                                cards: cards.map(convertCard),
-                            };
+                            var zoneContent = (zone === ZONE_TYPE_IN_PLAY) ? this_1.getZone(zone, null).cards : this_1.getZone(zone, zoneOwner).cards;
+                            var cards = restrictions ? zoneContent.filter(this_1.makeCardFilter(restrictions)) : zoneContent;
+                            var maxNumberOfCards = Math.min(numberOfCards, cards.length);
+                            if (maxNumberOfCards > 0) {
+                                promptParams = {
+                                    zone: zone,
+                                    zoneOwner: zoneOwner,
+                                    restrictions: restrictions,
+                                    numberOfCards: maxNumberOfCards,
+                                    cards: cards.map(convertCard),
+                                };
+                            }
+                            else {
+                                skipPrompt = true;
+                            }
                             break;
                         }
                         case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {
@@ -1960,7 +1971,9 @@ var State = /** @class */ (function () {
                             break;
                         }
                     }
-                    this_1.state = __assign(__assign({}, this_1.state), { actions: [], savedActions: savedActions, prompt: true, promptMessage: ('message' in action) ? action.message : '', promptPlayer: promptPlayer, promptType: action.promptType, promptVariable: action.variable, promptGeneratedBy: action.generatedBy, promptParams: promptParams });
+                    if (!skipPrompt) {
+                        this_1.state = __assign(__assign({}, this_1.state), { actions: [], savedActions: savedActions, prompt: true, promptMessage: ('message' in action) ? action.message : '', promptPlayer: promptPlayer, promptType: action.promptType, promptVariable: action.variable, promptGeneratedBy: action.generatedBy, promptParams: promptParams });
+                    }
                     break;
                 }
                 case ACTION_EXIT_PROMPTS: {
@@ -3229,7 +3242,11 @@ var State = /** @class */ (function () {
                                 console.error('Source zone or destination zone invalid');
                                 throw new Error('Invalid params for EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
                             }
-                            var zoneChangingTargets = this_1.getMetaValue(action.target, action.generatedBy);
+                            var zoneChangingTargets = this_1.getMetaValue(action.target, action.generatedBy) || [];
+                            if (!zoneChangingTargets) {
+                                console.dir(zoneChangingTargets);
+                                console.dir(this_1.getSpellMetadata(action.generatedBy));
+                            }
                             if (zoneChangingTargets.length) {
                                 // We assume all cards changing zones are in one zone initially
                                 var zoneOwner = zoneChangingTargets[0].owner;

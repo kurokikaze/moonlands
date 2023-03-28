@@ -595,6 +595,7 @@ describe('Adis', () => {
 		const adis = new CardInGame(byName('Adis'), NON_ACTIVE_PLAYER).addEnergy(2);
 		const jaela = new CardInGame(byName('Jaela'), NON_ACTIVE_PLAYER);
 		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER).addEnergy(5);
+		const lavaAq = new CardInGame(byName('Lava Aq'), ACTIVE_PLAYER);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaBalamant], [grega]);
 
 		const gameState = new State({
@@ -605,6 +606,7 @@ describe('Adis', () => {
 
 		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([adis]);
 		gameState.getZone(ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER).add([jaela]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([lavaAq]);
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const attackAction = {
@@ -618,13 +620,12 @@ describe('Adis', () => {
 		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
 		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, 'Game is in prompt state');
 		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game is prompting active player');
-		expect(gameState.state.promptParams).toEqual({
-			cards: [],
-			zone: ZONE_TYPE_HAND,
-			zoneOwner: ACTIVE_PLAYER,
-			restrictions: null,
-			numberOfCards: 3,
-		}, 'Game prompt params are right');
+		expect(gameState.state.promptParams.zone).toEqual(ZONE_TYPE_HAND, 'Zone is correct');
+		expect(gameState.state.promptParams.zoneOwner).toEqual(ACTIVE_PLAYER, 'Zone owner is correct');
+		expect(gameState.state.promptParams.restrictions).toEqual(null, 'No restrictions here');
+		expect(gameState.state.promptParams.numberOfCards).toEqual(1, 'Number of cards is correct (player only have one in hand)');
+		expect(gameState.state.promptParams.cards).toHaveLength(1, 'Cards are correct (player only have one in hand)');
+		expect(gameState.state.promptParams.cards[0].card).toEqual('Lava Aq', 'Card itself is correct (player only have one in hand)');
 	});
 
 	it('Haunt (on our turn)', () => {
@@ -634,6 +635,7 @@ describe('Adis', () => {
 		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(15);
 		const adis = new CardInGame(byName('Adis'), ACTIVE_PLAYER).addEnergy(0);
 		const jaela = new CardInGame(byName('Jaela'), ACTIVE_PLAYER);
+		const lavaAq = new CardInGame(byName('Lava Aq'), NON_ACTIVE_PLAYER);
 
 		const pharan = new CardInGame(byName('Pharan'), ACTIVE_PLAYER).addEnergy(1);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [pharan], [adis]);
@@ -646,6 +648,7 @@ describe('Adis', () => {
 
 		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
 		gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([jaela]);
+		gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).add([lavaAq]);
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 
 		const powerAction = {
@@ -669,13 +672,51 @@ describe('Adis', () => {
 		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
 		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, 'Game is in correct prompt type');
 		expect(gameState.state.promptPlayer).toEqual(NON_ACTIVE_PLAYER, 'Game is prompting non-active player');
-		expect(gameState.state.promptParams).toEqual({
-			zone: ZONE_TYPE_HAND,
-			cards: [],
-			restrictions: null,
-			zoneOwner: NON_ACTIVE_PLAYER,
-			numberOfCards: 3,
-		}, 'Game prompt params are right');
+		expect(gameState.state.promptParams.zone).toEqual(ZONE_TYPE_HAND, 'Zone is correct');
+		expect(gameState.state.promptParams.zoneOwner).toEqual(NON_ACTIVE_PLAYER, 'Zone owner is correct');
+		expect(gameState.state.promptParams.restrictions).toEqual(null, 'No restrictions here');
+		expect(gameState.state.promptParams.numberOfCards).toEqual(1, 'Number of cards is correct (player only have one in hand)');
+		expect(gameState.state.promptParams.cards).toHaveLength(1, 'Cards are correct (player only have one in hand)');
+		expect(gameState.state.promptParams.cards[0].card).toEqual('Lava Aq', 'Card itself is correct (player only have one in hand)');
+		// expect(gameState.state.promptParams).toEqual({
+		// 	zone: ZONE_TYPE_HAND,
+		// 	cards: [],
+		// 	restrictions: null,
+		// 	zoneOwner: NON_ACTIVE_PLAYER,
+		// 	numberOfCards: 3,
+		// }, 'Game prompt params are right');
+	});
+
+	it('Haunt (no cards to discard)', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(4);
+		const adis = new CardInGame(byName('Adis'), NON_ACTIVE_PLAYER).addEnergy(2);
+		const jaela = new CardInGame(byName('Jaela'), NON_ACTIVE_PLAYER);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER).addEnergy(5);
+		const lavaAq = new CardInGame(byName('Lava Aq'), ACTIVE_PLAYER);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaBalamant], [grega]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([adis]);
+		gameState.getZone(ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER).add([jaela]);
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: ACTION_ATTACK,
+			source: lavaBalamant,
+			target: adis,
+		};
+		
+		gameState.update(attackAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
 	});
 });
 

@@ -742,9 +742,10 @@ describe('Prompts', () => {
 
 		arbolit.addEnergy(5);
 		kelthet.addEnergy(2);
+		weebo.addEnergy(2);
 
 		const zones = [
-			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit, kelthet]),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit, kelthet, weebo]),
 		];
 
 		const gameState = new moonlands.State({
@@ -758,7 +759,7 @@ describe('Prompts', () => {
 			promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 			player: ACTIVE_PLAYER,
 			zone: ZONE_TYPE_IN_PLAY,
-			zoneOwner: ACTIVE_PLAYER,
+			zoneOwner: null,
 			restriction: RESTRICTION_REGION,
 			restrictionValue: REGION_CALD,
 			numberOfCards: 2,
@@ -805,7 +806,7 @@ describe('Prompts', () => {
 
 		const correctResult = gameState.update(correctCardsAction);
 
-		expect(correctResult).toEqual(true, 'Resolve action with restriction breaking cards fails');
+		expect(correctResult).toEqual(true, 'Resolve action without restriction breaking cards works');
 		expect(gameState.state.prompt).toEqual(false, 'Engine is not in prompt state');
 	});
 
