@@ -650,14 +650,22 @@ export class State {
 					case EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT: {
 						return {
 							...action,
-							staticAbilities: action.staticAbilities?.map(ability => ({
-								...ability,
-								modifier: {
-									operandOne: this.getMetaValue(ability.modifier.operandOne, action.generatedBy),
-									operator: ability.modifier.operator,
-								},
-								selectorParameter: ability.selectorParameter ? this.getMetaValue(ability.selectorParameter, action.generatedBy)?.id : null,
-							})),
+							staticAbilities: action.staticAbilities?.map(ability => {
+                let selectorParameter = ability.selectorParameter;
+                if (ability.selector === SELECTOR_ID) {
+                  selectorParameter = ability.selectorParameter ? this.getMetaValue(ability.selectorParameter, action.generatedBy)?.id : null;
+                } else {
+                  selectorParameter = this.getMetaValue(ability.selectorParameter, action.generatedBy);
+                }
+                return {
+                  ...ability,
+                  modifier: {
+                    operandOne: this.getMetaValue(ability.modifier.operandOne, action.generatedBy),
+                    operator: ability.modifier.operator,
+                  },
+                  selectorParameter,
+							  };
+              }),
 						}
 					}
 				}

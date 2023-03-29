@@ -228,10 +228,17 @@ var State = /** @class */ (function () {
                     case EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT: {
                         return __assign(__assign({}, action), { staticAbilities: (_a = action.staticAbilities) === null || _a === void 0 ? void 0 : _a.map(function (ability) {
                                 var _a;
-                                return (__assign(__assign({}, ability), { modifier: {
+                                var selectorParameter = ability.selectorParameter;
+                                if (ability.selector === SELECTOR_ID) {
+                                    selectorParameter = ability.selectorParameter ? (_a = _this.getMetaValue(ability.selectorParameter, action.generatedBy)) === null || _a === void 0 ? void 0 : _a.id : null;
+                                }
+                                else {
+                                    selectorParameter = _this.getMetaValue(ability.selectorParameter, action.generatedBy);
+                                }
+                                return __assign(__assign({}, ability), { modifier: {
                                         operandOne: _this.getMetaValue(ability.modifier.operandOne, action.generatedBy),
                                         operator: ability.modifier.operator,
-                                    }, selectorParameter: ability.selectorParameter ? (_a = _this.getMetaValue(ability.selectorParameter, action.generatedBy)) === null || _a === void 0 ? void 0 : _a.id : null }));
+                                    }, selectorParameter: selectorParameter });
                             }) });
                     }
                 }
