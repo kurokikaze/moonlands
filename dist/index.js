@@ -1687,33 +1687,36 @@ var State = /** @class */ (function () {
                     if (!attackerCanAttack) {
                         console.error("Somehow ".concat(attackSource.card.name, " cannot attack"));
                     }
-                    var targetCanBeAttacked = this_1.modifyByStaticAbilities(attackTarget, PROPERTY_CAN_BE_ATTACKED);
-                    if (!targetCanBeAttacked) {
-                        console.error("Somehow ".concat(attackSource.card.name, " cannot be attacked"));
-                    }
-                    var sourceHasAttacksLeft = attackSource.data.attacked < sourceAttacksPerTurn;
-                    var additionalAttackersCanAttack = additionalAttackers.every(function (card) { return card.card.data.canPackHunt && _this.modifyByStaticAbilities(card, PROPERTY_ABLE_TO_ATTACK); });
-                    var additionalAttackersHasAttacksLeft = additionalAttackers.every(function (card) { return card.data.attacked < _this.modifyByStaticAbilities(card, PROPERTY_ATTACKS_PER_TURN); });
-                    var targetIsMagi = attackTarget.card.type == TYPE_MAGI;
-                    var opponentCreatures = this_1.useSelector(SELECTOR_OWN_CREATURES, attackTarget.owner);
-                    var magiHasCreatures = opponentCreatures instanceof Array && opponentCreatures.length > 0;
-                    var attackApproved = attackerCanAttack &&
-                        !targetIsMagi || ( // Either we attack a creature
-                    targetIsMagi && ( // Or we are attacking a magi, but then...
-                    !magiHasCreatures || // ...he either shouldn't have creatures
-                        this_1.modifyByStaticAbilities(attackSource, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY) // ...or we can just trample through
-                    ));
-                    var enoughAttacksLeft = (sourceHasAttacksLeft && ((additionalAttackersCanAttack && additionalAttackersHasAttacksLeft) || additionalAttackers.length === 0));
-                    if (enoughAttacksLeft && attackApproved && this_1.getCurrentPriority() == PRIORITY_ATTACK) {
-                        this_1.transformIntoActions({
-                            type: ACTION_EFFECT,
-                            effectType: EFFECT_TYPE_ATTACK,
-                            source: attackSource,
-                            target: attackTarget,
-                            additionalAttackers: additionalAttackers,
-                            generatedBy: attackSource.id,
-                            player: attackSource.data.controller,
-                        });
+                    else {
+                        var targetCanBeAttacked = this_1.modifyByStaticAbilities(attackTarget, PROPERTY_CAN_BE_ATTACKED);
+                        if (!targetCanBeAttacked) {
+                            console.error("Somehow ".concat(attackSource.card.name, " cannot be attacked"));
+                        }
+                        else {
+                            var sourceHasAttacksLeft = attackSource.data.attacked < sourceAttacksPerTurn;
+                            var additionalAttackersCanAttack = additionalAttackers.every(function (card) { return card.card.data.canPackHunt && _this.modifyByStaticAbilities(card, PROPERTY_ABLE_TO_ATTACK); });
+                            var additionalAttackersHasAttacksLeft = additionalAttackers.every(function (card) { return card.data.attacked < _this.modifyByStaticAbilities(card, PROPERTY_ATTACKS_PER_TURN); });
+                            var targetIsMagi = attackTarget.card.type == TYPE_MAGI;
+                            var opponentCreatures = this_1.useSelector(SELECTOR_OWN_CREATURES, attackTarget.owner);
+                            var magiHasCreatures = opponentCreatures instanceof Array && opponentCreatures.length > 0;
+                            var attackApproved = !targetIsMagi || ( // Either we attack a creature
+                            targetIsMagi && ( // Or we are attacking a magi, but then...
+                            !magiHasCreatures || // ...he either shouldn't have creatures
+                                this_1.modifyByStaticAbilities(attackSource, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY) // ...or we can just trample through
+                            ));
+                            var enoughAttacksLeft = (sourceHasAttacksLeft && ((additionalAttackersCanAttack && additionalAttackersHasAttacksLeft) || additionalAttackers.length === 0));
+                            if (enoughAttacksLeft && attackApproved && this_1.getCurrentPriority() == PRIORITY_ATTACK) {
+                                this_1.transformIntoActions({
+                                    type: ACTION_EFFECT,
+                                    effectType: EFFECT_TYPE_ATTACK,
+                                    source: attackSource,
+                                    target: attackTarget,
+                                    additionalAttackers: additionalAttackers,
+                                    generatedBy: attackSource.id,
+                                    player: attackSource.data.controller,
+                                });
+                            }
+                        }
                     }
                     break;
                 }
