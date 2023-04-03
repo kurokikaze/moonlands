@@ -1827,7 +1827,7 @@ export class State {
 			case RESTRICTION_REGION_IS_NOT:
 				return (card: CardInGame) => card.card.region !== restrictionValue;
 			case RESTRICTION_ENERGY_LESS_THAN_STARTING:
-				return (card: CardInGame) => Boolean(card.card.type === TYPE_CREATURE && card.card.cost && card.data.energy < card.card.cost);
+				return (card: CardInGame) => Boolean(card.card.type === TYPE_CREATURE && card.card.cost && typeof card.card.cost == 'number' && card.data.energy < card.card.cost);
 			case RESTRICTION_ENERGY_LESS_THAN:
 				return (card: CardInGame) => card.card.type === TYPE_CREATURE && card.data.energy < restrictionValue;
 			case RESTRICTION_CREATURE_WAS_ATTACKED:
@@ -3962,7 +3962,9 @@ export class State {
 									},
 								]).flat();
 	
-								attackSequence = [...attackSequence, ...preparedEffects];
+                for (let effect of preparedEffects) {
+                  attackSequence.push(effect);
+                }
 							}
 	
 							this.transformIntoActions(...attackSequence);

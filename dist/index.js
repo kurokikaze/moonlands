@@ -1179,7 +1179,7 @@ var State = /** @class */ (function () {
             case RESTRICTION_REGION_IS_NOT:
                 return function (card) { return card.card.region !== restrictionValue; };
             case RESTRICTION_ENERGY_LESS_THAN_STARTING:
-                return function (card) { return Boolean(card.card.type === TYPE_CREATURE && card.card.cost && card.data.energy < card.card.cost); };
+                return function (card) { return Boolean(card.card.type === TYPE_CREATURE && card.card.cost && typeof card.card.cost == 'number' && card.data.energy < card.card.cost); };
             case RESTRICTION_ENERGY_LESS_THAN:
                 return function (card) { return card.card.type === TYPE_CREATURE && card.data.energy < restrictionValue; };
             case RESTRICTION_CREATURE_WAS_ATTACKED:
@@ -2993,7 +2993,10 @@ var State = /** @class */ (function () {
                                         generatedBy: source_2.id,
                                     },
                                 ]; }).flat();
-                                attackSequence = __spreadArray(__spreadArray([], attackSequence, true), preparedEffects, true);
+                                for (var _q = 0, preparedEffects_1 = preparedEffects; _q < preparedEffects_1.length; _q++) {
+                                    var effect = preparedEffects_1[_q];
+                                    attackSequence.push(effect);
+                                }
                             }
                             this_1.transformIntoActions.apply(this_1, attackSequence);
                             break;

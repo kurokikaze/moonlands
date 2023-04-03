@@ -69,7 +69,10 @@ var Zone = /** @class */ (function () {
         configurable: true
     });
     Zone.prototype.add = function (cards) {
-        this.cards = __spreadArray(__spreadArray([], this.cards, true), cards, true);
+        for (var _i = 0, cards_1 = cards; _i < cards_1.length; _i++) {
+            var card = cards_1[_i];
+            this.cards.push(card);
+        }
         return this;
     };
     Zone.prototype.addToTop = function (cards) {
