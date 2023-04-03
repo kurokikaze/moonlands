@@ -2290,7 +2290,8 @@ export const cards = [
 					prompt({
 						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 						zone: ZONE_TYPE_DISCARD,
-						zoneOwner: '$spellController',
+						zoneOwner: '$relicController',
+            message: 'Choose a spell to put on top of your deck',
 						restriction: RESTRICTION_TYPE,
 						restrictionValue: TYPE_SPELL,
 						numberOfCards: 1,
@@ -2317,6 +2318,7 @@ export const cards = [
 			prompt({
 				promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 				zone: ZONE_TYPE_DISCARD,
+        message: 'Choose a card to put on top of your deck',
 				zoneOwner: '$spellController',
 				numberOfCards: 1,
 				variable: 'selectedCard',
