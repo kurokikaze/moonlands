@@ -3127,6 +3127,10 @@ export const cards = [
 				cost: 0,
 				text: 'Discard Orwin\'s Staff from play and discard two cards from your hand. Search your deck for any one card. Place that card in your hand without showing it to your opponents. Shuffle your deck.',
 				effects: [
+          effect({
+						effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
+						target: '$source',
+					}),
 					prompt({
 						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 						zone: ZONE_TYPE_HAND,
@@ -3147,7 +3151,7 @@ export const cards = [
 						effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
 						sourceZone: ZONE_TYPE_DECK,
 						destinationZone: ZONE_TYPE_HAND,
-						target: '$targetCard',
+						target: '$targetCards',
 					}),
 				],
 			},
