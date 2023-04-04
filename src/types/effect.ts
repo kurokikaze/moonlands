@@ -68,6 +68,7 @@ import {
   EFFECT_TYPE_DISCARD_RESHUFFLED,
   EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
   EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
+  EFFECT_TYPE_DIE_ROLLED,
 } from '../const';
 
 export type EffectTypeType =
@@ -401,6 +402,11 @@ type RollDieEffect = ActionEffect & {
 	result?: number;
 }
 
+export type DieRolledEffect = ActionEffect & {
+	effectType: typeof EFFECT_TYPE_DIE_ROLLED;
+	result: number;
+}
+
 type MoveEnergyEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_MOVE_ENERGY;
 	source: CardInGame | string;
@@ -529,6 +535,7 @@ export type EffectType = ActionEffect & {
 	AddDelayedTriggerEffect |
 	EnergizeEffect |
 	RollDieEffect |
+  DieRolledEffect |
 	MoveEnergyEffect |
 	MagiIsDefeatedEffect |
 	CreateContinuousEffect |

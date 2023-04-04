@@ -125,6 +125,7 @@ export const EFFECT_TYPE_CREATURE_IS_DEFEATED = 'effects/creature_is_defeated';
 export const EFFECT_TYPE_DEFEAT_MAGI = 'effects/defeat_magi';
 export const EFFECT_TYPE_MAGI_IS_DEFEATED = 'effects/magi_is_defeated';
 export const EFFECT_TYPE_ROLL_DIE = 'effects/roll_die';
+export const EFFECT_TYPE_DIE_ROLLED = 'effects/die_rolled';
 export const EFFECT_TYPE_MOVE_ENERGY = 'effects/move_energy';
 export const EFFECT_TYPE_PLAY_CREATURE = 'effects/play_creature';
 export const EFFECT_TYPE_PLAY_RELIC = 'effects/play_relic';

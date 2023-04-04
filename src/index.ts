@@ -236,6 +236,7 @@ import {
   EFFECT_TYPE_DISCARD_RESHUFFLED,
   EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
   EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
+  EFFECT_TYPE_DIE_ROLLED,
 } from './const';
 
 import {showAction} from './logAction';
@@ -273,7 +274,7 @@ import {
   ReplacingEffectType,
   CardData,
 } from './types';
-import { DiscardCreatureFromPlayEffect, DiscardEnergyFromCreatureEffect, EnhancedDelayedTriggerType, StartingEnergyOnCreatureEffect } from './types/effect';
+import { DieRolledEffect, DiscardCreatureFromPlayEffect, DiscardEnergyFromCreatureEffect, EnhancedDelayedTriggerType, StartingEnergyOnCreatureEffect } from './types/effect';
 import { CardType, StatusType } from './types/common';
 import { ChooseCardsPromptType, PromptTypeMayAbility } from './types/prompt';
 
@@ -4100,25 +4101,26 @@ export class State {
                   player: action.player,
                   generatedBy: action.generatedBy,
                 } as DiscardCreatureFromPlayEffect);
-								// this.transformIntoActions({
-								// 	type: ACTION_EFFECT,
-								// 	effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-								// 	target: action.target,
-								// 	bottom: false,
-								// 	sourceZone: ZONE_TYPE_IN_PLAY,
-								// 	destinationZone: ZONE_TYPE_DISCARD,
-								// 	attack: true,
-								// 	generatedBy: action.generatedBy,
-								// });
 							}
 							break;
 						}
 						case EFFECT_TYPE_ROLL_DIE: {
 							const result = action.result || 
 								(this.rollDebugValue === null ? (Math.floor(Math.random() * 6) + 1) : this.rollDebugValue);
-							this.setSpellMetaDataField('roll_result', result, action.generatedBy);
+              this.transformIntoActions({
+                type: ACTION_EFFECT,
+                effectType: EFFECT_TYPE_DIE_ROLLED,
+                result,
+                player: action.player,
+                generatedBy: action.generatedBy,
+              } as DieRolledEffect);
+							// this.setSpellMetaDataField('roll_result', result, action.generatedBy);
 							break;
 						}
+            case EFFECT_TYPE_DIE_ROLLED: {
+              this.setSpellMetaDataField('roll_result', action.result, action.generatedBy);
+              break;
+            }
 						case EFFECT_TYPE_ENERGIZE: {
 							const targets = this.getMetaValue(action.target, action.generatedBy);
 
