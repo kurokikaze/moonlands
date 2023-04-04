@@ -1129,7 +1129,7 @@ describe('Mobis', () => {
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER)).toHaveLength(1, 'Magi flipped succesfully');
 
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).card.card.name).toEqual('Jaela', 'Magi flipped succesfully');
-		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).card.data.energy).toEqual(20, 'Jaela has 20 energy because of Legacy trigger');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).card.data.energy).toEqual(23, 'Jaela has 23 energy because of Legacy trigger (15 starting, 5 energize, 3 from Mobis)');
 	});
 });
 
