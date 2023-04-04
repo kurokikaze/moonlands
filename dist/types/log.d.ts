@@ -1,4 +1,4 @@
-import { LOG_ENTRY_CREATURE_ENERGY_LOSS, LOG_ENTRY_ATTACK, LOG_ENTRY_CHOOSES_STARTING_CARDS, LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY, LOG_ENTRY_CREATURE_ENERGY_GAIN, LOG_ENTRY_DRAW, LOG_ENTRY_MAGI_DEFEATED, LOG_ENTRY_MAGI_ENERGY_GAIN, LOG_ENTRY_MAGI_ENERGY_LOSS, LOG_ENTRY_NUMBER_CHOICE, LOG_ENTRY_PLAY, LOG_ENTRY_POWER_ACTIVATION, LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY, LOG_ENTRY_TARGETING } from '../const';
+import { LOG_ENTRY_CREATURE_ENERGY_LOSS, LOG_ENTRY_ATTACK, LOG_ENTRY_CHOOSES_STARTING_CARDS, LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY, LOG_ENTRY_CREATURE_ENERGY_GAIN, LOG_ENTRY_DRAW, LOG_ENTRY_MAGI_DEFEATED, LOG_ENTRY_MAGI_ENERGY_GAIN, LOG_ENTRY_MAGI_ENERGY_LOSS, LOG_ENTRY_NUMBER_CHOICE, LOG_ENTRY_PLAY, LOG_ENTRY_POWER_ACTIVATION, LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY, LOG_ENTRY_TARGETING, LOG_ENTRY_DIE_ROLLED } from '../const';
 declare type CreatureEnergyLossEntry = {
     type: typeof LOG_ENTRY_CREATURE_ENERGY_LOSS;
     card: string;
@@ -69,5 +69,10 @@ declare type AttackEntry = {
     target: string;
     packHuntAttack: boolean;
 };
-export declare type LogEntryType = CreatureEnergyLossEntry | CreatureEnergyGainEntry | PlayEntry | PowerActivationEntry | DrawEntry | NumberChoiceEntry | TargetingEntry | ChoosesStartingCards | CreatureDiscardedFromPlay | MagiEnergyGainEntry | MagiEnergyLossEntry | MagiIsDefeatedEntry | RelicDiscadedFromPlayEntry | AttackEntry;
+declare type DieRolledEntry = {
+    type: typeof LOG_ENTRY_DIE_ROLLED;
+    result: number;
+    player?: number;
+};
+export declare type LogEntryType = CreatureEnergyLossEntry | CreatureEnergyGainEntry | PlayEntry | PowerActivationEntry | DrawEntry | NumberChoiceEntry | TargetingEntry | ChoosesStartingCards | CreatureDiscardedFromPlay | MagiEnergyGainEntry | MagiEnergyLossEntry | MagiIsDefeatedEntry | RelicDiscadedFromPlayEntry | DieRolledEntry | AttackEntry;
 export {};

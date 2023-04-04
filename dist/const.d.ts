@@ -233,3 +233,4 @@ export declare const LOG_ENTRY_MAGI_ENERGY_LOSS = "log_entry/magi_energy_loss";
 export declare const LOG_ENTRY_CREATURE_ENERGY_GAIN = "log_entry/creature_energy_gain";
 export declare const LOG_ENTRY_MAGI_ENERGY_GAIN = "log_entry/magi_energy_gain";
 export declare const LOG_ENTRY_MAGI_DEFEATED = "log_entry/magi_defeated";
+export declare const LOG_ENTRY_DIE_ROLLED = "log_entry/die_rolled";

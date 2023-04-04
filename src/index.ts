@@ -237,6 +237,7 @@ import {
   EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
   EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
   EFFECT_TYPE_DIE_ROLLED,
+  LOG_ENTRY_DIE_ROLLED,
 } from './const';
 
 import {showAction} from './logAction';
@@ -864,6 +865,14 @@ export class State {
 							}
 							break;
 						}
+            case EFFECT_TYPE_DIE_ROLLED: {
+              newLogEntry = {
+                type: LOG_ENTRY_DIE_ROLLED,
+                result: action.result,
+                player: action.player,
+              }
+              break;
+            }
 						case EFFECT_TYPE_ADD_ENERGY_TO_MAGI: {
 							const target = this.getMetaValue(action.target, action.generatedBy);
 							if (Array.isArray(target)) {

@@ -13,6 +13,7 @@ import {
     LOG_ENTRY_POWER_ACTIVATION,
     LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,
     LOG_ENTRY_TARGETING,
+    LOG_ENTRY_DIE_ROLLED,
 } from '../const';
 
 type CreatureEnergyLossEntry = {
@@ -99,6 +100,12 @@ type AttackEntry = {
   packHuntAttack: boolean;
 }
 
+type DieRolledEntry = {
+  type: typeof LOG_ENTRY_DIE_ROLLED,
+  result: number,
+  player?: number,
+}
+
 export type LogEntryType = CreatureEnergyLossEntry |
     CreatureEnergyGainEntry |
     PlayEntry |
@@ -112,4 +119,5 @@ export type LogEntryType = CreatureEnergyLossEntry |
     MagiEnergyLossEntry |
     MagiIsDefeatedEntry |
     RelicDiscadedFromPlayEntry |
+    DieRolledEntry |
     AttackEntry;
