@@ -3481,9 +3481,9 @@ export var cards = [
     }),
     new Card('Corf Pearl', TYPE_RELIC, REGION_OROTHE, 0, {
         powers: [{
-                name: 'Wild Fire',
+                name: 'Weathercall',
                 cost: 0,
-                text: 'Roll a die. 1, 2 or 3: Discard 1 energy from each of your Creatures. 4 or 5: Choose any one Creature in play. Discard 2 energy from the chosen Creature. 6: Choose a Creature in play. Add 3 energy to the chosen Creature.',
+                text: 'Roll one die. 1, 2, or 3 = Remove three energy from your Magi. 4 or 5 = Choose any one Creature in play. Discard two energy from the chosen Creature. 6 = Choose any one Creature in play. Add three energy to the chosen Creature.',
                 effects: [
                     effect({
                         effectType: EFFECT_TYPE_ROLL_DIE,
@@ -3792,7 +3792,7 @@ export var cards = [
                             },
                             effects: [
                                 effect({
-                                    type: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+                                    effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
                                     target: '%target',
                                     amount: 3,
                                 }),

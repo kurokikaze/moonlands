@@ -202,7 +202,6 @@ import {
 	RestrictionObjectType,
 	ZoneType,
 } from './types';
-import { PromptTypeRearrangeCardsOfZone } from './types/prompt';
 
 const effect = (data: any): EffectType => ({
 	type: ACTION_EFFECT,
@@ -3749,9 +3748,9 @@ export const cards = [
 	}),
 	new Card('Corf Pearl', TYPE_RELIC, REGION_OROTHE, 0, {
 		powers: [{
-			name: 'Wild Fire',
+			name: 'Weathercall',
 			cost: 0,
-			text: 'Roll a die. 1, 2 or 3: Discard 1 energy from each of your Creatures. 4 or 5: Choose any one Creature in play. Discard 2 energy from the chosen Creature. 6: Choose a Creature in play. Add 3 energy to the chosen Creature.',
+			text: 'Roll one die. 1, 2, or 3 = Remove three energy from your Magi. 4 or 5 = Choose any one Creature in play. Discard two energy from the chosen Creature. 6 = Choose any one Creature in play. Add three energy to the chosen Creature.',
 			effects: [
 				effect({
 					effectType: EFFECT_TYPE_ROLL_DIE,
@@ -3779,7 +3778,7 @@ export const cards = [
 						}),
 					],
 				}),
-				effect({ // 4-5: discard Wellisk Pup from play
+				effect({
 					effectType: EFFECT_TYPE_CONDITIONAL,
 					rollResult: '$roll_result',
 					conditions: [
@@ -4060,7 +4059,7 @@ export const cards = [
 							},
 							effects: [
 								effect({
-									type: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
+									effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
 									target: '%target',
 									amount: 3,
 								}),
