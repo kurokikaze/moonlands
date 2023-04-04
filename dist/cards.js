@@ -369,10 +369,11 @@ export var cards = [
             }),
             prompt({
                 promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+                message: 'Choose any number of Cald creature cards to discard',
                 restrictions: [
                     {
                         type: RESTRICTION_REGION,
-                        value: REGION_OROTHE,
+                        value: REGION_CALD,
                     },
                     {
                         type: RESTRICTION_TYPE,
