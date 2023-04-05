@@ -2160,6 +2160,7 @@ export var cards = [
                 effects: [
                     getPropertyValue({
                         property: PROPERTY_CONTROLLER,
+                        target: "$source",
                         variable: 'relicController',
                     }),
                     prompt({
