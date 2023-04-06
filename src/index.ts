@@ -238,6 +238,8 @@ import {
   EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
   EFFECT_TYPE_DIE_ROLLED,
   LOG_ENTRY_DIE_ROLLED,
+  PROPERTY_CREATURE_NAME,
+  RESTRICTION_CREATURE_NAME,
 } from './const';
 
 import {showAction} from './logAction';
@@ -1304,6 +1306,7 @@ export class State {
   getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_MAGI_NAME): string
   getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_TYPE): CardType
   getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CREATURE_TYPES): string[]
+  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CREATURE_NAME): string
   getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_COST): CostType
   getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_STATUS, subProperty: typeof STATUS_BURROWED): boolean
 	getByProperty(target: CardInGame | CardWithModification, property: PropertyType, subProperty: null | typeof STATUS_BURROWED | string = null): any {
@@ -1314,6 +1317,8 @@ export class State {
 				return target.card.type;
 			case PROPERTY_CREATURE_TYPES:
 				return target.card.name.split(' ');
+      case PROPERTY_CREATURE_NAME:
+        return target.card.name;
 			case PROPERTY_MAGI_NAME:
 				return target.card.name;
 			case PROPERTY_CONTROLLER:
@@ -1811,7 +1816,9 @@ export class State {
 
 	makeChecker(restriction: RestrictionType, restrictionValue: any): (card: CardInGame) => boolean {
 		switch (restriction) {
-			case RESTRICTION_CREATURE_TYPE:
+      case RESTRICTION_CREATURE_NAME:
+        return (card: CardInGame) => card.card.name === restrictionValue;
+      case RESTRICTION_CREATURE_TYPE:
 				if (restrictionValue instanceof Array) {
 					return (card: CardInGame) => card.card.name.split(' ').some(type => restrictionValue.includes(type));
 				}
@@ -2353,6 +2360,10 @@ export class State {
 				case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
 					const zoneOwner = this.getMetaValue(promptAction.zoneOwner, source.id);
 					const cardsInZone = this.getZone(promptAction.zone as ZoneType, zoneOwner).cards;
+					const numberOfCards = this.getMetaValue(promptAction.numberOfCards, source.id);
+          // if (cardsInZone.length < numberOfCards) {
+          //   return false;
+          // }
 					if (promptAction.restrictions) {
 						return this.checkAnyCardForRestrictions(cardsInZone, promptAction.restrictions);
 					} else if (promptAction.restriction) {

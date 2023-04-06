@@ -26,6 +26,7 @@ export const PROPERTY_REGION = 'properties/region';
 export const PROPERTY_COST = 'properties/cost';
 export const PROPERTY_ENERGIZE = 'properties/energize';
 export const PROPERTY_CREATURE_TYPES = 'properties/creature_types';
+export const PROPERTY_CREATURE_NAME = 'properties/creature_name';
 export const PROPERTY_MAGI_NAME = 'properties/magi_name';
 export const PROPERTY_MAGI_STARTING_ENERGY = 'properties/magi_starting_energy';
 export const PROPERTY_ATTACKS_PER_TURN = 'properties/attacks_per_turn';
@@ -218,6 +219,8 @@ export const RESTRICTION_OPPONENT_CREATURE = 'restrictions/opponent_creature';
 export const RESTRICTION_REGION = 'restrictions/region';
 export const RESTRICTION_REGION_IS_NOT = 'restrictions/region_is_not';
 export const RESTRICTION_CREATURE_TYPE = 'restrictions/creature_type';
+export const RESTRICTION_CREATURE_NAME = 'restrictions/creature_name';
+
 export const RESTRICTION_PLAYABLE = 'restrictions/card_playable';
 export const RESTRICTION_CREATURE_WAS_ATTACKED = 'restrictions/creature_was_attacked';
 export const RESTRICTION_MAGI_WITHOUT_CREATURES = 'restrictions/magi_without_creatures';

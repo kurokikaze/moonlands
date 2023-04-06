@@ -162,7 +162,7 @@ export type CalculateType = CalculateParams & EnrichedAction & {
 
 export type PropertyGetterParams = {
     property: PropertyType;
-    target?: string;
+    target: string;
     variable: string;
 }
 

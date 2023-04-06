@@ -102,7 +102,7 @@ export declare type CalculateType = CalculateParams & EnrichedAction & {
 };
 export declare type PropertyGetterParams = {
     property: PropertyType;
-    target?: string;
+    target: string;
     variable: string;
 };
 export declare type PropertyGetterType = EnrichedAction & PropertyGetterParams & {
