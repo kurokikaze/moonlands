@@ -989,19 +989,19 @@ export const cards = [
 				getPropertyValue({
 					property: CARD_COUNT,
 					target: '$targetCards',
-					variable: '$numberDiscarded',
+					variable: 'numberDiscarded',
 				}),
 				calculate({
 					operandOne: '$numberDiscarded',
 					operandTwo: 2,
 					operator: CALCULATION_MULTIPLY,
-					variable: '$damageReduction',
+					variable: 'damageReduction',
 				}),
 				calculate({
 					operandOne: 4,
 					operandTwo: '$damageReduction',
 					operator: CALCULATION_SUBTRACT,
-					variable: '$vulborDamage',
+					variable: 'vulborDamage',
 				}),
 				effect({
 					effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
@@ -2860,7 +2860,7 @@ export const cards = [
 					getPropertyValue({
 						property: PROPERTY_ENERGY_COUNT,
 						target: '$blu',
-						variable: '$energy',
+						variable: 'energy',
 					}),
 					effect({
 						energy: '$energy',
