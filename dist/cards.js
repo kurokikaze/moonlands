@@ -3939,7 +3939,7 @@ export var cards = [
             },
         ],
     }),
-    new Card('Twee', TYPE_CREATURE, REGION_CALD, 1, {
+    new Card('Twee', TYPE_CREATURE, REGION_NAROOM, 1, {
         triggerEffects: [
             {
                 name: 'Regrow',

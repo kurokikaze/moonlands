@@ -1519,7 +1519,6 @@ describe('Giant Vulbor', () => {
 			generatedBy: giantVulbor.id,
 		};
 
-		gameState.enableDebug();
 		gameState.update(chooseCardsAction);
 
 		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
