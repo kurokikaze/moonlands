@@ -3178,6 +3178,8 @@ export class State {
                     player: action.player,
                   })
                 }
+              } else {
+                result = []
               }
               break;
             }

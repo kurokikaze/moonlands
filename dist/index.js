@@ -2294,6 +2294,9 @@ var State = /** @class */ (function () {
                                     });
                                 }
                             }
+                            else {
+                                result = [];
+                            }
                             break;
                         }
                         default: {

@@ -743,7 +743,38 @@ describe('Scroll of Fire', () => {
 });
 
 describe('Gar', () => {
-	it('Strengthen (no ties)', () => {
+	it('Strengthen (no creatures)', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const ARBOLL_ENERGY = 4;
+		const BALAMANT_ENERGY = 5;
+		const gar = new CardInGame(byName('Gar'), ACTIVE_PLAYER).addEnergy(4);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(4);
+		// const lavaArboll = new CardInGame(byName('Lava Arboll'), ACTIVE_PLAYER).addEnergy(ARBOLL_ENERGY);
+		// const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER).addEnergy(BALAMANT_ENERGY);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [], [gar]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const passAction = {
+			type: ACTION_PASS,
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(passAction);
+
+		// expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(lavaArboll.id).data.energy).toEqual(ARBOLL_ENERGY + 2, 'Lava Arboll now has 6 energy');
+		// expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(lavaBalamant.id).data.energy).toEqual(BALAMANT_ENERGY, 'Lava Balamant still has 5 energy');
+	});
+
+  it('Strengthen (no ties)', () => {
 		const ACTIVE_PLAYER = 422;
 		const NON_ACTIVE_PLAYER = 1310;
 
