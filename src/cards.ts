@@ -601,6 +601,7 @@ export const cards = [
 				zone: ZONE_TYPE_HAND,
 				zoneOwner: '$player',
 				numberOfCards: '$targetEnergy',
+        variable: 'chosenCards'
 			}),
 			getPropertyValue({
 				target: '$chosenCards',
@@ -3794,6 +3795,7 @@ export const cards = [
 					thenEffects: [
 						prompt({
 							promptType: PROMPT_TYPE_SINGLE_CREATURE,
+              message: 'Choose creature to discard 2 energy from',
 						}),
 						effect({
 							effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
@@ -3817,6 +3819,7 @@ export const cards = [
 					thenEffects: [
 						prompt({
 							promptType: PROMPT_TYPE_SINGLE_CREATURE,
+              message:'Choose a creature to add 3 energy to',
 						}),
 						effect({
 							effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,

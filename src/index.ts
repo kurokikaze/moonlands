@@ -240,6 +240,8 @@ import {
   LOG_ENTRY_DIE_ROLLED,
   PROPERTY_CREATURE_NAME,
   RESTRICTION_CREATURE_NAME,
+  PROMPT_TYPE_NUMBER_OF_CREATURES,
+  PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED,
 } from './const';
 
 import {showAction} from './logAction';
@@ -380,6 +382,48 @@ type CardWithModification = {
   owner: number;
 }
 
+export const DEFAULT_PROMPT_VARIABLE: Record<PromptTypeType, string> = {
+  [PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE]: 'targetCards',
+  [PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE]: 'cardsOrder',
+  [PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE]: 'targetCards',
+  [PROMPT_TYPE_NUMBER]: 'number',
+  [PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE]: 'target',
+  [PROMPT_TYPE_RELIC]: 'target',
+  [PROMPT_TYPE_OWN_SINGLE_CREATURE]: 'target',
+  [PROMPT_TYPE_SINGLE_CREATURE_FILTERED]: 'target',
+  [PROMPT_TYPE_MAGI_WITHOUT_CREATURES]: 'target',
+  [PROMPT_TYPE_SINGLE_CREATURE]: 'target',
+  [PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI]: 'target',
+  [PROMPT_TYPE_SINGLE_MAGI]: 'targetMagi',
+  [PROMPT_TYPE_CHOOSE_CARDS]: 'selectedCards',
+  [PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES]: 'energyOnCreatures',
+  [PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES]: 'energyOnCreatures',
+  [PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES]: 'damageOnCreatures',
+  [PROMPT_TYPE_PLAYER]: 'targetPlayer',
+  [PROMPT_TYPE_NUMBER_OF_CREATURES]: 'targets',
+  [PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED]: 'targets',
+  [PROMPT_TYPE_MAY_ABILITY]: '', // Special case, doesn't use variables
+};
+
+/*
+[PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE]: 'targetCards',
+[PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE]: 'cardsOrder',
+[PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE]: 'targetCards',
+[PROMPT_TYPE_NUMBER]: 'number',
+[PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE]: 'target',
+[PROMPT_TYPE_RELIC]: 'target',
+[PROMPT_TYPE_OWN_SINGLE_CREATURE]: 'target',
+[PROMPT_TYPE_SINGLE_CREATURE_FILTERED]: 'target',
+[PROMPT_TYPE_MAGI_WITHOUT_CREATURES]: 'target',
+[PROMPT_TYPE_SINGLE_CREATURE]: 'target',
+[PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI]: 'target',
+[PROMPT_TYPE_SINGLE_MAGI]: 'targetMagi',
+[PROMPT_TYPE_CHOOSE_CARDS]: 'selectedCards',
+[PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES]: 'energyOnCreatures',
+[PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES]: 'energyOnCreatures',
+[PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES]: 'damageOnCreatures',
+[PROMPT_TYPE_PLAYER]: 'targetPlayer',
+*/
 const steps: StepType[] = [
 	{
 		name: 'Energize',
@@ -2895,7 +2939,7 @@ export class State {
 											return false;
 										}
 									}
-									currentActionMetaData[variable || 'targetCards'] = action.cards;
+									currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE]] = action.cards;
 								}
 								break;
 							}
@@ -2905,7 +2949,7 @@ export class State {
                     console.error('Number of cards is wrong')
 										return false;
 									}
-                  currentActionMetaData[variable || 'cardsOrder'] = action.cards;
+                  currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE]] = action.cards;
                 }
                 break;
               }
@@ -2923,13 +2967,13 @@ export class State {
 											return false;
 										}
 									}
-									currentActionMetaData[variable || 'targetCards'] = action.cards;
+									currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE]] = action.cards;
 								}
 								break;
 							}
 							case PROMPT_TYPE_NUMBER:
 								if ('number' in action) {
-									currentActionMetaData[variable || 'number'] = (typeof action.number === 'number') ? action.number : parseInt(action.number || '0', 10);
+									currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_NUMBER]] = (typeof action.number === 'number') ? action.number : parseInt(action.number || '0', 10);
 								}
 								break;
 							case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE:
@@ -2937,7 +2981,7 @@ export class State {
 									if (this.state.promptParams.source.id === action.target?.id) {
 										throw new Error('Got forbidden target on prompt');
 									}
-									currentActionMetaData[variable || 'target'] = action.target;
+									currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE]] = action.target;
 								}
 								break;
 							case PROMPT_TYPE_RELIC: {
@@ -2945,7 +2989,7 @@ export class State {
 									if (action.target?.card.type !== TYPE_RELIC) {
 										throw new Error('Got forbidden target on prompt');
 									}
-									currentActionMetaData[variable || 'target'] = action.target;
+									currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_RELIC]] = action.target;
 								}
 								break;
 							}
@@ -2955,53 +2999,53 @@ export class State {
 									if (this.state.promptPlayer !== targetController) {
 										throw new Error('Not-controlled creature supplied to Own Creatures prompt');
 									}
-									currentActionMetaData[variable || 'target'] = action.target;
+									currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_OWN_SINGLE_CREATURE]] = action.target;
 								}
 								break;
 							}
 							case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
 								if ('target' in action && action.target) {
-									currentActionMetaData[variable || 'target'] = action.target;
+									currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_SINGLE_CREATURE_FILTERED]] = action.target;
 								}
 								break;
 							}
 							case PROMPT_TYPE_MAGI_WITHOUT_CREATURES: {
 								if ('target' in action && action.target?.card.type === TYPE_MAGI && this.useSelector(SELECTOR_CREATURES_OF_PLAYER, action.target.data.controller)) {
-									currentActionMetaData[variable || 'target'] = action.target;
+									currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_MAGI_WITHOUT_CREATURES]] = action.target;
 									break;
 								}
 							}
 							case PROMPT_TYPE_SINGLE_CREATURE:
 								if ('target' in action && action.target) {
-									currentActionMetaData[variable || 'target'] = action.target;
+									currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_SINGLE_CREATURE]] = action.target;
 								}
 								break;
 							case PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI:
 								if ('target' in action && action.target) {
-									currentActionMetaData[variable || 'target'] = action.target;
+									currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI]] = action.target;
 								}
 								break;
 							case PROMPT_TYPE_SINGLE_MAGI:
 								if ('target' in action && action.target) {
-									currentActionMetaData[variable || 'targetMagi'] = action.target;
+									currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_SINGLE_MAGI]] = action.target;
 								}
 								break;
 							case PROMPT_TYPE_CHOOSE_CARDS:
 								if ('cards' in action) {
                   // Should be a check against promptParams.availableCards
-									currentActionMetaData[variable || 'selectedCards'] = action.cards || [];
+									currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_CHOOSE_CARDS]] = action.cards || [];
 								}
 								break;
 							case PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES:
 								if ('energyOnCreatures' in action && action.energyOnCreatures) {
-									currentActionMetaData[variable || 'energyOnCreatures'] = action.energyOnCreatures || [];
+									currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES]] = action.energyOnCreatures || [];
 								}
 								break;
 							case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
 								if ('energyOnCreatures' in action && action.energyOnCreatures) {
 									const totalEnergy = Object.values(action.energyOnCreatures).reduce((a, b) => a + b, 0);
 									if (totalEnergy === this.state.promptParams.amount) {
-										currentActionMetaData[variable || 'energyOnCreatures'] = action.energyOnCreatures || [];
+										currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES]] = action.energyOnCreatures || [];
 									}
 								}
 								break;
@@ -3010,7 +3054,7 @@ export class State {
 								if ('damageOnCreatures' in action) {
 									const totalDamage = Object.values(action.damageOnCreatures).reduce((a, b) => a + b, 0);
 									if (totalDamage === this.state.promptParams.amount) {
-										currentActionMetaData[variable || 'damageOnCreatures'] = action.damageOnCreatures || [];
+										currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES]] = action.damageOnCreatures || [];
 									}
 								}
 								break;
@@ -3018,7 +3062,7 @@ export class State {
 							case PROMPT_TYPE_PLAYER: {
 								if ('targetPlayer' in action) {
 									if (this.players.includes(action.targetPlayer)) {
-										currentActionMetaData[variable || 'targetPlayer'] = action.targetPlayer;
+										currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_PLAYER]] = action.targetPlayer;
 									} else {
 										console.error(`Unknown player: ${action.targetPlayer} in PROMPT_TYPE_PLAYER prompt resolution`);
 									}

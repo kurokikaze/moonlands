@@ -21,6 +21,7 @@ declare type CardWithModification = {
     id: string;
     owner: number;
 };
+export declare const DEFAULT_PROMPT_VARIABLE: Record<PromptTypeType, string>;
 declare type PromptParamsType = {
     cards?: ConvertedCard[];
     source?: CardInGame;

@@ -1,6 +1,6 @@
 /* global expect, describe, it */
 import * as moonlands from '../src/index.ts';
-import { byName } from '../src/cards.ts';
+import { byName, cards } from '../src/cards.ts';
 import CardInGame from '../src/classes/CardInGame.ts';
 import Card from '../src/classes/Card.ts';
 import { caldDeck, naroomDeck } from './testData';
@@ -96,6 +96,7 @@ import {
 	EXPIRATION_NEVER,
 
 	STATUS_BURROWED,
+	EFFECT_TYPE_CONDITIONAL,
 } from '../src/const.ts';
 
 import Zone from '../src/classes/Zone.ts';
@@ -5445,4 +5446,92 @@ describe('Cloning the game state', () => {
 		lavaArboll.addEnergy(2);
 		expect(newState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(2);
 	});
+});
+
+function validateEffects(effects, initialVariables, cardName) {
+	const variables = {
+		...initialVariables,
+	};
+	let spellValid = true;
+
+	effects.forEach(effect => {
+		const variableValues = Object.values(effect).filter(value => typeof value == 'string' && value.startsWith('$'));
+		variableValues.forEach(value => {
+			if (!(value in variables)) {
+				console.error(`No value ${value} in variables of card ${cardName}`);
+			}
+		});
+		if (effect.type === ACTION_EFFECT && effect.effectType === EFFECT_TYPE_CONDITIONAL) {
+			if (effect.thenActions) {
+				const thenActionsValid = validateEffects(effect.thenActions, variables);
+				spellValid = spellValid && thenActionsValid;
+			}
+			if (effect.elseActions) {
+				const elseActionsValid = validateEffects(effect.elseActions, variables);
+				spellValid = spellValid && elseActionsValid;
+			}
+		}
+
+		if (effect.type === ACTION_ENTER_PROMPT) {
+			const variable = effect.variable || moonlands.DEFAULT_PROMPT_VARIABLE[effect.promptType];
+			variables['$' + variable] = 1;
+		}
+		if (effect.type === ACTION_SELECT) {
+			const variable = effect.variable || 'selected';
+			variables['$' + variable] = 1;
+		}
+		if (effect.type === moonlands.ACTION_CALCULATE) {
+			const variable = effect.variable || 'result';
+			variables['$' + variable] = 1;
+		}
+		if (effect.type === moonlands.ACTION_GET_PROPERTY_VALUE) {
+			const variable = effect.variable || 'result';
+			variables['$' + variable] = 1;
+		}
+		if (effect.type == ACTION_EFFECT && effect.effectType == EFFECT_TYPE_ROLL_DIE) {
+			const variable = effect.variable || 'roll_result';
+			variables['$' + variable] = 1;
+		}
+		if (effect.type == ACTION_EFFECT && 
+			(
+				effect.effectType == moonlands.EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES ||
+				effect.effectType == moonlands.EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY ||
+				effect.effectType == moonlands.EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY
+			)
+		) {
+			const variable = effect.variable || 'new_card';
+			variables['$' + variable] = 1;
+		}
+	});
+	return spellValid;
+}
+
+describe('Card logic', () => {
+	const spells = cards.filter(card => card.type === moonlands.TYPE_SPELL);
+
+	for (let spell of spells) {
+		let variables = {
+			'$source': 1,
+			'$player': 1,
+		};
+		if (spell.cost == moonlands.COST_X || spell.cost == moonlands.COST_X_PLUS_ONE) {
+			variables['$chosen_cost'] = 1;
+		}
+
+		expect(validateEffects(spell.data.effects, variables, spell.name)).toEqual(true);
+	}
+
+	const cardsWithPowers = cards.filter(card => card.type === moonlands.TYPE_RELIC || card.type === moonlands.TYPE_CREATURE || card.type === moonlands.TYPE_MAGI);
+
+	for (let card of cardsWithPowers) {
+		let variables = {
+			'$source': 1,
+		};
+
+		if (card.powers && card.powers.length) {
+			for (let power of card.powers) {
+				expect(validateEffects(power.effects, variables, card.name)).toEqual(true);
+			}
+		}
+	}
 });
