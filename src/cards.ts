@@ -177,6 +177,7 @@ import {
   SELECTOR_NTH_CARD_OF_ZONE,
   PROPERTY_CREATURE_NAME,
   RESTRICTION_CREATURE_NAME,
+  SELECTOR_SELF_AND_STATUS,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -2702,6 +2703,19 @@ export const cards = [
 			},
 		],
 	}),
+  new Card('Bisiwog', TYPE_CREATURE, REGION_UNDERNEATH, 3, {
+    staticAbilities: [{
+      name: 'Tunneling Attack',
+      text: 'While burrowed, Bisiwog may still attack as normal.',
+      selector: SELECTOR_SELF_AND_STATUS,
+      selectorParameter: STATUS_BURROWED,
+      property: PROPERTY_ABLE_TO_ATTACK,
+      modifier: {
+        operandOne: true,
+        operator: CALCULATION_SET,
+      },
+    }],
+  }),
 	new Card('Xyx', TYPE_CREATURE, REGION_ARDERIAL, 3, {
 		powers: [
 			{

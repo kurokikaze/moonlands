@@ -9,6 +9,7 @@ import { EnhancedDelayedTriggerType } from './types/effect';
 import { CardType, StatusType } from './types/common';
 declare type EnrichedStaticAbilityType = StaticAbilityType & {
     player: number;
+    card?: CardInGame;
 };
 declare type GameStaticAbility = StaticAbilityType & {
     selector: typeof SELECTOR_STATUS;
@@ -201,7 +202,7 @@ export declare class State {
     getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_COST): CostType;
     getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_STATUS, subProperty: typeof STATUS_BURROWED): boolean;
     isCardAffectedByEffect(card: CardInGame, effect: EnrichedAction & EffectType): boolean;
-    isCardAffectedByStaticAbility(card: CardInGame | CardWithModification, staticAbility: EnrichedStaticAbilityType | GameStaticAbility): boolean;
+    isCardAffectedByStaticAbility(card: CardInGame | CardWithModification, staticAbility: EnrichedStaticAbilityType | GameStaticAbility): boolean | undefined;
     modifyByStaticAbilities(target: CardInGame, property: PropertyType, subProperty?: string | null | undefined): any;
     layeredDataReducer(currentCard: CardWithModification, staticAbility: EnrichedStaticAbilityType | GameStaticAbility): CardWithModification;
     makeChecker(restriction: RestrictionType, restrictionValue: any): (card: CardInGame) => boolean;

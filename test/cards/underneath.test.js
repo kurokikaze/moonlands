@@ -47,6 +47,8 @@ import {
 	ZONE_TYPE_IN_PLAY,
 	ZONE_TYPE_DISCARD,
 	ZONE_TYPE_HAND,
+	PROPERTY_STATUS,
+	STATUS_BURROWED,
 } from '../../src/const.ts';
 
 import {
@@ -1605,5 +1607,67 @@ describe('Ulk', () => {
 		expect(metaData.selected).toBeInstanceOf(Array);
 		expect(metaData.selected).toHaveLength(0);
 		expect(mushroomHyren.data.energy).toEqual(2, 'Hyren got no energy');
+	});
+});
+
+describe('Bisiwog', () => {
+	it('Tunnelling Attack', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const bisiwog = new CardInGame(byName('Bisiwog'), ACTIVE_PLAYER).addEnergy(3);
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(2);
+		const burrow = new CardInGame(byName('Burrow'), ACTIVE_PLAYER);
+
+		const ulk = new CardInGame(byName('Ulk'), ACTIVE_PLAYER).addEnergy(15);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(5);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [bisiwog, arbolit], [ulk]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([burrow]);
+
+		const spellAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: burrow,
+				player: ACTIVE_PLAYER,
+			}
+		};
+
+		gameState.enableDebug(true);
+		gameState.update(spellAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+
+		const numberAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_NUMBER,
+			number: 4,
+			generatedBy: burrow.id,
+		};
+
+		gameState.update(numberAction);
+
+		const targetAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
+			target: bisiwog,
+			generatedBy: burrow.id,
+		};
+
+		gameState.update(targetAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+
+		expect(gameState.modifyByStaticAbilities(bisiwog, PROPERTY_STATUS, STATUS_BURROWED)).toEqual(true, 'Bisiwog is burrowed');
+		expect(gameState.modifyByStaticAbilities(bisiwog, PROPERTY_ABLE_TO_ATTACK)).toEqual(true, 'Bisiwog still can attack');
 	});
 });

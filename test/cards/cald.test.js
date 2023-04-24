@@ -774,7 +774,7 @@ describe('Gar', () => {
 		// expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(lavaBalamant.id).data.energy).toEqual(BALAMANT_ENERGY, 'Lava Balamant still has 5 energy');
 	});
 
-  it('Strengthen (no ties)', () => {
+	it('Strengthen (no ties)', () => {
 		const ACTIVE_PLAYER = 422;
 		const NON_ACTIVE_PLAYER = 1310;
 

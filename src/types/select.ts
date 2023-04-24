@@ -32,6 +32,7 @@ import {
     SELECTOR_STATUS,
     SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY,
     SELECTOR_NTH_CARD_OF_ZONE,
+    SELECTOR_SELF_AND_STATUS,
 } from "../const";
 
 export type SelectorParams = {
@@ -58,6 +59,7 @@ export type SelectorTypeType = typeof SELECTOR_OPPONENT_ID |
     typeof SELECTOR_CREATURES_NOT_OF_TYPE |
     typeof SELECTOR_OWN_CREATURES |
     typeof SELECTOR_ENEMY_CREATURES |
+    typeof SELECTOR_SELF_AND_STATUS |
     typeof SELECTOR_MAGI_OF_REGION |
     typeof SELECTOR_MAGI_NOT_OF_REGION |
     typeof SELECTOR_TOP_MAGI_OF_PILE |
@@ -224,6 +226,12 @@ type SelectTopMagiOfPileParams = SelectParams & {
     selector: typeof SELECTOR_TOP_MAGI_OF_PILE;
 }
 
+type SelectSelfWithStatusParams = SelectParams & {
+  selector: typeof SELECTOR_SELF_AND_STATUS;
+}
+
+type SelectSelfWithStatus = SelectAction & SelectSelfWithStatusParams;
+
 type SelectTopMagiOfPile = SelectAction & SelectTopMagiOfPileParams;
 
 type SelectEnemyCreaturesParams = {
@@ -263,6 +271,7 @@ export type RefinedSelectParams = SelectCreaturesOfTypeParams |
     SelectOwnCreaturesOfTypeParams | 
     SelectMagiOfRegionParams |
     SelectCreaturesParams |
+    SelectSelfWithStatusParams |
     SelectMagiParams |
     SelectRelicsParams |
     SelectTopMagiOfPileParams |
@@ -291,6 +300,7 @@ export type SelectType = SelectCreatures |
     SelectCreaturesNotOfRegion |
     SelectMagiOfRegion |
     SelectMagiNotOfRegion |
+    SelectSelfWithStatus |
     SelectStatus |
     SelectCreaturesWithoutStatus |
     SelectTopMagiOfPile |

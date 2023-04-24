@@ -242,6 +242,7 @@ import {
   RESTRICTION_CREATURE_NAME,
   PROMPT_TYPE_NUMBER_OF_CREATURES,
   PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED,
+  SELECTOR_SELF_AND_STATUS,
 } from './const';
 
 import {showAction} from './logAction';
@@ -292,6 +293,7 @@ const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
 
 type EnrichedStaticAbilityType = StaticAbilityType & {
 	player: number;
+  card?: CardInGame;
 }
 
 type GameStaticAbility = StaticAbilityType & {
@@ -1491,6 +1493,12 @@ export class State {
 			case SELECTOR_ID: {
 				return card.id === staticAbility.selectorParameter;
 			}
+      case SELECTOR_SELF_AND_STATUS: {
+        return 'card' in staticAbility &&
+          staticAbility.card &&
+          card.id === staticAbility.card.id &&
+          this.getByProperty(card, PROPERTY_STATUS, staticAbility.selectorParameter as StatusType);
+      }
 			case SELECTOR_CREATURES: {
 				return card.card.type === TYPE_CREATURE &&
 				this.getZone(ZONE_TYPE_IN_PLAY).cards.some(({id}) => id === card.id);
@@ -1592,7 +1600,7 @@ export class State {
 		const zoneAbilities: EnrichedStaticAbilityType[] = allZonesCards.reduce<EnrichedStaticAbilityType[]>(
 			(acc, cardInPlay) => cardInPlay.card.data.staticAbilities ? [
 				...acc,
-				...(cardInPlay.card.data.staticAbilities.map(a => ({...a, player: cardInPlay.data.controller})))
+				...(cardInPlay.card.data.staticAbilities.map(a => ({...a, player: cardInPlay.data.controller, card: cardInPlay})))
 			] : acc,
 			[],
 		);

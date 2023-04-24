@@ -104,6 +104,7 @@ Done: **171** card out of **190**
 - Barak
 - Twee
 - Ulk
+- Bisiwog
 
 # Done, not tested
 
@@ -276,7 +277,6 @@ Done: **171** card out of **190**
 
 # Not done yet
 
-- Bisiwog (overriding game continuous effect)
 - Colossus (protection)
 - Energy Band (using only before attack, must attack if able)
 - Entangle ([in]ability to play spells)
