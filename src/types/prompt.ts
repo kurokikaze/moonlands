@@ -94,11 +94,11 @@ type GeneralPromptType = PromptParams & {
 }
 
 export type MagiPowerPromptParams = {
-  type: typeof PROMPT_TYPE_POWER_ON_MAGI;
+  promptType: typeof PROMPT_TYPE_POWER_ON_MAGI;
   magi: CardInGame | string;
 } 
 
-type PromptTypeMagiPower = PromptInteface & MagiPowerPromptParams;
+export type PromptTypeMagiPower = PromptInteface & MagiPowerPromptParams;
 
 export type PromptType = GeneralPromptType |
   PromptTypeRearrangeEnergy |

@@ -1,4 +1,4 @@
-Done: **171** card out of **190**
+Done: **173** card out of **190**
 
 # Done, tested
 
@@ -105,6 +105,7 @@ Done: **171** card out of **190**
 - Twee
 - Ulk
 - Bisiwog
+- Mirror Pendant
 
 # Done, not tested
 
@@ -285,7 +286,6 @@ Done: **171** card out of **190**
 - Karak (exiling under creature, ability to play named relics)
 - Lightning (select between alternatives)
 - Mask of Abwyn (looking at hand)
-- Mirror Pendant (choosing power on Magi)
 - Orathan Flyer (paying for creature from creature)
 - Orish (choosing player, discard at random)
 - Raxis (choice between alternatives)
@@ -325,7 +325,6 @@ Done: **171** card out of **190**
 
 # Looking at library, rearranging
 
-- Barak
 - Orothean Goggles
 
 # Looking at hands

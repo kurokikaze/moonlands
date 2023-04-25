@@ -169,6 +169,7 @@ export var EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES = 'effects/rearrange_energy
 export var EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES = 'effects/distribute_energy_on_creatures';
 export var EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES = 'effects/distribute_damage_on_creatures';
 export var EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE = 'effects/rearrange_cards_of_zone';
+export var EFFECT_TYPE_EXECUTE_POWER_EFFECTS = 'effects/execute_power_effects';
 export var EXPIRATION_OPPONENT_TURNS = 'expiration/opponents_turns';
 export var EXPIRATION_PLAYER_TURNS = 'expirations/players_turns';
 export var EXPIRATION_ANY_TURNS = 'expirations/any_turns';

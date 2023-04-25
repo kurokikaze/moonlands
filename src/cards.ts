@@ -178,6 +178,8 @@ import {
   PROPERTY_CREATURE_NAME,
   RESTRICTION_CREATURE_NAME,
   SELECTOR_SELF_AND_STATUS,
+  PROMPT_TYPE_POWER_ON_MAGI,
+  EFFECT_TYPE_EXECUTE_POWER_EFFECTS,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -196,6 +198,7 @@ import {
 	RestrictionObjectType,
 	ZoneType,
 } from './types';
+import { PromptTypeMagiPower } from './types/prompt';
 
 const effect = (data: any): EffectType => ({
 	type: ACTION_EFFECT,
@@ -257,7 +260,19 @@ type RearrangeCardsPromptParams = {
   variable?: string;
 }
 
-type PromptParamsType = PromptParams | DistributeEnergyPromptParams | RearrangeEnergyPromptParams | UpToNCardsPromptParams | DistributeDamagePromptParams | RearrangeCardsPromptParams;
+type PowerOnMagiParams = {
+  promptType: typeof PROMPT_TYPE_POWER_ON_MAGI,
+  magi: string;
+  variable?: string;
+}
+
+type PromptParamsType = PromptParams |
+  DistributeEnergyPromptParams |
+  RearrangeEnergyPromptParams |
+  UpToNCardsPromptParams |
+  DistributeDamagePromptParams |
+  RearrangeCardsPromptParams |
+  PowerOnMagiParams;
 
 const prompt = (data: PromptParamsType): PromptType => {
 	switch (data.promptType) {
@@ -276,6 +291,12 @@ const prompt = (data: PromptParamsType): PromptType => {
         type: ACTION_ENTER_PROMPT,
         ...data,
       }
+    case PROMPT_TYPE_POWER_ON_MAGI: {
+      return {
+        type: ACTION_ENTER_PROMPT,
+        ...data,
+      };
+    }
 	}
 	return ({
 		type: ACTION_ENTER_PROMPT,
@@ -4287,6 +4308,62 @@ export const cards = [
 			},
 		],
 	}),
+  new Card('Mirror Pendant', TYPE_RELIC, REGION_UNIVERSAL, 0, {
+    powers: [{
+      name: 'Auraflection',
+      text: 'Choose any one Power on your Magi. Discard energy from your Magi equal to the chosen Power\'s cost, and discard an additional two energy. Play all actions of the chosen Power.',
+      cost: 0,
+      effects: [
+        select({
+          selector: SELECTOR_OWN_MAGI,
+          variable: 'ownMagi',
+        }),
+        prompt({
+          promptType: PROMPT_TYPE_POWER_ON_MAGI,
+          magi: '$ownMagi',
+          variable: 'chosenPower',
+        }),
+        getPropertyValue({
+          target: '$chosenPower',
+          property: PROPERTY_POWER_COST,
+          variable: 'powerCost',
+        }),
+        calculate({
+          operator: CALCULATION_ADD,
+          operandOne: '$powerCost',
+          operandTwo: 2,
+          variable: 'costPlusTwo',
+        }),
+        effect({
+          effectType: EFFECT_TYPE_CONDITIONAL,
+          ownMagi: '$ownMagi',
+          costPlusTwo: '$costPlusTwo',
+					conditions: [
+						{
+							objectOne: 'ownMagi',
+							propertyOne: PROPERTY_ENERGY_COUNT,
+							comparator: '>=',
+							objectTwo: 'costPlusTwo',
+							propertyTwo: ACTION_PROPERTY,
+						},
+					],
+          thenEffects: [
+            effect({
+              effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+              target: '$ownMagi',
+              amount: '$costPlusTwo',
+            }),
+            effect({
+              effectType: EFFECT_TYPE_EXECUTE_POWER_EFFECTS,
+              power: '$chosenPower',
+              source: '$ownMagi',
+              setUsage: false,
+            }),
+          ],
+        })
+      ],
+    }],
+  }),
 	new Card('Plith', TYPE_CREATURE, REGION_NAROOM, 3, {
 		triggerEffects:[{
       name: 'Warning',

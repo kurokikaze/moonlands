@@ -82,9 +82,9 @@ declare type GeneralPromptType = PromptParams & {
     replacedBy?: string[];
 };
 export declare type MagiPowerPromptParams = {
-    type: typeof PROMPT_TYPE_POWER_ON_MAGI;
+    promptType: typeof PROMPT_TYPE_POWER_ON_MAGI;
     magi: CardInGame | string;
 };
-declare type PromptTypeMagiPower = PromptInteface & MagiPowerPromptParams;
+export declare type PromptTypeMagiPower = PromptInteface & MagiPowerPromptParams;
 export declare type PromptType = GeneralPromptType | PromptTypeRearrangeEnergy | PromptTypeDistributeEnergy | PromptTypeChooseUpToNCardsFromZone | PromptTypeDistributeDamage | PromptTypePlayer | ChooseCardsPromptType | PromptTypeMayAbility | PromptTypeRearrangeCardsOfZone | PromptTypeMagiPower;
 export {};

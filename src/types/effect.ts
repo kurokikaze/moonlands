@@ -69,6 +69,7 @@ import {
   EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
   EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
   EFFECT_TYPE_DIE_ROLLED,
+  EFFECT_TYPE_EXECUTE_POWER_EFFECTS,
 } from '../const';
 
 export type EffectTypeType =
@@ -117,6 +118,7 @@ export type EffectTypeType =
 	typeof EFFECT_TYPE_PAYING_ENERGY_FOR_POWER |
 	typeof EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI |
 	typeof EFFECT_TYPE_MAGI_FLIPPED |
+  typeof EFFECT_TYPE_EXECUTE_POWER_EFFECTS |
 	typeof EFFECT_TYPE_START_STEP;
 
 type EffectTypeStillInUse = typeof EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY |
@@ -402,6 +404,17 @@ type RollDieEffect = ActionEffect & {
 	result?: number;
 }
 
+export type ExecutePowerEffect = ActionEffect & {
+  effectType: typeof EFFECT_TYPE_EXECUTE_POWER_EFFECTS;
+  power: string | {
+    cost: number | "X",
+    name: string,
+    effects: AnyEffectType[]
+  };
+  setUsage?: boolean
+  source: string | CardInGame;
+}
+
 export type DieRolledEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_DIE_ROLLED;
 	result: number;
@@ -546,4 +559,5 @@ export type EffectType = ActionEffect & {
   DiscardRelicFromPlayEffect |
   ReturnCreatureReturningEnergyEffect |
   DiscardCreatureFromPlayEffect |
-  RearrangeCardsOfZoneEffect;
+  RearrangeCardsOfZoneEffect |
+  ExecutePowerEffect;

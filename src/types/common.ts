@@ -87,6 +87,7 @@ import {
     PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
     PROPERTY_CREATURE_NAME,
     RESTRICTION_CREATURE_NAME,
+    PROMPT_TYPE_POWER_ON_MAGI,
 } from "../const";
 
 export type ZoneType =
@@ -152,6 +153,7 @@ export type PromptTypeType = typeof PROMPT_TYPE_NUMBER |
     typeof PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES |
     typeof PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES |
     typeof PROMPT_TYPE_PLAYER |
+    typeof PROMPT_TYPE_POWER_ON_MAGI |
     typeof PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE;
 
 export type GenericPromptType = typeof PROMPT_TYPE_NUMBER |

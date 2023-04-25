@@ -45,6 +45,7 @@ import {
 	ZONE_TYPE_IN_PLAY,
 	ZONE_TYPE_DISCARD,
 	ZONE_TYPE_HAND,
+	PROMPT_TYPE_POWER_ON_MAGI,
 } from '../../src/const.ts';
 
 import {
@@ -673,6 +674,67 @@ describe('Ancestral Flute', () => {
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1);
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Pharan');
+	});
+});
+
+describe('Mirror Pendant', () => {
+	it('Auraflection', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(5);
+		const pharan = new CardInGame(byName('Pharan'), NON_ACTIVE_PLAYER).addEnergy(7);
+		const pendant = new CardInGame(byName('Mirror Pendant'), ACTIVE_PLAYER);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [pharan, pendant], [grega]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const pendantAction = {
+			type: ACTION_POWER,
+			source: pendant,
+			power: pendant.card.data.powers[0],
+			player: ACTIVE_PLAYER,	
+		};
+
+		gameState.update(pendantAction);
+		
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_POWER_ON_MAGI);
+
+		const choosingPowerAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			power: grega.card.data.powers[0],
+			source: grega,
+			player: ACTIVE_PLAYER,
+			generatedBy: pendant.id,
+		};
+
+		gameState.update(choosingPowerAction);
+
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI);
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+			target: pharan,
+			player: ACTIVE_PLAYER,
+			generatedBy: grega.id,
+		};
+
+		// gameState.update(powerAction);
+		gameState.update(targetingAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(pharan.id).data.energy).toBeLessThan(7, 'Pharan now has less than 7 energy');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(pharan.id).data.energy).toBeGreaterThan(0, 'Pharan now more than 0 energy');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(0, 'No cards in Player 1 discard');
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI).card.data.energy).toEqual(1, 'Grega now has 2 energy');
+		expect(grega.data.actionsUsed).toEqual([]);
 	});
 });
 

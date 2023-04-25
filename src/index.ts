@@ -243,6 +243,8 @@ import {
   PROMPT_TYPE_NUMBER_OF_CREATURES,
   PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED,
   SELECTOR_SELF_AND_STATUS,
+  EFFECT_TYPE_EXECUTE_POWER_EFFECTS,
+  PROMPT_TYPE_POWER_ON_MAGI,
 } from './const';
 
 import {showAction} from './logAction';
@@ -278,9 +280,8 @@ import {
   Region,
   ProtectionType,
   ReplacingEffectType,
-  CardData,
 } from './types';
-import { DieRolledEffect, DiscardCreatureFromPlayEffect, DiscardEnergyFromCreatureEffect, EnhancedDelayedTriggerType, StartingEnergyOnCreatureEffect } from './types/effect';
+import { DieRolledEffect, DiscardCreatureFromPlayEffect, DiscardEnergyFromCreatureEffect, EnhancedDelayedTriggerType, ExecutePowerEffect, StartingEnergyOnCreatureEffect } from './types/effect';
 import { CardType, StatusType } from './types/common';
 import { ChooseCardsPromptType, PromptTypeMayAbility } from './types/prompt';
 
@@ -404,6 +405,7 @@ export const DEFAULT_PROMPT_VARIABLE: Record<PromptTypeType, string> = {
   [PROMPT_TYPE_PLAYER]: 'targetPlayer',
   [PROMPT_TYPE_NUMBER_OF_CREATURES]: 'targets',
   [PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED]: 'targets',
+  [PROMPT_TYPE_POWER_ON_MAGI]: 'chosenPower',
   [PROMPT_TYPE_MAY_ABILITY]: '', // Special case, doesn't use variables
 };
 
@@ -2595,7 +2597,12 @@ export class State {
 						// If so, work on first element of result.
 						const target = (multiTarget instanceof Array) ? multiTarget[0] : multiTarget;
 
-						const modifiedResult = this.modifyByStaticAbilities(target, property);
+            let modifiedResult: any;
+            if (target && 'name' in target && 'effects' in target && property === PROPERTY_POWER_COST) {
+              modifiedResult = target.cost;
+            } else {
+              modifiedResult = this.modifyByStaticAbilities(target, property);
+            }
 	
 						const variable = action.variable || 'result';
             if (action.generatedBy) {
@@ -2648,6 +2655,7 @@ export class State {
 						const preparedActions: AnyEffectType[] = effects.map(enrichAction);
 
 						const allPromptsAreDoable = this.checkPrompts(source, preparedActions, true, powerCost);
+
 						if (allPromptsAreDoable) {
 							let currentPowerMetaData = {
 								source,
@@ -2692,7 +2700,17 @@ export class State {
 									generatedBy: source.id,
 								});
 							}
-							this.addActions(...preparedActions);
+              if (sourcePower) {
+                const powerEffects: ExecutePowerEffect = {
+                  type: ACTION_EFFECT,
+                  effectType: EFFECT_TYPE_EXECUTE_POWER_EFFECTS,
+                  power: sourcePower,
+                  source,
+                  player: action.player,
+                  generatedBy: source.id,
+                };
+                this.addActions(powerEffects);
+              }
 							this.setSpellMetadata(currentPowerMetaData, source.id);
 						}
 					}
@@ -3076,6 +3094,21 @@ export class State {
 									}
 								} else {
 									console.error('No player in PROMPT_TYPE_PLAYER prompt resolution');
+								}
+								break;
+							}
+              case PROMPT_TYPE_POWER_ON_MAGI: {
+								if ('power' in action && 'source' in action) {
+                  const source: CardInGame = this.getMetaValue(action.source, action.generatedBy);
+                  const power = this.getMetaValue(action.power, action.generatedBy);
+
+                  if (source && power && source.card.data.powers && source.card.data.powers.some(p => p.name === power.name)) {
+										currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_POWER_ON_MAGI]] = action.power;
+									} else {
+										console.error(`Unknown power: ${power.name || power} in PROMPT_TYPE_POWER_ON_MAGI prompt resolution`);
+									}
+								} else {
+									console.error('No power or source in PROMPT_TYPE_POWER_ON_MAGI prompt resolution');
 								}
 								break;
 							}
@@ -4193,6 +4226,42 @@ export class State {
 						}
             case EFFECT_TYPE_DIE_ROLLED: {
               this.setSpellMetaDataField('roll_result', action.result, action.generatedBy);
+              break;
+            }
+            case EFFECT_TYPE_EXECUTE_POWER_EFFECTS: {
+              const power = this.getMetaValue(action.power, action.generatedBy);
+              const sourceRaw = this.getMetaValue(action.source, action.generatedBy);
+              // Some selectors will give us arrays anyway
+              const source = sourceRaw instanceof Array ? sourceRaw[0] : sourceRaw;
+
+              const sourceController = this.modifyByStaticAbilities(source, PROPERTY_CONTROLLER);
+              const powerCost = this.modifyByStaticAbilities(source, PROPERTY_POWER_COST, power.name || '');
+
+              const enrichAction = <T>(effect: T): T & EnrichedAction => ({
+                source,
+                player: sourceController,
+                ...effect,
+                power: true,
+                generatedBy:
+                source.id,
+              });
+
+              if ('effects' in power && power.effects) {
+                const effects = power.effects;
+                const preparedActions: AnyEffectType[] = effects.map(enrichAction);
+  
+                const allPromptsAreDoable = this.checkPrompts(source, preparedActions, true);
+  
+                if (allPromptsAreDoable) {
+                  if (!('setUsage' in action) || action.setUsage == true) {
+                    source.setActionUsed(power.name);
+                  } else {
+                    console.log('Skipped usage setting');
+                  }
+      
+                  this.addActions(...preparedActions);
+                }
+              }
               break;
             }
 						case EFFECT_TYPE_ENERGIZE: {

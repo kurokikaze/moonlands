@@ -1642,7 +1642,6 @@ describe('Bisiwog', () => {
 			}
 		};
 
-		gameState.enableDebug(true);
 		gameState.update(spellAction);
 
 		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
