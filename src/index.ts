@@ -564,6 +564,7 @@ type PromptParamsType = {
   amount?: number;
   zone?: ZoneType;
   zoneOwner?: number;
+  magi?: CardInGame;
   min?: number;
   max?: number;
 }
@@ -2849,6 +2850,12 @@ export class State {
 							};
 							break;
 						}
+            case PROMPT_TYPE_POWER_ON_MAGI: {
+              promptParams = {
+                magi: this.getMetaValue(action.magi, action.generatedBy),
+              }
+              break;
+            }
 						case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
               if (action.restriction) {
                 promptParams = {
