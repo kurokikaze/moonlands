@@ -1,4 +1,4 @@
-import {Writable} from 'stream';
+// import {Writable} from 'stream';
 // import EventEmitter from 'events';
 import {nanoid} from 'nanoid';
 
@@ -409,25 +409,6 @@ export const DEFAULT_PROMPT_VARIABLE: Record<PromptTypeType, string> = {
   [PROMPT_TYPE_MAY_ABILITY]: '', // Special case, doesn't use variables
 };
 
-/*
-[PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE]: 'targetCards',
-[PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE]: 'cardsOrder',
-[PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE]: 'targetCards',
-[PROMPT_TYPE_NUMBER]: 'number',
-[PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE]: 'target',
-[PROMPT_TYPE_RELIC]: 'target',
-[PROMPT_TYPE_OWN_SINGLE_CREATURE]: 'target',
-[PROMPT_TYPE_SINGLE_CREATURE_FILTERED]: 'target',
-[PROMPT_TYPE_MAGI_WITHOUT_CREATURES]: 'target',
-[PROMPT_TYPE_SINGLE_CREATURE]: 'target',
-[PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI]: 'target',
-[PROMPT_TYPE_SINGLE_MAGI]: 'targetMagi',
-[PROMPT_TYPE_CHOOSE_CARDS]: 'selectedCards',
-[PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES]: 'energyOnCreatures',
-[PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES]: 'energyOnCreatures',
-[PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES]: 'damageOnCreatures',
-[PROMPT_TYPE_PLAYER]: 'targetPlayer',
-*/
 const steps: StepType[] = [
 	{
 		name: 'Energize',
@@ -564,7 +545,7 @@ type PromptParamsType = {
   amount?: number;
   zone?: ZoneType;
   zoneOwner?: number;
-  magi?: CardInGame;
+  magi?: CardInGame[];
   min?: number;
   max?: number;
 }
@@ -2336,7 +2317,7 @@ export class State {
 		}
 
 		// powerPromptsDoable
-		const testablePrompts = [
+		const testablePrompts: PromptTypeType[] = [
 			PROMPT_TYPE_SINGLE_CREATURE,
 			PROMPT_TYPE_RELIC,
 			PROMPT_TYPE_OWN_SINGLE_CREATURE,
@@ -2344,6 +2325,7 @@ export class State {
 			PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 			PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 			PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
+			PROMPT_TYPE_POWER_ON_MAGI,
 		];
 
 		const testablePromptFilter = (action: AnyEffectType): action is PromptType => 
@@ -2365,6 +2347,10 @@ export class State {
 					return ourCardsInPlay.some(card => card.card.type === TYPE_CREATURE);
 				case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
 					return this.getZone(ZONE_TYPE_IN_PLAY).cards.some(card => card.id !== source.id);
+				}
+				case PROMPT_TYPE_POWER_ON_MAGI: {
+					const magi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, source.data.controller).cards;
+					return magi.some(magi => magi.card.data.powers && magi.card.data.powers.some(power => power.cost === COST_X || (power.cost <= magi.data.energy + 2)));
 				}
 				case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
 					if (promptAction.restrictions) {
@@ -2416,9 +2402,9 @@ export class State {
 					const zoneOwner = this.getMetaValue(promptAction.zoneOwner, source.id);
 					const cardsInZone = this.getZone(promptAction.zone as ZoneType, zoneOwner).cards;
 					const numberOfCards = this.getMetaValue(promptAction.numberOfCards, source.id);
-          // if (cardsInZone.length < numberOfCards) {
-          //   return false;
-          // }
+					// if (cardsInZone.length < numberOfCards) {
+					//   return false;
+					// }
 					if (promptAction.restrictions) {
 						return this.checkAnyCardForRestrictions(cardsInZone, promptAction.restrictions);
 					} else if (promptAction.restriction) {
@@ -2976,19 +2962,19 @@ export class State {
 								}
 								break;
 							}
-              case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {
-                if ('cards' in action && action.cards) {
-									if (this.state.promptParams && this.state.promptParams.cards && this.state.promptParams.cards.length !== action.cards.length) {
-                    console.error('Number of cards is wrong')
-										return false;
-									}
-                  currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE]] = action.cards;
-                }
-                break;
-              }
+							case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {
+								if ('cards' in action && action.cards) {
+													if (this.state.promptParams && this.state.promptParams.cards && this.state.promptParams.cards.length !== action.cards.length) {
+									console.error('Number of cards is wrong')
+														return false;
+													}
+									currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE]] = action.cards;
+								}
+								break;
+							}
 							case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
 								if ('cards' in action && action.cards) {
-                  const expectedNumber = this.state?.promptParams?.numberOfCards || 0
+									const expectedNumber = this.state?.promptParams?.numberOfCards || 0
 									if (action.cards.length > expectedNumber) {
 										return false;
 									}
@@ -3028,7 +3014,7 @@ export class State {
 							}
 							case PROMPT_TYPE_OWN_SINGLE_CREATURE: {
 								if ('target' in action && action.target) {
-                  const targetController = this.modifyByStaticAbilities(action.target, PROPERTY_CONTROLLER);
+									const targetController = this.modifyByStaticAbilities(action.target, PROPERTY_CONTROLLER);
 									if (this.state.promptPlayer !== targetController) {
 										throw new Error('Not-controlled creature supplied to Own Creatures prompt');
 									}
@@ -3065,7 +3051,7 @@ export class State {
 								break;
 							case PROMPT_TYPE_CHOOSE_CARDS:
 								if ('cards' in action) {
-                  // Should be a check against promptParams.availableCards
+									// Should be a check against promptParams.availableCards
 									currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_CHOOSE_CARDS]] = action.cards || [];
 								}
 								break;
