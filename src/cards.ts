@@ -180,6 +180,9 @@ import {
   SELECTOR_SELF_AND_STATUS,
   PROMPT_TYPE_POWER_ON_MAGI,
   EFFECT_TYPE_EXECUTE_POWER_EFFECTS,
+  PROMPT_TYPE_ALTERNATIVE,
+	SELECTOR_OWN_CARDS_IN_HAND,
+	SELECTOR_CARDS_IN_HAND,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -198,7 +201,7 @@ import {
 	RestrictionObjectType,
 	ZoneType,
 } from './types';
-import { PromptTypeMagiPower } from './types/prompt';
+import { AlternativePromptParams, PromptTypeMagiPower } from './types/prompt';
 
 const effect = (data: any): EffectType => ({
 	type: ACTION_EFFECT,
@@ -272,6 +275,7 @@ type PromptParamsType = PromptParams |
   UpToNCardsPromptParams |
   DistributeDamagePromptParams |
   RearrangeCardsPromptParams |
+  AlternativePromptParams |
   PowerOnMagiParams;
 
 const prompt = (data: PromptParamsType): PromptType => {
@@ -476,7 +480,7 @@ export const cards = [
 								amount: 4,
 							}),
 						],
-					}),					
+					}),	
 				],
 			},
 		],
@@ -2946,6 +2950,57 @@ export const cards = [
 			},
 		],
 	}),
+	new Card('Lightning', TYPE_SPELL, REGION_ARDERIAL, 2, {
+        text: 'Choose any one Creature in play. Add two energy to or discard two energy from the chosen Creature.',
+		effects: [
+			prompt({
+				promptType: PROMPT_TYPE_SINGLE_CREATURE,
+				message: 'Choose a Creature to add 2 energy to or remove 2 energy from.',
+				variable: 'chosenCreature'
+			}),
+			prompt({
+				promptType: PROMPT_TYPE_ALTERNATIVE,
+				alternatives: [
+					{
+						name: 'Add energy to creature',
+						value: 'add'
+					},
+					{
+						name: 'Remove energy from creature',
+						value: 'remove'
+					},
+				],
+				variable: 'addRemoveChoice'
+			}),
+			effect({
+				effectType: EFFECT_TYPE_CONDITIONAL,
+				addRemoveChoice: '$addRemoveChoice',
+				conditions: [
+					{
+						objectOne: 'addRemoveChoice',
+						propertyOne: ACTION_PROPERTY,
+						comparator: '=',
+						objectTwo: 'add',
+						propertyTwo: null,
+					}
+				],
+				thenEffects: [
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						amount: 2,
+						target: '$chosenCreature'
+					}),
+				],
+				elseEffects: [
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+						amount: 2,
+						target: '$chosenCreature'
+					}),
+				]
+			}),
+		],
+	}),
 	new Card('Storm Ring', TYPE_RELIC, REGION_ARDERIAL, 0, {
 		triggerEffects: [
 			{
@@ -2997,6 +3052,111 @@ export const cards = [
 						target: '%source',
 						amount: 1,
 					}),
+				],
+			},
+		],
+	}),
+	new Card('Eye of the Storm', TYPE_RELIC, REGION_ARDERIAL, 0, {
+		powers: [
+			{
+				name: 'Energy Boost',
+				text: 'Roll one die. 1 = Discard your hand. 2, 3, 4 or 5 = Do nothing. 6 = Draw five cards, or choose any one opponent. The chosen opponent discards his or her hand.',
+				cost: 0,
+				effects: [
+					effect({
+						effectType: EFFECT_TYPE_ROLL_DIE,
+						variable: 'roll_result',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_CONDITIONAL,
+						rollResult: '$roll_result',
+						conditions: [
+							{
+								objectOne: 'rollResult',
+								propertyOne: ACTION_PROPERTY,
+								comparator: '=',
+								objectTwo: 1,
+								propertyTwo: null,
+							}
+						],
+						thenEffects: [
+							select({
+								selector: SELECTOR_OWN_CARDS_IN_HAND,
+								variable: 'cardsInHand',
+							}),
+							effect({
+								effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+								sourceZone: ZONE_TYPE_HAND,
+								destinationZone: ZONE_TYPE_DISCARD,
+								target: '$cardsInHand',
+							}),
+						],
+					}),
+					effect({
+						effectType: EFFECT_TYPE_CONDITIONAL,
+						rollResult: '$roll_result',
+						conditions: [
+							{
+								objectOne: 'rollResult',
+								propertyOne: ACTION_PROPERTY,
+								comparator: '=',
+								objectTwo: 6,
+								propertyTwo: null,
+							}
+						],
+						thenEffects: [
+							prompt({
+								promptType: PROMPT_TYPE_ALTERNATIVE,
+								alternatives: [
+									{
+										name: 'Draw five cards',
+										value: 'draw',
+									},
+									{
+										name: 'Make the opponent discard their hand',
+										value: 'discard',
+									}
+								],
+								variable: 'actionMode'
+							}),
+							effect({
+								effectType: EFFECT_TYPE_CONDITIONAL,
+								actionMode: '$actionMode',
+								conditions: [
+									{
+										objectOne: 'actionMode',
+										propertyOne: ACTION_PROPERTY,
+										comparator: '=',
+										objectTwo: 'draw',
+										propertyTwo: null,
+									}
+								],
+								thenEffects: [
+									effect({
+										effectType: EFFECT_TYPE_DRAW_N_CARDS,
+										numberOfCards: 5,
+									}),
+								],
+								elseEffects: [
+									select({
+										selector: SELECTOR_OPPONENT_ID,
+										variable: 'opponentId',
+									}),
+									select({
+										selector: SELECTOR_CARDS_IN_HAND,
+										zoneOwner: '$opponentId',
+										variable: 'opponentsHand',
+									}),
+									effect({
+										effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+										sourceZone: ZONE_TYPE_HAND,
+										destinationZone: ZONE_TYPE_DISCARD,
+										target: '$opponentsHand',
+									}),
+								],
+							}),
+						],
+					}),	
 				],
 			},
 		],

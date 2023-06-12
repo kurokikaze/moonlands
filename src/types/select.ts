@@ -33,6 +33,8 @@ import {
     SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY,
     SELECTOR_NTH_CARD_OF_ZONE,
     SELECTOR_SELF_AND_STATUS,
+    SELECTOR_OWN_CARDS_IN_HAND,
+    SELECTOR_CARDS_IN_HAND,
 } from "../const";
 
 export type SelectorParams = {
@@ -73,6 +75,8 @@ export type SelectorTypeType = typeof SELECTOR_OPPONENT_ID |
     typeof SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE |
     typeof SELECTOR_OWN_CARDS_IN_PLAY |
     typeof SELECTOR_STATUS |
+    typeof SELECTOR_OWN_CARDS_IN_HAND |
+    typeof SELECTOR_CARDS_IN_HAND |
     typeof SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY;
 
 interface SelectAction {
@@ -257,6 +261,21 @@ type SelectNthCardParams = {
 
 type SelectNthCard = SelectAction & SelectNthCardParams;
 
+type SelectOwnCardsInHandParams = {
+    selector: typeof SELECTOR_OWN_CARDS_IN_HAND,
+    variable?: string,
+}
+
+type SelectOwnCardsInHand = SelectAction & SelectOwnCardsInHandParams;
+
+type SelectCardsInHandParams = {
+    selector: typeof SELECTOR_CARDS_IN_HAND,
+    zoneOwner: number | string,
+    variable?: string,
+}
+
+type SelectCardsInHand = SelectAction & SelectCardsInHandParams;
+
 export type RefinedSelectParams = SelectCreaturesOfTypeParams |
     SelectOtherCreaturesOfTypeParams |
     SelectCreaturesNotOfTypeParams |
@@ -281,6 +300,8 @@ export type RefinedSelectParams = SelectCreaturesOfTypeParams |
     SelectCardsWithEnergizeRateParams |
     SelectCreaturesAndMagiParams |
     SelectOwnCreatureOfLeastEnergyParams |
+    SelectOwnCardsInHandParams |
+    SelectCardsInHandParams |
     SelectNthCardParams;
 
 export type SelectType = SelectCreatures |
@@ -308,4 +329,6 @@ export type SelectType = SelectCreatures |
     SelectOwnMagi |
     SelectEnemyMagi |
     SelectOwnCreatureOfLeastEnergy |
+    SelectOwnCardsInHand |
+    SelectCardsInHand |
     SelectNthCard;

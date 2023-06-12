@@ -46,6 +46,7 @@ import {
 	ZONE_TYPE_IN_PLAY,
 	ZONE_TYPE_DISCARD,
 	ZONE_TYPE_HAND,
+	PROMPT_TYPE_ALTERNATIVE,
 } from '../../src/const.ts';
 
 import {
@@ -1392,3 +1393,305 @@ describe('Cloud Sceptre', () => {
 		expect(jaela.data.energy).toEqual(9);
 	});
 });
+
+describe('Lightning', () => {
+	it('Casting Lightning (add energy)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const lasada = new CardInGame(byName('Lasada'), ACTIVE_PLAYER).addEnergy(12);
+		const pruitt = new CardInGame(byName('Pruitt'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const rudwot = new CardInGame(byName('Rudwot'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const arboll = new CardInGame(byName('Arboll'), NON_ACTIVE_PLAYER).addEnergy(1);
+		const seaBarl = new CardInGame(byName('Sea Barl'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const lightning = new CardInGame(byName('Lightning'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [rudwot, arboll, seaBarl], [lasada]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([lightning]);
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([pruitt]);
+
+		const playSpellAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: lightning,
+				player: ACTIVE_PLAYER,
+			},
+		};
+
+		expect(lasada.data.energy).toEqual(12, 'Lasada has 12 energy');
+
+		gameState.update(playSpellAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: rudwot,
+			generatedBy: lightning.id,
+		};
+
+		gameState.update(targetingAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is still in prompt state');
+
+		const modeAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			alternative: 'add',
+			generatedBy: lightning.id,
+		};
+
+		gameState.update(modeAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+		expect(lasada.data.energy).toEqual(10, 'Lasada has 10 energy');
+
+		expect(rudwot.data.energy).toEqual(12, 'Rudwot has 12 energy');
+	});
+
+	it('Casting Lightning (remove energy)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const lasada = new CardInGame(byName('Lasada'), ACTIVE_PLAYER).addEnergy(12);
+		const pruitt = new CardInGame(byName('Pruitt'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const rudwot = new CardInGame(byName('Rudwot'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const arboll = new CardInGame(byName('Arboll'), NON_ACTIVE_PLAYER).addEnergy(1);
+		const seaBarl = new CardInGame(byName('Sea Barl'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const lightning = new CardInGame(byName('Lightning'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [rudwot, arboll, seaBarl], [lasada]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([lightning]);
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([pruitt]);
+
+		const playSpellAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: lightning,
+				player: ACTIVE_PLAYER,
+			},
+		};
+
+		expect(lasada.data.energy).toEqual(12, 'Lasada has 12 energy');
+
+		gameState.update(playSpellAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: rudwot,
+			generatedBy: lightning.id,
+		};
+
+		gameState.update(targetingAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is still in prompt state');
+
+		const modeAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			alternative: 'remove',
+			generatedBy: lightning.id,
+		};
+
+		gameState.update(modeAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+		expect(lasada.data.energy).toEqual(10, 'Lasada has 10 energy');
+
+		expect(rudwot.data.energy).toEqual(8, 'Rudwot has 8 energy');
+	});
+});
+
+describe('Eye of the Storm', () => {
+	it('Eye of the Storm (discards own hand)', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+	
+		const lasada = new CardInGame(byName('Lasada'), ACTIVE_PLAYER).addEnergy(4);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(7);
+		const xyxElder = new CardInGame(byName('Xyx Elder'), ACTIVE_PLAYER);
+		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
+		const arboll = new CardInGame(byName('Arboll'), NON_ACTIVE_PLAYER);
+		const lavaArboll = new CardInGame(byName('Lava Arboll'), NON_ACTIVE_PLAYER);
+		const eyeOfTheStorm = new CardInGame(byName('Eye of the Storm'), ACTIVE_PLAYER);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [eyeOfTheStorm], [lasada]);
+	
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+	
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([xyxElder, xyx]);
+		gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).add([arboll, lavaArboll]);
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+	
+		gameState.setRollDebugValue(1);
+	
+		const powerAction = {
+			type: ACTION_POWER,
+			source: eyeOfTheStorm,
+			power: eyeOfTheStorm.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+	
+		gameState.update(powerAction);
+	
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(0, 'Active player hand has no cards');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(2, 'Active player discard has two cards');
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(2, 'Non-active player hand has two cards');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(0, 'Non-active player discard has no cards');
+	});
+
+	it('Eye of the Storm (rolling six, choosing to draw)', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+	
+		const lasada = new CardInGame(byName('Lasada'), ACTIVE_PLAYER).addEnergy(4);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(7);
+		const xyxElder = new CardInGame(byName('Xyx Elder'), ACTIVE_PLAYER);
+		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
+
+		const lavaBalamantOne = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER);
+		const lavaBalamantTwo = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER);
+		const lavaBalamantThree = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER);
+		const lavaBalamantFour = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER);
+		const lavaBalamantFive = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER);
+
+		const arboll = new CardInGame(byName('Arboll'), NON_ACTIVE_PLAYER);
+		const lavaArboll = new CardInGame(byName('Lava Arboll'), NON_ACTIVE_PLAYER);
+		const eyeOfTheStorm = new CardInGame(byName('Eye of the Storm'), ACTIVE_PLAYER);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [eyeOfTheStorm], [lasada]);
+	
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+	
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
+		gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).add([
+			lavaBalamantOne,
+			lavaBalamantTwo,
+			lavaBalamantThree,
+			lavaBalamantFour,
+			lavaBalamantFive,
+		]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([xyxElder, xyx]);
+		gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).add([arboll, lavaArboll]);
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+	
+		gameState.setRollDebugValue(6);
+	
+		const powerAction = {
+			type: ACTION_POWER,
+			source: eyeOfTheStorm,
+			power: eyeOfTheStorm.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+	
+		gameState.update(powerAction);
+	
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_ALTERNATIVE);
+
+		const modeAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			alternative: 'draw',
+			generatedBy: eyeOfTheStorm.id,
+		};
+
+		gameState.update(modeAction);
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(7, 'Active player hand has 7 cards');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(0, 'Active player discard has no cards');
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(2, 'Non-active player hand has two cards');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(0, 'Non-active player discard has no cards');
+	});
+
+
+	it('Eye of the Storm (rolling six, choosing to discard)', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+	
+		const lasada = new CardInGame(byName('Lasada'), ACTIVE_PLAYER).addEnergy(4);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(7);
+		const xyxElder = new CardInGame(byName('Xyx Elder'), ACTIVE_PLAYER);
+		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
+
+		const lavaBalamantOne = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER);
+		const lavaBalamantTwo = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER);
+		const lavaBalamantThree = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER);
+		const lavaBalamantFour = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER);
+		const lavaBalamantFive = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER);
+
+		const arboll = new CardInGame(byName('Arboll'), NON_ACTIVE_PLAYER);
+		const lavaArboll = new CardInGame(byName('Lava Arboll'), NON_ACTIVE_PLAYER);
+		const eyeOfTheStorm = new CardInGame(byName('Eye of the Storm'), ACTIVE_PLAYER);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [eyeOfTheStorm], [lasada]);
+	
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+	
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
+		gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).add([
+			lavaBalamantOne,
+			lavaBalamantTwo,
+			lavaBalamantThree,
+			lavaBalamantFour,
+			lavaBalamantFive,
+		]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([xyxElder, xyx]);
+		gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).add([arboll, lavaArboll]);
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+	
+		gameState.setRollDebugValue(6);
+	
+		const powerAction = {
+			type: ACTION_POWER,
+			source: eyeOfTheStorm,
+			power: eyeOfTheStorm.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+	
+		gameState.update(powerAction);
+	
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_ALTERNATIVE);
+
+		const modeAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			alternative: 'discard',
+			generatedBy: eyeOfTheStorm.id,
+		};
+
+		gameState.update(modeAction);
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(2, 'Active player hand has 2 cards');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(0, 'Active player discard has no cards');
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(0, 'Non-active player hand has no cards');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(2, 'Non-active player discard has 2 cards');
+	});
+})

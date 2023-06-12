@@ -82,7 +82,7 @@ import {
 	SELECTOR_CREATURES_WITHOUT_STATUS,
 	SELECTOR_ID,
 	SELECTOR_CREATURES_OF_PLAYER,
-  SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY,
+	SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY,
 
 	STATUS_BURROWED,
 
@@ -184,7 +184,7 @@ import {
 	RESTRICTION_MAGI_WITHOUT_CREATURES,
 	RESTRICTION_STATUS,
 	RESTRICTION_REGION_IS_NOT,
-  RESTRICTION_ENERGY_EQUALS,
+	RESTRICTION_ENERGY_EQUALS,
 
 	COST_X,
 	COST_X_PLUS_ONE,
@@ -228,23 +228,26 @@ import {
 	PROPERTY_PROTECTION,
 	PROTECTION_FROM_ATTACKS,
 	CALCULATION_MULTIPLY,
-  EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP,
-  PROTECTION_TYPE_ENERGY_LOSS,
-  PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
-  EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
-  SELECTOR_NTH_CARD_OF_ZONE,
-  EFFECT_TYPE_DISCARD_RESHUFFLED,
-  EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
-  EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
-  EFFECT_TYPE_DIE_ROLLED,
-  LOG_ENTRY_DIE_ROLLED,
-  PROPERTY_CREATURE_NAME,
-  RESTRICTION_CREATURE_NAME,
-  PROMPT_TYPE_NUMBER_OF_CREATURES,
-  PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED,
-  SELECTOR_SELF_AND_STATUS,
-  EFFECT_TYPE_EXECUTE_POWER_EFFECTS,
-  PROMPT_TYPE_POWER_ON_MAGI,
+	EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP,
+	PROTECTION_TYPE_ENERGY_LOSS,
+	PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
+	EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
+	SELECTOR_NTH_CARD_OF_ZONE,
+	EFFECT_TYPE_DISCARD_RESHUFFLED,
+	EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
+	EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
+	EFFECT_TYPE_DIE_ROLLED,
+	LOG_ENTRY_DIE_ROLLED,
+	PROPERTY_CREATURE_NAME,
+	RESTRICTION_CREATURE_NAME,
+	PROMPT_TYPE_NUMBER_OF_CREATURES,
+	PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED,
+	SELECTOR_SELF_AND_STATUS,
+	EFFECT_TYPE_EXECUTE_POWER_EFFECTS,
+	PROMPT_TYPE_POWER_ON_MAGI,
+	PROMPT_TYPE_ALTERNATIVE,
+	SELECTOR_OWN_CARDS_IN_HAND,
+	SELECTOR_CARDS_IN_HAND,
 } from './const';
 
 import {showAction} from './logAction';
@@ -276,14 +279,14 @@ import {
 	ContinuousEffectType,
 	EffectType,
 	PropertyGetterType,
-  ZoneType,
-  Region,
-  ProtectionType,
-  ReplacingEffectType,
+	ZoneType,
+	Region,
+	ProtectionType,
+	ReplacingEffectType,
 } from './types';
 import { DieRolledEffect, DiscardCreatureFromPlayEffect, DiscardEnergyFromCreatureEffect, EnhancedDelayedTriggerType, ExecutePowerEffect, StartingEnergyOnCreatureEffect } from './types/effect';
 import { CardType, StatusType } from './types/common';
-import { ChooseCardsPromptType, PromptTypeMayAbility } from './types/prompt';
+import { AlternativeType, ChooseCardsPromptType, PromptTypeMayAbility } from './types/prompt';
 
 const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
 	id: cardInGame.id,
@@ -294,7 +297,7 @@ const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
 
 type EnrichedStaticAbilityType = StaticAbilityType & {
 	player: number;
-  card?: CardInGame;
+	card?: CardInGame;
 }
 
 type GameStaticAbility = StaticAbilityType & {
@@ -304,71 +307,71 @@ type GameStaticAbility = StaticAbilityType & {
 type PriorityType = typeof NO_PRIORITY | typeof PRIORITY_PRS | typeof PRIORITY_ATTACK | typeof PRIORITY_CREATURES;
 
 type ProtoSelectEffect = {
-  type: typeof ACTION_SELECT,
-  selector: SelectorTypeType,
-  variable: string, 
+	type: typeof ACTION_SELECT,
+	selector: SelectorTypeType,
+	variable: string, 
 }
 
 type ProtoEnergizeEffect = {
-  type: typeof ACTION_EFFECT,
-  effectType: typeof EFFECT_TYPE_ENERGIZE,
-  target: string,
+	type: typeof ACTION_EFFECT,
+	effectType: typeof EFFECT_TYPE_ENERGIZE,
+	target: string,
 }
 
 type ProtoBeforeDrawEffect = {
-  type: typeof ACTION_EFFECT,
-  effectType: typeof EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP,
+	type: typeof ACTION_EFFECT,
+	effectType: typeof EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP,
 }
 
 type ProtoDrawEffect = {
-  type: typeof ACTION_EFFECT,
-  effectType: typeof EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP,
-  numberOfCards: 2,
+	type: typeof ACTION_EFFECT,
+	effectType: typeof EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP,
+	numberOfCards: 2,
 }
 
 type ProtoMagiFlippedEffect = {
-  type: typeof ACTION_EFFECT,
-  effectType: typeof EFFECT_TYPE_MAGI_FLIPPED,
-  target: CardInGame,
+	type: typeof ACTION_EFFECT,
+	effectType: typeof EFFECT_TYPE_MAGI_FLIPPED,
+	target: CardInGame,
 }
 
 type ProtoAddStartingEnergyEffect = {
-  type: typeof ACTION_EFFECT,
-  effectType: typeof EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI,
-  target: string,
+	type: typeof ACTION_EFFECT,
+	effectType: typeof EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI,
+	target: string,
 }
 
 type ProtoChooseCardsPrompt = {
-  type: typeof ACTION_ENTER_PROMPT,
-  promptType: typeof PROMPT_TYPE_CHOOSE_CARDS,
-  promptParams: {
-    startingCards: string[],
-    availableCards: string[],
-  },
-  variable?: string,
+	type: typeof ACTION_ENTER_PROMPT,
+	promptType: typeof PROMPT_TYPE_CHOOSE_CARDS,
+	promptParams: {
+		startingCards: string[],
+		availableCards: string[],
+	},
+	variable?: string,
 }
 
 type ProtoFindStartingCardsEffect = {
-  type: typeof ACTION_EFFECT,
-  effectType: typeof EFFECT_TYPE_FIND_STARTING_CARDS,
-  cards: string,
+	type: typeof ACTION_EFFECT,
+	effectType: typeof EFFECT_TYPE_FIND_STARTING_CARDS,
+	cards: string,
 }
 
 type ProtoDrawRestOfCardsEffect = {
-  type: typeof ACTION_EFFECT,
-  effectType: typeof EFFECT_TYPE_DRAW_REST_OF_CARDS,
-  drawnCards: string,
+	type: typeof ACTION_EFFECT,
+	effectType: typeof EFFECT_TYPE_DRAW_REST_OF_CARDS,
+	drawnCards: string,
 }
 
 type ProtoEffectType = ProtoSelectEffect |
-  ProtoEnergizeEffect |
-  ProtoBeforeDrawEffect |
-  ProtoDrawEffect |
-  ProtoMagiFlippedEffect |
-  ProtoAddStartingEnergyEffect |
-  ProtoChooseCardsPrompt |
-  ProtoFindStartingCardsEffect |
-  ProtoDrawRestOfCardsEffect
+	ProtoEnergizeEffect |
+	ProtoBeforeDrawEffect |
+	ProtoDrawEffect |
+	ProtoMagiFlippedEffect |
+	ProtoAddStartingEnergyEffect |
+	ProtoChooseCardsPrompt |
+	ProtoFindStartingCardsEffect |
+	ProtoDrawRestOfCardsEffect
 
 type StepType = {
 	name: string,
@@ -378,35 +381,36 @@ type StepType = {
 }
 
 type CardWithModification = {
-  card: Card;
-  data: InGameData;
-  modifiedCard: ModifiedCardType;
-  id: string;
-  owner: number;
+	card: Card;
+	data: InGameData;
+	modifiedCard: ModifiedCardType;
+	id: string;
+	owner: number;
 }
 
 export const DEFAULT_PROMPT_VARIABLE: Record<PromptTypeType, string> = {
-  [PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE]: 'targetCards',
-  [PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE]: 'cardsOrder',
-  [PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE]: 'targetCards',
-  [PROMPT_TYPE_NUMBER]: 'number',
-  [PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE]: 'target',
-  [PROMPT_TYPE_RELIC]: 'target',
-  [PROMPT_TYPE_OWN_SINGLE_CREATURE]: 'target',
-  [PROMPT_TYPE_SINGLE_CREATURE_FILTERED]: 'target',
-  [PROMPT_TYPE_MAGI_WITHOUT_CREATURES]: 'target',
-  [PROMPT_TYPE_SINGLE_CREATURE]: 'target',
-  [PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI]: 'target',
-  [PROMPT_TYPE_SINGLE_MAGI]: 'targetMagi',
-  [PROMPT_TYPE_CHOOSE_CARDS]: 'selectedCards',
-  [PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES]: 'energyOnCreatures',
-  [PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES]: 'energyOnCreatures',
-  [PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES]: 'damageOnCreatures',
-  [PROMPT_TYPE_PLAYER]: 'targetPlayer',
-  [PROMPT_TYPE_NUMBER_OF_CREATURES]: 'targets',
-  [PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED]: 'targets',
-  [PROMPT_TYPE_POWER_ON_MAGI]: 'chosenPower',
-  [PROMPT_TYPE_MAY_ABILITY]: '', // Special case, doesn't use variables
+	[PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE]: 'targetCards',
+	[PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE]: 'cardsOrder',
+	[PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE]: 'targetCards',
+	[PROMPT_TYPE_NUMBER]: 'number',
+	[PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE]: 'target',
+	[PROMPT_TYPE_RELIC]: 'target',
+	[PROMPT_TYPE_OWN_SINGLE_CREATURE]: 'target',
+	[PROMPT_TYPE_SINGLE_CREATURE_FILTERED]: 'target',
+	[PROMPT_TYPE_MAGI_WITHOUT_CREATURES]: 'target',
+	[PROMPT_TYPE_SINGLE_CREATURE]: 'target',
+	[PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI]: 'target',
+	[PROMPT_TYPE_SINGLE_MAGI]: 'targetMagi',
+	[PROMPT_TYPE_CHOOSE_CARDS]: 'selectedCards',
+	[PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES]: 'energyOnCreatures',
+	[PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES]: 'energyOnCreatures',
+	[PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES]: 'damageOnCreatures',
+	[PROMPT_TYPE_PLAYER]: 'targetPlayer',
+	[PROMPT_TYPE_NUMBER_OF_CREATURES]: 'targets',
+	[PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED]: 'targets',
+	[PROMPT_TYPE_POWER_ON_MAGI]: 'chosenPower',
+	[PROMPT_TYPE_ALTERNATIVE]: 'alternative',
+	[PROMPT_TYPE_MAY_ABILITY]: '', // Special case, doesn't use variables
 };
 
 const steps: StepType[] = [
@@ -452,10 +456,10 @@ const steps: StepType[] = [
 		priority: NO_PRIORITY,
 		automatic: true,
 		effects: [
-      {
-        type: ACTION_EFFECT,
-        effectType: EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP,
-      },
+			{
+				type: ACTION_EFFECT,
+				effectType: EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP,
+			},
 			{
 				type: ACTION_EFFECT,
 				effectType: EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP,
@@ -535,22 +539,23 @@ const updateContinuousEffects = (player: number) => (effect: ContinuousEffectTyp
 };
 
 type PromptParamsType = {
-  cards?: ConvertedCard[];
-  source?: CardInGame;
-  availableCards?: string[];
-  startingCards?: string[];
-  numberOfCards?: number;
-  restrictions?: RestrictionObjectType[] | null;
-  restriction?: RestrictionType;
-  amount?: number;
-  zone?: ZoneType;
-  zoneOwner?: number;
-  magi?: CardInGame[];
-  min?: number;
-  max?: number;
+	cards?: ConvertedCard[];
+	source?: CardInGame;
+	availableCards?: string[];
+	startingCards?: string[];
+	numberOfCards?: number;
+	restrictions?: RestrictionObjectType[] | null;
+	restriction?: RestrictionType;
+	amount?: number;
+	zone?: ZoneType;
+	zoneOwner?: number;
+	magi?: CardInGame[];
+	min?: number;
+	max?: number;
+	alternatives?: AlternativeType[];
 }
 
-export type MetaDataValue = CardInGame | CardInGame[] | Region | number | Record<string, number>;
+export type MetaDataValue = CardInGame | CardInGame[] | Region | number | Record<string, number> | string;
 export type MetaDataRecord = Record<string, MetaDataValue>
 type StateShape = {
 	step: number | null;
@@ -577,8 +582,8 @@ type StateShape = {
 }
 
 type DeckType = {
-  player: number,
-  deck: CardInGame[]
+	player: number,
+	deck: CardInGame[]
 }
 
 export class State {
@@ -591,7 +596,7 @@ export class State {
 	rollDebugValue: number | null;
 	actionsOne: any[];
 	actionsTwo: any[];
-  onAction: Function | null = null;
+	onAction: Function | null = null;
 	turnTimer: number | null = null;
 	timerEnabled: boolean;
 	turnTimeout: NodeJS.Timer | null;
@@ -618,7 +623,7 @@ export class State {
 
 		// this.actionStreamOne = new EventEmitter();
 		// this.actionStreamTwo = new EventEmitter();
-		// this.logStream =  new EventEmitter();
+		// this.logStream =	new EventEmitter();
 
 		// this.commandStream = new Writable({
 		// 	objectMode: true,
@@ -637,16 +642,16 @@ export class State {
 		// this.commandStream.destroy();
 	}
 
-  setOnAction(callback: (e: AnyEffectType) => void) {
-    this.onAction = callback
-  }
-  
+	setOnAction(callback: (e: AnyEffectType) => void) {
+		this.onAction = callback
+	}
+	
 	addActionToStream(action: AnyEffectType): void {
 		const actionWithValues = this.addValuesToAction(action);
 
 		// Do not send outside CALCULATE, SELECT and so on
 		if (![ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE].includes(action.type) && this.onAction) {
-      this.onAction(actionWithValues);
+			this.onAction(actionWithValues);
 			// this.actionStreamOne.emit('action', actionWithValues);
 			// this.actionStreamTwo.emit('action', actionWithValues);
 		}
@@ -685,21 +690,21 @@ export class State {
 						return {
 							...action,
 							staticAbilities: action.staticAbilities?.map(ability => {
-                let selectorParameter = ability.selectorParameter;
-                if (ability.selector === SELECTOR_ID) {
-                  selectorParameter = ability.selectorParameter ? this.getMetaValue(ability.selectorParameter, action.generatedBy)?.id : null;
-                } else {
-                  selectorParameter = this.getMetaValue(ability.selectorParameter, action.generatedBy);
-                }
-                return {
-                  ...ability,
-                  modifier: {
-                    operandOne: this.getMetaValue(ability.modifier.operandOne, action.generatedBy),
-                    operator: ability.modifier.operator,
-                  },
-                  selectorParameter,
-							  };
-              }),
+								let selectorParameter = ability.selectorParameter;
+								if (ability.selector === SELECTOR_ID) {
+									selectorParameter = ability.selectorParameter ? this.getMetaValue(ability.selectorParameter, action.generatedBy)?.id : null;
+								} else {
+									selectorParameter = this.getMetaValue(ability.selectorParameter, action.generatedBy);
+								}
+								return {
+									...ability,
+									modifier: {
+										operandOne: this.getMetaValue(ability.modifier.operandOne, action.generatedBy),
+										operator: ability.modifier.operator,
+									},
+									selectorParameter,
+								};
+							}),
 						}
 					}
 				}
@@ -729,14 +734,14 @@ export class State {
 		return this.winner !== false;
 	}
 
-  clone(): State {
-    const newObject = new State(clone(this.state))
-    newObject.winner = this.winner
-    newObject.rollDebugValue = this.rollDebugValue
-    newObject.players = this.players
-    newObject.decks = this.decks
-    return newObject
-  }
+	clone(): State {
+		const newObject = new State(clone(this.state))
+		newObject.winner = this.winner
+		newObject.rollDebugValue = this.rollDebugValue
+		newObject.players = this.players
+		newObject.decks = this.decks
+		return newObject
+	}
 
 	setPlayers(player1: number, player2: number) {
 		this.players = [player1, player2];
@@ -747,12 +752,12 @@ export class State {
 	setDeck(player: number, cardNames: string[]) {
 		if (this.players.includes(player)) {
 			const deck = cardNames.map(card => {
-        const cardObject = byName(card)
-        if (!cardObject) {
-          throw new Error(`Unknown card in deck: ${card}`)
-        }
-        return new CardInGame(cardObject, player)
-      });
+				const cardObject = byName(card)
+				if (!cardObject) {
+					throw new Error(`Unknown card in deck: ${card}`)
+				}
+				return new CardInGame(cardObject, player)
+			});
 			this.decks.push({
 				player,
 				deck,
@@ -782,12 +787,12 @@ export class State {
 	}
 
 	stopTurnTimer() {
-    if (this.turnTimeout) {
-		  clearTimeout(this.turnTimeout)
-    }
-    if (this.turnNotifyTimeout) {
-	  	clearTimeout(this.turnNotifyTimeout)
-    }
+		if (this.turnTimeout) {
+			clearTimeout(this.turnTimeout)
+		}
+		if (this.turnNotifyTimeout) {
+			clearTimeout(this.turnNotifyTimeout)
+		}
 	}
 
 	endTurn() {
@@ -843,13 +848,13 @@ export class State {
 						case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
 							const target = this.getMetaValue(action.target, action.generatedBy);
 							if (Array.isArray(target)) {
-                if (target.length) {
-                  newLogEntry = {
-                    type: LOG_ENTRY_CREATURE_ENERGY_LOSS,
-                    card: target[0].card.name,
-                    amount: this.getMetaValue(action.amount, action.generatedBy),
-                  };
-                }
+								if (target.length) {
+									newLogEntry = {
+										type: LOG_ENTRY_CREATURE_ENERGY_LOSS,
+										card: target[0].card.name,
+										amount: this.getMetaValue(action.amount, action.generatedBy),
+									};
+								}
 							} else {
 								newLogEntry = {
 									type: LOG_ENTRY_CREATURE_ENERGY_LOSS,
@@ -862,13 +867,13 @@ export class State {
 						case EFFECT_TYPE_ADD_ENERGY_TO_CREATURE: {
 							const target = this.getMetaValue(action.target, action.generatedBy);
 							if (Array.isArray(target)) {
-                if (target.length) {
-                  newLogEntry = {
-                    type: LOG_ENTRY_CREATURE_ENERGY_GAIN,
-                    card: target[0].card.name,
-                    amount: this.getMetaValue(action.amount, action.generatedBy),
-                  };
-                }
+								if (target.length) {
+									newLogEntry = {
+										type: LOG_ENTRY_CREATURE_ENERGY_GAIN,
+										card: target[0].card.name,
+										amount: this.getMetaValue(action.amount, action.generatedBy),
+									};
+								}
 							} else {
 								newLogEntry = {
 									type: LOG_ENTRY_CREATURE_ENERGY_GAIN,
@@ -881,13 +886,13 @@ export class State {
 						case EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI: {
 							const target = this.getMetaValue(action.target, action.generatedBy);
 							if (Array.isArray(target)) {
-                if (target.length) {
-                  newLogEntry = {
-                    type: LOG_ENTRY_MAGI_ENERGY_LOSS,
-                    card: target[0].card.name,
-                    amount: this.getMetaValue(action.amount, action.generatedBy),
-                  };
-                }
+								if (target.length) {
+									newLogEntry = {
+										type: LOG_ENTRY_MAGI_ENERGY_LOSS,
+										card: target[0].card.name,
+										amount: this.getMetaValue(action.amount, action.generatedBy),
+									};
+								}
 							} else {
 								newLogEntry = {
 									type: LOG_ENTRY_MAGI_ENERGY_LOSS,
@@ -897,24 +902,24 @@ export class State {
 							}
 							break;
 						}
-            case EFFECT_TYPE_DIE_ROLLED: {
-              newLogEntry = {
-                type: LOG_ENTRY_DIE_ROLLED,
-                result: action.result,
-                player: action.player,
-              }
-              break;
-            }
+						case EFFECT_TYPE_DIE_ROLLED: {
+							newLogEntry = {
+								type: LOG_ENTRY_DIE_ROLLED,
+								result: action.result,
+								player: action.player,
+							}
+							break;
+						}
 						case EFFECT_TYPE_ADD_ENERGY_TO_MAGI: {
 							const target = this.getMetaValue(action.target, action.generatedBy);
 							if (Array.isArray(target)) {
-                if (target.length) {
-                  newLogEntry = {
-                    type: LOG_ENTRY_MAGI_ENERGY_GAIN,
-                    card: target[0].card.name,
-                    amount: this.getMetaValue(action.amount, action.generatedBy),
-                  };
-                }
+								if (target.length) {
+									newLogEntry = {
+										type: LOG_ENTRY_MAGI_ENERGY_GAIN,
+										card: target[0].card.name,
+										amount: this.getMetaValue(action.amount, action.generatedBy),
+									};
+								}
 							} else {
 								newLogEntry = {
 									type: LOG_ENTRY_MAGI_ENERGY_GAIN,
@@ -932,33 +937,33 @@ export class State {
 							break;
 						}
 						case EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY: {
-              const target = this.getMetaValue(action.target, action.generatedBy);
+							const target = this.getMetaValue(action.target, action.generatedBy);
 							if (!Array.isArray(target)) {
-                newLogEntry = {
-                  type: LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY,
-                  card: target.card.name,
-                  player: action.player,
-                };
-              }
+								newLogEntry = {
+									type: LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY,
+									card: target.card.name,
+									player: action.player,
+								};
+							}
 							break;
 						}
 						case EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY: {
-              const target = this.getMetaValue(action.target, action.generatedBy);
-              if (Array.isArray(target)) {
-                if (target.length) {
-                  newLogEntry = {
-                    type: LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,
-                    card: target[0].card.name,
-                    player: action.player,
-                  };
-                }
-              } else {
-                newLogEntry = {
-                  type: LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,
-                  card: target.card.name,
-                  player: action.player,
-                };                
-              }
+							const target = this.getMetaValue(action.target, action.generatedBy);
+							if (Array.isArray(target)) {
+								if (target.length) {
+									newLogEntry = {
+										type: LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,
+										card: target[0].card.name,
+										player: action.player,
+									};
+								}
+							} else {
+								newLogEntry = {
+									type: LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,
+									card: target.card.name,
+									player: action.player,
+								};								
+							}
 							break;
 						}
 						case EFFECT_TYPE_MAGI_IS_DEFEATED: {
@@ -974,7 +979,7 @@ export class State {
 								type: LOG_ENTRY_ATTACK,
 								source: this.getMetaValue(action.source, action.generatedBy).card.name,
 								target: this.getMetaValue(action.target, action.generatedBy).card.name,
-                packHuntAttack: Boolean(action.packHuntAttack),
+								packHuntAttack: Boolean(action.packHuntAttack),
 							};
 						}
 					}
@@ -1114,7 +1119,7 @@ export class State {
 	}
 
 	getOpponent(player: number): number {
-    const opponent = this.players.find(pl => pl != player)
+		const opponent = this.players.find(pl => pl != player)
 		return opponent || 0
 	}
 
@@ -1149,7 +1154,7 @@ export class State {
 	private getNextAction() {
 		return this.state.actions.shift();
 	}
-    
+		
 	hasActions() {
 		return this.state.actions.length > 0;
 	}
@@ -1182,8 +1187,8 @@ export class State {
 	getMetaValue<T>(value: string | T, spellId: string | undefined): T | any {
 		if (
 			typeof value == 'string' &&
-        value[0] == '$' &&
-        spellId
+				value[0] == '$' &&
+				spellId
 		) {
 			const variableName = value.slice(1);
 			const spellMetaData = this.getSpellMetadata(spellId);
@@ -1194,16 +1199,16 @@ export class State {
 	}
 
 	/**
-     * Same as getMetaValue, but instead of $-variables it uses %-variables
-     * $-variables are kept intact, we probably need them
-     * %-variables include usual "self": link to trigger source
-     */
+		 * Same as getMetaValue, but instead of $-variables it uses %-variables
+		 * $-variables are kept intact, we probably need them
+		 * %-variables include usual "self": link to trigger source
+		 */
 	prepareMetaValue<T>(value: string | T, action: AnyEffectType, self: CardInGame, spellId: string): T | any {
 		if (value === '%self') return self;
 
 		if (
 			typeof value == 'string' &&
-            value[0] == '%'
+						value[0] == '%'
 		) {
 			const variableName = value.slice(1);
 
@@ -1218,36 +1223,36 @@ export class State {
 		}
 	}
 
-  selectNthCardOfZone(player: number, zoneType: ZoneType, cardNumber: number, restrictions?: RestrictionObjectType[]): CardInGame[] {
-    const zoneCards = this.getZone(zoneType, player).cards;
-    const filteredCards = (restrictions && restrictions.length) ? zoneCards.filter(this.makeCardFilter(restrictions)) : zoneCards;
-    const index = cardNumber - 1; // 1-based indexing, for better card data readability
+	selectNthCardOfZone(player: number, zoneType: ZoneType, cardNumber: number, restrictions?: RestrictionObjectType[]): CardInGame[] {
+		const zoneCards = this.getZone(zoneType, player).cards;
+		const filteredCards = (restrictions && restrictions.length) ? zoneCards.filter(this.makeCardFilter(restrictions)) : zoneCards;
+		const index = cardNumber - 1; // 1-based indexing, for better card data readability
 
-    if (filteredCards.length < index + 1) {
-      return []
-    } else {
-      return [filteredCards[index]];
-    }
-  }
+		if (filteredCards.length < index + 1) {
+			return []
+		} else {
+			return [filteredCards[index]];
+		}
+	}
 
-  useSelector(selector: typeof SELECTOR_STATUS, player: null, argument: StatusType): CardInGame[]
-  useSelector(selector: typeof SELECTOR_CREATURES_WITHOUT_STATUS, player: null, argument: StatusType): CardInGame[]
-  useSelector(selector: typeof SELECTOR_CREATURES, player: null): CardInGame[]
-  useSelector(selector: typeof SELECTOR_OWN_CREATURES_OF_TYPE, player: number, argument: string): CardInGame[]
-  useSelector(selector: typeof SELECTOR_CREATURES_OF_TYPE, player: null, argument: string): CardInGame[]
-  useSelector(selector: typeof SELECTOR_CREATURES_NOT_OF_TYPE, player: null, argument: string): CardInGame[]
-  useSelector(selector: typeof SELECTOR_CREATURES_NOT_OF_REGION, player: number, argument: Region): CardInGame[]
-  useSelector(selector: typeof SELECTOR_CREATURES_OF_REGION, player: number, argument: Region): CardInGame[]
-  useSelector(selector: typeof SELECTOR_OPPONENT_ID, player: number | null, argument: number): number
-  useSelector(selector: typeof SELECTOR_TOP_MAGI_OF_PILE, player: number): CardInGame[]
-  useSelector(selector: typeof SELECTOR_OWN_MAGI, player: number): CardInGame[]
-  useSelector(selector: typeof SELECTOR_ENEMY_MAGI, player: number): CardInGame[]
-  useSelector(selector: typeof SELECTOR_OWN_CREATURES, player: number): CardInGame[]
-  useSelector(selector: typeof SELECTOR_CREATURES_OF_PLAYER, player: number): CardInGame[]
-  useSelector(selector: typeof SELECTOR_OWN_CARDS_IN_PLAY, player: number): CardInGame[]
-  useSelector(selector: typeof SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, player: number): CardInGame[]
-  useSelector(selector: typeof SELECTOR_CARDS_WITH_ENERGIZE_RATE, player: null): CardInGame[]
-  useSelector(selector: typeof SELECTOR_RELICS, player: null): CardInGame[]
+	useSelector(selector: typeof SELECTOR_STATUS, player: null, argument: StatusType): CardInGame[]
+	useSelector(selector: typeof SELECTOR_CREATURES_WITHOUT_STATUS, player: null, argument: StatusType): CardInGame[]
+	useSelector(selector: typeof SELECTOR_CREATURES, player: null): CardInGame[]
+	useSelector(selector: typeof SELECTOR_OWN_CREATURES_OF_TYPE, player: number, argument: string): CardInGame[]
+	useSelector(selector: typeof SELECTOR_CREATURES_OF_TYPE, player: null, argument: string): CardInGame[]
+	useSelector(selector: typeof SELECTOR_CREATURES_NOT_OF_TYPE, player: null, argument: string): CardInGame[]
+	useSelector(selector: typeof SELECTOR_CREATURES_NOT_OF_REGION, player: number, argument: Region): CardInGame[]
+	useSelector(selector: typeof SELECTOR_CREATURES_OF_REGION, player: number, argument: Region): CardInGame[]
+	useSelector(selector: typeof SELECTOR_OPPONENT_ID, player: number | null, argument: number): number
+	useSelector(selector: typeof SELECTOR_TOP_MAGI_OF_PILE, player: number): CardInGame[]
+	useSelector(selector: typeof SELECTOR_OWN_MAGI, player: number): CardInGame[]
+	useSelector(selector: typeof SELECTOR_ENEMY_MAGI, player: number): CardInGame[]
+	useSelector(selector: typeof SELECTOR_OWN_CREATURES, player: number): CardInGame[]
+	useSelector(selector: typeof SELECTOR_CREATURES_OF_PLAYER, player: number): CardInGame[]
+	useSelector(selector: typeof SELECTOR_OWN_CARDS_IN_PLAY, player: number): CardInGame[]
+	useSelector(selector: typeof SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, player: number): CardInGame[]
+	useSelector(selector: typeof SELECTOR_CARDS_WITH_ENERGIZE_RATE, player: null): CardInGame[]
+	useSelector(selector: typeof SELECTOR_RELICS, player: null): CardInGame[]
 	useSelector(selector: SelectorTypeType, player: number | null, argument?: any): CardInGame[] | number {
 		switch (selector) {
 			case SELECTOR_OWN_CARDS_IN_PLAY: {
@@ -1319,26 +1324,26 @@ export class State {
 				return this.getZone(ZONE_TYPE_IN_PLAY).cards
 					.filter(card => card.card.type == TYPE_CREATURE)
 					.filter(card => !this.modifyByStaticAbilities(card, PROPERTY_STATUS, argument));
-      default:
-        return []
-    }
+			default:
+				return []
+		}
 	}
 
-  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_ABLE_TO_ATTACK): boolean
-  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CAN_ATTACK_MAGI_DIRECTLY): boolean
-  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CAN_BE_ATTACKED): boolean
-  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_ATTACKS_PER_TURN): number
-  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_ENERGIZE): number
-  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_ENERGY_COUNT): number
-  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_POWER_COST, subProperty: string): number
-  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CONTROLLER): number
-  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_PROTECTION): ProtectionType | undefined
-  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_MAGI_NAME): string
-  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_TYPE): CardType
-  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CREATURE_TYPES): string[]
-  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CREATURE_NAME): string
-  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_COST): CostType
-  getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_STATUS, subProperty: typeof STATUS_BURROWED): boolean
+	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_ABLE_TO_ATTACK): boolean
+	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CAN_ATTACK_MAGI_DIRECTLY): boolean
+	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CAN_BE_ATTACKED): boolean
+	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_ATTACKS_PER_TURN): number
+	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_ENERGIZE): number
+	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_ENERGY_COUNT): number
+	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_POWER_COST, subProperty: string): number
+	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CONTROLLER): number
+	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_PROTECTION): ProtectionType | undefined
+	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_MAGI_NAME): string
+	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_TYPE): CardType
+	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CREATURE_TYPES): string[]
+	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CREATURE_NAME): string
+	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_COST): CostType
+	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_STATUS, subProperty: typeof STATUS_BURROWED): boolean
 	getByProperty(target: CardInGame | CardWithModification, property: PropertyType, subProperty: null | typeof STATUS_BURROWED | string = null): any {
 		switch(property) {
 			case PROPERTY_ID:
@@ -1347,8 +1352,8 @@ export class State {
 				return target.card.type;
 			case PROPERTY_CREATURE_TYPES:
 				return target.card.name.split(' ');
-      case PROPERTY_CREATURE_NAME:
-        return target.card.name;
+			case PROPERTY_CREATURE_NAME:
+				return target.card.name;
 			case PROPERTY_MAGI_NAME:
 				return target.card.name;
 			case PROPERTY_CONTROLLER:
@@ -1378,7 +1383,7 @@ export class State {
 					target.modifiedCard.data.startingEnergy :
 					target.card.data.startingEnergy;
 			case PROPERTY_POWER_COST:
-        const powers = target.modifiedCard ? target.modifiedCard.data?.powers : target.card.data.powers;
+				const powers = target.modifiedCard ? target.modifiedCard.data?.powers : target.card.data.powers;
 				return (powers && powers.length) ? powers.find(({name}) => name === subProperty)?.cost : 0;
 			case PROPERTY_STATUS_WAS_ATTACKED:
 				return target.data.wasAttacked || false;
@@ -1426,7 +1431,7 @@ export class State {
 				effect.effectType === EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE &&
 				protection.type === PROTECTION_TYPE_ENERGY_LOSS
 			) {
-        const source = effect.source;
+				const source = effect.source;
 
 				if (protection.restrictions) {
 					const cardFilter = this.makeCardFilter(protection.restrictions);
@@ -1435,15 +1440,15 @@ export class State {
 				} else {
 					return false;
 				}
-      }
+			}
 
 
 			if (
 				(effect.effectType === EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY && protection.type === PROTECTION_TYPE_DISCARDING_FROM_PLAY) ||
 				protection.type === PROTECTION_TYPE_GENERAL
 			) {
-        const source = effect.source;
-        if (!source) return false;
+				const source = effect.source;
+				if (!source) return false;
 
 				if (protection.restrictions) {
 					const cardFilter = this.makeCardFilter(protection.restrictions);
@@ -1458,8 +1463,8 @@ export class State {
 				protection.type === PROTECTION_TYPE_GENERAL
 			) {
 				if (protection.restrictions) {
-          const source = effect.source;
-          if (!source) return false;
+					const source = effect.source;
+					if (!source) return false;
 
 					const cardFilter = this.makeCardFilter(protection.restrictions);
 
@@ -1477,12 +1482,12 @@ export class State {
 			case SELECTOR_ID: {
 				return card.id === staticAbility.selectorParameter;
 			}
-      case SELECTOR_SELF_AND_STATUS: {
-        return 'card' in staticAbility &&
-          staticAbility.card &&
-          card.id === staticAbility.card.id &&
-          this.getByProperty(card, PROPERTY_STATUS, staticAbility.selectorParameter as StatusType);
-      }
+			case SELECTOR_SELF_AND_STATUS: {
+				return 'card' in staticAbility &&
+					staticAbility.card &&
+					card.id === staticAbility.card.id &&
+					this.getByProperty(card, PROPERTY_STATUS, staticAbility.selectorParameter as StatusType);
+			}
 			case SELECTOR_CREATURES: {
 				return card.card.type === TYPE_CREATURE &&
 				this.getZone(ZONE_TYPE_IN_PLAY).cards.some(({id}) => id === card.id);
@@ -1513,7 +1518,7 @@ export class State {
 			}
 			case SELECTOR_OWN_CREATURES_WITH_STATUS: {
 				return this.getByProperty(card, PROPERTY_STATUS, staticAbility.selectorParameter as StatusType) &&
-                    card.data.controller === staticAbility.player;
+										card.data.controller === staticAbility.player;
 			}
 			case SELECTOR_OWN_SPELLS_IN_HAND: {
 				return this.getZone(ZONE_TYPE_HAND, staticAbility.player).cards.some(({id}) => id === card.id);
@@ -1617,22 +1622,22 @@ export class State {
 		return this.getByProperty(modifiedCardData, property, subProperty);
 	}
 
-  layeredDataReducer(currentCard: CardWithModification, staticAbility: EnrichedStaticAbilityType | GameStaticAbility): CardWithModification {
+	layeredDataReducer(currentCard: CardWithModification, staticAbility: EnrichedStaticAbilityType | GameStaticAbility): CardWithModification {
 		if (this.isCardAffectedByStaticAbility(currentCard, staticAbility)) {
 			switch (staticAbility.property) {
 				case PROPERTY_COST: {
 					const initialValue = this.getByProperty(currentCard, PROPERTY_COST);
 					const {operator, operandOne} = staticAbility.modifier;
 
-          if (typeof initialValue !== 'number') {
-            return {
-              ...currentCard,
-              modifiedCard: {
-                ...currentCard.modifiedCard,
-                cost: initialValue,
-              },  
-            }
-          }
+					if (typeof initialValue !== 'number') {
+						return {
+							...currentCard,
+							modifiedCard: {
+								...currentCard.modifiedCard,
+								cost: initialValue,
+							},	
+						}
+					}
 					const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
 						this.performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
 						this.performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
@@ -1708,20 +1713,20 @@ export class State {
 
 					const resultValue = (operator === CALCULATION_SET) ? operandOne : initialValue;
 
-          if (typeof resultValue == 'boolean') {
-            return {
-              ...currentCard,
-              modifiedCard: {
-                ...currentCard.modifiedCard,
-                data: {
-                  ...currentCard.modifiedCard.data,
-                  ableToAttack: resultValue,
-                },
-              },
-            };
-          } else {
-            return {...currentCard}
-          }
+					if (typeof resultValue == 'boolean') {
+						return {
+							...currentCard,
+							modifiedCard: {
+								...currentCard.modifiedCard,
+								data: {
+									...currentCard.modifiedCard.data,
+									ableToAttack: resultValue,
+								},
+							},
+						};
+					} else {
+						return {...currentCard}
+					}
 				}
 				case PROPERTY_CAN_BE_ATTACKED: {
 					const initialValue = this.getByProperty(currentCard, PROPERTY_CAN_BE_ATTACKED);
@@ -1729,39 +1734,39 @@ export class State {
 
 					const resultValue = (operator === CALCULATION_SET) ? operandOne : initialValue;
 
-          if (typeof resultValue == 'boolean') {
-            return {
-              ...currentCard,
-              modifiedCard: {
-                ...currentCard.modifiedCard,
-                data: {
-                  ...currentCard.modifiedCard.data,
-                  canBeAttacked: resultValue,
-                },
-              },
-            };  
-          } else {
-            return {
-              ...currentCard,
-            };
-          }
+					if (typeof resultValue == 'boolean') {
+						return {
+							...currentCard,
+							modifiedCard: {
+								...currentCard.modifiedCard,
+								data: {
+									...currentCard.modifiedCard.data,
+									canBeAttacked: resultValue,
+								},
+							},
+						};	
+					} else {
+						return {
+							...currentCard,
+						};
+					}
 				}
 				case PROPERTY_CONTROLLER: {
 					const initialValue = this.getByProperty(currentCard, PROPERTY_CONTROLLER);
 					const {operator, operandOne} = staticAbility.modifier;
 					const resultValue = (operator === CALCULATION_SET) ? operandOne : initialValue;
 
-          if (typeof resultValue == 'number') {
-            return {
-              ...currentCard,
-              data: {
-                ...currentCard.data,
-                controller: resultValue,
-              },
-            };
-          } else {
-            return {...currentCard}
-          }
+					if (typeof resultValue == 'number') {
+						return {
+							...currentCard,
+							data: {
+								...currentCard.data,
+								controller: resultValue,
+							},
+						};
+					} else {
+						return {...currentCard}
+					}
 				}
 				case PROPERTY_STATUS: {
 					const initialValue = this.getByProperty(currentCard, PROPERTY_STATUS, staticAbility.subProperty as StatusType);
@@ -1769,24 +1774,24 @@ export class State {
 
 					const resultValue = (operator === CALCULATION_SET) ? operandOne : initialValue;
 
-          if (typeof resultValue == 'boolean') {
-            switch (staticAbility.subProperty) {
-              case STATUS_BURROWED: {
-                return {
-                  ...currentCard,
-                  data: {
-                    ...currentCard.data,
-                    burrowed: resultValue,
-                  },
-                };
-              }
-              default: {
-                return currentCard;
-              }
-            }
-          } else {
-            return {...currentCard}
-          }
+					if (typeof resultValue == 'boolean') {
+						switch (staticAbility.subProperty) {
+							case STATUS_BURROWED: {
+								return {
+									...currentCard,
+									data: {
+										...currentCard.data,
+										burrowed: resultValue,
+									},
+								};
+							}
+							default: {
+								return currentCard;
+							}
+						}
+					} else {
+						return {...currentCard}
+					}
 				}
 				case PROPERTY_PROTECTION: {
 					const initialValue = this.getByProperty(currentCard, PROPERTY_PROTECTION);
@@ -1794,22 +1799,22 @@ export class State {
 
 					const resultValue = (operator === CALCULATION_SET) ? operandOne as ProtectionType[] : initialValue;
 
-          if (typeof resultValue == 'object' && 'from' in resultValue) {
-            return {
-              ...currentCard,
-              modifiedCard: {
-                ...currentCard.modifiedCard,
-                  data: {
-                  ...currentCard.modifiedCard.data,
-                  protection: resultValue,
-                },
-              }
-            };
-          } else {
-            return {
-              ...currentCard,
-            }
-          }
+					if (typeof resultValue == 'object' && 'from' in resultValue) {
+						return {
+							...currentCard,
+							modifiedCard: {
+								...currentCard.modifiedCard,
+									data: {
+									...currentCard.modifiedCard.data,
+									protection: resultValue,
+								},
+							}
+						};
+					} else {
+						return {
+							...currentCard,
+						}
+					}
 				}
 				case PROPERTY_POWER_COST: {
 					if (currentCard.modifiedCard.data.powers) {
@@ -1852,9 +1857,9 @@ export class State {
 
 	makeChecker(restriction: RestrictionType, restrictionValue: any): (card: CardInGame) => boolean {
 		switch (restriction) {
-      case RESTRICTION_CREATURE_NAME:
-        return (card: CardInGame) => card.card.name === restrictionValue;
-      case RESTRICTION_CREATURE_TYPE:
+			case RESTRICTION_CREATURE_NAME:
+				return (card: CardInGame) => card.card.name === restrictionValue;
+			case RESTRICTION_CREATURE_TYPE:
 				if (restrictionValue instanceof Array) {
 					return (card: CardInGame) => card.card.name.split(' ').some(type => restrictionValue.includes(type));
 				}
@@ -1892,7 +1897,7 @@ export class State {
 				return (card: CardInGame) => card.data.controller !== restrictionValue;
 			case RESTRICTION_STATUS:
 				return (card: CardInGame) => this.modifyByStaticAbilities(card, PROPERTY_STATUS, restrictionValue);
-      case RESTRICTION_ENERGY_EQUALS:
+			case RESTRICTION_ENERGY_EQUALS:
 				return (card: CardInGame) => card.card.type === TYPE_CREATURE && card.data.energy === restrictionValue;
 			default:
 				return () => true;
@@ -1958,7 +1963,7 @@ export class State {
 		let replaceWith: (ReplacingEffectType | EffectType | PromptType)[] | null = null;
 		let foundReplacer: ReplacementEffectEnhanced | null = null;
 
-    for (let replacer of zoneReplacements) {
+		for (let replacer of zoneReplacements) {
 			const replacerId = replacer.self.id; // Not really, but will work for now
 
 			if ('replacedBy' in action && action.replacedBy?.includes(replacerId)) {
@@ -1972,41 +1977,41 @@ export class State {
 				appliedReplacerId = replacerId;
 				replaceWith = (replacer.replaceWith instanceof Array) ? replacer.replaceWith : [replacer.replaceWith];
 			}
-    }
+		}
 
 		const previouslyReplacedBy = ('replacedBy' in action && action.replacedBy) ? action.replacedBy : [];
 
 		if (replacementFound && replaceWith) {
 
 			const resultEffects = appliedReplacerSelf ? replaceWith.map(((appliedReplacerSelf: CardInGame) => (replacementEffect: ReplacingEffectType | EffectType | PromptType) => {
-        if (!('type' in replacementEffect)) {
-          // @ts-ignore
-          const resultEffect: AnyEffectType = {
-            type: ACTION_EFFECT,
-            ...replacementEffect,
-            replacedBy: appliedReplacerId ? [
-              ...previouslyReplacedBy,
-              appliedReplacerId,
-            ] : previouslyReplacedBy,
-            generatedBy: action.generatedBy || nanoid(),
-            player: appliedReplacerSelf.data.controller,
-          }
+				if (!('type' in replacementEffect)) {
+					// @ts-ignore
+					const resultEffect: AnyEffectType = {
+						type: ACTION_EFFECT,
+						...replacementEffect,
+						replacedBy: appliedReplacerId ? [
+							...previouslyReplacedBy,
+							appliedReplacerId,
+						] : previouslyReplacedBy,
+						generatedBy: action.generatedBy || nanoid(),
+						player: appliedReplacerSelf.data.controller,
+					}
 
-          Object.keys(replacementEffect)
+					Object.keys(replacementEffect)
 					.filter(key => !['type', 'effectType'].includes(key))
 					.forEach(key => {
 						const value = this.prepareMetaValue(replacementEffect[key as keyof typeof replacementEffect], action, appliedReplacerSelf, action.generatedBy || 'thegame');
 						resultEffect[key as keyof AnyEffectType] = value;
 					});
 
-          return resultEffect
-        }
+					return resultEffect
+				}
 				let resultEffect = {
 					...replacementEffect,
 					replacedBy: appliedReplacerId ? [
-            ...previouslyReplacedBy,
-            appliedReplacerId,
-          ] : previouslyReplacedBy,
+						...previouslyReplacedBy,
+						appliedReplacerId,
+					] : previouslyReplacedBy,
 					generatedBy: action.generatedBy || nanoid(),
 					player: appliedReplacerSelf.data.controller,
 				};
@@ -2028,10 +2033,10 @@ export class State {
 			}
 
 			if (foundReplacer && foundReplacer.mayEffect) {
-        const replacedBy = ('replacedBy' in action && action.replacedBy) ? [...action.replacedBy] : []
-        if (appliedReplacerId) {
-          replacedBy.push(appliedReplacerId);
-        }
+				const replacedBy = ('replacedBy' in action && action.replacedBy) ? [...action.replacedBy] : []
+				if (appliedReplacerId) {
+					replacedBy.push(appliedReplacerId);
+				}
 				this.state.mayEffectActions = resultEffects;
 				this.state.fallbackActions = [{
 					...action,
@@ -2109,15 +2114,15 @@ export class State {
 		}
 
 		const conditions = find.conditions.map(condition => {
-      let result = false;
-      try {
-			  result = this.checkCondition(action, self, condition);
-      } catch (e) {
-        console.error('Failure checking condition');
-        console.dir(condition);
-      }
-      return result;
-    });
+			let result = false;
+			try {
+				result = this.checkCondition(action, self, condition);
+			} catch (e) {
+				console.error('Failure checking condition');
+				console.dir(condition);
+			}
+			return result;
+		});
 
 		return conditions.every(result => result === true);
 	}
@@ -2182,7 +2187,7 @@ export class State {
 							const value = this.prepareMetaValue(effect[key as keyof typeof effect], action, replacer.self, action.generatedBy || nanoid());
 							resultEffect[key as keyof typeof effect] = value;
 						});
-                    
+										
 					return resultEffect;
 				});
 
@@ -2306,7 +2311,7 @@ export class State {
 			const valueGetter: PropertyGetterType = testedActions[0];
 			testedActions.shift()
 
-			const multiTarget = valueGetter.source;  
+			const multiTarget = valueGetter.source;	
 			const target = (multiTarget instanceof Array) ? multiTarget[0] : multiTarget;
 			const property = this.getMetaValue(valueGetter.property, valueGetter.generatedBy);
 
@@ -2403,7 +2408,7 @@ export class State {
 					const cardsInZone = this.getZone(promptAction.zone as ZoneType, zoneOwner).cards;
 					const numberOfCards = this.getMetaValue(promptAction.numberOfCards, source.id);
 					// if (cardsInZone.length < numberOfCards) {
-					//   return false;
+					//	 return false;
 					// }
 					if (promptAction.restrictions) {
 						return this.checkAnyCardForRestrictions(cardsInZone, promptAction.restrictions);
@@ -2488,10 +2493,10 @@ export class State {
 				this.transformIntoActions(...replacedActions.slice(1));
 			}
 
-      if (this.state.prompt && !(action.type === ACTION_RESOLVE_PROMPT || action.type === ACTION_CONCEDE || action.type === ACTION_EXIT_PROMPTS)) {
-        showAction(action);
-        throw new Error('Non-prompt action in the prompt state')
-      }
+			if (this.state.prompt && !(action.type === ACTION_RESOLVE_PROMPT || action.type === ACTION_CONCEDE || action.type === ACTION_EXIT_PROMPTS)) {
+				showAction(action);
+				throw new Error('Non-prompt action in the prompt state')
+			}
 
 			if (this.debug) {
 				showAction(action);
@@ -2531,40 +2536,40 @@ export class State {
 					if (!attackerCanAttack) {
 						console.error(`Somehow ${attackSource.card.name} cannot attack`);
 					} else {
-            const targetCanBeAttacked = this.modifyByStaticAbilities(attackTarget, PROPERTY_CAN_BE_ATTACKED);
-            if (!targetCanBeAttacked) {
-              console.error(`Somehow ${attackSource.card.name} cannot be attacked`);
-            } else {
-              const sourceHasAttacksLeft = attackSource.data.attacked < sourceAttacksPerTurn;
-              const additionalAttackersCanAttack = additionalAttackers.every((card: CardInGame) => card.card.data.canPackHunt && this.modifyByStaticAbilities(card, PROPERTY_ABLE_TO_ATTACK));
-              const additionalAttackersHasAttacksLeft = additionalAttackers.every((card: CardInGame) => card.data.attacked < this.modifyByStaticAbilities(card, PROPERTY_ATTACKS_PER_TURN));
-    
-              const targetIsMagi = attackTarget.card.type == TYPE_MAGI;
-              const opponentCreatures = this.useSelector(SELECTOR_OWN_CREATURES, attackTarget.owner);
-              const magiHasCreatures = opponentCreatures instanceof Array && opponentCreatures.length > 0;
-    
-              const attackApproved = !targetIsMagi || ( // Either we attack a creature
-                targetIsMagi && ( // Or we are attacking a magi, but then...
-                  !magiHasCreatures || // ...he either shouldn't have creatures
-                    this.modifyByStaticAbilities(attackSource, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY) // ...or we can just trample through
-                )
-              );
-    
-              const enoughAttacksLeft = (sourceHasAttacksLeft && ((additionalAttackersCanAttack && additionalAttackersHasAttacksLeft) || additionalAttackers.length === 0));
-    
-              if (enoughAttacksLeft && attackApproved && this.getCurrentPriority() == PRIORITY_ATTACK) {
-                this.transformIntoActions({
-                  type: ACTION_EFFECT,
-                  effectType: EFFECT_TYPE_ATTACK,
-                  source: attackSource,
-                  target: attackTarget,
-                  additionalAttackers,
-                  generatedBy: attackSource.id,
-                  player: attackSource.data.controller,
-                });
-              }  
-            }  
-          }
+						const targetCanBeAttacked = this.modifyByStaticAbilities(attackTarget, PROPERTY_CAN_BE_ATTACKED);
+						if (!targetCanBeAttacked) {
+							console.error(`Somehow ${attackSource.card.name} cannot be attacked`);
+						} else {
+							const sourceHasAttacksLeft = attackSource.data.attacked < sourceAttacksPerTurn;
+							const additionalAttackersCanAttack = additionalAttackers.every((card: CardInGame) => card.card.data.canPackHunt && this.modifyByStaticAbilities(card, PROPERTY_ABLE_TO_ATTACK));
+							const additionalAttackersHasAttacksLeft = additionalAttackers.every((card: CardInGame) => card.data.attacked < this.modifyByStaticAbilities(card, PROPERTY_ATTACKS_PER_TURN));
+		
+							const targetIsMagi = attackTarget.card.type == TYPE_MAGI;
+							const opponentCreatures = this.useSelector(SELECTOR_OWN_CREATURES, attackTarget.owner);
+							const magiHasCreatures = opponentCreatures instanceof Array && opponentCreatures.length > 0;
+		
+							const attackApproved = !targetIsMagi || ( // Either we attack a creature
+								targetIsMagi && ( // Or we are attacking a magi, but then...
+									!magiHasCreatures || // ...he either shouldn't have creatures
+										this.modifyByStaticAbilities(attackSource, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY) // ...or we can just trample through
+								)
+							);
+		
+							const enoughAttacksLeft = (sourceHasAttacksLeft && ((additionalAttackersCanAttack && additionalAttackersHasAttacksLeft) || additionalAttackers.length === 0));
+		
+							if (enoughAttacksLeft && attackApproved && this.getCurrentPriority() == PRIORITY_ATTACK) {
+								this.transformIntoActions({
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_ATTACK,
+									source: attackSource,
+									target: attackTarget,
+									additionalAttackers,
+									generatedBy: attackSource.id,
+									player: attackSource.data.controller,
+								});
+							}	
+						}	
+					}
 
 					break;
 				}
@@ -2576,25 +2581,25 @@ export class State {
 						const result = (multiTarget instanceof Array) ? multiTarget.length : 0;
 
 						const variable = action.variable || 'result';
-            if (action.generatedBy) {
-						  this.setSpellMetaDataField(variable, result, action.generatedBy);
-            }
+						if (action.generatedBy) {
+							this.setSpellMetaDataField(variable, result, action.generatedBy);
+						}
 					} else {
 						// Sometimes we can only pass here results of a selector.
 						// If so, work on first element of result.
 						const target = (multiTarget instanceof Array) ? multiTarget[0] : multiTarget;
 
-            let modifiedResult: any;
-            if (target && 'name' in target && 'effects' in target && property === PROPERTY_POWER_COST) {
-              modifiedResult = target.cost;
-            } else {
-              modifiedResult = this.modifyByStaticAbilities(target, property);
-            }
+						let modifiedResult: any;
+						if (target && 'name' in target && 'effects' in target && property === PROPERTY_POWER_COST) {
+							modifiedResult = target.cost;
+						} else {
+							modifiedResult = this.modifyByStaticAbilities(target, property);
+						}
 	
 						const variable = action.variable || 'result';
-            if (action.generatedBy) {
-  						this.setSpellMetaDataField(variable, modifiedResult, action.generatedBy);
-            }
+						if (action.generatedBy) {
+							this.setSpellMetaDataField(variable, modifiedResult, action.generatedBy);
+						}
 					}
 					break;
 				}
@@ -2604,9 +2609,9 @@ export class State {
 					const result = this.performCalculation(action.operator, operandOne, operandTwo);
 
 					const variable = action.variable || 'result';
-          if (action.generatedBy) {
-					  this.setSpellMetaDataField(variable, result, action.generatedBy);
-          }
+					if (action.generatedBy) {
+						this.setSpellMetaDataField(variable, result, action.generatedBy);
+					}
 					break;
 				}
 				case ACTION_POWER: {
@@ -2617,7 +2622,7 @@ export class State {
 						action.source;
 
 					if (payingCard && 
-            !action.source.wasActionUsed(action.power.name) &&
+						!action.source.wasActionUsed(action.power.name) &&
 						(
 							payingCard.data.energy >= powerCost || 
 							(
@@ -2687,29 +2692,29 @@ export class State {
 									generatedBy: source.id,
 								});
 							}
-              if (sourcePower) {
-                const powerEffects: ExecutePowerEffect = {
-                  type: ACTION_EFFECT,
-                  effectType: EFFECT_TYPE_EXECUTE_POWER_EFFECTS,
-                  power: sourcePower,
-                  source,
-                  player: action.player,
-                  generatedBy: source.id,
-                };
-                this.addActions(powerEffects);
-              }
+							if (sourcePower) {
+								const powerEffects: ExecutePowerEffect = {
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_EXECUTE_POWER_EFFECTS,
+									power: sourcePower,
+									source,
+									player: action.player,
+									generatedBy: source.id,
+								};
+								this.addActions(powerEffects);
+							}
 							this.setSpellMetadata(currentPowerMetaData, source.id);
 						}
 					}
 					break;
 				}
-        case ACTION_ENTER_PROMPT: {
+				case ACTION_ENTER_PROMPT: {
 					if (!('player' in action)) {
 						throw new Error('Prompt without player!');
 					}
 					const savedActions = this.state.actions;
 					let promptParams: PromptParamsType = {};
-          let skipPrompt = false;
+					let skipPrompt = false;
 					const promptPlayer = this.getMetaValue(action.player, action.generatedBy);
 
 					switch (action.promptType) {
@@ -2721,6 +2726,12 @@ export class State {
 						}
 						case PROMPT_TYPE_MAY_ABILITY: {
 							promptParams = action.promptParams;
+							break;
+						}
+						case PROMPT_TYPE_ALTERNATIVE: {
+							promptParams = {
+								alternatives: action.alternatives,
+							}
 							break;
 						}
 						case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
@@ -2741,18 +2752,18 @@ export class State {
 							const zoneContent = (zone === ZONE_TYPE_IN_PLAY) ? this.getZone(zone, null).cards : this.getZone(zone, zoneOwner).cards;
 							const cards = restrictions ? zoneContent.filter(this.makeCardFilter(restrictions)) : zoneContent;
 
-              const maxNumberOfCards = Math.min(numberOfCards, cards.length);
-              if (maxNumberOfCards > 0) {
-                promptParams = {
-                  zone,
-                  zoneOwner,
-                  restrictions,
-                  numberOfCards: maxNumberOfCards,
-                  cards: cards.map(convertCard),
-                };
-              } else {
-                skipPrompt = true;
-              }
+							const maxNumberOfCards = Math.min(numberOfCards, cards.length);
+							if (maxNumberOfCards > 0) {
+								promptParams = {
+									zone,
+									zoneOwner,
+									restrictions,
+									numberOfCards: maxNumberOfCards,
+									cards: cards.map(convertCard),
+								};
+							} else {
+								skipPrompt = true;
+							}
 							break;
 						}
 						case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
@@ -2773,35 +2784,35 @@ export class State {
 							const zoneContent = (zone === ZONE_TYPE_IN_PLAY) ? this.getZone(zone, null).cards : this.getZone(zone, zoneOwner).cards;
 							const cards = restrictions ? zoneContent.filter(this.makeCardFilter(restrictions)) : zoneContent;
 
-              const maxNumberOfCards = Math.min(numberOfCards, cards.length);
+							const maxNumberOfCards = Math.min(numberOfCards, cards.length);
 
-              if (maxNumberOfCards > 0) {
-                promptParams = {
-                  zone,
-                  zoneOwner,
-                  restrictions,
-                  numberOfCards: maxNumberOfCards,
-                  cards: cards.map(convertCard),
-                };
-              } else {
-                skipPrompt = true;
-              }
+							if (maxNumberOfCards > 0) {
+								promptParams = {
+									zone,
+									zoneOwner,
+									restrictions,
+									numberOfCards: maxNumberOfCards,
+									cards: cards.map(convertCard),
+								};
+							} else {
+								skipPrompt = true;
+							}
 							break;
 						}
-            case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {
-              const zone = this.getMetaValue(action.promptParams.zone, action.generatedBy);
+						case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {
+							const zone = this.getMetaValue(action.promptParams.zone, action.generatedBy);
 							const zoneOwner = this.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
 							const numberOfCards = this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
-              const zoneContent = this.getZone(zone, zoneOwner).cards;
-              const cards = zoneContent.slice(0, numberOfCards);
-              promptParams = {
+							const zoneContent = this.getZone(zone, zoneOwner).cards;
+							const cards = zoneContent.slice(0, numberOfCards);
+							promptParams = {
 								zone,
 								zoneOwner,
 								numberOfCards,
 								cards: cards.map(convertCard),
 							};
-              break;
-            }
+							break;
+						}
 						case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
 							if (action.restrictions) {
 								const restrictionsWithValues = action.restrictions.map(({ type, value }: RestrictionObjectType) => ({
@@ -2814,12 +2825,12 @@ export class State {
 								};
 							} else if (action.restriction) {
 								promptParams = {
-                  restrictions: [
-                    {
-                      type: action.restriction,
-                      value: this.getMetaValue(action.restrictionValue, action.generatedBy),
-                    }
-                  ],
+									restrictions: [
+										{
+											type: action.restriction,
+											value: this.getMetaValue(action.restrictionValue, action.generatedBy),
+										}
+									],
 								};
 							}
 	
@@ -2836,64 +2847,64 @@ export class State {
 							};
 							break;
 						}
-            case PROMPT_TYPE_POWER_ON_MAGI: {
-              promptParams = {
-                magi: this.getMetaValue(action.magi, action.generatedBy),
-              }
-              break;
-            }
+						case PROMPT_TYPE_POWER_ON_MAGI: {
+							promptParams = {
+								magi: this.getMetaValue(action.magi, action.generatedBy),
+							}
+							break;
+						}
 						case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
-              if (action.restriction) {
-                promptParams = {
-                  amount: this.getMetaValue(action.amount, action.generatedBy),
-                  restrictions: [
-                    {
-                      type: action.restriction,
-                      value: this.getMetaValue(action.amount, action.generatedBy),
-                    },
-                  ],
-                };
-              } else {
-                promptParams = {
-                  amount: this.getMetaValue(action.amount, action.generatedBy),
-                };
-              }
+							if (action.restriction) {
+								promptParams = {
+									amount: this.getMetaValue(action.amount, action.generatedBy),
+									restrictions: [
+										{
+											type: action.restriction,
+											value: this.getMetaValue(action.amount, action.generatedBy),
+										},
+									],
+								};
+							} else {
+								promptParams = {
+									amount: this.getMetaValue(action.amount, action.generatedBy),
+								};
+							}
 							break;
 						}
 						case PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES: {
-              if (action.restriction) {
-                promptParams = {
-                  amount: this.getMetaValue(action.amount, action.generatedBy),
-                  restrictions: [
-                    {
-                      type: action.restriction,
-                      value: this.getMetaValue(action.amount, action.generatedBy),
-                    },
-                  ],
-                };
-              } else {
-                promptParams = {
-                  amount: this.getMetaValue(action.amount, action.generatedBy),
-                }
-              }
+							if (action.restriction) {
+								promptParams = {
+									amount: this.getMetaValue(action.amount, action.generatedBy),
+									restrictions: [
+										{
+											type: action.restriction,
+											value: this.getMetaValue(action.amount, action.generatedBy),
+										},
+									],
+								};
+							} else {
+								promptParams = {
+									amount: this.getMetaValue(action.amount, action.generatedBy),
+								}
+							}
 							break;
 						}
 					}
 
-          if (!skipPrompt) {
-            this.state = {
-              ...this.state,
-              actions: [],
-              savedActions,
-              prompt: true,
-              promptMessage: ('message' in action) ? action.message : '',
-              promptPlayer,
-              promptType: action.promptType,
-              promptVariable: action.variable,
-              promptGeneratedBy: action.generatedBy,
-              promptParams,
-            };
-          }
+					if (!skipPrompt) {
+						this.state = {
+							...this.state,
+							actions: [],
+							savedActions,
+							prompt: true,
+							promptMessage: ('message' in action) ? action.message : '',
+							promptPlayer,
+							promptType: action.promptType,
+							promptVariable: action.variable,
+							promptGeneratedBy: action.generatedBy,
+							promptParams,
+						};
+					}
 					break;
 				}
 				case ACTION_EXIT_PROMPTS: {
@@ -2964,10 +2975,10 @@ export class State {
 							}
 							case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {
 								if ('cards' in action && action.cards) {
-													if (this.state.promptParams && this.state.promptParams.cards && this.state.promptParams.cards.length !== action.cards.length) {
-									console.error('Number of cards is wrong')
-														return false;
-													}
+									if (this.state.promptParams && this.state.promptParams.cards && this.state.promptParams.cards.length !== action.cards.length) {
+										console.error('Number of cards is wrong')
+										return false;
+									}
 									currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE]] = action.cards;
 								}
 								break;
@@ -3090,12 +3101,12 @@ export class State {
 								}
 								break;
 							}
-              case PROMPT_TYPE_POWER_ON_MAGI: {
+							case PROMPT_TYPE_POWER_ON_MAGI: {
 								if ('power' in action && 'source' in action) {
-                  const source: CardInGame = this.getMetaValue(action.source, action.generatedBy);
-                  const power = this.getMetaValue(action.power, action.generatedBy);
+									const source: CardInGame = this.getMetaValue(action.source, action.generatedBy);
+									const power = this.getMetaValue(action.power, action.generatedBy);
 
-                  if (source && power && source.card.data.powers && source.card.data.powers.some(p => p.name === power.name)) {
+									if (source && power && source.card.data.powers && source.card.data.powers.some(p => p.name === power.name)) {
 										currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_POWER_ON_MAGI]] = action.power;
 									} else {
 										console.error(`Unknown power: ${power.name || power} in PROMPT_TYPE_POWER_ON_MAGI prompt resolution`);
@@ -3104,6 +3115,11 @@ export class State {
 									console.error('No power or source in PROMPT_TYPE_POWER_ON_MAGI prompt resolution');
 								}
 								break;
+							}
+							case PROMPT_TYPE_ALTERNATIVE: {
+								if ('alternative' in action) {
+									currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_ALTERNATIVE]] = action.alternative;
+								}
 							}
 						}
 						const actions = this.state.savedActions || [];
@@ -3211,58 +3227,76 @@ export class State {
 							break;
 						}
 						case SELECTOR_NTH_CARD_OF_ZONE: {
-              const zoneOwner = this.getMetaValue<number>(action.zoneOwner, action.generatedBy);
-              const zoneType = this.getMetaValue<ZoneType>(action.zone, action.generatedBy);
-              const cardNumber = this.getMetaValue<number>(action.cardNumber, action.generatedBy);
+							const zoneOwner = this.getMetaValue<number>(action.zoneOwner, action.generatedBy);
+							const zoneType = this.getMetaValue<ZoneType>(action.zone, action.generatedBy);
+							const cardNumber = this.getMetaValue<number>(action.cardNumber, action.generatedBy);
 							result = this.selectNthCardOfZone(zoneOwner, zoneType, cardNumber, action.restrictions);
 							break;
 						}
-            // This selector is special
-            // If there are more than one creature with the same (least) energy, it transforms into the corresponding prompt
-            case SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY: {
-              const creatures = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card =>
-                this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == action.player &&
-                card.card.type == TYPE_CREATURE
-              );
-              if (creatures.length) {
-                const energies: Record<number, CardInGame[]> = {}
-                let minEnergy = Infinity
-                for (let creature of creatures) {
-                  const energy = creature.data.energy
-                  if (!(energy in energies)) {
-                    energies[energy] = []
-                  }
-                  energies[energy].push(creature)
-                  if (creature.data.energy < minEnergy) {
-                    minEnergy = creature.data.energy
-                  }
-                }
-                if (energies[minEnergy].length == 1) {
-                  result = energies[minEnergy]
-                } else {
-                  result = []
-                  this.transformIntoActions({
-                    type: ACTION_ENTER_PROMPT,
-                    promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-                    restrictions: [{
-                      type: RESTRICTION_OWN_CREATURE,
-                      value: '',
-                    }, {
-                      type: RESTRICTION_ENERGY_EQUALS,
-                      value: minEnergy,
-                    }],
-                    variable: action.variable || 'selected',
-                    generatedBy: action.generatedBy,
-                    player: action.player,
-                  })
-                }
-              } else {
-                result = []
-              }
-              break;
-            }
+						case SELECTOR_OWN_CARDS_IN_HAND: {
+							if ('player' in action && typeof action.player == 'number') {
+								const zoneOwner = this.getMetaValue<number>(action.player, action.generatedBy);
+								result = this.getZone(ZONE_TYPE_HAND, zoneOwner).cards;
+							} else {
+								result = []
+							}
+							break;
+						}
+						case SELECTOR_CARDS_IN_HAND: {
+							if ('zoneOwner' in action) {
+								const zoneOwner = this.getMetaValue<number>(action.zoneOwner, action.generatedBy);
+								result = this.getZone(ZONE_TYPE_HAND, zoneOwner).cards;
+							} else {
+								result = []
+							}
+							break;
+						}
+						// This selector is special
+						// If there are more than one creature with the same (least) energy, it transforms into the corresponding prompt
+						case SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY: {
+							const creatures = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card =>
+								this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == action.player &&
+								card.card.type == TYPE_CREATURE
+							);
+							if (creatures.length) {
+								const energies: Record<number, CardInGame[]> = {}
+								let minEnergy = Infinity
+								for (let creature of creatures) {
+									const energy = creature.data.energy
+									if (!(energy in energies)) {
+										energies[energy] = []
+									}
+									energies[energy].push(creature)
+									if (creature.data.energy < minEnergy) {
+										minEnergy = creature.data.energy
+									}
+								}
+								if (energies[minEnergy].length == 1) {
+									result = energies[minEnergy]
+								} else {
+									result = []
+									this.transformIntoActions({
+										type: ACTION_ENTER_PROMPT,
+										promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+										restrictions: [{
+											type: RESTRICTION_OWN_CREATURE,
+											value: '',
+										}, {
+											type: RESTRICTION_ENERGY_EQUALS,
+											value: minEnergy,
+										}],
+										variable: action.variable || 'selected',
+										generatedBy: action.generatedBy,
+										player: action.player,
+									})
+								}
+							} else {
+								result = []
+							}
+							break;
+						}
 						default: {
-              // @ts-ignore
+							// @ts-ignore
 							result = this.useSelector(action.selector, action.player);
 						}
 					}
@@ -3320,13 +3354,13 @@ export class State {
 					const player = ('payload' in action) ? action.payload.player : action.player || 0;
 					const cardItself = ('payload' in action) ? action.payload.card : castCard;
 
-          if (!cardItself) {
-            throw new Error('No card itself found')
-          }
+					if (!cardItself) {
+						throw new Error('No card itself found')
+					}
 					const playerHand = this.getZone(ZONE_TYPE_HAND, player);
 					const cardInHand = playerHand.containsId(cardItself?.id || '');
-          // baseCard is "abstract" card, CardInPlay is concrete instance
-          const baseCard = ('payload' in action) ? action.payload.card.card : castCard?.card;
+					// baseCard is "abstract" card, CardInPlay is concrete instance
+					const baseCard = ('payload' in action) ? action.payload.card.card : castCard?.card;
 					if (cardInHand && baseCard) {
 						const currentPriority = this.getCurrentPriority();
 						const cardType = baseCard.type;
@@ -3337,9 +3371,9 @@ export class State {
 							action.forcePriority
 						) {
 							const activeMagi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card;
-              if (!activeMagi) {
-                throw new Error('Trying to play a card without Magi')
-              }
+							if (!activeMagi) {
+								throw new Error('Trying to play a card without Magi')
+							}
 							const totalCost = this.calculateTotalCost(cardItself);
 
 							switch (cardType) {
@@ -3619,15 +3653,16 @@ export class State {
 							// "new_card" fallback is for "defeated" triggers
 							const self = metaData.source || metaData.new_card || action.triggerSource;
 
-              if (!self) {
-                break;
-              }
+							if (!self) {
+								break;
+							}
 
 							// checkCondition(action, self, condition)
 							const results = action.conditions.map(condition =>
 								this.checkCondition(action, self, condition),
 							);
 
+							// console.dir(results)
 							const enrichAction = <T>(effect: T): T & EnrichedAction => ({
 								source: self,
 								player: self.data.controller,
@@ -3779,11 +3814,11 @@ export class State {
 									if (discard.cards.some(({ card }) => card.name == cardName)) {
 										const card = discard.cards.find(({ card }) => card.name == cardName);
 
-                    if (!card) {
-                      return true;
-                    }
+										if (!card) {
+											return true;
+										}
 
-                    const newCard = new CardInGame(card.card, action.player || 0);
+										const newCard = new CardInGame(card.card, action.player || 0);
 										hand.add([newCard]);
 										discard.removeById(card.id);
 										foundCards.push(cardName);
@@ -3799,10 +3834,10 @@ export class State {
 										});
 									} else if (deck.cards.some(({ card }) => card.name == cardName)) {
 										const card = deck.cards.find(({ card }) => card.name == cardName);
-                    
-                    if (!card) {
-                      return true;
-                    }
+										
+										if (!card) {
+											return true;
+										}
 
 										const newCard = new CardInGame(card.card, action.player || 0);
 										hand.add([newCard]);
@@ -3951,7 +3986,7 @@ export class State {
 									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_RESHUFFLE_DISCARD,
 									player: player,
-                  generatedBy: action.generatedBy,
+									generatedBy: action.generatedBy,
 								},
 								action);
 							}
@@ -3966,18 +4001,18 @@ export class State {
 							deck.add(newCards);
 							deck.shuffle();
 							discard.empty();
-              this.transformIntoActions({
-                type: ACTION_EFFECT,
-                effectType: EFFECT_TYPE_DISCARD_RESHUFFLED,
-                cards: newCards.map(({id}) => id),
-                player: player,
-                generatedBy: action.generatedBy,
-              });
+							this.transformIntoActions({
+								type: ACTION_EFFECT,
+								effectType: EFFECT_TYPE_DISCARD_RESHUFFLED,
+								cards: newCards.map(({id}) => id),
+								player: player,
+								generatedBy: action.generatedBy,
+							});
 							break;
 						}
-            case EFFECT_TYPE_DISCARD_RESHUFFLED: {
-              break;
-            }
+						case EFFECT_TYPE_DISCARD_RESHUFFLED: {
+							break;
+						}
 						case EFFECT_TYPE_ATTACK: {
 							const source = this.getMetaValue(action.source, action.generatedBy);
 							const target = this.getMetaValue(action.target, action.generatedBy);
@@ -4063,9 +4098,9 @@ export class State {
 									},
 								]).flat();
 	
-                for (let effect of preparedEffects) {
-                  attackSequence.push(effect);
-                }
+								for (let effect of preparedEffects) {
+									attackSequence.push(effect);
+								}
 							}
 	
 							this.transformIntoActions(...attackSequence);
@@ -4088,7 +4123,7 @@ export class State {
 								0
 							;
 
-							const attackerDamageAction: AttackerDealsDamageEffect = {  // from source to target
+							const attackerDamageAction: AttackerDealsDamageEffect = {	// from source to target
 								type: ACTION_EFFECT,
 								effectType: EFFECT_TYPE_ATTACKER_DEALS_DAMAGE,
 								source: attackSource,
@@ -4151,7 +4186,7 @@ export class State {
 								type: ACTION_EFFECT,
 								effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
 								target: action.target,
-                source: action.source,
+								source: action.source,
 								amount: action.amount,
 								attack: true,
 								generatedBy: action.generatedBy,
@@ -4192,71 +4227,69 @@ export class State {
 						case EFFECT_TYPE_CREATURE_DEFEATS_CREATURE: {
 							if (action.target.data.energy === 0) {
 								action.source.markDefeatedCreature();
-                this.transformIntoActions({
-                  type: ACTION_EFFECT,
-                  effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-                  source: action.source,
-                  target: action.target,
-                  attack: true,
-                  player: action.player,
-                  generatedBy: action.generatedBy,
-                } as DiscardCreatureFromPlayEffect);
+								this.transformIntoActions({
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+									source: action.source,
+									target: action.target,
+									attack: true,
+									player: action.player,
+									generatedBy: action.generatedBy,
+								} as DiscardCreatureFromPlayEffect);
 							}
 							break;
 						}
 						case EFFECT_TYPE_ROLL_DIE: {
 							const result = action.result || 
 								(this.rollDebugValue === null ? (Math.floor(Math.random() * 6) + 1) : this.rollDebugValue);
-              this.transformIntoActions({
-                type: ACTION_EFFECT,
-                effectType: EFFECT_TYPE_DIE_ROLLED,
-                result,
-                player: action.player,
-                generatedBy: action.generatedBy,
-              } as DieRolledEffect);
+							this.transformIntoActions({
+								type: ACTION_EFFECT,
+								effectType: EFFECT_TYPE_DIE_ROLLED,
+								result,
+								player: action.player,
+								generatedBy: action.generatedBy,
+							} as DieRolledEffect);
 							// this.setSpellMetaDataField('roll_result', result, action.generatedBy);
 							break;
 						}
-            case EFFECT_TYPE_DIE_ROLLED: {
-              this.setSpellMetaDataField('roll_result', action.result, action.generatedBy);
-              break;
-            }
-            case EFFECT_TYPE_EXECUTE_POWER_EFFECTS: {
-              const power = this.getMetaValue(action.power, action.generatedBy);
-              const sourceRaw = this.getMetaValue(action.source, action.generatedBy);
-              // Some selectors will give us arrays anyway
-              const source = sourceRaw instanceof Array ? sourceRaw[0] : sourceRaw;
+						case EFFECT_TYPE_DIE_ROLLED: {
+							this.setSpellMetaDataField('roll_result', action.result, action.generatedBy);
+							break;
+						}
+						case EFFECT_TYPE_EXECUTE_POWER_EFFECTS: {
+							const power = this.getMetaValue(action.power, action.generatedBy);
+							const sourceRaw = this.getMetaValue(action.source, action.generatedBy);
+							// Some selectors will give us arrays anyway
+							const source = sourceRaw instanceof Array ? sourceRaw[0] : sourceRaw;
 
-              const sourceController = this.modifyByStaticAbilities(source, PROPERTY_CONTROLLER);
-              const powerCost = this.modifyByStaticAbilities(source, PROPERTY_POWER_COST, power.name || '');
+							const sourceController = this.modifyByStaticAbilities(source, PROPERTY_CONTROLLER);
+							const powerCost = this.modifyByStaticAbilities(source, PROPERTY_POWER_COST, power.name || '');
 
-              const enrichAction = <T>(effect: T): T & EnrichedAction => ({
-                source,
-                player: sourceController,
-                ...effect,
-                power: true,
-                generatedBy:
-                source.id,
-              });
+							const enrichAction = <T>(effect: T): T & EnrichedAction => ({
+								source,
+								player: sourceController,
+								...effect,
+								power: true,
+								generatedBy:
+								source.id,
+							});
 
-              if ('effects' in power && power.effects) {
-                const effects = power.effects;
-                const preparedActions: AnyEffectType[] = effects.map(enrichAction);
-  
-                const allPromptsAreDoable = this.checkPrompts(source, preparedActions, true);
-  
-                if (allPromptsAreDoable) {
-                  if (!('setUsage' in action) || action.setUsage == true) {
-                    source.setActionUsed(power.name);
-                  } else {
-                    console.log('Skipped usage setting');
-                  }
-      
-                  this.addActions(...preparedActions);
-                }
-              }
-              break;
-            }
+							if ('effects' in power && power.effects) {
+								const effects = power.effects;
+								const preparedActions: AnyEffectType[] = effects.map(enrichAction);
+	
+								const allPromptsAreDoable = this.checkPrompts(source, preparedActions, true);
+	
+								if (allPromptsAreDoable) {
+									if (!('setUsage' in action) || action.setUsage == true) {
+										source.setActionUsed(power.name);
+									}
+			
+									this.addActions(...preparedActions);
+								}
+							}
+							break;
+						}
 						case EFFECT_TYPE_ENERGIZE: {
 							const targets = this.getMetaValue(action.target, action.generatedBy);
 
@@ -4275,51 +4308,51 @@ export class State {
 							break;
 						}
 						case EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC: {
-              const payingTarget: CardInGame = this.getMetaValue(action.from, action.generatedBy);
+							const payingTarget: CardInGame = this.getMetaValue(action.from, action.generatedBy);
 							const payingAmount = Number(this.getMetaValue(action.amount, action.generatedBy));
 
 							if (payingAmount > 0) {
-                this.transformIntoActions({
-                  type: ACTION_EFFECT,
-                  effectType: EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
-                  target: payingTarget,
-                  amount: payingAmount,
-                  player: action.player,
-                  generatedBy: action.generatedBy,
-                });
-              }
+								this.transformIntoActions({
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
+									target: payingTarget,
+									amount: payingAmount,
+									player: action.player,
+									generatedBy: action.generatedBy,
+								});
+							}
 							break;
 						}
 						case EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL: {
-              const payingTarget: CardInGame = this.getMetaValue(action.from, action.generatedBy);
+							const payingTarget: CardInGame = this.getMetaValue(action.from, action.generatedBy);
 							const payingAmount = Number(this.getMetaValue(action.amount, action.generatedBy));
 
-              if (payingAmount > 0) {
-                this.transformIntoActions({
-                  type: ACTION_EFFECT,
-                  effectType: EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
-                  target: payingTarget,
-                  amount: payingAmount,
-                  player: action.player,
-                  generatedBy: action.generatedBy,
-                });
-              }
+							if (payingAmount > 0) {
+								this.transformIntoActions({
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
+									target: payingTarget,
+									amount: payingAmount,
+									player: action.player,
+									generatedBy: action.generatedBy,
+								});
+							}
 							break;
 						}
 						case EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE: {
-              const payingTarget: CardInGame = this.getMetaValue(action.from, action.generatedBy);
+							const payingTarget: CardInGame = this.getMetaValue(action.from, action.generatedBy);
 							const payingAmount = Number(this.getMetaValue(action.amount, action.generatedBy));
 
-              if (payingAmount > 0) {
-                this.transformIntoActions({
-                  type: ACTION_EFFECT,
-                  effectType: EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
-                  target: payingTarget,
-                  amount: payingAmount,
-                  player: action.player,
-                  generatedBy: action.generatedBy,
-                });
-              }
+							if (payingAmount > 0) {
+								this.transformIntoActions({
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
+									target: payingTarget,
+									amount: payingAmount,
+									player: action.player,
+									generatedBy: action.generatedBy,
+								});
+							}
 							break;
 						}
 						case EFFECT_TYPE_PLAY_RELIC: {
@@ -4371,43 +4404,44 @@ export class State {
 								throw new Error('Invalid params for EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
 							}
 							const zoneChangingTargets = this.getMetaValue(action.target, action.generatedBy) || [];
-              if (!zoneChangingTargets) {
-                console.dir(zoneChangingTargets);
-                console.dir(this.getSpellMetadata(action.generatedBy));
-              }
-              if (zoneChangingTargets.length) {
-                // We assume all cards changing zones are in one zone initially
-                const zoneOwner = zoneChangingTargets[0].owner;
 
-                const sourceZoneType = this.getMetaValue(action.sourceZone, action.generatedBy);
-                const sourceZone = this.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
-                const destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
-                const destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
-                const newCards: CardInGame[] = [];
+							if (!zoneChangingTargets) {
+								console.dir(zoneChangingTargets);
+								console.dir(this.getSpellMetadata(action.generatedBy));
+							}
+							if (zoneChangingTargets.length) {
+								// We assume all cards changing zones are in one zone initially
+								const zoneOwner = zoneChangingTargets[0].owner;
 
-                oneOrSeveral(zoneChangingTargets, zoneChangingCard => {
-                  const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner);
-                  if (action.bottom) {
-                    destinationZone.add([newObject]);
-                  } else {
-                    destinationZone.addToTop([newObject]);
-                  }
-                  sourceZone.removeById(zoneChangingCard.id);
+								const sourceZoneType = this.getMetaValue(action.sourceZone, action.generatedBy);
+								const sourceZone = this.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
+								const destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
+								const destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
+								const newCards: CardInGame[] = [];
 
-                  newCards.push(newObject);
+								oneOrSeveral(zoneChangingTargets, zoneChangingCard => {
+									const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner);
+									if (action.bottom) {
+										destinationZone.add([newObject]);
+									} else {
+										destinationZone.addToTop([newObject]);
+									}
+									sourceZone.removeById(zoneChangingCard.id);
 
-                  this.transformIntoActions({
-                    type: ACTION_EFFECT,
-                    effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
-                    sourceCard: zoneChangingCard,
-                    sourceZone: sourceZoneType,
-                    destinationCard: newObject,
-                    destinationZone: destinationZoneType,
-                    generatedBy: action.generatedBy,
-                  });
-                });
-                this.setSpellMetaDataField('new_cards', newCards, action.generatedBy);
-              }
+									newCards.push(newObject);
+
+									this.transformIntoActions({
+										type: ACTION_EFFECT,
+										effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
+										sourceCard: zoneChangingCard,
+										sourceZone: sourceZoneType,
+										destinationCard: newObject,
+										destinationZone: destinationZoneType,
+										generatedBy: action.generatedBy,
+									});
+								});
+								this.setSpellMetaDataField('new_cards', newCards, action.generatedBy);
+							}
 							break;
 						}
 						case EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES: {
@@ -4417,31 +4451,31 @@ export class State {
 							}
 							const zoneChangingTarget = this.getMetaValue(action.target, action.generatedBy);
 							const zoneChangingCard = (zoneChangingTarget instanceof Array) ? zoneChangingTarget[0] : zoneChangingTarget;
-              if (zoneChangingCard) {
-                const sourceZoneType = this.getMetaValue(action.sourceZone, action.generatedBy);
-                const destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
-                const destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
-                const sourceZone = this.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
-                const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner);
-                if (action.bottom) {
-                  destinationZone.add([newObject]);
-                } else {
-                  destinationZone.addToTop([newObject]);
-                }
+							if (zoneChangingCard) {
+								const sourceZoneType = this.getMetaValue(action.sourceZone, action.generatedBy);
+								const destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
+								const destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
+								const sourceZone = this.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
+								const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner);
+								if (action.bottom) {
+									destinationZone.add([newObject]);
+								} else {
+									destinationZone.addToTop([newObject]);
+								}
 
-                sourceZone.removeById(zoneChangingCard.id);
+								sourceZone.removeById(zoneChangingCard.id);
 
-                this.setSpellMetaDataField('new_card', newObject, action.generatedBy);
-                this.transformIntoActions({
-                  type: ACTION_EFFECT,
-                  effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
-                  sourceCard: zoneChangingCard,
-                  sourceZone: sourceZoneType,
-                  destinationCard: newObject,
-                  destinationZone: destinationZoneType,
-                  generatedBy: action.generatedBy,
-                });
-              }
+								this.setSpellMetaDataField('new_card', newObject, action.generatedBy);
+								this.transformIntoActions({
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
+									sourceCard: zoneChangingCard,
+									sourceZone: sourceZoneType,
+									destinationCard: newObject,
+									destinationZone: destinationZoneType,
+									generatedBy: action.generatedBy,
+								});
+							}
 							break;
 						}
 						case EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES: {
@@ -4524,10 +4558,10 @@ export class State {
 						case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI: {
 							const discardMultiTarget = this.getMetaValue(action.target, action.generatedBy);
 
-              const source = action.source
-              if (!source) {
-                break
-              }
+							const source = action.source
+							if (!source) {
+								break
+							}
 							oneOrSeveral(discardMultiTarget, target => {
 								switch (target.card.type) {
 									case TYPE_CREATURE:
@@ -4584,12 +4618,12 @@ export class State {
 							const magiMiltiTarget = this.getMetaValue(action.target, action.generatedBy);
 
 							oneOrSeveral(magiMiltiTarget, target => {
-                this.transformIntoActions({
+								this.transformIntoActions({
 									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
 									target,
 									source: null,
-                  player: action.player,
+									player: action.player,
 									generatedBy: action.generatedBy,
 								});
 							});
@@ -4674,13 +4708,13 @@ export class State {
 										target.removeEnergy(energyToLose);
 
 										if (target.data.energy == 0 && !action.attack) {
-                      this.transformIntoActions({
+											this.transformIntoActions({
 												type: ACTION_EFFECT,
 												effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
 												source: action.source,
-                        target,
+												target,
 												attack: action.attack,
-                        player: action.player,
+												player: action.player,
 												generatedBy: action.generatedBy,
 											} as DiscardCreatureFromPlayEffect);
 											// this.transformIntoActions({
@@ -4699,35 +4733,35 @@ export class State {
 							);
 							break;
 						}
-            case EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE: {
+						case EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE: {
 							const target: CardInGame = this.getMetaValue(action.target, action.generatedBy);
-              const energyToLose = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
-              if (target.card.type === TYPE_CREATURE) {
-                target.removeEnergy(energyToLose);
+							const energyToLose = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
+							if (target.card.type === TYPE_CREATURE) {
+								target.removeEnergy(energyToLose);
 
-                if (target.data.energy === 0) {
-                  this.transformIntoActions({
-                    type: ACTION_EFFECT,
-                    effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-                    target,
-                    attack: false,
-                    sourceZone: ZONE_TYPE_IN_PLAY,
-                    destinationZone: ZONE_TYPE_DISCARD,
-                    bottom: false,
-                    generatedBy: action.generatedBy,
-                  });
-                }
-              } else {
-                console.error('Wrong card type')
-              }
+								if (target.data.energy === 0) {
+									this.transformIntoActions({
+										type: ACTION_EFFECT,
+										effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+										target,
+										attack: false,
+										sourceZone: ZONE_TYPE_IN_PLAY,
+										destinationZone: ZONE_TYPE_DISCARD,
+										bottom: false,
+										generatedBy: action.generatedBy,
+									});
+								}
+							} else {
+								console.error('Wrong card type')
+							}
 							break;
 						}
-            case EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI: {
+						case EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI: {
 							const target: CardInGame = this.getMetaValue(action.target, action.generatedBy);
-              const energyToLose = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
-              if (target.card.type === TYPE_MAGI) {
-                target.removeEnergy(energyToLose);
-              }
+							const energyToLose = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
+							if (target.card.type === TYPE_MAGI) {
+								target.removeEnergy(energyToLose);
+							}
 							break;
 						}
 						case EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY: {
@@ -4751,33 +4785,33 @@ export class State {
 							const payingAmount = Number(this.getMetaValue(action.amount, action.generatedBy));
 
 							if (payingAmount > 0) {
-                switch (payingTarget.card.type) {
-                  case TYPE_CREATURE: {
-                    this.transformIntoActions({
-                      type: ACTION_EFFECT,
-                      effectType: EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
-                      target: payingTarget,
-                      amount: payingAmount,
-                      player: action.player,
-                      generatedBy: action.generatedBy,
-                    });
-                    break;
-                  }
-                  case TYPE_MAGI: {
-                    this.transformIntoActions({
-                      type: ACTION_EFFECT,
-                      effectType: EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
-                      target: payingTarget,
-                      amount: payingAmount,
-                      player: action.player,
-                      generatedBy: action.generatedBy,
-                    });
-                    break;
-                  }
-                }
-              }
-              break;
-            }
+								switch (payingTarget.card.type) {
+									case TYPE_CREATURE: {
+										this.transformIntoActions({
+											type: ACTION_EFFECT,
+											effectType: EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
+											target: payingTarget,
+											amount: payingAmount,
+											player: action.player,
+											generatedBy: action.generatedBy,
+										});
+										break;
+									}
+									case TYPE_MAGI: {
+										this.transformIntoActions({
+											type: ACTION_EFFECT,
+											effectType: EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
+											target: payingTarget,
+											amount: payingAmount,
+											player: action.player,
+											generatedBy: action.generatedBy,
+										});
+										break;
+									}
+								}
+							}
+							break;
+						}
 						case EFFECT_TYPE_ADD_ENERGY_TO_CREATURE: {
 							const addTargets = this.getMetaValue(action.target, action.generatedBy);
 
@@ -4804,7 +4838,7 @@ export class State {
 						case EFFECT_TYPE_ADD_ENERGY_TO_MAGI: {
 							const magiTarget = this.getMetaValue(action.target, action.generatedBy);
 
-							oneOrSeveral(magiTarget, target => target.addEnergy(parseInt(this.getMetaValue(action.amount, action.generatedBy)), 10));                            
+							oneOrSeveral(magiTarget, target => target.addEnergy(parseInt(this.getMetaValue(action.amount, action.generatedBy)), 10));														
 							break;
 						}
 						case EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC: {
@@ -4812,13 +4846,13 @@ export class State {
 							oneOrSeveral(discardTargets, target => {
 								const targetType = target.card.type;
 								if (targetType === TYPE_CREATURE) {
-                  this.transformIntoActions({
+									this.transformIntoActions({
 										type: ACTION_EFFECT,
 										effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-                    attack: false,
+										attack: false,
 										target,
 										generatedBy: action.generatedBy,
-                    player: action.player || 0,
+										player: action.player || 0,
 									} as DiscardCreatureFromPlayEffect);
 								} else if (targetType === TYPE_RELIC) {
 									this.transformIntoActions({
@@ -4826,7 +4860,7 @@ export class State {
 										effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
 										target,
 										generatedBy: action.generatedBy,
-                    player: action.player || 0,
+										player: action.player || 0,
 									});
 								}
 							});
@@ -4857,7 +4891,7 @@ export class State {
 										type: ACTION_EFFECT,
 										effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
 										target: creature,
-                    attack: action.attack,
+										attack: action.attack,
 										sourceZone: ZONE_TYPE_IN_PLAY,
 										destinationZone: ZONE_TYPE_DISCARD,
 										bottom: false,
@@ -4968,44 +5002,44 @@ export class State {
 							this.getZone(ZONE_TYPE_IN_PLAY).cards.forEach(card => {
 								if (card.card.type === TYPE_CREATURE && card.id in damageArrangement) {
 									const damageAmount = damageArrangement[card.id];
-                  const source = action.source;
+									const source = action.source;
 									if (damageAmount > 0 && source) {
-                    this.transformIntoActions({
+										this.transformIntoActions({
 											type: ACTION_EFFECT,
 											effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
 											source,
 											target: card,
 											amount: damageAmount,
 											generatedBy: action.generatedBy,
-                      player: action.player,
+											player: action.player,
 										});
 									}
 								}
 							});
 							break;
 						}
-            case EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE: {
-              const zone = this.getMetaValue(action.zone, action.generatedBy);
+						case EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE: {
+							const zone = this.getMetaValue(action.zone, action.generatedBy);
 							const zoneOwner = this.getMetaValue(action.zoneOwner, action.generatedBy);
 							// const numberOfCards = this.getMetaValue(action.numberOfCards, action.generatedBy);
-              const zoneContent = this.getZone(zone, zoneOwner).cards;
+							const zoneContent = this.getZone(zone, zoneOwner).cards;
 
-              const cardsOrder: string[] = this.getMetaValue(action.cards, action.generatedBy);
-              const cardsToRearrange: Record<string, CardInGame> = {}
+							const cardsOrder: string[] = this.getMetaValue(action.cards, action.generatedBy);
+							const cardsToRearrange: Record<string, CardInGame> = {}
 
-              for (let i = 0; i < cardsOrder.length; i++) {
-                if (i >= zoneContent.length) break;
-                const currentCard = zoneContent[i]
-                cardsToRearrange[currentCard.id] = currentCard;
-              }
-              const newZoneContent = [
-                ...cardsOrder.map(id => cardsToRearrange[id]),
-                ...zoneContent.slice(cardsOrder.length),
-              ]
+							for (let i = 0; i < cardsOrder.length; i++) {
+								if (i >= zoneContent.length) break;
+								const currentCard = zoneContent[i]
+								cardsToRearrange[currentCard.id] = currentCard;
+							}
+							const newZoneContent = [
+								...cardsOrder.map(id => cardsToRearrange[id]),
+								...zoneContent.slice(cardsOrder.length),
+							]
 
-              this.getZone(zone, zoneOwner).cards = newZoneContent;
-              break;
-            }
+							this.getZone(zone, zoneOwner).cards = newZoneContent;
+							break;
+						}
 					}
 					break;
 				}
@@ -5019,9 +5053,9 @@ export class State {
 				if (this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).length === 1) {
 					const magi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card;
 					
-          if (!magi) {
-            throw new Error('Trying to defeat missing Magi')
-          }
+					if (!magi) {
+						throw new Error('Trying to defeat missing Magi')
+					}
 					const creatures = this.useSelector(SELECTOR_OWN_CREATURES, player);
 					if (magi.data.energy === 0 && creatures instanceof Array && creatures.length === 0) {
 						sbActions.push({

@@ -1,4 +1,4 @@
-Done: **173** card out of **190**
+Done: **175** card out of **190**
 
 # Done, tested
 
@@ -106,6 +106,8 @@ Done: **173** card out of **190**
 - Ulk
 - Bisiwog
 - Mirror Pendant
+- Lightning
+- Eye of the Storm
 
 # Done, not tested
 
@@ -281,10 +283,8 @@ Done: **173** card out of **190**
 - Colossus (protection)
 - Energy Band (using only before attack, must attack if able)
 - Entangle ([in]ability to play spells)
-- Eye of the Storm (choice between two alternatives)
 - Hood of Hiding (ability to use power)
 - Karak (exiling under creature, ability to play named relics)
-- Lightning (select between alternatives)
 - Mask of Abwyn (looking at hand)
 - Orathan Flyer (paying for creature from creature)
 - Orish (choosing player, discard at random)
@@ -306,11 +306,8 @@ Done: **173** card out of **190**
 
 # Custom prompts
 
-- Lightning (choosing between two alternatives)
 - Raxis (choosing between two alternatives)
-- Eye of the Storm (choosing between alternatives)
 - Tap Roots (creature not selected in previous prompt)
-- Mirror Pendant (choosing power on Magi)
 
 # Discarding from hand
 
