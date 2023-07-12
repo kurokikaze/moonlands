@@ -27,9 +27,12 @@ export declare type ResolvePowerOnMagiPrompt = ResolvePromptInterface & {
     power: any;
     source: CardInGame;
 };
+export declare type ResolveAlternativePrompt = ResolvePromptInterface & {
+    alternative: string;
+};
 export declare type ResolvePromptType = ResolvePromptInterface & {
     number?: number | string;
     cards?: CardInGame[];
     target?: CardInGame;
-} | ResolveRearrangeEnergyPrompt | ResolveDistributeEnergyPrompt | ResolveDistributeDamagePrompt | ResolvePlayerPrompt | ResolveRearrangeCardsPrompt | ResolvePowerOnMagiPrompt;
+} | ResolveRearrangeEnergyPrompt | ResolveDistributeEnergyPrompt | ResolveDistributeDamagePrompt | ResolvePlayerPrompt | ResolveRearrangeCardsPrompt | ResolveAlternativePrompt | ResolvePowerOnMagiPrompt;
 export {};

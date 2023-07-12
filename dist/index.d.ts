@@ -7,6 +7,7 @@ import Zone from './classes/Zone';
 import { AnyEffectType, PromptTypeType, RestrictionObjectType, RestrictionType, LogEntryType, PropertyType, EnrichedAction, StaticAbilityType, OperatorType, ConditionType, FindType, ContinuousEffectType, EffectType, ZoneType, Region, ProtectionType } from './types';
 import { EnhancedDelayedTriggerType } from './types/effect';
 import { CardType, StatusType } from './types/common';
+import { AlternativeType } from './types/prompt';
 declare type EnrichedStaticAbilityType = StaticAbilityType & {
     player: number;
     card?: CardInGame;
@@ -37,8 +38,9 @@ declare type PromptParamsType = {
     magi?: CardInGame[];
     min?: number;
     max?: number;
+    alternatives?: AlternativeType[];
 };
-export declare type MetaDataValue = CardInGame | CardInGame[] | Region | number | Record<string, number>;
+export declare type MetaDataValue = CardInGame | CardInGame[] | Region | number | Record<string, number> | string;
 export declare type MetaDataRecord = Record<string, MetaDataValue>;
 declare type StateShape = {
     step: number | null;
@@ -163,10 +165,10 @@ export declare class State {
     setSpellMetaDataField(field: string, value: any, spellId: string): void;
     getMetaValue<T>(value: string | T, spellId: string | undefined): T | any;
     /**
-     * Same as getMetaValue, but instead of $-variables it uses %-variables
-     * $-variables are kept intact, we probably need them
-     * %-variables include usual "self": link to trigger source
-     */
+         * Same as getMetaValue, but instead of $-variables it uses %-variables
+         * $-variables are kept intact, we probably need them
+         * %-variables include usual "self": link to trigger source
+         */
     prepareMetaValue<T>(value: string | T, action: AnyEffectType, self: CardInGame, spellId: string): T | any;
     selectNthCardOfZone(player: number, zoneType: ZoneType, cardNumber: number, restrictions?: RestrictionObjectType[]): CardInGame[];
     useSelector(selector: typeof SELECTOR_STATUS, player: null, argument: StatusType): CardInGame[];
