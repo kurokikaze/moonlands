@@ -160,7 +160,8 @@ declare type AddEnergyToCreatureOrMagiEffect = ActionEffect & {
 declare type AddEnergyToCreatureEffect = ActionEffect & {
     effectType: typeof EFFECT_TYPE_ADD_ENERGY_TO_CREATURE;
     target: CardInGame | CardInGame[];
-    source: CardInGame | null;
+    source: CardInGame | undefined;
+    power?: boolean;
     amount: number;
 };
 declare type AddEnergyToMagiEffect = ActionEffect & {
@@ -322,6 +323,7 @@ export declare type EffectType = ActionEffect & {
     effectType: EffectTypeStillInUse;
     generatedBy?: string;
     source?: CardInGame;
+    power?: boolean;
     target?: CardInGame;
 } | MoveCardBetwenZonesEffect | MoveCardsBetwenZonesEffect | NoneEffect | AttackEffect | CardMovedBetweenZonesEffect | BeforeDrawCardsInDrawStepType | DrawCardsInDrawStepType | DrawNCardsEffect | DiscardEnergyFromCreatureOrMagiEffect | DiscardEnergyFromCreaturesEffect | DiscardEnergyFromCreatureEffect | DiscardEnergyFromMagiEffect | RemoveEnergyFromCreatureEffect | RemoveEnergyFromMagiEffect | PayingEnergyForPowerEffect | StartTurnEffect | StartOfTurnEffect | StartStepEffect | EndOfTurnEffect | DrawEffect | DrawRestOfCardsEffect | MagiFlippedEffect | AddStartingEnergyToMagi | FindStartingCardsEffect | ReshuffleDiscardEffect | AddEnergyToCreatureOrMagiEffect | AddEnergyToCreatureEffect | AddEnergyToMagiEffect | DiscardCreatureOrRelicFromPlay | PayingEnergyForCreatureEffect | PlayCreatureEffect | DiscardReshuffledEffect | CreatureEntersPlayEffect | StartingEnergyOnCreatureEffect | PayingEnergyForRelicEffect | PlayRelicEffect | RelicEntersPlayEffect | PlaySpellEffect | PayingEnergyForSpellEffect | ConditionalEffect | AddDelayedTriggerEffect | EnergizeEffect | RollDieEffect | DieRolledEffect | MoveEnergyEffect | MagiIsDefeatedEffect | CreateContinuousEffect | DefeatMagiEffect | RearrangeEnergyEffect | DistributeEnergyEffect | DistributeDamageEffect | DiscardRelicFromPlayEffect | ReturnCreatureReturningEnergyEffect | DiscardCreatureFromPlayEffect | RearrangeCardsOfZoneEffect | ExecutePowerEffect;
 export {};

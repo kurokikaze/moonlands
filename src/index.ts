@@ -1418,58 +1418,58 @@ export class State {
 	isCardAffectedByEffect(card: CardInGame, effect: EnrichedAction & EffectType) {
 		const protection = this.modifyByStaticAbilities(card, PROPERTY_PROTECTION);
 
-		if (!protection) return true;
-
-		// Is the `from` right?
-		if (
-			(effect.spell && protection.from && protection.from.includes(PROTECTION_FROM_SPELLS)) ||
-			(effect.power && protection.from && protection.from.includes(PROTECTION_FROM_POWERS)) ||
-			(effect.attack && protection.from && protection.from.includes(PROTECTION_FROM_ATTACKS))
-			) {
-
+		if (protection) {
+			// Is the `from` right?
 			if (
-				effect.effectType === EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE &&
-				protection.type === PROTECTION_TYPE_ENERGY_LOSS
-			) {
-				const source = effect.source;
+				(effect.spell && protection.from && protection.from.includes(PROTECTION_FROM_SPELLS)) ||
+				(effect.power && protection.from && protection.from.includes(PROTECTION_FROM_POWERS)) ||
+				(effect.attack && protection.from && protection.from.includes(PROTECTION_FROM_ATTACKS))
+				) {
 
-				if (protection.restrictions) {
-					const cardFilter = this.makeCardFilter(protection.restrictions);
+				if (
+					effect.effectType === EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE &&
+					protection.type === PROTECTION_TYPE_ENERGY_LOSS
+				) {
+					const source = effect.source;
 
-					return !cardFilter(source);
-				} else {
-					return false;
+					if (protection.restrictions) {
+						const cardFilter = this.makeCardFilter(protection.restrictions);
+
+						return !cardFilter(source);
+					} else {
+						return false;
+					}
 				}
-			}
 
-			if (
-				(effect.effectType === EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY && protection.type === PROTECTION_TYPE_DISCARDING_FROM_PLAY) ||
-				protection.type === PROTECTION_TYPE_GENERAL
-			) {
-				const source = effect.source;
-				if (!source) return false;
-
-				if (protection.restrictions) {
-					const cardFilter = this.makeCardFilter(protection.restrictions);
-
-					return !cardFilter(source);
-				} else {
-					return false;
-				}
-			}
-
-			if (
-				protection.type === PROTECTION_TYPE_GENERAL
-			) {
-				if (protection.restrictions) {
+				if (
+					(effect.effectType === EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY && protection.type === PROTECTION_TYPE_DISCARDING_FROM_PLAY) ||
+					protection.type === PROTECTION_TYPE_GENERAL
+				) {
 					const source = effect.source;
 					if (!source) return false;
 
-					const cardFilter = this.makeCardFilter(protection.restrictions);
+					if (protection.restrictions) {
+						const cardFilter = this.makeCardFilter(protection.restrictions);
 
-					return !cardFilter(source);
-				} else {
-					return false;
+						return !cardFilter(source);
+					} else {
+						return false;
+					}
+				}
+
+				if (
+					protection.type === PROTECTION_TYPE_GENERAL
+				) {
+					if (protection.restrictions) {
+						const source = effect.source;
+						if (!source) return false;
+
+						const cardFilter = this.makeCardFilter(protection.restrictions);
+
+						return !cardFilter(source);
+					} else {
+						return false;
+					}
 				}
 			}
 		}
@@ -1481,7 +1481,7 @@ export class State {
 				effect.effectType === EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE ||
 				effect.effectType === EFFECT_TYPE_MOVE_ENERGY
 			) {
-				if (effect.source.data.controller === card.data.controller && 
+				if (effect.source && effect.source.data.controller === card.data.controller && 
 					(
 						effect.spell ||
 						effect.power
@@ -4316,7 +4316,7 @@ export class State {
 									type: ACTION_EFFECT,
 									effectType: (type == TYPE_CREATURE) ? EFFECT_TYPE_ADD_ENERGY_TO_CREATURE : EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
 									target,
-									source: null,
+									source: undefined,
 									amount,
 									generatedBy: action.generatedBy,
 								});
@@ -4506,7 +4506,7 @@ export class State {
 								type: ACTION_EFFECT,
 								effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 								target,
-								source: null,
+								source: undefined,
 								amount: this.getMetaValue(action.amount, action.generatedBy),
 								generatedBy: action.generatedBy,
 							});
@@ -4554,7 +4554,7 @@ export class State {
 											effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 											amount: action.amount,
 											target,
-											source: null,
+											source: undefined,
 											generatedBy: action.generatedBy,
 										});
 										break;
@@ -4615,17 +4615,6 @@ export class State {
 								this.getMetaValue(action.target, action.generatedBy),
 								target => {
 									target.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
-
-									// const hisCreatures = this.useSelector(SELECTOR_OWN_CREATURES, target.data.controller, null);
-									/* if (target.data.energy === 0 && hisCreatures instanceof Array && hisCreatures.length === 0) {
-										this.transformIntoActions({
-											type: ACTION_EFFECT,
-											effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
-											source: action.source || null,
-											target,
-											generatedBy: action.generatedBy,
-										});
-									} */
 								},
 							);
 							break;
@@ -4733,16 +4722,6 @@ export class State {
 												player: action.player,
 												generatedBy: action.generatedBy,
 											} as DiscardCreatureFromPlayEffect);
-											// this.transformIntoActions({
-											// 	type: ACTION_EFFECT,
-											// 	effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-											// 	target,
-											// 	attack: false,
-											// 	sourceZone: ZONE_TYPE_IN_PLAY,
-											// 	destinationZone: ZONE_TYPE_DISCARD,
-											// 	bottom: false,
-											// 	generatedBy: action.generatedBy,
-											// });
 										}
 									}
 								},
@@ -4787,7 +4766,9 @@ export class State {
 								this.transformIntoActions({
 									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
-									source: action.source || null,
+									source: action.source || undefined,
+									power: action.power || false,
+									spell: action.spell || false,
 									target: restoreTarget,
 									amount: restoreAmount,
 									player: action.player,
@@ -4831,9 +4812,11 @@ export class State {
 						case EFFECT_TYPE_ADD_ENERGY_TO_CREATURE: {
 							const addTargets = this.getMetaValue(action.target, action.generatedBy);
 
-							oneOrSeveral(addTargets, addTarget =>
-								addTarget.addEnergy(parseInt(this.getMetaValue(action.amount, action.generatedBy), 10)),
-							);
+							oneOrSeveral(addTargets, addTarget => {
+								if (this.isCardAffectedByEffect(addTarget, action)) {
+									addTarget.addEnergy(parseInt(this.getMetaValue(action.amount, action.generatedBy), 10));
+								}
+							});
 							break;
 						}
 						case EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI: {

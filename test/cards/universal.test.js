@@ -811,7 +811,7 @@ describe('Colossus', () => {
 		gameState.update(powerAction);
 		gameState.update(targetingAction);
 
-		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(colossus.id).data.energy).toEqual(7, 'Colossus still has 5 energy');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(colossus.id).data.energy).toEqual(5, 'Colossus still has 5 energy');
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'One card in Player 1 discard');
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Arbolit', 'Card in Player 1 discard is Arbolit');
 	});
@@ -901,5 +901,44 @@ describe('Colossus', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(colossus.id).data.energy).toEqual(12, 'Colossus still has 12 energy');
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'One card in Player 1 discard');
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Shockwave', 'Card in Player 1 discard is Shockwave');
+	});
+
+	it('Energy stasis (energy to starting)', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const dreamBalm = new CardInGame(byName('Dream Balm'), ACTIVE_PLAYER);
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const colossus = new CardInGame(byName('Colossus'), ACTIVE_PLAYER).addEnergy(5);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [dreamBalm, colossus]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: dreamBalm,
+			power: dreamBalm.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_SINGLE_CREATURE,
+			target: colossus,
+			generatedBy: dreamBalm.id,
+		};
+
+		gameState.update(powerAction);
+		gameState.update(targetingAction);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(colossus.id).data.energy).toEqual(5, 'Colossus still has 5 energy');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'One card in Player 1 discard');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Dream Balm', 'Card in Player 1 discard is Dream Balm');
 	});
 });

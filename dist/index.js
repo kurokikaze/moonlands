@@ -897,46 +897,46 @@ var State = /** @class */ (function () {
     };
     State.prototype.isCardAffectedByEffect = function (card, effect) {
         var protection = this.modifyByStaticAbilities(card, PROPERTY_PROTECTION);
-        if (!protection)
-            return true;
-        // Is the `from` right?
-        if ((effect.spell && protection.from && protection.from.includes(PROTECTION_FROM_SPELLS)) ||
-            (effect.power && protection.from && protection.from.includes(PROTECTION_FROM_POWERS)) ||
-            (effect.attack && protection.from && protection.from.includes(PROTECTION_FROM_ATTACKS))) {
-            if (effect.effectType === EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE &&
-                protection.type === PROTECTION_TYPE_ENERGY_LOSS) {
-                var source = effect.source;
-                if (protection.restrictions) {
-                    var cardFilter = this.makeCardFilter(protection.restrictions);
-                    return !cardFilter(source);
+        if (protection) {
+            // Is the `from` right?
+            if ((effect.spell && protection.from && protection.from.includes(PROTECTION_FROM_SPELLS)) ||
+                (effect.power && protection.from && protection.from.includes(PROTECTION_FROM_POWERS)) ||
+                (effect.attack && protection.from && protection.from.includes(PROTECTION_FROM_ATTACKS))) {
+                if (effect.effectType === EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE &&
+                    protection.type === PROTECTION_TYPE_ENERGY_LOSS) {
+                    var source = effect.source;
+                    if (protection.restrictions) {
+                        var cardFilter = this.makeCardFilter(protection.restrictions);
+                        return !cardFilter(source);
+                    }
+                    else {
+                        return false;
+                    }
                 }
-                else {
-                    return false;
-                }
-            }
-            if ((effect.effectType === EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY && protection.type === PROTECTION_TYPE_DISCARDING_FROM_PLAY) ||
-                protection.type === PROTECTION_TYPE_GENERAL) {
-                var source = effect.source;
-                if (!source)
-                    return false;
-                if (protection.restrictions) {
-                    var cardFilter = this.makeCardFilter(protection.restrictions);
-                    return !cardFilter(source);
-                }
-                else {
-                    return false;
-                }
-            }
-            if (protection.type === PROTECTION_TYPE_GENERAL) {
-                if (protection.restrictions) {
+                if ((effect.effectType === EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY && protection.type === PROTECTION_TYPE_DISCARDING_FROM_PLAY) ||
+                    protection.type === PROTECTION_TYPE_GENERAL) {
                     var source = effect.source;
                     if (!source)
                         return false;
-                    var cardFilter = this.makeCardFilter(protection.restrictions);
-                    return !cardFilter(source);
+                    if (protection.restrictions) {
+                        var cardFilter = this.makeCardFilter(protection.restrictions);
+                        return !cardFilter(source);
+                    }
+                    else {
+                        return false;
+                    }
                 }
-                else {
-                    return false;
+                if (protection.type === PROTECTION_TYPE_GENERAL) {
+                    if (protection.restrictions) {
+                        var source = effect.source;
+                        if (!source)
+                            return false;
+                        var cardFilter = this.makeCardFilter(protection.restrictions);
+                        return !cardFilter(source);
+                    }
+                    else {
+                        return false;
+                    }
                 }
             }
         }
@@ -945,7 +945,7 @@ var State = /** @class */ (function () {
             if (effect.effectType === EFFECT_TYPE_ADD_ENERGY_TO_CREATURE ||
                 effect.effectType === EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE ||
                 effect.effectType === EFFECT_TYPE_MOVE_ENERGY) {
-                if (effect.source.data.controller === card.data.controller &&
+                if (effect.source && effect.source.data.controller === card.data.controller &&
                     (effect.spell ||
                         effect.power)) {
                     return false;
@@ -3315,7 +3315,7 @@ var State = /** @class */ (function () {
                                     type: ACTION_EFFECT,
                                     effectType: (type == TYPE_CREATURE) ? EFFECT_TYPE_ADD_ENERGY_TO_CREATURE : EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
                                     target: target,
-                                    source: null,
+                                    source: undefined,
                                     amount: amount,
                                     generatedBy: action.generatedBy,
                                 });
@@ -3497,7 +3497,7 @@ var State = /** @class */ (function () {
                                 type: ACTION_EFFECT,
                                 effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
                                 target: target,
-                                source: null,
+                                source: undefined,
                                 amount: this_1.getMetaValue(action.amount, action.generatedBy),
                                 generatedBy: action.generatedBy,
                             });
@@ -3543,7 +3543,7 @@ var State = /** @class */ (function () {
                                             effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
                                             amount: action.amount,
                                             target: target,
-                                            source: null,
+                                            source: undefined,
                                             generatedBy: action.generatedBy,
                                         });
                                         break;
@@ -3601,16 +3601,6 @@ var State = /** @class */ (function () {
                         case EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI: {
                             oneOrSeveral(this_1.getMetaValue(action.target, action.generatedBy), function (target) {
                                 target.removeEnergy(_this.getMetaValue(action.amount, action.generatedBy));
-                                // const hisCreatures = this.useSelector(SELECTOR_OWN_CREATURES, target.data.controller, null);
-                                /* if (target.data.energy === 0 && hisCreatures instanceof Array && hisCreatures.length === 0) {
-                                    this.transformIntoActions({
-                                        type: ACTION_EFFECT,
-                                        effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
-                                        source: action.source || null,
-                                        target,
-                                        generatedBy: action.generatedBy,
-                                    });
-                                } */
                             });
                             break;
                         }
@@ -3707,16 +3697,6 @@ var State = /** @class */ (function () {
                                             player: action.player,
                                             generatedBy: action.generatedBy,
                                         });
-                                        // this.transformIntoActions({
-                                        // 	type: ACTION_EFFECT,
-                                        // 	effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-                                        // 	target,
-                                        // 	attack: false,
-                                        // 	sourceZone: ZONE_TYPE_IN_PLAY,
-                                        // 	destinationZone: ZONE_TYPE_DISCARD,
-                                        // 	bottom: false,
-                                        // 	generatedBy: action.generatedBy,
-                                        // });
                                     }
                                 }
                             });
@@ -3760,7 +3740,9 @@ var State = /** @class */ (function () {
                                 this_1.transformIntoActions({
                                     type: ACTION_EFFECT,
                                     effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
-                                    source: action.source || null,
+                                    source: action.source || undefined,
+                                    power: action.power || false,
+                                    spell: action.spell || false,
                                     target: restoreTarget,
                                     amount: restoreAmount,
                                     player: action.player,
@@ -3803,7 +3785,9 @@ var State = /** @class */ (function () {
                         case EFFECT_TYPE_ADD_ENERGY_TO_CREATURE: {
                             var addTargets = this_1.getMetaValue(action.target, action.generatedBy);
                             oneOrSeveral(addTargets, function (addTarget) {
-                                return addTarget.addEnergy(parseInt(_this.getMetaValue(action.amount, action.generatedBy), 10));
+                                if (_this.isCardAffectedByEffect(addTarget, action)) {
+                                    addTarget.addEnergy(parseInt(_this.getMetaValue(action.amount, action.generatedBy), 10));
+                                }
                             });
                             break;
                         }

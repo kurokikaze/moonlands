@@ -298,7 +298,7 @@ type ReshuffleDiscardEffect = ActionEffect & {
 type DiscardReshuffledEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_DISCARD_RESHUFFLED,
 	player: number;
-  cards: string[];
+	cards: string[];
 }
 
 type AddEnergyToCreatureOrMagiEffect = ActionEffect & {
@@ -310,7 +310,8 @@ type AddEnergyToCreatureOrMagiEffect = ActionEffect & {
 type AddEnergyToCreatureEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_ADD_ENERGY_TO_CREATURE;
 	target: CardInGame | CardInGame[];
-	source: CardInGame | null;
+	source: CardInGame | undefined;
+	power?: boolean;
 	amount: number;
 }
 
@@ -504,6 +505,7 @@ export type EffectType = ActionEffect & {
 	effectType: EffectTypeStillInUse;
 	generatedBy?: string;
 	source?: CardInGame;
+	power?: boolean;
 	target?: CardInGame;
 } | MoveCardBetwenZonesEffect |
 	MoveCardsBetwenZonesEffect |
