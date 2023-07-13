@@ -1,4 +1,4 @@
-Done: **175** card out of **190**
+Done: **176** card out of **190**
 
 # Done, tested
 
@@ -16,6 +16,7 @@ Done: **175** card out of **190**
 - Carillion
 - Cave Hyren
 - Cave Rudwot
+- Colossus
 - Coral Hyren
 - Deep Hyren
 - Diobor
@@ -280,7 +281,6 @@ Done: **175** card out of **190**
 
 # Not done yet
 
-- Colossus (protection)
 - Energy Band (using only before attack, must attack if able)
 - Entangle ([in]ability to play spells)
 - Hood of Hiding (ability to use power)
@@ -316,10 +316,6 @@ Done: **175** card out of **190**
 - Spirit of the Flame
 - Vinoc
 
-# May-abilities
-
-- Fossik
-
 # Looking at library, rearranging
 
 - Orothean Goggles
@@ -343,7 +339,6 @@ Done: **175** card out of **190**
 ## Continuous effects
 
 - Vaal
-- Parmalag
 
 ## Statuses
 
@@ -360,10 +355,6 @@ Done: **175** card out of **190**
 ## Ability to play spells
 
 - Entangle (also continuous effects)
-
-## Protection
-
-- Colossus
 
 ## Additional selectors
 

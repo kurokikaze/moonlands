@@ -1954,12 +1954,12 @@ describe('Orlon', () => {
 
 		expect(gameState.modifyByStaticAbilities(welliskPup, PROPERTY_PROTECTION)).toEqual({
 			type: PROTECTION_TYPE_GENERAL,
-			from: PROTECTION_FROM_SPELLS,
+			from: [PROTECTION_FROM_SPELLS],
 		});
 
 		expect(gameState.modifyByStaticAbilities(seaBarl, PROPERTY_PROTECTION)).toEqual({
 			type: PROTECTION_TYPE_GENERAL,
-			from: PROTECTION_FROM_SPELLS,
+			from: [PROTECTION_FROM_SPELLS],
 		});
 
 		expect(gameState.modifyByStaticAbilities(bwill, PROPERTY_PROTECTION)).toEqual(undefined);

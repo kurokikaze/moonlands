@@ -1422,9 +1422,9 @@ export class State {
 
 		// Is the `from` right?
 		if (
-			(effect.spell && protection.from === PROTECTION_FROM_SPELLS) ||
-			(effect.power && protection.from === PROTECTION_FROM_POWERS) ||
-			(effect.attack && protection.from === PROTECTION_FROM_ATTACKS)
+			(effect.spell && protection.from && protection.from.includes(PROTECTION_FROM_SPELLS)) ||
+			(effect.power && protection.from && protection.from.includes(PROTECTION_FROM_POWERS)) ||
+			(effect.attack && protection.from && protection.from.includes(PROTECTION_FROM_ATTACKS))
 			) {
 
 			if (
@@ -1441,7 +1441,6 @@ export class State {
 					return false;
 				}
 			}
-
 
 			if (
 				(effect.effectType === EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY && protection.type === PROTECTION_TYPE_DISCARDING_FROM_PLAY) ||
@@ -1470,6 +1469,23 @@ export class State {
 
 					return !cardFilter(source);
 				} else {
+					return false;
+				}
+			}
+		}
+
+		// Energy stasis check
+		if (card.card.data.energyStasis) {
+			if (
+				effect.effectType === EFFECT_TYPE_ADD_ENERGY_TO_CREATURE ||
+				effect.effectType === EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE ||
+				effect.effectType === EFFECT_TYPE_MOVE_ENERGY
+			) {
+				if (effect.source.data.controller === card.data.controller && 
+					(
+						effect.spell ||
+						effect.power
+					)) {
 					return false;
 				}
 			}
@@ -4961,27 +4977,42 @@ export class State {
 							const ownCreatures = this.useSelector(SELECTOR_OWN_CREATURES, action.player || 0);
 							const totalEnergyOnCreatures: number = (ownCreatures instanceof Array) ? ownCreatures.map(card => card.data.energy).reduce((a, b) => a + b, 0) : 0;
 							const newEnergyTotal: number = Object.values(energyArrangement).reduce((a, b) => a + b, 0);
-							if (newEnergyTotal === totalEnergyOnCreatures) {
-								this.getZone(ZONE_TYPE_IN_PLAY).cards.forEach(card => {
-									if (card.card.type === TYPE_CREATURE && card.id in energyArrangement) {
-										const newEnergy = energyArrangement[card.id];
-										card.setEnergy(newEnergy);
-										if (card.data.energy === 0) {
-											this.transformIntoActions({
-												type: ACTION_EFFECT,
-												effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-												target: card,
-												sourceZone: ZONE_TYPE_IN_PLAY,
-												destinationZone: ZONE_TYPE_DISCARD,
-												bottom: false,
-												attack: false,
-												generatedBy: action.generatedBy,
-											});
+
+							// energy stasis check
+							const valid = this.getZone(ZONE_TYPE_IN_PLAY).cards.every(card => {
+								if (!card.card.data.energyStasis) return true;
+
+								if (card.id in energyArrangement) {
+									const newEnergy = energyArrangement[card.id];
+									return newEnergy === card.data.energy;
+								}
+								return true;
+							});
+							if (valid) {
+								if (newEnergyTotal === totalEnergyOnCreatures) {
+									this.getZone(ZONE_TYPE_IN_PLAY).cards.forEach(card => {
+										if (card.card.type === TYPE_CREATURE && card.id in energyArrangement) {
+											const newEnergy = energyArrangement[card.id];
+											card.setEnergy(newEnergy);
+											if (card.data.energy === 0) {
+												this.transformIntoActions({
+													type: ACTION_EFFECT,
+													effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+													target: card,
+													sourceZone: ZONE_TYPE_IN_PLAY,
+													destinationZone: ZONE_TYPE_DISCARD,
+													bottom: false,
+													attack: false,
+													generatedBy: action.generatedBy,
+												});
+											}
 										}
-									}
-								});
+									});
+								} else if (this.debug) {
+									console.error(`Cannot rearrange energy because new total ${newEnergyTotal} is not equal to old total ${totalEnergyOnCreatures}`);
+								}
 							} else if (this.debug) {
-								console.error(`Cannot rearrange energy because new total ${newEnergyTotal} is not equal to old total ${totalEnergyOnCreatures}`);
+								console.error('One or more creatures with Energy Stasis is to be affected with energy rearrangement')
 							}
 							break;
 						}

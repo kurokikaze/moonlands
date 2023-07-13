@@ -54,7 +54,7 @@ type ProtectionFromType = typeof PROTECTION_FROM_SPELLS | typeof PROTECTION_FROM
 type ProtectionTypeType = typeof PROTECTION_TYPE_ENERGY_LOSS | typeof PROTECTION_TYPE_ENERGY_GAIN | typeof PROTECTION_TYPE_DISCARDING_FROM_PLAY | typeof PROTECTION_TYPE_GENERAL;
 
 export type ProtectionType = {
-    from: ProtectionFromType;
+    from: ProtectionFromType[];
     type: ProtectionTypeType;
     restrictions?: RestrictionObjectType[];
 }
@@ -72,6 +72,7 @@ export type CardData = {
   	staticAbilities?: StaticAbilityType[];
     effects?: AnyEffectType[];
     triggerEffects?: TriggerEffectType[];
+    energyStasis?: boolean;                         // This is done specifically for Colossus for now
     replacementEffects?: ReplacementEffectType[];
     energyLossThreshold?: number;
     ableToAttack?: boolean;

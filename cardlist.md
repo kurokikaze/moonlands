@@ -30,7 +30,7 @@
 - [x] Channeler's Gloves
 - [x] Cloud Narth
 - [x] Cloud Sceptre
-- [ ] Colossus
+- [x] Colossus
 - [x] Coral Hyren
 - [x] Corf
 - [x] Corf Pearl

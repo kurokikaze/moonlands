@@ -183,6 +183,9 @@ import {
   PROMPT_TYPE_ALTERNATIVE,
 	SELECTOR_OWN_CARDS_IN_HAND,
 	SELECTOR_CARDS_IN_HAND,
+	PROTECTION_TYPE_DISCARDING_FROM_PLAY,
+	PROTECTION_FROM_EFFECTS,
+	PROTECTION_FROM_POWERS,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -772,7 +775,7 @@ export const cards = [
 	}),
 	new Card('Lovian', TYPE_CREATURE, REGION_ARDERIAL, 4, {
 		protection: {
-			from: PROTECTION_FROM_SPELLS,
+			from: [PROTECTION_FROM_SPELLS],
 			type: PROTECTION_TYPE_GENERAL,
 			restrictions: [
 				{
@@ -862,6 +865,13 @@ export const cards = [
 	}),
 	new Card('Ayebaw', TYPE_CREATURE, REGION_ARDERIAL, 5, {
 		attacksPerTurn: 2,
+	}),
+	new Card('Colossus', TYPE_CREATURE, REGION_UNIVERSAL, 12, {
+		protection: {
+			type: PROTECTION_TYPE_DISCARDING_FROM_PLAY,
+			from: [PROTECTION_FROM_SPELLS, PROTECTION_FROM_EFFECTS, PROTECTION_FROM_POWERS],
+		},
+		energyStasis: true,
 	}),
 	new Card('Adis', TYPE_MAGI, REGION_ARDERIAL, null, {
 		startingEnergy: 15,
@@ -5804,7 +5814,7 @@ export const cards = [
 	new Card('Orlon', TYPE_MAGI, REGION_OROTHE, null, {
 		energize: 6,
 		startingEnergy: 10,
-    startingCards: ['Abaquist', 'Sea Barl', 'Submerge'],
+		startingCards: ['Abaquist', 'Sea Barl', 'Submerge'],
 		staticAbilities: [
 			{
 				name: 'Anti-Magic (Barls)',
@@ -5816,7 +5826,7 @@ export const cards = [
 					operator: CALCULATION_SET,
 					operandOne: {
 						type: PROTECTION_TYPE_GENERAL,
-						from: PROTECTION_FROM_SPELLS,
+						from: [PROTECTION_FROM_SPELLS],
 					},
 				},
 			},
@@ -5830,7 +5840,7 @@ export const cards = [
 					operator: CALCULATION_SET,
 					operandOne: {
 						type: PROTECTION_TYPE_GENERAL,
-						from: PROTECTION_FROM_SPELLS,
+						from: [PROTECTION_FROM_SPELLS],
 					},
 				},
 			}

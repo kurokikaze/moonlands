@@ -900,9 +900,9 @@ var State = /** @class */ (function () {
         if (!protection)
             return true;
         // Is the `from` right?
-        if ((effect.spell && protection.from === PROTECTION_FROM_SPELLS) ||
-            (effect.power && protection.from === PROTECTION_FROM_POWERS) ||
-            (effect.attack && protection.from === PROTECTION_FROM_ATTACKS)) {
+        if ((effect.spell && protection.from && protection.from.includes(PROTECTION_FROM_SPELLS)) ||
+            (effect.power && protection.from && protection.from.includes(PROTECTION_FROM_POWERS)) ||
+            (effect.attack && protection.from && protection.from.includes(PROTECTION_FROM_ATTACKS))) {
             if (effect.effectType === EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE &&
                 protection.type === PROTECTION_TYPE_ENERGY_LOSS) {
                 var source = effect.source;
@@ -936,6 +936,18 @@ var State = /** @class */ (function () {
                     return !cardFilter(source);
                 }
                 else {
+                    return false;
+                }
+            }
+        }
+        // Energy stasis check
+        if (card.card.data.energyStasis) {
+            if (effect.effectType === EFFECT_TYPE_ADD_ENERGY_TO_CREATURE ||
+                effect.effectType === EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE ||
+                effect.effectType === EFFECT_TYPE_MOVE_ENERGY) {
+                if (effect.source.data.controller === card.data.controller &&
+                    (effect.spell ||
+                        effect.power)) {
                     return false;
                 }
             }
@@ -3916,28 +3928,43 @@ var State = /** @class */ (function () {
                             var ownCreatures = this_1.useSelector(SELECTOR_OWN_CREATURES, action.player || 0);
                             var totalEnergyOnCreatures = (ownCreatures instanceof Array) ? ownCreatures.map(function (card) { return card.data.energy; }).reduce(function (a, b) { return a + b; }, 0) : 0;
                             var newEnergyTotal = Object.values(energyArrangement_1).reduce(function (a, b) { return a + b; }, 0);
-                            if (newEnergyTotal === totalEnergyOnCreatures) {
-                                this_1.getZone(ZONE_TYPE_IN_PLAY).cards.forEach(function (card) {
-                                    if (card.card.type === TYPE_CREATURE && card.id in energyArrangement_1) {
-                                        var newEnergy = energyArrangement_1[card.id];
-                                        card.setEnergy(newEnergy);
-                                        if (card.data.energy === 0) {
-                                            _this.transformIntoActions({
-                                                type: ACTION_EFFECT,
-                                                effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-                                                target: card,
-                                                sourceZone: ZONE_TYPE_IN_PLAY,
-                                                destinationZone: ZONE_TYPE_DISCARD,
-                                                bottom: false,
-                                                attack: false,
-                                                generatedBy: action.generatedBy,
-                                            });
+                            // energy stasis check
+                            var valid = this_1.getZone(ZONE_TYPE_IN_PLAY).cards.every(function (card) {
+                                if (!card.card.data.energyStasis)
+                                    return true;
+                                if (card.id in energyArrangement_1) {
+                                    var newEnergy = energyArrangement_1[card.id];
+                                    return newEnergy === card.data.energy;
+                                }
+                                return true;
+                            });
+                            if (valid) {
+                                if (newEnergyTotal === totalEnergyOnCreatures) {
+                                    this_1.getZone(ZONE_TYPE_IN_PLAY).cards.forEach(function (card) {
+                                        if (card.card.type === TYPE_CREATURE && card.id in energyArrangement_1) {
+                                            var newEnergy = energyArrangement_1[card.id];
+                                            card.setEnergy(newEnergy);
+                                            if (card.data.energy === 0) {
+                                                _this.transformIntoActions({
+                                                    type: ACTION_EFFECT,
+                                                    effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+                                                    target: card,
+                                                    sourceZone: ZONE_TYPE_IN_PLAY,
+                                                    destinationZone: ZONE_TYPE_DISCARD,
+                                                    bottom: false,
+                                                    attack: false,
+                                                    generatedBy: action.generatedBy,
+                                                });
+                                            }
                                         }
-                                    }
-                                });
+                                    });
+                                }
+                                else if (this_1.debug) {
+                                    console.error("Cannot rearrange energy because new total ".concat(newEnergyTotal, " is not equal to old total ").concat(totalEnergyOnCreatures));
+                                }
                             }
                             else if (this_1.debug) {
-                                console.error("Cannot rearrange energy because new total ".concat(newEnergyTotal, " is not equal to old total ").concat(totalEnergyOnCreatures));
+                                console.error('One or more creatures with Energy Stasis is to be affected with energy rearrangement');
                             }
                             break;
                         }
