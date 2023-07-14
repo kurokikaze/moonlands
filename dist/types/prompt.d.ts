@@ -1,5 +1,5 @@
 import CardInGame from '../classes/CardInGame';
-import { ACTION_ENTER_PROMPT, PROMPT_TYPE_ALTERNATIVE, PROMPT_TYPE_CHOOSE_CARDS, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_PLAYER, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES } from '../const';
+import { ACTION_ENTER_PROMPT, PROMPT_TYPE_ALTERNATIVE, PROMPT_TYPE_CHOOSE_CARDS, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_PAYMENT_SOURCE, PROMPT_TYPE_PLAYER, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, TYPE_CREATURE, TYPE_RELIC, TYPE_SPELL } from '../const';
 import { GenericPromptType, RestrictionType, RestrictionObjectType, ZoneType } from './common';
 export declare type PromptParams = {
     promptType: GenericPromptType;
@@ -91,10 +91,17 @@ export declare type AlternativePromptParams = {
     variable?: string;
 };
 export declare type PromptTypeAlternative = PromptInteface & AlternativePromptParams;
+export declare type PaymentSourcePromptParams = {
+    promptType: typeof PROMPT_TYPE_PAYMENT_SOURCE;
+    paymentType: typeof TYPE_CREATURE | typeof TYPE_SPELL | typeof TYPE_RELIC;
+    amount: number;
+    variable?: string;
+};
+export declare type PromptTypePaymentSource = PromptInteface & PaymentSourcePromptParams;
 export declare type MagiPowerPromptParams = {
     promptType: typeof PROMPT_TYPE_POWER_ON_MAGI;
     magi: CardInGame | string;
 };
 export declare type PromptTypeMagiPower = PromptInteface & MagiPowerPromptParams;
-export declare type PromptType = GeneralPromptType | PromptTypeRearrangeEnergy | PromptTypeDistributeEnergy | PromptTypeChooseUpToNCardsFromZone | PromptTypeDistributeDamage | PromptTypePlayer | ChooseCardsPromptType | PromptTypeMayAbility | PromptTypeRearrangeCardsOfZone | PromptTypeAlternative | PromptTypeMagiPower;
+export declare type PromptType = GeneralPromptType | PromptTypeRearrangeEnergy | PromptTypeDistributeEnergy | PromptTypeChooseUpToNCardsFromZone | PromptTypeDistributeDamage | PromptTypePlayer | ChooseCardsPromptType | PromptTypeMayAbility | PromptTypeRearrangeCardsOfZone | PromptTypeAlternative | PromptTypePaymentSource | PromptTypeMagiPower;
 export {};

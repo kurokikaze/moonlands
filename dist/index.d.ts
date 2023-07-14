@@ -29,6 +29,8 @@ declare type PromptParamsType = {
     source?: CardInGame;
     availableCards?: string[];
     startingCards?: string[];
+    paymentType?: typeof TYPE_CREATURE | typeof TYPE_RELIC | typeof TYPE_SPELL;
+    paymentAmount?: number;
     numberOfCards?: number;
     restrictions?: RestrictionObjectType[] | null;
     restriction?: RestrictionType;

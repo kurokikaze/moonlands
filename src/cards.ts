@@ -5119,6 +5119,11 @@ export const cards = [
 			},
 		],
 	}),
+	new Card('Flying Orathan', TYPE_CREATURE, REGION_ARDERIAL, 5, {
+		ableToAttack: false,
+		energize: 2,
+		paymentSource: [TYPE_CREATURE],
+	}),
 	new Card('Fossik', TYPE_MAGI, REGION_UNDERNEATH, 0, {
 		replacementEffects: [
 			{

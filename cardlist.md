@@ -107,7 +107,7 @@
 - [x] O'Qua
 - [x] Ora
 - [x] Orathan
-- [ ] Orathan Flyer
+- [x] Orathan Flyer
 - [ ] Orish
 - [x] Orlon
 - [x] Ormagon

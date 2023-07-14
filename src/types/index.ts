@@ -34,6 +34,9 @@ import {
 
     COST_X,
     STATUS_BURROWED,
+    TYPE_CREATURE,
+    TYPE_RELIC,
+    TYPE_SPELL,
 } from '../const';
 
 import { ResolvePromptType } from './resolvePrompt';
@@ -71,6 +74,7 @@ export type CardData = {
     protection?: ProtectionType;
   	staticAbilities?: StaticAbilityType[];
     effects?: AnyEffectType[];
+    paymentSource?: (typeof TYPE_CREATURE | typeof TYPE_SPELL | typeof TYPE_RELIC)[]
     triggerEffects?: TriggerEffectType[];
     energyStasis?: boolean;                         // This is done specifically for Colossus for now
     replacementEffects?: ReplacementEffectType[];

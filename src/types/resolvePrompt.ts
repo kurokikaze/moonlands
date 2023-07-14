@@ -39,6 +39,10 @@ export type ResolveAlternativePrompt = ResolvePromptInterface & {
   alternative: string;
 }
 
+export type ResolvePaymentSourcePrompt = ResolvePromptInterface & {
+  target: CardInGame;
+}
+
 export type ResolvePromptType = ResolvePromptInterface & {
     number?: number | string;
     cards?: CardInGame[];
@@ -49,4 +53,5 @@ export type ResolvePromptType = ResolvePromptInterface & {
   | ResolvePlayerPrompt
   | ResolveRearrangeCardsPrompt
   | ResolveAlternativePrompt
+  | ResolvePaymentSourcePrompt
   | ResolvePowerOnMagiPrompt;

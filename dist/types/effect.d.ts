@@ -171,7 +171,7 @@ declare type AddEnergyToMagiEffect = ActionEffect & {
 };
 declare type PayingEnergyForCreatureEffect = ActionEffect & {
     effectType: typeof EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE;
-    from: CardInGame;
+    from: CardInGame | string;
     amount: number;
     player: number;
 };

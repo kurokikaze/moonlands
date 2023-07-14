@@ -30,9 +30,12 @@ export declare type ResolvePowerOnMagiPrompt = ResolvePromptInterface & {
 export declare type ResolveAlternativePrompt = ResolvePromptInterface & {
     alternative: string;
 };
+export declare type ResolvePaymentSourcePrompt = ResolvePromptInterface & {
+    target: CardInGame;
+};
 export declare type ResolvePromptType = ResolvePromptInterface & {
     number?: number | string;
     cards?: CardInGame[];
     target?: CardInGame;
-} | ResolveRearrangeEnergyPrompt | ResolveDistributeEnergyPrompt | ResolveDistributeDamagePrompt | ResolvePlayerPrompt | ResolveRearrangeCardsPrompt | ResolveAlternativePrompt | ResolvePowerOnMagiPrompt;
+} | ResolveRearrangeEnergyPrompt | ResolveDistributeEnergyPrompt | ResolveDistributeDamagePrompt | ResolvePlayerPrompt | ResolveRearrangeCardsPrompt | ResolveAlternativePrompt | ResolvePaymentSourcePrompt | ResolvePowerOnMagiPrompt;
 export {};

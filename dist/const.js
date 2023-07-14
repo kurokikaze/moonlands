@@ -203,6 +203,7 @@ export var PROMPT_TYPE_PLAYER = 'prompt/player';
 export var PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE = 'prompt/rearrange_cards_of_zone';
 export var PROMPT_TYPE_POWER_ON_MAGI = 'prompt/power_on_magi';
 export var PROMPT_TYPE_ALTERNATIVE = 'prompt/alternative';
+export var PROMPT_TYPE_PAYMENT_SOURCE = 'prompt/payment_source';
 export var RESTRICTION_TYPE = 'restrictions/type';
 export var RESTRICTION_ENERGY_LESS_THAN_STARTING = 'restrictions/energy_less_than_starting';
 export var RESTRICTION_ENERGY_LESS_THAN = 'restrictions/energy_less_than';

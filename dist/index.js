@@ -23,7 +23,7 @@ var _a;
 // import EventEmitter from 'events';
 import { nanoid } from 'nanoid';
 import { TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, ACTION_PASS, ACTION_PLAY, ACTION_POWER, ACTION_EFFECT, ACTION_SELECT, ACTION_CALCULATE, ACTION_ENTER_PROMPT, ACTION_RESOLVE_PROMPT, ACTION_GET_PROPERTY_VALUE, ACTION_ATTACK, ACTION_PLAYER_WINS, ACTION_CONCEDE, ACTION_TIME_NOTIFICATION, ACTION_EXIT_PROMPTS, ACTION_PROPERTY, PROPERTY_ID, PROPERTY_TYPE, PROPERTY_CONTROLLER, PROPERTY_ENERGY_COUNT, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, PROPERTY_POWER_COST, PROPERTY_CREATURE_TYPES, PROPERTY_STATUS_WAS_ATTACKED, PROPERTY_STATUS_DEFEATED_CREATURE, PROPERTY_ENERGY_LOSS_THRESHOLD, PROPERTY_STATUS, PROPERTY_ABLE_TO_ATTACK, PROPERTY_MAGI_NAME, PROPERTY_CAN_BE_ATTACKED, CALCULATION_SET, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, CALCULATION_HALVE_ROUND_DOWN, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_MAX, SELECTOR_CREATURES, SELECTOR_MAGI, SELECTOR_CREATURES_AND_MAGI, SELECTOR_RELICS, SELECTOR_OWN_MAGI, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_MAGI_OF_REGION, SELECTOR_OPPONENT_ID, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_OWN_SPELLS_IN_HAND, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, SELECTOR_CREATURES_OF_TYPE, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_OTHER_CREATURES_OF_TYPE, SELECTOR_STATUS, SELECTOR_OWN_CREATURES_WITH_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_ID, SELECTOR_CREATURES_OF_PLAYER, SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY, STATUS_BURROWED, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_RELIC, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_OWN_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_CHOOSE_CARDS, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_MAGI_WITHOUT_CREATURES, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_PLAYER, NO_PRIORITY, PRIORITY_PRS, PRIORITY_ATTACK, PRIORITY_CREATURES, EFFECT_TYPE_START_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_DRAW, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_PLAY_CREATURE, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_DAMAGE_STEP, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_RELIC_ENTERS_PLAY, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE, EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC, EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_DEFEAT_MAGI, EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY, EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_PAYING_ENERGY_FOR_POWER, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_CREATURE_IS_DEFEATED, // Possibly redundant
-EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_ATTACKER_DEALS_DAMAGE, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_IS_ATTACKED, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_DRAW_REST_OF_CARDS, EFFECT_TYPE_DISCARD_CARDS_FROM_HAND, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_CONDITIONAL, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_ATTACK, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, REGION_UNIVERSAL, RESTRICTION_TYPE, RESTRICTION_REGION, RESTRICTION_ENERGY_LESS_THAN_STARTING, RESTRICTION_ENERGY_LESS_THAN, RESTRICTION_CREATURE_TYPE, RESTRICTION_OWN_CREATURE, RESTRICTION_OPPONENT_CREATURE, RESTRICTION_PLAYABLE, RESTRICTION_CREATURE_WAS_ATTACKED, RESTRICTION_MAGI_WITHOUT_CREATURES, RESTRICTION_STATUS, RESTRICTION_REGION_IS_NOT, RESTRICTION_ENERGY_EQUALS, COST_X, COST_X_PLUS_ONE, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, LOG_ENTRY_PLAY, LOG_ENTRY_DRAW, LOG_ENTRY_CHOOSES_STARTING_CARDS, LOG_ENTRY_POWER_ACTIVATION, LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY, LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY, LOG_ENTRY_TARGETING, LOG_ENTRY_NUMBER_CHOICE, LOG_ENTRY_ATTACK, LOG_ENTRY_CREATURE_ENERGY_LOSS, LOG_ENTRY_MAGI_ENERGY_LOSS, LOG_ENTRY_CREATURE_ENERGY_GAIN, LOG_ENTRY_MAGI_ENERGY_GAIN, LOG_ENTRY_MAGI_DEFEATED, ACTION_NONE, EXPIRATION_ANY_TURNS, EXPIRATION_NEVER, EXPIRATION_OPPONENT_TURNS, PROTECTION_FROM_POWERS, PROTECTION_FROM_SPELLS, PROTECTION_TYPE_DISCARDING_FROM_PLAY, PROTECTION_TYPE_GENERAL, CARD_COUNT, EFFECT_TYPE_DRAW_N_CARDS, EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROPERTY_PROTECTION, PROTECTION_FROM_ATTACKS, CALCULATION_MULTIPLY, EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP, PROTECTION_TYPE_ENERGY_LOSS, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, SELECTOR_NTH_CARD_OF_ZONE, EFFECT_TYPE_DISCARD_RESHUFFLED, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, LOG_ENTRY_DIE_ROLLED, PROPERTY_CREATURE_NAME, RESTRICTION_CREATURE_NAME, PROMPT_TYPE_NUMBER_OF_CREATURES, PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED, SELECTOR_SELF_AND_STATUS, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_ALTERNATIVE, SELECTOR_OWN_CARDS_IN_HAND, SELECTOR_CARDS_IN_HAND, } from './const';
+EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_ATTACKER_DEALS_DAMAGE, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_IS_ATTACKED, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_DRAW_REST_OF_CARDS, EFFECT_TYPE_DISCARD_CARDS_FROM_HAND, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_CONDITIONAL, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_ATTACK, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, REGION_UNIVERSAL, RESTRICTION_TYPE, RESTRICTION_REGION, RESTRICTION_ENERGY_LESS_THAN_STARTING, RESTRICTION_ENERGY_LESS_THAN, RESTRICTION_CREATURE_TYPE, RESTRICTION_OWN_CREATURE, RESTRICTION_OPPONENT_CREATURE, RESTRICTION_PLAYABLE, RESTRICTION_CREATURE_WAS_ATTACKED, RESTRICTION_MAGI_WITHOUT_CREATURES, RESTRICTION_STATUS, RESTRICTION_REGION_IS_NOT, RESTRICTION_ENERGY_EQUALS, COST_X, COST_X_PLUS_ONE, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, LOG_ENTRY_PLAY, LOG_ENTRY_DRAW, LOG_ENTRY_CHOOSES_STARTING_CARDS, LOG_ENTRY_POWER_ACTIVATION, LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY, LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY, LOG_ENTRY_TARGETING, LOG_ENTRY_NUMBER_CHOICE, LOG_ENTRY_ATTACK, LOG_ENTRY_CREATURE_ENERGY_LOSS, LOG_ENTRY_MAGI_ENERGY_LOSS, LOG_ENTRY_CREATURE_ENERGY_GAIN, LOG_ENTRY_MAGI_ENERGY_GAIN, LOG_ENTRY_MAGI_DEFEATED, ACTION_NONE, EXPIRATION_ANY_TURNS, EXPIRATION_NEVER, EXPIRATION_OPPONENT_TURNS, PROTECTION_FROM_POWERS, PROTECTION_FROM_SPELLS, PROTECTION_TYPE_DISCARDING_FROM_PLAY, PROTECTION_TYPE_GENERAL, CARD_COUNT, EFFECT_TYPE_DRAW_N_CARDS, EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROPERTY_PROTECTION, PROTECTION_FROM_ATTACKS, CALCULATION_MULTIPLY, EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP, PROTECTION_TYPE_ENERGY_LOSS, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, SELECTOR_NTH_CARD_OF_ZONE, EFFECT_TYPE_DISCARD_RESHUFFLED, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, LOG_ENTRY_DIE_ROLLED, PROPERTY_CREATURE_NAME, RESTRICTION_CREATURE_NAME, PROMPT_TYPE_NUMBER_OF_CREATURES, PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED, SELECTOR_SELF_AND_STATUS, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_ALTERNATIVE, SELECTOR_OWN_CARDS_IN_HAND, SELECTOR_CARDS_IN_HAND, PROMPT_TYPE_PAYMENT_SOURCE, } from './const';
 import { showAction } from './logAction';
 import clone from './clone';
 import { byName } from './cards';
@@ -57,6 +57,7 @@ export var DEFAULT_PROMPT_VARIABLE = (_a = {},
     _a[PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED] = 'targets',
     _a[PROMPT_TYPE_POWER_ON_MAGI] = 'chosenPower',
     _a[PROMPT_TYPE_ALTERNATIVE] = 'alternative',
+    _a[PROMPT_TYPE_PAYMENT_SOURCE] = 'paymentSource',
     _a[PROMPT_TYPE_MAY_ABILITY] = '',
     _a);
 var steps = [
@@ -194,24 +195,9 @@ var State = /** @class */ (function () {
         this.rollDebugValue = null,
             this.actionsOne = [];
         this.actionsTwo = [];
-        // this.actionStreamOne = new EventEmitter();
-        // this.actionStreamTwo = new EventEmitter();
-        // this.logStream =	new EventEmitter();
-        // this.commandStream = new Writable({
-        // 	objectMode: true,
-        // 	write: (command: AnyEffectType) => {
-        // 		if (Object.prototype.hasOwnProperty.call(command, 'type')) {
-        // 			this.update(command);
-        // 		}
-        // 	},
-        // });
     }
-    State.prototype.closeStreams = function () {
-        // this.actionStreamOne.removeAllListeners();
-        // this.actionStreamTwo.removeAllListeners();
-        // this.logStream.removeAllListeners();
-        // this.commandStream.destroy();
-    };
+    // @deprecated
+    State.prototype.closeStreams = function () { };
     State.prototype.setOnAction = function (callback) {
         this.onAction = callback;
     };
@@ -1705,13 +1691,13 @@ var State = /** @class */ (function () {
     };
     State.prototype.update = function (initialAction) {
         var _this = this;
-        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
         if (this.hasWinner()) {
             return false;
         }
         this.addActions(initialAction);
         var _loop_1 = function () {
-            var _p;
+            var _q;
             var rawAction = this_1.getNextAction();
             var replacedActions = this_1.replaceByReplacementEffect(rawAction);
             var action = replacedActions[0];
@@ -1916,6 +1902,13 @@ var State = /** @class */ (function () {
                         case PROMPT_TYPE_ALTERNATIVE: {
                             promptParams = {
                                 alternatives: action.alternatives,
+                            };
+                            break;
+                        }
+                        case PROMPT_TYPE_PAYMENT_SOURCE: {
+                            promptParams = {
+                                paymentAmount: action.amount,
+                                paymentType: action.paymentType,
                             };
                             break;
                         }
@@ -2266,9 +2259,26 @@ var State = /** @class */ (function () {
                                     currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_ALTERNATIVE]] = action.alternative;
                                 }
                             }
+                            case PROMPT_TYPE_PAYMENT_SOURCE: {
+                                if ('target' in action && action.target && this_1.state.promptParams.paymentType && this_1.state.promptParams.paymentAmount) {
+                                    var paymentSource = action.target;
+                                    if (paymentSource.card.type === TYPE_MAGI ||
+                                        (paymentSource.card.type === TYPE_CREATURE && ((_h = paymentSource.card.data.paymentSource) === null || _h === void 0 ? void 0 : _h.includes(this_1.state.promptParams.paymentType)))) {
+                                        if (paymentSource.data.energy >= this_1.state.promptParams.paymentAmount) {
+                                            currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_ALTERNATIVE]] = action.target;
+                                        }
+                                        else {
+                                            console.error("This payment target doesn't have enough energy to pay for that");
+                                        }
+                                    }
+                                    else {
+                                        console.error("You cannot pay for ".concat(this_1.state.promptParams.paymentType, " from this"));
+                                    }
+                                }
+                            }
                         }
                         var actions = this_1.state.savedActions || [];
-                        this_1.state = __assign(__assign({}, this_1.state), { actions: actions, savedActions: [], prompt: false, promptType: null, promptMessage: undefined, promptGeneratedBy: undefined, promptVariable: undefined, promptParams: {}, spellMetaData: __assign(__assign({}, this_1.state.spellMetaData), (_p = {}, _p[generatedBy] = currentActionMetaData, _p)) });
+                        this_1.state = __assign(__assign({}, this_1.state), { actions: actions, savedActions: [], prompt: false, promptType: null, promptMessage: undefined, promptGeneratedBy: undefined, promptVariable: undefined, promptParams: {}, spellMetaData: __assign(__assign({}, this_1.state.spellMetaData), (_q = {}, _q[generatedBy] = currentActionMetaData, _q)) });
                     }
                     break;
                 }
@@ -2489,37 +2499,60 @@ var State = /** @class */ (function () {
                             if (!activeMagi) {
                                 throw new Error('Trying to play a card without Magi');
                             }
-                            var totalCost = this_1.calculateTotalCost(cardItself_1);
+                            var totalCost_1 = this_1.calculateTotalCost(cardItself_1);
                             switch (cardType) {
                                 case TYPE_CREATURE: {
-                                    if (activeMagi.data.energy >= totalCost) {
-                                        this_1.transformIntoActions({
-                                            type: ACTION_EFFECT,
-                                            effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
-                                            from: activeMagi,
-                                            amount: totalCost,
-                                            player: player_1,
-                                            generatedBy: cardItself_1.id,
-                                        }, {
-                                            type: ACTION_EFFECT,
-                                            effectType: EFFECT_TYPE_PLAY_CREATURE,
-                                            card: cardItself_1,
-                                            player: player_1,
-                                            generatedBy: cardItself_1.id,
-                                        }, {
-                                            type: ACTION_EFFECT,
-                                            effectType: EFFECT_TYPE_CREATURE_ENTERS_PLAY,
-                                            target: '$creature_created',
-                                            player: player_1,
-                                            generatedBy: cardItself_1.id,
-                                        }, {
-                                            type: ACTION_EFFECT,
-                                            effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
-                                            target: '$creature_created',
-                                            player: player_1,
-                                            amount: (baseCard_1.cost === COST_X || baseCard_1.cost === COST_X_PLUS_ONE || baseCard_1.cost === null) ? 0 : baseCard_1.cost,
-                                            generatedBy: cardItself_1.id,
-                                        });
+                                    var alternativePaymentSources = this_1.getZone(ZONE_TYPE_IN_PLAY).cards.filter(function (card) { return card.card.data.paymentSource && card.card.data.paymentSource.includes(TYPE_CREATURE); });
+                                    var alternativePaymentSourcesAbleToPay = alternativePaymentSources.filter(function (card) { return card.data.energy >= totalCost_1; });
+                                    if (activeMagi.data.energy >= totalCost_1 || alternativePaymentSourcesAbleToPay.length > 0) {
+                                        var availablePaymentSources = __spreadArray(__spreadArray([], alternativePaymentSourcesAbleToPay, true), [
+                                            activeMagi.data.energy >= totalCost_1 ? activeMagi : undefined
+                                        ], false).filter(function (card) { return card instanceof CardInGame; });
+                                        var paymentActions = availablePaymentSources.length == 1 ? [{
+                                                type: ACTION_EFFECT,
+                                                effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
+                                                from: availablePaymentSources[0],
+                                                amount: totalCost_1,
+                                                player: player_1,
+                                                generatedBy: cardItself_1.id,
+                                            }] : [{
+                                                type: ACTION_ENTER_PROMPT,
+                                                promptType: PROMPT_TYPE_PAYMENT_SOURCE,
+                                                amount: totalCost_1,
+                                                paymentType: TYPE_CREATURE,
+                                                variable: 'paymentSource',
+                                                player: player_1,
+                                                generatedBy: cardItself_1.id,
+                                            }, {
+                                                type: ACTION_EFFECT,
+                                                effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
+                                                from: '$paymentSource',
+                                                amount: totalCost_1,
+                                                player: player_1,
+                                                generatedBy: cardItself_1.id,
+                                            }];
+                                        this_1.transformIntoActions.apply(this_1, __spreadArray(__spreadArray([], paymentActions, false), [{
+                                                type: ACTION_EFFECT,
+                                                effectType: EFFECT_TYPE_PLAY_CREATURE,
+                                                card: cardItself_1,
+                                                player: player_1,
+                                                generatedBy: cardItself_1.id,
+                                            },
+                                            {
+                                                type: ACTION_EFFECT,
+                                                effectType: EFFECT_TYPE_CREATURE_ENTERS_PLAY,
+                                                target: '$creature_created',
+                                                player: player_1,
+                                                generatedBy: cardItself_1.id,
+                                            },
+                                            {
+                                                type: ACTION_EFFECT,
+                                                effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
+                                                target: '$creature_created',
+                                                player: player_1,
+                                                amount: (baseCard_1.cost === COST_X || baseCard_1.cost === COST_X_PLUS_ONE || baseCard_1.cost === null) ? 0 : baseCard_1.cost,
+                                                generatedBy: cardItself_1.id,
+                                            }], false));
                                     }
                                     break;
                                 }
@@ -2534,7 +2567,7 @@ var State = /** @class */ (function () {
                                             type: ACTION_EFFECT,
                                             effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC,
                                             from: activeMagi,
-                                            amount: totalCost,
+                                            amount: totalCost_1,
                                             player: player_1,
                                             generatedBy: cardItself_1.id,
                                         }, {
@@ -2554,9 +2587,9 @@ var State = /** @class */ (function () {
                                     break;
                                 }
                                 case TYPE_SPELL: {
-                                    if (activeMagi.data.energy >= totalCost || baseCard_1.cost === COST_X || baseCard_1.cost === COST_X_PLUS_ONE) {
+                                    if (activeMagi.data.energy >= totalCost_1 || baseCard_1.cost === COST_X || baseCard_1.cost === COST_X_PLUS_ONE) {
                                         var enrichAction = function (effect) { return (__assign(__assign({ source: cardItself_1, player: player_1 }, effect), { spell: true, generatedBy: cardItself_1.id })); };
-                                        var preparedEffects = ((_j = (_h = baseCard_1.data) === null || _h === void 0 ? void 0 : _h.effects) === null || _j === void 0 ? void 0 : _j.map(enrichAction)) || [];
+                                        var preparedEffects = ((_k = (_j = baseCard_1.data) === null || _j === void 0 ? void 0 : _j.effects) === null || _k === void 0 ? void 0 : _k.map(enrichAction)) || [];
                                         var testablePrompts_1 = [
                                             PROMPT_TYPE_SINGLE_CREATURE,
                                             PROMPT_TYPE_RELIC,
@@ -2624,7 +2657,7 @@ var State = /** @class */ (function () {
                                                     type: ACTION_EFFECT,
                                                     effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
                                                     from: activeMagi,
-                                                    amount: totalCost,
+                                                    amount: totalCost_1,
                                                     player: player_1,
                                                     generatedBy: cardItself_1.id,
                                                 }
@@ -2701,7 +2734,7 @@ var State = /** @class */ (function () {
                                 action.player === this_1.state.goesFirst &&
                                 action.step === 0;
                             if (steps[action.step].effects && !isFirstEnergize) {
-                                var transformedActions = ((_l = (_k = steps[action.step]) === null || _k === void 0 ? void 0 : _k.effects) === null || _l === void 0 ? void 0 : _l.map(function (effect) {
+                                var transformedActions = ((_m = (_l = steps[action.step]) === null || _l === void 0 ? void 0 : _l.effects) === null || _m === void 0 ? void 0 : _m.map(function (effect) {
                                     return (__assign(__assign({}, effect), { player: action.player, generatedBy: action.generatedBy }));
                                 })) || [];
                                 this_1.addActions.apply(this_1, transformedActions);
@@ -2834,7 +2867,7 @@ var State = /** @class */ (function () {
                             }
                             // if magi is active, reset its actions used too
                             if (this_1.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).length == 1) {
-                                (_o = (_m = this_1.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player)) === null || _m === void 0 ? void 0 : _m.card) === null || _o === void 0 ? void 0 : _o.clearActionsUsed();
+                                (_p = (_o = this_1.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player)) === null || _o === void 0 ? void 0 : _o.card) === null || _p === void 0 ? void 0 : _p.clearActionsUsed();
                             }
                             break;
                         }
@@ -3131,8 +3164,8 @@ var State = /** @class */ (function () {
                                         generatedBy: source_2.id,
                                     },
                                 ]; }).flat();
-                                for (var _q = 0, preparedEffects_1 = preparedEffects; _q < preparedEffects_1.length; _q++) {
-                                    var effect = preparedEffects_1[_q];
+                                for (var _r = 0, preparedEffects_1 = preparedEffects; _r < preparedEffects_1.length; _r++) {
+                                    var effect = preparedEffects_1[_r];
                                     attackSequence.push(effect);
                                 }
                             }
@@ -3356,14 +3389,17 @@ var State = /** @class */ (function () {
                             var payingTarget = this_1.getMetaValue(action.from, action.generatedBy);
                             var payingAmount = Number(this_1.getMetaValue(action.amount, action.generatedBy));
                             if (payingAmount > 0) {
-                                this_1.transformIntoActions({
-                                    type: ACTION_EFFECT,
-                                    effectType: EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
-                                    target: payingTarget,
-                                    amount: payingAmount,
-                                    player: action.player,
-                                    generatedBy: action.generatedBy,
-                                });
+                                if (payingTarget instanceof CardInGame) {
+                                    var correctEffectType = payingTarget.card.type === TYPE_MAGI ? EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI : EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE;
+                                    this_1.transformIntoActions({
+                                        type: ACTION_EFFECT,
+                                        effectType: correctEffectType,
+                                        target: payingTarget,
+                                        amount: payingAmount,
+                                        player: action.player,
+                                        generatedBy: action.generatedBy,
+                                    });
+                                }
                             }
                             break;
                         }

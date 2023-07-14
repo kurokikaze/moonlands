@@ -248,6 +248,7 @@ import {
 	PROMPT_TYPE_ALTERNATIVE,
 	SELECTOR_OWN_CARDS_IN_HAND,
 	SELECTOR_CARDS_IN_HAND,
+	PROMPT_TYPE_PAYMENT_SOURCE,
 } from './const';
 
 import {showAction} from './logAction';
@@ -286,7 +287,7 @@ import {
 } from './types';
 import { DieRolledEffect, DiscardCreatureFromPlayEffect, DiscardEnergyFromCreatureEffect, EnhancedDelayedTriggerType, ExecutePowerEffect, StartingEnergyOnCreatureEffect } from './types/effect';
 import { CardType, StatusType } from './types/common';
-import { AlternativeType, ChooseCardsPromptType, PromptTypeMayAbility } from './types/prompt';
+import { AlternativeType, PromptTypeMayAbility } from './types/prompt';
 
 const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
 	id: cardInGame.id,
@@ -410,6 +411,7 @@ export const DEFAULT_PROMPT_VARIABLE: Record<PromptTypeType, string> = {
 	[PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED]: 'targets',
 	[PROMPT_TYPE_POWER_ON_MAGI]: 'chosenPower',
 	[PROMPT_TYPE_ALTERNATIVE]: 'alternative',
+	[PROMPT_TYPE_PAYMENT_SOURCE]: 'paymentSource',
 	[PROMPT_TYPE_MAY_ABILITY]: '', // Special case, doesn't use variables
 };
 
@@ -543,6 +545,8 @@ type PromptParamsType = {
 	source?: CardInGame;
 	availableCards?: string[];
 	startingCards?: string[];
+	paymentType?: typeof TYPE_CREATURE | typeof TYPE_RELIC | typeof TYPE_SPELL;
+	paymentAmount?: number;
 	numberOfCards?: number;
 	restrictions?: RestrictionObjectType[] | null;
 	restriction?: RestrictionType;
@@ -620,27 +624,10 @@ export class State {
 
 		this.actionsOne = [];
 		this.actionsTwo = [];
-
-		// this.actionStreamOne = new EventEmitter();
-		// this.actionStreamTwo = new EventEmitter();
-		// this.logStream =	new EventEmitter();
-
-		// this.commandStream = new Writable({
-		// 	objectMode: true,
-		// 	write: (command: AnyEffectType) => {
-		// 		if (Object.prototype.hasOwnProperty.call(command, 'type')) {
-		// 			this.update(command);
-		// 		}
-		// 	},
-		// });
 	}
 
-	closeStreams() {
-		// this.actionStreamOne.removeAllListeners();
-		// this.actionStreamTwo.removeAllListeners();
-		// this.logStream.removeAllListeners();
-		// this.commandStream.destroy();
-	}
+	// @deprecated
+	closeStreams() {}
 
 	setOnAction(callback: (e: AnyEffectType) => void) {
 		this.onAction = callback
@@ -2750,6 +2737,13 @@ export class State {
 							}
 							break;
 						}
+						case PROMPT_TYPE_PAYMENT_SOURCE: {
+							promptParams = {
+								paymentAmount: action.amount,
+								paymentType: action.paymentType,
+							}
+							break;
+						}
 						case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
 							if (action.restriction && action.restrictions) {
 								throw new Error('PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE error: single and multiple restrictions specified');
@@ -3137,6 +3131,22 @@ export class State {
 									currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_ALTERNATIVE]] = action.alternative;
 								}
 							}
+							case PROMPT_TYPE_PAYMENT_SOURCE: {
+								if ('target' in action && action.target && this.state.promptParams.paymentType && this.state.promptParams.paymentAmount) {
+									const paymentSource = action.target;
+									if (paymentSource.card.type === TYPE_MAGI ||
+										(paymentSource.card.type === TYPE_CREATURE && paymentSource.card.data.paymentSource?.includes(this.state.promptParams.paymentType))
+									) {
+										if (paymentSource.data.energy >= this.state.promptParams.paymentAmount) {
+											currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_ALTERNATIVE]] = action.target;
+										} else {
+											console.error(`This payment target doesn't have enough energy to pay for that`)
+										}
+									} else {
+										console.error(`You cannot pay for ${this.state.promptParams.paymentType} from this`);
+									}
+								}
+							}
 						}
 						const actions = this.state.savedActions || [];
 						this.state = {
@@ -3394,16 +3404,40 @@ export class State {
 
 							switch (cardType) {
 								case TYPE_CREATURE: {
-									if (activeMagi.data.energy >= totalCost) {
+									const alternativePaymentSources = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.data.paymentSource && card.card.data.paymentSource.includes(TYPE_CREATURE));
+									const alternativePaymentSourcesAbleToPay = alternativePaymentSources.filter(card => card.data.energy >= totalCost);
+
+									if (activeMagi.data.energy >= totalCost || alternativePaymentSourcesAbleToPay.length > 0) {
+										const availablePaymentSources: CardInGame[] = [
+											...alternativePaymentSourcesAbleToPay,
+											activeMagi.data.energy >= totalCost ? activeMagi : undefined
+										].filter<CardInGame>((card): card is CardInGame => card instanceof CardInGame);
+
+										const paymentActions: AnyEffectType[] = availablePaymentSources.length == 1 ? [{
+											type: ACTION_EFFECT,
+											effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
+											from: availablePaymentSources[0],
+											amount: totalCost,
+											player: player,
+											generatedBy: cardItself.id,
+										}] : [{
+											type: ACTION_ENTER_PROMPT,
+											promptType: PROMPT_TYPE_PAYMENT_SOURCE,
+											amount: totalCost,
+											paymentType: TYPE_CREATURE,
+											variable: 'paymentSource',
+											player: player,
+											generatedBy: cardItself.id,
+										}, {
+											type: ACTION_EFFECT,
+											effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
+											from: '$paymentSource',
+											amount: totalCost,
+											player: player,
+											generatedBy: cardItself.id,
+										}];
 										this.transformIntoActions(
-											{
-												type: ACTION_EFFECT,
-												effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
-												from: activeMagi,
-												amount: totalCost,
-												player: player,
-												generatedBy: cardItself.id,
-											},
+											...paymentActions,
 											{
 												type: ACTION_EFFECT,
 												effectType: EFFECT_TYPE_PLAY_CREATURE,
@@ -4360,14 +4394,17 @@ export class State {
 							const payingAmount = Number(this.getMetaValue(action.amount, action.generatedBy));
 
 							if (payingAmount > 0) {
-								this.transformIntoActions({
-									type: ACTION_EFFECT,
-									effectType: EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
-									target: payingTarget,
-									amount: payingAmount,
-									player: action.player,
-									generatedBy: action.generatedBy,
-								});
+								if (payingTarget instanceof CardInGame) {
+									const correctEffectType = payingTarget.card.type === TYPE_MAGI ? EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI : EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE;
+									this.transformIntoActions({
+										type: ACTION_EFFECT,
+										effectType: correctEffectType,
+										target: payingTarget,
+										amount: payingAmount,
+										player: action.player,
+										generatedBy: action.generatedBy,
+									});
+								}
 							}
 							break;
 						}

@@ -47,6 +47,8 @@ import {
 	ZONE_TYPE_DISCARD,
 	ZONE_TYPE_HAND,
 	PROMPT_TYPE_ALTERNATIVE,
+	PROMPT_TYPE_PAYMENT_SOURCE,
+	TYPE_CREATURE,
 } from '../../src/const.ts';
 
 import {
@@ -1695,3 +1697,126 @@ describe('Eye of the Storm', () => {
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(2, 'Non-active player discard has 2 cards');
 	});
 })
+
+describe('Flying Orathan', () => {
+	it('Payment from orathan', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+	
+		const lasada = new CardInGame(byName('Lasada'), ACTIVE_PLAYER).addEnergy(10);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(7);
+		const flyingOrathan = new CardInGame(byName('Flying Orathan'), ACTIVE_PLAYER).addEnergy(10);
+		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [flyingOrathan], [lasada]);
+	
+		const gameState = new State({
+			zones,
+			step: STEP_CREATURES,
+			activePlayer: ACTIVE_PLAYER,
+		});
+	
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([xyx]);
+
+		const playAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: xyx,
+				player: ACTIVE_PLAYER,
+			},
+		};
+	
+		gameState.update(playAction);
+	
+		expect(gameState.state.prompt).toEqual(true);
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_PAYMENT_SOURCE);
+		expect(gameState.state.promptParams.paymentAmount).toEqual(xyx.card.cost);
+		expect(gameState.state.promptParams.paymentType).toEqual(TYPE_CREATURE);
+
+		const resolvePaymentPrompt = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: flyingOrathan,
+			generatedBy: gameState.state.prompt.generatedBy,
+		};
+
+		gameState.update(resolvePaymentPrompt);
+
+		expect(gameState.state.prompt).toEqual(false);
+		expect(lasada.data.energy).toEqual(10);
+		expect(flyingOrathan.data.energy).toEqual(7);
+	});
+
+	it('Payment from orathan', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+	
+		const lasada = new CardInGame(byName('Lasada'), ACTIVE_PLAYER).addEnergy(10);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(7);
+		const flyingOrathan = new CardInGame(byName('Flying Orathan'), ACTIVE_PLAYER).addEnergy(2);
+		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [flyingOrathan], [lasada]);
+	
+		const gameState = new State({
+			zones,
+			step: STEP_CREATURES,
+			activePlayer: ACTIVE_PLAYER,
+		});
+	
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([xyx]);
+
+		const playAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: xyx,
+				player: ACTIVE_PLAYER,
+			},
+		};
+
+		gameState.update(playAction);
+
+		expect(gameState.state.prompt).toEqual(false);
+		expect(lasada.data.energy).toEqual(7);
+		expect(flyingOrathan.data.energy).toEqual(2);
+	});
+
+	it('Payment from orathan (Magi doesnt have enough energy)', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+	
+		const lasada = new CardInGame(byName('Lasada'), ACTIVE_PLAYER).addEnergy(1);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(7);
+		const flyingOrathan = new CardInGame(byName('Flying Orathan'), ACTIVE_PLAYER).addEnergy(10);
+		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [flyingOrathan], [lasada]);
+	
+		const gameState = new State({
+			zones,
+			step: STEP_CREATURES,
+			activePlayer: ACTIVE_PLAYER,
+		});
+	
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([xyx]);
+
+		const playAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: xyx,
+				player: ACTIVE_PLAYER,
+			},
+		};
+	
+		gameState.update(playAction);
+
+		expect(gameState.state.prompt).toEqual(false);
+		expect(lasada.data.energy).toEqual(1);
+		expect(flyingOrathan.data.energy).toEqual(7);
+	});
+});
