@@ -1698,14 +1698,14 @@ describe('Eye of the Storm', () => {
 	});
 })
 
-describe('Flying Orathan', () => {
+describe('Orathan Flyer', () => {
 	it('Payment from orathan', () => {
 		const ACTIVE_PLAYER = 422;
 		const NON_ACTIVE_PLAYER = 1310;
 	
 		const lasada = new CardInGame(byName('Lasada'), ACTIVE_PLAYER).addEnergy(10);
 		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(7);
-		const flyingOrathan = new CardInGame(byName('Flying Orathan'), ACTIVE_PLAYER).addEnergy(10);
+		const flyingOrathan = new CardInGame(byName('Orathan Flyer'), ACTIVE_PLAYER).addEnergy(10);
 		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [flyingOrathan], [lasada]);
@@ -1754,7 +1754,7 @@ describe('Flying Orathan', () => {
 	
 		const lasada = new CardInGame(byName('Lasada'), ACTIVE_PLAYER).addEnergy(10);
 		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(7);
-		const flyingOrathan = new CardInGame(byName('Flying Orathan'), ACTIVE_PLAYER).addEnergy(2);
+		const flyingOrathan = new CardInGame(byName('Orathan Flyer'), ACTIVE_PLAYER).addEnergy(2);
 		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [flyingOrathan], [lasada]);
@@ -1790,7 +1790,7 @@ describe('Flying Orathan', () => {
 	
 		const lasada = new CardInGame(byName('Lasada'), ACTIVE_PLAYER).addEnergy(1);
 		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(7);
-		const flyingOrathan = new CardInGame(byName('Flying Orathan'), ACTIVE_PLAYER).addEnergy(10);
+		const flyingOrathan = new CardInGame(byName('Orathan Flyer'), ACTIVE_PLAYER).addEnergy(10);
 		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [flyingOrathan], [lasada]);

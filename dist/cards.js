@@ -4832,7 +4832,7 @@ export var cards = [
             },
         ],
     }),
-    new Card('Flying Orathan', TYPE_CREATURE, REGION_ARDERIAL, 5, {
+    new Card('Orathan Flyer', TYPE_CREATURE, REGION_ARDERIAL, 5, {
         ableToAttack: false,
         energize: 2,
         paymentSource: [TYPE_CREATURE],
