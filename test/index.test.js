@@ -5507,31 +5507,49 @@ function validateEffects(effects, initialVariables, cardName) {
 }
 
 describe('Card logic', () => {
-	const spells = cards.filter(card => card.type === moonlands.TYPE_SPELL);
+	it('Spells and powers', () => {
+		const spells = cards.filter(card => card.type === moonlands.TYPE_SPELL);
 
-	for (let spell of spells) {
-		let variables = {
-			'$source': 1,
-			'$player': 1,
-		};
-		if (spell.cost == moonlands.COST_X || spell.cost == moonlands.COST_X_PLUS_ONE) {
-			variables['$chosen_cost'] = 1;
+		for (let spell of spells) {
+			let variables = {
+				'$source': 1,
+				'$player': 1,
+			};
+			if (spell.cost == moonlands.COST_X || spell.cost == moonlands.COST_X_PLUS_ONE) {
+				variables['$chosen_cost'] = 1;
+			}
+	
+			expect(validateEffects(spell.data.effects, variables, spell.name)).toEqual(true);
 		}
-
-		expect(validateEffects(spell.data.effects, variables, spell.name)).toEqual(true);
-	}
-
-	const cardsWithPowers = cards.filter(card => card.type === moonlands.TYPE_RELIC || card.type === moonlands.TYPE_CREATURE || card.type === moonlands.TYPE_MAGI);
-
-	for (let card of cardsWithPowers) {
-		let variables = {
-			'$source': 1,
-		};
-
-		if (card.powers && card.powers.length) {
-			for (let power of card.powers) {
-				expect(validateEffects(power.effects, variables, card.name)).toEqual(true);
+	
+		const cardsWithPowers = cards.filter(card => card.type === moonlands.TYPE_RELIC || card.type === moonlands.TYPE_CREATURE || card.type === moonlands.TYPE_MAGI);
+	
+		for (let card of cardsWithPowers) {
+			let variables = {
+				'$source': 1,
+			};
+	
+			if (card.powers && card.powers.length) {
+				for (let power of card.powers) {
+					expect(validateEffects(power.effects, variables, card.name)).toEqual(true);
+				}
 			}
 		}
-	}
+	});
+
+	it('Magi should have starting energy and energize', () => {
+		const magis = cards.filter(card => card.type === moonlands.TYPE_MAGI);
+
+		for (let magi of magis) {
+			expect(magi.data).toHaveProperty('startingEnergy');
+			expect(magi.data).toHaveProperty('startingCards');
+			expect(magi.data).toHaveProperty('energize');
+
+			// Should be enabled later when all of the base set cards are implemented
+			/* magi.data.startingCards.forEach(startingCard => {
+				const result = cards.some(card=> card.name === startingCard)
+				expect(result).toEqual(true, `${startingCard} is not present`)
+			}) */
+		}
+	});
 });

@@ -1994,6 +1994,7 @@ export const cards = [
 	new Card('Trug', TYPE_MAGI, REGION_UNDERNEATH, null, {
 		startingEnergy: 9,
 		energize: 5,
+		startingCards: ['Giant Parmalag', 'Crystal Arboll'],
 		powers: [{
 			name: 'Cataclysm',
 			cost: 15,
@@ -2885,6 +2886,9 @@ export const cards = [
 		],
 	}),
 	new Card('Blu', TYPE_MAGI, REGION_OROTHE, null, {
+		startingEnergy: 14,
+		energize: 5,
+		startingCards: ['Orathan', 'Orpus', 'Submerge'],
 		triggerEffects: [
 			{
 				name: 'Artifice',
@@ -5124,7 +5128,10 @@ export const cards = [
 		energize: 2,
 		paymentSource: [TYPE_CREATURE],
 	}),
-	new Card('Fossik', TYPE_MAGI, REGION_UNDERNEATH, 0, {
+	new Card('Fossik', TYPE_MAGI, REGION_UNDERNEATH, null, {
+		startingEnergy: 10,
+		energize: 5,
+		startingCards: ['Crystal Arboll', 'Parmalag', 'Bottomless Pit'],
 		replacementEffects: [
 			{
 				name: 'Strengthen',
