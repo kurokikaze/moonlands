@@ -293,6 +293,7 @@ describe('Stream of actions', () => {
 			target: '$our_magi',
 			player: PLAYER_ONE,
 			generatedBy: spellId,
+			variable: 'energizeValue'
 		});
 
 		// Property getter actions are not relayed to players

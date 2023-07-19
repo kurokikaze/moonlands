@@ -46,6 +46,7 @@ export interface EnrichedAction {
     power?: boolean;
     spell?: boolean;
     attack?: boolean;
+    player?: number;
     replacedBy?: string[];
 }
 declare type PowerType = {
