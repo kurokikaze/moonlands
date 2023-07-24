@@ -4788,10 +4788,10 @@ export const cards = [
 			{
 				name: 'Support', 
 				cost: 2,
-				text: 'Choose a Creature in play. Add 2 energy to the chosen Creature. Add additional 2 energy if the chosen Creature is a Balamant.',
+				text: 'Choose any one other Creature in play. Add 2 energy to the chosen Creature. Add additional 2 energy if the chosen Creature is a Balamant.',
 				effects: [
 					prompt({
-						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+						promptType: PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 						message: 'Choose a Creature to add 2 energy to',
 					}),
 					effect({

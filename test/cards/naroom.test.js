@@ -953,7 +953,7 @@ describe('Balamant Pup', () => {
 		gameState.update(powerAction);
 
 		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
-		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_SINGLE_CREATURE, 'Game is prompting you for a single creature or Magi');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, 'Game is prompting you for a single creature except source');
 
 		gameState.update(targetingAction);
 
@@ -1003,7 +1003,7 @@ describe('Balamant Pup', () => {
 		gameState.update(powerAction);
 
 		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
-		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_SINGLE_CREATURE, 'Game is prompting you for a single creature or Magi');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, 'Game is prompting you for a single creature except source');
 
 		gameState.update(targetingAction);
 
