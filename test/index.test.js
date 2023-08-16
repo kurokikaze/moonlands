@@ -4974,6 +4974,32 @@ describe('Not entering prompts when activating power will lead to inescapable pr
 	});
 });
 
+describe('Ability to attack',  () => {
+	it('Default state for the Orathan Flyer', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const orathanFlyer = new CardInGame(byName('Orathan Flyer'), ACTIVE_PLAYER);
+		orathanFlyer.addEnergy(3);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([orathanFlyer]),
+			],
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		const ability = gameState.modifyByStaticAbilities(orathanFlyer, PROPERTY_ABLE_TO_ATTACK);
+
+		expect(ability).toEqual(false);
+	})
+})
+
 describe('Burrowed status', () => {
 	it('Burrowed status prevents attacking', () => {
 		const ACTIVE_PLAYER = 12;

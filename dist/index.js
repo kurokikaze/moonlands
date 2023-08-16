@@ -877,8 +877,9 @@ var State = /** @class */ (function () {
                 return target.modifiedCard ?
                     target.modifiedCard.data.energyLossThreshold : 0;
             case PROPERTY_ABLE_TO_ATTACK:
+                var defaultValue = 'ableToAttack' in target.card.data ? target.card.data.ableToAttack : true;
                 return target.modifiedCard ?
-                    target.modifiedCard.data.ableToAttack : true;
+                    target.modifiedCard.data.ableToAttack : defaultValue;
         }
     };
     State.prototype.isCardAffectedByEffect = function (card, effect) {
@@ -1058,7 +1059,7 @@ var State = /** @class */ (function () {
         var staticAbilities = __spreadArray(__spreadArray(__spreadArray([], gameStaticAbilities, true), zoneAbilities, true), continuousStaticAbilities, true).sort(function (a, b) { return propertyLayers[a.property] - propertyLayers[b.property]; });
         var initialCardData = {
             card: target.card,
-            modifiedCard: __assign(__assign({}, target.card), { data: __assign(__assign({ protection: undefined }, target.card.data), { energyLossThreshold: 0, ableToAttack: true }) }),
+            modifiedCard: __assign(__assign({}, target.card), { data: __assign(__assign({ protection: undefined }, target.card.data), { energyLossThreshold: 0, ableToAttack: 'ableToAttack' in target.card.data ? target.card.data.ableToAttack : true }) }),
             data: __assign({}, target.data),
             id: target.id,
             owner: target.owner,

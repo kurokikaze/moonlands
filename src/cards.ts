@@ -1270,7 +1270,7 @@ export const cards = [
 			{
 				name: 'Undream',
 				cost: 1,
-				text: 'Choose one of your Creatures in play. Return it to your hand and place its energy to Gruk.',
+				text: 'Choose one of your Creatures in play. Return it to your hand and place its energy on Gruk.',
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,

@@ -1397,8 +1397,9 @@ export class State {
 				return target.modifiedCard ?
 					target.modifiedCard.data.energyLossThreshold : 0;
 			case PROPERTY_ABLE_TO_ATTACK:
+				const defaultValue = 'ableToAttack' in target.card.data ? target.card.data.ableToAttack : true;
 				return target.modifiedCard ?
-					target.modifiedCard.data.ableToAttack : true;
+					target.modifiedCard.data.ableToAttack : defaultValue;
 		}
 	}
 
@@ -1607,7 +1608,7 @@ export class State {
 					protection: undefined,
 					...target.card.data,
 					energyLossThreshold: 0,
-					ableToAttack: true,
+					ableToAttack: 'ableToAttack' in target.card.data ? target.card.data.ableToAttack : true,
 				},
 			},
 			data: {
