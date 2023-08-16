@@ -1035,6 +1035,7 @@ export class State {
 	serializeData(playerId: number, hideZones = true) {
 		const gameEnded = !(this.winner === false);
 
+		const opponentId = this.players.find(player => player !== playerId);
 		return {
 			zones: this.serializeZones(playerId, hideZones),
 			continuousEffects: this.state.continuousEffects,
@@ -1048,6 +1049,7 @@ export class State {
 			promptPlayer: this.state.promptPlayer,
 			promptGeneratedBy: this.state.promptGeneratedBy,
 			promptParams: this.state.promptParams,
+			opponentId,
 			log: this.state.log,
 			gameEnded,
 			winner: gameEnded ? this.winner : null,

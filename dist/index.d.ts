@@ -132,6 +132,7 @@ export declare class State {
         promptPlayer: number | undefined;
         promptGeneratedBy: string | undefined;
         promptParams: PromptParamsType;
+        opponentId: number | undefined;
         log: LogEntryType[];
         gameEnded: boolean;
         winner: number | boolean | null;

@@ -578,6 +578,7 @@ var State = /** @class */ (function () {
     State.prototype.serializeData = function (playerId, hideZones) {
         if (hideZones === void 0) { hideZones = true; }
         var gameEnded = !(this.winner === false);
+        var opponentId = this.players.find(function (player) { return player !== playerId; });
         return {
             zones: this.serializeZones(playerId, hideZones),
             continuousEffects: this.state.continuousEffects,
@@ -591,6 +592,7 @@ var State = /** @class */ (function () {
             promptPlayer: this.state.promptPlayer,
             promptGeneratedBy: this.state.promptGeneratedBy,
             promptParams: this.state.promptParams,
+            opponentId: opponentId,
             log: this.state.log,
             gameEnded: gameEnded,
             winner: gameEnded ? this.winner : null,
