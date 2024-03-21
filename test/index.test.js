@@ -3846,6 +3846,62 @@ describe('Initializing game from set of decks', () => {
 		gameState.closeStreams();
 	});
 
+	it('Initialization with PRNG', () => {
+		const PLAYER_ONE = 10;
+		const PLAYER_TWO = 12;
+
+
+		const zones = [
+			new Zone('Player One hand', ZONE_TYPE_HAND, PLAYER_ONE),
+			new Zone('Player 2 hand', ZONE_TYPE_HAND, PLAYER_TWO),
+			new Zone('Player 1 deck', ZONE_TYPE_DECK, PLAYER_ONE),
+			new Zone('Player 2 deck', ZONE_TYPE_DECK, PLAYER_TWO),
+			new Zone('Player 1 discard', ZONE_TYPE_DISCARD, PLAYER_ONE),
+			new Zone('Player 2 discard', ZONE_TYPE_DISCARD, PLAYER_TWO),
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE),
+			new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO),
+			new Zone('Player 1 magi pile', ZONE_TYPE_MAGI_PILE, PLAYER_ONE),
+			new Zone('Player 2 magi pile', ZONE_TYPE_MAGI_PILE, PLAYER_TWO),
+			new Zone('Player 1 magi pile', ZONE_TYPE_DEFEATED_MAGI, PLAYER_ONE),
+			new Zone('Player 2 magi pile', ZONE_TYPE_DEFEATED_MAGI, PLAYER_TWO),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: null,
+			activePlayer: PLAYER_ONE,
+		});
+
+		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
+
+		gameState.setDeck(PLAYER_ONE, caldDeck);
+		gameState.setDeck(PLAYER_TWO, naroomDeck);
+
+		gameState.initiatePRNG(12344);
+
+		gameState.setup();
+
+		// console.log(`Random number: ${gameState.twister.random()}`)
+		// console.log(`Random number: ${gameState.twister.random()}`)
+		// console.log(`Random number: ${gameState.twister.random()}`)
+		// console.log(`Random number: ${gameState.twister.random()}`)
+
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, PLAYER_ONE).length).toEqual(3, 'Player one magi transferred into pile zone');
+		expect(gameState.getZone(ZONE_TYPE_DECK, PLAYER_ONE).length).toEqual(40, 'Player one deck transferred into zone');
+
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, PLAYER_TWO).length).toEqual(3, 'Player two magi transferred into pile zone');
+		expect(gameState.getZone(ZONE_TYPE_DECK, PLAYER_TWO).length).toEqual(40, 'Player two deck transferred into zone');
+
+		expect(gameState.state.step).toEqual(null, 'Step is null (Nullstart)');
+		expect(gameState.state.turn).toEqual(1, 'Turn is 1');
+		expect(
+			gameState.state.goesFirst == PLAYER_ONE || gameState.state.goesFirst == PLAYER_TWO,
+		).toEqual(true, 'One of the players goes first');
+		expect(gameState.state.activePlayer).toEqual(gameState.state.goesFirst, 'First turn, player who goes first is active');
+		gameState.closeStreams();
+	});
+
 	it('Initialization (internal zones creation)', () => {
 		const PLAYER_ONE = 10;
 		const PLAYER_TWO = 12;
@@ -5340,6 +5396,39 @@ describe('Enrich', () => {
 		expect(gameState.state.prompt).toEqual(false, 'Game is not in Prompt state');
 		expect(protoPylofuf.data.energy).toEqual(7, 'Proto-Pylofuf has 7 energy now');
 		gameState.closeStreams();
+	});
+});
+
+describe('serializeData', () => {
+	it('Serializes state data', () => {
+		const ACTIVE_PLAYER = 64;
+		const NON_ACTIVE_PLAYER = 30;
+
+		const protoPylofufCard = new Card('Proto-Pylofuf', TYPE_CREATURE, REGION_UNDERNEATH, 4, {
+			burrowed: true,
+		});
+
+		const motash = new CardInGame(byName('Motash'), ACTIVE_PLAYER).addEnergy(4);
+		const protoPylofuf = new CardInGame(protoPylofufCard, ACTIVE_PLAYER).addEnergy(4);
+		const enrich = new CardInGame(byName('Enrich'), ACTIVE_PLAYER);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([enrich]),
+				new Zone('NAP Discard', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([motash]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([protoPylofuf]),
+			],
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		// console.dir(gameState.serializeData(ACTIVE_PLAYER));
 	});
 });
 

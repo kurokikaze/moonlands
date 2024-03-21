@@ -192,7 +192,7 @@ import {
 import {
 	ConditionType,
 	CalculateParams,
-	CalculateType, 
+	CalculateType,
 	EffectType,
 	PromptParams,
 	PromptType,
@@ -226,10 +226,10 @@ type UpToNCardsPromptParams = {
 	zone: ZoneType;
 	message?: string;
 	player?: number | string;
-    zoneOwner: string;
-    numberOfCards: number | string;
-    restriction?: RestrictionType;
-    restrictionValue?: string | number | boolean;
+	zoneOwner: string;
+	numberOfCards: number | string;
+	restriction?: RestrictionType;
+	restrictionValue?: string | number | boolean;
 	restrictions?: RestrictionObjectType[];
 	variable?: string;
 }
@@ -257,29 +257,29 @@ type DistributeDamagePromptParams = {
 }
 
 type RearrangeCardsPromptParams = {
-  promptType: typeof PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE;
-  promptParams: {
-    zone: ZoneType | string;
-    zoneOwner: number | string;
-    numberOfCards: number | string;
-  };
-  variable?: string;
+	promptType: typeof PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE;
+	promptParams: {
+		zone: ZoneType | string;
+		zoneOwner: number | string;
+		numberOfCards: number | string;
+	};
+	variable?: string;
 }
 
 type PowerOnMagiParams = {
-  promptType: typeof PROMPT_TYPE_POWER_ON_MAGI,
-  magi: string;
-  variable?: string;
+	promptType: typeof PROMPT_TYPE_POWER_ON_MAGI,
+	magi: string;
+	variable?: string;
 }
 
 type PromptParamsType = PromptParams |
-  DistributeEnergyPromptParams |
-  RearrangeEnergyPromptParams |
-  UpToNCardsPromptParams |
-  DistributeDamagePromptParams |
-  RearrangeCardsPromptParams |
-  AlternativePromptParams |
-  PowerOnMagiParams;
+	DistributeEnergyPromptParams |
+	RearrangeEnergyPromptParams |
+	UpToNCardsPromptParams |
+	DistributeDamagePromptParams |
+	RearrangeCardsPromptParams |
+	AlternativePromptParams |
+	PowerOnMagiParams;
 
 const prompt = (data: PromptParamsType): PromptType => {
 	switch (data.promptType) {
@@ -293,17 +293,17 @@ const prompt = (data: PromptParamsType): PromptType => {
 				type: ACTION_ENTER_PROMPT,
 				...data,
 			};
-    case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE:
-      return {
-        type: ACTION_ENTER_PROMPT,
-        ...data,
-      }
-    case PROMPT_TYPE_POWER_ON_MAGI: {
-      return {
-        type: ACTION_ENTER_PROMPT,
-        ...data,
-      };
-    }
+		case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE:
+			return {
+				type: ACTION_ENTER_PROMPT,
+				...data,
+			}
+		case PROMPT_TYPE_POWER_ON_MAGI: {
+			return {
+				type: ACTION_ENTER_PROMPT,
+				...data,
+			};
+		}
 	}
 	return ({
 		type: ACTION_ENTER_PROMPT,
@@ -483,7 +483,7 @@ export const cards = [
 								amount: 4,
 							}),
 						],
-					}),	
+					}),
 				],
 			},
 		],
@@ -630,7 +630,7 @@ export const cards = [
 				zone: ZONE_TYPE_HAND,
 				zoneOwner: '$player',
 				numberOfCards: '$targetEnergy',
-        variable: 'chosenCards'
+				variable: 'chosenCards'
 			}),
 			getPropertyValue({
 				target: '$chosenCards',
@@ -658,7 +658,7 @@ export const cards = [
 			}),
 			prompt({
 				promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
-        message: 'Choose any number of Cald creature cards to discard',
+				message: 'Choose any number of Cald creature cards to discard',
 				restrictions: [
 					{
 						type: RESTRICTION_REGION,
@@ -891,7 +891,7 @@ export const cards = [
 					getPropertyValue({
 						property: PROPERTY_CONTROLLER,
 						target: '$source',
-						variable: 'adisController', 
+						variable: 'adisController',
 					}),
 					select({
 						selector: SELECTOR_OPPONENT_ID,
@@ -1009,7 +1009,7 @@ export const cards = [
 				getPropertyValue({
 					property: PROPERTY_CONTROLLER,
 					target: '$target',
-					variable: 'creatureController', 
+					variable: 'creatureController',
 				}),
 				prompt({
 					promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
@@ -1077,7 +1077,7 @@ export const cards = [
 					effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
 					target: '$target',
 				}),
-			],	
+			],
 		}],
 	}),
 	new Card('Hubdra\'s Spear', TYPE_RELIC, REGION_OROTHE, 0, {
@@ -1140,7 +1140,7 @@ export const cards = [
 					effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
 					target: '$target',
 				}),
-			],	
+			],
 		}],
 	}),
 	new Card('Warrior\'s Boots', TYPE_RELIC, REGION_UNIVERSAL, 0, {
@@ -2204,8 +2204,8 @@ export const cards = [
 	new Card('Staff of Korrits', TYPE_RELIC, REGION_UNDERNEATH, 0, {
 		triggerEffects: [
 			{
-        name: 'Korrit Charge',
-        text: 'Whenever a Korrit you control Pack Hunts with another Creature, add one energy to that Korrit before energy is removed.',
+				name: 'Korrit Charge',
+				text: 'Whenever a Korrit you control Pack Hunts with another Creature, add one energy to that Korrit before energy is removed.',
 				find: {
 					effectType: EFFECT_TYPE_CREATURE_ATTACKS,
 					conditions: [
@@ -2316,13 +2316,13 @@ export const cards = [
 					getPropertyValue({
 						property: PROPERTY_CONTROLLER,
 						target: '$source',
-						variable: 'relicController', 
+						variable: 'relicController',
 					}),
 					prompt({
 						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 						zone: ZONE_TYPE_DISCARD,
 						zoneOwner: '$relicController',
-            message: 'Choose a spell to put on top of your deck',
+						message: 'Choose a spell to put on top of your deck',
 						restriction: RESTRICTION_TYPE,
 						restrictionValue: TYPE_SPELL,
 						numberOfCards: 1,
@@ -2344,12 +2344,12 @@ export const cards = [
 			getPropertyValue({
 				property: PROPERTY_CONTROLLER,
 				target: '$source',
-				variable: 'spellController', 
+				variable: 'spellController',
 			}),
 			prompt({
 				promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 				zone: ZONE_TYPE_DISCARD,
-        message: 'Choose a card to put on top of your deck',
+				message: 'Choose a card to put on top of your deck',
 				zoneOwner: '$spellController',
 				numberOfCards: 1,
 				variable: 'selectedCard',
@@ -2436,7 +2436,7 @@ export const cards = [
 						restrictions: [{
 							type: RESTRICTION_REGION,
 							value: REGION_OROTHE,
-						}], 
+						}],
 						variable: 'chosenOrotheCreature',
 					}),
 					effect({
@@ -2458,7 +2458,7 @@ export const cards = [
 				effects: [
 					getPropertyValue({
 						property: PROPERTY_CONTROLLER,
-            target: "$source",
+						target: "$source",
 						variable: 'relicController',
 					}),
 					prompt({
@@ -2617,7 +2617,7 @@ export const cards = [
 				effects: [
 					effect({
 						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
-						target: '$creature_created',
+						target: '%target',
 						amount: 1,
 					}),
 				],
@@ -2739,19 +2739,19 @@ export const cards = [
 			},
 		],
 	}),
-  new Card('Bisiwog', TYPE_CREATURE, REGION_UNDERNEATH, 3, {
-    staticAbilities: [{
-      name: 'Tunneling Attack',
-      text: 'While burrowed, Bisiwog may still attack as normal.',
-      selector: SELECTOR_SELF_AND_STATUS,
-      selectorParameter: STATUS_BURROWED,
-      property: PROPERTY_ABLE_TO_ATTACK,
-      modifier: {
-        operandOne: true,
-        operator: CALCULATION_SET,
-      },
-    }],
-  }),
+	new Card('Bisiwog', TYPE_CREATURE, REGION_UNDERNEATH, 3, {
+		staticAbilities: [{
+			name: 'Tunneling Attack',
+			text: 'While burrowed, Bisiwog may still attack as normal.',
+			selector: SELECTOR_SELF_AND_STATUS,
+			selectorParameter: STATUS_BURROWED,
+			property: PROPERTY_ABLE_TO_ATTACK,
+			modifier: {
+				operandOne: true,
+				operator: CALCULATION_SET,
+			},
+		}],
+	}),
 	new Card('Xyx', TYPE_CREATURE, REGION_ARDERIAL, 3, {
 		powers: [
 			{
@@ -2857,8 +2857,8 @@ export const cards = [
 	new Card('Ring of Secrets', TYPE_RELIC, REGION_UNIVERSAL, 0, {
 		triggerEffects: [
 			{
-        name: 'Tinker',
-        text: 'Whenever you play a Relic, choose any one Creature in play. Add one enery to the chosen Creature.',
+				name: 'Tinker',
+				text: 'Whenever you play a Relic, choose any one Creature in play. Add one enery to the chosen Creature.',
 				find: {
 					effectType: EFFECT_TYPE_PLAY_RELIC,
 					conditions: [
@@ -2965,7 +2965,7 @@ export const cards = [
 		],
 	}),
 	new Card('Lightning', TYPE_SPELL, REGION_ARDERIAL, 2, {
-        text: 'Choose any one Creature in play. Add two energy to or discard two energy from the chosen Creature.',
+		text: 'Choose any one Creature in play. Add two energy to or discard two energy from the chosen Creature.',
 		effects: [
 			prompt({
 				promptType: PROMPT_TYPE_SINGLE_CREATURE,
@@ -3018,8 +3018,8 @@ export const cards = [
 	new Card('Storm Ring', TYPE_RELIC, REGION_ARDERIAL, 0, {
 		triggerEffects: [
 			{
-        name: 'Thunder Charge',
-        text: 'Whenever one of your Creatures attacks, add one energy to that Creature before energy is removed. If that Creature is a hyren, add one additional energy.',
+				name: 'Thunder Charge',
+				text: 'Whenever one of your Creatures attacks, add one energy to that Creature before energy is removed. If that Creature is a hyren, add one additional energy.',
 				find: {
 					effectType: EFFECT_TYPE_CREATURE_ATTACKS,
 					conditions: [
@@ -3057,7 +3057,7 @@ export const cards = [
 							comparator: 'includes',
 							objectTwo: 'Hyren',
 							propertyTwo: null,
-						},					
+						},
 					],
 				},
 				effects: [
@@ -3170,7 +3170,7 @@ export const cards = [
 								],
 							}),
 						],
-					}),	
+					}),
 				],
 			},
 		],
@@ -3181,8 +3181,8 @@ export const cards = [
 		startingCards: ['Arbolit', 'Quor', 'Flame Geyser'],
 		triggerEffects: [
 			{
-        name: 'Nerve',
-        text: 'If a Creature attacks Ashgar directly, draw a card before energy is removed.',
+				name: 'Nerve',
+				text: 'If a Creature attacks Ashgar directly, draw a card before energy is removed.',
 				find: {
 					effectType: EFFECT_TYPE_BEFORE_DAMAGE,
 					conditions: [
@@ -3331,7 +3331,7 @@ export const cards = [
 				cost: 0,
 				text: 'Discard Orwin\'s Staff from play and discard two cards from your hand. Search your deck for any one card. Place that card in your hand without showing it to your opponents. Shuffle your deck.',
 				effects: [
-          effect({
+					effect({
 						effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
 						target: '$source',
 					}),
@@ -3454,7 +3454,7 @@ export const cards = [
 				calculate({
 					operator: CALCULATION_DOUBLE,
 					operandOne: '$creaturePower',
-					variable: 'doubleEnergy', 
+					variable: 'doubleEnergy',
 				}),
 				effect({
 					effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
@@ -3468,7 +3468,7 @@ export const cards = [
 			],
 		}],
 	}),
-	new Card('Green Stuff', TYPE_CREATURE, REGION_BOGRATH, 0, {energize: 1}),
+	new Card('Green Stuff', TYPE_CREATURE, REGION_BOGRATH, 0, { energize: 1 }),
 	new Card('Giant Carillion', TYPE_CREATURE, REGION_NAROOM, 8, {
 		powers: [
 			{
@@ -3483,7 +3483,7 @@ export const cards = [
 					effect({
 						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
 						target: '$target',
-					}),                    
+					}),
 				],
 			},
 		],
@@ -3692,7 +3692,7 @@ export const cards = [
 			},
 		],
 	}),
-	new Card ('Lava Aq', TYPE_CREATURE, REGION_CALD, 4, {
+	new Card('Lava Aq', TYPE_CREATURE, REGION_CALD, 4, {
 		powers: [
 			{
 				name: 'Firestorm',
@@ -3723,7 +3723,7 @@ export const cards = [
 						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
 						target: '$selected',
 						amount: 1,
-					}),                    
+					}),
 				],
 			},
 		],
@@ -4004,7 +4004,7 @@ export const cards = [
 					thenEffects: [
 						prompt({
 							promptType: PROMPT_TYPE_SINGLE_CREATURE,
-              message: 'Choose creature to discard 2 energy from',
+							message: 'Choose creature to discard 2 energy from',
 						}),
 						effect({
 							effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
@@ -4028,7 +4028,7 @@ export const cards = [
 					thenEffects: [
 						prompt({
 							promptType: PROMPT_TYPE_SINGLE_CREATURE,
-              message:'Choose a creature to add 3 energy to',
+							message: 'Choose a creature to add 3 energy to',
 						}),
 						effect({
 							effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
@@ -4151,7 +4151,7 @@ export const cards = [
 		triggerEffects: [
 			{
 				name: 'Feed',
-        text: 'Add one energy to Megathan at the end of any turn in which Megathan defeated one or more Creatures.',
+				text: 'Add one energy to Megathan at the end of any turn in which Megathan defeated one or more Creatures.',
 				find: {
 					effectType: EFFECT_TYPE_END_OF_TURN,
 					conditions: [],
@@ -4411,57 +4411,57 @@ export const cards = [
 			},
 		],
 	}),
-  new Card('Twee', TYPE_CREATURE, REGION_NAROOM, 1, {
-    triggerEffects: [
-      {
-        name: 'Regrow',
-        text: 'If Twee is put into your discard pile from play, move the first Creature card under Twee into your hand',
-        find: {
-          effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-          conditions: [
-            CONDITION_TARGET_IS_SELF,
-            {
-              objectOne: 'sourceZone',
-              propertyOne: ACTION_PROPERTY,
-              comparator: '=',
-              objectTwo: ZONE_TYPE_IN_PLAY,
-              propertyTwo: null,
-            },
-            {
-              objectOne: 'destinationZone',
-              propertyOne: ACTION_PROPERTY,
-              comparator: '=',
-              objectTwo: ZONE_TYPE_DISCARD,
-              propertyTwo: null,
-            },
-          ],
-        },
-        effects: [
-          getPropertyValue({
-            target: '%target',
-            property: PROPERTY_CONTROLLER,
-            variable: 'twee_controller'
-          }),
-          select({
-            selector: SELECTOR_NTH_CARD_OF_ZONE,
-            zone: ZONE_TYPE_DISCARD,
-            zoneOwner: '$twee_controller',
-            cardNumber: 2, // It will be a second card, because first is Twee itself (the triggered ability happens after the fact)
-            restrictions: [{
-              type: RESTRICTION_TYPE,
-              value: TYPE_CREATURE,
-            }],
-          }),
-          effect({
-            effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-            sourceZone: ZONE_TYPE_DISCARD,
-            destinationZone: ZONE_TYPE_HAND,
-            target: '$selected',
-          }),
-        ],
-      }
-    ]
-  }),
+	new Card('Twee', TYPE_CREATURE, REGION_NAROOM, 1, {
+		triggerEffects: [
+			{
+				name: 'Regrow',
+				text: 'If Twee is put into your discard pile from play, move the first Creature card under Twee into your hand',
+				find: {
+					effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+					conditions: [
+						CONDITION_TARGET_IS_SELF,
+						{
+							objectOne: 'sourceZone',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '=',
+							objectTwo: ZONE_TYPE_IN_PLAY,
+							propertyTwo: null,
+						},
+						{
+							objectOne: 'destinationZone',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '=',
+							objectTwo: ZONE_TYPE_DISCARD,
+							propertyTwo: null,
+						},
+					],
+				},
+				effects: [
+					getPropertyValue({
+						target: '%target',
+						property: PROPERTY_CONTROLLER,
+						variable: 'twee_controller'
+					}),
+					select({
+						selector: SELECTOR_NTH_CARD_OF_ZONE,
+						zone: ZONE_TYPE_DISCARD,
+						zoneOwner: '$twee_controller',
+						cardNumber: 2, // It will be a second card, because first is Twee itself (the triggered ability happens after the fact)
+						restrictions: [{
+							type: RESTRICTION_TYPE,
+							value: TYPE_CREATURE,
+						}],
+					}),
+					effect({
+						effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+						sourceZone: ZONE_TYPE_DISCARD,
+						destinationZone: ZONE_TYPE_HAND,
+						target: '$selected',
+					}),
+				],
+			}
+		]
+	}),
 	new Card('Bwill', TYPE_CREATURE, REGION_OROTHE, 1, {
 		triggerEffects: [
 			{
@@ -4482,36 +4482,36 @@ export const cards = [
 			},
 		],
 	}),
-  new Card('Mirror Pendant', TYPE_RELIC, REGION_UNIVERSAL, 0, {
-    powers: [{
-      name: 'Auraflection',
-      text: 'Choose any one Power on your Magi. Discard energy from your Magi equal to the chosen Power\'s cost, and discard an additional two energy. Play all actions of the chosen Power.',
-      cost: 0,
-      effects: [
-        select({
-          selector: SELECTOR_OWN_MAGI,
-          variable: 'ownMagi',
-        }),
-        prompt({
-          promptType: PROMPT_TYPE_POWER_ON_MAGI,
-          magi: '$ownMagi',
-          variable: 'chosenPower',
-        }),
-        getPropertyValue({
-          target: '$chosenPower',
-          property: PROPERTY_POWER_COST,
-          variable: 'powerCost',
-        }),
-        calculate({
-          operator: CALCULATION_ADD,
-          operandOne: '$powerCost',
-          operandTwo: 2,
-          variable: 'costPlusTwo',
-        }),
-        effect({
-          effectType: EFFECT_TYPE_CONDITIONAL,
-          ownMagi: '$ownMagi',
-          costPlusTwo: '$costPlusTwo',
+	new Card('Mirror Pendant', TYPE_RELIC, REGION_UNIVERSAL, 0, {
+		powers: [{
+			name: 'Auraflection',
+			text: 'Choose any one Power on your Magi. Discard energy from your Magi equal to the chosen Power\'s cost, and discard an additional two energy. Play all actions of the chosen Power.',
+			cost: 0,
+			effects: [
+				select({
+					selector: SELECTOR_OWN_MAGI,
+					variable: 'ownMagi',
+				}),
+				prompt({
+					promptType: PROMPT_TYPE_POWER_ON_MAGI,
+					magi: '$ownMagi',
+					variable: 'chosenPower',
+				}),
+				getPropertyValue({
+					target: '$chosenPower',
+					property: PROPERTY_POWER_COST,
+					variable: 'powerCost',
+				}),
+				calculate({
+					operator: CALCULATION_ADD,
+					operandOne: '$powerCost',
+					operandTwo: 2,
+					variable: 'costPlusTwo',
+				}),
+				effect({
+					effectType: EFFECT_TYPE_CONDITIONAL,
+					ownMagi: '$ownMagi',
+					costPlusTwo: '$costPlusTwo',
 					conditions: [
 						{
 							objectOne: 'ownMagi',
@@ -4521,27 +4521,27 @@ export const cards = [
 							propertyTwo: ACTION_PROPERTY,
 						},
 					],
-          thenEffects: [
-            effect({
-              effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
-              target: '$ownMagi',
-              amount: '$costPlusTwo',
-            }),
-            effect({
-              effectType: EFFECT_TYPE_EXECUTE_POWER_EFFECTS,
-              power: '$chosenPower',
-              source: '$ownMagi',
-              setUsage: false,
-            }),
-          ],
-        })
-      ],
-    }],
-  }),
+					thenEffects: [
+						effect({
+							effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+							target: '$ownMagi',
+							amount: '$costPlusTwo',
+						}),
+						effect({
+							effectType: EFFECT_TYPE_EXECUTE_POWER_EFFECTS,
+							power: '$chosenPower',
+							source: '$ownMagi',
+							setUsage: false,
+						}),
+					],
+				})
+			],
+		}],
+	}),
 	new Card('Plith', TYPE_CREATURE, REGION_NAROOM, 3, {
-		triggerEffects:[{
-      name: 'Warning',
-      text: 'If Plith is attacked, draw one card. If Evu is your Magi when Plith is attacked, draw one additional card.',
+		triggerEffects: [{
+			name: 'Warning',
+			text: 'If Plith is attacked, draw one card. If Evu is your Magi when Plith is attacked, draw one additional card.',
 			find: {
 				effectType: EFFECT_TYPE_CREATURE_ATTACKS,
 				conditions: [
@@ -4574,7 +4574,7 @@ export const cards = [
 						}),
 					],
 				}),
-				
+
 			],
 		}],
 	}),
@@ -4684,7 +4684,7 @@ export const cards = [
 					getPropertyValue({
 						property: PROPERTY_CONTROLLER,
 						target: '$source',
-						variable: 'spellController', 
+						variable: 'spellController',
 					}),
 					prompt({
 						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
@@ -4757,7 +4757,7 @@ export const cards = [
 								source: '$target',
 								target: '$source',
 								amount: '$korritEnergy',
-							}),	
+							}),
 						],
 					}),
 					effect({
@@ -4786,7 +4786,7 @@ export const cards = [
 	new Card('Balamant Pup', TYPE_CREATURE, REGION_NAROOM, 4, {
 		powers: [
 			{
-				name: 'Support', 
+				name: 'Support',
 				cost: 2,
 				text: 'Choose any one other Creature in play. Add 2 energy to the chosen Creature. Add additional 2 energy if the chosen Creature is a Balamant.',
 				effects: [
@@ -4816,7 +4816,7 @@ export const cards = [
 								effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 								target: '$target',
 								amount: 2,
-							}),	
+							}),
 						],
 					}),
 				],
@@ -4905,7 +4905,7 @@ export const cards = [
 				],
 			},
 		],
-	}),	
+	}),
 	new Card('Vortex of Knowledge', TYPE_SPELL, REGION_NAROOM, 1, {
 		text: 'You and your opponent each draw two cards.',
 		effects: [
@@ -4929,7 +4929,7 @@ export const cards = [
 			effect({
 				effectType: EFFECT_TYPE_DRAW,
 				player: '$opponent',
-			}),			
+			}),
 		],
 	}),
 	new Card('Timber Hyren', TYPE_CREATURE, REGION_NAROOM, 7, {
@@ -4957,7 +4957,7 @@ export const cards = [
 						promptType: PROMPT_TYPE_NUMBER,
 						min: 1,
 						max: '$max_tribute',
-					}),				
+					}),
 					effect({
 						effectType: EFFECT_TYPE_MOVE_ENERGY,
 						source: '$selected',
@@ -5228,7 +5228,7 @@ export const cards = [
 	new Card('Arboll', TYPE_CREATURE, REGION_NAROOM, 3, {
 		powers: [
 			{
-				name: 'Life Channel', 
+				name: 'Life Channel',
 				cost: 0,
 				text: 'Choose a Magi in play. Discard Arboll from play. Add four energy to the chosen Magi.',
 				effects: [
@@ -5495,7 +5495,7 @@ export const cards = [
 	new Card('Syphon Stone', TYPE_RELIC, REGION_UNIVERSAL, 0, {
 		powers: [
 			{
-				name: 'Syphon', 
+				name: 'Syphon',
 				cost: 0,
 				text: 'Choose a Creature. Discard Syphon Stone. Discard 1 energy from the chosen Creature.',
 				effects: [
@@ -5654,7 +5654,7 @@ export const cards = [
 			prompt({
 				promptType: PROMPT_TYPE_SINGLE_CREATURE,
 			}),
-			getPropertyValue({						
+			getPropertyValue({
 				target: '$target',
 				property: PROPERTY_ENERGY_COUNT,
 				variable: 'creatureEnergy',
@@ -5683,7 +5683,7 @@ export const cards = [
 				target: '$target',
 			}),
 		],
-	}),	
+	}),
 	new Card('Submerge', TYPE_SPELL, REGION_OROTHE, 2, {
 		text: 'Choose an Orothe Creature. Add 3 energy to the chosen Creature.',
 		effects: [
@@ -5766,7 +5766,7 @@ export const cards = [
 					}),
 					effect({
 						effectType: EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
-						energyOnCreatures: '$energyOnCreatures', 
+						energyOnCreatures: '$energyOnCreatures',
 					}),
 					effect({
 						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
@@ -5861,63 +5861,63 @@ export const cards = [
 	new Card('Gar', TYPE_MAGI, REGION_CALD, null, {
 		energize: 5,
 		startingEnergy: 14,
-    startingCards: ['Lava Balamant', 'Fireball', 'Magma Armor'],
+		startingCards: ['Lava Balamant', 'Fireball', 'Magma Armor'],
 		triggerEffects: [
 			{
 				name: 'Strengthen',
 				text: 'Before you draw your cards during your Draw Step, add two energy to your Creature with the least energy. If there is a tie, you choose which Creature the energy gets placed on.',
-        find: {
-          effectType: EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP,
-          conditions: [
-            {
-              objectOne: 'player',
-              propertyOne: ACTION_PROPERTY,
-              comparator: '=',
-              objectTwo: 'self',
-              propertyTwo: PROPERTY_CONTROLLER,
-            },
-          ],
-        },
-        effects: [
-          select({
-            selector: SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY,
-            variable: 'creatureWithLeastEnergy',
-          }),
-          effect({
-            effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
-            target: '$creatureWithLeastEnergy',
-            amount: 2,
-          }),
-        ]
+				find: {
+					effectType: EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP,
+					conditions: [
+						{
+							objectOne: 'player',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_CONTROLLER,
+						},
+					],
+				},
+				effects: [
+					select({
+						selector: SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY,
+						variable: 'creatureWithLeastEnergy',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						target: '$creatureWithLeastEnergy',
+						amount: 2,
+					}),
+				]
 			},
 		],
 	}),
-  new Card('Barak', TYPE_MAGI, REGION_CALD, null, {
+	new Card('Barak', TYPE_MAGI, REGION_CALD, null, {
 		energize: 5,
 		startingEnergy: 17,
-    startingCards: ['Arbolit', 'Lava Balamant', 'Thermal Blast'],
+		startingCards: ['Arbolit', 'Lava Balamant', 'Thermal Blast'],
 		powers: [
 			{
 				name: 'Prophecy',
-        cost: 0,
+				cost: 0,
 				text: 'Look at the top four cards of your deck. Replace them in any order you wish.',
-        effects: [
-          prompt({
-            promptType: PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
-            promptParams: {
-              zone: ZONE_TYPE_DECK,
-              zoneOwner: '$player',
-              numberOfCards: 4,
-            },
-            variable: 'rearrangedCards',
-          }),
-          effect({
-            effectType: EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
-            zone: ZONE_TYPE_DECK,
-            zoneOwner: '$player',
-            cards: '$rearrangedCards',
-          }),
-        ]
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
+						promptParams: {
+							zone: ZONE_TYPE_DECK,
+							zoneOwner: '$player',
+							numberOfCards: 4,
+						},
+						variable: 'rearrangedCards',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
+						zone: ZONE_TYPE_DECK,
+						zoneOwner: '$player',
+						cards: '$rearrangedCards',
+					}),
+				]
 			},
 		],
 	}),

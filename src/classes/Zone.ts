@@ -1,5 +1,6 @@
 import CardInGame, { ConvertedCard, HiddenConvertedCard } from "./CardInGame";
-import {ZoneType} from "../types";
+import { ZoneType } from "../types";
+import { MersenneTwister } from "../mersenneTwister";
 
 function shuffle<T>(array: T[]): T[] {
 	var currentIndex = array.length, temporaryValue, randomIndex;
@@ -25,6 +26,7 @@ export default class Zone {
 	_player: number | null;
 	_type: ZoneType;
 	ordered: boolean;
+	_twister: typeof MersenneTwister | null = null
 	cards: CardInGame[];
 	constructor(name: string, type: ZoneType, player: number | null = null, ordered = false) {
 		this._name = name;
@@ -35,6 +37,9 @@ export default class Zone {
 		this.cards = [];
 	}
 
+	setPRNG(twister: typeof MersenneTwister) {
+		this._twister = twister;
+	}
 	// Возвращаем карту если она единственная
 	// Для зон типа ACTIVE_MAGI
 	get card() {
@@ -58,16 +63,16 @@ export default class Zone {
 	}
 
 	add(cards: CardInGame[]) {
-    for (let card of cards) {
-      this.cards.push(card);
-    }
+		for (let card of cards) {
+			this.cards.push(card);
+		}
 		return this;
 	}
 
 	addToTop(cards: CardInGame[]) {
 		this.cards = [...cards, ...this.cards];
 
-		return this;        
+		return this;
 	}
 
 	byId(id: string) {
@@ -83,16 +88,36 @@ export default class Zone {
 	}
 
 	shuffle() {
-		this.cards = shuffle(this.cards);
+		this.cards = this._shuffle(this.cards);
 	}
 
+	_shuffle<T>(array: T[]): T[] {
+		var currentIndex = array.length, temporaryValue, randomIndex;
+
+		// While there remain elements to shuffle...
+		while (0 !== currentIndex) {
+
+			// Pick a remaining element...
+			// @ts-ignore
+			const randomValue = this._twister ? this._twister.random() : Math.random()
+			randomIndex = Math.floor(randomValue * currentIndex);
+			currentIndex -= 1;
+
+			// And swap it with the current element.
+			temporaryValue = array[currentIndex];
+			array[currentIndex] = array[randomIndex];
+			array[randomIndex] = temporaryValue;
+		}
+
+		return array;
+	}
 	empty() {
 		this.cards = [];
 	}
 
-  serialize<T>(hidden: T): T extends true ? HiddenConvertedCard[] : ConvertedCard[] 
-  serialize(): ConvertedCard[]
+	serialize<T>(hidden: T): T extends true ? HiddenConvertedCard[] : ConvertedCard[]
+	serialize(): ConvertedCard[]
 	serialize(hidden = false): HiddenConvertedCard[] | ConvertedCard[] {
-    return hidden ? this.cards.map(card => card.serialize(true)) as unknown as HiddenConvertedCard[] : this.cards.map(card => card.serialize(false)) as unknown as ConvertedCard[];
+		return hidden ? this.cards.map(card => card.serialize(true)) as unknown as HiddenConvertedCard[] : this.cards.map(card => card.serialize(false)) as unknown as ConvertedCard[];
 	}
 }

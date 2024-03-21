@@ -1,7 +1,7 @@
 // import {Writable} from 'stream';
 // import EventEmitter from 'events';
 import {nanoid} from 'nanoid';
-
+import {MersenneTwister} from './mersenneTwister';
 import {
 	TYPE_CREATURE,
 	TYPE_MAGI,
@@ -596,6 +596,7 @@ export class State {
 	decks: DeckType[];
 	winner: boolean | number;
 	debug: boolean;
+	twister: typeof MersenneTwister | null = null;
 	turn: number | null;
 	rollDebugValue: number | null;
 	actionsOne: any[];
@@ -628,6 +629,10 @@ export class State {
 
 	// @deprecated
 	closeStreams() {}
+
+	initiatePRNG(seed: number) {
+		this.twister = new (MersenneTwister as any)(seed);
+	}
 
 	setOnAction(callback: (e: AnyEffectType) => void) {
 		this.onAction = callback
@@ -1000,7 +1005,8 @@ export class State {
 			}
 		} catch(e) {
 			console.error('Log entry creation failed');
-			console.dir(e);
+			console.dir(action);
+			// console.dir(e);
 		}
 
 		if (newLogEntry) {
@@ -1015,9 +1021,16 @@ export class State {
 	createZones() {
 		const [playerOne, playerTwo] = this.players;
 
+		const hand1 = new Zone('Player 1 hand', ZONE_TYPE_HAND, playerOne)
+		const hand2 = new Zone('Player 2 hand', ZONE_TYPE_HAND, playerTwo)
+		if (this.twister) {
+			hand1.setPRNG(this.twister)
+			hand2.setPRNG(this.twister)
+		}
+
 		return [
-			new Zone('Player 1 hand', ZONE_TYPE_HAND, playerOne),
-			new Zone('Player 2 hand', ZONE_TYPE_HAND, playerTwo),
+			hand1,
+			hand2,
 			new Zone('Player 1 deck', ZONE_TYPE_DECK, playerOne),
 			new Zone('Player 2 deck', ZONE_TYPE_DECK, playerTwo),
 			new Zone('Player 1 discard', ZONE_TYPE_DISCARD, playerOne),
@@ -1095,7 +1108,9 @@ export class State {
 			this.getZone(ZONE_TYPE_DECK, player).add(rest).shuffle();
 		});
 		
-		const goesFirst = this.players[(Math.random() > 0.5 ? 0: 1)];
+		// @ts-ignore
+		const randomValue = this.twister ? this.twister.random() : Math.random();
+		const goesFirst = this.players[(randomValue > 0.5 ? 0: 1)];
 
 		this.state = {
 			...this.state,

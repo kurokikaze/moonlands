@@ -2331,7 +2331,7 @@ export var cards = [
                 effects: [
                     effect({
                         effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
-                        target: '$creature_created',
+                        target: '%target',
                         amount: 1,
                     }),
                 ],

@@ -25,12 +25,16 @@ var Zone = /** @class */ (function () {
     function Zone(name, type, player, ordered) {
         if (player === void 0) { player = null; }
         if (ordered === void 0) { ordered = false; }
+        this._twister = null;
         this._name = name;
         this._player = player;
         this._type = type;
         this.ordered = ordered;
         this.cards = [];
     }
+    Zone.prototype.setPRNG = function (twister) {
+        this._twister = twister;
+    };
     Object.defineProperty(Zone.prototype, "card", {
         // Возвращаем карту если она единственная
         // Для зон типа ACTIVE_MAGI
@@ -89,7 +93,23 @@ var Zone = /** @class */ (function () {
         this.cards = this.cards.filter(function (card) { return card.id != id; });
     };
     Zone.prototype.shuffle = function () {
-        this.cards = shuffle(this.cards);
+        this.cards = this._shuffle(this.cards);
+    };
+    Zone.prototype._shuffle = function (array) {
+        var currentIndex = array.length, temporaryValue, randomIndex;
+        // While there remain elements to shuffle...
+        while (0 !== currentIndex) {
+            // Pick a remaining element...
+            // @ts-ignore
+            var randomValue = this._twister ? this._twister.random() : Math.random();
+            randomIndex = Math.floor(randomValue * currentIndex);
+            currentIndex -= 1;
+            // And swap it with the current element.
+            temporaryValue = array[currentIndex];
+            array[currentIndex] = array[randomIndex];
+            array[randomIndex] = temporaryValue;
+        }
+        return array;
     };
     Zone.prototype.empty = function () {
         this.cards = [];
