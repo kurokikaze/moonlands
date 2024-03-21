@@ -3882,11 +3882,6 @@ describe('Initializing game from set of decks', () => {
 
 		gameState.setup();
 
-		// console.log(`Random number: ${gameState.twister.random()}`)
-		// console.log(`Random number: ${gameState.twister.random()}`)
-		// console.log(`Random number: ${gameState.twister.random()}`)
-		// console.log(`Random number: ${gameState.twister.random()}`)
-
 		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, PLAYER_ONE).length).toEqual(3, 'Player one magi transferred into pile zone');
 		expect(gameState.getZone(ZONE_TYPE_DECK, PLAYER_ONE).length).toEqual(40, 'Player one deck transferred into zone');
 
@@ -3895,9 +3890,7 @@ describe('Initializing game from set of decks', () => {
 
 		expect(gameState.state.step).toEqual(null, 'Step is null (Nullstart)');
 		expect(gameState.state.turn).toEqual(1, 'Turn is 1');
-		expect(
-			gameState.state.goesFirst == PLAYER_ONE || gameState.state.goesFirst == PLAYER_TWO,
-		).toEqual(true, 'One of the players goes first');
+		expect(gameState.state.goesFirst == PLAYER_TWO,).toEqual(true, 'Player two goes first');
 		expect(gameState.state.activePlayer).toEqual(gameState.state.goesFirst, 'First turn, player who goes first is active');
 		gameState.closeStreams();
 	});
