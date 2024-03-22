@@ -565,17 +565,17 @@ var State = /** @class */ (function () {
     };
     State.prototype.createZones = function () {
         var _a = this.players, playerOne = _a[0], playerTwo = _a[1];
-        var hand1 = new Zone('Player 1 hand', ZONE_TYPE_HAND, playerOne);
-        var hand2 = new Zone('Player 2 hand', ZONE_TYPE_HAND, playerTwo);
+        var deck1 = new Zone('Player 1 deck', ZONE_TYPE_DECK, playerOne);
+        var deck2 = new Zone('Player 2 deck', ZONE_TYPE_DECK, playerTwo);
         if (this.twister) {
-            hand1.setPRNG(this.twister);
-            hand2.setPRNG(this.twister);
+            deck1.setPRNG(this.twister);
+            deck2.setPRNG(this.twister);
         }
         return [
-            hand1,
-            hand2,
-            new Zone('Player 1 deck', ZONE_TYPE_DECK, playerOne),
-            new Zone('Player 2 deck', ZONE_TYPE_DECK, playerTwo),
+            new Zone('Player 1 hand', ZONE_TYPE_HAND, playerOne),
+            new Zone('Player 2 hand', ZONE_TYPE_HAND, playerTwo),
+            deck1,
+            deck2,
             new Zone('Player 1 discard', ZONE_TYPE_DISCARD, playerOne),
             new Zone('Player 2 discard', ZONE_TYPE_DISCARD, playerTwo),
             new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, playerOne),

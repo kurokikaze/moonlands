@@ -1021,18 +1021,18 @@ export class State {
 	createZones() {
 		const [playerOne, playerTwo] = this.players;
 
-		const hand1 = new Zone('Player 1 hand', ZONE_TYPE_HAND, playerOne)
-		const hand2 = new Zone('Player 2 hand', ZONE_TYPE_HAND, playerTwo)
+		const deck1 = new Zone('Player 1 deck', ZONE_TYPE_DECK, playerOne)
+		const deck2 = new Zone('Player 2 deck', ZONE_TYPE_DECK, playerTwo)
 		if (this.twister) {
-			hand1.setPRNG(this.twister)
-			hand2.setPRNG(this.twister)
+			deck1.setPRNG(this.twister)
+			deck2.setPRNG(this.twister)
 		}
 
 		return [
-			hand1,
-			hand2,
-			new Zone('Player 1 deck', ZONE_TYPE_DECK, playerOne),
-			new Zone('Player 2 deck', ZONE_TYPE_DECK, playerTwo),
+			new Zone('Player 1 hand', ZONE_TYPE_HAND, playerOne),
+			new Zone('Player 2 hand', ZONE_TYPE_HAND, playerTwo),
+			deck1,
+			deck2,
 			new Zone('Player 1 discard', ZONE_TYPE_DISCARD, playerOne),
 			new Zone('Player 2 discard', ZONE_TYPE_DISCARD, playerTwo),
 			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, playerOne),
