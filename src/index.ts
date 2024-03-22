@@ -4308,8 +4308,10 @@ export class State {
 							break;
 						}
 						case EFFECT_TYPE_ROLL_DIE: {
+							// @ts-ignore
+							const randomValue = this.twister ? this.twister.random() : Math.random();
 							const result = action.result || 
-								(this.rollDebugValue === null ? (Math.floor(Math.random() * 6) + 1) : this.rollDebugValue);
+								(this.rollDebugValue === null ? (Math.floor(randomValue * 6) + 1) : this.rollDebugValue);
 							this.transformIntoActions({
 								type: ACTION_EFFECT,
 								effectType: EFFECT_TYPE_DIE_ROLLED,
@@ -4317,7 +4319,6 @@ export class State {
 								player: action.player,
 								generatedBy: action.generatedBy,
 							} as DieRolledEffect);
-							// this.setSpellMetaDataField('roll_result', result, action.generatedBy);
 							break;
 						}
 						case EFFECT_TYPE_DIE_ROLLED: {

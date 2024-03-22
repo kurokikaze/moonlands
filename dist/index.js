@@ -3319,8 +3319,10 @@ var State = /** @class */ (function () {
                             break;
                         }
                         case EFFECT_TYPE_ROLL_DIE: {
+                            // @ts-ignore
+                            var randomValue = this_1.twister ? this_1.twister.random() : Math.random();
                             var result = action.result ||
-                                (this_1.rollDebugValue === null ? (Math.floor(Math.random() * 6) + 1) : this_1.rollDebugValue);
+                                (this_1.rollDebugValue === null ? (Math.floor(randomValue * 6) + 1) : this_1.rollDebugValue);
                             this_1.transformIntoActions({
                                 type: ACTION_EFFECT,
                                 effectType: EFFECT_TYPE_DIE_ROLLED,
@@ -3328,7 +3330,6 @@ var State = /** @class */ (function () {
                                 player: action.player,
                                 generatedBy: action.generatedBy,
                             });
-                            // this.setSpellMetaDataField('roll_result', result, action.generatedBy);
                             break;
                         }
                         case EFFECT_TYPE_DIE_ROLLED: {
