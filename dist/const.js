@@ -240,6 +240,7 @@ export var LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY = 'log_entry/creature_discarde
 export var LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY = 'log_entry/relic_discarded_from_play';
 export var LOG_ENTRY_TARGETING = 'log_entry/targeting';
 export var LOG_ENTRY_NUMBER_CHOICE = 'log_entry/number_choice';
+export var LOG_ENTRY_CONTINUOUS_EFFECT_CREATED = 'log_entry/continuous_effect_created';
 export var LOG_ENTRY_ATTACK = 'log_entry/attack';
 export var LOG_ENTRY_CREATURE_ENERGY_LOSS = 'log_entry/creature_energy_loss';
 export var LOG_ENTRY_MAGI_ENERGY_LOSS = 'log_entry/magi_energy_loss';

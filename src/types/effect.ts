@@ -446,7 +446,7 @@ export type MagiIsDefeatedEffect = ActionEffect & {
   player: number;
 }
 
-type CreateContinuousEffect = ActionEffect & {
+export type CreateContinuousEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT;
 	staticAbilities?: StaticAbilityType[];
 	triggerEffects?: TriggerEffectType[];

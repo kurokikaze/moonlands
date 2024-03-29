@@ -273,7 +273,7 @@ export declare type MagiIsDefeatedEffect = ActionEffect & {
     target: CardInGame;
     player: number;
 };
-declare type CreateContinuousEffect = ActionEffect & {
+export declare type CreateContinuousEffect = ActionEffect & {
     effectType: typeof EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT;
     staticAbilities?: StaticAbilityType[];
     triggerEffects?: TriggerEffectType[];

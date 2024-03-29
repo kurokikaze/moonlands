@@ -525,6 +525,29 @@ var State = /** @class */ (function () {
                                 target: this.getMetaValue(action.target, action.generatedBy).card.name,
                                 packHuntAttack: Boolean(action.packHuntAttack),
                             };
+                            break;
+                        }
+                        case EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT: {
+                            // This requires the useSelector method to accept SELECTOR_ID type, so I will do it a bit later
+                            break;
+                            /*if (action.staticAbilities) {
+                                for (let staticAbility of action.staticAbilities) {
+                                    // Targeting gets a little complicated here because we aren't explicitly saying "this creature is burrowed for X turns"
+                                    // Rather, we create a continuous effect of "creatures satisfying this selector have this property modified in this way with such-and-such expiration conditions"
+                                    // if (staticAbility.property === PROPERTY_STATUS && staticAbility.selector == SELECTOR_ID) {
+                                    // 	const id = this.getMetaValue(staticAbility.selectorParameter, action.generatedBy);
+                                    // 	const target = this.useSelector(SELECTOR_ID, action.player, id);
+                                    // 	if (target) {
+                                    // 		newLogEntry = {
+                                    // 			type: LOG_ENTRY_CONTINUOUS_EFFECT_CREATED,
+                                    // 			property: PROPERTY_STATUS,
+                                    // 			turns: this.getMetaValue(action.expiration.turns, action.generatedBy),
+                                    // 		}
+                                    // 	}
+                                    // }
+                                }
+                            }
+                            break;*/
                         }
                     }
                     break;
