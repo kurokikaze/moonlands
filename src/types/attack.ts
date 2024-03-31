@@ -2,6 +2,7 @@ import {
     ACTION_ATTACK,
     ACTION_EFFECT,
     EFFECT_TYPE_AFTER_DAMAGE,
+    EFFECT_TYPE_ATTACKER_DAMAGE_DEALT,
     EFFECT_TYPE_ATTACKER_DEALS_DAMAGE,
     EFFECT_TYPE_BEFORE_DAMAGE,
     EFFECT_TYPE_CREATURE_ATTACKS,
@@ -9,6 +10,7 @@ import {
     EFFECT_TYPE_CREATURE_IS_DEFEATED,
     EFFECT_TYPE_DAMAGE_STEP,
     EFFECT_TYPE_DEAL_DAMAGE,
+    EFFECT_TYPE_DEFENDER_DAMAGE_DEALT,
     EFFECT_TYPE_DEFENDER_DEALS_DAMAGE
 } from "../const";
 import CardInGame from "../classes/CardInGame";
@@ -74,12 +76,34 @@ export type AttackerDealsDamageEffect = AttackEffectAction & {
     amount: number;
 }
 
+export type AttackerDamageDealtEffect = AttackEffectAction & {
+    effectType: typeof EFFECT_TYPE_ATTACKER_DAMAGE_DEALT;
+    source: CardInGame;
+    sourceAtStart: CardInGame;
+    target: CardInGame;
+    targetAtStart: CardInGame;
+    sourceBeforeDamage: CardInGame;
+    targetBeforeDamage: CardInGame;
+    amount: number | string;
+}
+
 export type DefenderDealsDamageEffect = AttackEffectAction & {
     effectType: typeof EFFECT_TYPE_DEFENDER_DEALS_DAMAGE,
     source: CardInGame;
     sourceAtStart: CardInGame;
     target: CardInGame;
     amount: number;
+    targetAtStart: CardInGame;
+    sourceBeforeDamage: CardInGame;
+    targetBeforeDamage: CardInGame;
+}
+
+export type DefenderDamageDealt = AttackEffectAction & {
+    effectType: typeof EFFECT_TYPE_DEFENDER_DAMAGE_DEALT,
+    source: CardInGame;
+    sourceAtStart: CardInGame;
+    target: CardInGame;
+    amount: number | string;
     targetAtStart: CardInGame;
     sourceBeforeDamage: CardInGame;
     targetBeforeDamage: CardInGame;
@@ -114,7 +138,9 @@ export type AttackEffect = AttackType |
     DamageStepEffect |
     AfterDamageEffect |
     AttackerDealsDamageEffect |
+    AttackerDamageDealtEffect |
     DefenderDealsDamageEffect |
+    DefenderDamageDealt |
     DealDamageEffect |
     CreatureDefeatsCreatureEffect |
     CreatureIsDefeatedEffect;

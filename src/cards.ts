@@ -186,6 +186,7 @@ import {
 	PROTECTION_TYPE_DISCARDING_FROM_PLAY,
 	PROTECTION_FROM_EFFECTS,
 	PROTECTION_FROM_POWERS,
+	EFFECT_TYPE_DEFENDER_DAMAGE_DEALT,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -3753,7 +3754,7 @@ export const cards = [
 				name: 'Retrieve',
 				text: 'When a defending Creature removes energy from Furok, place half of that energy, rounded up, on your Magi',
 				find: {
-					effectType: EFFECT_TYPE_DEFENDER_DEALS_DAMAGE,
+					effectType: EFFECT_TYPE_DEFENDER_DAMAGE_DEALT,
 					conditions: [
 						CONDITION_TARGET_IS_SELF,
 					],

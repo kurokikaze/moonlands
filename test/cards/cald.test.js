@@ -1,6 +1,6 @@
 /* global expect, describe, it */
-import {State} from '../../src/index.ts';
-import {byName} from '../../src/cards.ts';
+import { State } from '../../src/index.ts';
+import { byName } from '../../src/cards.ts';
 import CardInGame from '../../src/classes/CardInGame.ts';
 import Zone from '../../src/classes/Zone.ts';
 
@@ -285,7 +285,7 @@ describe('Diobor', () => {
 
 		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
 		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_NUMBER, 'Game is waiting for number');
-		expect(gameState.state.promptParams).toEqual({min: 1, max: 6}, 'Min and max energy passed correctly');
+		expect(gameState.state.promptParams).toEqual({ min: 1, max: 6 }, 'Min and max energy passed correctly');
 
 		gameState.update(costChoiceAction);
 
@@ -361,7 +361,7 @@ describe('Lava Balamant', () => {
 			source: lavaBalamant,
 			target: weebo,
 		};
-        
+
 		gameState.update(attackAction);
 
 		expect(lavaBalamant.data.energy).toEqual(4, 'Lava Balamant gains 1 energy and loses 2 energy in attack, left at 4');
@@ -395,7 +395,7 @@ describe('Lava Balamant', () => {
 			source: weebo,
 			target: lavaBalamant,
 		};
-        
+
 		gameState.update(attackAction);
 
 		expect(lavaBalamant.data.energy).toEqual(3, 'Lava Balamant loses 2 energy in attack, left at 3');
@@ -432,7 +432,7 @@ describe('Magma Armor', () => {
 			source: weebo,
 			target: grega,
 		};
-        
+
 		gameState.update(attackMagiAction);
 
 		expect(weebo.data.energy).toEqual(1, 'Weebo loses no energy in the attack');
@@ -467,7 +467,7 @@ describe('Magma Armor', () => {
 			source: weebo,
 			target: grega,
 		};
-        
+
 		gameState.update(attackMagiAction);
 
 		expect(weebo.data.energy).toEqual(1, 'Weebo loses no energy in the attack');
@@ -511,11 +511,11 @@ describe('Magma Hyren', () => {
 			target: weebo,
 			generatedBy: magmaHyren.id,
 		};
-        
+
 		gameState.update(fireballWeeboAction);
 		gameState.update(targetWeeboAction);
 
-		expect(magmaHyren.data.energy).toEqual(2, 'Magma Hyren has 2 energy left');        
+		expect(magmaHyren.data.energy).toEqual(2, 'Magma Hyren has 2 energy left');
 		expect(weebo.data.energy).toEqual(0, 'Weebo is toast');
 	});
 
@@ -554,7 +554,7 @@ describe('Magma Hyren', () => {
 			target: fireGrag,
 			generatedBy: magmaHyren.id,
 		};
-        
+
 		gameState.update(healingFlameAction);
 
 		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, 'Prompt type is correct');
@@ -562,7 +562,7 @@ describe('Magma Hyren', () => {
 
 		gameState.update(targetFireGragAction);
 
-		expect(magmaHyren.data.energy).toEqual(2, 'Magma Hyren has 2 energy left');        
+		expect(magmaHyren.data.energy).toEqual(2, 'Magma Hyren has 2 energy left');
 		expect(fireGrag.data.energy).toEqual(4, 'Fire Grag has 4 energy');
 	});
 });
@@ -610,8 +610,8 @@ describe('Ashgar', () => {
 
 		gameState.update(attackAction);
 
-		expect(ashgar.data.energy).toEqual(4, 'Ashgar has 4 energy left');        
-		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(1, 'Non-active player has drawn a card');        
+		expect(ashgar.data.energy).toEqual(4, 'Ashgar has 4 energy left');
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(1, 'Non-active player has drawn a card');
 		expect(weebo.data.energy).toEqual(2, 'Weebo still has 2 energy');
 	});
 });
@@ -658,7 +658,7 @@ describe('Quor', () => {
 
 		gameState.update(attackAction);
 
-		expect(quor.data.energy).toEqual(1, 'Quor has 1 energy left');        
+		expect(quor.data.energy).toEqual(1, 'Quor has 1 energy left');
 		expect(weebo.data.energy).toEqual(0, 'Weebo is toast');
 		expect(yaki.data.energy).toEqual(5, 'Yaki lost 2 energy to Quor ability');
 	});
@@ -1123,7 +1123,7 @@ describe('Quor Pup', () => {
 
 		expect(gameState.state.prompt).toEqual(true, 'Engine stops the attack and prompts us for Charge amount');
 		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_NUMBER, 'Engine waits specifically for Number');
-		expect(gameState.state.promptParams).toEqual({min: 0, max: 2}, 'Engine specifies min and max for expected number');
+		expect(gameState.state.promptParams).toEqual({ min: 0, max: 2 }, 'Engine specifies min and max for expected number');
 
 		gameState.update(numberPromptAction);
 
@@ -1151,7 +1151,7 @@ describe('Quor Pup', () => {
 		});
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
-	
+
 
 		const attackAction = {
 			type: ACTION_ATTACK,
@@ -1171,7 +1171,7 @@ describe('Quor Pup', () => {
 
 		expect(gameState.state.prompt).toEqual(true, 'Engine stops the attack and prompts us for Charge amount');
 		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_NUMBER, 'Engine waits specifically for Number');
-		expect(gameState.state.promptParams).toEqual({min: 0, max: 2}, 'Engine specifies min and max for expected number');
+		expect(gameState.state.promptParams).toEqual({ min: 0, max: 2 }, 'Engine specifies min and max for expected number');
 
 		gameState.update(numberPromptAction);
 
@@ -1333,7 +1333,7 @@ describe('Lava Aq', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'Only one creature left on the field');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Lava Aq', 'It is Lava Aq');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(4, 'It has 4 energy left');
-		
+
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toEqual(2, 'Grega has 2 energy');
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).card.data.energy).toEqual(4, 'Pruitt has 4 energy');
 	});
@@ -1380,7 +1380,7 @@ describe('Lava Aq', () => {
 		gameState.update(targetingAction);
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'No creatures left on the field');
-		
+
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toEqual(2, 'Grega has 2 energy');
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).card.data.energy).toEqual(4, 'Pruitt has 4 energy');
 	});

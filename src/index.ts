@@ -250,6 +250,8 @@ import {
 	SELECTOR_CARDS_IN_HAND,
 	PROMPT_TYPE_PAYMENT_SOURCE,
 	LOG_ENTRY_CONTINUOUS_EFFECT_CREATED,
+	EFFECT_TYPE_ATTACKER_DAMAGE_DEALT,
+	EFFECT_TYPE_DEFENDER_DAMAGE_DEALT,
 } from './const';
 
 import { showAction } from './logAction';
@@ -289,6 +291,7 @@ import {
 import { DieRolledEffect, DiscardCreatureFromPlayEffect, DiscardEnergyFromCreatureEffect, EnhancedDelayedTriggerType, ExecutePowerEffect, StartingEnergyOnCreatureEffect } from './types/effect';
 import { CardType, StatusType } from './types/common';
 import { AlternativeType, PromptTypeMayAbility } from './types/prompt';
+import { AttackerDamageDealtEffect } from './types/attack';
 
 const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
 	id: cardInGame.id,
@@ -3900,7 +3903,6 @@ export class State {
 							if (cardsToFind.length) {
 								const deck = this.getZone(ZONE_TYPE_DECK, action.player);
 								const discard = this.getZone(ZONE_TYPE_DISCARD, action.player);
-								const hand = this.getZone(ZONE_TYPE_HAND, action.player);
 
 								cardsToFind.forEach(cardName => {
 									if (discard.cards.some(({ card }) => card.name == cardName)) {
@@ -3910,19 +3912,16 @@ export class State {
 											return true;
 										}
 
-										const newCard = new CardInGame(card.card, action.player || 0);
-										hand.add([newCard]);
-										discard.removeById(card.id);
 										foundCards.push(cardName);
 
 										this.transformIntoActions({
 											type: ACTION_EFFECT,
-											effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
-											sourceCard: card,
+											effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+											target: card,
 											sourceZone: ZONE_TYPE_DISCARD,
-											destinationCard: newCard,
 											destinationZone: ZONE_TYPE_HAND,
 											generatedBy: action.generatedBy,
+											bottom: false,
 										});
 									} else if (deck.cards.some(({ card }) => card.name == cardName)) {
 										const card = deck.cards.find(({ card }) => card.name == cardName);
@@ -3931,19 +3930,16 @@ export class State {
 											return true;
 										}
 
-										const newCard = new CardInGame(card.card, action.player || 0);
-										hand.add([newCard]);
-										deck.removeById(card.id);
 										foundCards.push(cardName);
 
 										this.transformIntoActions({
 											type: ACTION_EFFECT,
-											effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
-											sourceCard: card,
+											effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+											target: card,
 											sourceZone: ZONE_TYPE_DECK,
-											destinationCard: newCard,
 											destinationZone: ZONE_TYPE_HAND,
 											generatedBy: action.generatedBy,
+											bottom: false,
 										});
 									}
 								});
@@ -4215,7 +4211,7 @@ export class State {
 								0
 								;
 
-							const attackerDamageAction: AttackerDealsDamageEffect = {	// from source to target
+							const attackerDamageActions: [AttackerDealsDamageEffect, AttackerDamageDealtEffect] = [{	// from source to target
 								type: ACTION_EFFECT,
 								effectType: EFFECT_TYPE_ATTACKER_DEALS_DAMAGE,
 								source: attackSource,
@@ -4226,10 +4222,23 @@ export class State {
 								targetBeforeDamage: attackTarget.copy(),
 								amount: damageByAttacker,
 								generatedBy: attackSource.id,
-							};
+							},
+							{	// from source to target
+								type: ACTION_EFFECT,
+								effectType: EFFECT_TYPE_ATTACKER_DAMAGE_DEALT,
+								source: attackSource,
+								sourceAtStart: action.sourceAtStart,
+								target: attackTarget,
+								targetAtStart: action.targetAtStart,
+								sourceBeforeDamage: attackSource.copy(),
+								targetBeforeDamage: attackTarget.copy(),
+								amount: '$damageDealt',
+								generatedBy: attackSource.id,
+							}
+						];
 
 							const damageActions: AnyEffectType[] = (attackTarget.card.type === TYPE_CREATURE && !action.packHuntAttack) ? [
-								attackerDamageAction, {
+								...attackerDamageActions, {
 									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_DEFENDER_DEALS_DAMAGE,
 									source: attackTarget,
@@ -4240,7 +4249,19 @@ export class State {
 									sourceBeforeDamage: attackTarget.copy(),
 									targetBeforeDamage: attackSource.copy(),
 									generatedBy: attackSource.id,
-								}] : [attackerDamageAction];
+								},
+								{
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_DEFENDER_DAMAGE_DEALT,
+									source: attackTarget,
+									sourceAtStart: action.targetAtStart,
+									target: attackSource,
+									amount: '$damageDealt',
+									targetAtStart: action.sourceAtStart,
+									sourceBeforeDamage: attackTarget.copy(),
+									targetBeforeDamage: attackSource.copy(),
+									generatedBy: attackSource.id,
+								}] : attackerDamageActions;
 
 							this.transformIntoActions(...damageActions);
 							break;
@@ -4281,6 +4302,7 @@ export class State {
 								source: action.source,
 								amount: action.amount,
 								attack: true,
+								variable: 'damageDealt',
 								generatedBy: action.generatedBy,
 							});
 							break;
@@ -4669,6 +4691,7 @@ export class State {
 											spell: action.spell || false,
 											relic: action.relic || false,
 											source: action.source,
+											variable: action.variable || false,
 											target,
 											generatedBy: action.generatedBy,
 										} as DiscardEnergyFromCreatureEffect);
@@ -4682,6 +4705,7 @@ export class State {
 											attack: action.attack || false,
 											spell: action.spell || false,
 											relic: action.relic || false,
+											...(action.variable ? {variable: action.variable} : {}),
 											target,
 											generatedBy: action.generatedBy,
 										});
@@ -4778,6 +4802,7 @@ export class State {
 						}
 						case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
 							const multiTarget: CardInGame | CardInGame[] = this.getMetaValue(action.target, action.generatedBy);
+							var totalEnergyLost = 0;
 							oneOrSeveral(
 								multiTarget,
 								target => {
@@ -4791,6 +4816,7 @@ export class State {
 											energyToLose = Math.min(energyToLose, energyCanLoseThisTurn);
 										}
 										target.removeEnergy(energyToLose);
+										totalEnergyLost += energyToLose;
 
 										if (target.data.energy == 0 && !action.attack) {
 											this.transformIntoActions({
@@ -4806,6 +4832,9 @@ export class State {
 									}
 								},
 							);
+							if (action.variable) {
+								this.setSpellMetaDataField(action.variable, totalEnergyLost, action.generatedBy);
+							}
 							break;
 						}
 						case EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE: {

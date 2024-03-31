@@ -1,6 +1,6 @@
 /* global expect, describe, it */
-import {State} from '../../src/index.ts';
-import {byName} from '../../src/cards.ts';
+import { State } from '../../src/index.ts';
+import { byName } from '../../src/cards.ts';
 import CardInGame from '../../src/classes/CardInGame.ts';
 import Zone from '../../src/classes/Zone.ts';
 
@@ -250,7 +250,7 @@ describe('Motash', () => {
 			step: STEP_ATTACK,
 			activePlayer: ACTIVE_PLAYER,
 		});
-        
+
 		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([motash]);
 
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
@@ -284,7 +284,7 @@ describe('Motash', () => {
 			step: STEP_ATTACK,
 			activePlayer: ACTIVE_PLAYER,
 		});
-        
+
 		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([motash]);
 
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
@@ -332,7 +332,7 @@ describe('Cave Rudwot', () => {
 			source: weebo,
 			target: caveRudwot,
 		};
-        
+
 		gameState.update(attackAction);
 
 		expect(caveRudwot.data.energy).toEqual(3, 'Cave Rudwot loses 2 energy in attack and gain 2 from Defense, left at 3');
@@ -366,7 +366,7 @@ describe('Cave Rudwot', () => {
 			source: caveRudwot,
 			target: weebo,
 		};
-        
+
 		gameState.update(attackAction);
 
 		expect(caveRudwot.data.energy).toEqual(1, 'Cave Rudwot loses 2 energy in attack and gains none, left at 1');
@@ -403,7 +403,7 @@ describe('Gum-Gum', () => {
 			source: weebo,
 			target: gumGum,
 		};
-        
+
 		gameState.update(attackAction);
 
 		expect(gameState.state.prompt).toEqual(true);
@@ -463,7 +463,7 @@ describe('Gum-Gum', () => {
 			source: weebo,
 			target: gumGum,
 		};
-        
+
 		gameState.update(attackAction);
 
 		expect(gameState.state.prompt).toEqual(true);
@@ -490,11 +490,11 @@ describe('Strag', () => {
 	it('Defense', () => {
 		const ACTIVE_PLAYER = 0;
 		const NON_ACTIVE_PLAYER = 1;
-	
+
 		const strag = new CardInGame(byName('Strag'), NON_ACTIVE_PLAYER).addEnergy(5);
 		const thunderVashp = new CardInGame(byName('Thunder Vashp'), ACTIVE_PLAYER).addEnergy(2);
 		const mushroomHyren = new CardInGame(byName('Mushroom Hyren'), NON_ACTIVE_PLAYER).addEnergy(2);
-	
+
 		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
@@ -507,25 +507,25 @@ describe('Strag', () => {
 			activePlayer: ACTIVE_PLAYER,
 		});
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
-	
+
 		const attackAction = {
 			type: ACTION_ATTACK,
 			source: thunderVashp,
 			target: mushroomHyren,
 		};
-			
+
 		gameState.update(attackAction);
-	
+
 		expect(thunderVashp.data.energy).toEqual(0, 'Thunder Vashp loses 2 energy, dies');
 		expect(mushroomHyren.data.energy).toEqual(1, 'Mushroom Hyren gains 1 energy, loses 2, survives');
 	});
 	it('Defense (does not apply to Strag)', () => {
 		const ACTIVE_PLAYER = 0;
 		const NON_ACTIVE_PLAYER = 1;
-	
+
 		const strag = new CardInGame(byName('Strag'), NON_ACTIVE_PLAYER).addEnergy(5);
 		const thunderVashp = new CardInGame(byName('Thunder Vashp'), ACTIVE_PLAYER).addEnergy(2);
-	
+
 		const gameState = new State({
 			zones: [
 				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
@@ -538,15 +538,15 @@ describe('Strag', () => {
 			activePlayer: ACTIVE_PLAYER,
 		});
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
-	
+
 		const attackAction = {
 			type: ACTION_ATTACK,
 			source: thunderVashp,
 			target: strag,
 		};
-			
+
 		gameState.update(attackAction);
-	
+
 		expect(thunderVashp.data.energy).toEqual(2, 'Thunder Vashp loses no energy');
 		expect(strag.data.energy).toEqual(3, 'Strag loses 2, gains no energy in process');
 	});
@@ -720,7 +720,7 @@ describe('Staff of Korrits', () => {
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two cards on the field');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards.map(card => card.card.name)).toEqual(['Korrit', 'Staff of Korrits'], 'It is Korrit and the Staff');
-		expect(korrit.data.energy).toEqual(4, 'It has 4 energy');		
+		expect(korrit.data.energy).toEqual(4, 'It has 4 energy');
 
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'Active player has 1 card in discard');
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Mushroom Hyren', 'It is Mushroom Hyren');
@@ -767,7 +767,7 @@ describe('Staff of Korrits', () => {
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two cards on the field');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards.map(card => card.card.name)).toEqual(['Kelthet', 'Staff of Korrits'], 'It is Kelthet and the Staff');
-		expect(kelthet.data.energy).toEqual(3, 'Kelthet has 3 energy');		
+		expect(kelthet.data.energy).toEqual(3, 'Kelthet has 3 energy');
 
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'Active player has 1 card in discard');
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Korrit', 'It is Korrit');
@@ -815,7 +815,7 @@ describe('Staff of Korrits', () => {
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two cards on the field');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).cards.map(card => card.card.name)).toEqual(['Korrit', 'Staff of Korrits'], 'It is Korrit and the Staff');
-		expect(korrit.data.energy).toEqual(3, 'It has 3 energy');		
+		expect(korrit.data.energy).toEqual(3, 'It has 3 energy');
 
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'Active player has 1 card in discard');
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Mushroom Hyren', 'It is Mushroom Hyren');
@@ -865,7 +865,7 @@ describe('Korrit', () => {
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature on the field');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Korrit', 'It is Korrit');
-		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(3, 'It has 3 energy');		
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(3, 'It has 3 energy');
 
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'Active player has 1 card in discard');
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Mushroom Hyren', 'It is Mushroom Hyren');
@@ -913,7 +913,7 @@ describe('Korrit', () => {
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature on the field');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Korrit', 'It is Korrit');
-		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(13, 'It has 13 energy');		
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(13, 'It has 13 energy');
 
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'Active player has 1 card in discard');
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).card.card.name).toEqual('Mushroom Hyren', 'It is Mushroom Hyren');
@@ -1010,7 +1010,7 @@ describe('Korrit', () => {
 
 		gameState.update(attackAction);
 
-		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2,'Two creatures on the field');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two creatures on the field');
 
 		expect(grega.data.energy).toEqual(9, 'Grega has 9 energy left');
 		expect(mushroomHyren.data.energy).toEqual(3, 'Mushroom Hyren has 3 energy');
@@ -1206,7 +1206,7 @@ describe('Fossik', () => {
 		};
 
 		gameState.update(chooseCreatureAction);
-    
+
 		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
 
 		const napPassAction = {
@@ -1288,7 +1288,7 @@ describe('Parmalag', () => {
 			source: parmalag,
 			target: arbolit,
 		};
-		
+
 		gameState.update(attackAction);
 
 		expect(parmalag.data.energy).toEqual(2, 'Parmalag loses no energy in attack');
@@ -1321,7 +1321,7 @@ describe('Parmalag', () => {
 			source: parmalag,
 			target: arbolit,
 		};
-		
+
 		gameState.update(attackAction);
 
 		expect(parmalag.data.energy).toEqual(1, 'Parmalag loses 2 energy in attack');
@@ -1370,7 +1370,7 @@ describe('Thunderquake', () => {
 		const choosingCostAction = {
 			type: ACTION_RESOLVE_PROMPT,
 			number: 5,
-			generatedBy: thunderquake.id,            
+			generatedBy: thunderquake.id,
 		};
 
 		gameState.update(choosingCostAction);
@@ -1424,7 +1424,7 @@ describe('Vulbor', () => {
 			power: vulbor.card.data.powers[0],
 			generatedBy: vulbor.id,
 		};
-		
+
 		gameState.update(powerAction);
 
 		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
@@ -1493,7 +1493,7 @@ describe('Giant Vulbor', () => {
 			power: giantVulbor.card.data.powers[0],
 			generatedBy: giantVulbor.id,
 		};
-		
+
 		gameState.update(powerAction);
 
 		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');

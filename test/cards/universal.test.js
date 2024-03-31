@@ -1,6 +1,6 @@
 /* global expect, describe, it */
-import {State} from '../../src/index.ts';
-import {byName} from '../../src/cards.ts';
+import { State } from '../../src/index.ts';
+import { byName } from '../../src/cards.ts';
 import CardInGame from '../../src/classes/CardInGame.ts';
 import Zone from '../../src/classes/Zone.ts';
 
@@ -153,7 +153,7 @@ describe('Warrior\'s Boots', () => {
 		expect(gameState.state.promptParams.zone).toEqual(ZONE_TYPE_HAND, 'Prompt awaiting card from hand');
 		expect(gameState.state.promptParams.numberOfCards).toEqual(1, 'Prompt awaiting one card');
 		expect(gameState.state.promptParams.zoneOwner).toEqual(ACTIVE_PLAYER, 'Prompt awaiting card from active players hand');
-		
+
 		const cardChoiceAction = {
 			type: ACTION_RESOLVE_PROMPT,
 			cards: [arboll],
@@ -217,7 +217,7 @@ describe('Warrior\'s Boots', () => {
 		expect(gameState.state.promptParams.zone).toEqual(ZONE_TYPE_HAND, 'Prompt awaiting card from hand');
 		expect(gameState.state.promptParams.numberOfCards).toEqual(1, 'Prompt awaiting one card');
 		expect(gameState.state.promptParams.zoneOwner).toEqual(ACTIVE_PLAYER, 'Prompt awaiting card from active players hand');
-		
+
 		const cardChoiceAction = {
 			type: ACTION_RESOLVE_PROMPT,
 			cards: [arboll],
@@ -449,7 +449,7 @@ describe('Warrior\'s Boots', () => {
 		expect(gameState.state.promptParams.zone).toEqual(ZONE_TYPE_HAND, 'Prompt awaiting card from hand');
 		expect(gameState.state.promptParams.numberOfCards).toEqual(1, 'Prompt awaiting one card');
 		expect(gameState.state.promptParams.zoneOwner).toEqual(ACTIVE_PLAYER, 'Prompt awaiting card from active players hand');
-		
+
 		const cardChoiceAction = {
 			type: ACTION_RESOLVE_PROMPT,
 			cards: [arboll],
@@ -513,7 +513,7 @@ describe('Warrior\'s Boots', () => {
 		expect(gameState.state.promptParams.zone).toEqual(ZONE_TYPE_HAND, 'Prompt awaiting card from hand');
 		expect(gameState.state.promptParams.numberOfCards).toEqual(1, 'Prompt awaiting one card');
 		expect(gameState.state.promptParams.zoneOwner).toEqual(ACTIVE_PLAYER, 'Prompt awaiting card from active players hand');
-		
+
 		const cardChoiceAction = {
 			type: ACTION_RESOLVE_PROMPT,
 			cards: [giantParathin],
@@ -565,7 +565,7 @@ describe('Ancestral Flute', () => {
 			power: flute.card.data.powers[0],
 			generatedBy: flute.id,
 		};
-		
+
 		gameState.update(powerAction);
 
 		expect(gameState.state.prompt).toEqual(true); // Game is in prompt state
@@ -634,7 +634,7 @@ describe('Ancestral Flute', () => {
 			power: flute.card.data.powers[0],
 			generatedBy: flute.id,
 		};
-		
+
 		gameState.update(powerAction);
 
 		expect(gameState.state.prompt).toEqual(true); // Game is in prompt state
@@ -698,11 +698,11 @@ describe('Mirror Pendant', () => {
 			type: ACTION_POWER,
 			source: pendant,
 			power: pendant.card.data.powers[0],
-			player: ACTIVE_PLAYER,	
+			player: ACTIVE_PLAYER,
 		};
 
 		gameState.update(pendantAction);
-		
+
 		expect(gameState.state.prompt).toEqual(true);
 		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_POWER_ON_MAGI);
 

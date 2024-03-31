@@ -1,6 +1,6 @@
 /* global expect, describe, it */
-import {State} from '../../src/index.ts';
-import {byName} from '../../src/cards.ts';
+import { State } from '../../src/index.ts';
+import { byName } from '../../src/cards.ts';
 import CardInGame from '../../src/classes/CardInGame.ts';
 import Zone from '../../src/classes/Zone.ts';
 
@@ -236,7 +236,7 @@ describe('Fog Bank', () => {
 
 		expect(grega.data.energy).toEqual(3, 'Grega now has 3 energy');
 		expect(gameState.modifyByStaticAbilities(arboll, PROPERTY_CAN_BE_ATTACKED)).toEqual(false);
-		
+
 		const activePlayerPassAction = {
 			type: ACTION_PASS,
 			player: ACTIVE_PLAYER,
@@ -411,12 +411,12 @@ describe('Ora', () => {
 			step: STEP_CREATURES,
 			activePlayer,
 		});
-        
+
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'In play is empty before');
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(15, 'Ora\'s Energy is 15');
 
 		gameState.update({
-			type: ACTION_PLAY, 
+			type: ACTION_PLAY,
 			payload: {
 				player: activePlayer,
 				card: pharan,
@@ -461,7 +461,7 @@ describe('Vellup', () => {
 				player: ACTIVE_PLAYER,
 			}
 		};
-		
+
 		gameState.update(playAction);
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1);
@@ -528,7 +528,7 @@ describe('Vellup', () => {
 				player: ACTIVE_PLAYER,
 			}
 		};
-		
+
 		gameState.update(playAction);
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1);
@@ -537,7 +537,7 @@ describe('Vellup', () => {
 		expect(gameState.state.prompt).toEqual(true);
 		expect(gameState.state.promptParams.effect.name).toEqual('Flock');
 		expect(gameState.state.promptParams.effect.text).toEqual('When you play Vellup, you may search your deck for another Vellup. Show it to your opponent and put it into your hand. Shuffle the deck.');
-		
+
 		const denyEffect = {
 			type: ACTION_RESOLVE_PROMPT,
 			useEffect: false,
@@ -579,7 +579,7 @@ describe('Vellup', () => {
 				player: ACTIVE_PLAYER,
 			}
 		};
-		
+
 		gameState.update(playAction);
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1);
@@ -617,7 +617,7 @@ describe('Adis', () => {
 			source: lavaBalamant,
 			target: adis,
 		};
-		
+
 		gameState.update(attackAction);
 
 		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
@@ -716,7 +716,7 @@ describe('Adis', () => {
 			source: lavaBalamant,
 			target: adis,
 		};
-		
+
 		gameState.update(attackAction);
 
 		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
@@ -754,7 +754,7 @@ describe('Epik', () => {
 			power: epik.card.data.powers[0],
 			generatedBy: epik.id,
 		};
-		
+
 		gameState.update(powerAction);
 
 		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
@@ -899,7 +899,7 @@ describe('Cloud Narth', () => {
 		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state anymore');
 
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(2, 'Active player discard has two cards');
-	
+
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(thunderVashp.id).data.energy).toEqual(8, 'Thunder Vashp now has 8 energy');
 	});
 });
@@ -1528,7 +1528,7 @@ describe('Eye of the Storm', () => {
 	it('Eye of the Storm (discards own hand)', () => {
 		const ACTIVE_PLAYER = 422;
 		const NON_ACTIVE_PLAYER = 1310;
-	
+
 		const lasada = new CardInGame(byName('Lasada'), ACTIVE_PLAYER).addEnergy(4);
 		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(7);
 		const xyxElder = new CardInGame(byName('Xyx Elder'), ACTIVE_PLAYER);
@@ -1537,29 +1537,29 @@ describe('Eye of the Storm', () => {
 		const lavaArboll = new CardInGame(byName('Lava Arboll'), NON_ACTIVE_PLAYER);
 		const eyeOfTheStorm = new CardInGame(byName('Eye of the Storm'), ACTIVE_PLAYER);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [eyeOfTheStorm], [lasada]);
-	
+
 		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
 		});
-	
+
 		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
 		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([xyxElder, xyx]);
 		gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).add([arboll, lavaArboll]);
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
-	
+
 		gameState.setRollDebugValue(1);
-	
+
 		const powerAction = {
 			type: ACTION_POWER,
 			source: eyeOfTheStorm,
 			power: eyeOfTheStorm.card.data.powers[0],
 			player: ACTIVE_PLAYER,
 		};
-	
+
 		gameState.update(powerAction);
-	
+
 		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(0, 'Active player hand has no cards');
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(2, 'Active player discard has two cards');
 		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(2, 'Non-active player hand has two cards');
@@ -1569,7 +1569,7 @@ describe('Eye of the Storm', () => {
 	it('Eye of the Storm (rolling six, choosing to draw)', () => {
 		const ACTIVE_PLAYER = 422;
 		const NON_ACTIVE_PLAYER = 1310;
-	
+
 		const lasada = new CardInGame(byName('Lasada'), ACTIVE_PLAYER).addEnergy(4);
 		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(7);
 		const xyxElder = new CardInGame(byName('Xyx Elder'), ACTIVE_PLAYER);
@@ -1585,13 +1585,13 @@ describe('Eye of the Storm', () => {
 		const lavaArboll = new CardInGame(byName('Lava Arboll'), NON_ACTIVE_PLAYER);
 		const eyeOfTheStorm = new CardInGame(byName('Eye of the Storm'), ACTIVE_PLAYER);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [eyeOfTheStorm], [lasada]);
-	
+
 		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
 		});
-	
+
 		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
 		gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).add([
 			lavaBalamantOne,
@@ -1603,18 +1603,18 @@ describe('Eye of the Storm', () => {
 		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([xyxElder, xyx]);
 		gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).add([arboll, lavaArboll]);
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
-	
+
 		gameState.setRollDebugValue(6);
-	
+
 		const powerAction = {
 			type: ACTION_POWER,
 			source: eyeOfTheStorm,
 			power: eyeOfTheStorm.card.data.powers[0],
 			player: ACTIVE_PLAYER,
 		};
-	
+
 		gameState.update(powerAction);
-	
+
 		expect(gameState.state.prompt).toEqual(true);
 		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_ALTERNATIVE);
 
@@ -1635,7 +1635,7 @@ describe('Eye of the Storm', () => {
 	it('Eye of the Storm (rolling six, choosing to discard)', () => {
 		const ACTIVE_PLAYER = 422;
 		const NON_ACTIVE_PLAYER = 1310;
-	
+
 		const lasada = new CardInGame(byName('Lasada'), ACTIVE_PLAYER).addEnergy(4);
 		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(7);
 		const xyxElder = new CardInGame(byName('Xyx Elder'), ACTIVE_PLAYER);
@@ -1651,13 +1651,13 @@ describe('Eye of the Storm', () => {
 		const lavaArboll = new CardInGame(byName('Lava Arboll'), NON_ACTIVE_PLAYER);
 		const eyeOfTheStorm = new CardInGame(byName('Eye of the Storm'), ACTIVE_PLAYER);
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [eyeOfTheStorm], [lasada]);
-	
+
 		const gameState = new State({
 			zones,
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,
 		});
-	
+
 		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
 		gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).add([
 			lavaBalamantOne,
@@ -1669,18 +1669,18 @@ describe('Eye of the Storm', () => {
 		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([xyxElder, xyx]);
 		gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).add([arboll, lavaArboll]);
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
-	
+
 		gameState.setRollDebugValue(6);
-	
+
 		const powerAction = {
 			type: ACTION_POWER,
 			source: eyeOfTheStorm,
 			power: eyeOfTheStorm.card.data.powers[0],
 			player: ACTIVE_PLAYER,
 		};
-	
+
 		gameState.update(powerAction);
-	
+
 		expect(gameState.state.prompt).toEqual(true);
 		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_ALTERNATIVE);
 
@@ -1702,20 +1702,20 @@ describe('Orathan Flyer', () => {
 	it('Payment from orathan', () => {
 		const ACTIVE_PLAYER = 422;
 		const NON_ACTIVE_PLAYER = 1310;
-	
+
 		const lasada = new CardInGame(byName('Lasada'), ACTIVE_PLAYER).addEnergy(10);
 		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(7);
 		const flyingOrathan = new CardInGame(byName('Orathan Flyer'), ACTIVE_PLAYER).addEnergy(10);
 		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [flyingOrathan], [lasada]);
-	
+
 		const gameState = new State({
 			zones,
 			step: STEP_CREATURES,
 			activePlayer: ACTIVE_PLAYER,
 		});
-	
+
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
 		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([xyx]);
@@ -1727,9 +1727,9 @@ describe('Orathan Flyer', () => {
 				player: ACTIVE_PLAYER,
 			},
 		};
-	
+
 		gameState.update(playAction);
-	
+
 		expect(gameState.state.prompt).toEqual(true);
 		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_PAYMENT_SOURCE);
 		expect(gameState.state.promptParams.paymentAmount).toEqual(xyx.card.cost);
@@ -1751,20 +1751,20 @@ describe('Orathan Flyer', () => {
 	it('Payment from orathan', () => {
 		const ACTIVE_PLAYER = 422;
 		const NON_ACTIVE_PLAYER = 1310;
-	
+
 		const lasada = new CardInGame(byName('Lasada'), ACTIVE_PLAYER).addEnergy(10);
 		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(7);
 		const flyingOrathan = new CardInGame(byName('Orathan Flyer'), ACTIVE_PLAYER).addEnergy(2);
 		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [flyingOrathan], [lasada]);
-	
+
 		const gameState = new State({
 			zones,
 			step: STEP_CREATURES,
 			activePlayer: ACTIVE_PLAYER,
 		});
-	
+
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
 		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([xyx]);
@@ -1787,20 +1787,20 @@ describe('Orathan Flyer', () => {
 	it('Payment from orathan (Magi doesnt have enough energy)', () => {
 		const ACTIVE_PLAYER = 422;
 		const NON_ACTIVE_PLAYER = 1310;
-	
+
 		const lasada = new CardInGame(byName('Lasada'), ACTIVE_PLAYER).addEnergy(1);
 		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(7);
 		const flyingOrathan = new CardInGame(byName('Orathan Flyer'), ACTIVE_PLAYER).addEnergy(10);
 		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [flyingOrathan], [lasada]);
-	
+
 		const gameState = new State({
 			zones,
 			step: STEP_CREATURES,
 			activePlayer: ACTIVE_PLAYER,
 		});
-	
+
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
 		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([xyx]);
@@ -1812,7 +1812,7 @@ describe('Orathan Flyer', () => {
 				player: ACTIVE_PLAYER,
 			},
 		};
-	
+
 		gameState.update(playAction);
 
 		expect(gameState.state.prompt).toEqual(false);

@@ -64,12 +64,13 @@ import {
 	EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
 	EFFECT_TYPE_DRAW_N_CARDS,
 	EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
-  EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
-  EFFECT_TYPE_DISCARD_RESHUFFLED,
-  EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
-  EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
-  EFFECT_TYPE_DIE_ROLLED,
-  EFFECT_TYPE_EXECUTE_POWER_EFFECTS,
+	EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
+	EFFECT_TYPE_DISCARD_RESHUFFLED,
+	EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
+	EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
+	EFFECT_TYPE_DIE_ROLLED,
+	EFFECT_TYPE_EXECUTE_POWER_EFFECTS,
+	EFFECT_TYPE_DEFENDER_DAMAGE_DEALT,
 } from '../const';
 
 export type EffectTypeType =
@@ -97,6 +98,7 @@ export type EffectTypeType =
 	typeof EFFECT_TYPE_ADD_ENERGY_TO_MAGI |
 	typeof EFFECT_TYPE_ENERGIZE |
 	typeof EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT |
+	typeof EFFECT_TYPE_DEFENDER_DAMAGE_DEALT |
 	typeof EFFECT_TYPE_CONDITIONAL |
 	typeof EFFECT_TYPE_START_OF_TURN |
 	typeof EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES |
@@ -118,7 +120,7 @@ export type EffectTypeType =
 	typeof EFFECT_TYPE_PAYING_ENERGY_FOR_POWER |
 	typeof EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI |
 	typeof EFFECT_TYPE_MAGI_FLIPPED |
-  typeof EFFECT_TYPE_EXECUTE_POWER_EFFECTS |
+	typeof EFFECT_TYPE_EXECUTE_POWER_EFFECTS |
 	typeof EFFECT_TYPE_START_STEP;
 
 type EffectTypeStillInUse = typeof EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY |
@@ -232,6 +234,7 @@ type DiscardEnergyFromCreatureOrMagiEffect = ActionEffect & {
 	spell?: boolean;
 	relic?: boolean;
 	power?: boolean;
+	variable?: string;
 	amount: number;
 	attack: boolean;
 }
@@ -254,6 +257,7 @@ export type DiscardEnergyFromCreatureEffect = ActionEffect & {
 	attack?: boolean;
 	spell?: boolean;
 	relic?: boolean;
+	variable?: string;
 	amount: number;
 }
 
@@ -264,6 +268,7 @@ type DiscardEnergyFromMagiEffect = ActionEffect & {
 	attack?: boolean;
 	relic?: boolean;
 	spell?: boolean;
+	variable?: string;
 	amount: number;
 }
 
@@ -379,15 +384,15 @@ type ConditionalEffect = ActionEffect & {
 	elseEffects?: AnyEffectType[];
 }
 
-type DelayedTriggerType = {
+export type DelayedTriggerType = {
 	name: string;
 	find: FindType;
 	effects: AnyEffectType[];
 }
 
-export type EnhancedDelayedTriggerType  = DelayedTriggerType & {
-  self: CardInGame
-  id: string
+export type EnhancedDelayedTriggerType = DelayedTriggerType & {
+	self: CardInGame
+	id: string
 }
 
 type AddDelayedTriggerEffect = ActionEffect & {
@@ -406,14 +411,14 @@ type RollDieEffect = ActionEffect & {
 }
 
 export type ExecutePowerEffect = ActionEffect & {
-  effectType: typeof EFFECT_TYPE_EXECUTE_POWER_EFFECTS;
-  power: string | {
-    cost: number | "X",
-    name: string,
-    effects: AnyEffectType[]
-  };
-  setUsage?: boolean
-  source: string | CardInGame;
+	effectType: typeof EFFECT_TYPE_EXECUTE_POWER_EFFECTS;
+	power: string | {
+		cost: number | "X",
+		name: string,
+		effects: AnyEffectType[]
+	};
+	setUsage?: boolean
+	source: string | CardInGame;
 }
 
 export type DieRolledEffect = ActionEffect & {
@@ -436,14 +441,14 @@ type DiscardCreatureOrRelicFromPlay = ActionEffect & {
 type DefeatMagiEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_DEFEAT_MAGI;
 	target: CardInGame;
-  player: number;
+	player: number;
 }
 
 export type MagiIsDefeatedEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_MAGI_IS_DEFEATED;
 	source: CardInGame | null;
 	target: CardInGame;
-  player: number;
+	player: number;
 }
 
 export type CreateContinuousEffect = ActionEffect & {
@@ -475,30 +480,30 @@ type DrawNCardsEffect = ActionEffect & {
 }
 
 export type DiscardCreatureFromPlayEffect = ActionEffect & {
-  effectType: typeof EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY;
-  source: CardInGame;
-  target: CardInGame | string;
-  attack: boolean;
-  player: number;
+	effectType: typeof EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY;
+	source: CardInGame;
+	target: CardInGame | string;
+	attack: boolean;
+	player: number;
 }
 
 type DiscardRelicFromPlayEffect = ActionEffect & {
-  effectType: typeof EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY;
-  target: CardInGame | string;
-  player: number;
+	effectType: typeof EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY;
+	target: CardInGame | string;
+	player: number;
 }
 
 type ReturnCreatureReturningEnergyEffect = ActionEffect & {
-  effectType: typeof EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY;
-  target: string | CardInGame;
+	effectType: typeof EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY;
+	target: string | CardInGame;
 }
 
 type RearrangeCardsOfZoneEffect = ActionEffect & {
-  effectType: typeof EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE;
-  zone: ZoneType | string;
-  zoneOwner: number | string;
-  numberOfCards: number | string;
-  cards: string[] | string;
+	effectType: typeof EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE;
+	zone: ZoneType | string;
+	zoneOwner: number | string;
+	numberOfCards: number | string;
+	cards: string[] | string;
 }
 
 export type EffectType = ActionEffect & {
@@ -519,8 +524,8 @@ export type EffectType = ActionEffect & {
 	DiscardEnergyFromCreaturesEffect |
 	DiscardEnergyFromCreatureEffect |
 	DiscardEnergyFromMagiEffect |
-  RemoveEnergyFromCreatureEffect |
-  RemoveEnergyFromMagiEffect |
+	RemoveEnergyFromCreatureEffect |
+	RemoveEnergyFromMagiEffect |
 	PayingEnergyForPowerEffect |
 	StartTurnEffect |
 	StartOfTurnEffect |
@@ -538,7 +543,7 @@ export type EffectType = ActionEffect & {
 	DiscardCreatureOrRelicFromPlay |
 	PayingEnergyForCreatureEffect |
 	PlayCreatureEffect |
-  DiscardReshuffledEffect |
+	DiscardReshuffledEffect |
 	CreatureEntersPlayEffect |
 	StartingEnergyOnCreatureEffect |
 	PayingEnergyForRelicEffect |
@@ -550,7 +555,7 @@ export type EffectType = ActionEffect & {
 	AddDelayedTriggerEffect |
 	EnergizeEffect |
 	RollDieEffect |
-  DieRolledEffect |
+	DieRolledEffect |
 	MoveEnergyEffect |
 	MagiIsDefeatedEffect |
 	CreateContinuousEffect |
@@ -558,8 +563,8 @@ export type EffectType = ActionEffect & {
 	RearrangeEnergyEffect |
 	DistributeEnergyEffect |
 	DistributeDamageEffect |
-  DiscardRelicFromPlayEffect |
-  ReturnCreatureReturningEnergyEffect |
-  DiscardCreatureFromPlayEffect |
-  RearrangeCardsOfZoneEffect |
-  ExecutePowerEffect;
+	DiscardRelicFromPlayEffect |
+	ReturnCreatureReturningEnergyEffect |
+	DiscardCreatureFromPlayEffect |
+	RearrangeCardsOfZoneEffect |
+	ExecutePowerEffect;

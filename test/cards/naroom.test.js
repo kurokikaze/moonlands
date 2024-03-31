@@ -1,6 +1,6 @@
 /* global expect, describe, it */
-import {State} from '../../src/index.ts';
-import {byName} from '../../src/cards.ts';
+import { State } from '../../src/index.ts';
+import { byName } from '../../src/cards.ts';
 import CardInGame from '../../src/classes/CardInGame.ts';
 import Zone from '../../src/classes/Zone.ts';
 
@@ -223,13 +223,13 @@ describe('Carillion', () => {
 			source: carillion,
 			target: weebo,
 		};
-        
+
 		const attackHyrenAction = {
 			type: ACTION_ATTACK,
 			source: carillion,
 			target: leafHyren,
 		};
-        
+
 		gameState.update(attackAction);
 
 		expect(carillion.data.energy).toEqual(5, 'Carillion loses no energy in the attack');
@@ -270,7 +270,7 @@ describe('Carillion', () => {
 			source: carillion,
 			target: caveRudwot,
 		};
-        
+
 		gameState.update(attackAction);
 
 		expect(carillion.data.energy).toEqual(2, 'Carillion loses no energy in the attack');
@@ -306,7 +306,7 @@ describe('Carillion', () => {
 			source: weebo,
 			target: carillion,
 		};
-        
+
 		gameState.update(attackAction);
 
 		expect(carillion.data.energy).toEqual(3, 'Carillion loses 2 energy in the attack, left at 3');
@@ -342,7 +342,7 @@ describe('Bhatar', () => {
 			source: bhatar,
 			target: weebo,
 		};
-        
+
 		gameState.update(attackAction);
 
 		expect(bhatar.data.energy).toEqual(4, 'bhatar gains 1 energy and loses 2 energy in attack, left at 4');
@@ -376,7 +376,7 @@ describe('Bhatar', () => {
 			source: weebo,
 			target: bhatar,
 		};
-        
+
 		gameState.update(attackAction);
 
 		expect(bhatar.data.energy).toEqual(3, 'Bhatar loses 2 energy in attack, left at 3');
@@ -410,7 +410,7 @@ describe('Bhatar', () => {
 			source: bhatar,
 			target: agovo,
 		};
-        
+
 		gameState.update(attackAction);
 
 		expect(bhatar.data.energy).toEqual(6, 'Bhatar gains 3 energy and loses 2 energy in attack, left at 6');
@@ -445,7 +445,7 @@ describe('Bhatar', () => {
 			source: agovo,
 			target: bhatar,
 		};
-        
+
 		gameState.update(attackAction);
 
 		expect(bhatar.data.energy).toEqual(3, 'Bhatar loses 2 energy in attack, left at 3');
@@ -484,7 +484,7 @@ describe('Furok', () => {
 			source: furok,
 			target: weebo,
 		};
-        
+
 		gameState.update(attackAction);
 
 		expect(furok.data.energy).toEqual(2, 'Furok loses 3 energy in attack, left at 2');
@@ -522,7 +522,7 @@ describe('Furok', () => {
 			source: weebo,
 			target: furok,
 		};
-        
+
 		gameState.update(attackAction);
 
 		expect(furok.data.energy).toEqual(2, 'Furok loses 3 energy in attack, left at 2');
@@ -556,12 +556,12 @@ describe('Robe of Vines', () => {
 			step: STEP_CREATURES,
 			activePlayer,
 		});
-        
+
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'In play is empty before');
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(15, 'Yaki\'s Energy is 15');
 
 		gameState.update({
-			type: ACTION_PLAY, 
+			type: ACTION_PLAY,
 			payload: {
 				player: activePlayer,
 				card: weebo,
@@ -599,12 +599,12 @@ describe('Robe of Vines', () => {
 			step: 3,
 			activePlayer: 0,
 		});
-        
+
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'In play is empty before');
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, activePlayer).card.data.energy).toEqual(15, 'Grega\'s Energy is 15');
 
 		gameState.update({
-			type: ACTION_PLAY, 
+			type: ACTION_PLAY,
 			payload: {
 				player: activePlayer,
 				card: arbolit,
@@ -654,7 +654,7 @@ describe('Vinoc', () => {
 			power: vinoc.card.data.powers[0],
 			player: ACTIVE_PLAYER,
 		};
-        
+
 		gameState.update(powerAction);
 
 		expect(gameState.state.prompt).toEqual(true);
@@ -754,13 +754,13 @@ describe('Rudwot', () => {
 			source: rudwot,
 			target: weebo,
 		};
-        
+
 		const attackHyrenAction = {
 			type: ACTION_ATTACK,
 			source: rudwot,
 			target: leafHyren,
 		};
-        
+
 		gameState.update(attackAction);
 
 		expect(rudwot.data.energy).toEqual(5, 'Rudwot loses 2 energy but gains 2 energy in the attack');
@@ -801,7 +801,7 @@ describe('Rudwot', () => {
 			source: rudwot,
 			target: caveRudwot,
 		};
-        
+
 		gameState.update(attackAction);
 
 		expect(rudwot.data.energy).toEqual(1, 'Rudwot loses 4 energy but gains 2 energy in the attack');
@@ -1373,7 +1373,7 @@ describe('Eebit', () => {
 		gameState.update(attackAction);
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'Kelthet is still on the field');
-	
+
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(0, 'Non-active player has no cards in discard');
 		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(1, 'Non-active player has one card in hand');
 		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).card.card.name).toEqual('Eebit', 'It is Eebit');
@@ -1417,7 +1417,7 @@ describe('Eebit', () => {
 		gameState.update(attackAction);
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'Kelthet is still on the field');
-	
+
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(0, 'Active player has no cards in discard');
 		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(1, 'Active player has one card in hand');
 		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).card.card.name).toEqual('Eebit', 'It is Eebit');
@@ -1469,7 +1469,7 @@ describe('Plith', () => {
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Plith', 'It is Plith');
 
 		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(1, 'Non-active player has drawn 1 card');
-		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).card.card.name).toEqual('Grow', 'It is Grow');		
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).card.card.name).toEqual('Grow', 'It is Grow');
 	});
 
 	it('Warning (magi is Evu)', () => {

@@ -1,6 +1,6 @@
 /* global expect, describe, it */
-import {State} from '../../src/index.ts';
-import {byName} from '../../src/cards.ts';
+import { State } from '../../src/index.ts';
+import { byName } from '../../src/cards.ts';
 import CardInGame from '../../src/classes/CardInGame.ts';
 import Zone from '../../src/classes/Zone.ts';
 
@@ -316,13 +316,13 @@ describe('Orathan', () => {
 			source: orathan,
 			target: weebo,
 		};
-        
+
 		const attackHyrenAction = {
 			type: ACTION_ATTACK,
 			source: orathan,
 			target: leafHyren,
 		};
-        
+
 		gameState.update(attackAction);
 
 		expect(orathan.data.energy).toEqual(5, 'Orathan loses 2 energy but gains 2 energy in the attack');
@@ -363,7 +363,7 @@ describe('Orathan', () => {
 			source: orathan,
 			target: caveRudwot,
 		};
-        
+
 		gameState.update(attackAction);
 
 		expect(orathan.data.energy).toEqual(2, 'Orathan loses 3 energy, gaining none, because at damage step Cave Rudwot has 3 energy');
@@ -405,7 +405,7 @@ describe('Whall', () => {
 			power: whall.card.data.powers[0],
 			player: ACTIVE_PLAYER,
 		};
-        
+
 		gameState.update(powerUseAction);
 
 		expect(gameState.state.prompt).toEqual(true, 'Game is in Prompt state');
@@ -480,7 +480,7 @@ describe('Whall', () => {
 			power: whall.card.data.powers[0],
 			player: ACTIVE_PLAYER,
 		};
-        
+
 		gameState.update(powerUseAction);
 
 		expect(gameState.state.prompt).toEqual(true, 'Game is in Prompt state');
@@ -744,7 +744,7 @@ describe('O\'Qua', () => {
 			power: oqua.card.data.powers[0],
 			player: ACTIVE_PLAYER,
 		};
-        
+
 		gameState.update(powerUseAction);
 
 		expect(gameState.state.prompt).toEqual(true, 'Game is in Prompt state');
@@ -807,7 +807,7 @@ describe('O\'Qua', () => {
 			power: oqua.card.data.powers[0],
 			player: ACTIVE_PLAYER,
 		};
-        
+
 		gameState.update(powerUseAction);
 
 		expect(gameState.state.prompt).toEqual(true, 'Game is in Prompt state');
@@ -933,7 +933,7 @@ describe('Giant Parathin', () => {
 		};
 
 		gameState.update(conjureAction);
-		
+
 		expect(gameState.state.prompt).toEqual(true);
 		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE);
 		expect(gameState.state.promptParams.cards[0].id).toEqual(twoParathin.id);
@@ -1095,7 +1095,7 @@ describe('Mobis', () => {
 			source: lavaBalamant,
 			target: mobis,
 		};
-		
+
 		gameState.update(attackAction);
 
 		const passAction = {
@@ -1158,7 +1158,7 @@ describe('Megathan', () => {
 			source: megathan,
 			target: arbolit,
 		};
-		
+
 		gameState.update(attackAction);
 		expect(megathan.data.defeatedCreature).toEqual(true, 'Megathan marked as defeated a creature');
 
@@ -1442,7 +1442,7 @@ describe('Coral Hyren', () => {
 
 		expect(deepHyren.data.energy).toEqual(5, 'Deep Hyren got 3 energy from Submerge, now at 5');
 		expect(sinder.data.energy).toEqual(7, 'Sinder paid 3 for Submerge (2 + region penalty)');
-		expect(coralHyren.data.energy).toEqual(3, 'Coral Hyren got 1 energy from Spelltap and now at 3');		
+		expect(coralHyren.data.energy).toEqual(3, 'Coral Hyren got 1 energy from Spelltap and now at 3');
 	});
 
 	it('Spelltap (not activating on non-orothe spell)', () => {
@@ -1722,7 +1722,7 @@ describe('Abaquist', () => {
 
 		const seenActions = [];
 
-		gameState.setOnAction(function(action) {
+		gameState.setOnAction(function (action) {
 			seenActions.push(action);
 		});
 
@@ -1822,7 +1822,7 @@ describe('Abaquist', () => {
 		gameState.update(arbolitPowerAction);
 
 		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
-		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game is prompting active player');		
+		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game is prompting active player');
 	});
 
 	it('Choosing posessed creature as your own', () => {
@@ -1857,7 +1857,7 @@ describe('Abaquist', () => {
 
 		const seenActions = [];
 
-		gameState.setOnAction(function(action) {
+		gameState.setOnAction(function (action) {
 			seenActions.push(action);
 		});
 
