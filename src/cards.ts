@@ -1735,7 +1735,7 @@ export const cards = [
 						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 						message: 'Search your deck for another Vellup',
 						zone: ZONE_TYPE_DECK,
-						zoneOwner: '$player',
+						zoneOwner: '%player',
 						restrictions: [{
 							type: RESTRICTION_CREATURE_TYPE,
 							value: 'Vellup',
