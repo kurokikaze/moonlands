@@ -71,6 +71,8 @@ import {
 	EFFECT_TYPE_DIE_ROLLED,
 	EFFECT_TYPE_EXECUTE_POWER_EFFECTS,
 	EFFECT_TYPE_DEFENDER_DAMAGE_DEALT,
+	EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE,
+	EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
 } from '../const';
 
 export type EffectTypeType =
@@ -261,8 +263,31 @@ export type DiscardEnergyFromCreatureEffect = ActionEffect & {
 	amount: number;
 }
 
+export type EnergyDiscardedFromCreatureEffect = ActionEffect & {
+	effectType: typeof EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE;
+	target: CardInGame | CardInGame[];
+	source: CardInGame;
+	power?: boolean;
+	attack?: boolean;
+	spell?: boolean;
+	relic?: boolean;
+	variable?: string;
+	amount: number;
+}
+
 type DiscardEnergyFromMagiEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI;
+	target: CardInGame | CardInGame[];
+	source: CardInGame;
+	attack?: boolean;
+	relic?: boolean;
+	spell?: boolean;
+	variable?: string;
+	amount: number;
+}
+
+type EnergyDiscardedFromMagiEffect = ActionEffect & {
+	effectType: typeof EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI;
 	target: CardInGame | CardInGame[];
 	source: CardInGame;
 	attack?: boolean;
@@ -523,7 +548,9 @@ export type EffectType = ActionEffect & {
 	DiscardEnergyFromCreatureOrMagiEffect |
 	DiscardEnergyFromCreaturesEffect |
 	DiscardEnergyFromCreatureEffect |
+	EnergyDiscardedFromCreatureEffect |
 	DiscardEnergyFromMagiEffect |
+	EnergyDiscardedFromMagiEffect |
 	RemoveEnergyFromCreatureEffect |
 	RemoveEnergyFromMagiEffect |
 	PayingEnergyForPowerEffect |

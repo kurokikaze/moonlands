@@ -252,6 +252,8 @@ import {
 	LOG_ENTRY_CONTINUOUS_EFFECT_CREATED,
 	EFFECT_TYPE_ATTACKER_DAMAGE_DEALT,
 	EFFECT_TYPE_DEFENDER_DAMAGE_DEALT,
+	EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE,
+	EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
 } from './const';
 
 import { showAction } from './logAction';
@@ -4719,6 +4721,10 @@ export class State {
 								this.getMetaValue(action.target, action.generatedBy),
 								target => {
 									target.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
+									this.transformIntoActions({
+										...action,
+										effectType: EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
+									});
 								},
 							);
 							break;
@@ -4815,8 +4821,9 @@ export class State {
 											const energyCanLoseThisTurn = Math.max(energyLossThreshold - energyLostAlready, 0);
 											energyToLose = Math.min(energyToLose, energyCanLoseThisTurn);
 										}
-										target.removeEnergy(energyToLose);
-										totalEnergyLost += energyToLose;
+										const energyLost = Math.min(energyToLose, target.data.energy);
+										target.removeEnergy(energyLost);
+										totalEnergyLost += energyLost;
 
 										if (target.data.energy == 0 && !action.attack) {
 											this.transformIntoActions({
@@ -4828,6 +4835,16 @@ export class State {
 												player: action.player,
 												generatedBy: action.generatedBy,
 											} as DiscardCreatureFromPlayEffect);
+										}
+										// The events transformed later take precedence over the events transformed earlier
+										// That's why we transform the energy discarded event here before potentially transforming a discard creature event
+										if (energyToLose > 0) {
+											this.transformIntoActions({
+												...action,
+												type: ACTION_EFFECT,
+												effectType: EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE,
+												amount: energyLost,
+											});
 										}
 									}
 								},
@@ -4842,6 +4859,13 @@ export class State {
 							const energyToLose = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
 							if (target.card.type === TYPE_CREATURE) {
 								target.removeEnergy(energyToLose);
+
+								// this.transformIntoActions({
+								// 	...action,
+								// 	type: ACTION_EFFECT,
+								// 	effectType: EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE,
+								// 	amount: energyToLose,
+								// });
 
 								if (target.data.energy === 0) {
 									this.transformIntoActions({
