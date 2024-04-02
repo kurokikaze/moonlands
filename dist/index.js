@@ -3687,8 +3687,11 @@ var State = /** @class */ (function () {
                         }
                         case EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI: {
                             oneOrSeveral(this_1.getMetaValue(action.target, action.generatedBy), function (target) {
-                                target.removeEnergy(_this.getMetaValue(action.amount, action.generatedBy));
-                                _this.transformIntoActions(__assign(__assign({}, action), { effectType: EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI }));
+                                var energyToRemove = Math.min(_this.getMetaValue(action.amount, action.generatedBy), target.data.energy);
+                                target.removeEnergy(energyToRemove);
+                                if (energyToRemove > 0) {
+                                    _this.transformIntoActions(__assign(__assign({}, action), { effectType: EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI, amount: energyToRemove }));
+                                }
                             });
                             break;
                         }

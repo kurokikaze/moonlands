@@ -4720,11 +4720,15 @@ export class State {
 							oneOrSeveral(
 								this.getMetaValue(action.target, action.generatedBy),
 								target => {
-									target.removeEnergy(this.getMetaValue(action.amount, action.generatedBy));
-									this.transformIntoActions({
-										...action,
-										effectType: EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
-									});
+									const energyToRemove = Math.min(this.getMetaValue(action.amount, action.generatedBy), target.data.energy);
+									target.removeEnergy(energyToRemove);
+									if (energyToRemove > 0) {
+										this.transformIntoActions({
+											...action,
+											effectType: EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
+											amount: energyToRemove,
+										});
+									}
 								},
 							);
 							break;
