@@ -3013,6 +3013,7 @@ var State = /** @class */ (function () {
                                     effectType: EFFECT_TYPE_DISCARD_CARD_FROM_HAND,
                                     target: target,
                                     generatedBy: action.generatedBy,
+                                    player: action.player,
                                 });
                             });
                             break;
