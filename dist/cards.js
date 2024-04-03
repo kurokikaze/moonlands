@@ -1098,10 +1098,10 @@ export var cards = [
                         }
                     ],
                 },
-                replaceWith: {
+                replaceWith: effect({
                     effectType: EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY,
                     target: '%target',
-                },
+                }),
             }],
     }),
     new Card('Eclipse', TYPE_SPELL, REGION_ARDERIAL, 5, {
@@ -4771,9 +4771,9 @@ export var cards = [
                         }
                     ],
                 },
-                replaceWith: {
+                replaceWith: effect({
                     effectType: EFFECT_TYPE_NONE,
-                },
+                }),
             }
         ],
     }),
@@ -5253,11 +5253,11 @@ export var cards = [
                         }
                     ],
                 },
-                replaceWith: {
+                replaceWith: effect({
                     effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
                     target: '%self',
                     amount: 1,
-                },
+                }),
                 mayEffect: true,
             },
         ],
@@ -5293,10 +5293,10 @@ export var cards = [
                         }
                     ],
                 },
-                replaceWith: {
+                replaceWith: effect({
                     effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
                     target: '%self',
-                },
+                }),
                 mayEffect: true,
             },
         ],
@@ -5318,13 +5318,18 @@ export var cards = [
                         }
                     ],
                 },
-                replaceWith: [{
+                replaceWith: [
+                    effect({
                         effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-                        target: '%self',
-                    }, {
+                        target: '%self'
+                    }),
+                    effect({
                         effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
                         target: '%target',
-                    }],
+                        source: '%self',
+                        attack: false
+                    })
+                ],
                 mayEffect: true,
             },
         ],

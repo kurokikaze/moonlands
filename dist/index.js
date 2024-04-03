@@ -1339,8 +1339,10 @@ var State = /** @class */ (function () {
         var previouslyReplacedBy = ('replacedBy' in action && action.replacedBy) ? action.replacedBy : [];
         if (replacementFound && replaceWith) {
             var resultEffects = appliedReplacerSelf ? replaceWith.map((function (appliedReplacerSelf) { return function (replacementEffect) {
+                if ('type' in replacementEffect && replacementEffect.type == ACTION_EXIT_PROMPTS) {
+                    throw new Error('Cannot replace anything with ACTION_EXIT_PROMPTS');
+                }
                 if (!('type' in replacementEffect)) {
-                    // @ts-ignore
                     var resultEffect_1 = __assign(__assign({ type: ACTION_EFFECT }, replacementEffect), { replacedBy: appliedReplacerId ? __spreadArray(__spreadArray([], previouslyReplacedBy, true), [
                             appliedReplacerId,
                         ], false) : previouslyReplacedBy, generatedBy: action.generatedBy || nanoid(), player: appliedReplacerSelf.data.controller });
@@ -1352,7 +1354,7 @@ var State = /** @class */ (function () {
                     });
                     return resultEffect_1;
                 }
-                var resultEffect = __assign(__assign({}, replacementEffect), { replacedBy: appliedReplacerId ? __spreadArray(__spreadArray([], previouslyReplacedBy, true), [
+                var resultEffect /*: WithReplacementValues<EffectType, EffectType>*/ = __assign(__assign({}, replacementEffect), { replacedBy: appliedReplacerId ? __spreadArray(__spreadArray([], previouslyReplacedBy, true), [
                         appliedReplacerId,
                     ], false) : previouslyReplacedBy, generatedBy: action.generatedBy || nanoid(), player: appliedReplacerSelf.data.controller });
                 // prepare %-values on created action

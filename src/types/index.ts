@@ -20,7 +20,7 @@ import {
     CALCULATION_HALVE_ROUND_UP,
     CALCULATION_MIN,
     CALCULATION_MAX,
-    
+
     ACTION_GET_PROPERTY_VALUE,
 
     PROTECTION_FROM_EFFECTS,
@@ -37,11 +37,12 @@ import {
     TYPE_CREATURE,
     TYPE_RELIC,
     TYPE_SPELL,
+    EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
 } from '../const';
 
 import { ResolvePromptType } from './resolvePrompt';
 import { SelectorTypeType, SelectType } from './select';
-import { EffectTypeType, EffectType } from './effect';
+import { EffectTypeType, EffectType, ConditionalEffect, DiscardCreatureFromPlayEffect } from './effect';
 import { PromptType } from './prompt';
 import { PropertyType, ConditionType, ExpirationObjectType, RestrictionObjectType } from './common';
 import { AttackEffect } from './attack';
@@ -67,17 +68,17 @@ export type CardData = {
     startingEnergy?: number;
     energize?: number;
     startingCards?: string[];
-  	attacksPerTurn?: number;
+    attacksPerTurn?: number;
     canAttackMagiDirectly?: boolean;
     canPackHunt?: boolean;
     powers?: PowerType[];
     protection?: ProtectionType;
-  	staticAbilities?: StaticAbilityType[];
+    staticAbilities?: StaticAbilityType[];
     effects?: AnyEffectType[];
     paymentSource?: (typeof TYPE_CREATURE | typeof TYPE_SPELL | typeof TYPE_RELIC)[]
     triggerEffects?: TriggerEffectType[];
     energyStasis?: boolean;                         // This is done specifically for Colossus for now
-    replacementEffects?: ReplacementEffectType[];
+    replacementEffects?: ReplacementEffectType<FindType>[];
     energyLossThreshold?: number;
     ableToAttack?: boolean;
     canBeAttacked?: boolean;
@@ -102,16 +103,16 @@ type PowerType = {
 }
 
 export type StaticAbilityType = {
-	name: string,
-	text: string,
-  selector: SelectorTypeType,
-  selectorParameter?: string | number, 
-  property: PropertyType,
-  subProperty?: string | typeof STATUS_BURROWED;
-  modifier: {
-    operator: OperatorType,
-    operandOne: number | boolean | Record<string, any> | ProtectionType,
-  },
+    name: string,
+    text: string,
+    selector: SelectorTypeType,
+    selectorParameter?: string | number,
+    property: PropertyType,
+    subProperty?: string | typeof STATUS_BURROWED;
+    modifier: {
+        operator: OperatorType,
+        operandOne: number | boolean | Record<string, any> | ProtectionType,
+    },
 }
 
 export type FindType = {
@@ -126,14 +127,28 @@ export type TriggerEffectType = {
     find: FindType;
     effects: AnyEffectType[];
 }
+export type RequestBody<T> = {
+    [P in keyof T]: string;
+};
 
-export type ReplacementEffectType = {
+export type EffectMoldType = Omit<EffectType, 'generatedBy' | 'player'> | PromptType | NoneType
+
+export type WithReplacementValues<T extends EffectMoldType, Q extends EffectType> = {
+    // type: T['type']
+    [P in keyof T]: `%${keyof Q extends string ? keyof Q : never}` | '%self' | `$${string}` | T[P]
+} & { type : T['type'] }
+
+export type SingleOrMultiple<T> = T | T[];
+
+export type ReplacementEffectType<T extends FindType = FindType> = {
     name?: string;
     text?: string;
-    find: FindType;
-    replaceWith: ReplacingEffectType | EffectType | (ReplacingEffectType | EffectType | PromptType)[];
+    find: T;
+    replaceWith: Extract<EffectType, T> extends T ? SingleOrMultiple<WithReplacementValues<EffectMoldType, Extract<EffectType, T>>> : never,
+    // replaceWith: ReplacingEffectType | {
+    //     [P in keyof Extract<EffectType, T>]: string | Extract<EffectType, T>[P] } | (ReplacingEffectType | Extract<EffectType, T> | PromptType)[];
     mayEffect?: boolean;
-    oncePerTurn?: boolean; 
+    oncePerTurn?: boolean;
 }
 
 export type ReplacingEffectType = {
@@ -216,7 +231,7 @@ export type ForcedPlayType = EnrichedAction & {
     generatedBy?: string;
 }
 
-type NoneType = EnrichedAction & {
+export type NoneType = EnrichedAction & {
     type: typeof ACTION_NONE;
     generatedBy?: string;
 }
@@ -237,7 +252,7 @@ type TimeNotificationAction = EnrichedAction & {
     generatedBy?: string; // Not really needed
 }
 
-type ExitPromptsAction = EnrichedAction & {
+export type ExitPromptsAction = EnrichedAction & {
     type: typeof ACTION_EXIT_PROMPTS;
     generatedBy?: string; // Not really needed
 }

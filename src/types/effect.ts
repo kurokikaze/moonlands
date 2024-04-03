@@ -402,7 +402,7 @@ type PayingEnergyForSpellEffect = ActionEffect & {
 	amount: number | string;
 }
 
-type ConditionalEffect = ActionEffect & {
+export type ConditionalEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_CONDITIONAL;
 	conditions: ConditionType[];
 	thenEffects: AnyEffectType[];

@@ -289,6 +289,9 @@ import {
 	Region,
 	ProtectionType,
 	ReplacingEffectType,
+	ExitPromptsAction,
+	NoneType,
+	WithReplacementValues,
 } from './types';
 import { DieRolledEffect, DiscardCreatureFromPlayEffect, DiscardEnergyFromCreatureEffect, EnhancedDelayedTriggerType, ExecutePowerEffect, StartingEnergyOnCreatureEffect } from './types/effect';
 import { CardType, StatusType } from './types/common';
@@ -1996,7 +1999,7 @@ export class State {
 			self: CardInGame;
 		}
 
-		type ReplacementEffectEnhanced = ReplacementEffectType & WithSelf;
+		type ReplacementEffectEnhanced = ReplacementEffectType<FindType> & WithSelf;
 		const zoneReplacements: ReplacementEffectEnhanced[] = allZonesCards.reduce<ReplacementEffectEnhanced[]>(
 			(acc, cardInPlay) => cardInPlay.card.data.replacementEffects ? [
 				...acc,
@@ -2010,7 +2013,7 @@ export class State {
 		let replacementFound: boolean = false;
 		let appliedReplacerId: string | null = null;
 		let appliedReplacerSelf: CardInGame | null = null;
-		let replaceWith: (ReplacingEffectType | EffectType | PromptType)[] | null = null;
+		let replaceWith: Omit<ReplacingEffectType | EffectType | PromptType | NoneType, 'generatedBy'>[] | null = null;
 		let foundReplacer: ReplacementEffectEnhanced | null = null;
 
 		for (let replacer of zoneReplacements) {
@@ -2033,10 +2036,13 @@ export class State {
 
 		if (replacementFound && replaceWith) {
 
-			const resultEffects = appliedReplacerSelf ? replaceWith.map(((appliedReplacerSelf: CardInGame) => (replacementEffect: ReplacingEffectType | EffectType | PromptType) => {
+			const resultEffects: AnyEffectType[] = appliedReplacerSelf ? replaceWith.map(((appliedReplacerSelf: CardInGame) => (replacementEffect) => {
+				if ('type' in replacementEffect && replacementEffect.type == ACTION_EXIT_PROMPTS) {
+					throw new Error('Cannot replace anything with ACTION_EXIT_PROMPTS');
+				}
+
 				if (!('type' in replacementEffect)) {
-					// @ts-ignore
-					const resultEffect: AnyEffectType = {
+					const resultEffect = {
 						type: ACTION_EFFECT,
 						...replacementEffect,
 						replacedBy: appliedReplacerId ? [
@@ -2045,7 +2051,7 @@ export class State {
 						] : previouslyReplacedBy,
 						generatedBy: action.generatedBy || nanoid(),
 						player: appliedReplacerSelf.data.controller,
-					}
+					} as AnyEffectType;
 
 					Object.keys(replacementEffect)
 						.filter(key => !['type', 'effectType'].includes(key))
@@ -2056,7 +2062,7 @@ export class State {
 
 					return resultEffect
 				}
-				let resultEffect = {
+				let resultEffect/*: WithReplacementValues<EffectType, EffectType>*/ = {
 					...replacementEffect,
 					replacedBy: appliedReplacerId ? [
 						...previouslyReplacedBy,
@@ -2074,7 +2080,7 @@ export class State {
 						resultEffect[key as keyof AnyEffectType] = value;
 					});
 
-				return resultEffect;
+				return resultEffect as AnyEffectType;
 			})(appliedReplacerSelf)) : [];
 
 			// If the replacer is one-time, set the action usage
