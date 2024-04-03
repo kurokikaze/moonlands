@@ -8,32 +8,32 @@ interface ResolvePromptInterface {
     useEffect?: boolean;
     replacedBy?: string[];
 }
-export declare type ResolveRearrangeEnergyPrompt = ResolvePromptInterface & {
+export type ResolveRearrangeEnergyPrompt = ResolvePromptInterface & {
     energyOnCreatures: Record<string, number>;
 };
-export declare type ResolveDistributeEnergyPrompt = ResolvePromptInterface & {
+export type ResolveDistributeEnergyPrompt = ResolvePromptInterface & {
     energyOnCreatures: Record<string, number>;
 };
-export declare type ResolveDistributeDamagePrompt = ResolvePromptInterface & {
+export type ResolveDistributeDamagePrompt = ResolvePromptInterface & {
     damageOnCreatures: Record<string, number>;
 };
-export declare type ResolvePlayerPrompt = ResolvePromptInterface & {
+export type ResolvePlayerPrompt = ResolvePromptInterface & {
     targetPlayer: number;
 };
-export declare type ResolveRearrangeCardsPrompt = ResolvePromptInterface & {
+export type ResolveRearrangeCardsPrompt = ResolvePromptInterface & {
     cardsOrder: string[];
 };
-export declare type ResolvePowerOnMagiPrompt = ResolvePromptInterface & {
+export type ResolvePowerOnMagiPrompt = ResolvePromptInterface & {
     power: any;
     source: CardInGame;
 };
-export declare type ResolveAlternativePrompt = ResolvePromptInterface & {
+export type ResolveAlternativePrompt = ResolvePromptInterface & {
     alternative: string;
 };
-export declare type ResolvePaymentSourcePrompt = ResolvePromptInterface & {
+export type ResolvePaymentSourcePrompt = ResolvePromptInterface & {
     target: CardInGame;
 };
-export declare type ResolvePromptType = ResolvePromptInterface & {
+export type ResolvePromptType = ResolvePromptInterface & {
     number?: number | string;
     cards?: CardInGame[];
     target?: CardInGame;

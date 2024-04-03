@@ -1,4 +1,4 @@
-import { ACTION_ATTACK, ACTION_EFFECT, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_ATTACKER_DEALS_DAMAGE, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_CREATURE_IS_DEFEATED, EFFECT_TYPE_DAMAGE_STEP, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE } from "../const";
+import { ACTION_ATTACK, ACTION_EFFECT, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_ATTACKER_DAMAGE_DEALT, EFFECT_TYPE_ATTACKER_DEALS_DAMAGE, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_CREATURE_IS_DEFEATED, EFFECT_TYPE_DAMAGE_STEP, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_DEFENDER_DAMAGE_DEALT, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE } from "../const";
 import CardInGame from "../classes/CardInGame";
 interface AttackEffectAction {
     type: typeof ACTION_EFFECT;
@@ -7,7 +7,7 @@ interface AttackEffectAction {
     replacedBy?: string[];
     player?: number;
 }
-declare type AttackType = {
+type AttackType = {
     type: typeof ACTION_ATTACK;
     source: CardInGame | string;
     target: CardInGame | string;
@@ -17,21 +17,21 @@ declare type AttackType = {
     generatedBy?: string;
     replacedBy?: string[];
 };
-declare type CreatureAttacksEffect = AttackEffectAction & {
+type CreatureAttacksEffect = AttackEffectAction & {
     effectType: typeof EFFECT_TYPE_CREATURE_ATTACKS;
     source: CardInGame;
     sourceAtStart: CardInGame;
     target: CardInGame;
     targetAtStart: CardInGame;
 };
-export declare type BeforeDamageEffect = AttackEffectAction & {
+export type BeforeDamageEffect = AttackEffectAction & {
     effectType: typeof EFFECT_TYPE_BEFORE_DAMAGE;
     source: CardInGame;
     sourceAtStart: CardInGame;
     target: CardInGame;
     targetAtStart: CardInGame;
 };
-declare type DamageStepEffect = AttackEffectAction & {
+type DamageStepEffect = AttackEffectAction & {
     effectType: typeof EFFECT_TYPE_DAMAGE_STEP;
     source: CardInGame;
     sourceAtStart: CardInGame;
@@ -39,12 +39,12 @@ declare type DamageStepEffect = AttackEffectAction & {
     targetAtStart: CardInGame;
     packHuntAttack: boolean;
 };
-declare type AfterDamageEffect = AttackEffectAction & {
+type AfterDamageEffect = AttackEffectAction & {
     effectType: typeof EFFECT_TYPE_AFTER_DAMAGE;
     source: CardInGame;
     target: CardInGame;
 };
-export declare type AttackerDealsDamageEffect = AttackEffectAction & {
+export type AttackerDealsDamageEffect = AttackEffectAction & {
     effectType: typeof EFFECT_TYPE_ATTACKER_DEALS_DAMAGE;
     source: CardInGame;
     sourceAtStart: CardInGame;
@@ -54,7 +54,17 @@ export declare type AttackerDealsDamageEffect = AttackEffectAction & {
     targetBeforeDamage: CardInGame;
     amount: number;
 };
-export declare type DefenderDealsDamageEffect = AttackEffectAction & {
+export type AttackerDamageDealtEffect = AttackEffectAction & {
+    effectType: typeof EFFECT_TYPE_ATTACKER_DAMAGE_DEALT;
+    source: CardInGame;
+    sourceAtStart: CardInGame;
+    target: CardInGame;
+    targetAtStart: CardInGame;
+    sourceBeforeDamage: CardInGame;
+    targetBeforeDamage: CardInGame;
+    amount: number | string;
+};
+export type DefenderDealsDamageEffect = AttackEffectAction & {
     effectType: typeof EFFECT_TYPE_DEFENDER_DEALS_DAMAGE;
     source: CardInGame;
     sourceAtStart: CardInGame;
@@ -64,7 +74,17 @@ export declare type DefenderDealsDamageEffect = AttackEffectAction & {
     sourceBeforeDamage: CardInGame;
     targetBeforeDamage: CardInGame;
 };
-declare type DealDamageEffect = AttackEffectAction & {
+export type DefenderDamageDealt = AttackEffectAction & {
+    effectType: typeof EFFECT_TYPE_DEFENDER_DAMAGE_DEALT;
+    source: CardInGame;
+    sourceAtStart: CardInGame;
+    target: CardInGame;
+    amount: number | string;
+    targetAtStart: CardInGame;
+    sourceBeforeDamage: CardInGame;
+    targetBeforeDamage: CardInGame;
+};
+type DealDamageEffect = AttackEffectAction & {
     effectType: typeof EFFECT_TYPE_DEAL_DAMAGE;
     source: CardInGame;
     sourceAtStart: CardInGame;
@@ -73,16 +93,16 @@ declare type DealDamageEffect = AttackEffectAction & {
     amount: number;
     attack: boolean;
 };
-declare type CreatureDefeatsCreatureEffect = AttackEffectAction & {
+type CreatureDefeatsCreatureEffect = AttackEffectAction & {
     effectType: typeof EFFECT_TYPE_CREATURE_DEFEATS_CREATURE;
     source: CardInGame;
     target: CardInGame;
     attack: boolean;
 };
-declare type CreatureIsDefeatedEffect = AttackEffectAction & {
+type CreatureIsDefeatedEffect = AttackEffectAction & {
     effectType: typeof EFFECT_TYPE_CREATURE_IS_DEFEATED;
     target: CardInGame;
     attack: boolean;
 };
-export declare type AttackEffect = AttackType | CreatureAttacksEffect | BeforeDamageEffect | DamageStepEffect | AfterDamageEffect | AttackerDealsDamageEffect | DefenderDealsDamageEffect | DealDamageEffect | CreatureDefeatsCreatureEffect | CreatureIsDefeatedEffect;
+export type AttackEffect = AttackType | CreatureAttacksEffect | BeforeDamageEffect | DamageStepEffect | AfterDamageEffect | AttackerDealsDamageEffect | AttackerDamageDealtEffect | DefenderDealsDamageEffect | DefenderDamageDealt | DealDamageEffect | CreatureDefeatsCreatureEffect | CreatureIsDefeatedEffect;
 export {};

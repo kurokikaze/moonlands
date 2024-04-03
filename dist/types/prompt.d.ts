@@ -1,7 +1,7 @@
 import CardInGame from '../classes/CardInGame';
 import { ACTION_ENTER_PROMPT, PROMPT_TYPE_ALTERNATIVE, PROMPT_TYPE_CHOOSE_CARDS, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_PAYMENT_SOURCE, PROMPT_TYPE_PLAYER, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, TYPE_CREATURE, TYPE_RELIC, TYPE_SPELL } from '../const';
 import { GenericPromptType, RestrictionType, RestrictionObjectType, ZoneType } from './common';
-export declare type PromptParams = {
+export type PromptParams = {
     promptType: GenericPromptType;
     zone?: string;
     message?: string;
@@ -24,21 +24,21 @@ interface PromptInteface {
     generatedBy?: string;
     replacedBy?: string[];
 }
-export declare type PromptTypeDistributeEnergy = PromptInteface & {
+export type PromptTypeDistributeEnergy = PromptInteface & {
     promptType: typeof PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES;
     amount: string | number;
     restriction?: RestrictionType;
     restrictionValue?: any;
 };
-export declare type PromptTypeDistributeDamage = PromptInteface & {
+export type PromptTypeDistributeDamage = PromptInteface & {
     promptType: typeof PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES;
     amount: string | number;
     restriction?: RestrictionType;
 };
-export declare type PromptTypeRearrangeEnergy = PromptInteface & {
+export type PromptTypeRearrangeEnergy = PromptInteface & {
     promptType: typeof PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES;
 };
-export declare type PromptTypeChooseUpToNCardsFromZone = PromptInteface & {
+export type PromptTypeChooseUpToNCardsFromZone = PromptInteface & {
     promptType: typeof PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE;
     zone: ZoneType;
     zoneOwner: string;
@@ -47,17 +47,17 @@ export declare type PromptTypeChooseUpToNCardsFromZone = PromptInteface & {
     restrictionValue?: string | number | boolean;
     restrictions?: RestrictionObjectType[];
 };
-export declare type PromptTypePlayer = PromptInteface & {
+export type PromptTypePlayer = PromptInteface & {
     promptType: typeof PROMPT_TYPE_PLAYER;
 };
-export declare type ChooseCardsPromptType = PromptInteface & {
+export type ChooseCardsPromptType = PromptInteface & {
     promptType: typeof PROMPT_TYPE_CHOOSE_CARDS;
     promptParams: {
         availableCards: string[];
         startingCards: string[];
     };
 };
-export declare type PromptTypeMayAbility = PromptInteface & {
+export type PromptTypeMayAbility = PromptInteface & {
     promptType: typeof PROMPT_TYPE_MAY_ABILITY;
     promptParams: {
         effect: {
@@ -66,7 +66,7 @@ export declare type PromptTypeMayAbility = PromptInteface & {
         };
     };
 };
-export declare type PromptTypeRearrangeCardsOfZone = PromptInteface & {
+export type PromptTypeRearrangeCardsOfZone = PromptInteface & {
     promptType: typeof PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE;
     promptParams: {
         zone: ZoneType | string;
@@ -74,34 +74,34 @@ export declare type PromptTypeRearrangeCardsOfZone = PromptInteface & {
         numberOfCards: number | string;
     };
 };
-declare type GeneralPromptType = PromptParams & {
+type GeneralPromptType = PromptParams & {
     type: typeof ACTION_ENTER_PROMPT;
     promptType: GenericPromptType;
     promptParams?: any;
     generatedBy?: string;
     replacedBy?: string[];
 };
-export declare type AlternativeType = {
+export type AlternativeType = {
     name: string;
     value: string;
 };
-export declare type AlternativePromptParams = {
+export type AlternativePromptParams = {
     promptType: typeof PROMPT_TYPE_ALTERNATIVE;
     alternatives: AlternativeType[];
     variable?: string;
 };
-export declare type PromptTypeAlternative = PromptInteface & AlternativePromptParams;
-export declare type PaymentSourcePromptParams = {
+export type PromptTypeAlternative = PromptInteface & AlternativePromptParams;
+export type PaymentSourcePromptParams = {
     promptType: typeof PROMPT_TYPE_PAYMENT_SOURCE;
     paymentType: typeof TYPE_CREATURE | typeof TYPE_SPELL | typeof TYPE_RELIC;
     amount: number;
     variable?: string;
 };
-export declare type PromptTypePaymentSource = PromptInteface & PaymentSourcePromptParams;
-export declare type MagiPowerPromptParams = {
+export type PromptTypePaymentSource = PromptInteface & PaymentSourcePromptParams;
+export type MagiPowerPromptParams = {
     promptType: typeof PROMPT_TYPE_POWER_ON_MAGI;
     magi: CardInGame | string;
 };
-export declare type PromptTypeMagiPower = PromptInteface & MagiPowerPromptParams;
-export declare type PromptType = GeneralPromptType | PromptTypeRearrangeEnergy | PromptTypeDistributeEnergy | PromptTypeChooseUpToNCardsFromZone | PromptTypeDistributeDamage | PromptTypePlayer | ChooseCardsPromptType | PromptTypeMayAbility | PromptTypeRearrangeCardsOfZone | PromptTypeAlternative | PromptTypePaymentSource | PromptTypeMagiPower;
+export type PromptTypeMagiPower = PromptInteface & MagiPowerPromptParams;
+export type PromptType = GeneralPromptType | PromptTypeRearrangeEnergy | PromptTypeDistributeEnergy | PromptTypeChooseUpToNCardsFromZone | PromptTypeDistributeDamage | PromptTypePlayer | ChooseCardsPromptType | PromptTypeMayAbility | PromptTypeRearrangeCardsOfZone | PromptTypeAlternative | PromptTypePaymentSource | PromptTypeMagiPower;
 export {};

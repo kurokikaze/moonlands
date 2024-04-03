@@ -1,7 +1,7 @@
 import { COST_X, COST_X_PLUS_ONE } from '../const';
 import { Region, CardType, CardData } from '../types';
-export declare type CostType = number | typeof COST_X | typeof COST_X_PLUS_ONE | null;
-export declare type ModifiedCardType = {
+export type CostType = number | typeof COST_X | typeof COST_X_PLUS_ONE | null;
+export type ModifiedCardType = {
     name: string;
     data: CardData;
     region: Region;

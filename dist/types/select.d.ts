@@ -1,6 +1,6 @@
 import { Region, RestrictionObjectType, StatusType, ZoneType } from "./common";
 import { ACTION_SELECT, SELECTOR_OPPONENT_ID, SELECTOR_OWN_MAGI, SELECTOR_OWN_MAGI_SINGLE, SELECTOR_CREATURES, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_PLAYER, SELECTOR_CREATURES_AND_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_MAGI_OF_REGION, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, SELECTOR_MAGI, SELECTOR_ID, SELECTOR_RELICS, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_CREATURES_OF_TYPE, SELECTOR_OWN_SPELLS_IN_HAND, SELECTOR_OTHER_CREATURES_OF_TYPE, SELECTOR_OWN_CREATURES_WITH_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_STATUS, SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY, SELECTOR_NTH_CARD_OF_ZONE, SELECTOR_SELF_AND_STATUS, SELECTOR_OWN_CARDS_IN_HAND, SELECTOR_CARDS_IN_HAND } from "../const";
-export declare type SelectorParams = {
+export type SelectorParams = {
     selector: SelectorTypeType;
     variable?: string;
     opponentOf?: string;
@@ -8,7 +8,7 @@ export declare type SelectorParams = {
     region?: Region;
     status?: string;
 };
-export declare type SelectorTypeType = typeof SELECTOR_OPPONENT_ID | typeof SELECTOR_MAGI | typeof SELECTOR_ID | typeof SELECTOR_CREATURES_OF_PLAYER | typeof SELECTOR_OWN_MAGI | typeof SELECTOR_OWN_MAGI_SINGLE | typeof SELECTOR_CREATURES | typeof SELECTOR_ENEMY_MAGI | typeof SELECTOR_RELICS | typeof SELECTOR_CREATURES_AND_MAGI | typeof SELECTOR_CREATURES_OF_REGION | typeof SELECTOR_CREATURES_NOT_OF_REGION | typeof SELECTOR_CREATURES_NOT_OF_TYPE | typeof SELECTOR_OWN_CREATURES | typeof SELECTOR_ENEMY_CREATURES | typeof SELECTOR_SELF_AND_STATUS | typeof SELECTOR_MAGI_OF_REGION | typeof SELECTOR_MAGI_NOT_OF_REGION | typeof SELECTOR_TOP_MAGI_OF_PILE | typeof SELECTOR_CARDS_WITH_ENERGIZE_RATE | typeof SELECTOR_OWN_CREATURES_OF_TYPE | typeof SELECTOR_CREATURES_OF_TYPE | typeof SELECTOR_OWN_SPELLS_IN_HAND | typeof SELECTOR_OTHER_CREATURES_OF_TYPE | typeof SELECTOR_OWN_CREATURES_WITH_STATUS | typeof SELECTOR_CREATURES_WITHOUT_STATUS | typeof SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE | typeof SELECTOR_OWN_CARDS_IN_PLAY | typeof SELECTOR_STATUS | typeof SELECTOR_OWN_CARDS_IN_HAND | typeof SELECTOR_CARDS_IN_HAND | typeof SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY;
+export type SelectorTypeType = typeof SELECTOR_OPPONENT_ID | typeof SELECTOR_MAGI | typeof SELECTOR_ID | typeof SELECTOR_CREATURES_OF_PLAYER | typeof SELECTOR_OWN_MAGI | typeof SELECTOR_OWN_MAGI_SINGLE | typeof SELECTOR_CREATURES | typeof SELECTOR_ENEMY_MAGI | typeof SELECTOR_RELICS | typeof SELECTOR_CREATURES_AND_MAGI | typeof SELECTOR_CREATURES_OF_REGION | typeof SELECTOR_CREATURES_NOT_OF_REGION | typeof SELECTOR_CREATURES_NOT_OF_TYPE | typeof SELECTOR_OWN_CREATURES | typeof SELECTOR_ENEMY_CREATURES | typeof SELECTOR_SELF_AND_STATUS | typeof SELECTOR_MAGI_OF_REGION | typeof SELECTOR_MAGI_NOT_OF_REGION | typeof SELECTOR_TOP_MAGI_OF_PILE | typeof SELECTOR_CARDS_WITH_ENERGIZE_RATE | typeof SELECTOR_OWN_CREATURES_OF_TYPE | typeof SELECTOR_CREATURES_OF_TYPE | typeof SELECTOR_OWN_SPELLS_IN_HAND | typeof SELECTOR_OTHER_CREATURES_OF_TYPE | typeof SELECTOR_OWN_CREATURES_WITH_STATUS | typeof SELECTOR_CREATURES_WITHOUT_STATUS | typeof SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE | typeof SELECTOR_OWN_CARDS_IN_PLAY | typeof SELECTOR_STATUS | typeof SELECTOR_OWN_CARDS_IN_HAND | typeof SELECTOR_CARDS_IN_HAND | typeof SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY;
 interface SelectAction {
     type: typeof ACTION_SELECT;
     player?: number;
@@ -19,137 +19,137 @@ interface SelectAction {
 interface SelectParams {
     variable?: string;
 }
-declare type SelectOwnCardsInPlay = SelectAction & {
+type SelectOwnCardsInPlay = SelectAction & {
     selector: typeof SELECTOR_OWN_CARDS_IN_PLAY;
 };
-declare type SelectOwnCreaturesOfTypeParams = SelectParams & {
+type SelectOwnCreaturesOfTypeParams = SelectParams & {
     selector: typeof SELECTOR_OWN_CREATURES_OF_TYPE;
     creatureType: string;
 };
-declare type SelectOwnCreaturesOfType = SelectAction & SelectOwnCreaturesOfTypeParams;
-declare type SelectCreaturesParams = SelectParams & {
+type SelectOwnCreaturesOfType = SelectAction & SelectOwnCreaturesOfTypeParams;
+type SelectCreaturesParams = SelectParams & {
     selector: typeof SELECTOR_CREATURES;
 };
-declare type SelectCreatures = SelectAction & SelectCreaturesParams;
-declare type SelectMagiParams = SelectParams & {
+type SelectCreatures = SelectAction & SelectCreaturesParams;
+type SelectMagiParams = SelectParams & {
     selector: typeof SELECTOR_MAGI;
 };
-declare type SelectMagi = SelectAction & SelectMagiParams;
-declare type SelectOwnCreaturesParams = SelectParams & {
+type SelectMagi = SelectAction & SelectMagiParams;
+type SelectOwnCreaturesParams = SelectParams & {
     selector: typeof SELECTOR_OWN_CREATURES;
 };
-declare type SelectOwnCreatures = SelectAction & SelectOwnCreaturesParams;
-declare type SelectCreaturesOfTypeParams = SelectParams & {
+type SelectOwnCreatures = SelectAction & SelectOwnCreaturesParams;
+type SelectCreaturesOfTypeParams = SelectParams & {
     selector: typeof SELECTOR_CREATURES_OF_TYPE;
     creatureType: string;
 };
-declare type SelectCreaturesOfType = SelectAction & SelectCreaturesOfTypeParams;
-declare type SelectOtherCreaturesOfTypeParams = SelectParams & {
+type SelectCreaturesOfType = SelectAction & SelectCreaturesOfTypeParams;
+type SelectOtherCreaturesOfTypeParams = SelectParams & {
     selector: typeof SELECTOR_OTHER_CREATURES_OF_TYPE;
     creatureType: string;
 };
-declare type SelectOtherCreaturesOfType = SelectAction & SelectOtherCreaturesOfTypeParams;
-declare type SelectCreaturesNotOfTypeParams = SelectParams & {
+type SelectOtherCreaturesOfType = SelectAction & SelectOtherCreaturesOfTypeParams;
+type SelectCreaturesNotOfTypeParams = SelectParams & {
     selector: typeof SELECTOR_CREATURES_NOT_OF_TYPE;
     creatureType: string;
 };
-declare type SelectCreaturesNotOfType = SelectAction & SelectCreaturesNotOfTypeParams;
-declare type SelectRelicsParams = SelectParams & {
+type SelectCreaturesNotOfType = SelectAction & SelectCreaturesNotOfTypeParams;
+type SelectRelicsParams = SelectParams & {
     selector: typeof SELECTOR_RELICS;
 };
-declare type SelectRelics = SelectAction & SelectRelicsParams;
-declare type SelectOwnMagiParams = SelectParams & {
+type SelectRelics = SelectAction & SelectRelicsParams;
+type SelectOwnMagiParams = SelectParams & {
     selector: typeof SELECTOR_OWN_MAGI;
 };
-declare type SelectOwnMagi = SelectAction & SelectOwnMagiParams;
-declare type SelectEnemyMagiParams = SelectParams & {
+type SelectOwnMagi = SelectAction & SelectOwnMagiParams;
+type SelectEnemyMagiParams = SelectParams & {
     selector: typeof SELECTOR_ENEMY_MAGI;
 };
-declare type SelectEnemyMagi = SelectAction & SelectEnemyMagiParams;
-declare type SelectCardsWithEnergizeRateParams = {
+type SelectEnemyMagi = SelectAction & SelectEnemyMagiParams;
+type SelectCardsWithEnergizeRateParams = {
     selector: typeof SELECTOR_CARDS_WITH_ENERGIZE_RATE;
 };
-declare type SelectCardsWithEnergizeRate = SelectAction & SelectCardsWithEnergizeRateParams;
-declare type SelectOpponentIdParams = {
+type SelectCardsWithEnergizeRate = SelectAction & SelectCardsWithEnergizeRateParams;
+type SelectOpponentIdParams = {
     selector: typeof SELECTOR_OPPONENT_ID;
     opponentOf?: string;
     variable?: string;
 };
-declare type SelectOpponentId = SelectAction & SelectOpponentIdParams;
-declare type SelectCreaturesAndMagiParams = SelectParams & {
+type SelectOpponentId = SelectAction & SelectOpponentIdParams;
+type SelectCreaturesAndMagiParams = SelectParams & {
     selector: typeof SELECTOR_CREATURES_AND_MAGI;
 };
-declare type SelectCreaturesAndMagi = SelectAction & SelectCreaturesAndMagiParams;
-declare type SelectOwnCardsWithEnergizeRateParams = {
+type SelectCreaturesAndMagi = SelectAction & SelectCreaturesAndMagiParams;
+type SelectOwnCardsWithEnergizeRateParams = {
     selector: typeof SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE;
 };
-declare type SelectOwnCardsWithEnergizeRate = SelectAction & SelectOwnCardsWithEnergizeRateParams;
-declare type SelectCreaturesOfRegionParams = SelectParams & {
+type SelectOwnCardsWithEnergizeRate = SelectAction & SelectOwnCardsWithEnergizeRateParams;
+type SelectCreaturesOfRegionParams = SelectParams & {
     selector: typeof SELECTOR_CREATURES_OF_REGION;
     region: Region;
 };
-declare type SelectCreaturesOfRegion = SelectAction & SelectCreaturesOfRegionParams;
-declare type SelectCreaturesNotOfRegionParams = SelectParams & {
+type SelectCreaturesOfRegion = SelectAction & SelectCreaturesOfRegionParams;
+type SelectCreaturesNotOfRegionParams = SelectParams & {
     selector: typeof SELECTOR_CREATURES_NOT_OF_REGION;
     region: Region;
 };
-declare type SelectCreaturesNotOfRegion = SelectAction & SelectCreaturesNotOfRegionParams;
-declare type SelectMagiOfRegionParams = SelectParams & {
+type SelectCreaturesNotOfRegion = SelectAction & SelectCreaturesNotOfRegionParams;
+type SelectMagiOfRegionParams = SelectParams & {
     selector: typeof SELECTOR_MAGI_OF_REGION;
     region: Region;
 };
-declare type SelectMagiOfRegion = SelectAction & SelectMagiOfRegionParams;
-declare type SelectMagiNotOfRegionParams = {
+type SelectMagiOfRegion = SelectAction & SelectMagiOfRegionParams;
+type SelectMagiNotOfRegionParams = {
     selector: typeof SELECTOR_MAGI_NOT_OF_REGION;
     region: Region;
 };
-declare type SelectMagiNotOfRegion = SelectAction & SelectMagiNotOfRegionParams;
-declare type SelectStatusParams = SelectParams & {
+type SelectMagiNotOfRegion = SelectAction & SelectMagiNotOfRegionParams;
+type SelectStatusParams = SelectParams & {
     selector: typeof SELECTOR_STATUS;
     status: StatusType;
 };
-declare type SelectStatus = SelectAction & SelectStatusParams;
-declare type SelectCreaturesWithoutStatusParams = {
+type SelectStatus = SelectAction & SelectStatusParams;
+type SelectCreaturesWithoutStatusParams = {
     selector: typeof SELECTOR_CREATURES_WITHOUT_STATUS;
     status: StatusType;
 };
-declare type SelectCreaturesWithoutStatus = SelectAction & SelectCreaturesWithoutStatusParams;
-declare type SelectTopMagiOfPileParams = SelectParams & {
+type SelectCreaturesWithoutStatus = SelectAction & SelectCreaturesWithoutStatusParams;
+type SelectTopMagiOfPileParams = SelectParams & {
     selector: typeof SELECTOR_TOP_MAGI_OF_PILE;
 };
-declare type SelectSelfWithStatusParams = SelectParams & {
+type SelectSelfWithStatusParams = SelectParams & {
     selector: typeof SELECTOR_SELF_AND_STATUS;
 };
-declare type SelectSelfWithStatus = SelectAction & SelectSelfWithStatusParams;
-declare type SelectTopMagiOfPile = SelectAction & SelectTopMagiOfPileParams;
-declare type SelectEnemyCreaturesParams = {
+type SelectSelfWithStatus = SelectAction & SelectSelfWithStatusParams;
+type SelectTopMagiOfPile = SelectAction & SelectTopMagiOfPileParams;
+type SelectEnemyCreaturesParams = {
     selector: typeof SELECTOR_ENEMY_CREATURES;
 };
-declare type SelectEnemyCreatures = SelectAction & SelectEnemyCreaturesParams;
-declare type SelectOwnCreatureOfLeastEnergyParams = {
+type SelectEnemyCreatures = SelectAction & SelectEnemyCreaturesParams;
+type SelectOwnCreatureOfLeastEnergyParams = {
     selector: typeof SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY;
     variable?: string;
 };
-declare type SelectOwnCreatureOfLeastEnergy = SelectAction & SelectOwnCreatureOfLeastEnergyParams;
-declare type SelectNthCardParams = {
+type SelectOwnCreatureOfLeastEnergy = SelectAction & SelectOwnCreatureOfLeastEnergyParams;
+type SelectNthCardParams = {
     selector: typeof SELECTOR_NTH_CARD_OF_ZONE;
     zone: ZoneType | string;
     zoneOwner: number | string;
     cardNumber: number | string;
     restrictions?: RestrictionObjectType[];
 };
-declare type SelectNthCard = SelectAction & SelectNthCardParams;
-declare type SelectOwnCardsInHandParams = {
+type SelectNthCard = SelectAction & SelectNthCardParams;
+type SelectOwnCardsInHandParams = {
     selector: typeof SELECTOR_OWN_CARDS_IN_HAND;
     variable?: string;
 };
-declare type SelectOwnCardsInHand = SelectAction & SelectOwnCardsInHandParams;
-declare type SelectCardsInHandParams = {
+type SelectOwnCardsInHand = SelectAction & SelectOwnCardsInHandParams;
+type SelectCardsInHandParams = {
     selector: typeof SELECTOR_CARDS_IN_HAND;
     zoneOwner: number | string;
     variable?: string;
 };
-declare type SelectCardsInHand = SelectAction & SelectCardsInHandParams;
-export declare type RefinedSelectParams = SelectCreaturesOfTypeParams | SelectOtherCreaturesOfTypeParams | SelectCreaturesNotOfTypeParams | SelectOpponentIdParams | SelectOwnMagiParams | SelectEnemyMagiParams | SelectMagiNotOfRegionParams | SelectEnemyCreaturesParams | SelectCreaturesWithoutStatusParams | SelectOwnCreaturesParams | SelectStatusParams | SelectOwnCreaturesOfTypeParams | SelectMagiOfRegionParams | SelectCreaturesParams | SelectSelfWithStatusParams | SelectMagiParams | SelectRelicsParams | SelectTopMagiOfPileParams | SelectCreaturesNotOfRegionParams | SelectCreaturesOfRegionParams | SelectOwnCardsWithEnergizeRateParams | SelectCardsWithEnergizeRateParams | SelectCreaturesAndMagiParams | SelectOwnCreatureOfLeastEnergyParams | SelectOwnCardsInHandParams | SelectCardsInHandParams | SelectNthCardParams;
-export declare type SelectType = SelectCreatures | SelectMagi | SelectOwnCardsInPlay | SelectOwnCreatures | SelectRelics | SelectOwnCreaturesOfType | SelectCreaturesOfType | SelectCreaturesNotOfType | SelectOtherCreaturesOfType | SelectCardsWithEnergizeRate | SelectOpponentId | SelectCreaturesAndMagi | SelectOwnCardsWithEnergizeRate | SelectCreaturesOfRegion | SelectCreaturesNotOfRegion | SelectMagiOfRegion | SelectMagiNotOfRegion | SelectSelfWithStatus | SelectStatus | SelectCreaturesWithoutStatus | SelectTopMagiOfPile | SelectEnemyCreatures | SelectOwnMagi | SelectEnemyMagi | SelectOwnCreatureOfLeastEnergy | SelectOwnCardsInHand | SelectCardsInHand | SelectNthCard;
+type SelectCardsInHand = SelectAction & SelectCardsInHandParams;
+export type RefinedSelectParams = SelectCreaturesOfTypeParams | SelectOtherCreaturesOfTypeParams | SelectCreaturesNotOfTypeParams | SelectOpponentIdParams | SelectOwnMagiParams | SelectEnemyMagiParams | SelectMagiNotOfRegionParams | SelectEnemyCreaturesParams | SelectCreaturesWithoutStatusParams | SelectOwnCreaturesParams | SelectStatusParams | SelectOwnCreaturesOfTypeParams | SelectMagiOfRegionParams | SelectCreaturesParams | SelectSelfWithStatusParams | SelectMagiParams | SelectRelicsParams | SelectTopMagiOfPileParams | SelectCreaturesNotOfRegionParams | SelectCreaturesOfRegionParams | SelectOwnCardsWithEnergizeRateParams | SelectCardsWithEnergizeRateParams | SelectCreaturesAndMagiParams | SelectOwnCreatureOfLeastEnergyParams | SelectOwnCardsInHandParams | SelectCardsInHandParams | SelectNthCardParams;
+export type SelectType = SelectCreatures | SelectMagi | SelectOwnCardsInPlay | SelectOwnCreatures | SelectRelics | SelectOwnCreaturesOfType | SelectCreaturesOfType | SelectCreaturesNotOfType | SelectOtherCreaturesOfType | SelectCardsWithEnergizeRate | SelectOpponentId | SelectCreaturesAndMagi | SelectOwnCardsWithEnergizeRate | SelectCreaturesOfRegion | SelectCreaturesNotOfRegion | SelectMagiOfRegion | SelectMagiNotOfRegion | SelectSelfWithStatus | SelectStatus | SelectCreaturesWithoutStatus | SelectTopMagiOfPile | SelectEnemyCreatures | SelectOwnMagi | SelectEnemyMagi | SelectOwnCreatureOfLeastEnergy | SelectOwnCardsInHand | SelectCardsInHand | SelectNthCard;
 export {};

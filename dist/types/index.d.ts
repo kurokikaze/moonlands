@@ -12,14 +12,14 @@ export { type SelectType, type SelectorTypeType, type SelectorParams, type Refin
 export { type EffectType, type MoveCardBetwenZonesEffect } from './effect';
 export { type PromptType, type PromptParams } from './prompt';
 export { type LogEntryType } from './log';
-declare type ProtectionFromType = typeof PROTECTION_FROM_SPELLS | typeof PROTECTION_FROM_EFFECTS | typeof PROTECTION_FROM_POWERS;
-declare type ProtectionTypeType = typeof PROTECTION_TYPE_ENERGY_LOSS | typeof PROTECTION_TYPE_ENERGY_GAIN | typeof PROTECTION_TYPE_DISCARDING_FROM_PLAY | typeof PROTECTION_TYPE_GENERAL;
-export declare type ProtectionType = {
+type ProtectionFromType = typeof PROTECTION_FROM_SPELLS | typeof PROTECTION_FROM_EFFECTS | typeof PROTECTION_FROM_POWERS;
+type ProtectionTypeType = typeof PROTECTION_TYPE_ENERGY_LOSS | typeof PROTECTION_TYPE_ENERGY_GAIN | typeof PROTECTION_TYPE_DISCARDING_FROM_PLAY | typeof PROTECTION_TYPE_GENERAL;
+export type ProtectionType = {
     from: ProtectionFromType[];
     type: ProtectionTypeType;
     restrictions?: RestrictionObjectType[];
 };
-export declare type CardData = {
+export type CardData = {
     text?: string;
     startingEnergy?: number;
     energize?: number;
@@ -34,7 +34,7 @@ export declare type CardData = {
     paymentSource?: (typeof TYPE_CREATURE | typeof TYPE_SPELL | typeof TYPE_RELIC)[];
     triggerEffects?: TriggerEffectType[];
     energyStasis?: boolean;
-    replacementEffects?: ReplacementEffectType[];
+    replacementEffects?: ReplacementEffectType<FindType>[];
     energyLossThreshold?: number;
     ableToAttack?: boolean;
     canBeAttacked?: boolean;
@@ -49,13 +49,13 @@ export interface EnrichedAction {
     player?: number;
     replacedBy?: string[];
 }
-declare type PowerType = {
+type PowerType = {
     name: string;
     text: string;
     cost: number | typeof COST_X;
     effects: AnyEffectType[];
 };
-export declare type StaticAbilityType = {
+export type StaticAbilityType = {
     name: string;
     text: string;
     selector: SelectorTypeType;
@@ -67,31 +67,41 @@ export declare type StaticAbilityType = {
         operandOne: number | boolean | Record<string, any> | ProtectionType;
     };
 };
-export declare type FindType = {
+export type FindType = {
     effectType: EffectTypeType;
     conditions: ConditionType[];
 };
-export declare type TriggerEffectType = {
+export type TriggerEffectType = {
     name?: string;
     text?: string;
     mayEffect?: boolean;
     find: FindType;
     effects: AnyEffectType[];
 };
-export declare type ReplacementEffectType = {
+export type RequestBody<T> = {
+    [P in keyof T]: string;
+};
+export type EffectMoldType = Omit<EffectType, 'generatedBy' | 'player'> | PromptType | NoneType;
+export type WithReplacementValues<T extends EffectMoldType, Q extends EffectType> = {
+    [P in keyof T]: `%${keyof Q extends string ? keyof Q : never}` | '%self' | `$${string}` | T[P];
+} & {
+    type: T['type'];
+};
+export type SingleOrMultiple<T> = T | T[];
+export type ReplacementEffectType<T extends FindType = FindType> = {
     name?: string;
     text?: string;
-    find: FindType;
-    replaceWith: ReplacingEffectType | EffectType | (ReplacingEffectType | EffectType | PromptType)[];
+    find: T;
+    replaceWith: Extract<EffectType, T> extends T ? SingleOrMultiple<WithReplacementValues<EffectMoldType, Extract<EffectType, T>>> : never;
     mayEffect?: boolean;
     oncePerTurn?: boolean;
 };
-export declare type ReplacingEffectType = {
+export type ReplacingEffectType = {
     effectType: EffectTypeType;
     target?: string;
 };
-export declare type OperatorType = typeof CALCULATION_SET | typeof CALCULATION_DOUBLE | typeof CALCULATION_ADD | typeof CALCULATION_SUBTRACT | typeof CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE | typeof CALCULATION_MULTIPLY | typeof CALCULATION_HALVE_ROUND_DOWN | typeof CALCULATION_HALVE_ROUND_UP | typeof CALCULATION_MIN | typeof CALCULATION_MAX;
-export declare type CalculateParams = {
+export type OperatorType = typeof CALCULATION_SET | typeof CALCULATION_DOUBLE | typeof CALCULATION_ADD | typeof CALCULATION_SUBTRACT | typeof CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE | typeof CALCULATION_MULTIPLY | typeof CALCULATION_HALVE_ROUND_DOWN | typeof CALCULATION_HALVE_ROUND_UP | typeof CALCULATION_MIN | typeof CALCULATION_MAX;
+export type CalculateParams = {
     operator: OperatorType;
     operandOne: string | number;
     propertyOne?: string | null;
@@ -99,35 +109,35 @@ export declare type CalculateParams = {
     propertyTwo?: string | null;
     variable: string;
 };
-export declare type CalculateType = CalculateParams & EnrichedAction & {
+export type CalculateType = CalculateParams & EnrichedAction & {
     type: typeof ACTION_CALCULATE;
     generatedBy?: string;
 };
-export declare type PropertyGetterParams = {
+export type PropertyGetterParams = {
     property: PropertyType;
     target: string;
     variable: string;
 };
-export declare type PropertyGetterType = EnrichedAction & PropertyGetterParams & {
+export type PropertyGetterType = EnrichedAction & PropertyGetterParams & {
     type: typeof ACTION_GET_PROPERTY_VALUE;
     generatedBy?: string;
 };
-declare type PlayerWinType = EnrichedAction & {
+type PlayerWinType = EnrichedAction & {
     type: typeof ACTION_PLAYER_WINS;
     player: number;
     generatedBy?: string;
 };
-declare type PassType = EnrichedAction & {
+type PassType = EnrichedAction & {
     type: typeof ACTION_PASS;
     player: number;
     generatedBy?: string;
 };
-declare type ConcedeType = EnrichedAction & {
+type ConcedeType = EnrichedAction & {
     type: typeof ACTION_CONCEDE;
     player: number;
     generatedBy?: string;
 };
-export declare type NormalPlayType = EnrichedAction & {
+export type NormalPlayType = EnrichedAction & {
     type: typeof ACTION_PLAY;
     player: number;
     payload: {
@@ -137,7 +147,7 @@ export declare type NormalPlayType = EnrichedAction & {
     forcePriority: false;
     generatedBy?: string;
 };
-export declare type ForcedPlayType = EnrichedAction & {
+export type ForcedPlayType = EnrichedAction & {
     type: typeof ACTION_PLAY;
     card: string | CardInGame;
     sourceZone: string;
@@ -146,32 +156,32 @@ export declare type ForcedPlayType = EnrichedAction & {
     player?: number;
     generatedBy?: string;
 };
-declare type NoneType = EnrichedAction & {
+export type NoneType = EnrichedAction & {
     type: typeof ACTION_NONE;
     generatedBy?: string;
 };
-declare type PlayType = NormalPlayType | ForcedPlayType;
-declare type PowerActionType = EnrichedAction & {
+type PlayType = NormalPlayType | ForcedPlayType;
+type PowerActionType = EnrichedAction & {
     type: typeof ACTION_POWER;
     power: PowerType;
     source: CardInGame;
     player: number;
     generatedBy?: string;
 };
-declare type TimeNotificationAction = EnrichedAction & {
+type TimeNotificationAction = EnrichedAction & {
     type: typeof ACTION_TIME_NOTIFICATION;
     player: number;
     generatedBy?: string;
 };
-declare type ExitPromptsAction = EnrichedAction & {
+export type ExitPromptsAction = EnrichedAction & {
     type: typeof ACTION_EXIT_PROMPTS;
     generatedBy?: string;
 };
-export declare type ContinuousEffectType = {
+export type ContinuousEffectType = {
     staticAbilities?: StaticAbilityType[];
     triggerEffects?: TriggerEffectType[];
     expiration: ExpirationObjectType;
     player: number;
     id: string;
 };
-export declare type AnyEffectType = EffectType | PromptType | SelectType | CalculateType | PropertyGetterType | PlayerWinType | PassType | ConcedeType | ResolvePromptType | PlayType | PowerActionType | AttackEffect | TimeNotificationAction | NoneType | ExitPromptsAction;
+export type AnyEffectType = EffectType | PromptType | SelectType | CalculateType | PropertyGetterType | PlayerWinType | PassType | ConcedeType | ResolvePromptType | PlayType | PowerActionType | AttackEffect | TimeNotificationAction | NoneType | ExitPromptsAction;

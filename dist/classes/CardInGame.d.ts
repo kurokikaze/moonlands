@@ -1,5 +1,5 @@
 import Card from './Card';
-export declare type InGameData = {
+export type InGameData = {
     energy: number;
     controller: number;
     attacked: number;
@@ -12,13 +12,13 @@ export declare type InGameData = {
     ableToAttack?: boolean;
     energyLossThreshold?: number;
 };
-export declare type ConvertedCard = {
+export type ConvertedCard = {
     id: string;
     card: string;
     owner: number;
     data: InGameData;
 };
-export declare type HiddenConvertedCard = {
+export type HiddenConvertedCard = {
     id: string;
     card: null;
     owner: number;
