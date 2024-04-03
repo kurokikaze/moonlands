@@ -14,6 +14,7 @@ import {
     LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,
     LOG_ENTRY_TARGETING,
     LOG_ENTRY_DIE_ROLLED,
+    LOG_ENTRY_CARD_DISCARDED_FROM_HAND,
 } from '../const';
 
 type CreatureEnergyLossEntry = {
@@ -106,6 +107,12 @@ type DieRolledEntry = {
   player?: number,
 }
 
+type CardDiscardedEntry = {
+    type: typeof LOG_ENTRY_CARD_DISCARDED_FROM_HAND
+    card: string
+    player: number
+}
+
 export type LogEntryType = CreatureEnergyLossEntry |
     CreatureEnergyGainEntry |
     PlayEntry |
@@ -113,6 +120,7 @@ export type LogEntryType = CreatureEnergyLossEntry |
     DrawEntry |
     NumberChoiceEntry |
     TargetingEntry |
+    CardDiscardedEntry |
     ChoosesStartingCards |
     CreatureDiscardedFromPlay |
     MagiEnergyGainEntry |

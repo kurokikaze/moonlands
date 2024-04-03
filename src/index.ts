@@ -254,6 +254,8 @@ import {
 	EFFECT_TYPE_DEFENDER_DAMAGE_DEALT,
 	EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE,
 	EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
+	EFFECT_TYPE_DISCARD_CARD_FROM_HAND,
+	LOG_ENTRY_CARD_DISCARDED_FROM_HAND,
 } from './const';
 
 import { showAction } from './logAction';
@@ -982,6 +984,14 @@ export class State {
 								target: this.getMetaValue(action.target, action.generatedBy).card.name,
 								packHuntAttack: Boolean(action.packHuntAttack),
 							};
+							break;
+						}
+						case EFFECT_TYPE_DISCARD_CARD_FROM_HAND: {
+							newLogEntry = {
+								type: LOG_ENTRY_CARD_DISCARDED_FROM_HAND,
+								card: this.getMetaValue(action.target, action.generatedBy).card.name,
+								player: action.player || 1,
+							}
 							break;
 						}
 						case EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT: {
@@ -3989,6 +3999,18 @@ export class State {
 							oneOrSeveral(targets, target =>
 								target && this.transformIntoActions({
 									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_DISCARD_CARD_FROM_HAND,
+									target,
+									generatedBy: action.generatedBy,
+								})
+							);
+							break;
+						}
+						case EFFECT_TYPE_DISCARD_CARD_FROM_HAND: {
+							const target = this.getMetaValue(action.target, action.generatedBy);
+							
+							if (target) { this.transformIntoActions({
+									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
 									sourceZone: ZONE_TYPE_HAND,
 									destinationZone: ZONE_TYPE_DISCARD,
@@ -3996,7 +4018,7 @@ export class State {
 									target,
 									generatedBy: action.generatedBy,
 								})
-							);
+							}
 							break;
 						}
 						case EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY: {
