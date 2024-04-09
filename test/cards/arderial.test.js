@@ -775,6 +775,80 @@ describe('Adis', () => {
 	});
 });
 
+describe('Stradius', () => {
+	it('Attacking', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(4);
+		const stradus = new CardInGame(byName('Stradus'), NON_ACTIVE_PLAYER).addEnergy(12);
+		const jaela = new CardInGame(byName('Jaela'), NON_ACTIVE_PLAYER);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER).addEnergy(5);
+		const lavaAq = new CardInGame(byName('Lava Aq'), ACTIVE_PLAYER);
+		const lovian = new CardInGame(byName('Lovian'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaBalamant, lovian], [grega]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([stradus]);
+		gameState.getZone(ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER).add([jaela]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([lavaAq]);
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const attackAction = {
+			type: ACTION_ATTACK,
+			source: lavaBalamant,
+			target: lovian,
+		};
+
+		gameState.update(attackAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_MAY_ABILITY, 'Game is in correct prompt state');
+		expect(gameState.state.promptPlayer).toEqual(NON_ACTIVE_PLAYER, 'Game is prompting non-active player');
+
+		const gameStateClone = gameState.clone();
+
+		const yesAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			useEffect: true,
+			player: NON_ACTIVE_PLAYER,
+		}
+
+		expect(lavaBalamant.data.attacked).toEqual(0, 'Lava Balamant 2 not marked as attacked = 1')
+		expect(lavaBalamant.data.hasAttacked).toEqual(false, 'Lava Balamant 2 not marked as hasAttacked')
+
+		gameState.update(yesAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is in prompt state');
+
+		expect(lavaBalamant.data.attacked).toEqual(1, 'Lava Balamant marked as attacked = 1')
+		expect(lavaBalamant.data.hasAttacked).toEqual(true, 'Lava Balamant marked as hasAttacked')
+
+		// We usually can't do this but here we don't have any card or zone links so it should work
+		const lavaBalamantClone = gameStateClone.getZone(ZONE_TYPE_IN_PLAY).cards.find(card => card.card.name == 'Lava Balamant')
+
+		expect(lavaBalamantClone.data.attacked).toEqual(0, 'Lava Balamant 2 not marked as attacked = 1')
+		expect(lavaBalamantClone.data.hasAttacked).toEqual(false, 'Lava Balamant 2 not marked as hasAttacked')
+
+		const noAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			useEffect: true,
+			player: NON_ACTIVE_PLAYER,
+		}
+		gameStateClone.update(noAction)
+
+		expect(gameStateClone.state.prompt).toEqual(false, 'Game 2 is in prompt state');
+
+		expect(lavaBalamantClone.data.attacked).toEqual(1, 'Lava Balamant 2 marked as attacked = 1')
+		expect(lavaBalamantClone.data.hasAttacked).toEqual(true, 'Lava Balamant 2 marked as hasAttacked')
+	});
+});
+
 describe('Epik', () => {
 	it('Dream Feast', () => {
 		const ACTIVE_PLAYER = 422;

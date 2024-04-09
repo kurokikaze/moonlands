@@ -2,7 +2,7 @@ import { byName } from "./cards";
 import CardInGame from "./classes/CardInGame";
 import Zone from "./classes/Zone";
 
-export default function clone<T extends (any|any[]|Date|CardInGame|Zone)>(item: T): T {
+export default function clone<T extends (any|any[]|Date|CardInGame|Zone)>(item: T, cardsGenerated: Record<string, CardInGame> = {}): T {
 	if (!item) { return item; } // null, undefined values check
 
 	var types = [ Number, String, Boolean ], 
@@ -19,7 +19,7 @@ export default function clone<T extends (any|any[]|Date|CardInGame|Zone)>(item: 
 		if (Object.prototype.toString.call( item ) === '[object Array]') {
 			const result: any[] = [];
 			(item as Object[]).forEach(function(child, index) { 
-				result[index] = clone( child );
+				result[index] = clone( child, cardsGenerated );
 			});
       return result as T;
 		} else if (typeof item == 'object') {
@@ -29,15 +29,21 @@ export default function clone<T extends (any|any[]|Date|CardInGame|Zone)>(item: 
 					return new Date(item) as T;
 				} else if (item instanceof Zone) {
           result = new Zone(item.name, item.type, item.player, item.ordered)
-          result.add(item.cards.map(clone))
+          result.add(item.cards.map(card => clone(card, cardsGenerated)))
           return result as T;
         } else if (item instanceof CardInGame) {
           const card = byName(item.card.name);
           if (card) {
+			if (item.id in cardsGenerated) {
+				return cardsGenerated[item.id] as T
+			}
             result = new CardInGame(card, item.owner)
             result.id = item.id
             result.modifiedCard = item.modifiedCard
-            result.data = clone(item.data);
+            result.data = clone(item.data, cardsGenerated);
+
+			cardsGenerated[item.id] = result
+
             return result as T;
           } else {
             return {} as T;
@@ -46,7 +52,7 @@ export default function clone<T extends (any|any[]|Date|CardInGame|Zone)>(item: 
 					// it is an object literal
 					result = {} as Record<string, any>;
 					for (var i in item) {
-						result[i] = clone( item[i] );
+						result[i] = clone( item[i], cardsGenerated );
 					}
 				}
 			} else {
