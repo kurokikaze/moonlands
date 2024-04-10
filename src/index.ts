@@ -2804,6 +2804,7 @@ export class State {
 							promptParams = {
 								paymentAmount: action.amount,
 								paymentType: action.paymentType,
+								cards: action.cards.map(convertCard),
 							}
 							break;
 						}
@@ -3489,6 +3490,7 @@ export class State {
 											amount: totalCost,
 											paymentType: TYPE_CREATURE,
 											variable: 'paymentSource',
+											cards: availablePaymentSources,
 											player: player,
 											generatedBy: cardItself.id,
 										}, {

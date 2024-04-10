@@ -1959,6 +1959,7 @@ var State = /** @class */ (function () {
                             promptParams = {
                                 paymentAmount: action.amount,
                                 paymentType: action.paymentType,
+                                cards: action.cards.map(convertCard),
                             };
                             break;
                         }
@@ -2571,6 +2572,7 @@ var State = /** @class */ (function () {
                                                 amount: totalCost_1,
                                                 paymentType: TYPE_CREATURE,
                                                 variable: 'paymentSource',
+                                                cards: availablePaymentSources,
                                                 player: player_1,
                                                 generatedBy: cardItself_1.id,
                                             }, {

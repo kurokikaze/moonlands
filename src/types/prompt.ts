@@ -107,9 +107,10 @@ export type AlternativePromptParams = {
 export type PromptTypeAlternative = PromptInteface & AlternativePromptParams;
 
 export type PaymentSourcePromptParams = {
-  promptType: typeof PROMPT_TYPE_PAYMENT_SOURCE,
-  paymentType: typeof TYPE_CREATURE | typeof TYPE_SPELL | typeof TYPE_RELIC,
-  amount: number,
+  promptType: typeof PROMPT_TYPE_PAYMENT_SOURCE
+  paymentType: typeof TYPE_CREATURE | typeof TYPE_SPELL | typeof TYPE_RELIC
+  amount: number
+  cards: CardInGame[]
   variable?: string
 }
 
