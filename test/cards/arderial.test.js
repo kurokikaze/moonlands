@@ -1874,7 +1874,7 @@ describe('Orathan Flyer', () => {
 		expect(flyingOrathan.data.energy).toEqual(7);
 	});
 
-	it('Payment from orathan', () => {
+	it('Payment from orathan (Orathan doesnt have enough energy)', () => {
 		const ACTIVE_PLAYER = 422;
 		const NON_ACTIVE_PLAYER = 1310;
 
@@ -1909,6 +1909,87 @@ describe('Orathan Flyer', () => {
 		expect(lasada.data.energy).toEqual(7);
 		expect(flyingOrathan.data.energy).toEqual(2);
 	});
+
+	it('Payment from orathan (no prompt if we dont control orathan)', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const lasada = new CardInGame(byName('Lasada'), ACTIVE_PLAYER).addEnergy(10);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(7);
+		const flyingOrathan = new CardInGame(byName('Orathan Flyer'), NON_ACTIVE_PLAYER).addEnergy(12);
+		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [flyingOrathan], [lasada]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_CREATURES,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([xyx]);
+
+		const playAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: xyx,
+				player: ACTIVE_PLAYER,
+			},
+		};
+
+		gameState.update(playAction);
+
+		expect(gameState.state.prompt).toEqual(false);
+		expect(lasada.data.energy).toEqual(7);
+		expect(flyingOrathan.data.energy).toEqual(12);
+	});
+
+	it('Payment from orathan (cannot pass opponents Orathan to pay from)', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const lasada = new CardInGame(byName('Lasada'), ACTIVE_PLAYER).addEnergy(10);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(7);
+		const orathanFlyer = new CardInGame(byName('Orathan Flyer'), ACTIVE_PLAYER).addEnergy(12);
+		const opponentOrathanFlyer = new CardInGame(byName('Orathan Flyer'), NON_ACTIVE_PLAYER).addEnergy(12);
+		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [orathanFlyer, opponentOrathanFlyer], [lasada]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_CREATURES,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([xyx]);
+
+		const playAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: xyx,
+				player: ACTIVE_PLAYER,
+			},
+		};
+
+		gameState.update(playAction);
+
+		expect(gameState.state.prompt).toEqual(true);
+
+		const resolvePaymentPrompt = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: opponentOrathanFlyer,
+			generatedBy: gameState.state.prompt.generatedBy,
+		};
+
+		expect(() => gameState.update(resolvePaymentPrompt)).toThrow('Trying to pay for the creature from non-controlled Orathan')
+		;
+	});
+
 
 	it('Payment from orathan (Magi doesnt have enough energy)', () => {
 		const ACTIVE_PLAYER = 422;

@@ -3467,7 +3467,7 @@ export class State {
 
 							switch (cardType) {
 								case TYPE_CREATURE: {
-									const alternativePaymentSources = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.data.paymentSource && card.card.data.paymentSource.includes(TYPE_CREATURE));
+									const alternativePaymentSources = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.data.paymentSource && card.card.data.paymentSource.includes(TYPE_CREATURE) && this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player);
 									const alternativePaymentSourcesAbleToPay = alternativePaymentSources.filter(card => card.data.energy >= totalCost);
 
 									if (activeMagi.data.energy >= totalCost || alternativePaymentSourcesAbleToPay.length > 0) {
@@ -4009,8 +4009,9 @@ export class State {
 						}
 						case EFFECT_TYPE_DISCARD_CARD_FROM_HAND: {
 							const target = this.getMetaValue(action.target, action.generatedBy);
-							
-							if (target) { this.transformIntoActions({
+
+							if (target) {
+								this.transformIntoActions({
 									type: ACTION_EFFECT,
 									effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
 									sourceZone: ZONE_TYPE_HAND,
@@ -4266,7 +4267,7 @@ export class State {
 								amount: '$damageDealt',
 								generatedBy: attackSource.id,
 							}
-						];
+							];
 
 							const damageActions: AnyEffectType[] = (attackTarget.card.type === TYPE_CREATURE && !action.packHuntAttack) ? [
 								...attackerDamageActions, {
@@ -4491,15 +4492,19 @@ export class State {
 
 							if (payingAmount > 0) {
 								if (payingTarget instanceof CardInGame) {
-									const correctEffectType = payingTarget.card.type === TYPE_MAGI ? EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI : EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE;
-									this.transformIntoActions({
-										type: ACTION_EFFECT,
-										effectType: correctEffectType,
-										target: payingTarget,
-										amount: payingAmount,
-										player: action.player,
-										generatedBy: action.generatedBy,
-									});
+									if (this.modifyByStaticAbilities(payingTarget, PROPERTY_CONTROLLER) == action.player) {
+										const correctEffectType = payingTarget.card.type === TYPE_MAGI ? EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI : EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE;
+										this.transformIntoActions({
+											type: ACTION_EFFECT,
+											effectType: correctEffectType,
+											target: payingTarget,
+											amount: payingAmount,
+											player: action.player,
+											generatedBy: action.generatedBy,
+										});
+									} else {
+										throw new Error('Trying to pay for the creature from non-controlled Orathan');
+									}
 								}
 							}
 							break;
@@ -4736,7 +4741,7 @@ export class State {
 											attack: action.attack || false,
 											spell: action.spell || false,
 											relic: action.relic || false,
-											...(action.variable ? {variable: action.variable} : {}),
+											...(action.variable ? { variable: action.variable } : {}),
 											target,
 											generatedBy: action.generatedBy,
 										});

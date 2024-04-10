@@ -2552,7 +2552,7 @@ var State = /** @class */ (function () {
                             var totalCost_1 = this_1.calculateTotalCost(cardItself_1);
                             switch (cardType) {
                                 case TYPE_CREATURE: {
-                                    var alternativePaymentSources = this_1.getZone(ZONE_TYPE_IN_PLAY).cards.filter(function (card) { return card.card.data.paymentSource && card.card.data.paymentSource.includes(TYPE_CREATURE); });
+                                    var alternativePaymentSources = this_1.getZone(ZONE_TYPE_IN_PLAY).cards.filter(function (card) { return card.card.data.paymentSource && card.card.data.paymentSource.includes(TYPE_CREATURE) && _this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player_1; });
                                     var alternativePaymentSourcesAbleToPay = alternativePaymentSources.filter(function (card) { return card.data.energy >= totalCost_1; });
                                     if (activeMagi.data.energy >= totalCost_1 || alternativePaymentSourcesAbleToPay.length > 0) {
                                         var availablePaymentSources = __spreadArray(__spreadArray([], alternativePaymentSourcesAbleToPay, true), [
