@@ -3473,15 +3473,20 @@ var State = /** @class */ (function () {
                             var payingAmount = Number(this_1.getMetaValue(action.amount, action.generatedBy));
                             if (payingAmount > 0) {
                                 if (payingTarget instanceof CardInGame) {
-                                    var correctEffectType = payingTarget.card.type === TYPE_MAGI ? EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI : EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE;
-                                    this_1.transformIntoActions({
-                                        type: ACTION_EFFECT,
-                                        effectType: correctEffectType,
-                                        target: payingTarget,
-                                        amount: payingAmount,
-                                        player: action.player,
-                                        generatedBy: action.generatedBy,
-                                    });
+                                    if (this_1.modifyByStaticAbilities(payingTarget, PROPERTY_CONTROLLER) == action.player) {
+                                        var correctEffectType = payingTarget.card.type === TYPE_MAGI ? EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI : EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE;
+                                        this_1.transformIntoActions({
+                                            type: ACTION_EFFECT,
+                                            effectType: correctEffectType,
+                                            target: payingTarget,
+                                            amount: payingAmount,
+                                            player: action.player,
+                                            generatedBy: action.generatedBy,
+                                        });
+                                    }
+                                    else {
+                                        throw new Error('Trying to pay for the creature from non-controlled Orathan');
+                                    }
                                 }
                             }
                             break;
