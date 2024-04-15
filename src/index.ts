@@ -256,6 +256,9 @@ import {
 	EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
 	EFFECT_TYPE_DISCARD_CARD_FROM_HAND,
 	LOG_ENTRY_CARD_DISCARDED_FROM_HAND,
+	EFFECT_TYPE_ATTACH_CARD_TO_CARD,
+	EFFECT_TYPE_CARD_ATTACHED_TO_CARD,
+	EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE,
 } from './const';
 
 import { showAction } from './logAction';
@@ -499,6 +502,8 @@ const defaultState: StateShape = {
 	zones: [],
 	players: [],
 	spellMetaData: {},
+	attachedTo: {},
+	cardsAttached: {},
 };
 
 const oneOrSeveral = <T>(targets: T | T[], callback: (t: T) => void): void => {
@@ -593,6 +598,8 @@ type StateShape = {
 	fallbackActions: AnyEffectType[]; // Actions to apply if we deny may effect replacement
 	continuousEffects: ContinuousEffectType[]; // Continuous effects created by cards
 	spellMetaData: Record<string, MetaDataRecord>;
+	cardsAttached: Record<string, string[]>; // Two-way attachment hashes
+	attachedTo: Record<string, string>;
 	delayedTriggers: EnhancedDelayedTriggerType[];
 }
 
@@ -5225,6 +5232,45 @@ export class State {
 							]
 
 							this.getZone(zone, zoneOwner).cards = newZoneContent;
+							break;
+						}
+						case EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE: {
+							const card: CardInGame = this.getMetaValue(action.target, action.generatedBy);
+							const attachmentTarget = this.getMetaValue(action.attachmentTarget, action.generatedBy);
+							this.transformIntoActions({
+								type: ACTION_EFFECT,
+								effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+								sourceZone: ZONE_TYPE_HAND,
+								destinationZone: ZONE_TYPE_IN_PLAY,
+								target: card,
+								generatedBy: action.generatedBy,
+								bottom: false,
+							}, {
+								type: ACTION_EFFECT,
+								effectType: EFFECT_TYPE_ATTACH_CARD_TO_CARD,
+								target: card,
+								attachmentTarget,
+								generatedBy: action.generatedBy,
+							})
+							break;
+						}
+						case EFFECT_TYPE_ATTACH_CARD_TO_CARD: {
+							const card = this.getMetaValue(action.target, action.generatedBy);
+							const attachmentTarget = this.getMetaValue(action.attachmentTarget, action.generatedBy);
+
+							this.state.attachedTo[card.id] = attachmentTarget.id;
+							if (!(attachmentTarget.id in this.state.cardsAttached)) {
+								this.state.cardsAttached[attachmentTarget.id] = []
+							}
+							this.state.cardsAttached[attachmentTarget.id].push(card.id)
+
+							this.transformIntoActions({
+								type: ACTION_EFFECT,
+								effectType: EFFECT_TYPE_CARD_ATTACHED_TO_CARD,
+								target: card,
+								attachmentTarget: action.attachmentTarget,
+								generatedBy: action.generatedBy,
+							});
 							break;
 						}
 					}

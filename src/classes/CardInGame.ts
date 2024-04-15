@@ -14,6 +14,7 @@ export type InGameData = {
 	burrowed?: boolean;
 	ableToAttack?: boolean;
 	energyLossThreshold?: number;
+	attachedTo?: string; // uuid of the card it's attached to 
 }
 
 export type ConvertedCard = {

@@ -66,6 +66,8 @@ type StateShape = {
     fallbackActions: AnyEffectType[];
     continuousEffects: ContinuousEffectType[];
     spellMetaData: Record<string, MetaDataRecord>;
+    cardsAttached: Record<string, string[]>;
+    attachedTo: Record<string, string>;
     delayedTriggers: EnhancedDelayedTriggerType[];
 };
 type DeckType = {

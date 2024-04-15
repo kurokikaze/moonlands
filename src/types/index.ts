@@ -37,7 +37,6 @@ import {
     TYPE_CREATURE,
     TYPE_RELIC,
     TYPE_SPELL,
-    EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
 } from '../const';
 
 import { ResolvePromptType } from './resolvePrompt';

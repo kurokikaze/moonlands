@@ -74,6 +74,9 @@ import {
 	EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE,
 	EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
 	EFFECT_TYPE_DISCARD_CARD_FROM_HAND,
+	EFFECT_TYPE_ATTACH_CARD_TO_CARD,
+	EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE,
+	EFFECT_TYPE_CARD_ATTACHED_TO_CARD,
 } from '../const';
 
 export type EffectTypeType =
@@ -533,6 +536,24 @@ type RearrangeCardsOfZoneEffect = ActionEffect & {
 	cards: string[] | string;
 }
 
+type PlayAttachedToCreatureEffect = ActionEffect & {
+	effectType: typeof EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE
+	target: CardInGame | string
+	attachmentTarget: CardInGame | string
+}
+
+type AttachCardToCardEffect = ActionEffect & {
+	effectType: typeof EFFECT_TYPE_ATTACH_CARD_TO_CARD,
+	target: CardInGame | string
+	attachmentTarget: CardInGame | string
+}
+
+type CardAttachedToCardEffect = ActionEffect & {
+	effectType: typeof EFFECT_TYPE_CARD_ATTACHED_TO_CARD,
+	target: CardInGame | string
+	attachmentTarget: CardInGame | string
+}
+
 export type EffectType = ActionEffect & {
 	effectType: EffectTypeStillInUse;
 	generatedBy?: string;
@@ -596,4 +617,7 @@ export type EffectType = ActionEffect & {
 	ReturnCreatureReturningEnergyEffect |
 	DiscardCreatureFromPlayEffect |
 	RearrangeCardsOfZoneEffect |
+	PlayAttachedToCreatureEffect |
+	AttachCardToCardEffect |
+	CardAttachedToCardEffect |
 	ExecutePowerEffect;

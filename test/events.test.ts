@@ -44,6 +44,8 @@ describe('Stream of actions', () => {
 			continuousEffects: [],
 			spellMetaData: {},
 			delayedTriggers: [],
+			attachedTo: {},
+			cardsAttached: {}
 		});
 
 		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
@@ -117,6 +119,8 @@ describe('Stream of actions', () => {
 			continuousEffects: [],
 			spellMetaData: {},
 			delayedTriggers: [],
+			attachedTo: {},
+			cardsAttached: {}
 		});
 
 		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
@@ -166,6 +170,8 @@ describe('Stream of actions', () => {
 			continuousEffects: [],
 			spellMetaData: {},
 			delayedTriggers: [],
+			attachedTo: {},
+			cardsAttached: {}
 		});
 
 		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
@@ -214,6 +220,8 @@ describe('Stream of actions', () => {
 			continuousEffects: [],
 			spellMetaData: {},
 			delayedTriggers: [],
+			attachedTo: {},
+			cardsAttached: {}
 		});
 
 		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);
@@ -262,6 +270,8 @@ describe('Stream of actions', () => {
 			continuousEffects: [],
 			spellMetaData: {},
 			delayedTriggers: [],
+			attachedTo: {},
+			cardsAttached: {}
 		});
 
 		gameState.setPlayers(PLAYER_ONE, PLAYER_TWO);

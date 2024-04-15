@@ -11,6 +11,7 @@ export type InGameData = {
     burrowed?: boolean;
     ableToAttack?: boolean;
     energyLossThreshold?: number;
+    attachedTo?: string;
 };
 export type ConvertedCard = {
     id: string;

@@ -187,6 +187,9 @@ export const EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES = 'effects/distribute_en
 export const EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES = 'effects/distribute_damage_on_creatures';
 export const EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE = 'effects/rearrange_cards_of_zone';
 export const EFFECT_TYPE_EXECUTE_POWER_EFFECTS = 'effects/execute_power_effects';
+export const EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE = 'effects/play_attached_to_creature';
+export const EFFECT_TYPE_ATTACH_CARD_TO_CARD = 'effects/attach_card_to_card';
+export const EFFECT_TYPE_CARD_ATTACHED_TO_CARD = 'effects/card_becomes_attached_to_card';
 
 export const CHANGE_TYPE_DRAW = 'changes/draw';
 export const CHANGE_TYPE_RESHUFFLE_DISCARD = 'changes/reshuffle_discard';
