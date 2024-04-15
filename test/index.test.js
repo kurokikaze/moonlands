@@ -1032,6 +1032,9 @@ describe('Serializing the state', () => {
 
 		expect(serializationResultNAP.gameEnded).toEqual(true, 'Game ended correctly (for NAP)');
 		expect(serializationResultNAP.winner).toEqual(ACTIVE_PLAYER, 'Winner saved correctly (for NAP)');
+
+		expect(serializationResultAP.cardsAttached).toEqual({}, 'Empty attachedTo (AP)')
+		expect(serializationResultNAP.cardsAttached).toEqual({}, 'Empty attachedTo (NAP)')
 	});
 });
 

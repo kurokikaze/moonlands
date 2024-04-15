@@ -641,6 +641,7 @@ var State = /** @class */ (function () {
             log: this.state.log,
             gameEnded: gameEnded,
             winner: gameEnded ? this.winner : null,
+            cardsAttached: this.state.cardsAttached,
         };
     };
     State.prototype.serializeZones = function (playerId, hideZones) {

@@ -141,6 +141,7 @@ export declare class State {
         log: LogEntryType[];
         gameEnded: boolean;
         winner: number | boolean | null;
+        cardsAttached: Record<string, string[]>;
     };
     serializeZones(playerId: number, hideZones?: boolean): {
         playerHand: ConvertedCard[];

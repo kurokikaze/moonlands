@@ -1115,6 +1115,7 @@ export class State {
 			log: this.state.log,
 			gameEnded,
 			winner: gameEnded ? this.winner : null,
+			cardsAttached: this.state.cardsAttached,
 		};
 	}
 
