@@ -227,6 +227,9 @@ export declare class State {
     checkCondition(action: AnyEffectType, self: CardInGame, condition: ConditionType): any;
     matchAction(action: AnyEffectType, find: FindType, self: CardInGame): boolean;
     triggerAbilities(action: AnyEffectType): void;
+    attachCard(cardId: string, attachmentTargetId: string): void;
+    removeAttachments(cardId: string): void;
+    detachCard(cardId: string): void;
     performCalculation(operator: OperatorType, operandOne: number, operandTwo: number): number;
     calculateTotalCost(card: CardInGame): number;
     getAvailableCards(player: number, topMagi: CardInGame): string[];

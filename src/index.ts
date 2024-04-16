@@ -2296,6 +2296,37 @@ export class State {
 		});
 	}
 
+	attachCard(cardId: string, attachmentTargetId: string) {
+		this.state.attachedTo[cardId] = attachmentTargetId;
+		if (!(attachmentTargetId in this.state.cardsAttached)) {
+			this.state.cardsAttached[attachmentTargetId] = []
+		}
+		this.state.cardsAttached[attachmentTargetId].push(cardId)
+	}
+
+	removeAttachments(cardId: string) {
+		if (cardId in this.state.cardsAttached) {
+			for (let attachedCardId of this.state.cardsAttached[cardId]) {
+				if (attachedCardId in this.state.attachedTo) {
+					delete this.state.attachedTo[attachedCardId];
+				}
+			}
+
+			delete this.state.cardsAttached[cardId];
+		}
+	}
+
+	detachCard(cardId: string) {
+		if (cardId in this.state.attachedTo) {
+			const attachedTargetId = this.state.attachedTo[cardId]
+			delete this.state.attachedTo[cardId];
+
+			this.state.cardsAttached[attachedTargetId] =
+				this.state.cardsAttached[attachedTargetId].filter(attachedCard => attachedCard !== cardId);
+		}
+
+	}
+
 	performCalculation(operator: OperatorType, operandOne: number, operandTwo: number): number {
 		let result: number;
 		switch (operator) {
@@ -4629,6 +4660,31 @@ export class State {
 
 								sourceZone.removeById(zoneChangingCard.id);
 
+								if (sourceZoneType == ZONE_TYPE_IN_PLAY && destinationZoneType !== ZONE_TYPE_IN_PLAY) {
+									if (zoneChangingCard.id in this.state.cardsAttached) {
+										// Queue the removal of the attached cards
+										for (const attachmentId of this.state.cardsAttached[zoneChangingCard.id]) {
+											const attachedCard = this.getZone(ZONE_TYPE_IN_PLAY).byId(attachmentId)
+
+											if (attachedCard) {
+												this.transformIntoActions({
+													type: ACTION_EFFECT,
+													effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+													target: attachedCard,
+													sourceZone: ZONE_TYPE_IN_PLAY,
+													destinationZone: ZONE_TYPE_DISCARD,
+													generatedBy: action.generatedBy,
+													bottom: false,
+												})
+											} else {
+												console.log(`Cannot find the card ${attachmentId} in play`)
+											}
+										}
+										// This cleans up the attachments
+										this.removeAttachments(zoneChangingCard.id)
+									}
+								}
+
 								this.setSpellMetaDataField('new_card', newObject, action.generatedBy);
 								this.transformIntoActions({
 									type: ACTION_EFFECT,
@@ -5249,7 +5305,7 @@ export class State {
 							}, {
 								type: ACTION_EFFECT,
 								effectType: EFFECT_TYPE_ATTACH_CARD_TO_CARD,
-								target: card,
+								target: '$new_card',	// We need to attach the new card in play, not the one in hand 
 								attachmentTarget,
 								generatedBy: action.generatedBy,
 							})
@@ -5259,11 +5315,7 @@ export class State {
 							const card = this.getMetaValue(action.target, action.generatedBy);
 							const attachmentTarget = this.getMetaValue(action.attachmentTarget, action.generatedBy);
 
-							this.state.attachedTo[card.id] = attachmentTarget.id;
-							if (!(attachmentTarget.id in this.state.cardsAttached)) {
-								this.state.cardsAttached[attachmentTarget.id] = []
-							}
-							this.state.cardsAttached[attachmentTarget.id].push(card.id)
+							this.attachCard(card.id, attachmentTarget.id)
 
 							this.transformIntoActions({
 								type: ACTION_EFFECT,
@@ -5320,10 +5372,6 @@ export {
 	TYPE_RELIC,
 	TYPE_SPELL,
 
-	// PREPARATION_ACTION_CHOOSE_MAGI,
-	// PREPARATION_ACTION_CHOOSE_STARTING_CARDS,
-
-	// ACTION_DRAW,
 	ACTION_PASS,
 	ACTION_PLAY,
 	ACTION_POWER,
@@ -5334,7 +5382,6 @@ export {
 	ACTION_RESOLVE_PROMPT,
 	ACTION_GET_PROPERTY_VALUE,
 	ACTION_ATTACK,
-	// ACTION_RESHUFFLE_DISCARD,
 	ACTION_PLAYER_WINS,
 
 	PROPERTY_ID,
@@ -5344,7 +5391,6 @@ export {
 	PROPERTY_REGION,
 	PROPERTY_COST,
 	PROPERTY_ENERGIZE,
-	// PROPERTY_STARTING_ENERGY,
 	PROPERTY_MAGI_STARTING_ENERGY,
 	PROPERTY_ATTACKS_PER_TURN,
 	PROPERTY_CAN_ATTACK_MAGI_DIRECTLY,
@@ -5363,7 +5409,6 @@ export {
 	SELECTOR_CREATURES_AND_MAGI,
 	SELECTOR_OWN_MAGI,
 	SELECTOR_ENEMY_MAGI,
-	// SELECTOR_ACTIVE_MAGI_OF_PLAYER,
 	SELECTOR_CREATURES_OF_REGION,
 	SELECTOR_CREATURES_NOT_OF_REGION,
 	SELECTOR_OWN_CREATURES,

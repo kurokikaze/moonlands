@@ -1532,6 +1532,32 @@ var State = /** @class */ (function () {
             }
         });
     };
+    State.prototype.attachCard = function (cardId, attachmentTargetId) {
+        this.state.attachedTo[cardId] = attachmentTargetId;
+        if (!(attachmentTargetId in this.state.cardsAttached)) {
+            this.state.cardsAttached[attachmentTargetId] = [];
+        }
+        this.state.cardsAttached[attachmentTargetId].push(cardId);
+    };
+    State.prototype.removeAttachments = function (cardId) {
+        if (cardId in this.state.cardsAttached) {
+            for (var _i = 0, _a = this.state.cardsAttached[cardId]; _i < _a.length; _i++) {
+                var attachedCardId = _a[_i];
+                if (attachedCardId in this.state.attachedTo) {
+                    delete this.state.attachedTo[attachedCardId];
+                }
+            }
+            delete this.state.cardsAttached[cardId];
+        }
+    };
+    State.prototype.detachCard = function (cardId) {
+        if (cardId in this.state.attachedTo) {
+            var attachedTargetId = this.state.attachedTo[cardId];
+            delete this.state.attachedTo[cardId];
+            this.state.cardsAttached[attachedTargetId] =
+                this.state.cardsAttached[attachedTargetId].filter(function (attachedCard) { return attachedCard !== cardId; });
+        }
+    };
     State.prototype.performCalculation = function (operator, operandOne, operandTwo) {
         var result;
         switch (operator) {
@@ -3601,6 +3627,31 @@ var State = /** @class */ (function () {
                                     destinationZone.addToTop([newObject]);
                                 }
                                 sourceZone.removeById(zoneChangingCard.id);
+                                if (sourceZoneType == ZONE_TYPE_IN_PLAY && destinationZoneType !== ZONE_TYPE_IN_PLAY) {
+                                    if (zoneChangingCard.id in this_1.state.cardsAttached) {
+                                        // Queue the removal of the attached cards
+                                        for (var _s = 0, _t = this_1.state.cardsAttached[zoneChangingCard.id]; _s < _t.length; _s++) {
+                                            var attachmentId = _t[_s];
+                                            var attachedCard = this_1.getZone(ZONE_TYPE_IN_PLAY).byId(attachmentId);
+                                            if (attachedCard) {
+                                                this_1.transformIntoActions({
+                                                    type: ACTION_EFFECT,
+                                                    effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+                                                    target: attachedCard,
+                                                    sourceZone: ZONE_TYPE_IN_PLAY,
+                                                    destinationZone: ZONE_TYPE_DISCARD,
+                                                    generatedBy: action.generatedBy,
+                                                    bottom: false,
+                                                });
+                                            }
+                                            else {
+                                                console.log("Cannot find the card ".concat(attachmentId, " in play"));
+                                            }
+                                        }
+                                        // This cleans up the attachments
+                                        this_1.removeAttachments(zoneChangingCard.id);
+                                    }
+                                }
                                 this_1.setSpellMetaDataField('new_card', newObject, action.generatedBy);
                                 this_1.transformIntoActions({
                                     type: ACTION_EFFECT,
@@ -4155,7 +4206,7 @@ var State = /** @class */ (function () {
                             }, {
                                 type: ACTION_EFFECT,
                                 effectType: EFFECT_TYPE_ATTACH_CARD_TO_CARD,
-                                target: card,
+                                target: '$new_card', // We need to attach the new card in play, not the one in hand 
                                 attachmentTarget: attachmentTarget,
                                 generatedBy: action.generatedBy,
                             });
@@ -4164,11 +4215,7 @@ var State = /** @class */ (function () {
                         case EFFECT_TYPE_ATTACH_CARD_TO_CARD: {
                             var card = this_1.getMetaValue(action.target, action.generatedBy);
                             var attachmentTarget = this_1.getMetaValue(action.attachmentTarget, action.generatedBy);
-                            this_1.state.attachedTo[card.id] = attachmentTarget.id;
-                            if (!(attachmentTarget.id in this_1.state.cardsAttached)) {
-                                this_1.state.cardsAttached[attachmentTarget.id] = [];
-                            }
-                            this_1.state.cardsAttached[attachmentTarget.id].push(card.id);
+                            this_1.attachCard(card.id, attachmentTarget.id);
                             this_1.transformIntoActions({
                                 type: ACTION_EFFECT,
                                 effectType: EFFECT_TYPE_CARD_ATTACHED_TO_CARD,
@@ -4223,16 +4270,6 @@ var State = /** @class */ (function () {
     return State;
 }());
 export { State };
-export { TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, 
-// PREPARATION_ACTION_CHOOSE_MAGI,
-// PREPARATION_ACTION_CHOOSE_STARTING_CARDS,
-// ACTION_DRAW,
-ACTION_PASS, ACTION_PLAY, ACTION_POWER, ACTION_EFFECT, ACTION_SELECT, ACTION_CALCULATE, ACTION_ENTER_PROMPT, ACTION_RESOLVE_PROMPT, ACTION_GET_PROPERTY_VALUE, ACTION_ATTACK, 
-// ACTION_RESHUFFLE_DISCARD,
-ACTION_PLAYER_WINS, PROPERTY_ID, PROPERTY_TYPE, PROPERTY_CONTROLLER, PROPERTY_ENERGY_COUNT, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, 
-// PROPERTY_STARTING_ENERGY,
-PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, CALCULATION_SET, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_HALVE_ROUND_DOWN, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_MAX, CALCULATION_MULTIPLY, SELECTOR_CREATURES, SELECTOR_CREATURES_AND_MAGI, SELECTOR_OWN_MAGI, SELECTOR_ENEMY_MAGI, 
-// SELECTOR_ACTIVE_MAGI_OF_PLAYER,
-SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_MAGI_OF_REGION, SELECTOR_OPPONENT_ID, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, NO_PRIORITY, PRIORITY_PRS, PRIORITY_ATTACK, PRIORITY_CREATURES, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_CHOOSE_CARDS, EFFECT_TYPE_DRAW, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_PLAY_CREATURE, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_RELIC_ENTERS_PLAY, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE, EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC, EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_PAYING_ENERGY_FOR_POWER, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_CREATURE_IS_DEFEATED, // Possibly redundant
+export { TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, ACTION_PASS, ACTION_PLAY, ACTION_POWER, ACTION_EFFECT, ACTION_SELECT, ACTION_CALCULATE, ACTION_ENTER_PROMPT, ACTION_RESOLVE_PROMPT, ACTION_GET_PROPERTY_VALUE, ACTION_ATTACK, ACTION_PLAYER_WINS, PROPERTY_ID, PROPERTY_TYPE, PROPERTY_CONTROLLER, PROPERTY_ENERGY_COUNT, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, CALCULATION_SET, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_HALVE_ROUND_DOWN, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_MAX, CALCULATION_MULTIPLY, SELECTOR_CREATURES, SELECTOR_CREATURES_AND_MAGI, SELECTOR_OWN_MAGI, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_MAGI_OF_REGION, SELECTOR_OPPONENT_ID, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, NO_PRIORITY, PRIORITY_PRS, PRIORITY_ATTACK, PRIORITY_CREATURES, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_CHOOSE_CARDS, EFFECT_TYPE_DRAW, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_PLAY_CREATURE, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_RELIC_ENTERS_PLAY, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE, EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC, EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_PAYING_ENERGY_FOR_POWER, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_CREATURE_IS_DEFEATED, // Possibly redundant
 EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_IS_ATTACKED, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_DRAW_REST_OF_CARDS, REGION_UNIVERSAL, COST_X, COST_X_PLUS_ONE, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, };
 //# sourceMappingURL=index.js.map

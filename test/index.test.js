@@ -1621,11 +1621,71 @@ describe('Effects', () => {
 		expect(gameState.getZone(ZONE_TYPE_HAND, activePlayer).length).toEqual(0, 'No cards in hand');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, '2 cards in play');
 
-		expect(gameState.state.attachedTo[fogBank.id]).toEqual(arbolit.id, 'Fog Bank is attached to the Arbolit')
+		const newFogBankId = gameState.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.name === 'Fog Bank')[0].id;
+
+		expect(gameState.state.attachedTo[newFogBankId]).toEqual(arbolit.id, 'Fog Bank is attached to the Arbolit')
 
 		expect(gameState.state.cardsAttached).toHaveProperty(arbolit.id)
 		expect(gameState.state.cardsAttached[arbolit.id]).toHaveLength(1, 'One card attached to the Arbolit')
-		expect(gameState.state.cardsAttached[arbolit.id][0]).toEqual(fogBank.id, 'It"s Fog Bank')
+		expect(gameState.state.cardsAttached[arbolit.id][0]).toEqual(newFogBankId, 'It"s Fog Bank')
+	});
+
+	it('Removing the parent card should remove attached cards', () => {
+		const activePlayer = 0;
+		const arbolit = new CardInGame(byName('Arbolit'), activePlayer).addEnergy(5);
+		const fogBank = new CardInGame(byName('Fog Bank'), activePlayer);
+		const grega = new CardInGame(byName('Grega'), activePlayer).addEnergy(10);
+
+		const zones = [
+			new Zone('Player 1 hand', ZONE_TYPE_HAND, activePlayer).add([fogBank]),
+			new Zone('Player 1 discard', ZONE_TYPE_DISCARD, activePlayer),
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, activePlayer).add([grega]),
+			new Zone('Player 1 magi pile', ZONE_TYPE_MAGI_PILE, activePlayer),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
+		];
+
+		const playCardAttachedEffect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE,
+			attachmentTarget: arbolit,
+			target: fogBank,
+			generatedBy: 'testMoveEffect',
+		};
+
+		const gameState = new moonlands.State({
+			zones,
+			activePlayer,
+		});
+
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI).length).toEqual(1, 'Active Magi zone has 1 card');
+		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE).length).toEqual(0, 'Magi pile zone has no cards');
+
+		gameState.update(playCardAttachedEffect);
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, activePlayer).length).toEqual(0, 'No cards in hand');
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, '2 cards in play');
+
+		const newFogBankId = gameState.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.name === 'Fog Bank')[0].id;
+
+		expect(gameState.state.attachedTo[newFogBankId]).toEqual(arbolit.id, 'Fog Bank is attached to the Arbolit')
+
+		expect(gameState.state.cardsAttached).toHaveProperty(arbolit.id)
+		expect(gameState.state.cardsAttached[arbolit.id]).toHaveLength(1, 'One card attached to the Arbolit')
+		expect(gameState.state.cardsAttached[arbolit.id][0]).toEqual(newFogBankId, 'It"s Fog Bank')
+
+		const removalEffect = {
+			type: ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+			target: arbolit,
+			generatedBy: 'testRemovalEffect',
+			player: activePlayer,
+		}
+
+		gameState.update(removalEffect)
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'No cards in play');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, activePlayer).length).toEqual(2, '2 cards in discard');
+
 	});
 
 	it('Rearranging energy on creatures [EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES]', () => {
