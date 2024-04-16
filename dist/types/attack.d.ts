@@ -104,5 +104,6 @@ type CreatureIsDefeatedEffect = AttackEffectAction & {
     target: CardInGame;
     attack: boolean;
 };
+export type AttackOnlyEffect = CreatureAttacksEffect | BeforeDamageEffect | DamageStepEffect | AfterDamageEffect | AttackerDealsDamageEffect | AttackerDamageDealtEffect | DefenderDealsDamageEffect | DefenderDamageDealt | DealDamageEffect | CreatureDefeatsCreatureEffect | CreatureIsDefeatedEffect;
 export type AttackEffect = AttackType | CreatureAttacksEffect | BeforeDamageEffect | DamageStepEffect | AfterDamageEffect | AttackerDealsDamageEffect | AttackerDamageDealtEffect | DefenderDealsDamageEffect | DefenderDamageDealt | DealDamageEffect | CreatureDefeatsCreatureEffect | CreatureIsDefeatedEffect;
 export {};

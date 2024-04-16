@@ -187,6 +187,7 @@ import {
 	PROTECTION_FROM_EFFECTS,
 	PROTECTION_FROM_POWERS,
 	EFFECT_TYPE_DEFENDER_DAMAGE_DEALT,
+	EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -1449,6 +1450,14 @@ export const cards = [
 					turns: 2,
 				},
 			}),
+			effect({
+				effectType: EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE,
+				target: '$source',
+				attachmentTarget: '$target',
+			}),
+			// effect({
+			// 	effectType: EFFECT_TYPE_ADD_DELAYED_TRIGGER,
+			// })
 		],
 	}),
 	new Card('Burrow', TYPE_SPELL, REGION_UNDERNEATH, COST_X_PLUS_ONE, {

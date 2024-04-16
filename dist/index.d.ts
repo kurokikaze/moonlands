@@ -45,7 +45,7 @@ type PromptParamsType = {
 };
 export type MetaDataValue = CardInGame | CardInGame[] | Region | number | Record<string, number> | string;
 export type MetaDataRecord = Record<string, MetaDataValue>;
-type StateShape = {
+export type StateShape = {
     step: number | null;
     turn?: number;
     prompt: boolean;

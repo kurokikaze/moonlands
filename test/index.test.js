@@ -1685,7 +1685,6 @@ describe('Effects', () => {
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(0, 'No cards in play');
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, activePlayer).length).toEqual(2, '2 cards in discard');
-
 	});
 
 	it('Rearranging energy on creatures [EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES]', () => {

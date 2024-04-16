@@ -132,6 +132,20 @@ type CreatureIsDefeatedEffect = AttackEffectAction & {
     attack: boolean;
 }
 
+// Only effects for the new action map
+export type AttackOnlyEffect = 
+CreatureAttacksEffect |
+BeforeDamageEffect |
+DamageStepEffect |
+AfterDamageEffect |
+AttackerDealsDamageEffect |
+AttackerDamageDealtEffect |
+DefenderDealsDamageEffect |
+DefenderDamageDealt |
+DealDamageEffect |
+CreatureDefeatsCreatureEffect |
+CreatureIsDefeatedEffect;
+
 export type AttackEffect = AttackType |
     CreatureAttacksEffect |
     BeforeDamageEffect |
