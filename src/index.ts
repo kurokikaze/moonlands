@@ -248,8 +248,6 @@ import {
 	LogEntryType,
 	PropertyType,
 	PromptType,
-	AttackerDealsDamageEffect,
-	MoveCardBetwenZonesEffect,
 	EnrichedAction,
 	StaticAbilityType,
 	OperatorType,
@@ -264,15 +262,12 @@ import {
 	Region,
 	ProtectionType,
 	ReplacingEffectType,
-	ExitPromptsAction,
 	NoneType,
-	WithReplacementValues,
 } from './types';
-import { DieRolledEffect, DiscardCreatureFromPlayEffect, DiscardEnergyFromCreatureEffect, EnhancedDelayedTriggerType, ExecutePowerEffect, StartingEnergyOnCreatureEffect } from './types/effect';
+import { EnhancedDelayedTriggerType, ExecutePowerEffect, StartingEnergyOnCreatureEffect } from './types/effect';
 import { CardType, StatusType } from './types/common';
 import { AlternativeType, PromptTypeMayAbility } from './types/prompt';
-import { AttackerDamageDealtEffect } from './types/attack';
-import { ActionTransformer, EffectsUnited } from './actionMaps/actionMapTypes';
+import { ActionTransformer } from './actionMaps/actionMapTypes';
 
 const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
 	id: cardInGame.id,

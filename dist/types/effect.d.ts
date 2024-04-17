@@ -3,7 +3,6 @@ import { ConditionType, ExpirationObjectType, ZoneType } from './common';
 import CardInGame from '../classes/CardInGame';
 import { ACTION_EFFECT, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_NONE, EFFECT_TYPE_DRAW, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_PLAY_CREATURE, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP, EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE, EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY, EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_CONDITIONAL, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DISCARD_CARDS_FROM_HAND, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_PAYING_ENERGY_FOR_POWER, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES, EFFECT_TYPE_START_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_DRAW_REST_OF_CARDS, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC, EFFECT_TYPE_RELIC_ENTERS_PLAY, EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL, EFFECT_TYPE_DEFEAT_MAGI, EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC, EFFECT_TYPE_ATTACK, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_DRAW_N_CARDS, EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_DISCARD_RESHUFFLED, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, EFFECT_TYPE_DEFENDER_DAMAGE_DEALT, EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE, EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI, EFFECT_TYPE_DISCARD_CARD_FROM_HAND, EFFECT_TYPE_ATTACH_CARD_TO_CARD, EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE, EFFECT_TYPE_CARD_ATTACHED_TO_CARD } from '../const';
 export type EffectTypeType = typeof EFFECT_TYPE_END_OF_TURN | typeof EFFECT_TYPE_ATTACK | typeof EFFECT_TYPE_NONE | typeof EFFECT_TYPE_DRAW | typeof EFFECT_TYPE_ROLL_DIE | typeof EFFECT_TYPE_PLAY_CREATURE | typeof EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP | typeof EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP | typeof EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI | typeof EFFECT_TYPE_ADD_DELAYED_TRIGGER | typeof EFFECT_TYPE_PLAY_RELIC | typeof EFFECT_TYPE_PLAY_SPELL | typeof EFFECT_TYPE_MAGI_IS_DEFEATED | typeof EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY | typeof EFFECT_TYPE_CREATURE_ENTERS_PLAY | typeof EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE | typeof EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY | typeof EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY | typeof EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE | typeof EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI | typeof EFFECT_TYPE_ADD_ENERGY_TO_CREATURE | typeof EFFECT_TYPE_ADD_ENERGY_TO_MAGI | typeof EFFECT_TYPE_ENERGIZE | typeof EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT | typeof EFFECT_TYPE_DEFENDER_DAMAGE_DEALT | typeof EFFECT_TYPE_CONDITIONAL | typeof EFFECT_TYPE_START_OF_TURN | typeof EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES | typeof EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES | typeof EFFECT_TYPE_CREATURE_DEFEATS_CREATURE | typeof EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE | typeof EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI | typeof EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI | typeof EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY | typeof EFFECT_TYPE_DEFENDER_DEALS_DAMAGE | typeof EFFECT_TYPE_DEAL_DAMAGE | typeof EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY | typeof EFFECT_TYPE_MOVE_ENERGY | typeof EFFECT_TYPE_CREATURE_ATTACKS | typeof EFFECT_TYPE_BEFORE_DAMAGE | typeof EFFECT_TYPE_DISCARD_CARDS_FROM_HAND | typeof EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE | typeof EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES | typeof EFFECT_TYPE_PAYING_ENERGY_FOR_POWER | typeof EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI | typeof EFFECT_TYPE_MAGI_FLIPPED | typeof EFFECT_TYPE_EXECUTE_POWER_EFFECTS | typeof EFFECT_TYPE_START_STEP;
-type EffectTypeStillInUse = typeof EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY | typeof EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY | typeof EFFECT_TYPE_DISCARD_CARDS_FROM_HAND | typeof EFFECT_TYPE_DISCARD_CARD_FROM_HAND | typeof EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE;
 interface ActionEffect {
     type: typeof ACTION_EFFECT;
     generatedBy: string;
@@ -171,6 +170,10 @@ type ReshuffleDiscardEffect = ActionEffect & {
     effectType: typeof EFFECT_TYPE_RESHUFFLE_DISCARD;
     player: number;
 };
+type ForbidAttackToCreatureEffect = ActionEffect & {
+    effectType: typeof EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE;
+    target: string | CardInGame;
+};
 type DiscardReshuffledEffect = ActionEffect & {
     effectType: typeof EFFECT_TYPE_DISCARD_RESHUFFLED;
     player: number;
@@ -286,6 +289,24 @@ type DiscardCreatureOrRelicFromPlay = ActionEffect & {
     effectType: typeof EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC;
     target: CardInGame | string;
 };
+type DiscardCardsFromHandEffect = ActionEffect & {
+    effectType: typeof EFFECT_TYPE_DISCARD_CARDS_FROM_HAND;
+    target: CardInGame | CardInGame[] | string;
+};
+type DiscardCardFromHandEffect = ActionEffect & {
+    effectType: typeof EFFECT_TYPE_DISCARD_CARD_FROM_HAND;
+    target: CardInGame | string;
+};
+type ReturnCreatureDiscardingEnergyEffect = ActionEffect & {
+    effectType: typeof EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY;
+    target: CardInGame | string;
+};
+type RestoreCreatureToStartingEnergy = ActionEffect & {
+    effectType: typeof EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY;
+    source?: CardInGame;
+    power?: boolean;
+    target: CardInGame | string;
+};
 type DefeatMagiEffect = ActionEffect & {
     effectType: typeof EFFECT_TYPE_DEFEAT_MAGI;
     target: CardInGame;
@@ -358,11 +379,11 @@ type CardAttachedToCardEffect = ActionEffect & {
     target: CardInGame | string;
     attachmentTarget: CardInGame | string;
 };
-export type EffectType = ActionEffect & {
+export type EffectType = /* ActionEffect & {
     effectType: EffectTypeStillInUse;
     generatedBy?: string;
     source?: CardInGame;
     power?: boolean;
     target?: CardInGame;
-} | MoveCardBetwenZonesEffect | MoveCardsBetwenZonesEffect | NoneEffect | AttackEffect | CardMovedBetweenZonesEffect | BeforeDrawCardsInDrawStepType | DrawCardsInDrawStepType | DrawNCardsEffect | DiscardEnergyFromCreatureOrMagiEffect | DiscardEnergyFromCreaturesEffect | DiscardEnergyFromCreatureEffect | EnergyDiscardedFromCreatureEffect | DiscardEnergyFromMagiEffect | EnergyDiscardedFromMagiEffect | RemoveEnergyFromCreatureEffect | RemoveEnergyFromMagiEffect | PayingEnergyForPowerEffect | StartTurnEffect | StartOfTurnEffect | StartStepEffect | EndOfTurnEffect | DrawEffect | DrawRestOfCardsEffect | MagiFlippedEffect | AddStartingEnergyToMagi | FindStartingCardsEffect | ReshuffleDiscardEffect | AddEnergyToCreatureOrMagiEffect | AddEnergyToCreatureEffect | AddEnergyToMagiEffect | DiscardCreatureOrRelicFromPlay | PayingEnergyForCreatureEffect | PlayCreatureEffect | DiscardReshuffledEffect | CreatureEntersPlayEffect | StartingEnergyOnCreatureEffect | PayingEnergyForRelicEffect | PlayRelicEffect | RelicEntersPlayEffect | PlaySpellEffect | PayingEnergyForSpellEffect | ConditionalEffect | AddDelayedTriggerEffect | EnergizeEffect | RollDieEffect | DieRolledEffect | MoveEnergyEffect | MagiIsDefeatedEffect | CreateContinuousEffect | DefeatMagiEffect | RearrangeEnergyEffect | DistributeEnergyEffect | DistributeDamageEffect | DiscardRelicFromPlayEffect | ReturnCreatureReturningEnergyEffect | DiscardCreatureFromPlayEffect | RearrangeCardsOfZoneEffect | PlayAttachedToCreatureEffect | AttachCardToCardEffect | CardAttachedToCardEffect | ExecutePowerEffect;
+} | */ MoveCardBetwenZonesEffect | MoveCardsBetwenZonesEffect | NoneEffect | AttackEffect | CardMovedBetweenZonesEffect | BeforeDrawCardsInDrawStepType | DrawCardsInDrawStepType | DrawNCardsEffect | DiscardEnergyFromCreatureOrMagiEffect | DiscardEnergyFromCreaturesEffect | DiscardEnergyFromCreatureEffect | EnergyDiscardedFromCreatureEffect | DiscardEnergyFromMagiEffect | EnergyDiscardedFromMagiEffect | RemoveEnergyFromCreatureEffect | RemoveEnergyFromMagiEffect | PayingEnergyForPowerEffect | RestoreCreatureToStartingEnergy | StartTurnEffect | StartOfTurnEffect | StartStepEffect | EndOfTurnEffect | DrawEffect | DrawRestOfCardsEffect | MagiFlippedEffect | AddStartingEnergyToMagi | FindStartingCardsEffect | ReshuffleDiscardEffect | AddEnergyToCreatureOrMagiEffect | AddEnergyToCreatureEffect | AddEnergyToMagiEffect | DiscardCreatureOrRelicFromPlay | PayingEnergyForCreatureEffect | PlayCreatureEffect | DiscardReshuffledEffect | DiscardCardsFromHandEffect | DiscardCardFromHandEffect | CreatureEntersPlayEffect | StartingEnergyOnCreatureEffect | PayingEnergyForRelicEffect | PlayRelicEffect | RelicEntersPlayEffect | PlaySpellEffect | PayingEnergyForSpellEffect | ConditionalEffect | AddDelayedTriggerEffect | EnergizeEffect | RollDieEffect | DieRolledEffect | MoveEnergyEffect | MagiIsDefeatedEffect | CreateContinuousEffect | DefeatMagiEffect | RearrangeEnergyEffect | DistributeEnergyEffect | ForbidAttackToCreatureEffect | DistributeDamageEffect | DiscardRelicFromPlayEffect | ReturnCreatureReturningEnergyEffect | ReturnCreatureDiscardingEnergyEffect | DiscardCreatureFromPlayEffect | RearrangeCardsOfZoneEffect | PlayAttachedToCreatureEffect | AttachCardToCardEffect | CardAttachedToCardEffect | ExecutePowerEffect;
 export {};

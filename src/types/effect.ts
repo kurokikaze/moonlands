@@ -129,11 +129,7 @@ export type EffectTypeType =
 	typeof EFFECT_TYPE_EXECUTE_POWER_EFFECTS |
 	typeof EFFECT_TYPE_START_STEP;
 
-type EffectTypeStillInUse = typeof EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY |
-	typeof EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY |
-	typeof EFFECT_TYPE_DISCARD_CARDS_FROM_HAND |
-	typeof EFFECT_TYPE_DISCARD_CARD_FROM_HAND |
-	typeof EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE;
+type EffectTypeStillInUse = never;
 
 interface ActionEffect {
 	type: typeof ACTION_EFFECT;
@@ -330,6 +326,11 @@ type ReshuffleDiscardEffect = ActionEffect & {
 	player: number;
 }
 
+type ForbidAttackToCreatureEffect = ActionEffect & {
+	effectType: typeof EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE
+	target: string | CardInGame;
+}
+
 type DiscardReshuffledEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_DISCARD_RESHUFFLED,
 	player: number;
@@ -364,7 +365,7 @@ type PayingEnergyForCreatureEffect = ActionEffect & {
 }
 
 type PlayCreatureEffect = ActionEffect & {
-	effectType: typeof EFFECT_TYPE_PLAY_CREATURE;
+	effectType: typeof EFFECT_TYPE_PLAY_CREATURE
 	card: CardInGame;
 	player: number;
 }
@@ -468,6 +469,28 @@ type DiscardCreatureOrRelicFromPlay = ActionEffect & {
 	target: CardInGame | string;
 }
 
+type DiscardCardsFromHandEffect = ActionEffect & {
+	effectType: typeof EFFECT_TYPE_DISCARD_CARDS_FROM_HAND
+	target: CardInGame | CardInGame[] | string;
+}
+
+type DiscardCardFromHandEffect = ActionEffect & {
+	effectType: typeof EFFECT_TYPE_DISCARD_CARD_FROM_HAND
+	target: CardInGame | string;
+}
+
+type ReturnCreatureDiscardingEnergyEffect = ActionEffect & {
+	effectType: typeof EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY
+	target: CardInGame | string;
+}
+
+type RestoreCreatureToStartingEnergy = ActionEffect & {
+	effectType: typeof EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY
+	source?: CardInGame
+	power?: boolean
+	target: CardInGame | string
+}
+
 type DefeatMagiEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_DEFEAT_MAGI;
 	target: CardInGame;
@@ -554,13 +577,14 @@ type CardAttachedToCardEffect = ActionEffect & {
 	attachmentTarget: CardInGame | string
 }
 
-export type EffectType = ActionEffect & {
+export type EffectType = /* ActionEffect & {
 	effectType: EffectTypeStillInUse;
 	generatedBy?: string;
 	source?: CardInGame;
 	power?: boolean;
 	target?: CardInGame;
-} | MoveCardBetwenZonesEffect |
+} | */
+	MoveCardBetwenZonesEffect |
 	MoveCardsBetwenZonesEffect |
 	NoneEffect |
 	AttackEffect |
@@ -577,6 +601,7 @@ export type EffectType = ActionEffect & {
 	RemoveEnergyFromCreatureEffect |
 	RemoveEnergyFromMagiEffect |
 	PayingEnergyForPowerEffect |
+	RestoreCreatureToStartingEnergy |
 	StartTurnEffect |
 	StartOfTurnEffect |
 	StartStepEffect |
@@ -594,6 +619,8 @@ export type EffectType = ActionEffect & {
 	PayingEnergyForCreatureEffect |
 	PlayCreatureEffect |
 	DiscardReshuffledEffect |
+	DiscardCardsFromHandEffect |
+	DiscardCardFromHandEffect |
 	CreatureEntersPlayEffect |
 	StartingEnergyOnCreatureEffect |
 	PayingEnergyForRelicEffect |
@@ -612,9 +639,11 @@ export type EffectType = ActionEffect & {
 	DefeatMagiEffect |
 	RearrangeEnergyEffect |
 	DistributeEnergyEffect |
+	ForbidAttackToCreatureEffect |
 	DistributeDamageEffect |
 	DiscardRelicFromPlayEffect |
 	ReturnCreatureReturningEnergyEffect |
+	ReturnCreatureDiscardingEnergyEffect |
 	DiscardCreatureFromPlayEffect |
 	RearrangeCardsOfZoneEffect |
 	PlayAttachedToCreatureEffect |
