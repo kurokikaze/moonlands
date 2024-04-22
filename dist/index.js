@@ -185,6 +185,7 @@ var State = /** @class */ (function () {
     function State(state) {
         this.players = [0, 1];
         this.twister = null;
+        this.twisterSeed = 0;
         this.onAction = null;
         this.turnTimer = null;
         this.state = __assign(__assign({}, clone(defaultState)), state);
@@ -202,6 +203,7 @@ var State = /** @class */ (function () {
     // @deprecated
     State.prototype.closeStreams = function () { };
     State.prototype.initiatePRNG = function (seed) {
+        this.twisterSeed = seed;
         this.twister = new MersenneTwister(seed);
     };
     State.prototype.setOnAction = function (callback) {
@@ -286,6 +288,9 @@ var State = /** @class */ (function () {
         newObject.rollDebugValue = this.rollDebugValue;
         newObject.players = this.players;
         newObject.decks = this.decks;
+        if (this.twister) {
+            newObject.twister = new MersenneTwister(this.twisterSeed);
+        }
         return newObject;
     };
     State.prototype.setPlayers = function (player1, player2) {

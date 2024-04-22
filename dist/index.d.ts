@@ -81,6 +81,7 @@ export declare class State {
     winner: boolean | number;
     debug: boolean;
     twister: typeof MersenneTwister | null;
+    twisterSeed: number;
     turn: number | null;
     rollDebugValue: number | null;
     actionsOne: any[];

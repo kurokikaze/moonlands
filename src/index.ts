@@ -581,6 +581,7 @@ export class State {
 	winner: boolean | number;
 	debug: boolean;
 	twister: typeof MersenneTwister | null = null;
+	twisterSeed: number = 0
 	turn: number | null;
 	rollDebugValue: number | null;
 	actionsOne: any[];
@@ -615,6 +616,7 @@ export class State {
 	closeStreams() { }
 
 	initiatePRNG(seed: number) {
+		this.twisterSeed = seed;
 		this.twister = new (MersenneTwister as any)(seed);
 	}
 
@@ -716,6 +718,10 @@ export class State {
 		newObject.rollDebugValue = this.rollDebugValue
 		newObject.players = this.players
 		newObject.decks = this.decks
+
+		if (this.twister) {
+			newObject.twister = new (MersenneTwister as any)(this.twisterSeed);
+		}
 		return newObject
 	}
 
@@ -3711,7 +3717,7 @@ export class State {
 					break;
 				}
 			} // switch (action.type)
-			
+
 		} // while(this.hasActions())
 
 		// SBA for Magi losing
