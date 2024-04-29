@@ -641,6 +641,103 @@ describe('Lovian', () => {
 	});
 })
 
+describe('Orish', () => {
+	it('Hypnotize', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const adis = new CardInGame(byName('Adis'), ACTIVE_PLAYER).addEnergy(4);
+
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const lavaAq = new CardInGame(byName('Lava Aq'), NON_ACTIVE_PLAYER);
+		const orish = new CardInGame(byName('Orish'), ACTIVE_PLAYER).addEnergy(4);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaBalamant, orish], [adis]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+		gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).add([lavaAq]);
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.initiatePRNG(123);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: orish,
+			power: orish.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_PLAYER, 'Game is in prompt state (player)');
+		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game is prompting active player');
+
+		const choiceAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			targetPlayer: NON_ACTIVE_PLAYER,
+			generatedBy: gameState.state.promptGeneratedBy,
+		}
+
+		gameState.update(choiceAction)
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1, 'One card in the discard pile')
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Lava Aq', 'It is Lava Aq')
+	});
+
+	it('Hypnotize (no cards)', () => {
+		const ACTIVE_PLAYER = 422;
+		const NON_ACTIVE_PLAYER = 1310;
+
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const adis = new CardInGame(byName('Adis'), ACTIVE_PLAYER).addEnergy(4);
+
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const lavaAq = new CardInGame(byName('Lava Aq'), NON_ACTIVE_PLAYER);
+		const orish = new CardInGame(byName('Orish'), ACTIVE_PLAYER).addEnergy(4);
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [lavaBalamant, lavaAq, orish], [adis]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+		// gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).add([lavaAq]);
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.initiatePRNG(123);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: orish,
+			power: orish.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_PLAYER, 'Game is in prompt state (player)');
+		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game is prompting active player');
+
+		const choiceAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			targetPlayer: NON_ACTIVE_PLAYER,
+			generatedBy: gameState.state.promptGeneratedBy,
+		}
+
+		gameState.update(choiceAction)
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(0, 'No cards in the discard pile')
+	});
+});
+
 describe('Adis', () => {
 	it('Haunt', () => {
 		const ACTIVE_PLAYER = 422;

@@ -72,6 +72,7 @@ export declare const SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY = "selectors/own_cr
 export declare const SELECTOR_NTH_CARD_OF_ZONE = "selectors/nth_card_of_zone";
 export declare const SELECTOR_OWN_CARDS_IN_HAND = "selectors/own_cards_in_hand";
 export declare const SELECTOR_CARDS_IN_HAND = "selectors/cards_in_hand";
+export declare const SELECTOR_RANDOM_CARD_IN_HAND = "selectors/random_card_in_hand";
 export declare const STATUS_BURROWED = "status/burrowed";
 export declare const STATUS_FROZEN = "status/frozen";
 export declare const CALCULATION_SET = "calculations/set";

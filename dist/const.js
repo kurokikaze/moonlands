@@ -73,6 +73,7 @@ export var SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY = 'selectors/own_creature_wit
 export var SELECTOR_NTH_CARD_OF_ZONE = 'selectors/nth_card_of_zone';
 export var SELECTOR_OWN_CARDS_IN_HAND = 'selectors/own_cards_in_hand';
 export var SELECTOR_CARDS_IN_HAND = 'selectors/cards_in_hand';
+export var SELECTOR_RANDOM_CARD_IN_HAND = 'selectors/random_card_in_hand';
 export var STATUS_BURROWED = 'status/burrowed';
 export var STATUS_FROZEN = 'status/frozen';
 export var CALCULATION_SET = 'calculations/set';

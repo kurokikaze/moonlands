@@ -229,6 +229,7 @@ import {
 	EFFECT_TYPE_DISCARD_CARD_FROM_HAND,
 	LOG_ENTRY_CARD_DISCARDED_FROM_HAND,
 	SELECTOR_MAGI_OF_PLAYER,
+	SELECTOR_RANDOM_CARD_IN_HAND,
 } from './const';
 
 import { actionMap } from './actionMaps/effects';
@@ -1262,6 +1263,22 @@ export class State {
 		}
 	}
 
+	selectRandomCardOfZone(player: number, zoneType: ZoneType): CardInGame[] {
+		const zoneCards = this.getZone(zoneType, player).cards;
+		// const filteredCards = (restrictions && restrictions.length) ? zoneCards.filter(this.makeCardFilter(restrictions)) : zoneCards;
+
+		// @ts-ignore
+		const randomValue = this.twister ? this.twister.random() : Math.random();
+
+		const index = Math.floor(randomValue * zoneCards.length);
+
+		if (zoneCards.length == 0) {
+			return []
+		} else {
+			return [zoneCards[index]];
+		}
+	}
+
 	useSelector(selector: typeof SELECTOR_STATUS, player: null, argument: StatusType): CardInGame[]
 	useSelector(selector: typeof SELECTOR_CREATURES_WITHOUT_STATUS, player: null, argument: StatusType): CardInGame[]
 	useSelector(selector: typeof SELECTOR_CREATURES, player: null): CardInGame[]
@@ -1280,6 +1297,7 @@ export class State {
 	useSelector(selector: typeof SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, player: number): CardInGame[]
 	useSelector(selector: typeof SELECTOR_CARDS_WITH_ENERGIZE_RATE, player: null): CardInGame[]
 	useSelector(selector: typeof SELECTOR_RELICS, player: null): CardInGame[]
+	useSelector(selector: typeof SELECTOR_RANDOM_CARD_IN_HAND, player: null): CardInGame[]
 	useSelector(selector: SelectorTypeType, player: number | null, argument?: any): CardInGame[] | number {
 		switch (selector) {
 			case SELECTOR_OWN_CARDS_IN_PLAY: {
@@ -3333,6 +3351,11 @@ export class State {
 							const zoneType = this.getMetaValue<ZoneType>(action.zone, action.generatedBy);
 							const cardNumber = this.getMetaValue<number>(action.cardNumber, action.generatedBy);
 							result = this.selectNthCardOfZone(zoneOwner, zoneType, cardNumber, action.restrictions);
+							break;
+						}
+						case SELECTOR_RANDOM_CARD_IN_HAND: {
+							const zoneOwner = this.getMetaValue<number>(action.zoneOwner, action.generatedBy);
+							result = this.selectRandomCardOfZone(zoneOwner, ZONE_TYPE_HAND);
 							break;
 						}
 						case SELECTOR_MAGI_OF_PLAYER: {

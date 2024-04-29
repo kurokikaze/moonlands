@@ -129,7 +129,7 @@
 - [x] Pruitt
 - [x] Quor
 - [x] Quor Pup
-- [ ] Raxis
+- [x] Raxis
 - [x] Relic Mirror
 - [x] Relic Stalker
 - [x] Ring of Secrets

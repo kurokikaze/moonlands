@@ -41,6 +41,7 @@ import {
 	SELECTOR_ID,
 	SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY,
 	SELECTOR_NTH_CARD_OF_ZONE,
+	SELECTOR_RANDOM_CARD_IN_HAND,
 
 	REGION_NAROOM,
 	REGION_CALD,
@@ -111,7 +112,7 @@ import {
 	STEP_DRAW,
 	createZones,
 } from './utils.js';
-import {nanoid} from 'nanoid';
+import { nanoid } from 'nanoid';
 
 describe('Updating state with action', () => {
 	it('Pass action', () => {
@@ -2265,6 +2266,48 @@ describe('Selector actions', () => {
 		expect(selectedCreatures.map(({ card }) => card.name)).toEqual(['Lava Balamant'], 'Creature selector returns only Lava Balamant');
 	});
 
+	it('SELECTOR_RANDOM_CARD_IN_HAND', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+		const GENERATED_BY = 123;
+
+		const xyx = new CardInGame(byName('Xyx'), ACTIVE_PLAYER);
+		const xyxElder = new CardInGame(byName('Xyx Elder'), ACTIVE_PLAYER);
+		const lavaBalamant = new CardInGame(byName('Lava Balamant'), ACTIVE_PLAYER);
+		const magmaArmor = new CardInGame(byName('Magma Armor'), ACTIVE_PLAYER);
+		const opponentsXyx = new CardInGame(byName('Xyx'), NON_ACTIVE_PLAYER);
+
+		const zones = [
+			new Zone('Player 1 active magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('Player 2 active magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In Play', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([xyx, xyxElder, lavaBalamant, magmaArmor, opponentsXyx]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.initiatePRNG(12345);
+
+		const selectRandomCardAction = {
+			type: ACTION_SELECT,
+			selector: SELECTOR_RANDOM_CARD_IN_HAND,
+			zoneOwner: ACTIVE_PLAYER,
+			player: ACTIVE_PLAYER,
+			generatedBy: GENERATED_BY,
+		};
+
+		gameState.update(selectRandomCardAction);
+
+		const selectedCards = gameState.state.spellMetaData[GENERATED_BY].selected;
+
+		expect(selectedCards.map(({ card }) => card.name)).toHaveLength(1, 'Selector returns one creature');
+		expect(selectedCards.map(({ card }) => card.name)).toEqual(['Xyx'], 'Selector randomly gets Xyx');
+	});
+
 	it('SELECTOR_CREATURES_NOT_OF_TYPE', () => {
 		const ACTIVE_PLAYER = 0;
 		const NON_ACTIVE_PLAYER = 1;
@@ -3034,7 +3077,7 @@ describe('Activating power', () => {
 		const ACTIVE_PLAYER = 0;
 		const weebo = new CardInGame(byName('Weebo'), ACTIVE_PLAYER).addEnergy(3);
 		const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER).addEnergy(1);
-	
+
 		const gameState = new moonlands.State({
 			zones: [
 				new Zone('Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
@@ -5128,7 +5171,7 @@ describe('Not entering prompts when activating power will lead to inescapable pr
 	});
 });
 
-describe('Ability to attack',  () => {
+describe('Ability to attack', () => {
 	it('Default state for the Orathan Flyer', () => {
 		const ACTIVE_PLAYER = 0;
 		const NON_ACTIVE_PLAYER = 1;
@@ -5705,7 +5748,7 @@ function validateEffects(effects, initialVariables, cardName) {
 			const variable = effect.variable || 'roll_result';
 			variables['$' + variable] = 1;
 		}
-		if (effect.type == ACTION_EFFECT && 
+		if (effect.type == ACTION_EFFECT &&
 			(
 				effect.effectType == moonlands.EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES ||
 				effect.effectType == moonlands.EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY ||
@@ -5731,17 +5774,17 @@ describe('Card logic', () => {
 			if (spell.cost == moonlands.COST_X || spell.cost == moonlands.COST_X_PLUS_ONE) {
 				variables['$chosen_cost'] = 1;
 			}
-	
+
 			expect(validateEffects(spell.data.effects, variables, spell.name)).toEqual(true);
 		}
-	
+
 		const cardsWithPowers = cards.filter(card => card.type === moonlands.TYPE_RELIC || card.type === moonlands.TYPE_CREATURE || card.type === moonlands.TYPE_MAGI);
-	
+
 		for (let card of cardsWithPowers) {
 			let variables = {
 				'$source': 1,
 			};
-	
+
 			if (card.powers && card.powers.length) {
 				for (let power of card.powers) {
 					expect(validateEffects(power.effects, variables, card.name)).toEqual(true);

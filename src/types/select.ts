@@ -1,5 +1,5 @@
 import { Region, RestrictionObjectType, StatusType, ZoneType } from "./common";
-import { 
+import {
     ACTION_SELECT,
 
     SELECTOR_OPPONENT_ID,
@@ -36,6 +36,7 @@ import {
     SELECTOR_OWN_CARDS_IN_HAND,
     SELECTOR_CARDS_IN_HAND,
     SELECTOR_MAGI_OF_PLAYER,
+    SELECTOR_RANDOM_CARD_IN_HAND,
 } from "../const";
 
 export type SelectorParams = {
@@ -78,7 +79,8 @@ export type SelectorTypeType = typeof SELECTOR_OPPONENT_ID |
     typeof SELECTOR_STATUS |
     typeof SELECTOR_OWN_CARDS_IN_HAND |
     typeof SELECTOR_CARDS_IN_HAND |
-    typeof SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY;
+    typeof SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY |
+    typeof SELECTOR_RANDOM_CARD_IN_HAND;
 
 interface SelectAction {
     type: typeof ACTION_SELECT;
@@ -199,19 +201,19 @@ type SelectCreaturesNotOfRegionParams = SelectParams & {
 
 type SelectCreaturesNotOfRegion = SelectAction & SelectCreaturesNotOfRegionParams;
 
-type SelectMagiOfRegionParams =  SelectParams & {
+type SelectMagiOfRegionParams = SelectParams & {
     selector: typeof SELECTOR_MAGI_OF_REGION;
     region: Region;
 }
 
-type SelectMagiOfRegion =  SelectAction & SelectMagiOfRegionParams;
+type SelectMagiOfRegion = SelectAction & SelectMagiOfRegionParams;
 
 type SelectMagiNotOfRegionParams = {
     selector: typeof SELECTOR_MAGI_NOT_OF_REGION;
     region: Region;
 }
 
-type SelectMagiNotOfRegion =  SelectAction & SelectMagiNotOfRegionParams;
+type SelectMagiNotOfRegion = SelectAction & SelectMagiNotOfRegionParams;
 
 type SelectMagiOfPlayerParams = {
     selector: typeof SELECTOR_MAGI_OF_PLAYER;
@@ -219,7 +221,7 @@ type SelectMagiOfPlayerParams = {
     variable?: string;
 }
 
-type SelectMagiOfPlayer =  SelectAction & SelectMagiOfPlayerParams;
+type SelectMagiOfPlayer = SelectAction & SelectMagiOfPlayerParams;
 
 type SelectStatusParams = SelectParams & {
     selector: typeof SELECTOR_STATUS;
@@ -240,7 +242,7 @@ type SelectTopMagiOfPileParams = SelectParams & {
 }
 
 type SelectSelfWithStatusParams = SelectParams & {
-  selector: typeof SELECTOR_SELF_AND_STATUS;
+    selector: typeof SELECTOR_SELF_AND_STATUS;
 }
 
 type SelectSelfWithStatus = SelectAction & SelectSelfWithStatusParams;
@@ -254,18 +256,18 @@ type SelectEnemyCreaturesParams = {
 type SelectEnemyCreatures = SelectAction & SelectEnemyCreaturesParams;
 
 type SelectOwnCreatureOfLeastEnergyParams = {
-  selector: typeof SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY;
-  variable?: string;
+    selector: typeof SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY;
+    variable?: string;
 }
 
 type SelectOwnCreatureOfLeastEnergy = SelectAction & SelectOwnCreatureOfLeastEnergyParams;
 
 type SelectNthCardParams = {
-  selector: typeof SELECTOR_NTH_CARD_OF_ZONE;
-  zone: ZoneType | string;
-  zoneOwner: number | string;
-  cardNumber: number | string;
-  restrictions?: RestrictionObjectType[];
+    selector: typeof SELECTOR_NTH_CARD_OF_ZONE;
+    zone: ZoneType | string;
+    zoneOwner: number | string;
+    cardNumber: number | string;
+    restrictions?: RestrictionObjectType[];
 }
 
 type SelectNthCard = SelectAction & SelectNthCardParams;
@@ -285,6 +287,14 @@ type SelectCardsInHandParams = {
 
 type SelectCardsInHand = SelectAction & SelectCardsInHandParams;
 
+type SelectRandomCardInHandParams = {
+    selector: typeof SELECTOR_RANDOM_CARD_IN_HAND
+    zoneOwner: number | string
+    variable?: string
+}
+
+type SelectRandomCardInHand = SelectAction & SelectRandomCardInHandParams
+
 export type RefinedSelectParams = SelectCreaturesOfTypeParams |
     SelectOtherCreaturesOfTypeParams |
     SelectCreaturesNotOfTypeParams |
@@ -296,7 +306,7 @@ export type RefinedSelectParams = SelectCreaturesOfTypeParams |
     SelectCreaturesWithoutStatusParams |
     SelectOwnCreaturesParams |
     SelectStatusParams |
-    SelectOwnCreaturesOfTypeParams | 
+    SelectOwnCreaturesOfTypeParams |
     SelectMagiOfRegionParams |
     SelectCreaturesParams |
     SelectSelfWithStatusParams |
@@ -312,6 +322,7 @@ export type RefinedSelectParams = SelectCreaturesOfTypeParams |
     SelectOwnCardsInHandParams |
     SelectCardsInHandParams |
     SelectMagiOfPlayerParams |
+    SelectRandomCardInHandParams |
     SelectNthCardParams;
 
 export type SelectType = SelectCreatures |
@@ -342,4 +353,5 @@ export type SelectType = SelectCreatures |
     SelectOwnCardsInHand |
     SelectCardsInHand |
     SelectMagiOfPlayer |
+    SelectRandomCardInHand |
     SelectNthCard;
