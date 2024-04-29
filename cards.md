@@ -1,4 +1,4 @@
-Done: **177** cards out of **190**
+Done: **178** cards out of **190**
 
 # Done, tested
 
@@ -110,6 +110,7 @@ Done: **177** cards out of **190**
 - Lightning
 - Eye of the Storm
 - Raxis
+- Orish
 
 # Done, not tested
 
@@ -288,7 +289,6 @@ Done: **177** cards out of **190**
 - Karak (exiling under creature, ability to play named relics)
 - Mask of Abwyn (looking at hand)
 - Orathan Flyer (paying for creature from creature)
-- Orish (choosing player, discard at random)
 - Syphon Vortex (Cost X plus 4)
 - Tap Roots (selecting two creatures)
 - Tidal Wave (additional cost while spell resolves)

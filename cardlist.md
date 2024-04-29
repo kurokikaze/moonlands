@@ -108,7 +108,7 @@
 - [x] Ora
 - [x] Orathan
 - [x] Orathan Flyer
-- [ ] Orish
+- [x] Orish
 - [x] Orlon
 - [x] Ormagon
 - [x] Orothean Belt
