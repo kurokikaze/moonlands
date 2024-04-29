@@ -1,4 +1,4 @@
-Done: **176** card out of **190**
+Done: **177** cards out of **190**
 
 # Done, tested
 
@@ -109,6 +109,7 @@ Done: **176** card out of **190**
 - Mirror Pendant
 - Lightning
 - Eye of the Storm
+- Raxis
 
 # Done, not tested
 
@@ -288,7 +289,6 @@ Done: **176** card out of **190**
 - Mask of Abwyn (looking at hand)
 - Orathan Flyer (paying for creature from creature)
 - Orish (choosing player, discard at random)
-- Raxis (choice between alternatives)
 - Syphon Vortex (Cost X plus 4)
 - Tap Roots (selecting two creatures)
 - Tidal Wave (additional cost while spell resolves)

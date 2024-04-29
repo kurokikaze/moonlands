@@ -52,6 +52,7 @@ export var SELECTOR_CREATURES_OF_REGION = 'selectors/creatures_of_region';
 export var SELECTOR_CREATURES_NOT_OF_REGION = 'selectors/creatures_not_of_region';
 export var SELECTOR_MAGI_OF_REGION = 'selectors/magi_of_region';
 export var SELECTOR_MAGI_NOT_OF_REGION = 'selectors/magi_not_of_region';
+export var SELECTOR_MAGI_OF_PLAYER = 'selectors/magi_of_player';
 export var SELECTOR_OWN_CREATURES = 'selectors/own_creatures';
 export var SELECTOR_ENEMY_CREATURES = 'selectors/enemy_creatures';
 export var SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE = 'selectors/own_cards_with_energize_rate';

@@ -805,7 +805,6 @@ var applyConditionalEffect = function (action, transform) {
     var results = action.conditions.map(function (condition) {
         return _this.checkCondition(action, self, condition);
     });
-    // console.dir(results)
     var enrichAction = function (effect) { return (__assign(__assign({ source: self, player: self.data.controller }, effect), { generatedBy: action.generatedBy })); };
     if (results.every(function (result) { return result === true; })) {
         if (action.thenEffects) {

@@ -19,12 +19,15 @@ import {
 	PROMPT_TYPE_NUMBER,
 	PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
 	PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
+	PROMPT_TYPE_RELIC,
 
 	ZONE_TYPE_ACTIVE_MAGI,
 	ZONE_TYPE_DECK,
 	ZONE_TYPE_IN_PLAY,
 	ZONE_TYPE_DISCARD,
 	ZONE_TYPE_HAND,
+	PROMPT_TYPE_MAY_ABILITY,
+	PROMPT_TYPE_ALTERNATIVE,
 } from '../../src/const.ts';
 
 import {
@@ -81,6 +84,143 @@ describe('Flame Geyser', () => {
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY, null).length).toEqual(1, 'Only one creature stayed in play');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY, null).card.card.name).toEqual('Sea Barl', 'It is Sea Barl');
+	});
+});
+
+describe('Raxis', () => {
+	it('Shatterfire (choice to pay)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(12);
+		const raxis = new CardInGame(byName('Raxis'), ACTIVE_PLAYER).addEnergy(3);
+
+		const pruitt = new CardInGame(byName('Pruitt'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const rudwot = new CardInGame(byName('Rudwot'), NON_ACTIVE_PLAYER).addEnergy(1);
+		const arboll = new CardInGame(byName('Arboll'), NON_ACTIVE_PLAYER).addEnergy(1);
+		const seaBarl = new CardInGame(byName('Sea Barl'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const gloves = new CardInGame(byName('Orothean Gloves'), NON_ACTIVE_PLAYER);
+		const flameGeyser = new CardInGame(byName('Flame Geyser'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [rudwot, arboll, seaBarl, gloves, raxis], [grega]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([flameGeyser]);
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([pruitt]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: raxis,
+			power: raxis.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_RELIC, 'Prompt type is Relic');
+		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Prompt player is active player');
+
+		const relicAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: gloves,
+			generatedBy: gameState.state.promptGeneratedBy,
+			player: ACTIVE_PLAYER,
+		}
+
+		gameState.update(relicAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_ALTERNATIVE, 'Prompt type is May ability');
+		expect(gameState.state.promptPlayer).toEqual(NON_ACTIVE_PLAYER, 'Prompt player is non active player');
+
+		const choiceAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			alternative: 'discardEnergy',
+			player: NON_ACTIVE_PLAYER,
+		}
+
+		gameState.update(choiceAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+		expect(pruitt.data.energy).toEqual(0, 'Pruitt has 0 energy');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(0, 'No cards was discarded');
+	});
+
+	it('Shatterfire (choice to discard)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(12);
+		const raxis = new CardInGame(byName('Raxis'), ACTIVE_PLAYER).addEnergy(3);
+
+		const pruitt = new CardInGame(byName('Pruitt'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const rudwot = new CardInGame(byName('Rudwot'), NON_ACTIVE_PLAYER).addEnergy(1);
+		const arboll = new CardInGame(byName('Arboll'), NON_ACTIVE_PLAYER).addEnergy(1);
+		const seaBarl = new CardInGame(byName('Sea Barl'), NON_ACTIVE_PLAYER).addEnergy(4);
+		const gloves = new CardInGame(byName('Orothean Gloves'), NON_ACTIVE_PLAYER);
+		const flameGeyser = new CardInGame(byName('Flame Geyser'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [rudwot, arboll, seaBarl, gloves, raxis], [grega]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([flameGeyser]);
+
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([pruitt]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: raxis,
+			power: raxis.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(powerAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_RELIC, 'Prompt type is Relic');
+		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Prompt player is active player');
+
+		const relicAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			target: gloves,
+			generatedBy: gameState.state.promptGeneratedBy,
+			player: ACTIVE_PLAYER,
+		}
+
+		gameState.update(relicAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_ALTERNATIVE, 'Prompt type is May ability');
+		expect(gameState.state.promptPlayer).toEqual(NON_ACTIVE_PLAYER, 'Prompt player is non active player');
+
+		const choiceAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			alternative: 'discardRelic',
+			player: NON_ACTIVE_PLAYER,
+		}
+
+		gameState.update(choiceAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+		expect(pruitt.data.energy).toEqual(4, 'Pruitt has 4 energy');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1, 'One card was discarded');
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Orothean Gloves')
 	});
 });
 

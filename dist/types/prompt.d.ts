@@ -88,7 +88,9 @@ export type AlternativeType = {
 export type AlternativePromptParams = {
     promptType: typeof PROMPT_TYPE_ALTERNATIVE;
     alternatives: AlternativeType[];
+    message?: string;
     variable?: string;
+    player?: string | number;
 };
 export type PromptTypeAlternative = PromptInteface & AlternativePromptParams;
 export type PaymentSourcePromptParams = {

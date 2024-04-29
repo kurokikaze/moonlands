@@ -35,6 +35,7 @@ import {
     SELECTOR_SELF_AND_STATUS,
     SELECTOR_OWN_CARDS_IN_HAND,
     SELECTOR_CARDS_IN_HAND,
+    SELECTOR_MAGI_OF_PLAYER,
 } from "../const";
 
 export type SelectorParams = {
@@ -212,6 +213,14 @@ type SelectMagiNotOfRegionParams = {
 
 type SelectMagiNotOfRegion =  SelectAction & SelectMagiNotOfRegionParams;
 
+type SelectMagiOfPlayerParams = {
+    selector: typeof SELECTOR_MAGI_OF_PLAYER;
+    owner: string | number;
+    variable?: string;
+}
+
+type SelectMagiOfPlayer =  SelectAction & SelectMagiOfPlayerParams;
+
 type SelectStatusParams = SelectParams & {
     selector: typeof SELECTOR_STATUS;
     status: StatusType;
@@ -302,6 +311,7 @@ export type RefinedSelectParams = SelectCreaturesOfTypeParams |
     SelectOwnCreatureOfLeastEnergyParams |
     SelectOwnCardsInHandParams |
     SelectCardsInHandParams |
+    SelectMagiOfPlayerParams |
     SelectNthCardParams;
 
 export type SelectType = SelectCreatures |
@@ -331,4 +341,5 @@ export type SelectType = SelectCreatures |
     SelectOwnCreatureOfLeastEnergy |
     SelectOwnCardsInHand |
     SelectCardsInHand |
+    SelectMagiOfPlayer |
     SelectNthCard;

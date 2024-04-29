@@ -188,6 +188,8 @@ import {
 	PROTECTION_FROM_POWERS,
 	EFFECT_TYPE_DEFENDER_DAMAGE_DEALT,
 	EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE,
+	PROMPT_TYPE_MAY_ABILITY,
+	SELECTOR_MAGI_OF_PLAYER,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -1190,7 +1192,7 @@ export const cards = [
 			{
 				name: 'Dream Twist',
 				cost: 5,
-				text: 'Choose your Creature and discard it from play. Choose a Creature from your hand. Put it onto the battlefield. Place energy on it equal to its starting energy.',
+				text: 'Choose your Creature and discard it from play. Choose a Creature from your hand. Put it onto the battlefield. Place energy on it equal to its starting energy. That Creature may not attack this turn',
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
@@ -1229,6 +1231,73 @@ export const cards = [
 					}),
 				],
 			},
+		],
+	}),
+
+	new Card('Raxis', TYPE_CREATURE, REGION_CALD, 4, {
+		powers: [
+			{
+				name: 'Shatterfire',
+				text: 'Choose any one Relic in play. The Relic\'s controller may discard four energy from his or her Magi. If he or she doesn\'t, discard the chosen Relic from play.',
+				cost: 1,
+				effects: [
+					prompt({
+						promptType: PROMPT_TYPE_RELIC,
+					}),
+					getPropertyValue({
+						target: '$target',
+						property: PROPERTY_CONTROLLER,
+						variable: 'relicController',
+					}),
+					prompt({
+						promptType: PROMPT_TYPE_ALTERNATIVE,
+						// message: 'Do you want to discard 4 energy to avoid discarding ${target}?',
+						alternatives: [
+							{
+								name: 'Discard the relic',
+								value: 'discardRelic',
+							},
+							{
+								name: 'Discard 4 energy from Magi',
+								value: 'discardEnergy'
+							}
+						],
+						variable: 'choice',
+						player: '$relicController',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_CONDITIONAL,
+						choseToDiscard: '$choice',
+						conditions: [
+							{
+								objectOne: 'choseToDiscard',
+								propertyOne: ACTION_PROPERTY,
+								comparator: '=',
+								objectTwo: 'discardEnergy',
+								propertyTwo: null,
+							}
+						],
+						thenEffects: [
+							select({
+								selector: SELECTOR_MAGI_OF_PLAYER,
+								owner: '$relicController',
+								variable: 'relicMagi',
+							}),
+							effect({
+								effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+								target: '$relicMagi',
+								amount: 4,
+							}),
+						],
+						elseEffects: [
+							effect({
+								effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
+								target: '$target',
+							}),
+						],
+					}),
+				],
+			}
 		],
 	}),
 	new Card('Paralit', TYPE_CREATURE, REGION_OROTHE, 3, {

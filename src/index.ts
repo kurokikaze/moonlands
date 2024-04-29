@@ -228,6 +228,7 @@ import {
 	PROMPT_TYPE_PAYMENT_SOURCE,
 	EFFECT_TYPE_DISCARD_CARD_FROM_HAND,
 	LOG_ENTRY_CARD_DISCARDED_FROM_HAND,
+	SELECTOR_MAGI_OF_PLAYER,
 } from './const';
 
 import { actionMap } from './actionMaps/effects';
@@ -3332,6 +3333,12 @@ export class State {
 							const zoneType = this.getMetaValue<ZoneType>(action.zone, action.generatedBy);
 							const cardNumber = this.getMetaValue<number>(action.cardNumber, action.generatedBy);
 							result = this.selectNthCardOfZone(zoneOwner, zoneType, cardNumber, action.restrictions);
+							break;
+						}
+						case SELECTOR_MAGI_OF_PLAYER: {
+							const owner = this.getMetaValue<number>(action.owner, action.generatedBy);
+
+							result = this.useSelector(SELECTOR_OWN_MAGI, owner);
 							break;
 						}
 						case SELECTOR_OWN_CARDS_IN_HAND: {

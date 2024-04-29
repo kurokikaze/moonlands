@@ -1002,7 +1002,6 @@ const applyConditionalEffect: ActionTransformer<typeof EFFECT_TYPE_CONDITIONAL> 
         this.checkCondition(action, self, condition),
     );
 
-    // console.dir(results)
     const enrichAction = <T>(effect: T): T & EnrichedAction => ({
         source: self,
         player: self.data.controller,

@@ -1,5 +1,5 @@
 import { Region, RestrictionObjectType, StatusType, ZoneType } from "./common";
-import { ACTION_SELECT, SELECTOR_OPPONENT_ID, SELECTOR_OWN_MAGI, SELECTOR_OWN_MAGI_SINGLE, SELECTOR_CREATURES, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_PLAYER, SELECTOR_CREATURES_AND_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_MAGI_OF_REGION, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, SELECTOR_MAGI, SELECTOR_ID, SELECTOR_RELICS, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_CREATURES_OF_TYPE, SELECTOR_OWN_SPELLS_IN_HAND, SELECTOR_OTHER_CREATURES_OF_TYPE, SELECTOR_OWN_CREATURES_WITH_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_STATUS, SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY, SELECTOR_NTH_CARD_OF_ZONE, SELECTOR_SELF_AND_STATUS, SELECTOR_OWN_CARDS_IN_HAND, SELECTOR_CARDS_IN_HAND } from "../const";
+import { ACTION_SELECT, SELECTOR_OPPONENT_ID, SELECTOR_OWN_MAGI, SELECTOR_OWN_MAGI_SINGLE, SELECTOR_CREATURES, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_PLAYER, SELECTOR_CREATURES_AND_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_MAGI_OF_REGION, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, SELECTOR_MAGI, SELECTOR_ID, SELECTOR_RELICS, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_CREATURES_OF_TYPE, SELECTOR_OWN_SPELLS_IN_HAND, SELECTOR_OTHER_CREATURES_OF_TYPE, SELECTOR_OWN_CREATURES_WITH_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_STATUS, SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY, SELECTOR_NTH_CARD_OF_ZONE, SELECTOR_SELF_AND_STATUS, SELECTOR_OWN_CARDS_IN_HAND, SELECTOR_CARDS_IN_HAND, SELECTOR_MAGI_OF_PLAYER } from "../const";
 export type SelectorParams = {
     selector: SelectorTypeType;
     variable?: string;
@@ -104,6 +104,12 @@ type SelectMagiNotOfRegionParams = {
     region: Region;
 };
 type SelectMagiNotOfRegion = SelectAction & SelectMagiNotOfRegionParams;
+type SelectMagiOfPlayerParams = {
+    selector: typeof SELECTOR_MAGI_OF_PLAYER;
+    owner: string | number;
+    variable?: string;
+};
+type SelectMagiOfPlayer = SelectAction & SelectMagiOfPlayerParams;
 type SelectStatusParams = SelectParams & {
     selector: typeof SELECTOR_STATUS;
     status: StatusType;
@@ -150,6 +156,6 @@ type SelectCardsInHandParams = {
     variable?: string;
 };
 type SelectCardsInHand = SelectAction & SelectCardsInHandParams;
-export type RefinedSelectParams = SelectCreaturesOfTypeParams | SelectOtherCreaturesOfTypeParams | SelectCreaturesNotOfTypeParams | SelectOpponentIdParams | SelectOwnMagiParams | SelectEnemyMagiParams | SelectMagiNotOfRegionParams | SelectEnemyCreaturesParams | SelectCreaturesWithoutStatusParams | SelectOwnCreaturesParams | SelectStatusParams | SelectOwnCreaturesOfTypeParams | SelectMagiOfRegionParams | SelectCreaturesParams | SelectSelfWithStatusParams | SelectMagiParams | SelectRelicsParams | SelectTopMagiOfPileParams | SelectCreaturesNotOfRegionParams | SelectCreaturesOfRegionParams | SelectOwnCardsWithEnergizeRateParams | SelectCardsWithEnergizeRateParams | SelectCreaturesAndMagiParams | SelectOwnCreatureOfLeastEnergyParams | SelectOwnCardsInHandParams | SelectCardsInHandParams | SelectNthCardParams;
-export type SelectType = SelectCreatures | SelectMagi | SelectOwnCardsInPlay | SelectOwnCreatures | SelectRelics | SelectOwnCreaturesOfType | SelectCreaturesOfType | SelectCreaturesNotOfType | SelectOtherCreaturesOfType | SelectCardsWithEnergizeRate | SelectOpponentId | SelectCreaturesAndMagi | SelectOwnCardsWithEnergizeRate | SelectCreaturesOfRegion | SelectCreaturesNotOfRegion | SelectMagiOfRegion | SelectMagiNotOfRegion | SelectSelfWithStatus | SelectStatus | SelectCreaturesWithoutStatus | SelectTopMagiOfPile | SelectEnemyCreatures | SelectOwnMagi | SelectEnemyMagi | SelectOwnCreatureOfLeastEnergy | SelectOwnCardsInHand | SelectCardsInHand | SelectNthCard;
+export type RefinedSelectParams = SelectCreaturesOfTypeParams | SelectOtherCreaturesOfTypeParams | SelectCreaturesNotOfTypeParams | SelectOpponentIdParams | SelectOwnMagiParams | SelectEnemyMagiParams | SelectMagiNotOfRegionParams | SelectEnemyCreaturesParams | SelectCreaturesWithoutStatusParams | SelectOwnCreaturesParams | SelectStatusParams | SelectOwnCreaturesOfTypeParams | SelectMagiOfRegionParams | SelectCreaturesParams | SelectSelfWithStatusParams | SelectMagiParams | SelectRelicsParams | SelectTopMagiOfPileParams | SelectCreaturesNotOfRegionParams | SelectCreaturesOfRegionParams | SelectOwnCardsWithEnergizeRateParams | SelectCardsWithEnergizeRateParams | SelectCreaturesAndMagiParams | SelectOwnCreatureOfLeastEnergyParams | SelectOwnCardsInHandParams | SelectCardsInHandParams | SelectMagiOfPlayerParams | SelectNthCardParams;
+export type SelectType = SelectCreatures | SelectMagi | SelectOwnCardsInPlay | SelectOwnCreatures | SelectRelics | SelectOwnCreaturesOfType | SelectCreaturesOfType | SelectCreaturesNotOfType | SelectOtherCreaturesOfType | SelectCardsWithEnergizeRate | SelectOpponentId | SelectCreaturesAndMagi | SelectOwnCardsWithEnergizeRate | SelectCreaturesOfRegion | SelectCreaturesNotOfRegion | SelectMagiOfRegion | SelectMagiNotOfRegion | SelectSelfWithStatus | SelectStatus | SelectCreaturesWithoutStatus | SelectTopMagiOfPile | SelectEnemyCreatures | SelectOwnMagi | SelectEnemyMagi | SelectOwnCreatureOfLeastEnergy | SelectOwnCardsInHand | SelectCardsInHand | SelectMagiOfPlayer | SelectNthCard;
 export {};
