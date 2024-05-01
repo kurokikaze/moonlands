@@ -2999,6 +2999,7 @@ export const cards = [
 						variable: 'energy',
 					}),
 					effect({
+            effectType: EFFECT_TYPE_CONDITIONAL,
 						energy: '$energy',
 						conditions: [
 							{
@@ -3010,6 +3011,11 @@ export const cards = [
 							}
 						],
 						thenEffects: [
+              effect({
+                effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+                amount: 1,
+                target: '$blu',
+              }),
 							effect({
 								effectType: EFFECT_TYPE_DRAW,
 							}),
