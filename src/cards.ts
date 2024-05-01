@@ -4584,6 +4584,13 @@ export const cards = [
 					effectType: EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
 					conditions: [
 						CONDITION_TARGET_IS_SELF,
+            {
+              objectOne: 'asAttacker',
+              propertyOne: ACTION_PROPERTY,
+              comparator: '=',
+              objectTwo: true,
+              propertyTwo: null,
+            }
 					],
 				},
 				effects: [

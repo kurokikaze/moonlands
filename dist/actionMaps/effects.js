@@ -610,11 +610,16 @@ var applyAfterDamageEffect = function (action, transform) {
     if (action.source.data.energy === 0) {
         transform({
             type: ACTION_EFFECT,
-            effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+            effectType: EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
+            source: action.target,
             target: action.source,
-            sourceZone: ZONE_TYPE_IN_PLAY,
-            destinationZone: ZONE_TYPE_DISCARD,
-            bottom: false,
+            attack: true,
+            asAttacker: false,
+            generatedBy: action.generatedBy,
+        }, {
+            type: ACTION_EFFECT,
+            effectType: EFFECT_TYPE_CREATURE_IS_DEFEATED,
+            target: action.source,
             attack: true,
             generatedBy: action.generatedBy,
         });
@@ -626,6 +631,7 @@ var applyAfterDamageEffect = function (action, transform) {
             source: action.source,
             target: action.target,
             attack: true,
+            asAttacker: true,
             generatedBy: action.generatedBy,
         }, {
             type: ACTION_EFFECT,

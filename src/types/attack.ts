@@ -124,6 +124,7 @@ type CreatureDefeatsCreatureEffect = AttackEffectAction & {
     source: CardInGame;
     target: CardInGame;
     attack: boolean;
+    asAttacker: boolean;
 }
 
 type CreatureIsDefeatedEffect = AttackEffectAction & {
