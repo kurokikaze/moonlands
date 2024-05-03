@@ -3889,7 +3889,7 @@ export var cards = [
                         thenEffects: [
                             effect({
                                 effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
-                                target: '$source',
+                                target: '$sourceCreature',
                                 amount: 3,
                             }),
                         ],
@@ -3909,7 +3909,7 @@ export var cards = [
                         thenEffects: [
                             effect({
                                 effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-                                target: '$source',
+                                target: '$sourceCreature',
                             }),
                         ],
                     }),
@@ -4461,7 +4461,13 @@ export var cards = [
                 find: {
                     effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
                     conditions: [
-                        CONDITION_TARGET_IS_SELF,
+                        {
+                            objectOne: 'target',
+                            propertyOne: PROPERTY_ID,
+                            comparator: '=',
+                            objectTwo: 'self',
+                            propertyTwo: PROPERTY_ID,
+                        },
                         {
                             objectOne: 'sourceZone',
                             propertyOne: ACTION_PROPERTY,
@@ -4486,6 +4492,7 @@ export var cards = [
                     ],
                 },
                 effects: [
+                    // This is a hacky way to do this
                     effect({
                         effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
                         target: '$new_card',
@@ -5751,6 +5758,30 @@ export var cards = [
             },
         ],
     }),
+    /*new Card('Cursed Tome', TYPE_RELIC, REGION_UNIVERSAL, 0, {
+        triggerEffects: [
+            {
+                name: 'Curse of Knowledge',
+                text: 'Whenever a player draws a card, discard 1 energy from their Magi',
+                find: {
+                    effectType: EFFECT_TYPE_DRAW,
+                    conditions: [],
+                },
+                effects: [
+                    select({
+                        selector: SELECTOR_MAGI_OF_PLAYER,
+                        owner: '%player',
+                        variable: 'playerMagi',
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+                        target: '$playerMagi',
+                        amount: 1,
+                    }),
+                ]
+            },
+        ],
+    }),*/
 ];
 export var byName = function (name) { return cards.find(function (card) { return card.name === name; }); };
 //# sourceMappingURL=cards.js.map

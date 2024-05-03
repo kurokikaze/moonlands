@@ -803,11 +803,11 @@ var applyConditionalEffect = function (action, transform) {
     var _this = this;
     var metaData = this.getSpellMetadata(action.generatedBy);
     // "new_card" fallback is for "defeated" triggers
-    var self = metaData.source || metaData.new_card || action.triggerSource;
+    var self = action.triggerSource || metaData.source || metaData.new_card;
     if (!self) {
         return;
     }
-    // checkCondition(action, self, condition)
+    //   checkCondition(action, self, condition)
     var results = action.conditions.map(function (condition) {
         return _this.checkCondition(action, self, condition);
     });
@@ -828,6 +828,7 @@ var applyConditionalEffect = function (action, transform) {
     }
 };
 var applyMoveCardsBetweenZonesEffect = function (action, transform) {
+    var _this = this;
     if (!action.sourceZone || !action.destinationZone) {
         console.error('Source zone or destination zone invalid');
         throw new Error('Invalid params for EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
@@ -855,6 +856,8 @@ var applyMoveCardsBetweenZonesEffect = function (action, transform) {
             }
             sourceZone_1.removeById(zoneChangingCard.id);
             newCards_1.push(newObject);
+            // Let the old cards keep track of the movement too
+            _this.setSpellMetaDataField('new_card', newObject, zoneChangingCard.id);
             transform({
                 type: ACTION_EFFECT,
                 effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
@@ -914,12 +917,14 @@ var applyMoveCardBetweenZonesEffect = function (action, transform) {
             }
         }
         this.setSpellMetaDataField('new_card', newObject, action.generatedBy);
+        this.setSpellMetaDataField('new_card', newObject, zoneChangingCard.id);
         transform({
             type: ACTION_EFFECT,
             effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
             sourceCard: zoneChangingCard,
             sourceZone: sourceZoneType,
             destinationCard: newObject,
+            attack: action.attack,
             destinationZone: destinationZoneType,
             generatedBy: action.generatedBy,
         });

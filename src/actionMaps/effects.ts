@@ -997,13 +997,13 @@ const applyForbidAttackToCreatureEffect: ActionTransformer<typeof EFFECT_TYPE_FO
 const applyConditionalEffect: ActionTransformer<typeof EFFECT_TYPE_CONDITIONAL> = function (action, transform) {
   const metaData: { source?: CardInGame, new_card?: CardInGame } = this.getSpellMetadata(action.generatedBy);
   // "new_card" fallback is for "defeated" triggers
-  const self = metaData.source || metaData.new_card || action.triggerSource;
+  const self = action.triggerSource || metaData.source || metaData.new_card;
 
   if (!self) {
     return
   }
 
-  // checkCondition(action, self, condition)
+//   checkCondition(action, self, condition)
   const results = action.conditions.map(condition =>
     this.checkCondition(action, self, condition),
   );
@@ -1061,7 +1061,8 @@ const applyMoveCardsBetweenZonesEffect: ActionTransformer<typeof EFFECT_TYPE_MOV
       sourceZone.removeById(zoneChangingCard.id);
 
       newCards.push(newObject);
-
+      // Let the old cards keep track of the movement too
+      this.setSpellMetaDataField('new_card', newObject, zoneChangingCard.id);
       transform({
         type: ACTION_EFFECT,
         effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
@@ -1123,12 +1124,15 @@ const applyMoveCardBetweenZonesEffect: ActionTransformer<typeof EFFECT_TYPE_MOVE
     }
 
     this.setSpellMetaDataField('new_card', newObject, action.generatedBy);
+    this.setSpellMetaDataField('new_card', newObject, zoneChangingCard.id);
+
     transform({
       type: ACTION_EFFECT,
       effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
       sourceCard: zoneChangingCard,
       sourceZone: sourceZoneType,
       destinationCard: newObject,
+      attack: action.attack,
       destinationZone: destinationZoneType,
       generatedBy: action.generatedBy,
     });

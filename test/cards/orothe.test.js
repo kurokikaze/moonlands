@@ -1182,6 +1182,58 @@ describe('Megathan', () => {
     expect(megathan.data.energy).toEqual(8, 'Feed ability gave 1 energy to Megathan');
   });
 
+  it('Feed (two Megathans)', () => {
+    const ACTIVE_PLAYER = 422;
+    const NON_ACTIVE_PLAYER = 1310;
+
+    const mobis = new CardInGame(byName('Mobis'), ACTIVE_PLAYER).addEnergy(12);
+    const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(4);
+    const megathan = new CardInGame(byName('Megathan'), ACTIVE_PLAYER).addEnergy(8);
+    const megathanTwo = new CardInGame(byName('Megathan'), ACTIVE_PLAYER).addEnergy(7);
+    const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER).addEnergy(1);
+    const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [megathan, megathanTwo, arbolit], [mobis]);
+
+    const gameState = new State({
+      zones,
+      step: STEP_ATTACK,
+      activePlayer: ACTIVE_PLAYER,
+    });
+
+    gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+    gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+    const attackAction = {
+      type: ACTION_ATTACK,
+      source: megathan,
+      target: arbolit,
+    };
+
+    gameState.update(attackAction);
+    expect(megathan.data.defeatedCreature).toEqual(true, 'Megathan marked as defeated a creature');
+    expect(megathanTwo.data.defeatedCreature).toEqual(false, 'Megathan two is not marked as defeated a creature');
+
+    const passAction = {
+      type: ACTION_PASS,
+      player: ACTIVE_PLAYER,
+    };
+
+    gameState.update(passAction);
+    expect(gameState.state.step).toEqual(STEP_CREATURES, 'Creatures step');
+    expect(gameState.state.activePlayer).toEqual(ACTIVE_PLAYER, 'Active player is active');
+
+    gameState.update(passAction);
+    expect(gameState.state.step).toEqual(STEP_PRS_SECOND, 'Second PRS step');
+    expect(gameState.state.activePlayer).toEqual(ACTIVE_PLAYER, 'Active player is active');
+    expect(megathan.data.energy).toEqual(7, 'Megathan has 7 energy');
+    expect(megathanTwo.data.energy).toEqual(7, 'Megathan two has 7 energy');
+
+    gameState.update(passAction);
+    expect(gameState.state.step).toEqual(STEP_PRS_FIRST, 'Next turn! Card prompt.');
+    expect(gameState.state.activePlayer).toEqual(NON_ACTIVE_PLAYER, '"Non-active" player is active');
+    expect(megathan.data.energy).toEqual(8, 'Feed ability gave 1 energy to Megathan');
+    expect(megathanTwo.data.energy).toEqual(7, 'Megathan two has 7 energy');
+  });
+
   it('Feed (no killings, to trigger)', () => {
     const ACTIVE_PLAYER = 422;
     const NON_ACTIVE_PLAYER = 1310;
@@ -2097,7 +2149,7 @@ describe('Orthea', () => {
     const targetingAction = {
       type: ACTION_RESOLVE_PROMPT,
       target: orthea,
-      generatedBy: fireBall.id,
+      generatedBy: gameState.state.promptGeneratedBy,
     };
 
     gameState.update(targetingAction);
@@ -2118,12 +2170,12 @@ describe('Orthea', () => {
     expect(gameState.state.prompt).toEqual(true);
     expect(gameState.state.promptPlayer).toEqual(NON_ACTIVE_PLAYER);
     expect(gameState.state.promptType).toEqual(PROMPT_TYPE_SINGLE_CREATURE_FILTERED);
-    expect(gameState.state.promptGeneratedBy).toEqual(fireBall.id);
+    expect(gameState.state.promptGeneratedBy).toEqual(orthea.id);
 
     const chooseOrathanAction = {
       type: ACTION_RESOLVE_PROMPT,
       target: orathan,
-      generatedBy: fireBall.id,
+      generatedBy: gameState.state.promptGeneratedBy,
     };
 
     gameState.update(chooseOrathanAction);
@@ -2166,7 +2218,7 @@ describe('Orthea', () => {
     const targetingAction = {
       type: ACTION_RESOLVE_PROMPT,
       target: orthea,
-      generatedBy: grega.id,
+      generatedBy: gameState.state.promptGeneratedBy,
     };
 
     gameState.update(targetingAction);

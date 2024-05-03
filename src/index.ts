@@ -1521,7 +1521,7 @@ export class State {
 		}
 
 		// Energy stasis check
-		if (card.card.data.energyStasis) {
+		if (card.modifiedCard.data.energyStasis) {
 			if (
 				effect.effectType === EFFECT_TYPE_ADD_ENERGY_TO_CREATURE ||
 				effect.effectType === EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE ||
@@ -2224,16 +2224,25 @@ export class State {
 			if (this.matchAction(action, replacer.find, replacer.self)) {
 				// Save source to *trigger source* metadata (it's probably empty)
 				// For creatures set creatureSource field (just for convenience)
-				this.setSpellMetaDataField('source', replacer.self, action.generatedBy || triggeredId);
+				this.setSpellMetaDataField('source', replacer.self, /*action.generatedBy ||*/ triggeredId);
 				if (replacer.self.card.type === TYPE_CREATURE) {
-					this.setSpellMetaDataField('sourceCreature', replacer.self, action.generatedBy || triggeredId);
+					this.setSpellMetaDataField('sourceCreature', replacer.self, /*action.generatedBy ||*/ triggeredId);
 				}
+
+				// Turn all metadata entries into their corresponding values 
+				const actionWithValues = Object.fromEntries(Object.entries(action).map(([key, value]) => {
+					if (typeof value == 'string' && value.startsWith('$')) {
+						return [key, this.getMetaValue(value, action.generatedBy)]
+					}
+					return [key, value]
+				})) as AnyEffectType;
+
 				// Turn effect-templates into actual effect actions by preparing meta-values				
 				const preparedEffects = replacer.effects.map(effect => {
 					// @ts-ignore
 					let resultEffect: AnyEffectType = {
 						type: effect.type || ACTION_EFFECT,
-						generatedBy: action.generatedBy || triggeredId, // Some actions do not have generatedBy (game actions). We still need one though.
+						generatedBy: /*action.generatedBy ||*/ triggeredId, // Some actions do not have generatedBy (game actions). We still need one though.
 						triggeredId: [triggeredId],
 						triggerSource: replacer.self,
 						player: replacer.self.data.controller,
@@ -2249,8 +2258,15 @@ export class State {
 					Object.keys(effect)
 						.filter(key => !['type', 'effectType'].includes(key))
 						.forEach(key => {
-							const value = this.prepareMetaValue(effect[key as keyof typeof effect], action, replacer.self, action.generatedBy || nanoid());
-							resultEffect[key as keyof typeof effect] = value;
+							const propertyValue = effect[key as keyof typeof effect]
+							const value = this.prepareMetaValue(propertyValue, actionWithValues, replacer.self, action.generatedBy || nanoid());
+							// if (typeof value == 'string' && value.startsWith('$')) {
+							// 	console.log(`Interpolating ${key} with generatedBy ${action.generatedBy}`)
+							// 	console.dir(this.getMetaValue(value, action.generatedBy))
+							// 	resultEffect[key as keyof typeof effect] = this.getMetaValue(value, action.generatedBy)
+							// } else {
+								resultEffect[key as keyof typeof effect] = value;
+							// }
 						});
 
 					return resultEffect;
@@ -3144,7 +3160,7 @@ export class State {
 								break;
 							}
 							case PROMPT_TYPE_MAGI_WITHOUT_CREATURES: {
-								if ('target' in action && action.target?.card.type === TYPE_MAGI && this.useSelector(SELECTOR_CREATURES_OF_PLAYER, action.target.data.controller)) {
+								if ('target' in action && action.target?.card.type === TYPE_MAGI && this.useSelector(SELECTOR_CREATURES_OF_PLAYER, action.target.data.controller).length == 0) {
 									currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_MAGI_WITHOUT_CREATURES]] = action.target;
 									break;
 								}

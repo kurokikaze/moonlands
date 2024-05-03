@@ -995,7 +995,7 @@ var State = /** @class */ (function () {
             }
         }
         // Energy stasis check
-        if (card.card.data.energyStasis) {
+        if (card.modifiedCard.data.energyStasis) {
             if (effect.effectType === EFFECT_TYPE_ADD_ENERGY_TO_CREATURE ||
                 effect.effectType === EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE ||
                 effect.effectType === EFFECT_TYPE_MOVE_ENERGY) {
@@ -1492,16 +1492,24 @@ var State = /** @class */ (function () {
             if (_this.matchAction(action, replacer.find, replacer.self)) {
                 // Save source to *trigger source* metadata (it's probably empty)
                 // For creatures set creatureSource field (just for convenience)
-                _this.setSpellMetaDataField('source', replacer.self, action.generatedBy || triggeredId);
+                _this.setSpellMetaDataField('source', replacer.self, /*action.generatedBy ||*/ triggeredId);
                 if (replacer.self.card.type === TYPE_CREATURE) {
-                    _this.setSpellMetaDataField('sourceCreature', replacer.self, action.generatedBy || triggeredId);
+                    _this.setSpellMetaDataField('sourceCreature', replacer.self, /*action.generatedBy ||*/ triggeredId);
                 }
+                // Turn all metadata entries into their corresponding values 
+                var actionWithValues_1 = Object.fromEntries(Object.entries(action).map(function (_a) {
+                    var key = _a[0], value = _a[1];
+                    if (typeof value == 'string' && value.startsWith('$')) {
+                        return [key, _this.getMetaValue(value, action.generatedBy)];
+                    }
+                    return [key, value];
+                }));
                 // Turn effect-templates into actual effect actions by preparing meta-values				
                 var preparedEffects = replacer.effects.map(function (effect) {
                     // @ts-ignore
                     var resultEffect = {
                         type: effect.type || ACTION_EFFECT,
-                        generatedBy: action.generatedBy || triggeredId, // Some actions do not have generatedBy (game actions). We still need one though.
+                        generatedBy: /*action.generatedBy ||*/ triggeredId, // Some actions do not have generatedBy (game actions). We still need one though.
                         triggeredId: [triggeredId],
                         triggerSource: replacer.self,
                         player: replacer.self.data.controller,
@@ -1515,8 +1523,15 @@ var State = /** @class */ (function () {
                     Object.keys(effect)
                         .filter(function (key) { return !['type', 'effectType'].includes(key); })
                         .forEach(function (key) {
-                        var value = _this.prepareMetaValue(effect[key], action, replacer.self, action.generatedBy || nanoid());
+                        var propertyValue = effect[key];
+                        var value = _this.prepareMetaValue(propertyValue, actionWithValues_1, replacer.self, action.generatedBy || nanoid());
+                        // if (typeof value == 'string' && value.startsWith('$')) {
+                        // 	console.log(`Interpolating ${key} with generatedBy ${action.generatedBy}`)
+                        // 	console.dir(this.getMetaValue(value, action.generatedBy))
+                        // 	resultEffect[key as keyof typeof effect] = this.getMetaValue(value, action.generatedBy)
+                        // } else {
                         resultEffect[key] = value;
+                        // }
                     });
                     return resultEffect;
                 });
@@ -2272,7 +2287,7 @@ var State = /** @class */ (function () {
                                 break;
                             }
                             case PROMPT_TYPE_MAGI_WITHOUT_CREATURES: {
-                                if ('target' in action && ((_g = action.target) === null || _g === void 0 ? void 0 : _g.card.type) === TYPE_MAGI && this_1.useSelector(SELECTOR_CREATURES_OF_PLAYER, action.target.data.controller)) {
+                                if ('target' in action && ((_g = action.target) === null || _g === void 0 ? void 0 : _g.card.type) === TYPE_MAGI && this_1.useSelector(SELECTOR_CREATURES_OF_PLAYER, action.target.data.controller).length == 0) {
                                     currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_MAGI_WITHOUT_CREATURES]] = action.target;
                                     break;
                                 }

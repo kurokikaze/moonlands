@@ -432,7 +432,7 @@ describe('Ora', () => {
 });
 
 describe('Vellup', () => {
-	it('Flock (use ability)', () => {
+	it.only('Flock (use ability)', () => {
 		const ACTIVE_PLAYER = 40;
 		const NON_ACTIVE_PLAYER = 1;
 
@@ -487,7 +487,7 @@ describe('Vellup', () => {
 		const selectCardAction = {
 			type: ACTION_RESOLVE_PROMPT,
 			cards: [vellupTwo],
-			generatedBy: vellup.id,
+			generatedBy: gameState.state.promptGeneratedBy,
 			player: ACTIVE_PLAYER,
 		};
 

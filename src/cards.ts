@@ -193,6 +193,7 @@ import {
 	PROTECTION_FROM_EFFECTS,
 	PROTECTION_FROM_POWERS,
 	SELECTOR_RANDOM_CARD_IN_HAND,
+	EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -2999,7 +3000,7 @@ export const cards = [
 						variable: 'energy',
 					}),
 					effect({
-            effectType: EFFECT_TYPE_CONDITIONAL,
+						effectType: EFFECT_TYPE_CONDITIONAL,
 						energy: '$energy',
 						conditions: [
 							{
@@ -3011,11 +3012,11 @@ export const cards = [
 							}
 						],
 						thenEffects: [
-              effect({
-                effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
-                amount: 1,
-                target: '$blu',
-              }),
+							effect({
+								effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+								amount: 1,
+								target: '$blu',
+							}),
 							effect({
 								effectType: EFFECT_TYPE_DRAW,
 							}),
@@ -4183,7 +4184,7 @@ export const cards = [
 						thenEffects: [
 							effect({
 								effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
-								target: '$source',
+								target: '$sourceCreature',
 								amount: 3,
 							}),
 						],
@@ -4203,7 +4204,7 @@ export const cards = [
 						thenEffects: [
 							effect({
 								effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-								target: '$source',
+								target: '$sourceCreature',
 							}),
 						],
 					}),
@@ -4584,13 +4585,13 @@ export const cards = [
 					effectType: EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
 					conditions: [
 						CONDITION_TARGET_IS_SELF,
-            {
-              objectOne: 'asAttacker',
-              propertyOne: ACTION_PROPERTY,
-              comparator: '=',
-              objectTwo: true,
-              propertyTwo: null,
-            }
+						{
+							objectOne: 'asAttacker',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '=',
+							objectTwo: true,
+							propertyTwo: null,
+						}
 					],
 				},
 				effects: [
@@ -4756,7 +4757,13 @@ export const cards = [
 				find: {
 					effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
 					conditions: [
-						CONDITION_TARGET_IS_SELF,
+						{
+							objectOne: 'target',
+							propertyOne: PROPERTY_ID,
+							comparator: '=',
+							objectTwo: 'self',
+							propertyTwo: PROPERTY_ID,
+						},
 						{
 							objectOne: 'sourceZone',
 							propertyOne: ACTION_PROPERTY,
@@ -4781,6 +4788,7 @@ export const cards = [
 					],
 				},
 				effects: [
+					// This is a hacky way to do this
 					effect({
 						effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
 						target: '$new_card',
@@ -6046,6 +6054,32 @@ export const cards = [
 			},
 		],
 	}),
+
+
+	/*new Card('Cursed Tome', TYPE_RELIC, REGION_UNIVERSAL, 0, {
+		triggerEffects: [
+			{
+				name: 'Curse of Knowledge',
+				text: 'Whenever a player draws a card, discard 1 energy from their Magi',
+				find: {
+					effectType: EFFECT_TYPE_DRAW,
+					conditions: [],
+				},
+				effects: [
+					select({
+						selector: SELECTOR_MAGI_OF_PLAYER,
+						owner: '%player',
+						variable: 'playerMagi',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+						target: '$playerMagi',
+						amount: 1,
+					}),
+				]
+			},
+		],
+	}),*/
 ];
 
 export const byName = (name: string) => cards.find(card => card.name === name);

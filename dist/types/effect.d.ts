@@ -61,6 +61,7 @@ type CardMovedBetweenZonesEffect = ActionEffect & {
     effectType: typeof EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES;
     sourceCard: CardInGame;
     sourceZone: ZoneType;
+    attack?: boolean;
     destinationCard: CardInGame;
     destinationZone: ZoneType;
 };

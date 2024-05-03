@@ -165,6 +165,30 @@ type DrawEffect = ActionEffect & {
 	stepEffect?: boolean;
 }
 
+type DrawEffectFull = {
+	type: typeof ACTION_EFFECT;
+	effectType: typeof EFFECT_TYPE_DRAW;
+	// # Draw-specific fields
+	// Is the draw part of the step effect
+	stepEffect?: boolean;
+
+	// # All effects have these fields
+	// What card caused the effect. This determines the metaData that will be used
+	generatedBy: string;
+	// What player is affected
+	player?: number;
+	// Is the effect part of a spell 
+	// (for protections and things that trigger only on spell/power effects)
+	spell?: boolean;
+	// Not used here
+	triggerSource?: CardInGame;
+	// Not used here
+	triggeredId?: string[];
+	// What effects have replaced this effect 
+	// (to keep track, as each effect can only be replaced by each replacer once)
+	replacedBy?: string[];
+}
+
 type DrawRestOfCardsEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_DRAW_REST_OF_CARDS,
 	drawnCards: string;
@@ -199,6 +223,7 @@ type CardMovedBetweenZonesEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES;
 	sourceCard: CardInGame;
 	sourceZone: ZoneType;
+	attack?: boolean;
 	destinationCard: CardInGame;
 	destinationZone: ZoneType;
 }

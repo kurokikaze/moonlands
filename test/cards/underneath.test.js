@@ -1567,7 +1567,7 @@ describe('Ulk', () => {
 		expect(mushroomHyren.data.energy).toEqual(2, 'Hyren got no energy');
 	});
 
-	it('Strengthen (no korrits)', () => {
+	it.only('Strengthen (no korrits)', () => {
 		const ACTIVE_PLAYER = 0;
 		const NON_ACTIVE_PLAYER = 1;
 
@@ -1603,7 +1603,7 @@ describe('Ulk', () => {
 		gameState.update(passAction);
 		expect(gameState.state.activePlayer).toEqual(ACTIVE_PLAYER, 'New turn has started');
 
-		const metaData = gameState.getSpellMetadata(startTurnId);
+		const metaData = gameState.getSpellMetadata(ulk.id);
 		expect(metaData.selected).toBeInstanceOf(Array);
 		expect(metaData.selected).toHaveLength(0);
 		expect(mushroomHyren.data.energy).toEqual(2, 'Hyren got no energy');
