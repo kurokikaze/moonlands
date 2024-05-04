@@ -1067,7 +1067,7 @@ var State = /** @class */ (function () {
             case SELECTOR_OWN_SPELLS_IN_HAND: {
                 return this.getZone(ZONE_TYPE_HAND, staticAbility.player).cards.some(function (_a) {
                     var id = _a.id;
-                    return id === card.id;
+                    return id === card.id && card.card.type == TYPE_SPELL;
                 });
             }
             default: {

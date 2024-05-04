@@ -1583,7 +1583,7 @@ export class State {
 					card.data.controller === staticAbility.player;
 			}
 			case SELECTOR_OWN_SPELLS_IN_HAND: {
-				return this.getZone(ZONE_TYPE_HAND, staticAbility.player).cards.some(({ id }) => id === card.id);
+				return this.getZone(ZONE_TYPE_HAND, staticAbility.player).cards.some(({ id }) => id === card.id && card.card.type == TYPE_SPELL);
 			}
 			default: {
 				console.error(`Unknown static ability selector: ${staticAbility.selector}`)
@@ -3522,7 +3522,6 @@ export class State {
 								throw new Error('Trying to play a card without Magi')
 							}
 							const totalCost = this.calculateTotalCost(cardItself);
-
 							switch (cardType) {
 								case TYPE_CREATURE: {
 									const alternativePaymentSources = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.data.paymentSource && card.card.data.paymentSource.includes(TYPE_CREATURE) && this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player);

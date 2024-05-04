@@ -109,6 +109,47 @@ describe('Robes of the Ages', () => {
 		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
 		expect(oqua.data.energy).toEqual(6, 'O\'Qua has 6 energy (Undertow costed us 4 instead of 5)');
 	});
+
+	it('Creatures cost', () => {
+		const ACTIVE_PLAYER = 40;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const oqua = new CardInGame(byName('O\'Qua'), ACTIVE_PLAYER).addEnergy(10);
+		const robesOfTheAges = new CardInGame(byName('Robes of the Ages'), ACTIVE_PLAYER);
+		const seaBarl = new CardInGame(byName('Sea Barl'), ACTIVE_PLAYER);
+		const undertow = new CardInGame(byName('Undertow'), ACTIVE_PLAYER);
+
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(15);
+
+		const gameState = new State({
+			zones: [
+				new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([undertow, seaBarl]),
+				new Zone('AP Deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([oqua]),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([robesOfTheAges, seaBarl]),
+			],
+			step: STEP_CREATURES,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const creaturePlayAction = {
+			type: ACTION_PLAY,
+			payload: {
+				card: seaBarl,
+				player: ACTIVE_PLAYER,
+			},
+		};
+
+		gameState.update(creaturePlayAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+		expect(oqua.data.energy).toEqual(6, 'O\'Qua has 6 energy (Sea Barl costed us 4)');
+	});
 });
 
 describe('Warrior\'s Boots', () => {
