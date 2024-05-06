@@ -1638,6 +1638,7 @@ export class State {
 
 		const propertyLayers = {
 			[PROPERTY_CONTROLLER]: 0,
+			[PROPERTY_POWER_COST]: 1,
 			[PROPERTY_COST]: 1,
 			[PROPERTY_ENERGIZE]: 2,
 			[PROPERTY_STATUS]: 3,

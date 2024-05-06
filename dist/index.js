@@ -1113,6 +1113,7 @@ var State = /** @class */ (function () {
         var continuousStaticAbilities = this.state.continuousEffects.map(function (effect) { var _a; return ((_a = effect.staticAbilities) === null || _a === void 0 ? void 0 : _a.map(function (a) { return (__assign(__assign({}, a), { player: effect.player })); })) || []; }).flat();
         var propertyLayers = (_a = {},
             _a[PROPERTY_CONTROLLER] = 0,
+            _a[PROPERTY_POWER_COST] = 1,
             _a[PROPERTY_COST] = 1,
             _a[PROPERTY_ENERGIZE] = 2,
             _a[PROPERTY_STATUS] = 3,
