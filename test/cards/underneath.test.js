@@ -1567,7 +1567,7 @@ describe('Ulk', () => {
 		expect(mushroomHyren.data.energy).toEqual(2, 'Hyren got no energy');
 	});
 
-	it.only('Strengthen (no korrits)', () => {
+	it('Strengthen (no korrits)', () => {
 		const ACTIVE_PLAYER = 0;
 		const NON_ACTIVE_PLAYER = 1;
 

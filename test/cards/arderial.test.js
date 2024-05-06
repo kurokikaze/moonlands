@@ -432,7 +432,7 @@ describe('Ora', () => {
 });
 
 describe('Vellup', () => {
-	it.only('Flock (use ability)', () => {
+	it('Flock (use ability)', () => {
 		const ACTIVE_PLAYER = 40;
 		const NON_ACTIVE_PLAYER = 1;
 

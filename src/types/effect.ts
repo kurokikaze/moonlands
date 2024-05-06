@@ -77,6 +77,9 @@ import {
 	EFFECT_TYPE_ATTACH_CARD_TO_CARD,
 	EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE,
 	EFFECT_TYPE_CARD_ATTACHED_TO_CARD,
+	EFFECT_TYPE_PLAY_FINISHED,
+	EFFECT_TYPE_POWER_FINISHED,
+	EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED,
 } from '../const';
 
 export type EffectTypeType =
@@ -604,6 +607,18 @@ type CardAttachedToCardEffect = ActionEffect & {
 	attachmentTarget: CardInGame | string
 }
 
+type PlayFinishedEffect = ActionEffect & {
+	effectType: typeof EFFECT_TYPE_PLAY_FINISHED
+}
+
+type PowerFinishedEffect = ActionEffect & {
+	effectType: typeof EFFECT_TYPE_POWER_FINISHED
+}
+
+type TriggerFinishedEffect = ActionEffect & {
+	effectType: typeof EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED
+}
+
 export type EffectType = /* ActionEffect & {
 	effectType: EffectTypeStillInUse;
 	generatedBy?: string;
@@ -676,4 +691,7 @@ export type EffectType = /* ActionEffect & {
 	PlayAttachedToCreatureEffect |
 	AttachCardToCardEffect |
 	CardAttachedToCardEffect |
-	ExecutePowerEffect;
+	ExecutePowerEffect |
+	PlayFinishedEffect |
+	PowerFinishedEffect |
+	TriggerFinishedEffect;

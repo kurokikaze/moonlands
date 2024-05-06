@@ -192,6 +192,9 @@ export const EFFECT_TYPE_EXECUTE_POWER_EFFECTS = 'effects/execute_power_effects'
 export const EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE = 'effects/play_attached_to_creature';
 export const EFFECT_TYPE_ATTACH_CARD_TO_CARD = 'effects/attach_card_to_card';
 export const EFFECT_TYPE_CARD_ATTACHED_TO_CARD = 'effects/card_becomes_attached_to_card';
+export const EFFECT_TYPE_PLAY_FINISHED = 'effects/play_finished';
+export const EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED = 'effects/trigger_finished';
+export const EFFECT_TYPE_POWER_FINISHED = 'effects/power_finished';
 
 export const CHANGE_TYPE_DRAW = 'changes/draw';
 export const CHANGE_TYPE_RESHUFFLE_DISCARD = 'changes/reshuffle_discard';

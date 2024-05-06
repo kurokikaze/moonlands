@@ -230,6 +230,9 @@ import {
 	LOG_ENTRY_CARD_DISCARDED_FROM_HAND,
 	SELECTOR_MAGI_OF_PLAYER,
 	SELECTOR_RANDOM_CARD_IN_HAND,
+	EFFECT_TYPE_PLAY_FINISHED,
+	EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED,
+	EFFECT_TYPE_POWER_FINISHED,
 } from './const';
 
 import { actionMap } from './actionMaps/effects';
@@ -2266,12 +2269,18 @@ export class State {
 							// 	console.dir(this.getMetaValue(value, action.generatedBy))
 							// 	resultEffect[key as keyof typeof effect] = this.getMetaValue(value, action.generatedBy)
 							// } else {
-								resultEffect[key as keyof typeof effect] = value;
+							resultEffect[key as keyof typeof effect] = value;
 							// }
 						});
 
 					return resultEffect;
 				});
+
+				preparedEffects.push({
+					type: ACTION_EFFECT,
+					effectType: EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED,
+					generatedBy: triggeredId,
+				})
 
 				const allPromptsAreDoable = this.checkPrompts(replacer.self, preparedEffects, false, 0);
 				if (allPromptsAreDoable) {
@@ -2816,6 +2825,13 @@ export class State {
 								};
 								this.addActions(powerEffects);
 							}
+							this.addActions(
+								{
+									type: ACTION_EFFECT,
+									effectType: EFFECT_TYPE_POWER_FINISHED,
+									generatedBy: source.id,
+								}
+							)
 							this.setSpellMetadata(currentPowerMetaData, source.id);
 						}
 					}
@@ -3582,6 +3598,11 @@ export class State {
 												amount: (baseCard.cost === COST_X || baseCard.cost === COST_X_PLUS_ONE || baseCard.cost === null) ? 0 : baseCard.cost,
 												generatedBy: cardItself.id,
 											} as StartingEnergyOnCreatureEffect,
+											{
+												type: ACTION_EFFECT,
+												effectType: EFFECT_TYPE_PLAY_FINISHED,
+												generatedBy: cardItself.id,
+											}
 										);
 									}
 									break;
@@ -3615,6 +3636,11 @@ export class State {
 												effectType: EFFECT_TYPE_RELIC_ENTERS_PLAY,
 												card: '$relic_created',
 												player,
+												generatedBy: cardItself.id,
+											},
+											{
+												type: ACTION_EFFECT,
+												effectType: EFFECT_TYPE_PLAY_FINISHED,
 												generatedBy: cardItself.id,
 											}
 										);
@@ -3736,6 +3762,11 @@ export class State {
 													generatedBy: cardItself.id,
 												},
 												...preparedEffects,
+												{
+													type: ACTION_EFFECT,
+													effectType: EFFECT_TYPE_PLAY_FINISHED,
+													generatedBy: cardItself.id,
+												},
 											);
 											let currentMetaData = {
 												source: cardItself,

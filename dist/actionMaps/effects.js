@@ -688,7 +688,7 @@ var applyExecutePowerEffects = function (action) {
             if (!('setUsage' in action) || action.setUsage == true) {
                 source.setActionUsed(power.name);
             }
-            this.addActions.apply(this, preparedActions);
+            this.transformIntoActions.apply(this, preparedActions);
         }
     }
 };

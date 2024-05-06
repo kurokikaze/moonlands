@@ -873,7 +873,7 @@ const applyExecutePowerEffects: ActionTransformer<typeof EFFECT_TYPE_EXECUTE_POW
         source.setActionUsed(power.name);
       }
 
-      this.addActions(...preparedActions);
+      this.transformIntoActions(...preparedActions);
     }
   }
 }
