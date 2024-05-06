@@ -288,6 +288,7 @@ type MoveEnergyEffect = ActionEffect & {
 };
 type DiscardCreatureOrRelicFromPlay = ActionEffect & {
     effectType: typeof EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC;
+    dueToMagiDefeat?: boolean;
     target: CardInGame | string;
 };
 type DiscardCardsFromHandEffect = ActionEffect & {
@@ -351,6 +352,7 @@ export type DiscardCreatureFromPlayEffect = ActionEffect & {
 };
 type DiscardRelicFromPlayEffect = ActionEffect & {
     effectType: typeof EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY;
+    dueToMagiDefeat?: boolean;
     target: CardInGame | string;
     player: number;
 };

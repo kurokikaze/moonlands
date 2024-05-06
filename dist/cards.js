@@ -5409,6 +5409,13 @@ export var cards = [
                             comparator: '!=',
                             objectTwo: 'self',
                             propertyTwo: PROPERTY_ID,
+                        },
+                        {
+                            objectOne: 'dueToMagiDefeat',
+                            propertyOne: ACTION_PROPERTY,
+                            comparator: '!=',
+                            objectTwo: true,
+                            propertyTwo: null,
                         }
                     ],
                 },

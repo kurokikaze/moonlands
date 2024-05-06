@@ -1003,7 +1003,7 @@ const applyConditionalEffect: ActionTransformer<typeof EFFECT_TYPE_CONDITIONAL> 
     return
   }
 
-//   checkCondition(action, self, condition)
+  //   checkCondition(action, self, condition)
   const results = action.conditions.map(condition =>
     this.checkCondition(action, self, condition),
   );
@@ -1307,6 +1307,7 @@ const applyMagiIsDefeatedEffect: ActionTransformer<typeof EFFECT_TYPE_MAGI_IS_DE
     }, {
       type: ACTION_EFFECT,
       effectType: EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC,
+      dueToMagiDefeat: true,
       target: '$cardsInPlay',
       player: target.owner,
       generatedBy,
@@ -1525,6 +1526,7 @@ const applyDiscardCreatureOrRelic: ActionTransformer<typeof EFFECT_TYPE_DISCARD_
         type: ACTION_EFFECT,
         effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
         target,
+        ...(action.dueToMagiDefeat ? { dueToMagiDefeat: true } : {}),
         generatedBy: action.generatedBy,
         player: action.player || 0,
       });

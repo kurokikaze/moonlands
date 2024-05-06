@@ -1070,6 +1070,7 @@ var applyMagiIsDefeatedEffect = function (action, transform) {
         }, {
             type: ACTION_EFFECT,
             effectType: EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC,
+            dueToMagiDefeat: true,
             target: '$cardsInPlay',
             player: target.owner,
             generatedBy: generatedBy,
@@ -1261,13 +1262,7 @@ var applyDiscardCreatureOrRelic = function (action, transform) {
             });
         }
         else if (targetType === TYPE_RELIC) {
-            transform({
-                type: ACTION_EFFECT,
-                effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
-                target: target,
-                generatedBy: action.generatedBy,
-                player: action.player || 0,
-            });
+            transform(__assign(__assign({ type: ACTION_EFFECT, effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, target: target }, (action.dueToMagiDefeat ? { dueToMagiDefeat: true } : {})), { generatedBy: action.generatedBy, player: action.player || 0 }));
         }
     });
 };
