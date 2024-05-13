@@ -1,5 +1,6 @@
 import { ACTION_RESOLVE_PROMPT } from "../const";
 import CardInGame from "../classes/CardInGame";
+import { ZoneType } from "./common";
 interface ResolvePromptInterface {
     type: typeof ACTION_RESOLVE_PROMPT;
     generatedBy?: string;
@@ -32,6 +33,9 @@ export type ResolveAlternativePrompt = ResolvePromptInterface & {
 };
 export type ResolvePaymentSourcePrompt = ResolvePromptInterface & {
     target: CardInGame;
+};
+export type ResolveDistributeCardsPrompt = ResolvePromptInterface & {
+    cards: Record<ZoneType, CardInGame>;
 };
 export type ResolvePromptType = ResolvePromptInterface & {
     number?: number | string;

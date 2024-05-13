@@ -80,6 +80,7 @@ import {
 	EFFECT_TYPE_PLAY_FINISHED,
 	EFFECT_TYPE_POWER_FINISHED,
 	EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED,
+	EFFECT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
 } from '../const';
 
 export type EffectTypeType =
@@ -619,6 +620,13 @@ type TriggerFinishedEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED
 }
 
+type DistributeCardsInZonesEffect = ActionEffect & {
+	effectType: typeof EFFECT_TYPE_DISTRIBUTE_CARDS_IN_ZONES
+	sourceZone: ZoneType
+	sourceZoneOwner: number | string
+	cards: Record<ZoneType, CardInGame>
+}
+
 export type EffectType = /* ActionEffect & {
 	effectType: EffectTypeStillInUse;
 	generatedBy?: string;
@@ -694,4 +702,5 @@ export type EffectType = /* ActionEffect & {
 	ExecutePowerEffect |
 	PlayFinishedEffect |
 	PowerFinishedEffect |
+	DistributeCardsInZonesEffect |
 	TriggerFinishedEffect;

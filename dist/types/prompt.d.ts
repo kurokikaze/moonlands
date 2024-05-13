@@ -1,5 +1,5 @@
 import CardInGame from '../classes/CardInGame';
-import { ACTION_ENTER_PROMPT, PROMPT_TYPE_ALTERNATIVE, PROMPT_TYPE_CHOOSE_CARDS, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_PAYMENT_SOURCE, PROMPT_TYPE_PLAYER, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, TYPE_CREATURE, TYPE_RELIC, TYPE_SPELL } from '../const';
+import { ACTION_ENTER_PROMPT, PROMPT_TYPE_ALTERNATIVE, PROMPT_TYPE_CHOOSE_CARDS, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_PAYMENT_SOURCE, PROMPT_TYPE_PLAYER, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, TYPE_CREATURE, TYPE_RELIC, TYPE_SPELL } from '../const';
 import { GenericPromptType, RestrictionType, RestrictionObjectType, ZoneType } from './common';
 export type PromptParams = {
     promptType: GenericPromptType;
@@ -16,7 +16,7 @@ export type PromptParams = {
     numberOfCards?: number;
     variable?: string;
 };
-interface PromptInteface {
+interface PromptInterface {
     type: typeof ACTION_ENTER_PROMPT;
     message?: string;
     player?: number | string;
@@ -24,21 +24,21 @@ interface PromptInteface {
     generatedBy?: string;
     replacedBy?: string[];
 }
-export type PromptTypeDistributeEnergy = PromptInteface & {
+export type PromptTypeDistributeEnergy = PromptInterface & {
     promptType: typeof PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES;
     amount: string | number;
     restriction?: RestrictionType;
     restrictionValue?: any;
 };
-export type PromptTypeDistributeDamage = PromptInteface & {
+export type PromptTypeDistributeDamage = PromptInterface & {
     promptType: typeof PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES;
     amount: string | number;
     restriction?: RestrictionType;
 };
-export type PromptTypeRearrangeEnergy = PromptInteface & {
+export type PromptTypeRearrangeEnergy = PromptInterface & {
     promptType: typeof PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES;
 };
-export type PromptTypeChooseUpToNCardsFromZone = PromptInteface & {
+export type PromptTypeChooseUpToNCardsFromZone = PromptInterface & {
     promptType: typeof PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE;
     zone: ZoneType;
     zoneOwner: string;
@@ -47,17 +47,17 @@ export type PromptTypeChooseUpToNCardsFromZone = PromptInteface & {
     restrictionValue?: string | number | boolean;
     restrictions?: RestrictionObjectType[];
 };
-export type PromptTypePlayer = PromptInteface & {
+export type PromptTypePlayer = PromptInterface & {
     promptType: typeof PROMPT_TYPE_PLAYER;
 };
-export type ChooseCardsPromptType = PromptInteface & {
+export type ChooseCardsPromptType = PromptInterface & {
     promptType: typeof PROMPT_TYPE_CHOOSE_CARDS;
     promptParams: {
         availableCards: string[];
         startingCards: string[];
     };
 };
-export type PromptTypeMayAbility = PromptInteface & {
+export type PromptTypeMayAbility = PromptInterface & {
     promptType: typeof PROMPT_TYPE_MAY_ABILITY;
     promptParams: {
         effect: {
@@ -66,13 +66,20 @@ export type PromptTypeMayAbility = PromptInteface & {
         };
     };
 };
-export type PromptTypeRearrangeCardsOfZone = PromptInteface & {
+export type PromptTypeRearrangeCardsOfZone = PromptInterface & {
     promptType: typeof PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE;
     promptParams: {
         zone: ZoneType | string;
         zoneOwner: number | string;
         numberOfCards: number | string;
     };
+};
+export type PromptTypeDistributeCardsInZones = PromptInterface & {
+    promptType: typeof PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES;
+    sourceZone: ZoneType | string;
+    sourceZoneOwner: ZoneType | string;
+    targetZones: ZoneType[] | string[];
+    numberOfCards: number;
 };
 type GeneralPromptType = PromptParams & {
     type: typeof ACTION_ENTER_PROMPT;
@@ -92,7 +99,7 @@ export type AlternativePromptParams = {
     variable?: string;
     player?: string | number;
 };
-export type PromptTypeAlternative = PromptInteface & AlternativePromptParams;
+export type PromptTypeAlternative = PromptInterface & AlternativePromptParams;
 export type PaymentSourcePromptParams = {
     promptType: typeof PROMPT_TYPE_PAYMENT_SOURCE;
     paymentType: typeof TYPE_CREATURE | typeof TYPE_SPELL | typeof TYPE_RELIC;
@@ -100,11 +107,11 @@ export type PaymentSourcePromptParams = {
     cards: CardInGame[];
     variable?: string;
 };
-export type PromptTypePaymentSource = PromptInteface & PaymentSourcePromptParams;
+export type PromptTypePaymentSource = PromptInterface & PaymentSourcePromptParams;
 export type MagiPowerPromptParams = {
     promptType: typeof PROMPT_TYPE_POWER_ON_MAGI;
     magi: CardInGame | string;
 };
-export type PromptTypeMagiPower = PromptInteface & MagiPowerPromptParams;
-export type PromptType = GeneralPromptType | PromptTypeRearrangeEnergy | PromptTypeDistributeEnergy | PromptTypeChooseUpToNCardsFromZone | PromptTypeDistributeDamage | PromptTypePlayer | ChooseCardsPromptType | PromptTypeMayAbility | PromptTypeRearrangeCardsOfZone | PromptTypeAlternative | PromptTypePaymentSource | PromptTypeMagiPower;
+export type PromptTypeMagiPower = PromptInterface & MagiPowerPromptParams;
+export type PromptType = GeneralPromptType | PromptTypeRearrangeEnergy | PromptTypeDistributeEnergy | PromptTypeChooseUpToNCardsFromZone | PromptTypeDistributeDamage | PromptTypePlayer | ChooseCardsPromptType | PromptTypeMayAbility | PromptTypeRearrangeCardsOfZone | PromptTypeAlternative | PromptTypePaymentSource | PromptTypeDistributeCardsInZones | PromptTypeMagiPower;
 export {};

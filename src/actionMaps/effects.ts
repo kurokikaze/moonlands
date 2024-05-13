@@ -81,6 +81,7 @@ import {
   EFFECT_TYPE_START_OF_TURN,
   EFFECT_TYPE_START_STEP,
   EFFECT_TYPE_START_TURN,
+  EFFECT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
   NO_PRIORITY,
   PRIORITY_ATTACK,
   PRIORITY_CREATURES,
@@ -110,11 +111,12 @@ import {
   ZONE_TYPE_IN_PLAY,
   ZONE_TYPE_MAGI_PILE
 } from "../const";
-import { AnyEffectType, ContinuousEffectType, EnrichedAction } from "../types";
+import { AnyEffectType, ContinuousEffectType, EnrichedAction, ZoneType } from "../types";
 import { oneOrSeveral, updateContinuousEffects } from "./actionMapUtils";
 import { ActionTransformer, ProtoEffectType, ActionHandlerMap, ProtoChooseCardsPrompt, StepType } from "./actionMapTypes";
 import { AttackerDamageDealtEffect, AttackerDealsDamageEffect, BeforeDamageEffect } from "../types/attack";
 import { DiscardCreatureFromPlayEffect, DiscardEnergyFromCreatureEffect, MoveCardBetwenZonesEffect } from "../types/effect";
+import { cards } from "../cards";
 
 const steps: StepType[] = [
   {
@@ -1721,6 +1723,42 @@ const applyRearrangeCardsOfZoneEffect: ActionTransformer<typeof EFFECT_TYPE_REAR
   this.getZone(zone, zoneOwner).cards = newZoneContent;
 }
 
+const applyDistributeCardsInZonesEffect: ActionTransformer<typeof EFFECT_TYPE_DISTRIBUTE_CARDS_IN_ZONES> = function (action, transform) {
+  const sourceZone = this.getMetaValue(action.sourceZone, action.generatedBy);
+  const sourceZoneOwner = this.getMetaValue(action.sourceZoneOwner, action.generatedBy);
+
+  const zoneContent = this.getZone(sourceZone, sourceZoneOwner);
+  const cardsDistribution: Record<ZoneType, CardInGame[]> = this.getMetaValue(action.cards, action.generatedBy)
+  // Check for the cards in the zone
+  const totalCards = Object.values(cardsDistribution).flat()
+
+  for (let card of totalCards) {
+    if (!zoneContent.containsId(card.id)) {
+      console.error(`Card ${card.id} is not in the indicated zone`);
+
+      return;
+    }
+  }
+
+  // Move the cards
+  for (let [zone, zoneCards] of Object.entries(cardsDistribution)) {
+    for (let card of zoneCards) {
+      const targetCard = zoneContent.byId(card.id)
+      if (targetCard) {
+        transform({
+          type: ACTION_EFFECT,
+          effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+          sourceZone,
+          target: targetCard,
+          bottom: false,
+          destinationZone: zone as ZoneType,
+          generatedBy: action.generatedBy,
+        })
+      }
+    }
+  }
+}
+
 const applyPlayAttachedToCreatureEffect: ActionTransformer<typeof EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE> = function (action, transform) {
   const card: CardInGame = this.getMetaValue(action.target, action.generatedBy);
   const attachmentTarget = this.getMetaValue(action.attachmentTarget, action.generatedBy);
@@ -1807,6 +1845,7 @@ export const actionMap: Partial<ActionHandlerMap> = {
   [EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY]: applyDiscardCreatureFromPlayEffect,
   [EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE]: applyRearrangeCardsOfZoneEffect,
   [EFFECT_TYPE_ATTACH_CARD_TO_CARD]: applyAttachCardToCardEffect,
+  [EFFECT_TYPE_DISTRIBUTE_CARDS_IN_ZONES]: applyDistributeCardsInZonesEffect,
 
   // Moving energy
   [EFFECT_TYPE_MOVE_ENERGY]: applyMoveEnergyEffect,

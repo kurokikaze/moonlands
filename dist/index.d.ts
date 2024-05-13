@@ -38,6 +38,9 @@ type PromptParamsType = {
     amount?: number;
     zone?: ZoneType;
     zoneOwner?: number;
+    sourceZone?: ZoneType;
+    sourceZoneOwner?: number;
+    targetZones?: ZoneType[];
     magi?: CardInGame[];
     min?: number;
     max?: number;

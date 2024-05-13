@@ -40,6 +40,7 @@ import {
   ZONE_TYPE_IN_PLAY,
   ZONE_TYPE_DISCARD,
   ZONE_TYPE_HAND,
+  PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
 } from '../../src/const.ts';
 
 import {
@@ -563,6 +564,192 @@ describe('Orothean Gloves', () => {
 
     expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(1, 'Lore drawn us a card');
     expect(seaBarl.data.energy).toEqual(2, 'Lore costs 2 instead of usual 3');
+  });
+});
+
+describe('Orothean Goggles', () => {
+  it('Foresight', () => {
+    const ACTIVE_PLAYER = 441;
+    const NON_ACTIVE_PLAYER = 21;
+
+    const oqua = new CardInGame(byName('O\'Qua'), ACTIVE_PLAYER).addEnergy(10);
+    const orotheanGoggles = new CardInGame(byName('Orothean Goggles'), ACTIVE_PLAYER);
+    const seaBarl = new CardInGame(byName('Sea Barl'), ACTIVE_PLAYER).addEnergy(4);
+    const otherSeaBarl = new CardInGame(byName('Sea Barl'), ACTIVE_PLAYER);
+    const flyingOrathan = new CardInGame(byName('Orathan Flyer'), ACTIVE_PLAYER);
+
+    const undertow = new CardInGame(byName('Undertow'), ACTIVE_PLAYER);
+
+    const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(15);
+
+    const gameState = new State({
+      zones: [
+        new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+        new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+        new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([otherSeaBarl]),
+        new Zone('AP Deck', ZONE_TYPE_DECK, ACTIVE_PLAYER).add([undertow, flyingOrathan]),
+        new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([oqua]),
+        new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+        new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([orotheanGoggles, seaBarl]),
+      ],
+      step: STEP_PRS_FIRST,
+      activePlayer: ACTIVE_PLAYER,
+    });
+
+    gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+    const powerAction = {
+      type: ACTION_POWER,
+      source: orotheanGoggles,
+      power: orotheanGoggles.card.data.powers[0],
+      player: ACTIVE_PLAYER,
+    };
+
+    gameState.update(powerAction);
+
+    expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+    expect(gameState.state.promptType).toEqual(PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES, 'Prompt type is correct');
+
+    const resolvePromptAction = {
+      type: ACTION_RESOLVE_PROMPT,
+      cards: {
+        [ZONE_TYPE_DECK]: [gameState.state.promptParams.cards[0]],
+        [ZONE_TYPE_DISCARD]: [gameState.state.promptParams.cards[1]],
+      },
+      generatedBy: orotheanGoggles.id,
+    }
+
+    gameState.update(resolvePromptAction);
+    expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+
+    expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'One card in the discard');
+    expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).cards[0].card.name).toEqual('Orathan Flyer', 'The card is Orathan Flyer')
+
+    expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).cards[0].card.name).toEqual('Undertow', 'The top card of the library is Undertow')
+  });
+
+  it('Foresight (to top of the deck, reverse order)', () => {
+    const ACTIVE_PLAYER = 441;
+    const NON_ACTIVE_PLAYER = 21;
+
+    const oqua = new CardInGame(byName('O\'Qua'), ACTIVE_PLAYER).addEnergy(10);
+    const orotheanGoggles = new CardInGame(byName('Orothean Goggles'), ACTIVE_PLAYER);
+    const seaBarl = new CardInGame(byName('Sea Barl'), ACTIVE_PLAYER).addEnergy(4);
+    const otherSeaBarl = new CardInGame(byName('Sea Barl'), ACTIVE_PLAYER);
+    const flyingOrathan = new CardInGame(byName('Orathan Flyer'), ACTIVE_PLAYER);
+
+    const undertow = new CardInGame(byName('Undertow'), ACTIVE_PLAYER);
+
+    const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(15);
+
+    const gameState = new State({
+      zones: [
+        new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+        new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+        new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([otherSeaBarl]),
+        new Zone('AP Deck', ZONE_TYPE_DECK, ACTIVE_PLAYER).add([undertow, flyingOrathan]),
+        new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([oqua]),
+        new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+        new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([orotheanGoggles, seaBarl]),
+      ],
+      step: STEP_PRS_FIRST,
+      activePlayer: ACTIVE_PLAYER,
+    });
+
+    gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+    const powerAction = {
+      type: ACTION_POWER,
+      source: orotheanGoggles,
+      power: orotheanGoggles.card.data.powers[0],
+      player: ACTIVE_PLAYER,
+    };
+
+    gameState.update(powerAction);
+
+    expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+    expect(gameState.state.promptType).toEqual(PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES, 'Prompt type is correct');
+
+    const resolvePromptAction = {
+      type: ACTION_RESOLVE_PROMPT,
+      cards: {
+        [ZONE_TYPE_DECK]: [
+          gameState.state.promptParams.cards[1],
+          gameState.state.promptParams.cards[0],
+        ],
+        [ZONE_TYPE_DISCARD]: [],
+      },
+      generatedBy: orotheanGoggles.id,
+    }
+
+    gameState.update(resolvePromptAction);
+    expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+
+    expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(0, 'No cards in the discard');
+    expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).cards[0].card.name).toEqual('Orathan Flyer', 'The top card of the library is Undertow')
+    expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).cards[1].card.name).toEqual('Undertow', 'The top card of the library is Undertow')
+  });
+
+  it('Foresight (to the discard)', () => {
+    const ACTIVE_PLAYER = 441;
+    const NON_ACTIVE_PLAYER = 21;
+
+    const oqua = new CardInGame(byName('O\'Qua'), ACTIVE_PLAYER).addEnergy(10);
+    const orotheanGoggles = new CardInGame(byName('Orothean Goggles'), ACTIVE_PLAYER);
+    const seaBarl = new CardInGame(byName('Sea Barl'), ACTIVE_PLAYER).addEnergy(4);
+    const otherSeaBarl = new CardInGame(byName('Sea Barl'), ACTIVE_PLAYER);
+    const flyingOrathan = new CardInGame(byName('Orathan Flyer'), ACTIVE_PLAYER);
+
+    const undertow = new CardInGame(byName('Undertow'), ACTIVE_PLAYER);
+
+    const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(15);
+
+    const gameState = new State({
+      zones: [
+        new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+        new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+        new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([otherSeaBarl]),
+        new Zone('AP Deck', ZONE_TYPE_DECK, ACTIVE_PLAYER).add([undertow, flyingOrathan]),
+        new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([oqua]),
+        new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]),
+        new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([orotheanGoggles, seaBarl]),
+      ],
+      step: STEP_PRS_FIRST,
+      activePlayer: ACTIVE_PLAYER,
+    });
+
+    gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+    const powerAction = {
+      type: ACTION_POWER,
+      source: orotheanGoggles,
+      power: orotheanGoggles.card.data.powers[0],
+      player: ACTIVE_PLAYER,
+    };
+
+    gameState.update(powerAction);
+
+    expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+    expect(gameState.state.promptType).toEqual(PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES, 'Prompt type is correct');
+
+    const resolvePromptAction = {
+      type: ACTION_RESOLVE_PROMPT,
+      cards: {
+        [ZONE_TYPE_DECK]: [],
+        [ZONE_TYPE_DISCARD]: [
+          gameState.state.promptParams.cards[1],
+          gameState.state.promptParams.cards[0],
+        ],
+      },
+      generatedBy: orotheanGoggles.id,
+    }
+
+    gameState.update(resolvePromptAction);
+    expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+
+    expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(2, 'Two cards in the discard');
+    expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).cards[0].card.name).toEqual('Orathan Flyer', 'First card of the discard is Undertow')
+    expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).cards[1].card.name).toEqual('Undertow', 'Second card of the library is Undertow')
   });
 });
 
@@ -1779,7 +1966,6 @@ describe('Abaquist', () => {
     });
 
     gameState.update(powerAction);
-
 
     expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
     expect(gameState.state.promptParams.restrictions).toHaveLength(1);

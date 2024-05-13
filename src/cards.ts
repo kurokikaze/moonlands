@@ -9,7 +9,6 @@ import {
 	ACTION_GET_PROPERTY_VALUE,
 	ACTION_PLAY,
 
-
 	CALCULATION_DOUBLE,
 	CALCULATION_ADD,
 	CALCULATION_SUBTRACT,
@@ -19,7 +18,6 @@ import {
 	CALCULATION_SET,
 	CALCULATION_MAX,
 	CALCULATION_MULTIPLY,
-
 
 	PROPERTY_ENERGY_COUNT,
 	PROPERTY_CONTROLLER,
@@ -82,6 +80,7 @@ import {
 	SELECTOR_OWN_CARDS_IN_HAND,
 	SELECTOR_CARDS_IN_HAND,
 	SELECTOR_MAGI_OF_PLAYER,
+	SELECTOR_RANDOM_CARD_IN_HAND,
 
 	EFFECT_TYPE_END_OF_TURN,
 	EFFECT_TYPE_NONE,
@@ -131,6 +130,7 @@ import {
 	EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
 	EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP,
 	EFFECT_TYPE_EXECUTE_POWER_EFFECTS,
+	EFFECT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
 
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 	PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
@@ -150,6 +150,7 @@ import {
 	PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
 	PROMPT_TYPE_POWER_ON_MAGI,
 	PROMPT_TYPE_ALTERNATIVE,
+	PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
 
 	PROTECTION_FROM_SPELLS,
 	PROTECTION_TYPE_GENERAL,
@@ -192,8 +193,6 @@ import {
 	PROTECTION_TYPE_DISCARDING_FROM_PLAY,
 	PROTECTION_FROM_EFFECTS,
 	PROTECTION_FROM_POWERS,
-	SELECTOR_RANDOM_CARD_IN_HAND,
-	EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
 	/* eslint-enable no-unused-vars */
 } from './const';
 
@@ -212,7 +211,7 @@ import {
 	RestrictionObjectType,
 	ZoneType,
 } from './types';
-import { AlternativePromptParams } from './types/prompt';
+import { AlternativePromptParams, PromptTypeDistributeCardsInZones } from './types/prompt';
 
 const effect = (data: any): EffectType => ({
 	type: ACTION_EFFECT,
@@ -280,6 +279,15 @@ type PowerOnMagiParams = {
 	variable?: string;
 }
 
+type DistributeCardsPromptParams = {
+	promptType: typeof PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
+	sourceZone: ZoneType | string
+	sourceZoneOwner: string
+	targetZones: ZoneType[] | string[]
+	numberOfCards: number
+	variable?: string
+}
+
 type PromptParamsType = PromptParams |
 	DistributeEnergyPromptParams |
 	RearrangeEnergyPromptParams |
@@ -287,6 +295,7 @@ type PromptParamsType = PromptParams |
 	DistributeDamagePromptParams |
 	RearrangeCardsPromptParams |
 	AlternativePromptParams |
+	DistributeCardsPromptParams |
 	PowerOnMagiParams;
 
 const prompt = (data: PromptParamsType): PromptType => {
@@ -311,6 +320,13 @@ const prompt = (data: PromptParamsType): PromptType => {
 				type: ACTION_ENTER_PROMPT,
 				...data,
 			};
+		}
+		case PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES: {
+			const promptAction: PromptTypeDistributeCardsInZones = {
+				type: ACTION_ENTER_PROMPT,
+				...data as DistributeCardsPromptParams,
+			};
+			return promptAction;
 		}
 	}
 	return ({
@@ -6061,8 +6077,32 @@ export const cards = [
 			},
 		],
 	}),
-
-
+	new Card('Orothean Goggles', TYPE_RELIC, REGION_OROTHE, 0, {
+		powers: [{
+			name: 'Foresight',
+			cost: 0,
+			text: 'Look at the top two cards of your deck. You may discard either or both of these cards, or put them back on top of your deck in any order.',
+			effects: [
+				prompt({
+					promptType: PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
+					sourceZone: ZONE_TYPE_DECK,
+					sourceZoneOwner: '$player',
+					targetZones: [
+						ZONE_TYPE_DECK,
+						ZONE_TYPE_DISCARD,
+					],
+					numberOfCards: 2,
+					variable: 'cardsInZones',
+				}),
+				effect({
+					effectType: EFFECT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
+					sourceZone: ZONE_TYPE_DECK,
+					sourceZoneOwner: '$player',
+					cards: '$cardsInZones',
+				}),
+			]
+		}],
+	}),
 	/*new Card('Cursed Tome', TYPE_RELIC, REGION_UNIVERSAL, 0, {
 		triggerEffects: [
 			{

@@ -233,6 +233,7 @@ import {
 	EFFECT_TYPE_PLAY_FINISHED,
 	EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED,
 	EFFECT_TYPE_POWER_FINISHED,
+	PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
 } from './const';
 
 import { actionMap } from './actionMaps/effects';
@@ -397,6 +398,7 @@ export const DEFAULT_PROMPT_VARIABLE: Record<PromptTypeType, string> = {
 	[PROMPT_TYPE_POWER_ON_MAGI]: 'chosenPower',
 	[PROMPT_TYPE_ALTERNATIVE]: 'alternative',
 	[PROMPT_TYPE_PAYMENT_SOURCE]: 'paymentSource',
+	[PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES]: 'cardsInZones',
 	[PROMPT_TYPE_MAY_ABILITY]: '', // Special case, doesn't use variables
 };
 
@@ -528,22 +530,25 @@ const updateContinuousEffects = (player: number) => (effect: ContinuousEffectTyp
 };
 
 type PromptParamsType = {
-	cards?: ConvertedCard[];
-	source?: CardInGame;
-	availableCards?: string[];
-	startingCards?: string[];
-	paymentType?: typeof TYPE_CREATURE | typeof TYPE_RELIC | typeof TYPE_SPELL;
-	paymentAmount?: number;
-	numberOfCards?: number;
-	restrictions?: RestrictionObjectType[] | null;
-	restriction?: RestrictionType;
-	amount?: number;
-	zone?: ZoneType;
-	zoneOwner?: number;
-	magi?: CardInGame[];
-	min?: number;
-	max?: number;
-	alternatives?: AlternativeType[];
+	cards?: ConvertedCard[]
+	source?: CardInGame
+	availableCards?: string[]
+	startingCards?: string[]
+	paymentType?: typeof TYPE_CREATURE | typeof TYPE_RELIC | typeof TYPE_SPELL
+	paymentAmount?: number
+	numberOfCards?: number
+	restrictions?: RestrictionObjectType[] | null
+	restriction?: RestrictionType
+	amount?: number
+	zone?: ZoneType
+	zoneOwner?: number
+	sourceZone?: ZoneType
+	sourceZoneOwner?: number
+	targetZones?: ZoneType[]
+	magi?: CardInGame[]
+	min?: number
+	max?: number
+	alternatives?: AlternativeType[]
 }
 
 export type MetaDataValue = CardInGame | CardInGame[] | Region | number | Record<string, number> | string;
@@ -3026,6 +3031,22 @@ export class State {
 							}
 							break;
 						}
+						case PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES: {
+							// console.dir(this.getSpellMetadata(action.generatedBy))
+							const sourceZone = this.getMetaValue(action.sourceZone, action.generatedBy);
+							const sourceZoneOwner = this.getMetaValue(action.sourceZoneOwner, action.generatedBy);
+							const numberOfCards = this.getMetaValue(action.numberOfCards, action.generatedBy);
+							const zoneContent = this.getZone(sourceZone, sourceZoneOwner).cards;
+							const cards = zoneContent.slice(0, numberOfCards);
+
+							promptParams = {
+								sourceZone,
+								sourceZoneOwner,
+								numberOfCards,
+								cards: cards.map(convertCard),
+								targetZones: action.targetZones as ZoneType[],
+							};
+						}
 					}
 
 					if (!skipPrompt) {
@@ -3119,6 +3140,16 @@ export class State {
 									currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE]] = action.cards;
 								}
 								break;
+							}
+							case PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES: {
+								if ('cards' in action && action.cards) {
+									const totalCards = Object.values(action.cards).flat()
+									if (this.state.promptParams && this.state.promptParams.cards && this.state.promptParams.cards.length !== totalCards.length) {
+										console.error('Number of cards is wrong')
+										return false;
+									}
+									currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE]] = action.cards;
+								}
 							}
 							case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
 								if ('cards' in action && action.cards) {

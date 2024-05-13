@@ -195,6 +195,7 @@ export const EFFECT_TYPE_CARD_ATTACHED_TO_CARD = 'effects/card_becomes_attached_
 export const EFFECT_TYPE_PLAY_FINISHED = 'effects/play_finished';
 export const EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED = 'effects/trigger_finished';
 export const EFFECT_TYPE_POWER_FINISHED = 'effects/power_finished';
+export const EFFECT_TYPE_DISTRIBUTE_CARDS_IN_ZONES = 'effects/distribute_cards_in_zones';
 
 export const CHANGE_TYPE_DRAW = 'changes/draw';
 export const CHANGE_TYPE_RESHUFFLE_DISCARD = 'changes/reshuffle_discard';
@@ -244,6 +245,7 @@ export const PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE = 'prompt/rearrange_cards_of_zo
 export const PROMPT_TYPE_POWER_ON_MAGI = 'prompt/power_on_magi';
 export const PROMPT_TYPE_ALTERNATIVE = 'prompt/alternative';
 export const PROMPT_TYPE_PAYMENT_SOURCE = 'prompt/payment_source';
+export const PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES = 'prompt/distribute_cards_in_zones';
 
 export const RESTRICTION_TYPE ='restrictions/type';
 export const RESTRICTION_ENERGY_LESS_THAN_STARTING = 'restrictions/energy_less_than_starting';

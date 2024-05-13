@@ -90,6 +90,7 @@ import {
     PROMPT_TYPE_POWER_ON_MAGI,
     PROMPT_TYPE_ALTERNATIVE,
     PROMPT_TYPE_PAYMENT_SOURCE,
+    PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
 } from "../const";
 
 export type ZoneType =
@@ -158,6 +159,7 @@ export type PromptTypeType = typeof PROMPT_TYPE_NUMBER |
     typeof PROMPT_TYPE_ALTERNATIVE |
     typeof PROMPT_TYPE_POWER_ON_MAGI |
     typeof PROMPT_TYPE_PAYMENT_SOURCE |
+    typeof PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES |
     typeof PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE;
 
 export type GenericPromptType = typeof PROMPT_TYPE_NUMBER |
