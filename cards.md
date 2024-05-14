@@ -111,6 +111,7 @@ Done: **178** cards out of **190**
 - Eye of the Storm
 - Raxis
 - Orish
+- Orothean Goggles
 
 # Done, not tested
 
@@ -315,10 +316,6 @@ Done: **178** cards out of **190**
 - Orish
 - Spirit of the Flame
 - Vinoc
-
-# Looking at library, rearranging
-
-- Orothean Goggles
 
 # Looking at hands
 

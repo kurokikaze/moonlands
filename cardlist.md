@@ -113,7 +113,7 @@
 - [x] Ormagon
 - [x] Orothean Belt
 - [x] Orothean Gloves
-- [ ] Orothean Goggles
+- [x] Orothean Goggles
 - [x] Orpus
 - [x] Orthea
 - [x] Orwin

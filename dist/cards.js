@@ -5795,30 +5795,6 @@ export var cards = [
                 ]
             }],
     }),
-    /*new Card('Cursed Tome', TYPE_RELIC, REGION_UNIVERSAL, 0, {
-        triggerEffects: [
-            {
-                name: 'Curse of Knowledge',
-                text: 'Whenever a player draws a card, discard 1 energy from their Magi',
-                find: {
-                    effectType: EFFECT_TYPE_DRAW,
-                    conditions: [],
-                },
-                effects: [
-                    select({
-                        selector: SELECTOR_MAGI_OF_PLAYER,
-                        owner: '%player',
-                        variable: 'playerMagi',
-                    }),
-                    effect({
-                        effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
-                        target: '$playerMagi',
-                        amount: 1,
-                    }),
-                ]
-            },
-        ],
-    }),*/
 ];
 export var byName = function (name) { return cards.find(function (card) { return card.name === name; }); };
 //# sourceMappingURL=cards.js.map

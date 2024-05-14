@@ -92,8 +92,8 @@ export declare class State {
     onAction: Function | null;
     turnTimer: number | null;
     timerEnabled: boolean;
-    turnTimeout: NodeJS.Timer | null;
-    turnNotifyTimeout: NodeJS.Timer | null;
+    turnTimeout: ReturnType<typeof setTimeout> | null;
+    turnNotifyTimeout: ReturnType<typeof setTimeout> | null;
     constructor(state: StateShape);
     closeStreams(): void;
     initiatePRNG(seed: number): void;
