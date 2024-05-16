@@ -5,7 +5,7 @@ EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_AFTER_DAMAGE, EF
 import CardInGame, { ConvertedCard, InGameData } from './classes/CardInGame';
 import Card, { CostType, ModifiedCardType } from './classes/Card';
 import Zone from './classes/Zone';
-import { AnyEffectType, PromptTypeType, RestrictionObjectType, RestrictionType, LogEntryType, PropertyType, EnrichedAction, StaticAbilityType, OperatorType, ConditionType, FindType, ContinuousEffectType, EffectType, ZoneType, Region, ProtectionType } from './types';
+import { AnyEffectType, PromptTypeType, RestrictionObjectType, RestrictionType, LogEntryType, PropertyType, EnrichedAction, StaticAbilityType, OperatorType, ConditionType, FindType, ContinuousEffectType, EffectType, ZoneType, Region, ProtectionType, SerializedState, SerializedZones } from './types';
 import { EnhancedDelayedTriggerType } from './types/effect';
 import { CardType, StatusType } from './types/common';
 import { AlternativeType } from './types/prompt';
@@ -25,7 +25,7 @@ type CardWithModification = {
     owner: number;
 };
 export declare const DEFAULT_PROMPT_VARIABLE: Record<PromptTypeType, string>;
-type PromptParamsType = {
+export type PromptParamsType = {
     cards?: ConvertedCard[];
     source?: CardInGame;
     availableCards?: string[];
@@ -114,54 +114,8 @@ export declare class State {
     endTurn(): void;
     addActionToLog(action: AnyEffectType): void;
     createZones(): Zone[];
-    serializeData(playerId: number, hideZones?: boolean): {
-        zones: {
-            playerHand: ConvertedCard[];
-            opponentHand: import("./classes/CardInGame").HiddenConvertedCard[] | ConvertedCard[];
-            playerDeck: import("./classes/CardInGame").HiddenConvertedCard[] | ConvertedCard[];
-            opponentDeck: import("./classes/CardInGame").HiddenConvertedCard[] | ConvertedCard[];
-            playerActiveMagi: ConvertedCard[];
-            opponentActiveMagi: ConvertedCard[];
-            playerMagiPile: ConvertedCard[];
-            opponentMagiPile: import("./classes/CardInGame").HiddenConvertedCard[] | ConvertedCard[];
-            inPlay: (import("./classes/CardInGame").HiddenConvertedCard | ConvertedCard)[];
-            playerDefeatedMagi: ConvertedCard[];
-            opponentDefeatedMagi: ConvertedCard[];
-            playerDiscard: ConvertedCard[];
-            opponentDiscard: ConvertedCard[];
-        };
-        continuousEffects: ContinuousEffectType[];
-        step: number | null;
-        turn: number | undefined;
-        goesFirst: number | undefined;
-        activePlayer: number;
-        prompt: boolean;
-        promptType: PromptTypeType | null;
-        promptMessage: string | undefined;
-        promptPlayer: number | undefined;
-        promptGeneratedBy: string | undefined;
-        promptParams: PromptParamsType;
-        opponentId: number | undefined;
-        log: LogEntryType[];
-        gameEnded: boolean;
-        winner: number | boolean | null;
-        cardsAttached: Record<string, string[]>;
-    };
-    serializeZones(playerId: number, hideZones?: boolean): {
-        playerHand: ConvertedCard[];
-        opponentHand: import("./classes/CardInGame").HiddenConvertedCard[] | ConvertedCard[];
-        playerDeck: import("./classes/CardInGame").HiddenConvertedCard[] | ConvertedCard[];
-        opponentDeck: import("./classes/CardInGame").HiddenConvertedCard[] | ConvertedCard[];
-        playerActiveMagi: ConvertedCard[];
-        opponentActiveMagi: ConvertedCard[];
-        playerMagiPile: ConvertedCard[];
-        opponentMagiPile: import("./classes/CardInGame").HiddenConvertedCard[] | ConvertedCard[];
-        inPlay: (import("./classes/CardInGame").HiddenConvertedCard | ConvertedCard)[];
-        playerDefeatedMagi: ConvertedCard[];
-        opponentDefeatedMagi: ConvertedCard[];
-        playerDiscard: ConvertedCard[];
-        opponentDiscard: ConvertedCard[];
-    };
+    serializeData(playerId: number, hideZones?: boolean): SerializedState;
+    serializeZones(playerId: number, hideZones?: boolean): SerializedZones;
     setup(): void;
     getOpponent(player: number): number;
     getZone(type: ZoneType, player?: number | null): Zone;

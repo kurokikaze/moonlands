@@ -269,6 +269,8 @@ import {
 	ProtectionType,
 	ReplacingEffectType,
 	NoneType,
+	SerializedState,
+	SerializedZones,
 } from './types';
 import { EnhancedDelayedTriggerType, ExecutePowerEffect, StartingEnergyOnCreatureEffect } from './types/effect';
 import { CardType, StatusType } from './types/common';
@@ -529,7 +531,7 @@ const updateContinuousEffects = (player: number) => (effect: ContinuousEffectTyp
 	}
 };
 
-type PromptParamsType = {
+export type PromptParamsType = {
 	cards?: ConvertedCard[]
 	source?: CardInGame
 	availableCards?: string[]
@@ -1076,22 +1078,22 @@ export class State {
 		];
 	}
 
-	serializeData(playerId: number, hideZones = true) {
+	serializeData(playerId: number, hideZones = true): SerializedState {
 		const gameEnded = !(this.winner === false);
 
-		const opponentId = this.players.find(player => player !== playerId);
+		const opponentId = this.players.find(player => player !== playerId) || 0;
 		return {
 			zones: this.serializeZones(playerId, hideZones),
 			continuousEffects: this.state.continuousEffects,
 			step: this.state.step,
-			turn: this.state.turn,
-			goesFirst: this.state.goesFirst,
+			turn: this.state.turn || 0,
+			goesFirst: this.state.goesFirst || 0,
 			activePlayer: this.state.activePlayer,
 			prompt: this.state.prompt,
 			promptType: this.state.promptType,
-			promptMessage: this.state.promptMessage,
-			promptPlayer: this.state.promptPlayer,
-			promptGeneratedBy: this.state.promptGeneratedBy,
+			promptMessage: this.state.promptMessage || null,
+			promptPlayer: this.state.promptPlayer || null,
+			promptGeneratedBy: this.state.promptGeneratedBy || null,
 			promptParams: this.state.promptParams,
 			opponentId,
 			log: this.state.log,
@@ -1101,7 +1103,7 @@ export class State {
 		};
 	}
 
-	serializeZones(playerId: number, hideZones = true) {
+	serializeZones(playerId: number, hideZones = true): SerializedZones {
 		const opponentId = this.getOpponent(playerId);
 		return {
 			playerHand: this.getZone(ZONE_TYPE_HAND, playerId).serialize(),
@@ -1112,7 +1114,7 @@ export class State {
 			opponentActiveMagi: this.getZone(ZONE_TYPE_ACTIVE_MAGI, opponentId).serialize(),
 			playerMagiPile: this.getZone(ZONE_TYPE_MAGI_PILE, playerId).serialize(),
 			opponentMagiPile: this.getZone(ZONE_TYPE_MAGI_PILE, opponentId).serialize(hideZones),
-			inPlay: this.getZone(ZONE_TYPE_IN_PLAY).cards.map(c => c.serialize()),
+			inPlay: this.getZone(ZONE_TYPE_IN_PLAY).cards.map(c => c.serialize() as ConvertedCard),
 			playerDefeatedMagi: this.getZone(ZONE_TYPE_DEFEATED_MAGI, playerId).serialize(),
 			opponentDefeatedMagi: this.getZone(ZONE_TYPE_DEFEATED_MAGI, opponentId).serialize(),
 			playerDiscard: this.getZone(ZONE_TYPE_DISCARD, playerId).serialize(),

@@ -118,6 +118,6 @@ export default class Zone {
 	serialize<T>(hidden: T): T extends true ? HiddenConvertedCard[] : ConvertedCard[]
 	serialize(): ConvertedCard[]
 	serialize(hidden = false): HiddenConvertedCard[] | ConvertedCard[] {
-		return hidden ? this.cards.map(card => card.serialize(true)) as unknown as HiddenConvertedCard[] : this.cards.map(card => card.serialize(false)) as unknown as ConvertedCard[];
+		return hidden ? this.cards.map(card => card.serialize(true)) : this.cards.map(card => card.serialize(false));
 	}
 }

@@ -1,4 +1,4 @@
-import CardInGame from '../classes/CardInGame';
+import CardInGame, { ConvertedCard, HiddenConvertedCard } from '../classes/CardInGame';
 import {
     ACTION_CALCULATE,
     ACTION_PLAY,
@@ -43,8 +43,10 @@ import { ResolvePromptType } from './resolvePrompt';
 import { SelectorTypeType, SelectType } from './select';
 import { EffectTypeType, EffectType, ConditionalEffect, DiscardCreatureFromPlayEffect } from './effect';
 import { PromptType } from './prompt';
-import { PropertyType, ConditionType, ExpirationObjectType, RestrictionObjectType } from './common';
+import { PropertyType, ConditionType, ExpirationObjectType, RestrictionObjectType, PromptTypeType } from './common';
 import { AttackEffect } from './attack';
+import { LogEntryType } from './log';
+import { PromptParamsType } from '..';
 
 export { type AttackerDealsDamageEffect, type DefenderDealsDamageEffect } from './attack';
 export { type Region, type CardType, type PromptTypeType, type PropertyType, type ConditionType, type ZoneType, type RestrictionType, type RestrictionObjectType } from './common';
@@ -135,7 +137,7 @@ export type EffectMoldType = Omit<EffectType, 'generatedBy' | 'player'> | Prompt
 export type WithReplacementValues<T extends EffectMoldType, Q extends EffectType> = {
     // type: T['type']
     [P in keyof T]: `%${keyof Q extends string ? keyof Q : never}` | '%self' | `$${string}` | T[P]
-} & { type : T['type'] }
+} & { type: T['type'] }
 
 export type SingleOrMultiple<T> = T | T[];
 
@@ -265,3 +267,41 @@ export type ContinuousEffectType = {
 }
 
 export type AnyEffectType = EffectType | PromptType | SelectType | CalculateType | PropertyGetterType | PlayerWinType | PassType | ConcedeType | ResolvePromptType | PlayType | PowerActionType | AttackEffect | TimeNotificationAction | NoneType | ExitPromptsAction;
+
+type SerializedZone = ConvertedCard[] | HiddenConvertedCard[]
+
+export type SerializedZones = {
+    playerHand: SerializedZone
+    opponentHand: SerializedZone
+    playerDeck: SerializedZone
+    opponentDeck: SerializedZone
+    playerActiveMagi: SerializedZone
+    opponentActiveMagi: SerializedZone
+    playerMagiPile: SerializedZone
+    opponentMagiPile: SerializedZone
+    inPlay: SerializedZone
+    playerDefeatedMagi: SerializedZone
+    opponentDefeatedMagi: SerializedZone
+    playerDiscard: SerializedZone
+    opponentDiscard: SerializedZone
+}
+
+export type SerializedState = {
+    zones: SerializedZones
+    continuousEffects: ContinuousEffectType[]
+    step: number | null
+    turn: number
+    goesFirst: number
+    activePlayer: number
+    prompt: boolean
+    promptType: PromptTypeType | null
+    promptMessage: string | null
+    promptPlayer: number | null
+    promptGeneratedBy: string | null
+    promptParams: PromptParamsType
+    opponentId: number
+    log: LogEntryType[]
+    gameEnded: boolean
+    winner: number | boolean | null
+    cardsAttached: Record<string, string[]>
+}

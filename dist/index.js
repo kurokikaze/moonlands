@@ -628,19 +628,19 @@ var State = /** @class */ (function () {
     State.prototype.serializeData = function (playerId, hideZones) {
         if (hideZones === void 0) { hideZones = true; }
         var gameEnded = !(this.winner === false);
-        var opponentId = this.players.find(function (player) { return player !== playerId; });
+        var opponentId = this.players.find(function (player) { return player !== playerId; }) || 0;
         return {
             zones: this.serializeZones(playerId, hideZones),
             continuousEffects: this.state.continuousEffects,
             step: this.state.step,
-            turn: this.state.turn,
-            goesFirst: this.state.goesFirst,
+            turn: this.state.turn || 0,
+            goesFirst: this.state.goesFirst || 0,
             activePlayer: this.state.activePlayer,
             prompt: this.state.prompt,
             promptType: this.state.promptType,
-            promptMessage: this.state.promptMessage,
-            promptPlayer: this.state.promptPlayer,
-            promptGeneratedBy: this.state.promptGeneratedBy,
+            promptMessage: this.state.promptMessage || null,
+            promptPlayer: this.state.promptPlayer || null,
+            promptGeneratedBy: this.state.promptGeneratedBy || null,
             promptParams: this.state.promptParams,
             opponentId: opponentId,
             log: this.state.log,
