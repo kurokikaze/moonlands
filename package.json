@@ -8,16 +8,15 @@
         "url": "git@github.com:kurokikaze/moonlands.git"
     },
     "main": "dist/esm/index.js",
-    "exports": {
-        "import": "./dist/esm/index.js",
-        "require": "./dist/cjs/index.js"
-    },
-  "directories": {
+    "directories": {
         "test": "test"
     },
     "scripts": {
-        "build": "./node_modules/.bin/tsc -p ./tsconfig.json",
-        "build-types": "./node_modules/.bin/tsc -p ./tsconfig.json --declaration",
+        "build": "npm run build-cjs && npm run build-types-cjs && npm run build-esm && npm run build-types-esm",
+        "build-cjs": "tsc -p ./tsconfig.json",
+        "build-types-cjs": "tsc -p ./tsconfig.json --declaration",
+        "build-esm": "tsc -p ./tsconfig.node.json",
+        "build-types-esm": "tsc -p ./tsconfig.node.json --declaration",
         "test": "./node_modules/.bin/jest",
         "coverage": "./node_modules/.bin/jest --coverage"
     },
