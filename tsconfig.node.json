@@ -1,15 +1,15 @@
 {
   "compilerOptions": {
-      "target": "es5",
-      "lib": ["es6", "es2022"],
-      "module": "ESNext",
+      "target": "esnext",
+      "lib": ["es2022"],
+      "module": "commonjs",
       "esModuleInterop": true,
       "moduleResolution": "node",
       "strict": true,
       "forceConsistentCasingInFileNames": true,
       "sourceMap": true,
-      "outDir": "dist/esm",
+      "outDir": "dist/cjs",
   },
   "exclude": ["test/*", "dist/*"],
-  "lib": ["es2015"]
+  "lib": ["es2022"]
 }

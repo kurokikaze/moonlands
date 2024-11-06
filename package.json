@@ -1,13 +1,13 @@
 {
   "name": "moonlands",
-  "version": "v0.23.6",
+  "version": "v0.23.7",
   "description": "Magi-Nation Duel engine",
   "type": "module",
   "repository": {
     "type": "git",
     "url": "git@github.com:kurokikaze/moonlands.git"
   },
-  "main": "dist/index.js",
+  "main": "dist/esm/index.js",
   "directories": {
     "test": "test"
   },
