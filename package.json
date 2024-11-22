@@ -1,6 +1,6 @@
 {
     "name": "moonlands",
-    "version": "v0.23.7",
+    "version": "v0.24.1",
     "description": "Magi-Nation Duel engine",
     "type": "module",
     "repository": {
@@ -12,11 +12,12 @@
         "test": "test"
     },
     "scripts": {
-        "build": "npm run build-cjs && npm run build-types-cjs && npm run build-esm && npm run build-types-esm",
-        "build-cjs": "tsc -p ./tsconfig.json",
-        "build-types-cjs": "tsc -p ./tsconfig.json --declaration",
-        "build-esm": "tsc -p ./tsconfig.node.json",
-        "build-types-esm": "tsc -p ./tsconfig.node.json --declaration",
+        "build": "npm run build-cjs && npm run build-types-cjs && npm run build-esm && npm run build-types-esm && npm run fix-esm",
+        "build-esm": "tsc -p ./tsconfig.json",
+        "build-types-esm": "tsc -p ./tsconfig.json --declaration",
+        "build-cjs": "tsc -p ./tsconfig.node.json",
+        "fix-esm": "tsc-alias -p ./tsconfig.json",
+        "build-types-cjs": "tsc -p ./tsconfig.node.json --declaration",
         "test": "./node_modules/.bin/jest",
         "coverage": "./node_modules/.bin/jest --coverage"
     },
@@ -38,6 +39,7 @@
         "typescript": "^5.4.3"
     },
     "dependencies": {
-        "nanoid": "^3.0.0"
+        "nanoid": "^3.0.0",
+        "tsc-alias": "^1.8.10"
     }
 }

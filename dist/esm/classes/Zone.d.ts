@@ -1,6 +1,6 @@
-import CardInGame, { ConvertedCard, HiddenConvertedCard } from "./CardInGame";
-import { ZoneType } from "../types";
-import { MersenneTwister } from "../mersenneTwister";
+import CardInGame, { ConvertedCard, HiddenConvertedCard } from "./CardInGame.js";
+import { ZoneType } from "../types/index.js";
+import { MersenneTwister } from "../mersenneTwister.js";
 export default class Zone {
     _name: string;
     _player: number | null;

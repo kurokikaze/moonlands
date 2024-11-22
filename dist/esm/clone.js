@@ -1,6 +1,6 @@
-import { byName } from "./cards";
-import CardInGame from "./classes/CardInGame";
-import Zone from "./classes/Zone";
+import { byName } from "./cards.js";
+import CardInGame from "./classes/CardInGame.js";
+import Zone from "./classes/Zone.js";
 export default function clone(item, cardsGenerated) {
     if (cardsGenerated === void 0) { cardsGenerated = {}; }
     if (!item) {

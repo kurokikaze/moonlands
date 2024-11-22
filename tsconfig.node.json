@@ -1,15 +1,26 @@
 {
-  "compilerOptions": {
-      "target": "esnext",
-      "lib": ["es2022"],
-      "module": "commonjs",
-      "esModuleInterop": true,
-      "moduleResolution": "node",
-      "strict": true,
-      "forceConsistentCasingInFileNames": true,
-      "sourceMap": true,
-      "outDir": "dist/cjs",
-  },
-  "exclude": ["test/*", "dist/*"],
-  "lib": ["es2022"]
+    "compilerOptions": {
+        "target": "esnext",
+        "lib": [
+            "es2022"
+        ],
+        "module": "commonjs",
+        "esModuleInterop": true,
+        "moduleResolution": "node",
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
+        "sourceMap": true,
+        "outDir": "dist/cjs",
+    },
+    "tsc-alias": {
+        "resolveFullPaths": true,
+        "resolveFullExtension": ".js",
+    },
+    "exclude": [
+        "test/*",
+        "dist/*"
+    ],
+    "lib": [
+        "es2022"
+    ]
 }

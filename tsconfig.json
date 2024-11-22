@@ -1,15 +1,30 @@
 {
-  "compilerOptions": {
-      "target": "es5",
-      "lib": ["es6", "es2022"],
-      "module": "ESNext",
-      "esModuleInterop": true,
-      "moduleResolution": "node",
-      "strict": true,
-      "forceConsistentCasingInFileNames": true,
-      "sourceMap": true,
-      "outDir": "dist/esm",
-  },
-  "exclude": ["test/*", "dist/*"],
-  "lib": ["es2015"]
+    "compilerOptions": {
+        "target": "es5",
+        "lib": [
+            "es6",
+            "es2022"
+        ],
+        "module": "ESNext",
+        "esModuleInterop": true,
+        "moduleResolution": "node",
+        "strict": true,
+        "forceConsistentCasingInFileNames": true,
+        "sourceMap": true,
+        "outDir": "dist/esm",
+    },
+    "include": [
+        "src/index.ts"
+    ],
+    "tsc-alias": {
+        "resolveFullPaths": true,
+        "resolveFullExtension": ".js",
+    },
+    "exclude": [
+        "test/*",
+        "dist/*"
+    ],
+    "lib": [
+        "es2015"
+    ]
 }
