@@ -12,10 +12,11 @@ var __assign = (this && this.__assign) || function () {
 import { nanoid } from 'nanoid';
 import clone from '../clone.js';
 var CardInGame = /** @class */ (function () {
-    function CardInGame(card, owner) {
+    function CardInGame(card, owner, seeded_nanoid) {
+        if (seeded_nanoid === void 0) { seeded_nanoid = nanoid; }
         this._card = card;
         this.modifiedCard = clone(card);
-        this.id = nanoid();
+        this.id = seeded_nanoid();
         this.data = {
             energy: 0,
             controller: owner,
@@ -82,7 +83,8 @@ var CardInGame = /** @class */ (function () {
         this.data.energyLostThisTurn = 0;
     };
     CardInGame.prototype.copy = function () {
-        var newCard = new CardInGame(this._card, this.owner);
+        var _this = this;
+        var newCard = new CardInGame(this._card, this.owner, function () { return _this.id; });
         newCard.data = __assign({}, this.data);
         newCard.id = this.id;
         return newCard;

@@ -7,7 +7,7 @@ type FilterFromUnion<T, U> = T extends U ? T : never;
 export type EffectsUnited = EffectType | AttackOnlyEffect;
 export type ActionTransformer<T> = (this: State, action: FilterFromUnion<EffectsUnited, {
     effectType: T;
-}>, transform: (...args: AnyEffectType[]) => void, state: StateShape) => void;
+}>, transform: (...args: AnyEffectType[]) => void, state: StateShape, nanoid: () => string) => void;
 export type ActionHandlerMap = {
     [K in EffectsUnited['effectType']]: ActionTransformer<K>;
 };

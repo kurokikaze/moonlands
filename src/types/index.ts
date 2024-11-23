@@ -305,3 +305,7 @@ export type SerializedState = {
     winner: number | boolean | null
     cardsAttached: Record<string, string[]>
 }
+
+export type MercenneFixed = {
+    random: () => number
+}

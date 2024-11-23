@@ -11,10 +11,10 @@ class CardInGame {
     data;
     owner;
     modifiedCard;
-    constructor(card, owner) {
+    constructor(card, owner, seeded_nanoid = nanoid_1.nanoid) {
         this._card = card;
         this.modifiedCard = (0, clone_1.default)(card);
-        this.id = (0, nanoid_1.nanoid)();
+        this.id = seeded_nanoid();
         this.data = {
             energy: 0,
             controller: owner,
@@ -75,7 +75,7 @@ class CardInGame {
         this.data.energyLostThisTurn = 0;
     }
     copy() {
-        const newCard = new CardInGame(this._card, this.owner);
+        const newCard = new CardInGame(this._card, this.owner, () => this.id);
         newCard.data = { ...this.data };
         newCard.id = this.id;
         return newCard;

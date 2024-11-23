@@ -288,6 +288,7 @@ class State {
     winner;
     debug;
     twister = null;
+    nanoid = nanoid_1.nanoid;
     twisterSeed = 0;
     turn;
     rollDebugValue;
@@ -319,6 +320,10 @@ class State {
     initiatePRNG(seed) {
         this.twisterSeed = seed;
         this.twister = new mersenneTwister_1.MersenneTwister(seed);
+        const seeded_nanoid = (0, nanoid_1.customRandom)(nanoid_1.urlAlphabet, 10, size => {
+            return (new Uint8Array(size)).map(() => 256 * this.twister.random());
+        });
+        this.nanoid = seeded_nanoid;
     }
     setOnAction(callback) {
         this.onAction = callback;
@@ -425,7 +430,7 @@ class State {
                 if (!cardObject) {
                     throw new Error(`Unknown card in deck: ${card}`);
                 }
-                return new CardInGame_1.default(cardObject, player);
+                return new CardInGame_1.default(cardObject, player, this.nanoid);
             });
             this.decks.push({
                 player,
@@ -1582,7 +1587,7 @@ class State {
                             ...previouslyReplacedBy,
                             appliedReplacerId,
                         ] : previouslyReplacedBy,
-                        generatedBy: action.generatedBy || (0, nanoid_1.nanoid)(),
+                        generatedBy: action.generatedBy || this.nanoid(),
                         player: appliedReplacerSelf.data.controller,
                     };
                     Object.keys(replacementEffect)
@@ -1599,7 +1604,7 @@ class State {
                         ...previouslyReplacedBy,
                         appliedReplacerId,
                     ] : previouslyReplacedBy,
-                    generatedBy: action.generatedBy || (0, nanoid_1.nanoid)(),
+                    generatedBy: action.generatedBy || this.nanoid(),
                     player: appliedReplacerSelf.data.controller,
                 };
                 // prepare %-values on created action
@@ -1748,7 +1753,7 @@ class State {
                         .filter(key => !['type', 'effectType'].includes(key))
                         .forEach(key => {
                         const propertyValue = effect[key];
-                        const value = this.prepareMetaValue(propertyValue, actionWithValues, replacer.self, action.generatedBy || (0, nanoid_1.nanoid)());
+                        const value = this.prepareMetaValue(propertyValue, actionWithValues, replacer.self, action.generatedBy || this.nanoid());
                         // if (typeof value == 'string' && value.startsWith('$')) {
                         // 	console.log(`Interpolating ${key} with generatedBy ${action.generatedBy}`)
                         // 	console.dir(this.getMetaValue(value, action.generatedBy))
@@ -2473,7 +2478,7 @@ class State {
                         };
                     }
                     else {
-                        const generatedBy = action.generatedBy || this.state.promptGeneratedBy || (0, nanoid_1.nanoid)();
+                        const generatedBy = action.generatedBy || this.state.promptGeneratedBy || this.nanoid();
                         const variable = action.variable || this.state.promptVariable;
                         let currentActionMetaData = this.state.spellMetaData[generatedBy] || {};
                         switch (this.state.promptType) {
@@ -2856,7 +2861,7 @@ class State {
                         }
                     }
                     const variable = action.variable || 'selected';
-                    this.setSpellMetaDataField(variable, result, action.generatedBy || (0, nanoid_1.nanoid)());
+                    this.setSpellMetaDataField(variable, result, action.generatedBy || this.nanoid());
                     break;
                 }
                 case const_1.ACTION_PASS: {
@@ -2867,7 +2872,7 @@ class State {
                             type: const_1.ACTION_EFFECT,
                             effectType: const_1.EFFECT_TYPE_START_TURN,
                             player: this.state.activePlayer,
-                            generatedBy: (0, nanoid_1.nanoid)(),
+                            generatedBy: this.nanoid(),
                         });
                     }
                     else {
@@ -2879,12 +2884,12 @@ class State {
                                     type: const_1.ACTION_EFFECT,
                                     effectType: const_1.EFFECT_TYPE_END_OF_TURN,
                                     player: this.state.activePlayer,
-                                    generatedBy: (0, nanoid_1.nanoid)(),
+                                    generatedBy: this.nanoid(),
                                 }, {
                                     type: const_1.ACTION_EFFECT,
                                     effectType: const_1.EFFECT_TYPE_START_TURN,
                                     player: this.getOpponent(this.state.activePlayer),
-                                    generatedBy: (0, nanoid_1.nanoid)(),
+                                    generatedBy: this.nanoid(),
                                 });
                             }
                             else {
@@ -2893,7 +2898,7 @@ class State {
                                     effectType: const_1.EFFECT_TYPE_START_STEP,
                                     player: this.state.activePlayer,
                                     step: newStep,
-                                    generatedBy: (0, nanoid_1.nanoid)(),
+                                    generatedBy: this.nanoid(),
                                 });
                             }
                         }
@@ -3144,7 +3149,7 @@ class State {
                     if (action.effectType in effects_1.actionMap) {
                         const transform = this.transformIntoActions.bind(this);
                         const actionTransformer = effects_1.actionMap[action.effectType];
-                        actionTransformer.call(this, action, transform, this.state);
+                        actionTransformer.call(this, action, transform, this.state, this.nanoid);
                     }
                     break;
                 }

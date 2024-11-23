@@ -1,4 +1,4 @@
-import { nanoid } from 'nanoid';
+import { nanoid, customRandom, urlAlphabet } from 'nanoid';
 import { MersenneTwister } from './mersenneTwister';
 import {
 	TYPE_CREATURE,
@@ -271,6 +271,7 @@ import {
 	NoneType,
 	SerializedState,
 	SerializedZones,
+    MercenneFixed,
 } from './types';
 import { EnhancedDelayedTriggerType, ExecutePowerEffect, StartingEnergyOnCreatureEffect } from './types/effect';
 import { CardType, StatusType } from './types/common';
@@ -592,7 +593,8 @@ export class State {
 	decks: DeckType[];
 	winner: boolean | number;
 	debug: boolean;
-	twister: typeof MersenneTwister | null = null;
+	twister: MercenneFixed | null = null;
+    nanoid: () => string = nanoid;
 	twisterSeed: number = 0
 	turn: number | null;
 	rollDebugValue: number | null;
@@ -629,7 +631,11 @@ export class State {
 
 	initiatePRNG(seed: number) {
 		this.twisterSeed = seed;
-		this.twister = new (MersenneTwister as any)(seed);
+		this.twister = new (MersenneTwister as any)(seed) as MercenneFixed;
+        const seeded_nanoid = customRandom(urlAlphabet, 10, size => {
+            return (new Uint8Array(size)).map(() => 256 * this.twister!.random())
+          })
+        this.nanoid = seeded_nanoid
 	}
 
 	setOnAction(callback: (e: AnyEffectType) => void) {
@@ -750,7 +756,7 @@ export class State {
 				if (!cardObject) {
 					throw new Error(`Unknown card in deck: ${card}`)
 				}
-				return new CardInGame(cardObject, player)
+				return new CardInGame(cardObject, player, this.nanoid)
 			});
 			this.decks.push({
 				player,
@@ -2069,7 +2075,7 @@ export class State {
 							...previouslyReplacedBy,
 							appliedReplacerId,
 						] : previouslyReplacedBy,
-						generatedBy: action.generatedBy || nanoid(),
+						generatedBy: action.generatedBy || this.nanoid(),
 						player: appliedReplacerSelf.data.controller,
 					} as AnyEffectType;
 
@@ -2088,7 +2094,7 @@ export class State {
 						...previouslyReplacedBy,
 						appliedReplacerId,
 					] : previouslyReplacedBy,
-					generatedBy: action.generatedBy || nanoid(),
+					generatedBy: action.generatedBy || this.nanoid(),
 					player: appliedReplacerSelf.data.controller,
 				};
 
@@ -2270,7 +2276,7 @@ export class State {
 						.filter(key => !['type', 'effectType'].includes(key))
 						.forEach(key => {
 							const propertyValue = effect[key as keyof typeof effect]
-							const value = this.prepareMetaValue(propertyValue, actionWithValues, replacer.self, action.generatedBy || nanoid());
+							const value = this.prepareMetaValue(propertyValue, actionWithValues, replacer.self, action.generatedBy || this.nanoid());
 							// if (typeof value == 'string' && value.startsWith('$')) {
 							// 	console.log(`Interpolating ${key} with generatedBy ${action.generatedBy}`)
 							// 	console.dir(this.getMetaValue(value, action.generatedBy))
@@ -3111,7 +3117,7 @@ export class State {
 							},
 						};
 					} else {
-						const generatedBy = action.generatedBy || this.state.promptGeneratedBy || nanoid();
+						const generatedBy = action.generatedBy || this.state.promptGeneratedBy || this.nanoid();
 						const variable = action.variable || this.state.promptVariable;
 						let currentActionMetaData = this.state.spellMetaData[generatedBy] || {};
 
@@ -3498,7 +3504,7 @@ export class State {
 						}
 					}
 					const variable = action.variable || 'selected';
-					this.setSpellMetaDataField(variable, result, action.generatedBy || nanoid());
+					this.setSpellMetaDataField(variable, result, action.generatedBy || this.nanoid());
 					break;
 				}
 				case ACTION_PASS: {
@@ -3509,7 +3515,7 @@ export class State {
 							type: ACTION_EFFECT,
 							effectType: EFFECT_TYPE_START_TURN,
 							player: this.state.activePlayer,
-							generatedBy: nanoid(),
+							generatedBy: this.nanoid(),
 						});
 					} else {
 						if (action.player === this.state.activePlayer) {
@@ -3522,13 +3528,13 @@ export class State {
 										type: ACTION_EFFECT,
 										effectType: EFFECT_TYPE_END_OF_TURN,
 										player: this.state.activePlayer,
-										generatedBy: nanoid(),
+										generatedBy: this.nanoid(),
 									},
 									{
 										type: ACTION_EFFECT,
 										effectType: EFFECT_TYPE_START_TURN,
 										player: this.getOpponent(this.state.activePlayer),
-										generatedBy: nanoid(),
+										generatedBy: this.nanoid(),
 									}
 								);
 							} else {
@@ -3537,7 +3543,7 @@ export class State {
 									effectType: EFFECT_TYPE_START_STEP,
 									player: this.state.activePlayer,
 									step: newStep,
-									generatedBy: nanoid(),
+									generatedBy: this.nanoid(),
 								});
 							}
 						}
@@ -3822,7 +3828,7 @@ export class State {
 					if (action.effectType in actionMap) {
 						const transform = this.transformIntoActions.bind(this)
 						const actionTransformer = actionMap[action.effectType] as ActionTransformer<typeof action.effectType>;
-						actionTransformer.call(this as State, action, transform, this.state)
+						actionTransformer.call(this as State, action, transform, this.state, this.nanoid)
 					}
 					break;
 				}

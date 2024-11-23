@@ -1,15 +1,14 @@
 import CardInGame, { ConvertedCard, HiddenConvertedCard } from "./CardInGame";
-import { ZoneType } from "../types";
-import { MersenneTwister } from "../mersenneTwister";
+import { MercenneFixed, ZoneType } from "../types";
 export default class Zone {
     _name: string;
     _player: number | null;
     _type: ZoneType;
     ordered: boolean;
-    _twister: typeof MersenneTwister | null;
+    _twister: MercenneFixed | null;
     cards: CardInGame[];
     constructor(name: string, type: ZoneType, player?: number | null, ordered?: boolean);
-    setPRNG(twister: typeof MersenneTwister): void;
+    setPRNG(twister: MercenneFixed): void;
     get card(): CardInGame | null;
     get name(): string;
     get player(): number | null;

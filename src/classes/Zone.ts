@@ -1,5 +1,5 @@
 import CardInGame, { ConvertedCard, HiddenConvertedCard } from "./CardInGame";
-import { ZoneType } from "../types";
+import { MercenneFixed, ZoneType } from "../types";
 import { MersenneTwister } from "../mersenneTwister";
 
 function shuffle<T>(array: T[]): T[] {
@@ -26,7 +26,7 @@ export default class Zone {
 	_player: number | null;
 	_type: ZoneType;
 	ordered: boolean;
-	_twister: typeof MersenneTwister | null = null
+	_twister: MercenneFixed | null = null
 	cards: CardInGame[];
 	constructor(name: string, type: ZoneType, player: number | null = null, ordered = false) {
 		this._name = name;
@@ -37,7 +37,7 @@ export default class Zone {
 		this.cards = [];
 	}
 
-	setPRNG(twister: typeof MersenneTwister) {
+	setPRNG(twister: MercenneFixed) {
 		this._twister = twister;
 	}
 	// Возвращаем карту если она единственная

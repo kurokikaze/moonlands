@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.actionMap = exports.applyDiscardEnergyFromCreatureOrMagiEffect = void 0;
-const nanoid_1 = require("nanoid");
 const CardInGame_1 = __importDefault(require("../classes/CardInGame"));
 const const_1 = require("../const");
 const actionMapUtils_1 = require("./actionMapUtils");
@@ -198,7 +197,7 @@ const applyStartStepEffect = function (action) {
         step: action.step,
     };
 };
-const applyAddDelayedTriggerEffect = function (action) {
+const applyAddDelayedTriggerEffect = function (action, _transform, _state, seeded_nanoid) {
     const metaData = this.getSpellMetadata(action.generatedBy);
     // "new_card" fallback is for "defeated" triggers
     if ('source' in metaData || 'new_card' in metaData) {
@@ -208,7 +207,7 @@ const applyAddDelayedTriggerEffect = function (action) {
             delayedTriggers: [
                 ...this.state.delayedTriggers,
                 {
-                    id: (0, nanoid_1.nanoid)(),
+                    id: seeded_nanoid(),
                     self,
                     ...action.delayedTrigger,
                 }
@@ -386,11 +385,11 @@ const applyDrawEffect = function (action, transform) {
         }, action);
     }
 };
-const applyReshuffleDiscardEffect = function (action, transform) {
+const applyReshuffleDiscardEffect = function (action, transform, _state, seeded_nanoid) {
     const player = this.getMetaValue(action.player, action.generatedBy);
     const deck = this.getZone(const_1.ZONE_TYPE_DECK, player);
     const discard = this.getZone(const_1.ZONE_TYPE_DISCARD, player);
-    const newCards = discard.cards.map(card => new CardInGame_1.default(card.card, card.owner));
+    const newCards = discard.cards.map(card => new CardInGame_1.default(card.card, card.owner, seeded_nanoid));
     deck.add(newCards);
     deck.shuffle();
     discard.empty();
@@ -821,7 +820,7 @@ const applyConditionalEffect = function (action, transform) {
         }
     }
 };
-const applyMoveCardsBetweenZonesEffect = function (action, transform) {
+const applyMoveCardsBetweenZonesEffect = function (action, transform, _state, seeded_nanoid) {
     if (!action.sourceZone || !action.destinationZone) {
         console.error('Source zone or destination zone invalid');
         throw new Error('Invalid params for EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
@@ -840,7 +839,7 @@ const applyMoveCardsBetweenZonesEffect = function (action, transform) {
         const destinationZone = this.getZone(destinationZoneType, destinationZoneType === const_1.ZONE_TYPE_IN_PLAY ? null : zoneOwner);
         const newCards = [];
         (0, actionMapUtils_1.oneOrSeveral)(zoneChangingTargets, zoneChangingCard => {
-            const newObject = new CardInGame_1.default(zoneChangingCard.card, zoneChangingCard.owner);
+            const newObject = new CardInGame_1.default(zoneChangingCard.card, zoneChangingCard.owner, seeded_nanoid);
             if (action.bottom) {
                 destinationZone.add([newObject]);
             }
@@ -864,7 +863,7 @@ const applyMoveCardsBetweenZonesEffect = function (action, transform) {
         this.setSpellMetaDataField('new_cards', newCards, action.generatedBy);
     }
 };
-const applyMoveCardBetweenZonesEffect = function (action, transform) {
+const applyMoveCardBetweenZonesEffect = function (action, transform, _state, seeded_nanoid) {
     if (!action.sourceZone || !action.destinationZone) {
         console.error('Source zone or destination zone invalid');
         throw new Error('Invalid params for EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
@@ -876,7 +875,7 @@ const applyMoveCardBetweenZonesEffect = function (action, transform) {
         const destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
         const destinationZone = this.getZone(destinationZoneType, destinationZoneType === const_1.ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
         const sourceZone = this.getZone(sourceZoneType, sourceZoneType === const_1.ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
-        const newObject = new CardInGame_1.default(zoneChangingCard.card, zoneChangingCard.owner);
+        const newObject = new CardInGame_1.default(zoneChangingCard.card, zoneChangingCard.owner, seeded_nanoid);
         if (action.bottom) {
             destinationZone.add([newObject]);
         }
@@ -1313,8 +1312,8 @@ const applyDiscardCreatureFromPlayEffect = function (action, transform) {
         }
     });
 };
-const applyCreateContinuousEffect = function (action) {
-    const id = (0, nanoid_1.nanoid)();
+const applyCreateContinuousEffect = function (action, _transform, _state, seeded_nanoid) {
+    const id = seeded_nanoid();
     const staticAbilities = (action.staticAbilities || []).map(ability => {
         switch (ability.selector) {
             case const_1.SELECTOR_ID: {

@@ -19,7 +19,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 var _a;
-import { nanoid } from 'nanoid';
+import { nanoid, customRandom, urlAlphabet } from 'nanoid';
 import { MersenneTwister } from './mersenneTwister.js';
 import { TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, ACTION_PASS, ACTION_PLAY, ACTION_POWER, ACTION_EFFECT, ACTION_SELECT, ACTION_CALCULATE, ACTION_ENTER_PROMPT, ACTION_RESOLVE_PROMPT, ACTION_GET_PROPERTY_VALUE, ACTION_ATTACK, ACTION_PLAYER_WINS, ACTION_CONCEDE, ACTION_TIME_NOTIFICATION, ACTION_EXIT_PROMPTS, ACTION_PROPERTY, PROPERTY_ID, PROPERTY_TYPE, PROPERTY_CONTROLLER, PROPERTY_ENERGY_COUNT, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, PROPERTY_POWER_COST, PROPERTY_CREATURE_TYPES, PROPERTY_STATUS_WAS_ATTACKED, PROPERTY_STATUS_DEFEATED_CREATURE, PROPERTY_ENERGY_LOSS_THRESHOLD, PROPERTY_STATUS, PROPERTY_ABLE_TO_ATTACK, PROPERTY_MAGI_NAME, PROPERTY_CAN_BE_ATTACKED, CALCULATION_SET, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, CALCULATION_HALVE_ROUND_DOWN, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_MAX, SELECTOR_CREATURES, SELECTOR_MAGI, SELECTOR_CREATURES_AND_MAGI, SELECTOR_RELICS, SELECTOR_OWN_MAGI, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_MAGI_OF_REGION, SELECTOR_OPPONENT_ID, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_OWN_SPELLS_IN_HAND, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, SELECTOR_CREATURES_OF_TYPE, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_OTHER_CREATURES_OF_TYPE, SELECTOR_STATUS, SELECTOR_OWN_CREATURES_WITH_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_ID, SELECTOR_CREATURES_OF_PLAYER, SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY, STATUS_BURROWED, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_RELIC, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_OWN_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_CHOOSE_CARDS, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_MAGI_WITHOUT_CREATURES, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_PLAYER, NO_PRIORITY, PRIORITY_PRS, PRIORITY_ATTACK, PRIORITY_CREATURES, EFFECT_TYPE_START_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_DRAW, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_PLAY_CREATURE, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_RELIC_ENTERS_PLAY, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE, EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC, EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_PAYING_ENERGY_FOR_POWER, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_CREATURE_IS_DEFEATED, // Possibly redundant
 EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_IS_ATTACKED, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_DRAW_REST_OF_CARDS, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_ATTACK, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, REGION_UNIVERSAL, RESTRICTION_TYPE, RESTRICTION_REGION, RESTRICTION_ENERGY_LESS_THAN_STARTING, RESTRICTION_ENERGY_LESS_THAN, RESTRICTION_CREATURE_TYPE, RESTRICTION_OWN_CREATURE, RESTRICTION_OPPONENT_CREATURE, RESTRICTION_PLAYABLE, RESTRICTION_CREATURE_WAS_ATTACKED, RESTRICTION_MAGI_WITHOUT_CREATURES, RESTRICTION_STATUS, RESTRICTION_REGION_IS_NOT, RESTRICTION_ENERGY_EQUALS, COST_X, COST_X_PLUS_ONE, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, LOG_ENTRY_PLAY, LOG_ENTRY_DRAW, LOG_ENTRY_CHOOSES_STARTING_CARDS, LOG_ENTRY_POWER_ACTIVATION, LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY, LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY, LOG_ENTRY_TARGETING, LOG_ENTRY_NUMBER_CHOICE, LOG_ENTRY_ATTACK, LOG_ENTRY_CREATURE_ENERGY_LOSS, LOG_ENTRY_MAGI_ENERGY_LOSS, LOG_ENTRY_CREATURE_ENERGY_GAIN, LOG_ENTRY_MAGI_ENERGY_GAIN, LOG_ENTRY_MAGI_DEFEATED, ACTION_NONE, EXPIRATION_ANY_TURNS, EXPIRATION_NEVER, EXPIRATION_OPPONENT_TURNS, PROTECTION_FROM_POWERS, PROTECTION_FROM_SPELLS, PROTECTION_TYPE_DISCARDING_FROM_PLAY, PROTECTION_TYPE_GENERAL, CARD_COUNT, PROPERTY_PROTECTION, PROTECTION_FROM_ATTACKS, CALCULATION_MULTIPLY, EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP, PROTECTION_TYPE_ENERGY_LOSS, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, SELECTOR_NTH_CARD_OF_ZONE, EFFECT_TYPE_DIE_ROLLED, LOG_ENTRY_DIE_ROLLED, PROPERTY_CREATURE_NAME, RESTRICTION_CREATURE_NAME, PROMPT_TYPE_NUMBER_OF_CREATURES, PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED, SELECTOR_SELF_AND_STATUS, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_ALTERNATIVE, SELECTOR_OWN_CARDS_IN_HAND, SELECTOR_CARDS_IN_HAND, PROMPT_TYPE_PAYMENT_SOURCE, EFFECT_TYPE_DISCARD_CARD_FROM_HAND, LOG_ENTRY_CARD_DISCARDED_FROM_HAND, SELECTOR_MAGI_OF_PLAYER, SELECTOR_RANDOM_CARD_IN_HAND, EFFECT_TYPE_PLAY_FINISHED, EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED, EFFECT_TYPE_POWER_FINISHED, PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES, } from './const.js';
@@ -186,6 +186,7 @@ var State = /** @class */ (function () {
     function State(state) {
         this.players = [0, 1];
         this.twister = null;
+        this.nanoid = nanoid;
         this.twisterSeed = 0;
         this.onAction = null;
         this.turnTimer = null;
@@ -204,8 +205,13 @@ var State = /** @class */ (function () {
     // @deprecated
     State.prototype.closeStreams = function () { };
     State.prototype.initiatePRNG = function (seed) {
+        var _this = this;
         this.twisterSeed = seed;
         this.twister = new MersenneTwister(seed);
+        var seeded_nanoid = customRandom(urlAlphabet, 10, function (size) {
+            return (new Uint8Array(size)).map(function () { return 256 * _this.twister.random(); });
+        });
+        this.nanoid = seeded_nanoid;
     };
     State.prototype.setOnAction = function (callback) {
         this.onAction = callback;
@@ -299,13 +305,14 @@ var State = /** @class */ (function () {
         return this;
     };
     State.prototype.setDeck = function (player, cardNames) {
+        var _this = this;
         if (this.players.includes(player)) {
             var deck = cardNames.map(function (card) {
                 var cardObject = byName(card);
                 if (!cardObject) {
                     throw new Error("Unknown card in deck: ".concat(card));
                 }
-                return new CardInGame(cardObject, player);
+                return new CardInGame(cardObject, player, _this.nanoid);
             });
             this.decks.push({
                 player: player,
@@ -1375,7 +1382,7 @@ var State = /** @class */ (function () {
                 if (!('type' in replacementEffect)) {
                     var resultEffect_1 = __assign(__assign({ type: ACTION_EFFECT }, replacementEffect), { replacedBy: appliedReplacerId ? __spreadArray(__spreadArray([], previouslyReplacedBy, true), [
                             appliedReplacerId,
-                        ], false) : previouslyReplacedBy, generatedBy: action.generatedBy || nanoid(), player: appliedReplacerSelf.data.controller });
+                        ], false) : previouslyReplacedBy, generatedBy: action.generatedBy || _this.nanoid(), player: appliedReplacerSelf.data.controller });
                     Object.keys(replacementEffect)
                         .filter(function (key) { return !['type', 'effectType'].includes(key); })
                         .forEach(function (key) {
@@ -1386,7 +1393,7 @@ var State = /** @class */ (function () {
                 }
                 var resultEffect /*: WithReplacementValues<EffectType, EffectType>*/ = __assign(__assign({}, replacementEffect), { replacedBy: appliedReplacerId ? __spreadArray(__spreadArray([], previouslyReplacedBy, true), [
                         appliedReplacerId,
-                    ], false) : previouslyReplacedBy, generatedBy: action.generatedBy || nanoid(), player: appliedReplacerSelf.data.controller });
+                    ], false) : previouslyReplacedBy, generatedBy: action.generatedBy || _this.nanoid(), player: appliedReplacerSelf.data.controller });
                 // prepare %-values on created action
                 Object.keys(replacementEffect)
                     .filter(function (key) { return !['type', 'effectType'].includes(key); })
@@ -1526,7 +1533,7 @@ var State = /** @class */ (function () {
                         .filter(function (key) { return !['type', 'effectType'].includes(key); })
                         .forEach(function (key) {
                         var propertyValue = effect[key];
-                        var value = _this.prepareMetaValue(propertyValue, actionWithValues_1, replacer.self, action.generatedBy || nanoid());
+                        var value = _this.prepareMetaValue(propertyValue, actionWithValues_1, replacer.self, action.generatedBy || _this.nanoid());
                         // if (typeof value == 'string' && value.startsWith('$')) {
                         // 	console.log(`Interpolating ${key} with generatedBy ${action.generatedBy}`)
                         // 	console.dir(this.getMetaValue(value, action.generatedBy))
@@ -2224,7 +2231,7 @@ var State = /** @class */ (function () {
                         this_1.state = __assign(__assign({}, this_1.state), { actions: actions, savedActions: [], mayEffectActions: [], fallbackActions: [], prompt: false, promptType: null, promptMessage: undefined, promptGeneratedBy: undefined, promptVariable: undefined, promptParams: {}, spellMetaData: __assign({}, this_1.state.spellMetaData) });
                     }
                     else {
-                        var generatedBy = action.generatedBy || this_1.state.promptGeneratedBy || nanoid();
+                        var generatedBy = action.generatedBy || this_1.state.promptGeneratedBy || this_1.nanoid();
                         var variable = action.variable || this_1.state.promptVariable;
                         var currentActionMetaData = this_1.state.spellMetaData[generatedBy] || {};
                         switch (this_1.state.promptType) {
@@ -2592,7 +2599,7 @@ var State = /** @class */ (function () {
                         }
                     }
                     var variable = action.variable || 'selected';
-                    this_1.setSpellMetaDataField(variable, result, action.generatedBy || nanoid());
+                    this_1.setSpellMetaDataField(variable, result, action.generatedBy || this_1.nanoid());
                     break;
                 }
                 case ACTION_PASS: {
@@ -2602,7 +2609,7 @@ var State = /** @class */ (function () {
                             type: ACTION_EFFECT,
                             effectType: EFFECT_TYPE_START_TURN,
                             player: this_1.state.activePlayer,
-                            generatedBy: nanoid(),
+                            generatedBy: this_1.nanoid(),
                         });
                     }
                     else {
@@ -2614,12 +2621,12 @@ var State = /** @class */ (function () {
                                     type: ACTION_EFFECT,
                                     effectType: EFFECT_TYPE_END_OF_TURN,
                                     player: this_1.state.activePlayer,
-                                    generatedBy: nanoid(),
+                                    generatedBy: this_1.nanoid(),
                                 }, {
                                     type: ACTION_EFFECT,
                                     effectType: EFFECT_TYPE_START_TURN,
                                     player: this_1.getOpponent(this_1.state.activePlayer),
-                                    generatedBy: nanoid(),
+                                    generatedBy: this_1.nanoid(),
                                 });
                             }
                             else {
@@ -2628,7 +2635,7 @@ var State = /** @class */ (function () {
                                     effectType: EFFECT_TYPE_START_STEP,
                                     player: this_1.state.activePlayer,
                                     step: newStep,
-                                    generatedBy: nanoid(),
+                                    generatedBy: this_1.nanoid(),
                                 });
                             }
                         }
@@ -2881,7 +2888,7 @@ var State = /** @class */ (function () {
                     if (action.effectType in actionMap) {
                         var transform = this_1.transformIntoActions.bind(this_1);
                         var actionTransformer = actionMap[action.effectType];
-                        actionTransformer.call(this_1, action, transform, this_1.state);
+                        actionTransformer.call(this_1, action, transform, this_1.state, this_1.nanoid);
                     }
                     break;
                 }

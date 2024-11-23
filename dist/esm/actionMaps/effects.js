@@ -19,7 +19,6 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 var _a;
-import { nanoid } from "nanoid";
 import CardInGame from "../classes/CardInGame.js";
 import { ACTION_CALCULATE, ACTION_EFFECT, ACTION_ENTER_PROMPT, ACTION_GET_PROPERTY_VALUE, ACTION_PASS, ACTION_PLAYER_WINS, ACTION_SELECT, CALCULATION_SET, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_ATTACH_CARD_TO_CARD, EFFECT_TYPE_ATTACK, EFFECT_TYPE_ATTACKER_DAMAGE_DEALT, EFFECT_TYPE_ATTACKER_DEALS_DAMAGE, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP, EFFECT_TYPE_CARD_ATTACHED_TO_CARD, EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES, EFFECT_TYPE_CONDITIONAL, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_CREATURE_IS_DEFEATED, EFFECT_TYPE_DAMAGE_STEP, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_DEFEAT_MAGI, EFFECT_TYPE_DEFENDER_DAMAGE_DEALT, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_DISCARD_CARDS_FROM_HAND, EFFECT_TYPE_DISCARD_CARD_FROM_HAND, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_DISCARD_RESHUFFLED, EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_DRAW, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_DRAW_N_CARDS, EFFECT_TYPE_DRAW_REST_OF_CARDS, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE, EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE, EFFECT_TYPE_PAYING_ENERGY_FOR_POWER, EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC, EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL, EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE, EFFECT_TYPE_PLAY_CREATURE, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY, EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_START_TURN, EFFECT_TYPE_DISTRIBUTE_CARDS_IN_ZONES, NO_PRIORITY, PRIORITY_ATTACK, PRIORITY_CREATURES, PRIORITY_PRS, PROMPT_TYPE_CHOOSE_CARDS, PROPERTY_CONTROLLER, PROPERTY_ENERGIZE, PROPERTY_ENERGY_COUNT, PROPERTY_ENERGY_LOSS_THRESHOLD, PROPERTY_ID, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_POWER_COST, SELECTOR_CREATURES_OF_PLAYER, SELECTOR_ID, SELECTOR_OWN_CARDS_IN_PLAY, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CREATURES, SELECTOR_OWN_MAGI, TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, ZONE_TYPE_DISCARD, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_MAGI_PILE } from "../const.js";
 import { oneOrSeveral, updateContinuousEffects } from "./actionMapUtils.js";
@@ -201,13 +200,13 @@ var applyStartStepEffect = function (action) {
     }
     this.state = __assign(__assign({}, this.state), { step: action.step });
 };
-var applyAddDelayedTriggerEffect = function (action) {
+var applyAddDelayedTriggerEffect = function (action, _transform, _state, seeded_nanoid) {
     var metaData = this.getSpellMetadata(action.generatedBy);
     // "new_card" fallback is for "defeated" triggers
     if ('source' in metaData || 'new_card' in metaData) {
         var self = metaData.source || metaData.new_card;
         this.state = __assign(__assign({}, this.state), { delayedTriggers: __spreadArray(__spreadArray([], this.state.delayedTriggers, true), [
-                __assign({ id: nanoid(), self: self }, action.delayedTrigger)
+                __assign({ id: seeded_nanoid(), self: self }, action.delayedTrigger)
             ], false) });
     }
 };
@@ -395,11 +394,11 @@ var applyDrawEffect = function (action, transform) {
         }, action);
     }
 };
-var applyReshuffleDiscardEffect = function (action, transform) {
+var applyReshuffleDiscardEffect = function (action, transform, _state, seeded_nanoid) {
     var player = this.getMetaValue(action.player, action.generatedBy);
     var deck = this.getZone(ZONE_TYPE_DECK, player);
     var discard = this.getZone(ZONE_TYPE_DISCARD, player);
-    var newCards = discard.cards.map(function (card) { return new CardInGame(card.card, card.owner); });
+    var newCards = discard.cards.map(function (card) { return new CardInGame(card.card, card.owner, seeded_nanoid); });
     deck.add(newCards);
     deck.shuffle();
     discard.empty();
@@ -827,7 +826,7 @@ var applyConditionalEffect = function (action, transform) {
         }
     }
 };
-var applyMoveCardsBetweenZonesEffect = function (action, transform) {
+var applyMoveCardsBetweenZonesEffect = function (action, transform, _state, seeded_nanoid) {
     var _this = this;
     if (!action.sourceZone || !action.destinationZone) {
         console.error('Source zone or destination zone invalid');
@@ -847,7 +846,7 @@ var applyMoveCardsBetweenZonesEffect = function (action, transform) {
         var destinationZone_1 = this.getZone(destinationZoneType_1, destinationZoneType_1 === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
         var newCards_1 = [];
         oneOrSeveral(zoneChangingTargets, function (zoneChangingCard) {
-            var newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner);
+            var newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner, seeded_nanoid);
             if (action.bottom) {
                 destinationZone_1.add([newObject]);
             }
@@ -871,7 +870,7 @@ var applyMoveCardsBetweenZonesEffect = function (action, transform) {
         this.setSpellMetaDataField('new_cards', newCards_1, action.generatedBy);
     }
 };
-var applyMoveCardBetweenZonesEffect = function (action, transform) {
+var applyMoveCardBetweenZonesEffect = function (action, transform, _state, seeded_nanoid) {
     if (!action.sourceZone || !action.destinationZone) {
         console.error('Source zone or destination zone invalid');
         throw new Error('Invalid params for EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
@@ -883,7 +882,7 @@ var applyMoveCardBetweenZonesEffect = function (action, transform) {
         var destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
         var destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
         var sourceZone = this.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
-        var newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner);
+        var newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner, seeded_nanoid);
         if (action.bottom) {
             destinationZone.add([newObject]);
         }
@@ -1299,9 +1298,9 @@ var applyDiscardCreatureFromPlayEffect = function (action, transform) {
         }
     });
 };
-var applyCreateContinuousEffect = function (action) {
+var applyCreateContinuousEffect = function (action, _transform, _state, seeded_nanoid) {
     var _this = this;
-    var id = nanoid();
+    var id = seeded_nanoid();
     var staticAbilities = (action.staticAbilities || []).map(function (ability) {
         switch (ability.selector) {
             case SELECTOR_ID: {

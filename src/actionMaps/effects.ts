@@ -334,7 +334,7 @@ const applyStartStepEffect: ActionTransformer<typeof EFFECT_TYPE_START_STEP> = f
   };
 }
 
-const applyAddDelayedTriggerEffect: ActionTransformer<typeof EFFECT_TYPE_ADD_DELAYED_TRIGGER> = function (action) {
+const applyAddDelayedTriggerEffect: ActionTransformer<typeof EFFECT_TYPE_ADD_DELAYED_TRIGGER> = function (action, _transform, _state, seeded_nanoid) {
   const metaData = this.getSpellMetadata(action.generatedBy);
   // "new_card" fallback is for "defeated" triggers
   if ('source' in metaData || 'new_card' in metaData) {
@@ -344,7 +344,7 @@ const applyAddDelayedTriggerEffect: ActionTransformer<typeof EFFECT_TYPE_ADD_DEL
       delayedTriggers: [
         ...this.state.delayedTriggers,
         {
-          id: nanoid(),
+          id: seeded_nanoid(),
           self,
           ...action.delayedTrigger,
         }
@@ -552,12 +552,12 @@ const applyDrawEffect: ActionTransformer<typeof EFFECT_TYPE_DRAW> = function (ac
   }
 }
 
-const applyReshuffleDiscardEffect: ActionTransformer<typeof EFFECT_TYPE_RESHUFFLE_DISCARD> = function (action, transform) {
+const applyReshuffleDiscardEffect: ActionTransformer<typeof EFFECT_TYPE_RESHUFFLE_DISCARD> = function (action, transform, _state, seeded_nanoid) {
   const player = this.getMetaValue(action.player, action.generatedBy);
   const deck = this.getZone(ZONE_TYPE_DECK, player);
   const discard = this.getZone(ZONE_TYPE_DISCARD, player);
 
-  const newCards = discard.cards.map(card => new CardInGame(card.card, card.owner));
+  const newCards = discard.cards.map(card => new CardInGame(card.card, card.owner, seeded_nanoid));
   deck.add(newCards);
   deck.shuffle();
   discard.empty();
@@ -1032,7 +1032,7 @@ const applyConditionalEffect: ActionTransformer<typeof EFFECT_TYPE_CONDITIONAL> 
   }
 }
 
-const applyMoveCardsBetweenZonesEffect: ActionTransformer<typeof EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES> = function (action, transform) {
+const applyMoveCardsBetweenZonesEffect: ActionTransformer<typeof EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES> = function (action, transform, _state, seeded_nanoid) {
   if (!action.sourceZone || !action.destinationZone) {
     console.error('Source zone or destination zone invalid');
     throw new Error('Invalid params for EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
@@ -1054,7 +1054,7 @@ const applyMoveCardsBetweenZonesEffect: ActionTransformer<typeof EFFECT_TYPE_MOV
     const newCards: CardInGame[] = [];
 
     oneOrSeveral(zoneChangingTargets, zoneChangingCard => {
-      const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner);
+      const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner, seeded_nanoid);
       if (action.bottom) {
         destinationZone.add([newObject]);
       } else {
@@ -1079,7 +1079,7 @@ const applyMoveCardsBetweenZonesEffect: ActionTransformer<typeof EFFECT_TYPE_MOV
   }
 }
 
-const applyMoveCardBetweenZonesEffect: ActionTransformer<typeof EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES> = function (action, transform) {
+const applyMoveCardBetweenZonesEffect: ActionTransformer<typeof EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES> = function (action, transform, _state, seeded_nanoid) {
   if (!action.sourceZone || !action.destinationZone) {
     console.error('Source zone or destination zone invalid');
     throw new Error('Invalid params for EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
@@ -1091,7 +1091,7 @@ const applyMoveCardBetweenZonesEffect: ActionTransformer<typeof EFFECT_TYPE_MOVE
     const destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
     const destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
     const sourceZone = this.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
-    const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner);
+    const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner, seeded_nanoid);
     if (action.bottom) {
       destinationZone.add([newObject]);
     } else {
@@ -1571,8 +1571,8 @@ const applyDiscardCreatureFromPlayEffect: ActionTransformer<typeof EFFECT_TYPE_D
   });
 }
 
-const applyCreateContinuousEffect: ActionTransformer<typeof EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT> = function (action) {
-  const id = nanoid();
+const applyCreateContinuousEffect: ActionTransformer<typeof EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT> = function (action, _transform, _state, seeded_nanoid) {
+  const id = seeded_nanoid();
 
   const staticAbilities = (action.staticAbilities || []).map(ability => {
     switch (ability.selector) {
