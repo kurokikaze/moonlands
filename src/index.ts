@@ -234,6 +234,7 @@ import {
 	EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED,
 	EFFECT_TYPE_POWER_FINISHED,
 	PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
+	EFFECT_TYPE_PROMPT_ENTERED,
 } from './const';
 
 import { actionMap } from './actionMaps/effects';
@@ -271,11 +272,12 @@ import {
 	NoneType,
 	SerializedState,
 	SerializedZones,
-    MercenneFixed,
+	MercenneFixed,
 } from './types';
 import { EnhancedDelayedTriggerType, ExecutePowerEffect, StartingEnergyOnCreatureEffect } from './types/effect';
 import { CardType, StatusType } from './types/common';
-import { AlternativeType, PromptTypeMayAbility } from './types/prompt';
+import { PromptTypeMayAbility } from './types/prompt';
+import { AlternativeType } from './types/promptParams';
 import { ActionTransformer } from './actionMaps/actionMapTypes';
 
 const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
@@ -543,6 +545,10 @@ export type PromptParamsType = {
 	restrictions?: RestrictionObjectType[] | null
 	restriction?: RestrictionType
 	amount?: number
+	effect?: {
+		name: string
+		text: string
+	}
 	zone?: ZoneType
 	zoneOwner?: number
 	sourceZone?: ZoneType
@@ -594,7 +600,7 @@ export class State {
 	winner: boolean | number;
 	debug: boolean;
 	twister: MercenneFixed | null = null;
-    nanoid: () => string = nanoid;
+	nanoid: () => string = nanoid;
 	twisterSeed: number = 0
 	turn: number | null;
 	rollDebugValue: number | null;
@@ -632,10 +638,10 @@ export class State {
 	initiatePRNG(seed: number) {
 		this.twisterSeed = seed;
 		this.twister = new (MersenneTwister as any)(seed) as MercenneFixed;
-        const seeded_nanoid = customRandom(urlAlphabet, 10, size => {
-            return (new Uint8Array(size)).map(() => 256 * this.twister!.random())
-          })
-        this.nanoid = seeded_nanoid
+		const seeded_nanoid = customRandom(urlAlphabet, 10, size => {
+			return (new Uint8Array(size)).map(() => 256 * this.twister!.random())
+		})
+		this.nanoid = seeded_nanoid
 	}
 
 	setOnAction(callback: (e: AnyEffectType) => void) {
@@ -2628,7 +2634,7 @@ export class State {
 				this.transformIntoActions(...replacedActions.slice(1));
 			}
 
-			if (this.state.prompt && !(action.type === ACTION_RESOLVE_PROMPT || action.type === ACTION_CONCEDE || action.type === ACTION_EXIT_PROMPTS)) {
+			if (this.state.prompt && !(action.type === ACTION_RESOLVE_PROMPT || action.type === ACTION_CONCEDE || action.type === ACTION_EXIT_PROMPTS || (action.type == ACTION_EFFECT && action.effectType == EFFECT_TYPE_PROMPT_ENTERED))) {
 				showAction(action);
 				throw new Error('Non-prompt action in the prompt state')
 			}
@@ -3060,7 +3066,13 @@ export class State {
 					if (!skipPrompt) {
 						this.state = {
 							...this.state,
-							actions: [],
+							actions: [{
+								type: ACTION_EFFECT,
+								effectType: EFFECT_TYPE_PROMPT_ENTERED,
+								promptType: action.promptType,
+								generatedBy: action.generatedBy || 'the-game',
+								player: promptPlayer
+							}],
 							savedActions,
 							prompt: true,
 							promptMessage: ('message' in action) ? action.message : '',

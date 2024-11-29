@@ -1,5 +1,5 @@
-import { AnyEffectType, FindType, StaticAbilityType, TriggerEffectType } from '.';
-import { ConditionType, ExpirationObjectType, ZoneType } from './common';
+import { AnyEffectType, FindType, PromptType, StaticAbilityType, TriggerEffectType } from '.';
+import { ConditionType, ExpirationObjectType, PromptTypeType, RestrictionObjectType, RestrictionType, ZoneType } from './common';
 import CardInGame from '../classes/CardInGame'
 
 import {
@@ -81,7 +81,11 @@ import {
 	EFFECT_TYPE_POWER_FINISHED,
 	EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED,
 	EFFECT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
+	EFFECT_TYPE_PROMPT_ENTERED,
+	PROMPT_TYPE_NUMBER,
+	PROMPT_TYPE_NUMBER_OF_CREATURES,
 } from '../const';
+import { AlternativePromptParams, AnyCreatureExceptSourcePromptParams, ChooseCardsPromptParams, ChooseNCardsFromZonePromptParams, ChooseUpToNCardsFromZonePromptParams, DistributeCardsInZonesPromptParams, DistributeDamagePromptParams, DistributeEnergyPromptParams, MayAbilityPromptParams, PaymentSourcePromptParams, PlayerPromptParams, RearrangeCardsOfZonePromptParams, RearrangeEnergyPromptParams } from './promptParams';
 
 export type EffectTypeType =
 	typeof EFFECT_TYPE_END_OF_TURN |
@@ -627,14 +631,48 @@ type DistributeCardsInZonesEffect = ActionEffect & {
 	cards: Record<ZoneType, CardInGame>
 }
 
-export type EffectType = /* ActionEffect & {
-	effectType: EffectTypeStillInUse;
-	generatedBy?: string;
-	source?: CardInGame;
-	power?: boolean;
-	target?: CardInGame;
-} | */
-	MoveCardBetwenZonesEffect |
+interface PromptEnteredEffectInterface extends ActionEffect {
+	effectType: typeof EFFECT_TYPE_PROMPT_ENTERED
+	message?: string;
+}
+
+export type DistributeEnergyPromptEnteredEffect = PromptEnteredEffectInterface & DistributeEnergyPromptParams
+export type DistributeDamagePromptEnteredEffect = PromptEnteredEffectInterface & DistributeDamagePromptParams
+export type RearrangeEnergyPromptEnteredEffect = PromptEnteredEffectInterface & RearrangeEnergyPromptParams
+export type ChooseUpToNCardsFromZonePromptEnteredEffect = PromptEnteredEffectInterface & ChooseUpToNCardsFromZonePromptParams
+export type ChooseNCardsFromZonePromptEnteredEffect = PromptEnteredEffectInterface & ChooseNCardsFromZonePromptParams
+export type PlayerPromptEnteredEffect = PromptEnteredEffectInterface & PlayerPromptParams
+export type ChooseCardsPromptPromptEnteredEffect = PromptEnteredEffectInterface & ChooseCardsPromptParams
+export type MayAbilityPromptEnteredEffect = PromptEnteredEffectInterface & MayAbilityPromptParams
+export type RearrangeCardsOfZonePromptEnteredEffect = PromptEnteredEffectInterface & RearrangeCardsOfZonePromptParams
+export type DistributeCardsInZonesPromptEnteredEffect = PromptEnteredEffectInterface & DistributeCardsInZonesPromptParams
+export type AlternativePromptEnteredEffect = PromptEnteredEffectInterface & AlternativePromptParams
+export type PaymentSourcePromptEnteredEffect = PromptEnteredEffectInterface & PaymentSourcePromptParams
+export type AnyCreatureExceptSourcePromptEnteredEffect = PromptEnteredEffectInterface & AnyCreatureExceptSourcePromptParams
+export type NumberPromptEnteredEffect = PromptEnteredEffectInterface & {
+	promptType: typeof PROMPT_TYPE_NUMBER
+}
+export type GenericPromptEnteredEffect = PromptEnteredEffectInterface & {
+	promptType: PromptTypeType | typeof PROMPT_TYPE_NUMBER_OF_CREATURES
+}
+
+export type AnyPromptEnteredEffect = DistributeEnergyPromptEnteredEffect |
+	DistributeDamagePromptEnteredEffect |
+	RearrangeEnergyPromptEnteredEffect |
+	ChooseUpToNCardsFromZonePromptEnteredEffect |
+	ChooseNCardsFromZonePromptEnteredEffect |
+	PlayerPromptEnteredEffect |
+	ChooseCardsPromptPromptEnteredEffect |
+	MayAbilityPromptEnteredEffect |
+	RearrangeCardsOfZonePromptEnteredEffect |
+	DistributeCardsInZonesPromptEnteredEffect |
+	AlternativePromptEnteredEffect |
+	AnyCreatureExceptSourcePromptEnteredEffect |
+	PaymentSourcePromptEnteredEffect |
+	NumberPromptEnteredEffect |
+	GenericPromptEnteredEffect
+
+export type EffectType = MoveCardBetwenZonesEffect |
 	MoveCardsBetwenZonesEffect |
 	NoneEffect |
 	AttackEffect |
@@ -703,4 +741,5 @@ export type EffectType = /* ActionEffect & {
 	PlayFinishedEffect |
 	PowerFinishedEffect |
 	DistributeCardsInZonesEffect |
-	TriggerFinishedEffect;
+	TriggerFinishedEffect |
+	AnyPromptEnteredEffect;

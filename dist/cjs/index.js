@@ -2033,7 +2033,7 @@ class State {
                 // Stuff the rest of them into beginning of the action queue
                 this.transformIntoActions(...replacedActions.slice(1));
             }
-            if (this.state.prompt && !(action.type === const_1.ACTION_RESOLVE_PROMPT || action.type === const_1.ACTION_CONCEDE || action.type === const_1.ACTION_EXIT_PROMPTS)) {
+            if (this.state.prompt && !(action.type === const_1.ACTION_RESOLVE_PROMPT || action.type === const_1.ACTION_CONCEDE || action.type === const_1.ACTION_EXIT_PROMPTS || (action.type == const_1.ACTION_EFFECT && action.effectType == const_1.EFFECT_TYPE_PROMPT_ENTERED))) {
                 (0, logAction_1.showAction)(action);
                 throw new Error('Non-prompt action in the prompt state');
             }
@@ -2422,7 +2422,13 @@ class State {
                     if (!skipPrompt) {
                         this.state = {
                             ...this.state,
-                            actions: [],
+                            actions: [{
+                                    type: const_1.ACTION_EFFECT,
+                                    effectType: const_1.EFFECT_TYPE_PROMPT_ENTERED,
+                                    promptType: action.promptType,
+                                    generatedBy: action.generatedBy || 'the-game',
+                                    player: promptPlayer
+                                }],
                             savedActions,
                             prompt: true,
                             promptMessage: ('message' in action) ? action.message : '',

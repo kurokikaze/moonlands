@@ -1,6 +1,6 @@
-import CardInGame from '../classes/CardInGame';
-import { ACTION_ENTER_PROMPT, PROMPT_TYPE_ALTERNATIVE, PROMPT_TYPE_CHOOSE_CARDS, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_PAYMENT_SOURCE, PROMPT_TYPE_PLAYER, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, RESTRICTION_CREATURE_TYPE, RESTRICTION_CREATURE_WAS_ATTACKED, RESTRICTION_ENERGY_LESS_THAN, RESTRICTION_ENERGY_LESS_THAN_STARTING, RESTRICTION_EXCEPT_SOURCE, RESTRICTION_MAGI_WITHOUT_CREATURES, RESTRICTION_OPPONENT_CREATURE, RESTRICTION_OWN_CREATURE, RESTRICTION_PLAYABLE, RESTRICTION_REGION, RESTRICTION_REGION_IS_NOT, RESTRICTION_STATUS, RESTRICTION_TYPE, TYPE_CREATURE, TYPE_RELIC, TYPE_SPELL } from '../const';
+import { ACTION_ENTER_PROMPT } from '../const';
 import { GenericPromptType, RestrictionType, RestrictionObjectType, ZoneType } from './common'
+import { AlternativePromptParams, AnyCreatureExceptSourcePromptParams, ChooseCardsPromptParams, ChooseNCardsFromZonePromptParams, ChooseUpToNCardsFromZonePromptParams, DistributeCardsInZonesPromptParams, DistributeDamagePromptParams, DistributeEnergyPromptParams, GenericPromptParams, MagiPowerPromptParams, MayAbilityPromptParams, PaymentSourcePromptParams, PlayerPromptParams, RearrangeCardsOfZonePromptParams, RearrangeEnergyPromptParams } from './promptParams'
 
 export type PromptParams = {
   promptType: GenericPromptType;
@@ -27,112 +27,22 @@ interface PromptInterface {
   replacedBy?: string[];
 }
 
-export type PromptTypeDistributeEnergy = PromptInterface & {
-  promptType: typeof PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES;
-  amount: string | number;
-  restriction?: RestrictionType;
-  restrictionValue?: any;
-}
+type GeneralPromptType = PromptParams & GenericPromptParams
 
-export type PromptTypeDistributeDamage = PromptInterface & {
-  promptType: typeof PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES;
-  amount: string | number;
-  restriction?: RestrictionType;
-}
-
-export type PromptTypeRearrangeEnergy = PromptInterface & {
-  promptType: typeof PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES;
-}
-
-export type PromptTypeChooseUpToNCardsFromZone = PromptInterface & {
-  promptType: typeof PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE;
-  zone: ZoneType;
-  zoneOwner: string;
-  numberOfCards: number | string;
-  restriction?: RestrictionType;
-  restrictionValue?: string | number | boolean;
-  restrictions?: RestrictionObjectType[];
-}
-
-export type PromptTypePlayer = PromptInterface & {
-  promptType: typeof PROMPT_TYPE_PLAYER;
-}
-
-export type ChooseCardsPromptType = PromptInterface & {
-  promptType: typeof PROMPT_TYPE_CHOOSE_CARDS;
-  promptParams: {
-    availableCards: string[];
-    startingCards: string[];
-  }
-}
-
-export type PromptTypeMayAbility = PromptInterface & {
-  promptType: typeof PROMPT_TYPE_MAY_ABILITY;
-  promptParams: {
-    effect: {
-      name: string;
-      text: string;
-    },
-  }
-}
-
-export type PromptTypeRearrangeCardsOfZone = PromptInterface & {
-  promptType: typeof PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE;
-  promptParams: {
-    zone: ZoneType | string,
-    zoneOwner: number | string,
-    numberOfCards: number | string,
-  }
-}
-
-export type PromptTypeDistributeCardsInZones = PromptInterface & {
-  promptType: typeof PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES
-  sourceZone: ZoneType | string
-  sourceZoneOwner: ZoneType | string
-  targetZones: ZoneType[] | string[]
-  numberOfCards: number
-
-}
-
-type GeneralPromptType = PromptParams & {
-  type: typeof ACTION_ENTER_PROMPT;
-  promptType: GenericPromptType;
-  promptParams?: any;
-  generatedBy?: string;
-  replacedBy?: string[];
-}
-
-export type AlternativeType = {
-  name: string
-  value: string
-}
-
-export type AlternativePromptParams = {
-  promptType: typeof PROMPT_TYPE_ALTERNATIVE,
-  alternatives: AlternativeType[],
-  message?: string
-  variable?: string
-  player?: string | number
-}
-
+export type PromptTypeDistributeEnergy = PromptInterface & DistributeEnergyPromptParams
+export type PromptTypeDistributeDamage = PromptInterface & DistributeDamagePromptParams
+export type PromptTypeRearrangeEnergy = PromptInterface & RearrangeEnergyPromptParams
+export type PromptTypeChooseUpToNCardsFromZone = PromptInterface & ChooseUpToNCardsFromZonePromptParams
+export type PromptTypeChooseNCardsFromZone = PromptInterface & ChooseNCardsFromZonePromptParams
+export type PromptTypePlayer = PromptInterface & PlayerPromptParams
+export type ChooseCardsPromptType = PromptInterface & ChooseCardsPromptParams
+export type PromptTypeMayAbility = PromptInterface & MayAbilityPromptParams
+export type PromptTypeRearrangeCardsOfZone = PromptInterface & RearrangeCardsOfZonePromptParams
+export type PromptTypeDistributeCardsInZones = PromptInterface & DistributeCardsInZonesPromptParams
 export type PromptTypeAlternative = PromptInterface & AlternativePromptParams;
-
-export type PaymentSourcePromptParams = {
-  promptType: typeof PROMPT_TYPE_PAYMENT_SOURCE
-  paymentType: typeof TYPE_CREATURE | typeof TYPE_SPELL | typeof TYPE_RELIC
-  amount: number
-  cards: CardInGame[]
-  variable?: string
-}
-
 export type PromptTypePaymentSource = PromptInterface & PaymentSourcePromptParams;
-
-export type MagiPowerPromptParams = {
-  promptType: typeof PROMPT_TYPE_POWER_ON_MAGI;
-  magi: CardInGame | string;
-}
-
 export type PromptTypeMagiPower = PromptInterface & MagiPowerPromptParams;
+export type PromptTypeAnyCreatureExceptSource = PromptInterface & AnyCreatureExceptSourcePromptParams
 
 export type PromptType = GeneralPromptType |
   PromptTypeRearrangeEnergy |
@@ -146,4 +56,5 @@ export type PromptType = GeneralPromptType |
   PromptTypeAlternative |
   PromptTypePaymentSource |
   PromptTypeDistributeCardsInZones |
+  PromptTypeAnyCreatureExceptSource |
   PromptTypeMagiPower;

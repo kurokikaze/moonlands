@@ -1,5 +1,5 @@
 import { nanoid } from "nanoid";
-import CardInGame from "../classes/CardInGame";
+import CardInGame, { ConvertedCard } from "../classes/CardInGame";
 import {
   ACTION_CALCULATE,
   ACTION_EFFECT,
@@ -109,14 +109,36 @@ import {
   ZONE_TYPE_DISCARD,
   ZONE_TYPE_HAND,
   ZONE_TYPE_IN_PLAY,
-  ZONE_TYPE_MAGI_PILE
+  ZONE_TYPE_MAGI_PILE,
+  EFFECT_TYPE_PROMPT_ENTERED,
+  PROMPT_TYPE_ALTERNATIVE,
+  PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
+  PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
+  PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+  PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
+  PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
+  PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
+  PROMPT_TYPE_MAY_ABILITY,
+  PROMPT_TYPE_NUMBER,
+  PROMPT_TYPE_PAYMENT_SOURCE,
+  PROMPT_TYPE_POWER_ON_MAGI,
+  PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
+  PROMPT_TYPE_SINGLE_CREATURE_FILTERED
 } from "../const";
-import { AnyEffectType, ContinuousEffectType, EnrichedAction, ZoneType } from "../types";
+import { AnyEffectType, ContinuousEffectType, EnrichedAction, RestrictionObjectType, ZoneType } from "../types";
 import { oneOrSeveral, updateContinuousEffects } from "./actionMapUtils";
 import { ActionTransformer, ProtoEffectType, ActionHandlerMap, ProtoChooseCardsPrompt, StepType } from "./actionMapTypes";
 import { AttackerDamageDealtEffect, AttackerDealsDamageEffect, BeforeDamageEffect } from "../types/attack";
 import { DiscardCreatureFromPlayEffect, DiscardEnergyFromCreatureEffect, MoveCardBetwenZonesEffect } from "../types/effect";
-import { cards } from "../cards";
+
+import { PromptParamsType } from "..";
+
+const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
+  id: cardInGame.id,
+  owner: cardInGame.owner,
+  card: cardInGame.card.name,
+  data: cardInGame.data,
+});
 
 const steps: StepType[] = [
   {

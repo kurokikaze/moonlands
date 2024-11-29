@@ -564,6 +564,7 @@ describe('Prompts', () => {
 			actions: [promptAction, addEnergyAction],
 		});
 
+		console.dir(gameState.state.actions)
 		expect(gameState.state.actions.length).toEqual(2, 'Two actions in queue');
 
 		const passAction = {
@@ -573,6 +574,7 @@ describe('Prompts', () => {
 
 		gameState.update(passAction);
 		expect(gameState.state.actions.length).toEqual(0, 'Queue is empty');
+		console.dir(gameState.state.savedActions)
 		expect(gameState.state.savedActions.length).toEqual(2, 'Two actions saved for later');
 		expect(arbolit.data.energy).toEqual(0, 'No energy added to creature');
 	});

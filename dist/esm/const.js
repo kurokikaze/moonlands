@@ -187,6 +187,7 @@ export var EFFECT_TYPE_PLAY_FINISHED = 'effects/play_finished';
 export var EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED = 'effects/trigger_finished';
 export var EFFECT_TYPE_POWER_FINISHED = 'effects/power_finished';
 export var EFFECT_TYPE_DISTRIBUTE_CARDS_IN_ZONES = 'effects/distribute_cards_in_zones';
+export var EFFECT_TYPE_PROMPT_ENTERED = 'effects/prompt_entered';
 export var CHANGE_TYPE_DRAW = 'changes/draw';
 export var CHANGE_TYPE_RESHUFFLE_DISCARD = 'changes/reshuffle_discard';
 export var CHANGE_TYPE_FIND_STARTING_CARDS = 'changes/find_starting_cards';

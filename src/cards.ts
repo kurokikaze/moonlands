@@ -211,7 +211,8 @@ import {
 	RestrictionObjectType,
 	ZoneType,
 } from './types';
-import { AlternativePromptParams, PromptTypeDistributeCardsInZones } from './types/prompt';
+import { PromptTypeDistributeCardsInZones } from './types/prompt';
+import { AlternativePromptParams } from './types/promptParams';
 
 const effect = (data: any): EffectType => ({
 	type: ACTION_EFFECT,

@@ -7,7 +7,7 @@ import Zone from './classes/Zone.js';
 import { AnyEffectType, PromptTypeType, RestrictionObjectType, RestrictionType, LogEntryType, PropertyType, EnrichedAction, StaticAbilityType, OperatorType, ConditionType, FindType, ContinuousEffectType, EffectType, ZoneType, Region, ProtectionType, SerializedState, SerializedZones, MercenneFixed } from './types/index.js';
 import { EnhancedDelayedTriggerType } from './types/effect.js';
 import { CardType, StatusType } from './types/common.js';
-import { AlternativeType } from './types/prompt.js';
+import { AlternativeType } from './types/promptParams.js';
 type EnrichedStaticAbilityType = StaticAbilityType & {
     player: number;
     card?: CardInGame;
@@ -35,6 +35,10 @@ export type PromptParamsType = {
     restrictions?: RestrictionObjectType[] | null;
     restriction?: RestrictionType;
     amount?: number;
+    effect?: {
+        name: string;
+        text: string;
+    };
     zone?: ZoneType;
     zoneOwner?: number;
     sourceZone?: ZoneType;

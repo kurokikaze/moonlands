@@ -7,6 +7,12 @@ exports.actionMap = exports.applyDiscardEnergyFromCreatureOrMagiEffect = void 0;
 const CardInGame_1 = __importDefault(require("../classes/CardInGame"));
 const const_1 = require("../const");
 const actionMapUtils_1 = require("./actionMapUtils");
+const convertCard = (cardInGame) => ({
+    id: cardInGame.id,
+    owner: cardInGame.owner,
+    card: cardInGame.card.name,
+    data: cardInGame.data,
+});
 const steps = [
     {
         name: 'Energize',

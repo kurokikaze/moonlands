@@ -196,6 +196,7 @@ export const EFFECT_TYPE_PLAY_FINISHED = 'effects/play_finished';
 export const EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED = 'effects/trigger_finished';
 export const EFFECT_TYPE_POWER_FINISHED = 'effects/power_finished';
 export const EFFECT_TYPE_DISTRIBUTE_CARDS_IN_ZONES = 'effects/distribute_cards_in_zones';
+export const EFFECT_TYPE_PROMPT_ENTERED = 'effects/prompt_entered';
 
 export const CHANGE_TYPE_DRAW = 'changes/draw';
 export const CHANGE_TYPE_RESHUFFLE_DISCARD = 'changes/reshuffle_discard';

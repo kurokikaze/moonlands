@@ -182,6 +182,7 @@ export declare const EFFECT_TYPE_PLAY_FINISHED = "effects/play_finished";
 export declare const EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED = "effects/trigger_finished";
 export declare const EFFECT_TYPE_POWER_FINISHED = "effects/power_finished";
 export declare const EFFECT_TYPE_DISTRIBUTE_CARDS_IN_ZONES = "effects/distribute_cards_in_zones";
+export declare const EFFECT_TYPE_PROMPT_ENTERED = "effects/prompt_entered";
 export declare const CHANGE_TYPE_DRAW = "changes/draw";
 export declare const CHANGE_TYPE_RESHUFFLE_DISCARD = "changes/reshuffle_discard";
 export declare const CHANGE_TYPE_FIND_STARTING_CARDS = "changes/find_starting_cards";
