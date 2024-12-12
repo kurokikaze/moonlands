@@ -4,8 +4,8 @@ EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_AFTER_DAMAGE, EF
 import CardInGame, { ConvertedCard, InGameData } from './classes/CardInGame';
 import Card, { CostType, ModifiedCardType } from './classes/Card';
 import Zone from './classes/Zone';
-import { AnyEffectType, PromptTypeType, RestrictionObjectType, RestrictionType, LogEntryType, PropertyType, EnrichedAction, StaticAbilityType, OperatorType, ConditionType, FindType, ContinuousEffectType, EffectType, ZoneType, Region, ProtectionType, SerializedState, SerializedZones, MercenneFixed } from './types';
-import { EnhancedDelayedTriggerType } from './types/effect';
+import { AnyEffectType, PromptTypeType, RestrictionObjectType, RestrictionType, LogEntryType, PropertyType, PromptType, EnrichedAction, StaticAbilityType, OperatorType, ConditionType, FindType, ContinuousEffectType, EffectType, ZoneType, Region, ProtectionType, SerializedState, SerializedZones, MercenneFixed } from './types';
+import { AnyPromptEnteredEffect, EnhancedDelayedTriggerType } from './types/effect';
 import { CardType, StatusType } from './types/common';
 import { AlternativeType } from './types/promptParams';
 type EnrichedStaticAbilityType = StaticAbilityType & {
@@ -193,6 +193,7 @@ export declare class State {
     triggerAbilities(action: AnyEffectType): void;
     attachCard(cardId: string, attachmentTargetId: string): void;
     removeAttachments(cardId: string): void;
+    convertPromptActionToEffect(action: PromptType): AnyPromptEnteredEffect;
     detachCard(cardId: string): void;
     performCalculation(operator: OperatorType, operandOne: number, operandTwo: number): number;
     calculateTotalCost(card: CardInGame): number;

@@ -1,6 +1,6 @@
 import { ACTION_ENTER_PROMPT } from '../const.js';
 import { GenericPromptType, RestrictionType, RestrictionObjectType } from './common.js';
-import { AlternativePromptParams, AnyCreatureExceptSourcePromptParams, ChooseCardsPromptParams, ChooseNCardsFromZonePromptParams, ChooseUpToNCardsFromZonePromptParams, DistributeCardsInZonesPromptParams, DistributeDamagePromptParams, DistributeEnergyPromptParams, GenericPromptParams, MagiPowerPromptParams, MayAbilityPromptParams, PaymentSourcePromptParams, PlayerPromptParams, RearrangeCardsOfZonePromptParams, RearrangeEnergyPromptParams } from './promptParams.js';
+import { AlternativePromptParams, AnyCreatureExceptSourcePromptParams, ChooseCardsPromptParams, ChooseNCardsFromZonePromptParams, ChooseUpToNCardsFromZonePromptParams, DistributeCardsInZonesPromptParams, DistributeDamagePromptParams, DistributeEnergyPromptParams, GenericPromptParams, MagiPowerPromptParams, MayAbilityPromptParams, NumberPromptParams, PaymentSourcePromptParams, PlayerPromptParams, RearrangeCardsOfZonePromptParams, RearrangeEnergyPromptParams } from './promptParams.js';
 export type PromptParams = {
     promptType: GenericPromptType;
     zone?: string;
@@ -39,5 +39,6 @@ export type PromptTypeAlternative = PromptInterface & AlternativePromptParams;
 export type PromptTypePaymentSource = PromptInterface & PaymentSourcePromptParams;
 export type PromptTypeMagiPower = PromptInterface & MagiPowerPromptParams;
 export type PromptTypeAnyCreatureExceptSource = PromptInterface & AnyCreatureExceptSourcePromptParams;
-export type PromptType = GeneralPromptType | PromptTypeRearrangeEnergy | PromptTypeDistributeEnergy | PromptTypeChooseUpToNCardsFromZone | PromptTypeDistributeDamage | PromptTypePlayer | ChooseCardsPromptType | PromptTypeMayAbility | PromptTypeRearrangeCardsOfZone | PromptTypeAlternative | PromptTypePaymentSource | PromptTypeDistributeCardsInZones | PromptTypeAnyCreatureExceptSource | PromptTypeMagiPower;
+export type PromptTypeNumber = PromptInterface & NumberPromptParams;
+export type PromptType = GeneralPromptType | PromptTypeRearrangeEnergy | PromptTypeDistributeEnergy | PromptTypeChooseUpToNCardsFromZone | PromptTypeDistributeDamage | PromptTypePlayer | ChooseCardsPromptType | PromptTypeMayAbility | PromptTypeRearrangeCardsOfZone | PromptTypeAlternative | PromptTypePaymentSource | PromptTypeDistributeCardsInZones | PromptTypeAnyCreatureExceptSource | PromptTypeNumber | PromptTypeMagiPower;
 export {};

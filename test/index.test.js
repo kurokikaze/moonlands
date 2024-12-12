@@ -283,6 +283,8 @@ describe('Magi stuff', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 		gameState.state.turn = 1;
 
+		gameState.enableDebug();
+
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).length).toEqual(0, 'No active magi');
 		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(2, 'Two magi in pile');
 
@@ -555,6 +557,7 @@ describe('Prompts', () => {
 		const promptAction = {
 			type: ACTION_ENTER_PROMPT,
 			player: ACTIVE_PLAYER,
+			promptType: PROMPT_TYPE_PLAYER,
 		};
 
 		const gameState = new moonlands.State({
@@ -564,7 +567,6 @@ describe('Prompts', () => {
 			actions: [promptAction, addEnergyAction],
 		});
 
-		console.dir(gameState.state.actions)
 		expect(gameState.state.actions.length).toEqual(2, 'Two actions in queue');
 
 		const passAction = {
@@ -574,7 +576,6 @@ describe('Prompts', () => {
 
 		gameState.update(passAction);
 		expect(gameState.state.actions.length).toEqual(0, 'Queue is empty');
-		console.dir(gameState.state.savedActions)
 		expect(gameState.state.savedActions.length).toEqual(2, 'Two actions saved for later');
 		expect(arbolit.data.energy).toEqual(0, 'No energy added to creature');
 	});
@@ -923,6 +924,7 @@ describe('Prompts', () => {
 		const promptAction = {
 			type: moonlands.ACTION_ENTER_PROMPT,
 			player: ACTIVE_PLAYER,
+			promptType: PROMPT_TYPE_PLAYER,
 		};
 
 		const exitPromptsAction = { type: ACTION_EXIT_PROMPTS };
@@ -5570,8 +5572,6 @@ describe('serializeData', () => {
 		});
 
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
-
-		// console.dir(gameState.serializeData(ACTIVE_PLAYER));
 	});
 });
 

@@ -1,5 +1,5 @@
-import { AnyEffectType, FindType, PromptType, StaticAbilityType, TriggerEffectType } from '.';
-import { ConditionType, ExpirationObjectType, PromptTypeType, RestrictionObjectType, RestrictionType, ZoneType } from './common';
+import { AnyEffectType, FindType, StaticAbilityType, TriggerEffectType } from '.';
+import { ConditionType, ExpirationObjectType, GenericPromptType, PromptTypeType, ZoneType } from './common';
 import CardInGame from '../classes/CardInGame'
 
 import {
@@ -85,7 +85,22 @@ import {
 	PROMPT_TYPE_NUMBER,
 	PROMPT_TYPE_NUMBER_OF_CREATURES,
 } from '../const';
-import { AlternativePromptParams, AnyCreatureExceptSourcePromptParams, ChooseCardsPromptParams, ChooseNCardsFromZonePromptParams, ChooseUpToNCardsFromZonePromptParams, DistributeCardsInZonesPromptParams, DistributeDamagePromptParams, DistributeEnergyPromptParams, MayAbilityPromptParams, PaymentSourcePromptParams, PlayerPromptParams, RearrangeCardsOfZonePromptParams, RearrangeEnergyPromptParams } from './promptParams';
+import {
+	AlternativePromptParams,
+	AnyCreatureExceptSourcePromptParams,
+	ChooseCardsPromptParams,
+	ChooseNCardsFromZonePromptParams,
+	ChooseUpToNCardsFromZonePromptParams,
+	DistributeCardsInZonesPromptParams,
+	DistributeDamagePromptParams,
+	DistributeEnergyPromptParams,
+	MagiPowerPromptParams,
+	MayAbilityPromptParams,
+	PaymentSourcePromptParams,
+	PlayerPromptParams,
+	RearrangeCardsOfZonePromptParams,
+	RearrangeEnergyPromptParams
+} from './promptParams';
 
 export type EffectTypeType =
 	typeof EFFECT_TYPE_END_OF_TURN |
@@ -651,9 +666,13 @@ export type PaymentSourcePromptEnteredEffect = PromptEnteredEffectInterface & Pa
 export type AnyCreatureExceptSourcePromptEnteredEffect = PromptEnteredEffectInterface & AnyCreatureExceptSourcePromptParams
 export type NumberPromptEnteredEffect = PromptEnteredEffectInterface & {
 	promptType: typeof PROMPT_TYPE_NUMBER
+	min: number | string
+	max: number | string
 }
+export type PowerOnMagiPromptEntered = PromptEnteredEffectInterface & MagiPowerPromptParams
+
 export type GenericPromptEnteredEffect = PromptEnteredEffectInterface & {
-	promptType: PromptTypeType | typeof PROMPT_TYPE_NUMBER_OF_CREATURES
+	promptType: GenericPromptType | typeof PROMPT_TYPE_NUMBER_OF_CREATURES
 }
 
 export type AnyPromptEnteredEffect = DistributeEnergyPromptEnteredEffect |
@@ -670,6 +689,7 @@ export type AnyPromptEnteredEffect = DistributeEnergyPromptEnteredEffect |
 	AnyCreatureExceptSourcePromptEnteredEffect |
 	PaymentSourcePromptEnteredEffect |
 	NumberPromptEnteredEffect |
+	PowerOnMagiPromptEntered |
 	GenericPromptEnteredEffect
 
 export type EffectType = MoveCardBetwenZonesEffect |

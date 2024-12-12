@@ -1374,6 +1374,9 @@ var State = /** @class */ (function () {
             }
         }
         var previouslyReplacedBy = ('replacedBy' in action && action.replacedBy) ? action.replacedBy : [];
+        if (!action) {
+            throw new Error('Empty action found in the queue');
+        }
         if (replacementFound && replaceWith) {
             var resultEffects = appliedReplacerSelf ? replaceWith.map((function (appliedReplacerSelf) { return function (replacementEffect) {
                 if ('type' in replacementEffect && replacementEffect.type == ACTION_EXIT_PROMPTS) {
@@ -1558,8 +1561,8 @@ var State = /** @class */ (function () {
                             promptType: PROMPT_TYPE_MAY_ABILITY,
                             promptParams: {
                                 effect: {
-                                    name: replacer.name,
-                                    text: replacer.text,
+                                    name: replacer.name || 'Generic replacer',
+                                    text: replacer.text || 'There was an error determining the replacer for the effect',
                                 },
                             },
                             generatedBy: replacer.self.id,
@@ -1594,6 +1597,107 @@ var State = /** @class */ (function () {
                 }
             }
             delete this.state.cardsAttached[cardId];
+        }
+    };
+    State.prototype.convertPromptActionToEffect = function (action) {
+        var player = this.getMetaValue(action.player, action.generatedBy);
+        switch (action.promptType) {
+            case PROMPT_TYPE_NUMBER: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_ALTERNATIVE: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, promptType: PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, source: this.getMetaValue(action.source, action.generatedBy), generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_CHOOSE_CARDS: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, zone: this.getMetaValue(action.zone, action.generatedBy), zoneOwner: this.getMetaValue(action.zoneOwner, action.generatedBy), numberOfCards: this.getMetaValue(action.numberOfCards, action.generatedBy), generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_MAGI_WITHOUT_CREATURES: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_MAY_ABILITY: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, promptType: PROMPT_TYPE_MAY_ABILITY, generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_NUMBER_OF_CREATURES: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_OWN_SINGLE_CREATURE: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_PAYMENT_SOURCE: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_PLAYER: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, promptType: PROMPT_TYPE_PLAYER, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_POWER_ON_MAGI: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_RELIC: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_SINGLE_CREATURE: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
+            case PROMPT_TYPE_SINGLE_MAGI: {
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
+                return effect;
+            }
         }
     };
     State.prototype.detachCard = function (cardId) {
@@ -2214,13 +2318,9 @@ var State = /** @class */ (function () {
                         }
                     }
                     if (!skipPrompt) {
-                        this_1.state = __assign(__assign({}, this_1.state), { actions: [{
-                                    type: ACTION_EFFECT,
-                                    effectType: EFFECT_TYPE_PROMPT_ENTERED,
-                                    promptType: action.promptType,
-                                    generatedBy: action.generatedBy || 'the-game',
-                                    player: promptPlayer
-                                }], savedActions: savedActions, prompt: true, promptMessage: ('message' in action) ? action.message : '', promptPlayer: promptPlayer, promptType: action.promptType, promptVariable: action.variable, promptGeneratedBy: action.generatedBy, promptParams: promptParams });
+                        this_1.state = __assign(__assign({}, this_1.state), { savedActions: savedActions, 
+                            // This will be the only action to fire after entering the prompt
+                            actions: [this_1.convertPromptActionToEffect(action)], prompt: true, promptMessage: ('message' in action) ? action.message : '', promptPlayer: promptPlayer, promptType: action.promptType, promptVariable: action.variable, promptGeneratedBy: action.generatedBy, promptParams: promptParams });
                     }
                     break;
                 }

@@ -212,7 +212,7 @@ import {
 	ZoneType,
 } from './types';
 import { PromptTypeDistributeCardsInZones } from './types/prompt';
-import { AlternativePromptParams } from './types/promptParams';
+import { AlternativePromptParams, NumberPromptParams } from './types/promptParams';
 
 const effect = (data: any): EffectType => ({
 	type: ACTION_EFFECT,
@@ -297,9 +297,10 @@ type PromptParamsType = PromptParams |
 	RearrangeCardsPromptParams |
 	AlternativePromptParams |
 	DistributeCardsPromptParams |
+	NumberPromptParams |
 	PowerOnMagiParams;
 
-const prompt = (data: PromptParamsType): PromptType => {
+const prompt = (data: PromptParamsType & { message?: string }): PromptType => {
 	switch (data.promptType) {
 		case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES:
 			return {
