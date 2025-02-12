@@ -211,8 +211,8 @@ import {
 	RestrictionObjectType,
 	ZoneType,
 } from './types';
-import { PromptTypeDistributeCardsInZones } from './types/prompt';
-import { AlternativePromptParams, NumberPromptParams } from './types/promptParams';
+import { PromptTypeChooseNCardsFromZone, PromptTypeDistributeCardsInZones } from './types/prompt';
+import { AlternativePromptParams, ChooseNCardsFromZonePromptParams, NumberPromptParams, SingleCreatureFilteredPromptParams } from './types/promptParams';
 
 const effect = (data: any): EffectType => ({
 	type: ACTION_EFFECT,
@@ -289,6 +289,9 @@ type DistributeCardsPromptParams = {
 	variable?: string
 }
 
+type SingleCreatureFilteredPromptParams_Create = Omit<SingleCreatureFilteredPromptParams, "source"> & { source?:  string, variable?: string, player?: string | number }
+type ChooseNCardsFromZonePromptParams_Create = Omit<ChooseNCardsFromZonePromptParams, "source"> & { source?:  string, variable?: string, player?: string | number }
+
 type PromptParamsType = PromptParams |
 	DistributeEnergyPromptParams |
 	RearrangeEnergyPromptParams |
@@ -298,6 +301,8 @@ type PromptParamsType = PromptParams |
 	AlternativePromptParams |
 	DistributeCardsPromptParams |
 	NumberPromptParams |
+	SingleCreatureFilteredPromptParams_Create |
+	ChooseNCardsFromZonePromptParams_Create |
 	PowerOnMagiParams;
 
 const prompt = (data: PromptParamsType & { message?: string }): PromptType => {
@@ -327,6 +332,13 @@ const prompt = (data: PromptParamsType & { message?: string }): PromptType => {
 			const promptAction: PromptTypeDistributeCardsInZones = {
 				type: ACTION_ENTER_PROMPT,
 				...data as DistributeCardsPromptParams,
+			};
+			return promptAction;
+		}
+		case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
+			const promptAction: PromptTypeChooseNCardsFromZone = {
+				type: ACTION_ENTER_PROMPT,
+				...data,
 			};
 			return promptAction;
 		}

@@ -48,6 +48,13 @@ const prompt = (data) => {
             };
             return promptAction;
         }
+        case const_1.PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
+            const promptAction = {
+                type: const_1.ACTION_ENTER_PROMPT,
+                ...data,
+            };
+            return promptAction;
+        }
     }
     return ({
         type: const_1.ACTION_ENTER_PROMPT,

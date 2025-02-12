@@ -33,6 +33,10 @@ var prompt = function (data) {
             var promptAction = __assign({ type: ACTION_ENTER_PROMPT }, data);
             return promptAction;
         }
+        case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
+            var promptAction = __assign({ type: ACTION_ENTER_PROMPT }, data);
+            return promptAction;
+        }
     }
     return (__assign({ type: ACTION_ENTER_PROMPT }, data));
 };

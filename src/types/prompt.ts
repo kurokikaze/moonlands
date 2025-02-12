@@ -49,6 +49,7 @@ export type PromptType = GeneralPromptType |
   PromptTypeRearrangeEnergy |
   PromptTypeDistributeEnergy |
   PromptTypeChooseUpToNCardsFromZone |
+  PromptTypeChooseNCardsFromZone |
   PromptTypeDistributeDamage |
   PromptTypePlayer |
   ChooseCardsPromptType |
