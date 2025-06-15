@@ -38,6 +38,8 @@ export type ChooseNCardsFromZonePromptParams = {
     restriction?: RestrictionType;
     restrictionValue?: string | number | boolean;
     restrictions?: RestrictionObjectType[];
+    player?: string | number;
+    variable?: string;
 };
 export type ChooseUpToNCardsFromZonePromptParams = {
     promptType: typeof PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE;

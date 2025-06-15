@@ -45,6 +45,8 @@ export type ChooseNCardsFromZonePromptParams = {
     restriction?: RestrictionType;
     restrictionValue?: string | number | boolean;
     restrictions?: RestrictionObjectType[];
+    player?: string | number
+    variable?: string
 }
 
 export type ChooseUpToNCardsFromZonePromptParams = {

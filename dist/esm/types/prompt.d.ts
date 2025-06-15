@@ -40,5 +40,5 @@ export type PromptTypePaymentSource = PromptInterface & PaymentSourcePromptParam
 export type PromptTypeMagiPower = PromptInterface & MagiPowerPromptParams;
 export type PromptTypeAnyCreatureExceptSource = PromptInterface & AnyCreatureExceptSourcePromptParams;
 export type PromptTypeNumber = PromptInterface & NumberPromptParams;
-export type PromptType = GeneralPromptType | PromptTypeRearrangeEnergy | PromptTypeDistributeEnergy | PromptTypeChooseUpToNCardsFromZone | PromptTypeDistributeDamage | PromptTypePlayer | ChooseCardsPromptType | PromptTypeMayAbility | PromptTypeRearrangeCardsOfZone | PromptTypeAlternative | PromptTypePaymentSource | PromptTypeDistributeCardsInZones | PromptTypeAnyCreatureExceptSource | PromptTypeNumber | PromptTypeMagiPower;
+export type PromptType = GeneralPromptType | PromptTypeRearrangeEnergy | PromptTypeDistributeEnergy | PromptTypeChooseUpToNCardsFromZone | PromptTypeChooseNCardsFromZone | PromptTypeDistributeDamage | PromptTypePlayer | ChooseCardsPromptType | PromptTypeMayAbility | PromptTypeRearrangeCardsOfZone | PromptTypeAlternative | PromptTypePaymentSource | PromptTypeDistributeCardsInZones | PromptTypeAnyCreatureExceptSource | PromptTypeNumber | PromptTypeMagiPower;
 export {};

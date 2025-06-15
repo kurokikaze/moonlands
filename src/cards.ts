@@ -212,7 +212,7 @@ import {
 	ZoneType,
 } from './types';
 import { PromptTypeDistributeCardsInZones } from './types/prompt';
-import { AlternativePromptParams, NumberPromptParams } from './types/promptParams';
+import { AlternativePromptParams, ChooseNCardsFromZonePromptParams, NumberPromptParams } from './types/promptParams';
 
 const effect = (data: any): EffectType => ({
 	type: ACTION_EFFECT,
@@ -298,6 +298,7 @@ type PromptParamsType = PromptParams |
 	AlternativePromptParams |
 	DistributeCardsPromptParams |
 	NumberPromptParams |
+    ChooseNCardsFromZonePromptParams |
 	PowerOnMagiParams;
 
 const prompt = (data: PromptParamsType & { message?: string }): PromptType => {
