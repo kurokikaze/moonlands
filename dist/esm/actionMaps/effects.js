@@ -1495,6 +1495,10 @@ var applyAttachCardToCardEffect = function (action, transform) {
         generatedBy: action.generatedBy,
     });
 };
+var applyPromptEntered = function (action) {
+    var promptPlayer = this.getMetaValue(action.player, action.generatedBy);
+    this.state = __assign(__assign({}, this.state), { prompt: true, promptType: action.promptType, promptParams: action.promptParams || this.state.promptParams, promptGeneratedBy: action.generatedBy, promptMessage: action.message, promptPlayer: promptPlayer, promptVariable: action.variable });
+};
 export var actionMap = (_a = {},
     // Beginning of turn and step
     _a[EFFECT_TYPE_START_TURN] = applyStartTurnEffect,

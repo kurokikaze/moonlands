@@ -37,6 +37,10 @@ var prompt = function (data) {
             var promptAction = __assign({ type: ACTION_ENTER_PROMPT }, data);
             return promptAction;
         }
+        case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
+            var promptAction = __assign({ type: ACTION_ENTER_PROMPT }, data);
+            return promptAction;
+        }
     }
     return (__assign({ type: ACTION_ENTER_PROMPT }, data));
 };

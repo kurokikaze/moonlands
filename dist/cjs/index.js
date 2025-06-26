@@ -343,15 +343,17 @@ class State {
             case const_1.ACTION_ENTER_PROMPT: {
                 switch (action.promptType) {
                     case const_1.PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-                        if (Object.hasOwn(action, 'restrictions') && action.restrictions) {
-                            const restrictionsWithValues = action.restrictions.map(({ type, value }) => ({
-                                type,
-                                value: this.getMetaValue(value, action.generatedBy),
-                            }));
-                            return {
-                                ...action,
-                                restrictions: restrictionsWithValues,
-                            };
+                        if ('restrictions' in action) {
+                            if (action.restrictions) {
+                                const restrictionsWithValues = action.restrictions.map(({ type, value }) => ({
+                                    type,
+                                    value: this.getMetaValue(value, action.generatedBy),
+                                }));
+                                return {
+                                    ...action,
+                                    restrictions: restrictionsWithValues,
+                                };
+                            }
                         }
                         else {
                             return {
@@ -1922,6 +1924,7 @@ class State {
                     ...action,
                     type: const_1.ACTION_EFFECT,
                     effectType: const_1.EFFECT_TYPE_PROMPT_ENTERED,
+                    promptType: action.promptType,
                     generatedBy: action.generatedBy || 'the-game',
                     player,
                 };
@@ -1943,6 +1946,7 @@ class State {
                     ...action,
                     type: const_1.ACTION_EFFECT,
                     effectType: const_1.EFFECT_TYPE_PROMPT_ENTERED,
+                    promptType: action.promptType,
                     generatedBy: action.generatedBy || 'the-game',
                     player,
                 };
@@ -1952,6 +1956,7 @@ class State {
                 const effect = {
                     ...action,
                     type: const_1.ACTION_EFFECT,
+                    promptType: action.promptType,
                     effectType: const_1.EFFECT_TYPE_PROMPT_ENTERED,
                     generatedBy: action.generatedBy || 'the-game',
                     player,
@@ -1963,6 +1968,7 @@ class State {
                     ...action,
                     type: const_1.ACTION_EFFECT,
                     effectType: const_1.EFFECT_TYPE_PROMPT_ENTERED,
+                    promptType: action.promptType,
                     generatedBy: action.generatedBy || 'the-game',
                     player,
                 };
@@ -2003,6 +2009,12 @@ class State {
                 const effect = {
                     ...action,
                     type: const_1.ACTION_EFFECT,
+                    promptParams: {
+                        ...action.promptParams,
+                        zone: this.getMetaValue(action.promptParams.zone, action.generatedBy),
+                        zoneOwner: this.getMetaValue(action.promptParams.zoneOwner, action.generatedBy),
+                        numberOfCards: this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy),
+                    },
                     effectType: const_1.EFFECT_TYPE_PROMPT_ENTERED,
                     generatedBy: action.generatedBy || 'the-game',
                     player,
@@ -2024,6 +2036,7 @@ class State {
                     ...action,
                     type: const_1.ACTION_EFFECT,
                     effectType: const_1.EFFECT_TYPE_PROMPT_ENTERED,
+                    promptType: action.promptType,
                     generatedBy: action.generatedBy || 'the-game',
                     player,
                 };
@@ -2034,6 +2047,7 @@ class State {
                     ...action,
                     type: const_1.ACTION_EFFECT,
                     effectType: const_1.EFFECT_TYPE_PROMPT_ENTERED,
+                    promptType: action.promptType,
                     generatedBy: action.generatedBy || 'the-game',
                     player,
                 };
@@ -2054,6 +2068,7 @@ class State {
                     ...action,
                     type: const_1.ACTION_EFFECT,
                     effectType: const_1.EFFECT_TYPE_PROMPT_ENTERED,
+                    promptType: action.promptType,
                     generatedBy: action.generatedBy || 'the-game',
                     player,
                 };
@@ -2064,6 +2079,7 @@ class State {
                     ...action,
                     type: const_1.ACTION_EFFECT,
                     effectType: const_1.EFFECT_TYPE_PROMPT_ENTERED,
+                    promptType: action.promptType,
                     generatedBy: action.generatedBy || 'the-game',
                     player,
                 };
@@ -2196,7 +2212,7 @@ class State {
                     return magi.some(magi => magi.card.data.powers && magi.card.data.powers.some(power => power.cost === const_1.COST_X || (power.cost <= magi.data.energy + 2)));
                 }
                 case const_1.PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-                    if (promptAction.restrictions) {
+                    if ('restrictions' in promptAction && promptAction.restrictions) {
                         const restrictionsWithValues = promptAction.restrictions.map(({ type, value }) => {
                             const restrictionValue = (typeof value === 'string' &&
                                 value in metaValues) ? metaValues[value] : value;
@@ -2207,7 +2223,7 @@ class State {
                         });
                         return this.checkAnyCardForRestrictions(allCardsInPlay.filter(card => card.card.type === const_1.TYPE_CREATURE), restrictionsWithValues);
                     }
-                    else if (promptAction.restriction) {
+                    else if ('restriction' in promptAction) {
                         switch (promptAction.restriction) {
                             case const_1.RESTRICTION_OWN_CREATURE: {
                                 return this.checkAnyCardForRestriction(allCardsInPlay.filter(card => card.card.type === const_1.TYPE_CREATURE), promptAction.restriction, source.data.controller);
@@ -2583,7 +2599,7 @@ class State {
                             break;
                         }
                         case const_1.PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-                            if (action.restrictions) {
+                            if ('restrictions' in action) {
                                 const restrictionsWithValues = action.restrictions.map(({ type, value }) => ({
                                     type,
                                     value: this.getMetaValue(value, action.generatedBy),
@@ -2592,7 +2608,7 @@ class State {
                                     restrictions: restrictionsWithValues,
                                 };
                             }
-                            else if (action.restriction) {
+                            else if ('restriction' in action) {
                                 promptParams = {
                                     restrictions: [
                                         {
@@ -3307,10 +3323,10 @@ class State {
                                                 case const_1.PROMPT_TYPE_OWN_SINGLE_CREATURE:
                                                     return this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.some(card => this.modifyByStaticAbilities(card, const_1.PROPERTY_CONTROLLER) === promptAction.player);
                                                 case const_1.PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-                                                    if (promptAction.restrictions) {
+                                                    if ('restrictions' in promptAction) {
                                                         return promptAction.restrictions.every(({ type, value }) => this.checkAnyCardForRestriction(this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards, type, value));
                                                     }
-                                                    else if (promptAction.restriction) {
+                                                    else if ('restriction' in promptAction) {
                                                         return this.checkAnyCardForRestriction(this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.type === const_1.TYPE_CREATURE), promptAction.restriction, promptAction.restrictionValue);
                                                     }
                                                     return true;

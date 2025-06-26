@@ -9,10 +9,13 @@ export type AnyCreatureExceptSourcePromptParams = {
 
 export type SingleCreatureFilteredPromptParams = {
     promptType: typeof PROMPT_TYPE_SINGLE_CREATURE_FILTERED;
-    restrictions: RestrictionObjectType[],
     restriction: RestrictionType,
-    restrictionValue: string | number | boolean | undefined
-    source: CardInGame;
+    restrictionValue?: string | number | boolean
+    // source: CardInGame | string;
+} | {
+    promptType: typeof PROMPT_TYPE_SINGLE_CREATURE_FILTERED;
+    restrictions: RestrictionObjectType[],
+    // source: CardInGame;
 }
 
 export type PaymentSourcePromptParams = {

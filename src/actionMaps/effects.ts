@@ -1816,6 +1816,21 @@ const applyAttachCardToCardEffect: ActionTransformer<typeof EFFECT_TYPE_ATTACH_C
   });
 }
 
+const applyPromptEntered: ActionTransformer<typeof EFFECT_TYPE_PROMPT_ENTERED> = function (action ) {
+  const promptPlayer = this.getMetaValue(action.player, action.generatedBy);
+
+  this.state = {
+    ...this.state,
+    prompt: true,
+    promptType: action.promptType,
+    promptParams: action.promptParams || this.state.promptParams,
+    promptGeneratedBy: action.generatedBy,
+    promptMessage: action.message,
+    promptPlayer: promptPlayer,
+    promptVariable: action.variable,
+  }
+}
+
 export const actionMap: Partial<ActionHandlerMap> = {
   // Beginning of turn and step
   [EFFECT_TYPE_START_TURN]: applyStartTurnEffect,
@@ -1902,4 +1917,7 @@ export const actionMap: Partial<ActionHandlerMap> = {
   [EFFECT_TYPE_ADD_DELAYED_TRIGGER]: applyAddDelayedTriggerEffect,
   [EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT]: applyCreateContinuousEffect,
   [EFFECT_TYPE_CONDITIONAL]: applyConditionalEffect,
+
+  // Prompt-related stuff
+  // [EFFECT_TYPE_PROMPT_ENTERED]: applyPromptEntered,
 }

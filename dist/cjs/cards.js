@@ -55,6 +55,13 @@ const prompt = (data) => {
             };
             return promptAction;
         }
+        case const_1.PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
+            const promptAction = {
+                type: const_1.ACTION_ENTER_PROMPT,
+                ...data,
+            };
+            return promptAction;
+        }
     }
     return ({
         type: const_1.ACTION_ENTER_PROMPT,

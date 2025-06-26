@@ -859,7 +859,6 @@ describe('Hubdra\'s Spear', () => {
       power: abaquist.card.data.powers[0],
     };
 
-    // gameState.enableDebug();
     gameState.update(abaquistPowerAction);
 
     expect(gameState.state.prompt).toEqual(true);

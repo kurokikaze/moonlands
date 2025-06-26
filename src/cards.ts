@@ -211,7 +211,7 @@ import {
 	RestrictionObjectType,
 	ZoneType,
 } from './types';
-import { PromptTypeChooseNCardsFromZone, PromptTypeDistributeCardsInZones } from './types/prompt';
+import { PromptTypeChooseNCardsFromZone, PromptTypeDistributeCardsInZones, PromptTypeSingleCreatureFiltered } from './types/prompt';
 import { AlternativePromptParams, ChooseNCardsFromZonePromptParams, NumberPromptParams, SingleCreatureFilteredPromptParams } from './types/promptParams';
 
 const effect = (data: any): EffectType => ({
@@ -289,8 +289,17 @@ type DistributeCardsPromptParams = {
 	variable?: string
 }
 
-type SingleCreatureFilteredPromptParams_Create = Omit<SingleCreatureFilteredPromptParams, "source"> & { source?:  string, variable?: string, player?: string | number }
-type ChooseNCardsFromZonePromptParams_Create = Omit<ChooseNCardsFromZonePromptParams, "source"> & { source?:  string, variable?: string, player?: string | number }
+type DistributiveOmit<T, K extends keyof any> = T extends any
+	? Omit<T, K>
+	: never;
+
+type ExpandRecursively<T> = T extends object
+	? T extends infer O ? { [K in keyof O]: ExpandRecursively<O[K]> } : never
+	: T;
+
+type SingleCreatureFilteredPromptParamsWithoutSource = ExpandRecursively<DistributiveOmit<SingleCreatureFilteredPromptParams, "source">>
+type SingleCreatureFilteredPromptParams_Create = SingleCreatureFilteredPromptParamsWithoutSource & { source?: string, variable?: string, player?: string | number }
+type ChooseNCardsFromZonePromptParams_Create = Omit<ChooseNCardsFromZonePromptParams, "source"> & { source?: string, variable?: string, player?: string | number }
 
 type PromptParamsType = PromptParams |
 	DistributeEnergyPromptParams |
@@ -337,6 +346,13 @@ const prompt = (data: PromptParamsType & { message?: string }): PromptType => {
 		}
 		case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
 			const promptAction: PromptTypeChooseNCardsFromZone = {
+				type: ACTION_ENTER_PROMPT,
+				...data,
+			};
+			return promptAction;
+		}
+		case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
+			const promptAction: PromptTypeSingleCreatureFiltered = {
 				type: ACTION_ENTER_PROMPT,
 				...data,
 			};

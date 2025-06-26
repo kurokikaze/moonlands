@@ -274,7 +274,7 @@ import {
 	SerializedZones,
 	MercenneFixed,
 } from './types';
-import { AlternativePromptEnteredEffect, AnyCreatureExceptSourcePromptEnteredEffect, AnyPromptEnteredEffect, ChooseCardsPromptPromptEnteredEffect, ChooseNCardsFromZonePromptEnteredEffect, ChooseUpToNCardsFromZonePromptEnteredEffect, DistributeCardsInZonesPromptEnteredEffect, DistributeDamagePromptEnteredEffect, DistributeEnergyPromptEnteredEffect, EnhancedDelayedTriggerType, ExecutePowerEffect, GenericPromptEnteredEffect, MayAbilityPromptEnteredEffect, NumberPromptEnteredEffect, PaymentSourcePromptEnteredEffect, PlayerPromptEnteredEffect, PowerOnMagiPromptEntered, RearrangeCardsOfZonePromptEnteredEffect, RearrangeEnergyPromptEnteredEffect, StartingEnergyOnCreatureEffect } from './types/effect';
+import { AlternativePromptEnteredEffect, AnyCreatureExceptSourcePromptEnteredEffect, AnyPromptEnteredEffect, ChooseCardsPromptPromptEnteredEffect, ChooseNCardsFromZonePromptEnteredEffect, ChooseUpToNCardsFromZonePromptEnteredEffect, DistributeCardsInZonesPromptEnteredEffect, DistributeDamagePromptEnteredEffect, DistributeEnergyPromptEnteredEffect, EnhancedDelayedTriggerType, ExecutePowerEffect, GenericPromptEnteredEffect, GenericPromptEnteredPromptType, MayAbilityPromptEnteredEffect, NumberPromptEnteredEffect, PaymentSourcePromptEnteredEffect, PlayerPromptEnteredEffect, PowerOnMagiPromptEntered, RearrangeCardsOfZonePromptEnteredEffect, RearrangeEnergyPromptEnteredEffect, SingleCreatureFilteredPromptEnteredEffect, StartingEnergyOnCreatureEffect } from './types/effect';
 import { CardType, StatusType } from './types/common';
 import { PromptTypeMayAbility } from './types/prompt';
 import { AlternativeType } from './types/promptParams';
@@ -666,16 +666,18 @@ export class State {
 			case ACTION_ENTER_PROMPT: {
 				switch (action.promptType) {
 					case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-						if (Object.hasOwn(action, 'restrictions') && action.restrictions) {
-							const restrictionsWithValues = action.restrictions.map(({ type, value }: RestrictionObjectType) => ({
-								type,
-								value: this.getMetaValue(value, action.generatedBy),
-							}));
+						if ('restrictions' in action) {
+							if (action.restrictions) {
+								const restrictionsWithValues = action.restrictions.map(({ type, value }: RestrictionObjectType) => ({
+									type,
+									value: this.getMetaValue(value, action.generatedBy),
+								}));
 
-							return {
-								...action,
-								restrictions: restrictionsWithValues,
-							};
+								return {
+									...action,
+									restrictions: restrictionsWithValues,
+								};
+							}
 						} else {
 							return {
 								...action,
@@ -2388,7 +2390,7 @@ export class State {
 					generatedBy: action.generatedBy || 'the-game',
 					player,
 				}
-	
+
 				return effect
 			}
 			case PROMPT_TYPE_CHOOSE_CARDS: {
@@ -2409,7 +2411,7 @@ export class State {
 					promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 					zone: this.getMetaValue(action.zone, action.generatedBy) as ZoneType,
 					zoneOwner: this.getMetaValue(action.zoneOwner, action.generatedBy) as string,
-					numberOfCards:this.getMetaValue(action.numberOfCards, action.generatedBy) as number,
+					numberOfCards: this.getMetaValue(action.numberOfCards, action.generatedBy) as number,
 					generatedBy: action.generatedBy || 'the-game',
 					player,
 				}
@@ -2460,6 +2462,7 @@ export class State {
 					...action,
 					type: ACTION_EFFECT,
 					effectType: EFFECT_TYPE_PROMPT_ENTERED,
+					promptType: action.promptType as GenericPromptEnteredPromptType,
 					generatedBy: action.generatedBy || 'the-game',
 					player,
 				}
@@ -2481,6 +2484,7 @@ export class State {
 					...action,
 					type: ACTION_EFFECT,
 					effectType: EFFECT_TYPE_PROMPT_ENTERED,
+					promptType: action.promptType as GenericPromptEnteredPromptType,
 					generatedBy: action.generatedBy || 'the-game',
 					player,
 				}
@@ -2490,6 +2494,7 @@ export class State {
 				const effect: GenericPromptEnteredEffect = {
 					...action,
 					type: ACTION_EFFECT,
+					promptType: action.promptType as GenericPromptEnteredPromptType,
 					effectType: EFFECT_TYPE_PROMPT_ENTERED,
 					generatedBy: action.generatedBy || 'the-game',
 					player,
@@ -2501,6 +2506,7 @@ export class State {
 					...action,
 					type: ACTION_EFFECT,
 					effectType: EFFECT_TYPE_PROMPT_ENTERED,
+					promptType: action.promptType as GenericPromptEnteredPromptType,
 					generatedBy: action.generatedBy || 'the-game',
 					player,
 				}
@@ -2541,11 +2547,17 @@ export class State {
 				const effect: RearrangeCardsOfZonePromptEnteredEffect = {
 					...action,
 					type: ACTION_EFFECT,
+					promptParams: {
+						...action.promptParams,
+						zone: this.getMetaValue(action.promptParams.zone, action.generatedBy) as ZoneType,
+						zoneOwner: this.getMetaValue(action.promptParams.zoneOwner, action.generatedBy) as number,
+						numberOfCards: this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy) as number,
+					},
 					effectType: EFFECT_TYPE_PROMPT_ENTERED,
 					generatedBy: action.generatedBy || 'the-game',
 					player,
 				}
-				return effect
+				return effect as RearrangeCardsOfZonePromptEnteredEffect;
 			}
 			case PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES: {
 				const effect: RearrangeEnergyPromptEnteredEffect = {
@@ -2562,6 +2574,7 @@ export class State {
 					...action,
 					type: ACTION_EFFECT,
 					effectType: EFFECT_TYPE_PROMPT_ENTERED,
+					promptType: action.promptType as GenericPromptEnteredPromptType,
 					generatedBy: action.generatedBy || 'the-game',
 					player,
 				}
@@ -2572,13 +2585,14 @@ export class State {
 					...action,
 					type: ACTION_EFFECT,
 					effectType: EFFECT_TYPE_PROMPT_ENTERED,
+					promptType: action.promptType as GenericPromptEnteredPromptType,
 					generatedBy: action.generatedBy || 'the-game',
 					player,
 				}
 				return effect
 			}
 			case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-				const effect: GenericPromptEnteredEffect = {
+				const effect: SingleCreatureFilteredPromptEnteredEffect = {
 					...action,
 					type: ACTION_EFFECT,
 					effectType: EFFECT_TYPE_PROMPT_ENTERED,
@@ -2592,6 +2606,7 @@ export class State {
 					...action,
 					type: ACTION_EFFECT,
 					effectType: EFFECT_TYPE_PROMPT_ENTERED,
+					promptType: action.promptType as GenericPromptEnteredPromptType,
 					generatedBy: action.generatedBy || 'the-game',
 					player,
 				}
@@ -2602,6 +2617,7 @@ export class State {
 					...action,
 					type: ACTION_EFFECT,
 					effectType: EFFECT_TYPE_PROMPT_ENTERED,
+					promptType: action.promptType as GenericPromptEnteredPromptType,
 					generatedBy: action.generatedBy || 'the-game',
 					player,
 				}
@@ -2757,7 +2773,7 @@ export class State {
 					return magi.some(magi => magi.card.data.powers && magi.card.data.powers.some(power => power.cost === COST_X || (power.cost <= magi.data.energy + 2)));
 				}
 				case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-					if (promptAction.restrictions) {
+					if ('restrictions' in promptAction && promptAction.restrictions) {
 						const restrictionsWithValues = promptAction.restrictions.map(({ type, value }: RestrictionObjectType) => {
 							const restrictionValue = (
 								typeof value === 'string' &&
@@ -2770,7 +2786,7 @@ export class State {
 							};
 						});
 						return this.checkAnyCardForRestrictions(allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE), restrictionsWithValues as RestrictionObjectType[]);
-					} else if (promptAction.restriction) {
+					} else if ('restriction' in promptAction) {
 						switch (promptAction.restriction) {
 							case RESTRICTION_OWN_CREATURE: {
 								return this.checkAnyCardForRestriction(
@@ -3228,7 +3244,7 @@ export class State {
 							break;
 						}
 						case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-							if (action.restrictions) {
+							if ('restrictions' in action) {
 								const restrictionsWithValues = action.restrictions.map(({ type, value }: RestrictionObjectType) => ({
 									type,
 									value: this.getMetaValue(value, action.generatedBy as string),
@@ -3237,7 +3253,7 @@ export class State {
 								promptParams = {
 									restrictions: restrictionsWithValues,
 								};
-							} else if (action.restriction) {
+							} else if ('restriction' in action) {
 								promptParams = {
 									restrictions: [
 										{
@@ -3983,11 +3999,11 @@ export class State {
 												case PROMPT_TYPE_OWN_SINGLE_CREATURE:
 													return this.getZone(ZONE_TYPE_IN_PLAY).cards.some(card => this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === promptAction.player);
 												case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-													if (promptAction.restrictions) {
+													if ('restrictions' in promptAction) {
 														return promptAction.restrictions.every(({ type, value }) =>
 															this.checkAnyCardForRestriction(this.getZone(ZONE_TYPE_IN_PLAY).cards, type, value)
 														);
-													} else if (promptAction.restriction) {
+													} else if ('restriction' in promptAction) {
 														return this.checkAnyCardForRestriction(
 															this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.type === TYPE_CREATURE),
 															promptAction.restriction,

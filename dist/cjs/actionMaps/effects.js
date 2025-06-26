@@ -1520,6 +1520,19 @@ const applyAttachCardToCardEffect = function (action, transform) {
         generatedBy: action.generatedBy,
     });
 };
+const applyPromptEntered = function (action) {
+    const promptPlayer = this.getMetaValue(action.player, action.generatedBy);
+    this.state = {
+        ...this.state,
+        prompt: true,
+        promptType: action.promptType,
+        promptParams: action.promptParams || this.state.promptParams,
+        promptGeneratedBy: action.generatedBy,
+        promptMessage: action.message,
+        promptPlayer: promptPlayer,
+        promptVariable: action.variable,
+    };
+};
 exports.actionMap = {
     // Beginning of turn and step
     [const_1.EFFECT_TYPE_START_TURN]: applyStartTurnEffect,
@@ -1595,5 +1608,7 @@ exports.actionMap = {
     [const_1.EFFECT_TYPE_ADD_DELAYED_TRIGGER]: applyAddDelayedTriggerEffect,
     [const_1.EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT]: applyCreateContinuousEffect,
     [const_1.EFFECT_TYPE_CONDITIONAL]: applyConditionalEffect,
+    // Prompt-related stuff
+    // [EFFECT_TYPE_PROMPT_ENTERED]: applyPromptEntered,
 };
 //# sourceMappingURL=effects.js.map

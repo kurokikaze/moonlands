@@ -283,8 +283,6 @@ describe('Magi stuff', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 		gameState.state.turn = 1;
 
-		gameState.enableDebug();
-
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).length).toEqual(0, 'No active magi');
 		expect(gameState.getZone(ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).length).toEqual(2, 'Two magi in pile');
 

@@ -1,6 +1,6 @@
 import { ACTION_ENTER_PROMPT } from '../const';
 import { GenericPromptType, RestrictionType, RestrictionObjectType } from './common'
-import { AlternativePromptParams, AnyCreatureExceptSourcePromptParams, ChooseCardsPromptParams, ChooseNCardsFromZonePromptParams, ChooseUpToNCardsFromZonePromptParams, DistributeCardsInZonesPromptParams, DistributeDamagePromptParams, DistributeEnergyPromptParams, GenericPromptParams, MagiPowerPromptParams, MayAbilityPromptParams, NumberPromptParams, PaymentSourcePromptParams, PlayerPromptParams, RearrangeCardsOfZonePromptParams, RearrangeEnergyPromptParams } from './promptParams'
+import { AlternativePromptParams, AnyCreatureExceptSourcePromptParams, ChooseCardsPromptParams, ChooseNCardsFromZonePromptParams, ChooseUpToNCardsFromZonePromptParams, DistributeCardsInZonesPromptParams, DistributeDamagePromptParams, DistributeEnergyPromptParams, GenericPromptParams, MagiPowerPromptParams, MayAbilityPromptParams, NumberPromptParams, PaymentSourcePromptParams, PlayerPromptParams, RearrangeCardsOfZonePromptParams, RearrangeEnergyPromptParams, SingleCreatureFilteredPromptParams } from './promptParams'
 
 export type PromptParams = {
   promptType: GenericPromptType;
@@ -44,6 +44,7 @@ export type PromptTypePaymentSource = PromptInterface & PaymentSourcePromptParam
 export type PromptTypeMagiPower = PromptInterface & MagiPowerPromptParams;
 export type PromptTypeAnyCreatureExceptSource = PromptInterface & AnyCreatureExceptSourcePromptParams
 export type PromptTypeNumber = PromptInterface & NumberPromptParams
+export type PromptTypeSingleCreatureFiltered = PromptInterface & SingleCreatureFilteredPromptParams
 
 export type PromptType = GeneralPromptType |
   PromptTypeRearrangeEnergy |
@@ -60,4 +61,5 @@ export type PromptType = GeneralPromptType |
   PromptTypeDistributeCardsInZones |
   PromptTypeAnyCreatureExceptSource |
   PromptTypeNumber |
+  PromptTypeSingleCreatureFiltered |
   PromptTypeMagiPower;
