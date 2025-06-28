@@ -1971,8 +1971,8 @@ describe('Abaquist', () => {
     expect(gameState.state.promptParams.restrictions[0].type).toEqual(RESTRICTION_ENERGY_LESS_THAN);
     expect(gameState.state.promptParams.restrictions[0].value).toEqual(6);
 
-    expect(seenActions[2].restrictions[0].type).toEqual(RESTRICTION_ENERGY_LESS_THAN);
-    expect(seenActions[2].restrictions[0].value).toEqual(6);
+    expect(seenActions[2].promptParams.restrictions[0].type).toEqual(RESTRICTION_ENERGY_LESS_THAN);
+    expect(seenActions[2].promptParams.restrictions[0].value).toEqual(6);
 
     const chooseCreatureAction = {
       type: ACTION_RESOLVE_PROMPT,
@@ -2105,8 +2105,8 @@ describe('Abaquist', () => {
     expect(gameState.state.promptParams.restrictions[0].type).toEqual(RESTRICTION_ENERGY_LESS_THAN);
     expect(gameState.state.promptParams.restrictions[0].value).toEqual(6);
 
-    expect(seenActions[2].restrictions[0].type).toEqual(RESTRICTION_ENERGY_LESS_THAN);
-    expect(seenActions[2].restrictions[0].value).toEqual(6);
+    expect(seenActions[2].promptParams.restrictions[0].type).toEqual(RESTRICTION_ENERGY_LESS_THAN);
+    expect(seenActions[2].promptParams.restrictions[0].value).toEqual(6);
 
     const chooseCreatureAction = {
       type: ACTION_RESOLVE_PROMPT,

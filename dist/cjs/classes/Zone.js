@@ -70,6 +70,9 @@ class Zone {
     shuffle() {
         this.cards = this._shuffle(this.cards);
     }
+    getCardsByRestriction(restrictions, state) {
+        return restrictions ? this.cards.filter(state.makeCardFilter(restrictions)) : this.cards;
+    }
     _shuffle(array) {
         var currentIndex = array.length, temporaryValue, randomIndex;
         // While there remain elements to shuffle...

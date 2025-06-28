@@ -9,63 +9,86 @@ export type AnyCreatureExceptSourcePromptParams = {
 
 export type SingleCreatureFilteredPromptParams = {
     promptType: typeof PROMPT_TYPE_SINGLE_CREATURE_FILTERED;
-    restriction: RestrictionType,
-    restrictionValue?: string | number | boolean
-    // source: CardInGame | string;
+    promptParams: {
+        restriction: RestrictionType,
+        restrictionValue?: string | number | boolean
+        // source: CardInGame | string;
+    }
 } | {
     promptType: typeof PROMPT_TYPE_SINGLE_CREATURE_FILTERED;
-    restrictions: RestrictionObjectType[],
-    // source: CardInGame;
+    promptParams: {
+        restrictions: RestrictionObjectType[],
+        // source: CardInGame;
+    }
 }
 
 export type PaymentSourcePromptParams = {
     promptType: typeof PROMPT_TYPE_PAYMENT_SOURCE
-    paymentType: typeof TYPE_CREATURE | typeof TYPE_SPELL | typeof TYPE_RELIC
-    amount: number
-    cards: CardInGame[]
+    promptParams: {
+        paymentType: typeof TYPE_CREATURE | typeof TYPE_SPELL | typeof TYPE_RELIC
+        amount: number
+        cards: CardInGame[]
+    }
     variable?: string
 }
 
 export type MagiPowerPromptParams = {
     promptType: typeof PROMPT_TYPE_POWER_ON_MAGI;
-    magi: CardInGame | string;
+    promptParams: {
+        magi: CardInGame | string;
+    }
+    variable?: string
 }
 
 export type DistributeEnergyPromptParams = {
     promptType: typeof PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES;
-    amount: string | number;
-    restriction?: RestrictionType;
-    restrictionValue?: any;
+    promptParams: {
+        amount: string | number;
+        restriction?: RestrictionType;
+        restrictionValue?: any;
+    }
 }
 
 export type DistributeDamagePromptParams = {
     promptType: typeof PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES;
-    amount: string | number;
-    restriction?: RestrictionType;
+    promptParams: {
+        amount: string | number;
+        restriction?: RestrictionType;
+    }
 }
 
 export type RearrangeEnergyPromptParams = {
     promptType: typeof PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES;
+    message?: string;
+    variable?: string;
 }
 
 export type ChooseNCardsFromZonePromptParams = {
     promptType: typeof PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE;
-    zone: ZoneType;
-    zoneOwner: string;
-    numberOfCards: number | string;
-    restriction?: RestrictionType;
-    restrictionValue?: string | number | boolean;
-    restrictions?: RestrictionObjectType[];
+    promptParams: {
+        zone: ZoneType;
+        zoneOwner: string;
+        numberOfCards: number | string;
+        restriction?: RestrictionType;
+        restrictionValue?: string | number | boolean;
+        restrictions?: RestrictionObjectType[];
+        player?: string | number
+        variable?: string
+    }
 }
 
 export type ChooseUpToNCardsFromZonePromptParams = {
     promptType: typeof PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE;
-    zone: ZoneType;
-    zoneOwner: string;
-    numberOfCards: number | string;
-    restriction?: RestrictionType;
-    restrictionValue?: string | number | boolean;
-    restrictions?: RestrictionObjectType[];
+    promptParams: {
+        zone: ZoneType;
+        zoneOwner: string;
+        numberOfCards: number | string;
+        restriction?: RestrictionType;
+        restrictionValue?: string | number | boolean;
+        restrictions?: RestrictionObjectType[];
+    },
+    player?: string | number
+    variable?: string
 }
 
 export type PlayerPromptParams = {
@@ -97,14 +120,18 @@ export type RearrangeCardsOfZonePromptParams = {
         zoneOwner: number | string,
         numberOfCards: number | string,
     }
+    variable?: string
 }
 
 export type DistributeCardsInZonesPromptParams = {
     promptType: typeof PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES
-    sourceZone: ZoneType | string
-    sourceZoneOwner: ZoneType | string
-    targetZones: ZoneType[] | string[]
-    numberOfCards: number
+    promptParams: {
+        sourceZone: ZoneType | string
+        sourceZoneOwner: ZoneType | string
+        targetZones: ZoneType[] | string[]
+        numberOfCards: number
+    }
+    variable?: string
 }
 
 export type GenericPromptParams = {
@@ -122,7 +149,9 @@ export type AlternativeType = {
 
 export type AlternativePromptParams = {
     promptType: typeof PROMPT_TYPE_ALTERNATIVE,
-    alternatives: AlternativeType[],
+    promptParams: {
+        alternatives: AlternativeType[],
+    }
     message?: string
     variable?: string
     player?: string | number
@@ -130,6 +159,8 @@ export type AlternativePromptParams = {
 
 export type NumberPromptParams = {
     promptType: typeof PROMPT_TYPE_NUMBER
-    min: number | string
-    max: number | string
+    promptParams: {
+        min: number | string
+        max: number | string
+    }
 }

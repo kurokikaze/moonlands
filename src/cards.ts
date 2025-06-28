@@ -207,12 +207,27 @@ import {
 	PropertyGetterParams,
 	SelectType,
 	RefinedSelectParams,
-	RestrictionType,
-	RestrictionObjectType,
 	ZoneType,
 } from './types';
-import { PromptTypeChooseNCardsFromZone, PromptTypeDistributeCardsInZones, PromptTypeSingleCreatureFiltered } from './types/prompt';
-import { AlternativePromptParams, ChooseNCardsFromZonePromptParams, NumberPromptParams, SingleCreatureFilteredPromptParams } from './types/promptParams';
+
+import {
+	PromptTypeChooseNCardsFromZone,
+	PromptTypeDistributeCardsInZones,
+	PromptTypeSingleCreatureFiltered
+} from './types/prompt';
+import {
+	AlternativePromptParams,
+	ChooseNCardsFromZonePromptParams,
+	NumberPromptParams,
+	SingleCreatureFilteredPromptParams,
+	DistributeEnergyPromptParams,
+	ChooseUpToNCardsFromZonePromptParams,
+	MagiPowerPromptParams,
+	RearrangeCardsOfZonePromptParams,
+	RearrangeEnergyPromptParams,
+	DistributeDamagePromptParams,
+	DistributeCardsInZonesPromptParams
+} from './types/promptParams';
 
 const effect = (data: any): EffectType => ({
 	type: ACTION_EFFECT,
@@ -229,66 +244,6 @@ const getPropertyValue = (data: PropertyGetterParams): PropertyGetterType => ({
 	...data,
 });
 
-type UpToNCardsPromptParams = {
-	promptType: typeof PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE;
-	zone: ZoneType;
-	message?: string;
-	player?: number | string;
-	zoneOwner: string;
-	numberOfCards: number | string;
-	restriction?: RestrictionType;
-	restrictionValue?: string | number | boolean;
-	restrictions?: RestrictionObjectType[];
-	variable?: string;
-}
-
-type RearrangeEnergyPromptParams = {
-	promptType: typeof PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES;
-	message?: string;
-	variable?: string;
-}
-
-type DistributeEnergyPromptParams = {
-	promptType: typeof PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES;
-	amount: string | number;
-	message?: string;
-	restriction?: RestrictionType;
-	variable?: string;
-}
-
-type DistributeDamagePromptParams = {
-	promptType: typeof PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES;
-	amount: string | number;
-	message?: string;
-	restriction?: RestrictionType;
-	variable?: string;
-}
-
-type RearrangeCardsPromptParams = {
-	promptType: typeof PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE;
-	promptParams: {
-		zone: ZoneType | string;
-		zoneOwner: number | string;
-		numberOfCards: number | string;
-	};
-	variable?: string;
-}
-
-type PowerOnMagiParams = {
-	promptType: typeof PROMPT_TYPE_POWER_ON_MAGI,
-	magi: string;
-	variable?: string;
-}
-
-type DistributeCardsPromptParams = {
-	promptType: typeof PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
-	sourceZone: ZoneType | string
-	sourceZoneOwner: string
-	targetZones: ZoneType[] | string[]
-	numberOfCards: number
-	variable?: string
-}
-
 type DistributiveOmit<T, K extends keyof any> = T extends any
 	? Omit<T, K>
 	: never;
@@ -304,15 +259,16 @@ type ChooseNCardsFromZonePromptParams_Create = Omit<ChooseNCardsFromZonePromptPa
 type PromptParamsType = PromptParams |
 	DistributeEnergyPromptParams |
 	RearrangeEnergyPromptParams |
-	UpToNCardsPromptParams |
+	ChooseUpToNCardsFromZonePromptParams |
 	DistributeDamagePromptParams |
-	RearrangeCardsPromptParams |
+	RearrangeCardsOfZonePromptParams |
 	AlternativePromptParams |
-	DistributeCardsPromptParams |
+	DistributeCardsInZonesPromptParams |
 	NumberPromptParams |
 	SingleCreatureFilteredPromptParams_Create |
 	ChooseNCardsFromZonePromptParams_Create |
-	PowerOnMagiParams;
+	ChooseNCardsFromZonePromptParams |
+	MagiPowerPromptParams;
 
 const prompt = (data: PromptParamsType & { message?: string }): PromptType => {
 	switch (data.promptType) {
@@ -340,7 +296,7 @@ const prompt = (data: PromptParamsType & { message?: string }): PromptType => {
 		case PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES: {
 			const promptAction: PromptTypeDistributeCardsInZones = {
 				type: ACTION_ENTER_PROMPT,
-				...data as DistributeCardsPromptParams,
+				...data,
 			};
 			return promptAction;
 		}
@@ -414,7 +370,9 @@ export const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-						restriction: RESTRICTION_CREATURE_WAS_ATTACKED,
+						promptParams: {
+							restriction: RESTRICTION_CREATURE_WAS_ATTACKED,
+						},
 					}),
 					effect({
 						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
@@ -547,19 +505,21 @@ export const cards = [
 		effects: [
 			prompt({
 				promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
-				zone: ZONE_TYPE_DECK,
-				zoneOwner: '$player',
-				restrictions: [
-					{
-						type: RESTRICTION_TYPE,
-						value: TYPE_CREATURE,
-					},
-					{
-						type: RESTRICTION_CREATURE_TYPE,
-						value: 'Hyren',
-					},
-				],
-				numberOfCards: 1,
+				promptParams: {
+					zone: ZONE_TYPE_DECK,
+					zoneOwner: '$player',
+					restrictions: [
+						{
+							type: RESTRICTION_TYPE,
+							value: TYPE_CREATURE,
+						},
+						{
+							type: RESTRICTION_CREATURE_TYPE,
+							value: 'Hyren',
+						},
+					],
+					numberOfCards: 1,
+				},
 				variable: 'chosenHyren',
 			}),
 			effect({
@@ -604,11 +564,13 @@ export const cards = [
 				}),
 				prompt({
 					promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
-					zone: ZONE_TYPE_DECK,
-					restriction: RESTRICTION_CREATURE_NAME,
-					restrictionValue: '$creatureName',
-					zoneOwner: '$player',
-					numberOfCards: 2,
+					promptParams: {
+						zone: ZONE_TYPE_DECK,
+						restriction: RESTRICTION_CREATURE_NAME,
+						restrictionValue: '$creatureName',
+						zoneOwner: '$player',
+						numberOfCards: 2,
+					},
 					variable: 'chosenCards',
 				}),
 				effect({
@@ -632,19 +594,21 @@ export const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
-						zone: ZONE_TYPE_DECK,
-						zoneOwner: '$player',
-						restrictions: [
-							{
-								type: RESTRICTION_TYPE,
-								value: TYPE_CREATURE,
-							},
-							{
-								type: RESTRICTION_REGION,
-								value: REGION_OROTHE,
-							},
-						],
-						numberOfCards: 1,
+						promptParams: {
+							zone: ZONE_TYPE_DECK,
+							zoneOwner: '$player',
+							restrictions: [
+								{
+									type: RESTRICTION_TYPE,
+									value: TYPE_CREATURE,
+								},
+								{
+									type: RESTRICTION_REGION,
+									value: REGION_OROTHE,
+								},
+							],
+							numberOfCards: 1,
+						},
 						variable: 'orotheCreature',
 					}),
 					effect({
@@ -679,11 +643,13 @@ export const cards = [
 			}),
 			prompt({
 				promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
-				restriction: RESTRICTION_REGION,
-				restrictionValue: REGION_OROTHE,
-				zone: ZONE_TYPE_HAND,
-				zoneOwner: '$player',
-				numberOfCards: '$targetEnergy',
+				promptParams: {
+					restriction: RESTRICTION_REGION,
+					restrictionValue: REGION_OROTHE,
+					zone: ZONE_TYPE_HAND,
+					zoneOwner: '$player',
+					numberOfCards: '$targetEnergy',
+				},
 				variable: 'chosenCards'
 			}),
 			getPropertyValue({
@@ -713,19 +679,21 @@ export const cards = [
 			prompt({
 				promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
 				message: 'Choose any number of Cald creature cards to discard',
-				restrictions: [
-					{
-						type: RESTRICTION_REGION,
-						value: REGION_CALD,
-					},
-					{
-						type: RESTRICTION_TYPE,
-						value: TYPE_CREATURE,
-					},
-				],
-				zone: ZONE_TYPE_HAND,
-				zoneOwner: '$player',
-				numberOfCards: 100,
+				promptParams: {
+					restrictions: [
+						{
+							type: RESTRICTION_REGION,
+							value: REGION_CALD,
+						},
+						{
+							type: RESTRICTION_TYPE,
+							value: TYPE_CREATURE,
+						},
+					],
+					zone: ZONE_TYPE_HAND,
+					zoneOwner: '$player',
+					numberOfCards: 100,
+				},
 			}),
 			getPropertyValue({
 				target: '$targetCards',
@@ -753,9 +721,11 @@ export const cards = [
 			effects: [
 				prompt({
 					promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
-					zone: ZONE_TYPE_HAND,
-					zoneOwner: '$player',
-					numberOfCards: 5,
+					promptParams: {
+						zone: ZONE_TYPE_HAND,
+						zoneOwner: '$player',
+						numberOfCards: 5,
+					},
 				}),
 				getPropertyValue({
 					target: '$targetCards',
@@ -783,9 +753,11 @@ export const cards = [
 			effects: [
 				prompt({
 					promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
-					zone: ZONE_TYPE_HAND,
-					zoneOwner: '$player',
-					numberOfCards: 100,
+					promptParams: {
+						zone: ZONE_TYPE_HAND,
+						zoneOwner: '$player',
+						numberOfCards: 100,
+					},
 				}),
 				getPropertyValue({
 					target: '$targetCards',
@@ -870,7 +842,9 @@ export const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-						restriction: RESTRICTION_ENERGY_LESS_THAN_STARTING,
+						promptParams: {
+							restriction: RESTRICTION_ENERGY_LESS_THAN_STARTING,
+						},
 					}),
 					effect({
 						effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
@@ -954,10 +928,12 @@ export const cards = [
 					}),
 					prompt({
 						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
-						zone: ZONE_TYPE_HAND,
+						promptParams: {
+							zone: ZONE_TYPE_HAND,
+							zoneOwner: '$opponentId',
+							numberOfCards: 3,
+						},
 						player: '$opponentId',
-						zoneOwner: '$opponentId',
-						numberOfCards: 3,
 					}),
 					effect({
 						effectType: EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
@@ -984,11 +960,13 @@ export const cards = [
 				prompt({
 					promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
 					message: 'Choose up to two creature cards to be discarded',
-					zone: ZONE_TYPE_HAND,
-					restriction: RESTRICTION_TYPE,
-					restrictionValue: TYPE_CREATURE,
-					zoneOwner: '$targetPlayer',
-					numberOfCards: 2,
+					promptParams: {
+						zone: ZONE_TYPE_HAND,
+						restriction: RESTRICTION_TYPE,
+						restrictionValue: TYPE_CREATURE,
+						zoneOwner: '$targetPlayer',
+						numberOfCards: 2,
+					},
 				}),
 				effect({
 					effectType: EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
@@ -1014,9 +992,11 @@ export const cards = [
 				prompt({
 					promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
 					message: 'Choose up to one card to be discarded',
-					zone: ZONE_TYPE_HAND,
-					zoneOwner: '$targetPlayer',
-					numberOfCards: 1,
+					promptParams: {
+						zone: ZONE_TYPE_HAND,
+						zoneOwner: '$targetPlayer',
+						numberOfCards: 1,
+					},
 				}),
 				effect({
 					effectType: EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
@@ -1038,10 +1018,12 @@ export const cards = [
 				prompt({
 					promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 					message: 'Choose two cards to be discarded',
-					zone: ZONE_TYPE_HAND,
-					zoneOwner: '$targetPlayer',
+					promptParams: {
+						zone: ZONE_TYPE_HAND,
+						zoneOwner: '$targetPlayer',
+						numberOfCards: 2,
+					},
 					player: '$targetPlayer',
-					numberOfCards: 2,
 				}),
 				effect({
 					effectType: EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
@@ -1068,10 +1050,12 @@ export const cards = [
 				prompt({
 					promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
 					message: 'Choose up to two cards to be discarded. For each discarded card Giant Vulbor will remove two less energy.',
-					zone: ZONE_TYPE_HAND,
-					zoneOwner: '$creatureController',
+					promptParams: {
+						zone: ZONE_TYPE_HAND,
+						zoneOwner: '$creatureController',
+						numberOfCards: 2,
+					},
 					player: '$creatureController',
-					numberOfCards: 2,
 				}),
 				effect({
 					effectType: EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
@@ -1107,8 +1091,10 @@ export const cards = [
 		effects: [
 			prompt({
 				promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-				restriction: RESTRICTION_ENERGY_LESS_THAN,
-				restrictionValue: 5,
+				promptParams: {
+					restriction: RESTRICTION_ENERGY_LESS_THAN,
+					restrictionValue: 5,
+				},
 			}),
 			effect({
 				effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
@@ -1124,8 +1110,10 @@ export const cards = [
 			effects: [
 				prompt({
 					promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-					restriction: RESTRICTION_ENERGY_LESS_THAN,
-					restrictionValue: 2,
+					promptParams: {
+						restriction: RESTRICTION_ENERGY_LESS_THAN,
+						restrictionValue: 2,
+					},
 				}),
 				effect({
 					effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
@@ -1183,8 +1171,10 @@ export const cards = [
 			effects: [
 				prompt({
 					promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-					restriction: RESTRICTION_ENERGY_LESS_THAN,
-					restrictionValue: 4,
+					promptParams: {
+						restriction: RESTRICTION_ENERGY_LESS_THAN,
+						restrictionValue: 4,
+					},
 				}),
 				effect({
 					effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
@@ -1210,18 +1200,20 @@ export const cards = [
 					}),
 					prompt({
 						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
-						zone: ZONE_TYPE_HAND,
-						zoneOwner: '$player',
-						numberOfCards: 1,
-						restrictions: [
-							{
-								type: RESTRICTION_TYPE,
-								value: TYPE_CREATURE,
-							},
-							{
-								type: RESTRICTION_PLAYABLE,
-							}
-						],
+						promptParams: {
+							zone: ZONE_TYPE_HAND,
+							zoneOwner: '$player',
+							numberOfCards: 1,
+							restrictions: [
+								{
+									type: RESTRICTION_TYPE,
+									value: TYPE_CREATURE,
+								},
+								{
+									type: RESTRICTION_PLAYABLE,
+								}
+							],
+						},
 					}),
 					{
 						type: ACTION_PLAY,
@@ -1253,11 +1245,13 @@ export const cards = [
 					}),
 					prompt({
 						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
-						zone: ZONE_TYPE_HAND,
-						restriction: RESTRICTION_TYPE,
-						restrictionValue: TYPE_CREATURE,
-						zoneOwner: '$player',
-						numberOfCards: 1,
+						promptParams: {
+							zone: ZONE_TYPE_HAND,
+							restriction: RESTRICTION_TYPE,
+							restrictionValue: TYPE_CREATURE,
+							zoneOwner: '$player',
+							numberOfCards: 1,
+						},
 					}),
 					effect({
 						effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
@@ -1302,16 +1296,18 @@ export const cards = [
 					prompt({
 						promptType: PROMPT_TYPE_ALTERNATIVE,
 						// message: 'Do you want to discard 4 energy to avoid discarding ${target}?',
-						alternatives: [
-							{
-								name: 'Discard the relic',
-								value: 'discardRelic',
-							},
-							{
-								name: 'Discard 4 energy from Magi',
-								value: 'discardEnergy'
-							}
-						],
+						promptParams: {
+							alternatives: [
+								{
+									name: 'Discard the relic',
+									value: 'discardRelic',
+								},
+								{
+									name: 'Discard 4 energy from Magi',
+									value: 'discardEnergy'
+								}
+							],
+						},
 						variable: 'choice',
 						player: '$relicController',
 					}),
@@ -1686,10 +1682,12 @@ export const cards = [
 					}),
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-						restrictions: [{
-							type: RESTRICTION_ENERGY_LESS_THAN,
-							value: '$abaquistEnergy',
-						}],
+						promptParams: {
+							restrictions: [{
+								type: RESTRICTION_ENERGY_LESS_THAN,
+								value: '$abaquistEnergy',
+							}],
+						},
 					}),
 					getPropertyValue({
 						property: PROPERTY_CONTROLLER,
@@ -1859,16 +1857,23 @@ export const cards = [
 					],
 				},
 				effects: [
+					getPropertyValue({
+						property: PROPERTY_CONTROLLER,
+						target: '$sourceCreature',
+						variable: 'controller',
+					}),
 					prompt({
 						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 						message: 'Search your deck for another Vellup',
-						zone: ZONE_TYPE_DECK,
-						zoneOwner: '%player',
-						restrictions: [{
-							type: RESTRICTION_CREATURE_TYPE,
-							value: 'Vellup',
-						}],
-						numberOfCards: 1,
+						promptParams: {
+							zone: ZONE_TYPE_DECK,
+							zoneOwner: '$controller',
+							restrictions: [{
+								type: RESTRICTION_CREATURE_TYPE,
+								value: 'Vellup',
+							}],
+							numberOfCards: 1,
+						},
 						variable: 'targetCard',
 					}),
 					effect({
@@ -2107,7 +2112,9 @@ export const cards = [
 					prompt({
 						promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
 						variable: 'target',
-						source: '%self',
+						promptParams: {
+							source: '%self',
+						}
 					}),
 					effect({
 						effectType: EFFECT_TYPE_ATTACK,
@@ -2449,12 +2456,14 @@ export const cards = [
 					}),
 					prompt({
 						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
-						zone: ZONE_TYPE_DISCARD,
-						zoneOwner: '$relicController',
 						message: 'Choose a spell to put on top of your deck',
-						restriction: RESTRICTION_TYPE,
-						restrictionValue: TYPE_SPELL,
-						numberOfCards: 1,
+						promptParams: {
+							zone: ZONE_TYPE_DISCARD,
+							zoneOwner: '$relicController',
+							restriction: RESTRICTION_TYPE,
+							restrictionValue: TYPE_SPELL,
+							numberOfCards: 1,
+						},
 						variable: 'selectedCard',
 					}),
 					effect({
@@ -2477,10 +2486,12 @@ export const cards = [
 			}),
 			prompt({
 				promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
-				zone: ZONE_TYPE_DISCARD,
 				message: 'Choose a card to put on top of your deck',
-				zoneOwner: '$spellController',
-				numberOfCards: 1,
+				promptParams: {
+					zone: ZONE_TYPE_DISCARD,
+					zoneOwner: '$spellController',
+					numberOfCards: 1,
+				},
 				variable: 'selectedCard',
 			}),
 			effect({
@@ -2522,10 +2533,12 @@ export const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-						restrictions: [{
-							type: RESTRICTION_REGION,
-							value: REGION_OROTHE,
-						}],
+						promptParams: {
+							restrictions: [{
+								type: RESTRICTION_REGION,
+								value: REGION_OROTHE,
+							}],
+						},
 						variable: 'chosenOrotheCreature',
 					}),
 					effect({
@@ -2562,10 +2575,12 @@ export const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-						restrictions: [{
-							type: RESTRICTION_REGION,
-							value: REGION_OROTHE,
-						}],
+						promptParams: {
+							restrictions: [{
+								type: RESTRICTION_REGION,
+								value: REGION_OROTHE,
+							}],
+						},
 						variable: 'chosenOrotheCreature',
 					}),
 					effect({
@@ -2592,9 +2607,11 @@ export const cards = [
 					}),
 					prompt({
 						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
-						zone: ZONE_TYPE_HAND,
-						zoneOwner: '$relicController',
-						numberOfCards: 2,
+						promptParams: {
+							zone: ZONE_TYPE_HAND,
+							zoneOwner: '$relicController',
+							numberOfCards: 2,
+						},
 					}),
 					effect({
 						effectType: EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
@@ -2676,7 +2693,9 @@ export const cards = [
 					prompt({
 						promptType: PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 						message: 'Choose a creature to add 2 energy to.',
-						source: '$sourceCreature',
+						promptParams: {
+							source: '$sourceCreature',
+						}
 					}),
 					effect({
 						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
@@ -2970,8 +2989,10 @@ export const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-						restriction: RESTRICTION_CREATURE_TYPE,
-						restrictionValue: 'Xyx',
+						promptParams: {
+							restriction: RESTRICTION_CREATURE_TYPE,
+							restrictionValue: 'Xyx',
+						},
 						message: 'Choose a Creature to add 4 energy to',
 					}),
 					effect({
@@ -3109,16 +3130,18 @@ export const cards = [
 			}),
 			prompt({
 				promptType: PROMPT_TYPE_ALTERNATIVE,
-				alternatives: [
-					{
-						name: 'Add energy to creature',
-						value: 'add'
-					},
-					{
-						name: 'Remove energy from creature',
-						value: 'remove'
-					},
-				],
+				promptParams: {
+					alternatives: [
+						{
+							name: 'Add energy to creature',
+							value: 'add'
+						},
+						{
+							name: 'Remove energy from creature',
+							value: 'remove'
+						},
+					],
+				},
 				variable: 'addRemoveChoice'
 			}),
 			effect({
@@ -3256,16 +3279,18 @@ export const cards = [
 						thenEffects: [
 							prompt({
 								promptType: PROMPT_TYPE_ALTERNATIVE,
-								alternatives: [
-									{
-										name: 'Draw five cards',
-										value: 'draw',
-									},
-									{
-										name: 'Make the opponent discard their hand',
-										value: 'discard',
-									}
-								],
+								promptParams: {
+									alternatives: [
+										{
+											name: 'Draw five cards',
+											value: 'draw',
+										},
+										{
+											name: 'Make the opponent discard their hand',
+											value: 'discard',
+										}
+									],
+								},
 								variable: 'actionMode'
 							}),
 							effect({
@@ -3472,9 +3497,11 @@ export const cards = [
 					}),
 					prompt({
 						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
-						zone: ZONE_TYPE_HAND,
-						zoneOwner: '$player',
-						numberOfCards: 2,
+						promptParams: {
+							zone: ZONE_TYPE_HAND,
+							zoneOwner: '$player',
+							numberOfCards: 2,
+						},
 					}),
 					effect({
 						effectType: EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
@@ -3482,9 +3509,11 @@ export const cards = [
 					}),
 					prompt({
 						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
-						zone: ZONE_TYPE_DECK,
-						zoneOwner: '$player',
-						numberOfCards: 1,
+						promptParams: {
+							zone: ZONE_TYPE_DECK,
+							zoneOwner: '$player',
+							numberOfCards: 1,
+						},
 					}),
 					effect({
 						effectType: EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
@@ -3571,13 +3600,17 @@ export const cards = [
 			effects: [
 				prompt({
 					promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-					restriction: RESTRICTION_OWN_CREATURE,
+					promptParams: {
+						restriction: RESTRICTION_OWN_CREATURE,
+					},
 					message: 'Choose your creature',
 					variable: 'yourCreature',
 				}),
 				prompt({
 					promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-					restriction: RESTRICTION_OPPONENT_CREATURE,
+					promptParams: {
+						restriction: RESTRICTION_OPPONENT_CREATURE,
+					},
 					message: 'Choose opponent\'s creature',
 					variable: 'opponentCreature',
 				}),
@@ -3652,8 +3685,10 @@ export const cards = [
 					prompt({
 						promptType: PROMPT_TYPE_NUMBER,
 						message: 'Choose up to ${max_tribute} energy to move to Quor Pup',
-						min: 0,
-						max: '$max_tribute',
+						promptParams: {
+							min: 0,
+							max: '$max_tribute',
+						},
 					}),
 					effect({
 						effectType: EFFECT_TYPE_MOVE_ENERGY,
@@ -3688,8 +3723,10 @@ export const cards = [
 			}),
 			prompt({
 				promptType: PROMPT_TYPE_NUMBER,
-				min: 1,
-				max: '$max_amount',
+				promptParams: {
+					min: 1,
+					max: '$max_amount',
+				},
 			}),
 			select({
 				selector: SELECTOR_OWN_MAGI,
@@ -3723,8 +3760,10 @@ export const cards = [
 		effects: [
 			prompt({
 				promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-				restriction: RESTRICTION_STATUS,
-				restrictionValue: STATUS_BURROWED,
+				promptParams: {
+					restriction: RESTRICTION_STATUS,
+					restrictionValue: STATUS_BURROWED,
+				},
 			}),
 			effect({
 				effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
@@ -3766,8 +3805,10 @@ export const cards = [
 					}),
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-						restriction: RESTRICTION_CREATURE_TYPE,
-						restrictionValue: 'Pharan',
+						promptParams: {
+							restriction: RESTRICTION_CREATURE_TYPE,
+							restrictionValue: 'Pharan',
+						},
 						message: 'Choose a Pharan',
 						variable: 'chosenPharan',
 					}),
@@ -4471,7 +4512,9 @@ export const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-						restriction: RESTRICTION_ENERGY_LESS_THAN_STARTING,
+						promptParams: {
+							restriction: RESTRICTION_ENERGY_LESS_THAN_STARTING,
+						}
 					}),
 					effect({
 						effectType: EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
@@ -4486,7 +4529,9 @@ export const cards = [
 		effects: [
 			prompt({
 				promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-				restriction: RESTRICTION_ENERGY_LESS_THAN_STARTING,
+				promptParams: {
+					restriction: RESTRICTION_ENERGY_LESS_THAN_STARTING,
+				}
 			}),
 			effect({
 				effectType: EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
@@ -4661,7 +4706,9 @@ export const cards = [
 				}),
 				prompt({
 					promptType: PROMPT_TYPE_POWER_ON_MAGI,
-					magi: '$ownMagi',
+					promptParams: {
+						magi: '$ownMagi',
+					},
 					variable: 'chosenPower',
 				}),
 				getPropertyValue({
@@ -4862,9 +4909,11 @@ export const cards = [
 					}),
 					prompt({
 						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
-						zone: ZONE_TYPE_DISCARD,
-						zoneOwner: '$spellController',
-						numberOfCards: 1,
+						promptParams: {
+							zone: ZONE_TYPE_DISCARD,
+							zoneOwner: '$spellController',
+							numberOfCards: 1,
+						},
 						variable: 'selectedCard',
 					}),
 					effect({
@@ -4905,8 +4954,10 @@ export const cards = [
 					prompt({
 						message: 'Choose a Korrit in play',
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-						restriction: RESTRICTION_CREATURE_TYPE,
-						restrictionValue: 'Korrit',
+						promptParams: {
+							restriction: RESTRICTION_CREATURE_TYPE,
+							restrictionValue: 'Korrit',
+						},
 					}),
 					effect({
 						effectType: EFFECT_TYPE_CONDITIONAL,
@@ -5129,8 +5180,10 @@ export const cards = [
 					}),
 					prompt({
 						promptType: PROMPT_TYPE_NUMBER,
-						min: 1,
-						max: '$max_tribute',
+						promptParams: {
+							min: 1,
+							max: '$max_tribute',
+						},
 					}),
 					effect({
 						effectType: EFFECT_TYPE_MOVE_ENERGY,
@@ -5432,7 +5485,9 @@ export const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE,
-						restriction: RESTRICTION_ENERGY_LESS_THAN_STARTING,
+						promptParams: {
+							restriction: RESTRICTION_ENERGY_LESS_THAN_STARTING,
+						},
 					}),
 					effect({
 						effectType: EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
@@ -5504,7 +5559,9 @@ export const cards = [
 		effects: [
 			prompt({
 				promptType: PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
-				amount: '$chosen_cost',
+				promptParams: {
+					amount: '$chosen_cost',
+				},
 				message: 'Distribute damage among any number of creatures'
 			}),
 			effect({
@@ -5606,13 +5663,17 @@ export const cards = [
 				effects: [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-						restriction: RESTRICTION_OWN_CREATURE,
+						promptParams: {
+							restriction: RESTRICTION_OWN_CREATURE,
+						},
 						message: 'Choose your creature',
 						variable: 'ownCreature',
 					}),
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-						restriction: RESTRICTION_OPPONENT_CREATURE,
+						promptParams: {
+							restriction: RESTRICTION_OPPONENT_CREATURE,
+						},
 						message: 'Choose opponent\'s creature',
 						variable: 'opponentCreature',
 					}),
@@ -5824,8 +5885,10 @@ export const cards = [
 		effects: [
 			prompt({
 				promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-				restriction: RESTRICTION_REGION,
-				restrictionValue: REGION_ARDERIAL,
+				promptParams: {
+					restriction: RESTRICTION_REGION,
+					restrictionValue: REGION_ARDERIAL,
+				},
 			}),
 			effect({
 				effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
@@ -5875,8 +5938,10 @@ export const cards = [
 		effects: [
 			prompt({
 				promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-				restriction: RESTRICTION_REGION,
-				restrictionValue: REGION_OROTHE,
+				promptParams: {
+					restriction: RESTRICTION_REGION,
+					restrictionValue: REGION_OROTHE,
+				},
 			}),
 			effect({
 				effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
@@ -5947,8 +6012,10 @@ export const cards = [
 					prompt({
 						promptType: PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
 						message: 'Distribute Flame Hyren\'s energy among any number of creatures. After this Flame Hyren will be discarded.',
-						restriction: RESTRICTION_EXCEPT_SOURCE,
-						amount: '$flameHyrenEnergy',
+						promptParams: {
+							restriction: RESTRICTION_EXCEPT_SOURCE,
+							amount: '$flameHyrenEnergy',
+						},
 					}),
 					effect({
 						effectType: EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
@@ -6115,13 +6182,15 @@ export const cards = [
 			effects: [
 				prompt({
 					promptType: PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
-					sourceZone: ZONE_TYPE_DECK,
-					sourceZoneOwner: '$player',
-					targetZones: [
-						ZONE_TYPE_DECK,
-						ZONE_TYPE_DISCARD,
-					],
-					numberOfCards: 2,
+					promptParams: {
+						sourceZone: ZONE_TYPE_DECK,
+						sourceZoneOwner: '$player',
+						targetZones: [
+							ZONE_TYPE_DECK,
+							ZONE_TYPE_DISCARD,
+						],
+						numberOfCards: 2,
+					},
 					variable: 'cardsInZones',
 				}),
 				effect({

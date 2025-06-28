@@ -233,20 +233,20 @@ var State = /** @class */ (function () {
             case ACTION_ENTER_PROMPT: {
                 switch (action.promptType) {
                     case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-                        if ('restrictions' in action) {
-                            if (action.restrictions) {
-                                var restrictionsWithValues = action.restrictions.map(function (_a) {
+                        if ('restrictions' in action.promptParams) {
+                            if (action.promptParams.restrictions) {
+                                var restrictionsWithValues = action.promptParams.restrictions.map(function (_a) {
                                     var type = _a.type, value = _a.value;
                                     return ({
                                         type: type,
                                         value: _this.getMetaValue(value, action.generatedBy),
                                     });
                                 });
-                                return __assign(__assign({}, action), { restrictions: restrictionsWithValues });
+                                return __assign(__assign({}, action), { promptParams: __assign(__assign({}, action.promptParams), { restrictions: restrictionsWithValues }) });
                             }
                         }
                         else {
-                            return __assign(__assign({}, action), { restrictionValue: this.getMetaValue(action.restrictionValue, action.generatedBy) });
+                            return __assign(__assign({}, action), { promptParams: __assign(__assign({}, action.promptParams), { restrictionValue: this.getMetaValue(action.promptParams.restrictionValue, action.generatedBy) }) });
                         }
                     }
                 }
@@ -1605,7 +1605,10 @@ var State = /** @class */ (function () {
         var player = this.getMetaValue(action.player, action.generatedBy);
         switch (action.promptType) {
             case PROMPT_TYPE_NUMBER: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, promptParams: {
+                        min: this.getMetaValue(action.promptParams.min, action.generatedBy),
+                        max: this.getMetaValue(action.promptParams.max, action.generatedBy),
+                    }, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
                 return effect;
             }
             case PROMPT_TYPE_ALTERNATIVE: {
@@ -1613,7 +1616,11 @@ var State = /** @class */ (function () {
                 return effect;
             }
             case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, promptType: PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, source: this.getMetaValue(action.source, action.generatedBy), generatedBy: action.generatedBy || 'the-game', player: player });
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, promptType: PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, 
+                    /*promptParams: {
+                        source: this.getMetaValue(action.source, action.generatedBy) as CardInGame,
+                    },*/
+                    generatedBy: action.generatedBy || 'the-game', player: player });
                 return effect;
             }
             case PROMPT_TYPE_CHOOSE_CARDS: {
@@ -1621,7 +1628,11 @@ var State = /** @class */ (function () {
                 return effect;
             }
             case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, zone: this.getMetaValue(action.zone, action.generatedBy), zoneOwner: this.getMetaValue(action.zoneOwner, action.generatedBy), numberOfCards: this.getMetaValue(action.numberOfCards, action.generatedBy), generatedBy: action.generatedBy || 'the-game', player: player });
+                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, promptParams: {
+                        zone: this.getMetaValue(action.promptParams.zone, action.generatedBy),
+                        zoneOwner: this.getMetaValue(action.promptParams.zoneOwner, action.generatedBy),
+                        numberOfCards: this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy),
+                    }, generatedBy: action.generatedBy || 'the-game', player: player });
                 return effect;
             }
             case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
@@ -1839,8 +1850,8 @@ var State = /** @class */ (function () {
                     return magi_1.some(function (magi) { return magi.card.data.powers && magi.card.data.powers.some(function (power) { return power.cost === COST_X || (power.cost <= magi.data.energy + 2); }); });
                 }
                 case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-                    if ('restrictions' in promptAction && promptAction.restrictions) {
-                        var restrictionsWithValues = promptAction.restrictions.map(function (_a) {
+                    if ('restrictions' in promptAction.promptParams && promptAction.promptParams.restrictions) {
+                        var restrictionsWithValues = promptAction.promptParams.restrictions.map(function (_a) {
                             var type = _a.type, value = _a.value;
                             var restrictionValue = (typeof value === 'string' &&
                                 value in metaValues) ? metaValues[value] : value;
@@ -1851,64 +1862,64 @@ var State = /** @class */ (function () {
                         });
                         return _this.checkAnyCardForRestrictions(allCardsInPlay.filter(function (card) { return card.card.type === TYPE_CREATURE; }), restrictionsWithValues);
                     }
-                    else if ('restriction' in promptAction) {
-                        switch (promptAction.restriction) {
+                    else if ('restriction' in promptAction.promptParams) {
+                        switch (promptAction.promptParams.restriction) {
                             case RESTRICTION_OWN_CREATURE: {
-                                return _this.checkAnyCardForRestriction(allCardsInPlay.filter(function (card) { return card.card.type === TYPE_CREATURE; }), promptAction.restriction, source.data.controller);
+                                return _this.checkAnyCardForRestriction(allCardsInPlay.filter(function (card) { return card.card.type === TYPE_CREATURE; }), promptAction.promptParams.restriction, source.data.controller);
                             }
                             case RESTRICTION_OPPONENT_CREATURE: {
-                                return _this.checkAnyCardForRestriction(allCardsInPlay.filter(function (card) { return card.card.type === TYPE_CREATURE; }), promptAction.restriction, source.data.controller);
+                                return _this.checkAnyCardForRestriction(allCardsInPlay.filter(function (card) { return card.card.type === TYPE_CREATURE; }), promptAction.promptParams.restriction, source.data.controller);
                             }
                             default: {
-                                var restrictionValue = (typeof promptAction.restrictionValue === 'string' &&
-                                    promptAction.restrictionValue in metaValues) ? metaValues[promptAction.restrictionValue] : promptAction.restrictionValue;
-                                return _this.checkAnyCardForRestriction(allCardsInPlay.filter(function (card) { return card.card.type === TYPE_CREATURE; }), promptAction.restriction, restrictionValue);
+                                var restrictionValue = (typeof promptAction.promptParams.restrictionValue === 'string' &&
+                                    promptAction.promptParams.restrictionValue in metaValues) ? metaValues[promptAction.promptParams.restrictionValue] : promptAction.promptParams.restrictionValue;
+                                return _this.checkAnyCardForRestriction(allCardsInPlay.filter(function (card) { return card.card.type === TYPE_CREATURE; }), promptAction.promptParams.restriction, restrictionValue);
                             }
                         }
                     }
                     return true;
                 }
                 case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
-                    var zoneOwner = _this.getMetaValue(promptAction.zoneOwner, source.id);
-                    var cardsInZone = _this.getZone(promptAction.zone, zoneOwner).cards;
-                    var numberOfCards = _this.getMetaValue(promptAction.numberOfCards, source.id);
+                    var zoneOwner = _this.getMetaValue(promptAction.promptParams.zoneOwner, source.id);
+                    var cardsInZone = _this.getZone(promptAction.promptParams.zone, zoneOwner).cards;
+                    var numberOfCards = _this.getMetaValue(promptAction.promptParams.numberOfCards, source.id);
                     // if (cardsInZone.length < numberOfCards) {
                     //	 return false;
                     // }
-                    if (promptAction.restrictions) {
-                        return _this.checkAnyCardForRestrictions(cardsInZone, promptAction.restrictions);
+                    if (promptAction.promptParams.restrictions) {
+                        return _this.checkAnyCardForRestrictions(cardsInZone, promptAction.promptParams.restrictions);
                     }
-                    else if (promptAction.restriction) {
-                        switch (promptAction.restriction) {
+                    else if (promptAction.promptParams.restriction) {
+                        switch (promptAction.promptParams.restriction) {
                             case RESTRICTION_OWN_CREATURE: {
-                                return _this.checkAnyCardForRestriction(cardsInZone.filter(function (card) { return card.card.type === TYPE_CREATURE; }), promptAction.restriction, source.data.controller);
+                                return _this.checkAnyCardForRestriction(cardsInZone.filter(function (card) { return card.card.type === TYPE_CREATURE; }), promptAction.promptParams.restriction, source.data.controller);
                             }
                             case RESTRICTION_OPPONENT_CREATURE: {
-                                return _this.checkAnyCardForRestriction(cardsInZone.filter(function (card) { return card.card.type === TYPE_CREATURE; }), promptAction.restriction, source.data.controller);
+                                return _this.checkAnyCardForRestriction(cardsInZone.filter(function (card) { return card.card.type === TYPE_CREATURE; }), promptAction.promptParams.restriction, source.data.controller);
                             }
                             default: {
-                                return _this.checkAnyCardForRestriction(cardsInZone.filter(function (card) { return card.card.type === TYPE_CREATURE; }), promptAction.restriction, promptAction.restrictionValue);
+                                return _this.checkAnyCardForRestriction(cardsInZone.filter(function (card) { return card.card.type === TYPE_CREATURE; }), promptAction.promptParams.restriction, promptAction.promptParams.restrictionValue);
                             }
                         }
                     }
                     return true;
                 }
                 case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
-                    var zoneOwner = _this.getMetaValue(promptAction.zoneOwner, source.id);
-                    var cardsInZone = _this.getZone(promptAction.zone, zoneOwner).cards;
-                    if (promptAction.restrictions) {
-                        return _this.checkAnyCardForRestrictions(cardsInZone, promptAction.restrictions);
+                    var zoneOwner = _this.getMetaValue(promptAction.promptParams.zoneOwner, source.id);
+                    var cardsInZone = _this.getZone(promptAction.promptParams.zone, zoneOwner).cards;
+                    if (promptAction.promptParams.restrictions) {
+                        return _this.checkAnyCardForRestrictions(cardsInZone, promptAction.promptParams.restrictions);
                     }
-                    else if (promptAction.restriction) {
-                        switch (promptAction.restriction) {
+                    else if (promptAction.promptParams.restriction) {
+                        switch (promptAction.promptParams.restriction) {
                             case RESTRICTION_OWN_CREATURE: {
-                                return _this.checkAnyCardForRestriction(cardsInZone.filter(function (card) { return card.card.type === TYPE_CREATURE; }), promptAction.restriction, source.data.controller);
+                                return _this.checkAnyCardForRestriction(cardsInZone.filter(function (card) { return card.card.type === TYPE_CREATURE; }), promptAction.promptParams.restriction, source.data.controller);
                             }
                             case RESTRICTION_OPPONENT_CREATURE: {
-                                return _this.checkAnyCardForRestriction(cardsInZone.filter(function (card) { return card.card.type === TYPE_CREATURE; }), promptAction.restriction, source.data.controller);
+                                return _this.checkAnyCardForRestriction(cardsInZone.filter(function (card) { return card.card.type === TYPE_CREATURE; }), promptAction.promptParams.restriction, source.data.controller);
                             }
                             default: {
-                                return _this.checkAnyCardForRestriction(cardsInZone.filter(function (card) { return card.card.type === TYPE_CREATURE; }), promptAction.restriction, promptAction.restrictionValue);
+                                return _this.checkAnyCardForRestriction(cardsInZone.filter(function (card) { return card.card.type === TYPE_CREATURE; }), promptAction.promptParams.restriction, promptAction.promptParams.restrictionValue);
                             }
                         }
                     }
@@ -2070,8 +2081,10 @@ var State = /** @class */ (function () {
                                     promptType: PROMPT_TYPE_NUMBER,
                                     player: sourceController_1,
                                     generatedBy: source_1.id,
-                                    min: 1,
-                                    max: action.source.data.energy,
+                                    promptParams: {
+                                        min: 1,
+                                        max: action.source.data.energy,
+                                    },
                                 }, {
                                     type: ACTION_CALCULATE,
                                     operator: CALCULATION_SET,
@@ -2127,6 +2140,8 @@ var State = /** @class */ (function () {
                     switch (action.promptType) {
                         case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
                             promptParams = {
+                                // @Todo fix enriched cards moving through the engine
+                                // @ts-ignore
                                 source: this_1.getMetaValue(action.source, action.generatedBy),
                             };
                             break;
@@ -2137,31 +2152,31 @@ var State = /** @class */ (function () {
                         }
                         case PROMPT_TYPE_ALTERNATIVE: {
                             promptParams = {
-                                alternatives: action.alternatives,
+                                alternatives: action.promptParams.alternatives,
                             };
                             break;
                         }
                         case PROMPT_TYPE_PAYMENT_SOURCE: {
                             promptParams = {
-                                paymentAmount: action.amount,
-                                paymentType: action.paymentType,
-                                cards: action.cards.map(convertCard),
+                                paymentAmount: action.promptParams.amount,
+                                paymentType: action.promptParams.paymentType,
+                                cards: action.promptParams.cards.map(convertCard),
                             };
                             break;
                         }
                         case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
-                            if (action.restriction && action.restrictions) {
+                            if (action.promptParams.restriction && action.promptParams.restrictions) {
                                 throw new Error('PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE error: single and multiple restrictions specified');
                             }
-                            var restrictions = action.restrictions || (action.restriction ? [
+                            var restrictions = action.promptParams.restrictions || (action.promptParams.restriction ? [
                                 {
-                                    type: this_1.getMetaValue(action.restriction, action.generatedBy),
-                                    value: this_1.getMetaValue(action.restrictionValue, action.generatedBy),
+                                    type: this_1.getMetaValue(action.promptParams.restriction, action.generatedBy),
+                                    value: this_1.getMetaValue(action.promptParams.restrictionValue, action.generatedBy),
                                 },
                             ] : null);
-                            var zone = this_1.getMetaValue(action.zone, action.generatedBy);
-                            var zoneOwner = this_1.getMetaValue(action.zoneOwner, action.generatedBy);
-                            var numberOfCards = this_1.getMetaValue(action.numberOfCards, action.generatedBy);
+                            var zone = this_1.getMetaValue(action.promptParams.zone, action.generatedBy);
+                            var zoneOwner = this_1.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
+                            var numberOfCards = this_1.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
                             var zoneContent = (zone === ZONE_TYPE_IN_PLAY) ? this_1.getZone(zone, null).cards : this_1.getZone(zone, zoneOwner).cards;
                             var cards = restrictions ? zoneContent.filter(this_1.makeCardFilter(restrictions)) : zoneContent;
                             var maxNumberOfCards = Math.min(numberOfCards, cards.length);
@@ -2180,18 +2195,18 @@ var State = /** @class */ (function () {
                             break;
                         }
                         case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
-                            if (action.restriction && action.restrictions) {
+                            if (action.promptParams.restriction && action.promptParams.restrictions) {
                                 throw new Error('PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE error: single and multiple restrictions specified');
                             }
-                            var restrictions = action.restrictions || (action.restriction ? [
+                            var restrictions = action.promptParams.restrictions || (action.promptParams.restriction ? [
                                 {
-                                    type: this_1.getMetaValue(action.restriction, action.generatedBy),
-                                    value: this_1.getMetaValue(action.restrictionValue, action.generatedBy),
+                                    type: this_1.getMetaValue(action.promptParams.restriction, action.generatedBy),
+                                    value: this_1.getMetaValue(action.promptParams.restrictionValue, action.generatedBy),
                                 },
                             ] : null);
-                            var zone = this_1.getMetaValue(action.zone, action.generatedBy);
-                            var zoneOwner = this_1.getMetaValue(action.zoneOwner, action.generatedBy);
-                            var numberOfCards = this_1.getMetaValue(action.numberOfCards, action.generatedBy);
+                            var zone = this_1.getMetaValue(action.promptParams.zone, action.generatedBy);
+                            var zoneOwner = this_1.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
+                            var numberOfCards = this_1.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
                             var zoneContent = (zone === ZONE_TYPE_IN_PLAY) ? this_1.getZone(zone, null).cards : this_1.getZone(zone, zoneOwner).cards;
                             var cards = restrictions ? zoneContent.filter(this_1.makeCardFilter(restrictions)) : zoneContent;
                             var maxNumberOfCards = Math.min(numberOfCards, cards.length);
@@ -2224,27 +2239,34 @@ var State = /** @class */ (function () {
                             break;
                         }
                         case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-                            if ('restrictions' in action) {
-                                var restrictionsWithValues = action.restrictions.map(function (_a) {
+                            var restrictions = [];
+                            if ('restrictions' in action.promptParams) {
+                                restrictions = action.promptParams.restrictions.map(function (_a) {
                                     var type = _a.type, value = _a.value;
                                     return ({
                                         type: type,
                                         value: _this.getMetaValue(value, action.generatedBy),
                                     });
                                 });
-                                promptParams = {
-                                    restrictions: restrictionsWithValues,
-                                };
                             }
-                            else if ('restriction' in action) {
+                            else if ('restriction' in action.promptParams) {
+                                restrictions = [
+                                    {
+                                        type: action.promptParams.restriction,
+                                        value: this_1.getMetaValue(action.promptParams.restrictionValue, action.generatedBy),
+                                    }
+                                ];
+                            }
+                            if (restrictions.length) {
+                                /*const zoneContent = this.getZone(ZONE_TYPE_IN_PLAY, null).getCardsByRestriction(restrictions, this);
+
+                                if (zoneContent.length == 0) {
+                                    skipPrompt = true
+                                } else { */
                                 promptParams = {
-                                    restrictions: [
-                                        {
-                                            type: action.restriction,
-                                            value: this_1.getMetaValue(action.restrictionValue, action.generatedBy),
-                                        }
-                                    ],
+                                    restrictions: restrictions,
                                 };
+                                // }
                             }
                             break;
                         }
@@ -2254,60 +2276,59 @@ var State = /** @class */ (function () {
                         }
                         case PROMPT_TYPE_NUMBER: {
                             promptParams = {
-                                min: this_1.getMetaValue(action.min, action.generatedBy),
-                                max: this_1.getMetaValue(action.max, action.generatedBy),
+                                min: this_1.getMetaValue(action.promptParams.min, action.generatedBy),
+                                max: this_1.getMetaValue(action.promptParams.max, action.generatedBy),
                             };
                             break;
                         }
                         case PROMPT_TYPE_POWER_ON_MAGI: {
                             promptParams = {
-                                magi: this_1.getMetaValue(action.magi, action.generatedBy),
+                                magi: this_1.getMetaValue(action.promptParams.magi, action.generatedBy),
                             };
                             break;
                         }
                         case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
-                            if (action.restriction) {
+                            if (action.promptParams.restriction) {
                                 promptParams = {
-                                    amount: this_1.getMetaValue(action.amount, action.generatedBy),
+                                    amount: this_1.getMetaValue(action.promptParams.amount, action.generatedBy),
                                     restrictions: [
                                         {
-                                            type: action.restriction,
-                                            value: this_1.getMetaValue(action.amount, action.generatedBy),
+                                            type: action.promptParams.restriction,
+                                            value: this_1.getMetaValue(action.promptParams.amount, action.generatedBy),
                                         },
                                     ],
                                 };
                             }
                             else {
                                 promptParams = {
-                                    amount: this_1.getMetaValue(action.amount, action.generatedBy),
+                                    amount: this_1.getMetaValue(action.promptParams.amount, action.generatedBy),
                                 };
                             }
                             break;
                         }
                         case PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES: {
-                            if (action.restriction) {
+                            if (action.promptParams.restriction) {
                                 promptParams = {
-                                    amount: this_1.getMetaValue(action.amount, action.generatedBy),
+                                    amount: this_1.getMetaValue(action.promptParams.amount, action.generatedBy),
                                     restrictions: [
                                         {
-                                            type: action.restriction,
-                                            value: this_1.getMetaValue(action.amount, action.generatedBy),
+                                            type: action.promptParams.restriction,
+                                            value: this_1.getMetaValue(action.promptParams.amount, action.generatedBy),
                                         },
                                     ],
                                 };
                             }
                             else {
                                 promptParams = {
-                                    amount: this_1.getMetaValue(action.amount, action.generatedBy),
+                                    amount: this_1.getMetaValue(action.promptParams.amount, action.generatedBy),
                                 };
                             }
                             break;
                         }
                         case PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES: {
-                            // console.dir(this.getSpellMetadata(action.generatedBy))
-                            var sourceZone = this_1.getMetaValue(action.sourceZone, action.generatedBy);
-                            var sourceZoneOwner = this_1.getMetaValue(action.sourceZoneOwner, action.generatedBy);
-                            var numberOfCards = this_1.getMetaValue(action.numberOfCards, action.generatedBy);
+                            var sourceZone = this_1.getMetaValue(action.promptParams.sourceZone, action.generatedBy);
+                            var sourceZoneOwner = this_1.getMetaValue(action.promptParams.sourceZoneOwner, action.generatedBy);
+                            var numberOfCards = this_1.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
                             var zoneContent = this_1.getZone(sourceZone, sourceZoneOwner).cards;
                             var cards = zoneContent.slice(0, numberOfCards);
                             promptParams = {
@@ -2315,7 +2336,7 @@ var State = /** @class */ (function () {
                                 sourceZoneOwner: sourceZoneOwner,
                                 numberOfCards: numberOfCards,
                                 cards: cards.map(convertCard),
-                                targetZones: action.targetZones,
+                                targetZones: action.promptParams.targetZones,
                             };
                         }
                     }
@@ -2683,13 +2704,15 @@ var State = /** @class */ (function () {
                                     this_1.transformIntoActions({
                                         type: ACTION_ENTER_PROMPT,
                                         promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-                                        restrictions: [{
-                                                type: RESTRICTION_OWN_CREATURE,
-                                                value: '',
-                                            }, {
-                                                type: RESTRICTION_ENERGY_EQUALS,
-                                                value: minEnergy,
-                                            }],
+                                        promptParams: {
+                                            restrictions: [{
+                                                    type: RESTRICTION_OWN_CREATURE,
+                                                    value: '',
+                                                }, {
+                                                    type: RESTRICTION_ENERGY_EQUALS,
+                                                    value: minEnergy,
+                                                }],
+                                        },
                                         variable: action.variable || 'selected',
                                         generatedBy: action.generatedBy,
                                         player: action.player,
@@ -2792,10 +2815,12 @@ var State = /** @class */ (function () {
                                             }] : [{
                                                 type: ACTION_ENTER_PROMPT,
                                                 promptType: PROMPT_TYPE_PAYMENT_SOURCE,
-                                                amount: totalCost_1,
-                                                paymentType: TYPE_CREATURE,
+                                                promptParams: {
+                                                    amount: totalCost_1,
+                                                    paymentType: TYPE_CREATURE,
+                                                    cards: availablePaymentSources,
+                                                },
                                                 variable: 'paymentSource',
-                                                cards: availablePaymentSources,
                                                 player: player_1,
                                                 generatedBy: cardItself_1.id,
                                             }, {
@@ -2893,14 +2918,14 @@ var State = /** @class */ (function () {
                                                 case PROMPT_TYPE_OWN_SINGLE_CREATURE:
                                                     return _this.getZone(ZONE_TYPE_IN_PLAY).cards.some(function (card) { return _this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === promptAction.player; });
                                                 case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-                                                    if ('restrictions' in promptAction) {
-                                                        return promptAction.restrictions.every(function (_a) {
+                                                    if ('restrictions' in promptAction.promptParams) {
+                                                        return promptAction.promptParams.restrictions.every(function (_a) {
                                                             var type = _a.type, value = _a.value;
                                                             return _this.checkAnyCardForRestriction(_this.getZone(ZONE_TYPE_IN_PLAY).cards, type, value);
                                                         });
                                                     }
-                                                    else if ('restriction' in promptAction) {
-                                                        return _this.checkAnyCardForRestriction(_this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(function (card) { return card.card.type === TYPE_CREATURE; }), promptAction.restriction, promptAction.restrictionValue);
+                                                    else if ('restriction' in promptAction.promptParams) {
+                                                        return _this.checkAnyCardForRestriction(_this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(function (card) { return card.card.type === TYPE_CREATURE; }), promptAction.promptParams.restriction, promptAction.promptParams.restrictionValue);
                                                     }
                                                     return true;
                                                 }
@@ -2916,8 +2941,10 @@ var State = /** @class */ (function () {
                                                     type: ACTION_ENTER_PROMPT,
                                                     promptType: PROMPT_TYPE_NUMBER,
                                                     player: player_1,
-                                                    min: 1,
-                                                    max: Math.min(activeMagi.data.energy, maxCost) - regionPenalty - (baseCard_1.cost === COST_X_PLUS_ONE ? 1 : 0),
+                                                    promptParams: {
+                                                        min: 1,
+                                                        max: Math.min(activeMagi.data.energy, maxCost) - regionPenalty - (baseCard_1.cost === COST_X_PLUS_ONE ? 1 : 0),
+                                                    },
                                                     variable: 'chosen_cost',
                                                     generatedBy: cardItself_1.id,
                                                 },

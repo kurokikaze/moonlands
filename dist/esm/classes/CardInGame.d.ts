@@ -45,5 +45,6 @@ export default class CardInGame {
     clearActionsUsed(): void;
     clearAttackMarkers(): void;
     copy(): CardInGame;
-    serialize<T extends boolean>(hidden?: T): T extends true ? HiddenConvertedCard : ConvertedCard;
+    serialize(hidden: true): HiddenConvertedCard;
+    serialize(hidden?: false): ConvertedCard;
 }

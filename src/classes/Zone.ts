@@ -1,6 +1,7 @@
 import CardInGame, { ConvertedCard, HiddenConvertedCard } from "./CardInGame";
-import { MercenneFixed, ZoneType } from "../types";
+import { MercenneFixed, RestrictionObjectType, ZoneType } from "../types";
 import { MersenneTwister } from "../mersenneTwister";
+import { State } from "..";
 
 function shuffle<T>(array: T[]): T[] {
 	var currentIndex = array.length, temporaryValue, randomIndex;
@@ -89,6 +90,10 @@ export default class Zone {
 
 	shuffle() {
 		this.cards = this._shuffle(this.cards);
+	}
+
+	getCardsByRestriction(restrictions: RestrictionObjectType[], state: State): CardInGame[]  {
+		return restrictions ? this.cards.filter(state.makeCardFilter(restrictions)) : this.cards;
 	}
 
 	_shuffle<T>(array: T[]): T[] {

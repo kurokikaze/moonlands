@@ -4,18 +4,20 @@ import { AlternativePromptParams, AnyCreatureExceptSourcePromptParams, ChooseCar
 
 export type PromptParams = {
   promptType: GenericPromptType;
-  zone?: string;
-  message?: string;
-  source?: string;
-  player?: number | string;
-  min?: number | string;
-  max?: number | string;
-  zoneOwner?: string;
-  restriction?: RestrictionType;
-  restrictionValue?: string | number | boolean;
-  restrictions?: RestrictionObjectType[];
-  numberOfCards?: number;
+  promptParams?: {
+    zone?: string;
+    source?: string;
+    min?: number | string;
+    max?: number | string;
+    zoneOwner?: string;
+    restriction?: RestrictionType;
+    restrictionValue?: string | number | boolean;
+    restrictions?: RestrictionObjectType[];
+    numberOfCards?: number;
+  },
   variable?: string;
+  message?: string;
+  player?: number | string;
 }
 
 interface PromptInterface {

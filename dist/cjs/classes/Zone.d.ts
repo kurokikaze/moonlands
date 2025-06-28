@@ -1,5 +1,6 @@
 import CardInGame, { ConvertedCard, HiddenConvertedCard } from "./CardInGame";
-import { MercenneFixed, ZoneType } from "../types";
+import { MercenneFixed, RestrictionObjectType, ZoneType } from "../types";
+import { State } from "..";
 export default class Zone {
     _name: string;
     _player: number | null;
@@ -20,6 +21,7 @@ export default class Zone {
     containsId(id: string): boolean;
     removeById(id: string): void;
     shuffle(): void;
+    getCardsByRestriction(restrictions: RestrictionObjectType[], state: State): CardInGame[];
     _shuffle<T>(array: T[]): T[];
     empty(): void;
     serialize<T>(hidden: T): T extends true ? HiddenConvertedCard[] : ConvertedCard[];

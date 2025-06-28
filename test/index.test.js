@@ -66,6 +66,7 @@ import {
 	PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 	PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
 	PROMPT_TYPE_PLAYER,
+	PROMPT_TYPE_NUMBER,
 
 	RESTRICTION_REGION,
 	RESTRICTION_TYPE,
@@ -596,16 +597,20 @@ describe('Prompts', () => {
 		const promptAction = {
 			type: ACTION_ENTER_PROMPT,
 			player: ACTIVE_PLAYER,
-			promptType: moonlands.PROMPT_TYPE_NUMBER,
+			promptParams: {
+				min: 0,
+				max: 10,
+			},
+			promptType: PROMPT_TYPE_NUMBER,
 		};
 
 		const resolvePromptAction = {
-			type: moonlands.ACTION_RESOLVE_PROMPT,
+			type: ACTION_RESOLVE_PROMPT,
 			number: 2,
 		};
 
 		const passAction = {
-			type: moonlands.ACTION_PASS,
+			type: ACTION_PASS,
 
 		};
 
@@ -642,17 +647,21 @@ describe('Prompts', () => {
 		];
 
 		const addEnergyAction = {
-			type: moonlands.ACTION_EFFECT,
-			effectType: moonlands.EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
 			amount: '$number',
 			target: arbolit,
 			generatedBy: 1,
 		};
 
 		const promptAction = {
-			type: moonlands.ACTION_ENTER_PROMPT,
-			promptType: moonlands.PROMPT_TYPE_NUMBER,
+			type: ACTION_ENTER_PROMPT,
+			promptType: PROMPT_TYPE_NUMBER,
 			player: ACTIVE_PLAYER,
+			promptParams: {
+				min: 0,
+				max: 10,
+			},
 			generatedBy: 1,
 		};
 
@@ -762,11 +771,13 @@ describe('Prompts', () => {
 			type: ACTION_ENTER_PROMPT,
 			promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 			player: ACTIVE_PLAYER,
-			zone: ZONE_TYPE_IN_PLAY,
-			zoneOwner: null,
-			restriction: RESTRICTION_REGION,
-			restrictionValue: REGION_CALD,
-			numberOfCards: 2,
+			promptParams: {
+				zone: ZONE_TYPE_IN_PLAY,
+				zoneOwner: null,
+				restriction: RESTRICTION_REGION,
+				restrictionValue: REGION_CALD,
+				numberOfCards: 2,
+			},
 			variable: 'caldCreatures',
 		};
 
@@ -839,19 +850,21 @@ describe('Prompts', () => {
 			type: ACTION_ENTER_PROMPT,
 			promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 			player: ACTIVE_PLAYER,
-			zone: ZONE_TYPE_HAND,
-			zoneOwner: ACTIVE_PLAYER,
-			restrictions: [
-				{
-					type: RESTRICTION_REGION,
-					value: REGION_CALD,
-				},
-				{
-					type: RESTRICTION_TYPE,
-					value: TYPE_CREATURE,
-				},
-			],
-			numberOfCards: 2,
+			promptParams: {
+				zone: ZONE_TYPE_HAND,
+				zoneOwner: ACTIVE_PLAYER,
+				restrictions: [
+					{
+						type: RESTRICTION_REGION,
+						value: REGION_CALD,
+					},
+					{
+						type: RESTRICTION_TYPE,
+						value: TYPE_CREATURE,
+					},
+				],
+				numberOfCards: 2,
+			},
 			variable: 'caldCreatures',
 		};
 

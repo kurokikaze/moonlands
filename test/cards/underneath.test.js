@@ -1441,7 +1441,7 @@ describe('Vulbor', () => {
 
 		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
 		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, 'Game is in cards prompt state');
-		expect(gameState.state.promptPlayer).toEqual(NON_ACTIVE_PLAYER, 'Game is prompting active player');
+		expect(gameState.state.promptPlayer).toEqual(NON_ACTIVE_PLAYER, 'Game is prompting non active player');
 		expect(gameState.state.promptParams.cards).toHaveLength(4);
 		expect(gameState.state.promptParams.numberOfCards).toEqual(2);
 		expect(gameState.state.promptParams.cards.map(({ card }) => card)).toEqual(['Lava Balamant', 'Lava Arboll', 'Balamant Pup', 'Eclipse']);

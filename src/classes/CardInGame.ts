@@ -120,8 +120,9 @@ export default class CardInGame {
 
         return newCard;
     }
-
-    serialize<T extends boolean>(hidden: T = false as T): T extends true ? HiddenConvertedCard : ConvertedCard {
+    serialize(hidden: true): HiddenConvertedCard;
+    serialize(hidden?: false): ConvertedCard;
+    serialize(hidden: boolean = false): HiddenConvertedCard | ConvertedCard {
         return hidden ? {
             card: null,
             data: {},

@@ -654,7 +654,7 @@ interface PromptEnteredEffectInterface extends ActionEffect {
 	effectType: typeof EFFECT_TYPE_PROMPT_ENTERED
 	message?: string;
 	variable?: string;
-	promptParams?: PromptParamsType;
+	// promptParams?: PromptParamsType;
 }
 
 export type DistributeEnergyPromptEnteredEffect = PromptEnteredEffectInterface & DistributeEnergyPromptParams
@@ -673,8 +673,10 @@ export type SingleCreatureFilteredPromptEnteredEffect = PromptEnteredEffectInter
 export type AnyCreatureExceptSourcePromptEnteredEffect = PromptEnteredEffectInterface & AnyCreatureExceptSourcePromptParams
 export type NumberPromptEnteredEffect = PromptEnteredEffectInterface & {
 	promptType: typeof PROMPT_TYPE_NUMBER
-	min: number | string
-	max: number | string
+	promptParams: {
+		min: number | string
+		max: number | string
+	}
 }
 export type PowerOnMagiPromptEntered = PromptEnteredEffectInterface & MagiPowerPromptParams
 

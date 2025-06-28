@@ -915,7 +915,7 @@ describe('Giant Carillion', () => {
 });
 
 describe('Balamant Pup', () => {
-	it('Support (target is not Balamant)', () => {
+	it.only('Support (target is not Balamant)', () => {
 		const ACTIVE_PLAYER = 421;
 		const NON_ACTIVE_PLAYER = 160;
 

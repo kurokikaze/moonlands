@@ -193,7 +193,9 @@ export declare class State {
     triggerAbilities(action: AnyEffectType): void;
     attachCard(cardId: string, attachmentTargetId: string): void;
     removeAttachments(cardId: string): void;
-    convertPromptActionToEffect(action: PromptType): AnyPromptEnteredEffect;
+    convertPromptActionToEffect(action: PromptType & {
+        source: CardInGame;
+    }): AnyPromptEnteredEffect;
     detachCard(cardId: string): void;
     performCalculation(operator: OperatorType, operandOne: number, operandTwo: number): number;
     calculateTotalCost(card: CardInGame): number;

@@ -95,6 +95,9 @@ var Zone = /** @class */ (function () {
     Zone.prototype.shuffle = function () {
         this.cards = this._shuffle(this.cards);
     };
+    Zone.prototype.getCardsByRestriction = function (restrictions, state) {
+        return restrictions ? this.cards.filter(state.makeCardFilter(restrictions)) : this.cards;
+    };
     Zone.prototype._shuffle = function (array) {
         var currentIndex = array.length, temporaryValue, randomIndex;
         // While there remain elements to shuffle...

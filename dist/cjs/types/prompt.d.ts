@@ -3,18 +3,20 @@ import { GenericPromptType, RestrictionType, RestrictionObjectType } from './com
 import { AlternativePromptParams, AnyCreatureExceptSourcePromptParams, ChooseCardsPromptParams, ChooseNCardsFromZonePromptParams, ChooseUpToNCardsFromZonePromptParams, DistributeCardsInZonesPromptParams, DistributeDamagePromptParams, DistributeEnergyPromptParams, GenericPromptParams, MagiPowerPromptParams, MayAbilityPromptParams, NumberPromptParams, PaymentSourcePromptParams, PlayerPromptParams, RearrangeCardsOfZonePromptParams, RearrangeEnergyPromptParams, SingleCreatureFilteredPromptParams } from './promptParams';
 export type PromptParams = {
     promptType: GenericPromptType;
-    zone?: string;
-    message?: string;
-    source?: string;
-    player?: number | string;
-    min?: number | string;
-    max?: number | string;
-    zoneOwner?: string;
-    restriction?: RestrictionType;
-    restrictionValue?: string | number | boolean;
-    restrictions?: RestrictionObjectType[];
-    numberOfCards?: number;
+    promptParams?: {
+        zone?: string;
+        source?: string;
+        min?: number | string;
+        max?: number | string;
+        zoneOwner?: string;
+        restriction?: RestrictionType;
+        restrictionValue?: string | number | boolean;
+        restrictions?: RestrictionObjectType[];
+        numberOfCards?: number;
+    };
     variable?: string;
+    message?: string;
+    player?: number | string;
 };
 interface PromptInterface {
     type: typeof ACTION_ENTER_PROMPT;
