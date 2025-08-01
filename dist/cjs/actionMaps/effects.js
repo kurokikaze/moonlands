@@ -1439,19 +1439,30 @@ const applyDistributeDamageEffect = function (action, transform) {
         }
     });
 };
+const applyPromptEntered = function (action) {
+    const promptPlayer = this.getMetaValue(action.player, action.generatedBy);
+    this.state = {
+        ...this.state,
+        prompt: true,
+        promptType: action.promptType,
+        // @ts-ignore
+        promptParams: action.promptParams || this.state.promptParams,
+        promptGeneratedBy: action.generatedBy,
+        promptMessage: action.message,
+        promptPlayer: promptPlayer,
+        promptVariable: action.variable,
+    };
+};
 const applyPromptEnteredEffect = function (action) {
     if (!('player' in action)) {
         throw new Error('Prompt without player!');
     }
-    const savedActions = this.state.actions;
     let promptParams = {};
-    let skipPrompt = false;
     const promptPlayer = this.getMetaValue(action.player, action.generatedBy);
     switch (action.promptType) {
         case const_1.PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
             promptParams = {
-                // @ts-ignore
-                source: this.getMetaValue(action.promptParams.source, action.generatedBy),
+                source: this.getMetaValue(action.source, action.generatedBy),
             };
             break;
         }
@@ -1498,9 +1509,6 @@ const applyPromptEnteredEffect = function (action) {
                     cards: cards.map(convertCard),
                 };
             }
-            else {
-                skipPrompt = true;
-            }
             break;
         }
         case const_1.PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
@@ -1527,9 +1535,6 @@ const applyPromptEnteredEffect = function (action) {
                     numberOfCards: maxNumberOfCards,
                     cards: cards.map(convertCard),
                 };
-            }
-            else {
-                skipPrompt = true;
             }
             break;
         }
@@ -1641,21 +1646,16 @@ const applyPromptEnteredEffect = function (action) {
             break;
         }
     }
-    if (!skipPrompt) {
-        this.state = {
-            ...this.state,
-            savedActions,
-            // This will be the only action to fire after entering the prompt
-            actions: [ /*this.convertPromptActionToEffect(action)*/],
-            prompt: true,
-            promptMessage: ('message' in action) ? action.message : '',
-            promptPlayer,
-            promptType: action.promptType,
-            promptVariable: action.variable,
-            promptGeneratedBy: action.generatedBy,
-            promptParams,
-        };
-    }
+    this.state = {
+        ...this.state,
+        prompt: true,
+        promptMessage: ('message' in action) ? action.message : '',
+        promptPlayer,
+        promptType: action.promptType,
+        promptVariable: action.variable,
+        promptGeneratedBy: action.generatedBy,
+        promptParams,
+    };
 };
 const applyRearrangeCardsOfZoneEffect = function (action) {
     const zone = this.getMetaValue(action.zone, action.generatedBy);
@@ -1738,20 +1738,6 @@ const applyAttachCardToCardEffect = function (action, transform) {
         generatedBy: action.generatedBy,
     });
 };
-const applyPromptEntered = function (action) {
-    const promptPlayer = this.getMetaValue(action.player, action.generatedBy);
-    this.state = {
-        ...this.state,
-        prompt: true,
-        promptType: action.promptType,
-        // @ts-ignore
-        promptParams: action.promptParams || this.state.promptParams,
-        promptGeneratedBy: action.generatedBy,
-        promptMessage: action.message,
-        promptPlayer: promptPlayer,
-        promptVariable: action.variable,
-    };
-};
 exports.actionMap = {
     // Beginning of turn and step
     [const_1.EFFECT_TYPE_START_TURN]: applyStartTurnEffect,
@@ -1828,6 +1814,6 @@ exports.actionMap = {
     [const_1.EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT]: applyCreateContinuousEffect,
     [const_1.EFFECT_TYPE_CONDITIONAL]: applyConditionalEffect,
     // Prompt-related stuff
-    // [EFFECT_TYPE_PROMPT_ENTERED]: applyPromptEntered,
+    [const_1.EFFECT_TYPE_PROMPT_ENTERED]: applyPromptEnteredEffect,
 };
 //# sourceMappingURL=effects.js.map

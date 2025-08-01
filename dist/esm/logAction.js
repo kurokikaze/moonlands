@@ -1,4 +1,5 @@
 import CardInGame from './classes/CardInGame.js';
+import { ACTION_ENTER_PROMPT, ACTION_RESOLVE_PROMPT } from './const.js';
 var FgRed = '\x1b[31m';
 var FgGreen = '\x1b[32m';
 var FgYellow = '\x1b[33m';
@@ -19,11 +20,14 @@ export var color = {
 var showCard = function (card) { return (card instanceof CardInGame) ? "<".concat(color.blue(card.card.name), " [").concat(card.id, "]>") : card; };
 export var showAction = function (action) {
     var fields = Object.keys(action).filter(function (f) { return f != 'type'; }).map(function (field) {
+        if (field == 'promptParams') {
+            return "\t".concat(field, ": ").concat(JSON.stringify(action[field], null, 2));
+        }
         var cards = action[field];
         if (!cards)
             return "\t".concat(field, ": Empty card encountered");
         return "\t".concat(field, ": ").concat((cards instanceof Array) ? cards.map(function (c) { return showCard(c); }).join(' ') : showCard(cards));
     });
-    console.log("\n{\n\t".concat(color.yellow(action.type), "\n").concat(fields.join('\n'), "\n}"));
+    console.log("\n{\n\t".concat((action.type == ACTION_ENTER_PROMPT || action.type == ACTION_RESOLVE_PROMPT) ? color.blue(action.type) : color.yellow(action.type), "\n").concat(fields.join('\n'), "\n}"));
 };
 //# sourceMappingURL=logAction.js.map

@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.showAction = exports.color = void 0;
 const CardInGame_1 = __importDefault(require("./classes/CardInGame"));
+const const_1 = require("./const");
 const FgRed = '\x1b[31m';
 const FgGreen = '\x1b[32m';
 const FgYellow = '\x1b[33m';
@@ -25,6 +26,9 @@ exports.color = {
 const showCard = (card) => (card instanceof CardInGame_1.default) ? `<${exports.color.blue(card.card.name)} [${card.id}]>` : card;
 const showAction = (action) => {
     const fields = Object.keys(action).filter(f => f != 'type').map(field => {
+        if (field == 'promptParams') {
+            return `\t${field}: ${JSON.stringify(action[field], null, 2)}`;
+        }
         const cards = action[field];
         if (!cards)
             return `\t${field}: Empty card encountered`;
@@ -32,7 +36,7 @@ const showAction = (action) => {
     });
     console.log(`
 {
-	${exports.color.yellow(action.type)}
+	${(action.type == const_1.ACTION_ENTER_PROMPT || action.type == const_1.ACTION_RESOLVE_PROMPT) ? exports.color.blue(action.type) : exports.color.yellow(action.type)}
 ${fields.join('\n')}
 }`);
 };

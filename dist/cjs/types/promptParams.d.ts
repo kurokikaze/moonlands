@@ -1,9 +1,9 @@
-import CardInGame from '../classes/CardInGame';
-import { ACTION_ENTER_PROMPT, PROMPT_TYPE_ALTERNATIVE, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_CHOOSE_CARDS, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_NUMBER, PROMPT_TYPE_PAYMENT_SOURCE, PROMPT_TYPE_PLAYER, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, TYPE_CREATURE, TYPE_RELIC, TYPE_SPELL } from '../const';
+import CardInGame, { ConvertedCard } from '../classes/CardInGame';
+import { ACTION_ENTER_PROMPT, PROMPT_TYPE_ALTERNATIVE, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_CHOOSE_CARDS, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES, PROMPT_TYPE_MAGI_WITHOUT_CREATURES, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_NUMBER, PROMPT_TYPE_PAYMENT_SOURCE, PROMPT_TYPE_PLAYER, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, TYPE_CREATURE, TYPE_RELIC, TYPE_SPELL } from '../const';
 import { GenericPromptType, RestrictionType, RestrictionObjectType, ZoneType } from './common';
 export type AnyCreatureExceptSourcePromptParams = {
     promptType: typeof PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE;
-    source: CardInGame;
+    source?: string | CardInGame;
 };
 export type SingleCreatureFilteredPromptParams = {
     promptType: typeof PROMPT_TYPE_SINGLE_CREATURE_FILTERED;
@@ -63,6 +63,7 @@ export type ChooseNCardsFromZonePromptParams = {
         restrictionValue?: string | number | boolean;
         restrictions?: RestrictionObjectType[];
         player?: string | number;
+        cards?: ConvertedCard[];
         variable?: string;
     };
 };
@@ -75,6 +76,7 @@ export type ChooseUpToNCardsFromZonePromptParams = {
         restriction?: RestrictionType;
         restrictionValue?: string | number | boolean;
         restrictions?: RestrictionObjectType[];
+        cards?: ConvertedCard[];
     };
     player?: string | number;
     variable?: string;
@@ -115,6 +117,11 @@ export type DistributeCardsInZonesPromptParams = {
         targetZones: ZoneType[] | string[];
         numberOfCards: number;
     };
+    variable?: string;
+};
+export type MagiWithoutCreaturesPromptParams = {
+    promptType: typeof PROMPT_TYPE_MAGI_WITHOUT_CREATURES;
+    source?: string | CardInGame;
     variable?: string;
 };
 export type GenericPromptParams = {

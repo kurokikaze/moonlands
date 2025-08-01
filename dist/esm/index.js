@@ -29,6 +29,8 @@ import clone from './clone.js';
 import { byName } from './cards.js';
 import CardInGame from './classes/CardInGame.js';
 import Zone from './classes/Zone.js';
+import convertPromptActionToEffect from './helpers/convertPromptAction.js';
+import performCalculation from './helpers/performCalculation.js';
 var convertCard = function (cardInGame) { return ({
     id: cardInGame.id,
     owner: cardInGame.owner,
@@ -1602,116 +1604,7 @@ var State = /** @class */ (function () {
         }
     };
     State.prototype.convertPromptActionToEffect = function (action) {
-        var player = this.getMetaValue(action.player, action.generatedBy);
-        switch (action.promptType) {
-            case PROMPT_TYPE_NUMBER: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, promptParams: {
-                        min: this.getMetaValue(action.promptParams.min, action.generatedBy),
-                        max: this.getMetaValue(action.promptParams.max, action.generatedBy),
-                    }, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_ALTERNATIVE: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, promptType: PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, 
-                    /*promptParams: {
-                        source: this.getMetaValue(action.source, action.generatedBy) as CardInGame,
-                    },*/
-                    generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_CHOOSE_CARDS: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, promptParams: {
-                        zone: this.getMetaValue(action.promptParams.zone, action.generatedBy),
-                        zoneOwner: this.getMetaValue(action.promptParams.zoneOwner, action.generatedBy),
-                        numberOfCards: this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy),
-                    }, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_MAGI_WITHOUT_CREATURES: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, promptType: action.promptType, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_MAY_ABILITY: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, promptType: PROMPT_TYPE_MAY_ABILITY, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_NUMBER_OF_CREATURES: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, promptType: action.promptType, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, promptType: action.promptType, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_OWN_SINGLE_CREATURE: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, promptType: action.promptType, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_PAYMENT_SOURCE: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_PLAYER: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, promptType: PROMPT_TYPE_PLAYER, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_POWER_ON_MAGI: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, promptParams: __assign(__assign({}, action.promptParams), { zone: this.getMetaValue(action.promptParams.zone, action.generatedBy), zoneOwner: this.getMetaValue(action.promptParams.zoneOwner, action.generatedBy), numberOfCards: this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy) }), effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_RELIC: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, promptType: action.promptType, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_SINGLE_CREATURE: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, promptType: action.promptType, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, promptType: action.promptType, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-            case PROMPT_TYPE_SINGLE_MAGI: {
-                var effect = __assign(__assign({}, action), { type: ACTION_EFFECT, effectType: EFFECT_TYPE_PROMPT_ENTERED, promptType: action.promptType, generatedBy: action.generatedBy || 'the-game', player: player });
-                return effect;
-            }
-        }
+        return convertPromptActionToEffect(action, this);
     };
     State.prototype.detachCard = function (cardId) {
         if (cardId in this.state.attachedTo) {
@@ -1722,50 +1615,7 @@ var State = /** @class */ (function () {
         }
     };
     State.prototype.performCalculation = function (operator, operandOne, operandTwo) {
-        var result;
-        switch (operator) {
-            case CALCULATION_SET: {
-                result = operandOne;
-                break;
-            }
-            case CALCULATION_DOUBLE: {
-                result = operandOne * 2;
-                break;
-            }
-            case CALCULATION_ADD: {
-                result = operandOne + operandTwo;
-                break;
-            }
-            case CALCULATION_SUBTRACT: {
-                result = operandOne - operandTwo;
-                break;
-            }
-            case CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE: {
-                result = Math.max(operandOne - operandTwo, 1);
-                break;
-            }
-            case CALCULATION_HALVE_ROUND_DOWN: {
-                result = Math.floor(operandOne / 2);
-                break;
-            }
-            case CALCULATION_HALVE_ROUND_UP: {
-                result = Math.ceil(operandOne / 2);
-                break;
-            }
-            case CALCULATION_MULTIPLY: {
-                result = operandOne * operandTwo;
-                break;
-            }
-            case CALCULATION_MIN: {
-                result = Math.min(operandOne, operandTwo);
-                break;
-            }
-            case CALCULATION_MAX: {
-                result = Math.max(operandOne, operandTwo);
-                break;
-            }
-        }
-        return result;
+        return performCalculation(operator, operandOne, operandTwo);
     };
     State.prototype.calculateTotalCost = function (card) {
         var activeMagiSelected = this.useSelector(SELECTOR_OWN_MAGI, card.owner);
@@ -2343,7 +2193,7 @@ var State = /** @class */ (function () {
                     if (!skipPrompt) {
                         this_1.state = __assign(__assign({}, this_1.state), { savedActions: savedActions, 
                             // This will be the only action to fire after entering the prompt
-                            actions: [this_1.convertPromptActionToEffect(action)], prompt: true, promptMessage: ('message' in action) ? action.message : '', promptPlayer: promptPlayer, promptType: action.promptType, promptVariable: action.variable, promptGeneratedBy: action.generatedBy, promptParams: promptParams });
+                            actions: [this_1.convertPromptActionToEffect(action)] });
                     }
                     break;
                 }

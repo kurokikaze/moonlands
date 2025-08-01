@@ -2408,9 +2408,7 @@ export var cards = [
                     prompt({
                         promptType: PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
                         message: 'Choose a creature to add 2 energy to.',
-                        promptParams: {
-                            source: '$sourceCreature',
-                        }
+                        source: '$sourceCreature',
                     }),
                     effect({
                         effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
