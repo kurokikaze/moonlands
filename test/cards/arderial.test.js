@@ -774,7 +774,7 @@ describe('Adis', () => {
 		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game is prompting active player');
 		expect(gameState.state.promptParams.zone).toEqual(ZONE_TYPE_HAND, 'Zone is correct');
 		expect(gameState.state.promptParams.zoneOwner).toEqual(ACTIVE_PLAYER, 'Zone owner is correct');
-		expect(gameState.state.promptParams.restrictions).toEqual(null, 'No restrictions here');
+		expect(gameState.state.promptParams.restrictions).toBeNull();
 		expect(gameState.state.promptParams.numberOfCards).toEqual(1, 'Number of cards is correct (player only have one in hand)');
 		expect(gameState.state.promptParams.cards).toHaveLength(1, 'Cards are correct (player only have one in hand)');
 		expect(gameState.state.promptParams.cards[0].card).toEqual('Lava Aq', 'Card itself is correct (player only have one in hand)');
@@ -826,17 +826,10 @@ describe('Adis', () => {
 		expect(gameState.state.promptPlayer).toEqual(NON_ACTIVE_PLAYER, 'Game is prompting non-active player');
 		expect(gameState.state.promptParams.zone).toEqual(ZONE_TYPE_HAND, 'Zone is correct');
 		expect(gameState.state.promptParams.zoneOwner).toEqual(NON_ACTIVE_PLAYER, 'Zone owner is correct');
-		expect(gameState.state.promptParams.restrictions).toEqual(null, 'No restrictions here');
+		expect(gameState.state.promptParams.restrictions).toBeNull();
 		expect(gameState.state.promptParams.numberOfCards).toEqual(1, 'Number of cards is correct (player only have one in hand)');
 		expect(gameState.state.promptParams.cards).toHaveLength(1, 'Cards are correct (player only have one in hand)');
 		expect(gameState.state.promptParams.cards[0].card).toEqual('Lava Aq', 'Card itself is correct (player only have one in hand)');
-		// expect(gameState.state.promptParams).toEqual({
-		// 	zone: ZONE_TYPE_HAND,
-		// 	cards: [],
-		// 	restrictions: null,
-		// 	zoneOwner: NON_ACTIVE_PLAYER,
-		// 	numberOfCards: 3,
-		// }, 'Game prompt params are right');
 	});
 
 	it('Haunt (no cards to discard)', () => {

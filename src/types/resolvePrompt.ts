@@ -48,6 +48,10 @@ export type ResolveDistributeCardsPrompt = ResolvePromptInterface & {
   cards: Record<ZoneType, CardInGame>
 }
 
+export type ResolveMagiWithoutCreaturesPrompt = ResolvePromptInterface & {
+  target: CardInGame;
+}
+
 export type ResolvePromptType = ResolvePromptInterface & {
     number?: number | string;
     cards?: CardInGame[];
@@ -59,4 +63,5 @@ export type ResolvePromptType = ResolvePromptInterface & {
   | ResolveRearrangeCardsPrompt
   | ResolveAlternativePrompt
   | ResolvePaymentSourcePrompt
-  | ResolvePowerOnMagiPrompt;
+  | ResolvePowerOnMagiPrompt
+  | ResolveMagiWithoutCreaturesPrompt;

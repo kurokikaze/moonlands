@@ -1,6 +1,6 @@
 {
     "name": "moonlands",
-    "version": "v0.26.0",
+    "version": "v0.31.0",
     "description": "Magi-Nation Duel engine",
     "type": "module",
     "repository": {
@@ -18,8 +18,8 @@
         "build-cjs": "tsc -p ./tsconfig.node.json",
         "fix-esm": "tsc-alias -p ./tsconfig.json",
         "build-types-cjs": "tsc -p ./tsconfig.node.json --declaration",
-        "test": "./node_modules/.bin/jest",
-        "coverage": "./node_modules/.bin/jest --coverage"
+        "test": "jest",
+        "coverage": "jest --coverage"
     },
     "keywords": [
         "ccg"

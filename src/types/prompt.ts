@@ -1,6 +1,6 @@
 import { ACTION_ENTER_PROMPT } from '../const';
 import { GenericPromptType, RestrictionType, RestrictionObjectType } from './common'
-import { AlternativePromptParams, AnyCreatureExceptSourcePromptParams, ChooseCardsPromptParams, ChooseNCardsFromZonePromptParams, ChooseUpToNCardsFromZonePromptParams, DistributeCardsInZonesPromptParams, DistributeDamagePromptParams, DistributeEnergyPromptParams, GenericPromptParams, MagiPowerPromptParams, MayAbilityPromptParams, NumberPromptParams, PaymentSourcePromptParams, PlayerPromptParams, RearrangeCardsOfZonePromptParams, RearrangeEnergyPromptParams, SingleCreatureFilteredPromptParams } from './promptParams'
+import { AlternativePromptParams, AnyCreatureExceptSourcePromptParams, ChooseCardsPromptParams, ChooseNCardsFromZonePromptParams, ChooseUpToNCardsFromZonePromptParams, DistributeCardsInZonesPromptParams, DistributeDamagePromptParams, DistributeEnergyPromptParams, GenericPromptParams, MagiPowerPromptParams, MagiWithoutCreaturesPromptParams, MayAbilityPromptParams, NumberPromptParams, PaymentSourcePromptParams, PlayerPromptParams, RearrangeCardsOfZonePromptParams, RearrangeEnergyPromptParams, SingleCreatureFilteredPromptParams } from './promptParams'
 
 export type PromptParams = {
   promptType: GenericPromptType;
@@ -37,7 +37,7 @@ export type PromptTypeRearrangeEnergy = PromptInterface & RearrangeEnergyPromptP
 export type PromptTypeChooseUpToNCardsFromZone = PromptInterface & ChooseUpToNCardsFromZonePromptParams
 export type PromptTypeChooseNCardsFromZone = PromptInterface & ChooseNCardsFromZonePromptParams
 export type PromptTypePlayer = PromptInterface & PlayerPromptParams
-export type ChooseCardsPromptType = PromptInterface & ChooseCardsPromptParams
+export type PromptTypeChooseCards = PromptInterface & ChooseCardsPromptParams
 export type PromptTypeMayAbility = PromptInterface & MayAbilityPromptParams
 export type PromptTypeRearrangeCardsOfZone = PromptInterface & RearrangeCardsOfZonePromptParams
 export type PromptTypeDistributeCardsInZones = PromptInterface & DistributeCardsInZonesPromptParams
@@ -47,6 +47,7 @@ export type PromptTypeMagiPower = PromptInterface & MagiPowerPromptParams;
 export type PromptTypeAnyCreatureExceptSource = PromptInterface & AnyCreatureExceptSourcePromptParams
 export type PromptTypeNumber = PromptInterface & NumberPromptParams
 export type PromptTypeSingleCreatureFiltered = PromptInterface & SingleCreatureFilteredPromptParams
+export type PromptTypeMagiWithoutCreatures = PromptInterface & MagiWithoutCreaturesPromptParams
 
 export type PromptType = GeneralPromptType |
   PromptTypeRearrangeEnergy |
@@ -55,7 +56,7 @@ export type PromptType = GeneralPromptType |
   PromptTypeChooseNCardsFromZone |
   PromptTypeDistributeDamage |
   PromptTypePlayer |
-  ChooseCardsPromptType |
+  PromptTypeChooseCards |
   PromptTypeMayAbility |
   PromptTypeRearrangeCardsOfZone |
   PromptTypeAlternative |
@@ -64,4 +65,5 @@ export type PromptType = GeneralPromptType |
   PromptTypeAnyCreatureExceptSource |
   PromptTypeNumber |
   PromptTypeSingleCreatureFiltered |
+  PromptTypeMagiWithoutCreatures |
   PromptTypeMagiPower;

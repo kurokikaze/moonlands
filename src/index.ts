@@ -274,11 +274,18 @@ import {
 	SerializedZones,
 	MercenneFixed,
 } from './types';
-import { AlternativePromptEnteredEffect, AnyCreatureExceptSourcePromptEnteredEffect, AnyPromptEnteredEffect, ChooseCardsPromptPromptEnteredEffect, ChooseNCardsFromZonePromptEnteredEffect, ChooseUpToNCardsFromZonePromptEnteredEffect, DistributeCardsInZonesPromptEnteredEffect, DistributeDamagePromptEnteredEffect, DistributeEnergyPromptEnteredEffect, EnhancedDelayedTriggerType, ExecutePowerEffect, GenericPromptEnteredEffect, GenericPromptEnteredPromptType, MayAbilityPromptEnteredEffect, NumberPromptEnteredEffect, PaymentSourcePromptEnteredEffect, PlayerPromptEnteredEffect, PowerOnMagiPromptEntered, RearrangeCardsOfZonePromptEnteredEffect, RearrangeEnergyPromptEnteredEffect, SingleCreatureFilteredPromptEnteredEffect, StartingEnergyOnCreatureEffect } from './types/effect';
+import {
+	AnyPromptEnteredEffect,
+	EnhancedDelayedTriggerType,
+	ExecutePowerEffect,
+	StartingEnergyOnCreatureEffect
+} from './types/effect';
 import { CardType, StatusType } from './types/common';
 import { PromptTypeMayAbility } from './types/prompt';
 import { AlternativeType } from './types/promptParams';
 import { ActionTransformer } from './actionMaps/actionMapTypes';
+import convertPromptActionToEffect from './helpers/convertPromptAction';
+import performCalculation from './helpers/performCalculation';
 
 const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
 	id: cardInGame.id,
@@ -2368,280 +2375,7 @@ export class State {
 	}
 
 	convertPromptActionToEffect(action: PromptType & { source: CardInGame }): AnyPromptEnteredEffect {
-		const player = this.getMetaValue(action.player, action.generatedBy) as number;
-		switch (action.promptType) {
-			case PROMPT_TYPE_NUMBER: {
-				const effect: NumberPromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					promptParams: {
-						min: this.getMetaValue(action.promptParams.min, action.generatedBy) as number,
-						max: this.getMetaValue(action.promptParams.max, action.generatedBy) as number,
-					},
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect;
-			}
-			case PROMPT_TYPE_ALTERNATIVE: {
-				const effect: AlternativePromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect
-			}
-			case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
-				const effect: AnyCreatureExceptSourcePromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					promptType: PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
-					/*promptParams: {
-						source: this.getMetaValue(action.source, action.generatedBy) as CardInGame,
-					},*/
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-
-				return effect
-			}
-			case PROMPT_TYPE_CHOOSE_CARDS: {
-				const effect: ChooseCardsPromptPromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect
-			}
-			case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
-				const effect: ChooseNCardsFromZonePromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
-					promptParams: {
-						zone: this.getMetaValue(action.promptParams.zone, action.generatedBy) as ZoneType,
-						zoneOwner: this.getMetaValue(action.promptParams.zoneOwner, action.generatedBy) as string,
-						numberOfCards: this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy) as number,
-					},
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect
-			}
-			case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
-				const effect: ChooseUpToNCardsFromZonePromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect
-			}
-			case PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES: {
-				const effect: DistributeDamagePromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect
-			}
-			case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
-				const effect: DistributeEnergyPromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect
-			}
-			case PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES: {
-				const effect: DistributeCardsInZonesPromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect
-			}
-			case PROMPT_TYPE_MAGI_WITHOUT_CREATURES: {
-				const effect: GenericPromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					promptType: action.promptType as GenericPromptEnteredPromptType,
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect
-			}
-			case PROMPT_TYPE_MAY_ABILITY: {
-				const effect: MayAbilityPromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					promptType: PROMPT_TYPE_MAY_ABILITY,
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect
-			}
-			case PROMPT_TYPE_NUMBER_OF_CREATURES: {
-				const effect: GenericPromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					promptType: action.promptType as GenericPromptEnteredPromptType,
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect
-			}
-			case PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED: {
-				const effect: GenericPromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					promptType: action.promptType as GenericPromptEnteredPromptType,
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect
-			}
-			case PROMPT_TYPE_OWN_SINGLE_CREATURE: {
-				const effect: GenericPromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					promptType: action.promptType as GenericPromptEnteredPromptType,
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect
-			}
-			case PROMPT_TYPE_PAYMENT_SOURCE: {
-				const effect: PaymentSourcePromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect
-			}
-			case PROMPT_TYPE_PLAYER: {
-				const effect: PlayerPromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					promptType: PROMPT_TYPE_PLAYER,
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect
-			}
-			case PROMPT_TYPE_POWER_ON_MAGI: {
-				const effect: PowerOnMagiPromptEntered = {
-					...action,
-					type: ACTION_EFFECT,
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect
-			}
-			case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {
-				const effect: RearrangeCardsOfZonePromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					promptParams: {
-						...action.promptParams,
-						zone: this.getMetaValue(action.promptParams.zone, action.generatedBy) as ZoneType,
-						zoneOwner: this.getMetaValue(action.promptParams.zoneOwner, action.generatedBy) as number,
-						numberOfCards: this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy) as number,
-					},
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect as RearrangeCardsOfZonePromptEnteredEffect;
-			}
-			case PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES: {
-				const effect: RearrangeEnergyPromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect
-			}
-			case PROMPT_TYPE_RELIC: {
-				const effect: GenericPromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					promptType: action.promptType as GenericPromptEnteredPromptType,
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect
-			}
-			case PROMPT_TYPE_SINGLE_CREATURE: {
-				const effect: GenericPromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					promptType: action.promptType as GenericPromptEnteredPromptType,
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect
-			}
-			case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-				const effect: SingleCreatureFilteredPromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect
-			}
-			case PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI: {
-				const effect: GenericPromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					promptType: action.promptType as GenericPromptEnteredPromptType,
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect
-			}
-			case PROMPT_TYPE_SINGLE_MAGI: {
-				const effect: GenericPromptEnteredEffect = {
-					...action,
-					type: ACTION_EFFECT,
-					effectType: EFFECT_TYPE_PROMPT_ENTERED,
-					promptType: action.promptType as GenericPromptEnteredPromptType,
-					generatedBy: action.generatedBy || 'the-game',
-					player,
-				}
-				return effect
-			}
-		}
+		return convertPromptActionToEffect(action, this);
 	}
 
 	detachCard(cardId: string) {
@@ -2656,51 +2390,7 @@ export class State {
 	}
 
 	performCalculation(operator: OperatorType, operandOne: number, operandTwo: number): number {
-		let result: number;
-		switch (operator) {
-			case CALCULATION_SET: {
-				result = operandOne;
-				break;
-			}
-			case CALCULATION_DOUBLE: {
-				result = operandOne * 2;
-				break;
-			}
-			case CALCULATION_ADD: {
-				result = operandOne + operandTwo;
-				break;
-			}
-			case CALCULATION_SUBTRACT: {
-				result = operandOne - operandTwo;
-				break;
-			}
-			case CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE: {
-				result = Math.max(operandOne - operandTwo, 1);
-				break;
-			}
-			case CALCULATION_HALVE_ROUND_DOWN: {
-				result = Math.floor(operandOne / 2);
-				break;
-			}
-			case CALCULATION_HALVE_ROUND_UP: {
-				result = Math.ceil(operandOne / 2);
-				break;
-			}
-			case CALCULATION_MULTIPLY: {
-				result = operandOne * operandTwo;
-				break;
-			}
-			case CALCULATION_MIN: {
-				result = Math.min(operandOne, operandTwo);
-				break;
-			}
-			case CALCULATION_MAX: {
-				result = Math.max(operandOne, operandTwo);
-				break;
-			}
-		}
-
-		return result;
+		return performCalculation(operator, operandOne, operandTwo)
 	}
 
 	calculateTotalCost(card: CardInGame): number {
@@ -3287,9 +2977,9 @@ export class State {
 								if (zoneContent.length == 0) {
 									skipPrompt = true
 								} else { */
-									promptParams = {
-										restrictions,
-									};
+								promptParams = {
+									restrictions,
+								};
 								// }
 							}
 
@@ -3371,13 +3061,13 @@ export class State {
 							savedActions,
 							// This will be the only action to fire after entering the prompt
 							actions: [this.convertPromptActionToEffect(action as PromptType & { source: CardInGame })],
-							prompt: true,
-							promptMessage: ('message' in action) ? action.message : '',
-							promptPlayer,
-							promptType: action.promptType,
-							promptVariable: action.variable,
-							promptGeneratedBy: action.generatedBy,
-							promptParams,
+//							prompt: true,
+//							promptMessage: ('message' in action) ? action.message : '',
+//							promptPlayer,
+//							promptType: action.promptType,
+//							promptVariable: action.variable,
+//							promptGeneratedBy: action.generatedBy,
+//							promptParams,
 						};
 					}
 					break;

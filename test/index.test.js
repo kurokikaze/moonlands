@@ -67,6 +67,8 @@ import {
 	PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
 	PROMPT_TYPE_PLAYER,
 	PROMPT_TYPE_NUMBER,
+	PROMPT_TYPE_ALTERNATIVE,
+	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 
 	RESTRICTION_REGION,
 	RESTRICTION_TYPE,
@@ -81,6 +83,9 @@ import {
 	EFFECT_TYPE_ATTACK,
 	EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
 	EFFECT_TYPE_NONE,
+	EFFECT_TYPE_CONDITIONAL,
+	EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE,
+	EFFECT_TYPE_PROMPT_ENTERED,
 
 	ZONE_TYPE_ACTIVE_MAGI,
 	ZONE_TYPE_MAGI_PILE,
@@ -98,8 +103,6 @@ import {
 	EXPIRATION_NEVER,
 
 	STATUS_BURROWED,
-	EFFECT_TYPE_CONDITIONAL,
-	EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE,
 } from '../src/const.ts';
 
 import Zone from '../src/classes/Zone.ts';
@@ -5822,3 +5825,192 @@ describe('Card logic', () => {
 		}
 	});
 });
+
+describe('ENTER_PROMPT to PROMPT_ENTERED', () => {
+	it('PROMPT_TYPE_NUMBER', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+		const ashgar = new CardInGame(byName('Ashgar'), ACTIVE_PLAYER);
+
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
+		const lavaArboll = new CardInGame(byName('Lava Arboll'), ACTIVE_PLAYER).addEnergy(2);
+		const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER);
+
+		const quorOne = new CardInGame(byName('Quor'), ACTIVE_PLAYER);
+		const quorTwo = new CardInGame(byName('Quor'), ACTIVE_PLAYER);
+		const fireChogoOne = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER);
+		const fireChogoTwo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER);
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([grega, sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER).add([ashgar]),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([quorOne, fireChogoOne]),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER).add([
+				arbolit,
+				quorTwo,
+				fireChogoTwo,
+			]),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER).add([quorPup]),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY).add([lavaArboll]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_DRAW,
+			activePlayer: NON_ACTIVE_PLAYER,
+		});
+
+		const enterPromptAction = {
+			type: ACTION_ENTER_PROMPT,
+			promptType: PROMPT_TYPE_NUMBER,
+			promptParams: {
+				min: '$testMin',
+				max: '$testMax',
+			},
+			generatedBy: lavaArboll.id,
+			player: lavaArboll.owner,
+		}
+
+		gameState.setSpellMetaDataField('testMin', 1, lavaArboll.id)
+		gameState.setSpellMetaDataField('testMax', 10, lavaArboll.id)
+		const result = gameState.convertPromptActionToEffect(enterPromptAction)
+
+		expect(result.type).toEqual(ACTION_EFFECT)
+		expect(result.effectType).toEqual(EFFECT_TYPE_PROMPT_ENTERED)
+		expect(result.promptType).toEqual(PROMPT_TYPE_NUMBER)
+		expect(result).toHaveProperty('promptParams')
+		expect(result.promptParams).toHaveProperty('min')
+		expect(result.promptParams.min).toEqual(1)
+		expect(result.promptParams).toHaveProperty('max')
+		expect(result.promptParams.max).toEqual(10)
+		expect(result.player).toEqual(ACTIVE_PLAYER)
+		expect(result.generatedBy).toEqual(lavaArboll.id)
+	})
+
+	it('PROMPT_TYPE_ALTERNATIVE', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+		const ashgar = new CardInGame(byName('Ashgar'), ACTIVE_PLAYER);
+
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
+		const lavaArboll = new CardInGame(byName('Lava Arboll'), ACTIVE_PLAYER).addEnergy(2);
+		const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER);
+
+		const quorOne = new CardInGame(byName('Quor'), ACTIVE_PLAYER);
+		const quorTwo = new CardInGame(byName('Quor'), ACTIVE_PLAYER);
+		const fireChogoOne = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER);
+		const fireChogoTwo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER);
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([grega, sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER).add([ashgar]),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([quorOne, fireChogoOne]),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER).add([
+				arbolit,
+				quorTwo,
+				fireChogoTwo,
+			]),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER).add([quorPup]),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY).add([lavaArboll]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_DRAW,
+			activePlayer: NON_ACTIVE_PLAYER,
+		});
+
+		const enterPromptAction = {
+			type: ACTION_ENTER_PROMPT,
+			promptType: PROMPT_TYPE_ALTERNATIVE,
+			promptParams: {
+				alternatives: [{
+					name: 'Option 1',
+					value: 'opt1'
+				}, {
+					name: 'Option 2',
+					value: 'opt2'
+				}]
+			},
+			generatedBy: lavaArboll.id,
+			player: lavaArboll.owner,
+		}
+
+		const result = gameState.convertPromptActionToEffect(enterPromptAction)
+
+		expect(result.type).toEqual(ACTION_EFFECT)
+		expect(result.effectType).toEqual(EFFECT_TYPE_PROMPT_ENTERED)
+		expect(result.promptType).toEqual(PROMPT_TYPE_ALTERNATIVE)
+		expect(result).toHaveProperty('promptParams')
+		expect(result.promptParams).toHaveProperty('alternatives')
+		expect(result.promptParams.alternatives).toStrictEqual(enterPromptAction.promptParams.alternatives)
+		expect(result.player).toEqual(ACTIVE_PLAYER)
+		expect(result.generatedBy).toEqual(lavaArboll.id)
+	})
+
+	it('PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+		const ashgar = new CardInGame(byName('Ashgar'), ACTIVE_PLAYER);
+
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
+		const lavaArboll = new CardInGame(byName('Lava Arboll'), ACTIVE_PLAYER).addEnergy(2);
+		const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER);
+
+		const quorOne = new CardInGame(byName('Quor'), ACTIVE_PLAYER);
+		const quorTwo = new CardInGame(byName('Quor'), ACTIVE_PLAYER);
+		const fireChogoOne = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER);
+		const fireChogoTwo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER);
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([grega, sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER).add([ashgar]),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([quorOne, fireChogoOne]),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER).add([
+				arbolit,
+				quorTwo,
+				fireChogoTwo,
+			]),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER).add([quorPup]),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY).add([lavaArboll]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_DRAW,
+			activePlayer: NON_ACTIVE_PLAYER,
+		});
+
+		const enterPromptAction = {
+			type: ACTION_ENTER_PROMPT,
+			promptType: PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
+			source: lavaArboll.id,
+			generatedBy: lavaArboll.id,
+			player: lavaArboll.owner,
+		}
+
+		const result = gameState.convertPromptActionToEffect(enterPromptAction)
+
+		expect(result.type).toEqual(ACTION_EFFECT)
+		expect(result.effectType).toEqual(EFFECT_TYPE_PROMPT_ENTERED)
+		expect(result.promptType).toEqual(PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE)
+		expect(result.source).toEqual(lavaArboll.id)
+		expect(result.player).toEqual(ACTIVE_PLAYER)
+		expect(result.generatedBy).toEqual(lavaArboll.id)
+	})
+})

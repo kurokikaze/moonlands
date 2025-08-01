@@ -1703,7 +1703,6 @@ const applyDistributeEnergyOnCreaturesEffect: ActionTransformer<typeof EFFECT_TY
 
 const applyDistributeDamageEffect: ActionTransformer<typeof EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES> = function (action, transform) {
   const damageArrangement: Record<string, number> = this.getMetaValue(action.damageOnCreatures, action.generatedBy);
-
   this.getZone(ZONE_TYPE_IN_PLAY).cards.forEach(card => {
     if (card.card.type === TYPE_CREATURE && card.id in damageArrangement) {
       const damageAmount = damageArrangement[card.id];
@@ -1723,20 +1722,33 @@ const applyDistributeDamageEffect: ActionTransformer<typeof EFFECT_TYPE_DISTRIBU
   });
 }
 
+const applyPromptEntered: ActionTransformer<typeof EFFECT_TYPE_PROMPT_ENTERED> = function (action) {
+  const promptPlayer = this.getMetaValue(action.player, action.generatedBy);
+
+  this.state = {
+    ...this.state,
+    prompt: true,
+    promptType: action.promptType,
+    // @ts-ignore
+    promptParams: action.promptParams || this.state.promptParams,
+    promptGeneratedBy: action.generatedBy,
+    promptMessage: action.message,
+    promptPlayer: promptPlayer,
+    promptVariable: action.variable,
+  }
+}
+
 const applyPromptEnteredEffect: ActionTransformer<typeof EFFECT_TYPE_PROMPT_ENTERED> = function (action) {
   if (!('player' in action)) {
     throw new Error('Prompt without player!');
   }
-  const savedActions = this.state.actions;
   let promptParams: PromptParamsType = {};
-  let skipPrompt = false;
   const promptPlayer = this.getMetaValue(action.player, action.generatedBy);
 
   switch (action.promptType) {
     case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
       promptParams = {
-            // @ts-ignore
-        source: this.getMetaValue(action.promptParams.source, action.generatedBy),
+        source: this.getMetaValue(action.source, action.generatedBy),
       };
       break;
     }
@@ -1785,8 +1797,6 @@ const applyPromptEnteredEffect: ActionTransformer<typeof EFFECT_TYPE_PROMPT_ENTE
           numberOfCards: maxNumberOfCards,
           cards: cards.map(convertCard),
         };
-      } else {
-        skipPrompt = true;
       }
       break;
     }
@@ -1818,8 +1828,6 @@ const applyPromptEnteredEffect: ActionTransformer<typeof EFFECT_TYPE_PROMPT_ENTE
           numberOfCards: maxNumberOfCards,
           cards: cards.map(convertCard),
         };
-      } else {
-        skipPrompt = true;
       }
       break;
     }
@@ -1932,21 +1940,16 @@ const applyPromptEnteredEffect: ActionTransformer<typeof EFFECT_TYPE_PROMPT_ENTE
     }
   }
 
-  if (!skipPrompt) {
-    this.state = {
-      ...this.state,
-      savedActions,
-      // This will be the only action to fire after entering the prompt
-      actions: [/*this.convertPromptActionToEffect(action)*/],
-      prompt: true,
-      promptMessage: ('message' in action) ? action.message : '',
-      promptPlayer,
-      promptType: action.promptType,
-      promptVariable: action.variable,
-      promptGeneratedBy: action.generatedBy,
-      promptParams,
-    };
-  }
+  this.state = {
+    ...this.state,
+    prompt: true,
+    promptMessage: ('message' in action) ? action.message : '',
+    promptPlayer,
+    promptType: action.promptType,
+    promptVariable: action.variable,
+    promptGeneratedBy: action.generatedBy,
+    promptParams,
+  };
 }
 
 const applyRearrangeCardsOfZoneEffect: ActionTransformer<typeof EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE> = function (action) {
@@ -2042,22 +2045,6 @@ const applyAttachCardToCardEffect: ActionTransformer<typeof EFFECT_TYPE_ATTACH_C
   });
 }
 
-const applyPromptEntered: ActionTransformer<typeof EFFECT_TYPE_PROMPT_ENTERED> = function (action) {
-  const promptPlayer = this.getMetaValue(action.player, action.generatedBy);
-
-  this.state = {
-    ...this.state,
-    prompt: true,
-    promptType: action.promptType,
-    // @ts-ignore
-    promptParams: action.promptParams || this.state.promptParams,
-    promptGeneratedBy: action.generatedBy,
-    promptMessage: action.message,
-    promptPlayer: promptPlayer,
-    promptVariable: action.variable,
-  }
-}
-
 export const actionMap: Partial<ActionHandlerMap> = {
   // Beginning of turn and step
   [EFFECT_TYPE_START_TURN]: applyStartTurnEffect,
@@ -2146,5 +2133,5 @@ export const actionMap: Partial<ActionHandlerMap> = {
   [EFFECT_TYPE_CONDITIONAL]: applyConditionalEffect,
 
   // Prompt-related stuff
-  // [EFFECT_TYPE_PROMPT_ENTERED]: applyPromptEntered,
+  [EFFECT_TYPE_PROMPT_ENTERED]: applyPromptEnteredEffect,
 }

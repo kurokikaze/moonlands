@@ -226,7 +226,9 @@ import {
 	RearrangeCardsOfZonePromptParams,
 	RearrangeEnergyPromptParams,
 	DistributeDamagePromptParams,
-	DistributeCardsInZonesPromptParams
+	DistributeCardsInZonesPromptParams,
+	MagiWithoutCreaturesPromptParams,
+	AnyCreatureExceptSourcePromptParams
 } from './types/promptParams';
 
 const effect = (data: any): EffectType => ({
@@ -266,8 +268,10 @@ type PromptParamsType = PromptParams |
 	DistributeCardsInZonesPromptParams |
 	NumberPromptParams |
 	SingleCreatureFilteredPromptParams_Create |
+	AnyCreatureExceptSourcePromptParams |
 	ChooseNCardsFromZonePromptParams_Create |
 	ChooseNCardsFromZonePromptParams |
+	MagiWithoutCreaturesPromptParams |
 	MagiPowerPromptParams;
 
 const prompt = (data: PromptParamsType & { message?: string }): PromptType => {
@@ -2693,9 +2697,7 @@ export const cards = [
 					prompt({
 						promptType: PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 						message: 'Choose a creature to add 2 energy to.',
-						promptParams: {
-							source: '$sourceCreature',
-						}
+						source: '$sourceCreature',
 					}),
 					effect({
 						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
