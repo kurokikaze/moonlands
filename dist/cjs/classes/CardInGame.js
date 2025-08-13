@@ -62,7 +62,9 @@ class CardInGame {
         return this.data.actionsUsed.includes(actionName);
     }
     setActionUsed(actionName) {
-        this.data.actionsUsed.push(actionName);
+        if (!this.data.actionsUsed.includes(actionName)) {
+            this.data.actionsUsed.push(actionName);
+        }
     }
     clearActionsUsed() {
         this.data.actionsUsed = [];

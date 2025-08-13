@@ -70,7 +70,9 @@ var CardInGame = /** @class */ (function () {
         return this.data.actionsUsed.includes(actionName);
     };
     CardInGame.prototype.setActionUsed = function (actionName) {
-        this.data.actionsUsed.push(actionName);
+        if (!this.data.actionsUsed.includes(actionName)) {
+            this.data.actionsUsed.push(actionName);
+        }
     };
     CardInGame.prototype.clearActionsUsed = function () {
         this.data.actionsUsed = [];

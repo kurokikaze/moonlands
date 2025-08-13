@@ -893,7 +893,8 @@ const applyExecutePowerEffects: ActionTransformer<typeof EFFECT_TYPE_EXECUTE_POW
     const allPromptsAreDoable = this.checkPrompts(source, preparedActions, true);
 
     if (allPromptsAreDoable) {
-      if (!('setUsage' in action) || action.setUsage == true) {
+      const mustSetUsage = !('setUsage' in action) || action.setUsage == true
+      if (mustSetUsage && !source.wasActionUsed(power.name)) {
         source.setActionUsed(power.name);
       }
 
@@ -1720,22 +1721,6 @@ const applyDistributeDamageEffect: ActionTransformer<typeof EFFECT_TYPE_DISTRIBU
       }
     }
   });
-}
-
-const applyPromptEntered: ActionTransformer<typeof EFFECT_TYPE_PROMPT_ENTERED> = function (action) {
-  const promptPlayer = this.getMetaValue(action.player, action.generatedBy);
-
-  this.state = {
-    ...this.state,
-    prompt: true,
-    promptType: action.promptType,
-    // @ts-ignore
-    promptParams: action.promptParams || this.state.promptParams,
-    promptGeneratedBy: action.generatedBy,
-    promptMessage: action.message,
-    promptPlayer: promptPlayer,
-    promptVariable: action.variable,
-  }
 }
 
 const applyPromptEnteredEffect: ActionTransformer<typeof EFFECT_TYPE_PROMPT_ENTERED> = function (action) {

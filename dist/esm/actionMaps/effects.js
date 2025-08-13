@@ -690,7 +690,8 @@ var applyExecutePowerEffects = function (action) {
         var preparedActions = effects.map(enrichAction);
         var allPromptsAreDoable = this.checkPrompts(source, preparedActions, true);
         if (allPromptsAreDoable) {
-            if (!('setUsage' in action) || action.setUsage == true) {
+            var mustSetUsage = !('setUsage' in action) || action.setUsage == true;
+            if (mustSetUsage && !source.wasActionUsed(power.name)) {
                 source.setActionUsed(power.name);
             }
             this.transformIntoActions.apply(this, preparedActions);
@@ -1413,12 +1414,6 @@ var applyDistributeDamageEffect = function (action, transform) {
             }
         }
     });
-};
-var applyPromptEntered = function (action) {
-    var promptPlayer = this.getMetaValue(action.player, action.generatedBy);
-    this.state = __assign(__assign({}, this.state), { prompt: true, promptType: action.promptType, 
-        // @ts-ignore
-        promptParams: action.promptParams || this.state.promptParams, promptGeneratedBy: action.generatedBy, promptMessage: action.message, promptPlayer: promptPlayer, promptVariable: action.variable });
 };
 var applyPromptEnteredEffect = function (action) {
     var _this = this;
