@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = convertPromptActionToEffect;
 const const_1 = require("../const");
 const convertCard = (cardInGame) => ({
     id: cardInGame.id,
@@ -336,5 +337,4 @@ function convertPromptActionToEffect(action, state) {
         }
     }
 }
-exports.default = convertPromptActionToEffect;
 //# sourceMappingURL=convertPromptAction.js.map

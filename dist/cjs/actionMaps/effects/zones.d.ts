@@ -1,0 +1,11 @@
+import { EFFECT_TYPE_DEFEAT_MAGI, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_DISTRIBUTE_CARDS_IN_ZONES, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE } from "../../const";
+import { ActionTransformer } from "../actionMapTypes";
+export declare const applyMoveCardsBetweenZonesEffect: ActionTransformer<typeof EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES>;
+export declare const applyMoveCardBetweenZonesEffect: ActionTransformer<typeof EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES>;
+export declare const applyDefeatMagiEffect: ActionTransformer<typeof EFFECT_TYPE_DEFEAT_MAGI>;
+export declare const applyMagiIsDefeatedEffect: ActionTransformer<typeof EFFECT_TYPE_MAGI_IS_DEFEATED>;
+export declare const applyDiscardCreatureOrRelic: ActionTransformer<typeof EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC>;
+export declare const applyDiscardRelicFromPlayEffect: ActionTransformer<typeof EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY>;
+export declare const applyDiscardCreatureFromPlayEffect: ActionTransformer<typeof EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY>;
+export declare const applyRearrangeCardsOfZoneEffect: ActionTransformer<typeof EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE>;
+export declare const applyDistributeCardsInZonesEffect: ActionTransformer<typeof EFFECT_TYPE_DISTRIBUTE_CARDS_IN_ZONES>;

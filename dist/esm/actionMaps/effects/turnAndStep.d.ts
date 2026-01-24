@@ -1,0 +1,11 @@
+import { EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_DRAW_REST_OF_CARDS, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_START_TURN, EFFECT_TYPE_ADD_DELAYED_TRIGGER } from "../../const.js";
+import { ActionTransformer } from "../actionMapTypes.js";
+export declare const applyStartTurnEffect: ActionTransformer<typeof EFFECT_TYPE_START_TURN>;
+export declare const applyDrawCardsInDrawStep: ActionTransformer<typeof EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP>;
+export declare const applyStartOfTurnEffect: ActionTransformer<typeof EFFECT_TYPE_START_OF_TURN>;
+export declare const applyStartStepEffect: ActionTransformer<typeof EFFECT_TYPE_START_STEP>;
+export declare const applyAddDelayedTriggerEffect: ActionTransformer<typeof EFFECT_TYPE_ADD_DELAYED_TRIGGER>;
+export declare const applyFindStartingCardsEffect: ActionTransformer<typeof EFFECT_TYPE_FIND_STARTING_CARDS>;
+export declare const applyDrawRestOfCardsEffect: ActionTransformer<typeof EFFECT_TYPE_DRAW_REST_OF_CARDS>;
+export declare const applyMagiFlippedEffect: ActionTransformer<typeof EFFECT_TYPE_MAGI_FLIPPED>;
+export declare const applyAddStartingEnergyToMagiEffect: ActionTransformer<typeof EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI>;
