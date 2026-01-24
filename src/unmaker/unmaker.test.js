@@ -116,6 +116,7 @@ import {
 } from '../../test/utils.js';
 
 import Zone from '../classes/Zone.ts';
+import { UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE } from './types.ts';
 
 describe('Unmaking state action', () => {
     it('Damage action', () => {
@@ -171,5 +172,17 @@ describe('Unmaking state action', () => {
         gameState.update(effect);
 
 		console.log(JSON.stringify(unmaker.unActions, null, 2))
-    })
+
+		expect(unmaker.unActions).toHaveLength(1)
+		expect(unmaker.unActions[0].type).toBe(UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE)
+		expect(unmaker.unActions[0].creatures).toHaveLength(1)
+		expect(unmaker.unActions[0].creatures[0].id).toBe(arbolit.id)
+		expect(unmaker.unActions[0].creatures[0].energy).toBe(14)
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id).data.energy).toBe(9)
+
+		unmaker.applyUnAction(gameState, unmaker.unActions[0]);
+
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id).data.energy).toBe(14)
+	})
 })

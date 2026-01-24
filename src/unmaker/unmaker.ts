@@ -1,5 +1,5 @@
 import CardInGame from '../classes/CardInGame';
-import { ACTION_EFFECT, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, State } from '../index'
+import { ACTION_EFFECT, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, State, ZONE_TYPE_IN_PLAY } from '../index'
 import { AnyEffectType } from '../types'
 import { UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UnAction } from './types';
 export class Unmaker {
@@ -34,6 +34,20 @@ export class Unmaker {
                             creatures: creatures.map(creature => ({ id: creature.id, energy: creature.data.energy }))
                         }
                 }
+            }
+        }
+    }
+
+    public applyUnAction(state: State, unaction: UnAction) {
+        switch (unaction.type) {
+            case UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
+                const inPlay = state.getZone(ZONE_TYPE_IN_PLAY)
+                unaction.creatures.forEach(({id, energy}) => {
+                    let creatureCard = inPlay.byId(id)
+                    if (creatureCard) {
+                        creatureCard.data.energy = energy
+                    }
+                })
             }
         }
     }
