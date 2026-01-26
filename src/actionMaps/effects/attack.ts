@@ -114,7 +114,7 @@ export const applyAttackEffect: ActionTransformer<typeof EFFECT_TYPE_ATTACK> = f
   transform(...attackSequence);
 }
 
-export const applyBeforeDamageEffect: ActionTransformer<typeof EFFECT_TYPE_BEFORE_DAMAGE> = function (action: BeforeDamageEffect) {
+export const applyBeforeDamageEffect: ActionTransformer<typeof EFFECT_TYPE_BEFORE_DAMAGE> = function (action: BeforeDamageEffect, transform, _state) {
   action.source.markAttackDone();
   action.target.markAttackReceived();
 }

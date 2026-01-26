@@ -103,7 +103,7 @@ export const applyEnergizeEffect: ActionTransformer<typeof EFFECT_TYPE_ENERGIZE>
   });
 }
 
-export const applyMoveEnergyEffect: ActionTransformer<typeof EFFECT_TYPE_MOVE_ENERGY> = function (action, transform) {
+export const applyMoveEnergyEffect: ActionTransformer<typeof EFFECT_TYPE_MOVE_ENERGY> = function (action, transform, _state) {
   const moveMultiSource: CardInGame | CardInGame[] = this.getMetaValue(action.source, action.generatedBy);
   const moveSource = (moveMultiSource instanceof Array) ? moveMultiSource[0] : moveMultiSource;
   const moveMultiTarget = this.getMetaValue(action.target, action.generatedBy);
