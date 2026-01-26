@@ -1,7 +1,7 @@
 import CardInGame from '../classes/CardInGame';
-import { ACTION_EFFECT, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_START_STEP, EFFECT_TYPE_START_TURN, State, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_IN_PLAY } from '../index'
+import { ACTION_EFFECT, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_PROMPT_ENTERED, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_START_TURN, State, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_IN_PLAY } from '../index'
 import { AnyEffectType } from '../types'
-import { CardFlagsSnapshot, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI, UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, UNMAKE_EFFECT_TYPE_DIE_ROLLED, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, UNMAKE_EFFECT_TYPE_START_STEP, UNMAKE_EFFECT_TYPE_START_TURN, UnAction } from './types';
+import { CardFlagsSnapshot, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI, UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE, UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, UNMAKE_EFFECT_TYPE_DIE_ROLLED, UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS, UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_ENERGY, UNMAKE_EFFECT_TYPE_PROMPT_ENTERED, UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD, UNMAKE_EFFECT_TYPE_START_OF_TURN, UNMAKE_EFFECT_TYPE_START_STEP, UNMAKE_EFFECT_TYPE_START_TURN, UnAction } from './types';
 export class Unmaker {
     public unActions: UnAction[] = [];
 
@@ -47,13 +47,14 @@ export class Unmaker {
                                 creatures: [{
                                     id: creatures.id,
                                     energy: creatures.data.energy,
+                                    energyLostThisTurn: creatures.data.energyLostThisTurn
                                 }]
                             }
 
                         }
                         return {
                             type: UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
-                            creatures: creatures.map(creature => ({ id: creature.id, energy: creature.data.energy }))
+                            creatures: creatures.map(creature => ({ id: creature.id, energy: creature.data.energy, energyLostThisTurn: creature.data.energyLostThisTurn }))
                         }
                     case EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI:
                         const magiTargets: CardInGame[]|CardInGame = this.state.getMetaValue(action.target, action.generatedBy)
@@ -177,6 +178,61 @@ export class Unmaker {
                             cardFlags,
                         }
                     }
+                    case EFFECT_TYPE_START_OF_TURN: {
+                        // Capture card flags for creatures, relics, and magi that will be cleared by START_OF_TURN
+                        const cardFlags: Record<string, CardFlagsSnapshot> = {}
+                        const player = action.player
+
+                        // Capture creature flags (creatures controlled by the player)
+                        const creatures = this.state.getZone(ZONE_TYPE_IN_PLAY).cards
+                            .filter(card => card.card.type === TYPE_CREATURE && card.data.controller === player)
+                        for (const creature of creatures) {
+                            cardFlags[creature.id] = {
+                                id: creature.id,
+                                actionsUsed: [...creature.data.actionsUsed],
+                                wasAttacked: creature.data.wasAttacked,
+                                hasAttacked: creature.data.hasAttacked,
+                                attacked: creature.data.attacked,
+                                defeatedCreature: creature.data.defeatedCreature,
+                                energyLostThisTurn: creature.data.energyLostThisTurn,
+                            }
+                        }
+
+                        // Capture relic flags (relics controlled by the player)
+                        const relics = this.state.getZone(ZONE_TYPE_IN_PLAY).cards
+                            .filter(card => card.card.type === TYPE_RELIC && card.data.controller === player)
+                        for (const relic of relics) {
+                            cardFlags[relic.id] = {
+                                id: relic.id,
+                                actionsUsed: [...relic.data.actionsUsed],
+                                wasAttacked: relic.data.wasAttacked,
+                                hasAttacked: relic.data.hasAttacked,
+                                attacked: relic.data.attacked,
+                                defeatedCreature: relic.data.defeatedCreature,
+                                energyLostThisTurn: relic.data.energyLostThisTurn,
+                            }
+                        }
+
+                        // Capture magi flags
+                        const activeMagi = this.state.getZone(ZONE_TYPE_ACTIVE_MAGI, player)?.card
+                        if (activeMagi) {
+                            cardFlags[activeMagi.id] = {
+                                id: activeMagi.id,
+                                actionsUsed: [...activeMagi.data.actionsUsed],
+                                wasAttacked: activeMagi.data.wasAttacked,
+                                hasAttacked: activeMagi.data.hasAttacked,
+                                attacked: activeMagi.data.attacked,
+                                defeatedCreature: activeMagi.data.defeatedCreature,
+                                energyLostThisTurn: activeMagi.data.energyLostThisTurn,
+                            }
+                        }
+
+                        return {
+                            type: UNMAKE_EFFECT_TYPE_START_OF_TURN,
+                            player,
+                            cardFlags,
+                        }
+                    }
                     case EFFECT_TYPE_START_STEP: {
                         return {
                             type: UNMAKE_EFFECT_TYPE_START_STEP,
@@ -241,6 +297,93 @@ export class Unmaker {
                             magi: magiTargets.map(magi => ({ id: magi.id, owner: magi.owner, energy: magi.data.energy }))
                         }
                     }
+                    case EFFECT_TYPE_BEFORE_DAMAGE: {
+                        const source = action.source
+                        const target = action.target
+                        return {
+                            type: UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE,
+                            sourceId: source.id,
+                            sourceHasAttacked: source.data.hasAttacked,
+                            sourceAttacked: source.data.attacked,
+                            targetId: target.id,
+                            targetWasAttacked: target.data.wasAttacked,
+                        }
+                    }
+                    case EFFECT_TYPE_CREATURE_DEFEATS_CREATURE: {
+                        const source = action.source
+                        return {
+                            type: UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
+                            sourceId: source.id,
+                            sourceDefeatedCreature: source.data.defeatedCreature,
+                        }
+                    }
+                    case EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY: {
+                        return {
+                            type: UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY
+                        }
+                    }
+                    case EFFECT_TYPE_MOVE_ENERGY: {
+                        const source = this.state.getMetaValue(action.source, action.generatedBy)
+                        const target = this.state.getMetaValue(action.target, action.generatedBy)
+                        return {
+                            type: UNMAKE_EFFECT_TYPE_MOVE_ENERGY,
+                            sourceId: source.id,
+                            targetId: target.id,
+                            sourceEnergy: source.data.energy,
+                            sourceEnergyLost: source.data.energyLostThisTurn,
+                            targetEnergy: target.data.energy,
+                        }
+                    }
+                    case EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE: {
+                        const creature: CardInGame = this.state.getMetaValue(action.target, action.generatedBy)
+                        return {
+                            type: UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
+                            creatureId: creature.id,
+                            energy: creature.data.energy,
+                            energyLost: creature.data.energyLostThisTurn
+                        }
+                    }
+                    case EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI: {
+                        const magi: CardInGame = this.state.getMetaValue(action.target, action.generatedBy)
+                        return {
+                            type: UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
+                            magiId: magi.id,
+                            owner: magi.owner,
+                            energy: magi.data.energy,
+                            energyLost: magi.data.energyLostThisTurn
+                        }
+                    }
+                    case EFFECT_TYPE_PROMPT_ENTERED: {
+                        return {
+                            type: UNMAKE_EFFECT_TYPE_PROMPT_ENTERED,
+                            previousPrompt: this.state.state.prompt,
+                            previousPromptMessage: this.state.state.promptMessage,
+                            previousPromptPlayer: this.state.state.promptPlayer,
+                            previousPromptType: this.state.state.promptType,
+                            previousPromptVariable: this.state.state.promptVariable,
+                            previousPromptGeneratedBy: this.state.state.promptGeneratedBy,
+                            previousPromptParams: { ...this.state.state.promptParams },
+                        }
+                    }
+                    case EFFECT_TYPE_FIND_STARTING_CARDS: {
+                        const currentMeta = this.state.getSpellMetadata(action.generatedBy)
+                        return {
+                            type: UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS,
+                            spellId: action.generatedBy,
+                            previousFoundCards: currentMeta?.foundCards as unknown as string[] | undefined,
+                        }
+                    }
+                    case EFFECT_TYPE_RESHUFFLE_DISCARD: {
+                        const player = this.state.getMetaValue(action.player, action.generatedBy)
+                        const deck = this.state.getZone(ZONE_TYPE_DECK, player)
+                        const discard = this.state.getZone(ZONE_TYPE_DISCARD, player)
+                        return {
+                            type: UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD,
+                            player,
+                            previousDeckCards: [...deck.cards],
+                            previousDiscardCards: [...discard.cards],
+                        }
+                    }
                 }
             }
         }
@@ -250,11 +393,13 @@ export class Unmaker {
         switch (unaction.type) {
             case UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
                 const inPlay = state.getZone(ZONE_TYPE_IN_PLAY)
-                unaction.creatures.forEach(({id, energy}) => {
+                unaction.creatures.forEach(({id, energy, energyLostThisTurn}) => {
                     let creatureCard = inPlay.byId(id)
                     if (creatureCard) {
                         creatureCard.data.energy = energy
+                        creatureCard.data.energyLostThisTurn = energyLostThisTurn
                     }
+                    state.state.log.pop()
                 })
                 break
             }
@@ -286,14 +431,10 @@ export class Unmaker {
                     const currentMeta = state.getSpellMetadata(entry.spellId)
                     if (entry.previousValue === undefined) {
                         // Field didn't exist before, remove it
-                        const { [entry.field]: _, ...rest } = currentMeta
-                        state.setSpellMetadata(rest, entry.spellId)
+                        state.clearSpellMetaDataField(entry.field, entry.spellId)
                     } else {
                         // Restore to previous value
-                        state.setSpellMetadata({
-                            ...currentMeta,
-                            [entry.field]: entry.previousValue,
-                        }, entry.spellId)
+                        state.setSpellMetaDataField(entry.field, entry.previousValue, entry.spellId)
                     }
                 }
                 break
@@ -302,14 +443,10 @@ export class Unmaker {
                 const currentMeta = state.getSpellMetadata(unaction.spellId)
                 if (unaction.previousRollResult === undefined) {
                     // Field didn't exist before, remove it
-                    const { roll_result: _, ...rest } = currentMeta
-                    state.setSpellMetadata(rest, unaction.spellId)
+                    state.clearSpellMetaDataField('roll_result', unaction.spellId)
                 } else {
                     // Restore to previous value
-                    state.setSpellMetadata({
-                        ...currentMeta,
-                        roll_result: unaction.previousRollResult,
-                    }, unaction.spellId)
+                    state.setSpellMetaDataField('roll_result', unaction.previousRollResult, unaction.spellId)
                 }
                 break
             }
@@ -322,6 +459,29 @@ export class Unmaker {
                     continuousEffects: unaction.previousContinuousEffects,
                 }
 
+                // Restore card flags
+                for (const [cardId, flags] of Object.entries(unaction.cardFlags)) {
+                    // Try to find the card in play (creatures and relics)
+                    let card = state.getZone(ZONE_TYPE_IN_PLAY).byId(cardId)
+                    // If not in play, check all players' active magi zones
+                    if (!card) {
+                        for (const player of state.players) {
+                            card = state.getZone(ZONE_TYPE_ACTIVE_MAGI, player)?.byId(cardId)
+                            if (card) break
+                        }
+                    }
+                    if (card) {
+                        card.data.actionsUsed = [...flags.actionsUsed]
+                        card.data.wasAttacked = flags.wasAttacked
+                        card.data.hasAttacked = flags.hasAttacked
+                        card.data.attacked = flags.attacked
+                        card.data.defeatedCreature = flags.defeatedCreature
+                        card.data.energyLostThisTurn = flags.energyLostThisTurn
+                    }
+                }
+                break
+            }
+            case UNMAKE_EFFECT_TYPE_START_OF_TURN: {
                 // Restore card flags
                 for (const [cardId, flags] of Object.entries(unaction.cardFlags)) {
                     // Try to find the card in play (creatures and relics)
@@ -397,6 +557,94 @@ export class Unmaker {
                     }
                     state.state.log.pop()
                 })
+                break
+            }
+            case UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE: {
+                const inPlay = state.getZone(ZONE_TYPE_IN_PLAY)
+                const source = inPlay.byId(unaction.sourceId)
+                if (source) {
+                    source.data.hasAttacked = unaction.sourceHasAttacked
+                    source.data.attacked = unaction.sourceAttacked
+                }
+                const target = inPlay.byId(unaction.targetId)
+                if (target) {
+                    target.data.wasAttacked = unaction.targetWasAttacked
+                }
+                break
+            }
+            case UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE: {
+                const inPlay = state.getZone(ZONE_TYPE_IN_PLAY)
+                const source = inPlay.byId(unaction.sourceId)
+                if (source) {
+                    source.data.defeatedCreature = unaction.sourceDefeatedCreature
+                }
+                break
+            }
+            case UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY: {
+                state.state.log.pop()
+                break
+            }
+            case UNMAKE_EFFECT_TYPE_MOVE_ENERGY: {
+                const inPlay = state.getZone(ZONE_TYPE_IN_PLAY)
+                const source = inPlay.byId(unaction.sourceId)
+                if (source) {
+                    source.data.energy = unaction.sourceEnergy
+                    source.data.energyLostThisTurn = unaction.sourceEnergyLost
+                }
+                const target = inPlay.byId(unaction.targetId)
+                if (target) {
+                    target.data.energy = unaction.targetEnergy
+                }
+                break
+            }
+            case UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE: {
+                const inPlay = state.getZone(ZONE_TYPE_IN_PLAY)
+                const creature = inPlay.byId(unaction.creatureId)
+                if (creature) {
+                    creature.data.energy = unaction.energy
+                    creature.data.energyLostThisTurn = unaction.energyLost
+                }
+                break
+            }
+            case UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI: {
+                const activeMagi = state.getZone(ZONE_TYPE_ACTIVE_MAGI, unaction.owner)
+                const magi = activeMagi.byId(unaction.magiId)
+                if (magi) {
+                    magi.data.energy = unaction.energy
+                    magi.data.energyLostThisTurn = unaction.energyLost
+                }
+                break
+            }
+            case UNMAKE_EFFECT_TYPE_PROMPT_ENTERED: {
+                state.state = {
+                    ...state.state,
+                    prompt: unaction.previousPrompt,
+                    promptMessage: unaction.previousPromptMessage,
+                    promptPlayer: unaction.previousPromptPlayer,
+                    promptType: unaction.previousPromptType,
+                    promptVariable: unaction.previousPromptVariable,
+                    promptGeneratedBy: unaction.previousPromptGeneratedBy,
+                    promptParams: unaction.previousPromptParams,
+                }
+                break
+            }
+            case UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS: {
+                state.state.log.pop()
+                if (unaction.previousFoundCards === undefined) {
+                    state.clearSpellMetaDataField('foundCards', unaction.spellId)
+                } else {
+                    // Restore to previous value
+                    state.setSpellMetaDataField('foundCards', unaction.previousFoundCards, unaction.spellId)
+                }
+                break
+            }
+            case UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD: {
+                const deck = state.getZone(ZONE_TYPE_DECK, unaction.player)
+                const discard = state.getZone(ZONE_TYPE_DISCARD, unaction.player)
+                // Restore deck to its previous state
+                deck.cards = [...unaction.previousDeckCards]
+                // Restore discard to its previous state
+                discard.cards = [...unaction.previousDiscardCards]
                 break
             }
         }

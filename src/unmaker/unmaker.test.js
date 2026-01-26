@@ -2,7 +2,6 @@
 import * as moonlands from '../index.ts';
 import { byName, cards } from '../cards.ts';
 import CardInGame from '../classes/CardInGame.ts';
-import Card from '../classes/Card.ts';
 import { Unmaker } from './unmaker.ts';
 
 import {
@@ -20,6 +19,7 @@ import {
 
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
+	EFFECT_TYPE_START_OF_TURN,
 	EFFECT_TYPE_ADD_DELAYED_TRIGGER,
 	EFFECT_TYPE_DRAW,
 	EFFECT_TYPE_ROLL_DIE,
@@ -82,13 +82,19 @@ import {
 	CALCULATION_SET,
 
 	EFFECT_TYPE_MOVE_ENERGY,
+	EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
+	EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
 	EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
 	EFFECT_TYPE_ATTACK,
+	EFFECT_TYPE_BEFORE_DAMAGE,
+	EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
 	EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
 	EFFECT_TYPE_NONE,
 	EFFECT_TYPE_CONDITIONAL,
 	EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE,
 	EFFECT_TYPE_PROMPT_ENTERED,
+	EFFECT_TYPE_FIND_STARTING_CARDS,
+	EFFECT_TYPE_RESHUFFLE_DISCARD,
 
 	ZONE_TYPE_ACTIVE_MAGI,
 	ZONE_TYPE_MAGI_PILE,
@@ -119,7 +125,17 @@ import {
 } from '../../test/utils.js';
 
 import Zone from '../classes/Zone.ts';
-import { UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_DIE_ROLLED, UNMAKE_EFFECT_TYPE_START_TURN, UNMAKE_EFFECT_TYPE_START_STEP, UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI } from './types.ts';
+import { UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_DIE_ROLLED, UNMAKE_EFFECT_TYPE_START_TURN, UNMAKE_EFFECT_TYPE_START_OF_TURN, UNMAKE_EFFECT_TYPE_START_STEP, UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI, UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE, UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, UNMAKE_EFFECT_TYPE_MOVE_ENERGY, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_PROMPT_ENTERED, UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS, UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD } from './types.ts';
+
+
+expect.extend({
+	toHaveEnergy(received, expected) {
+		return {
+			message: () => `The creature expected energy to be ${expected}, instead got ${received.data.energy}`,
+			pass: received.data.energy == expected
+		}
+	}
+})
 
 describe('Unmaking state action', () => {
     it('Damage action', () => {
@@ -171,10 +187,10 @@ describe('Unmaking state action', () => {
         }
 
         const unmaker = new Unmaker(gameState)
+		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
+		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData)
 
         gameState.update(effect);
-
-		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
 
 		expect(unmaker.unActions).toHaveLength(1)
 		expect(unmaker.unActions[0].type).toBe(UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE)
@@ -182,12 +198,13 @@ describe('Unmaking state action', () => {
 		expect(unmaker.unActions[0].creatures[0].id).toBe(arbolit.id)
 		expect(unmaker.unActions[0].creatures[0].energy).toBe(14)
 
-		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id).data.energy).toBe(9)
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(9)
 
 		unmaker.applyUnAction(gameState, unmaker.unActions[0]);
 
-		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id).data.energy).toBe(14)
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(14)
 		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData))
 	})
 
 	it('Discard energy from magi action', () => {
@@ -245,11 +262,11 @@ describe('Unmaking state action', () => {
 		expect(unmaker.unActions[0].magi[0].id).toBe(grega.id)
 		expect(unmaker.unActions[0].magi[0].energy).toBe(10)
 
-		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).byId(grega.id).data.energy).toBe(7)
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).byId(grega.id)).toHaveEnergy(7)
 
 		unmaker.applyUnAction(gameState, unmaker.unActions[0]);
 
-		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).byId(grega.id).data.energy).toBe(10)
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).byId(grega.id)).toHaveEnergy(10)
 
 		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
 	})
@@ -407,7 +424,7 @@ describe('Unmaking state action', () => {
 		}
 
 		const unmaker = new Unmaker(gameState)
-
+		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData)
 		gameState.update(effect);
 
 		// Verify action was captured
@@ -430,6 +447,7 @@ describe('Unmaking state action', () => {
 		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).length).toBe(1)
 		// Verify the card is back at its original position (first in hand)
 		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).cards[0].id).toBe(quorOne.id)
+		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData))
 	})
 
 	it('Die rolled action', () => {
@@ -692,6 +710,135 @@ describe('Unmaking state action', () => {
 		expect(gregaRestored.data.actionsUsed).toEqual(['Flame Geyser'])
 	})
 
+	it('Start of turn action', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+
+		// Create a creature with some flags set
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER).addEnergy(5);
+		arbolit.data.controller = ACTIVE_PLAYER;
+		arbolit.data.hasAttacked = true;
+		arbolit.data.attacked = 1;
+		arbolit.data.actionsUsed = ['SomePower'];
+		arbolit.data.energyLostThisTurn = 2;
+		arbolit.data.wasAttacked = true;
+		arbolit.data.defeatedCreature = true;
+
+		// Create a relic with some flags set
+		const staffOfHyren = new CardInGame(byName('Staff of Hyren'), ACTIVE_PLAYER);
+		staffOfHyren.data.controller = ACTIVE_PLAYER;
+		staffOfHyren.data.actionsUsed = ['HealingLight'];
+
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const tryn = new CardInGame(byName('Tryn'), NON_ACTIVE_PLAYER);
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('NAP Magi pile', ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER).add([tryn]),
+			new Zone('NAP Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('NAP hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('NAP deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('NAP discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY).add([arbolit, staffOfHyren]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_DRAW,
+			activePlayer: NON_ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		// Set initial turn state
+		gameState.turn = 5;
+		gameState.state.step = STEP_DRAW;
+
+		// Also set some flags on the magi
+		grega.data.actionsUsed = ['Flame Geyser'];
+
+		// Verify initial card flags
+		expect(arbolit.data.hasAttacked).toBe(true)
+		expect(arbolit.data.attacked).toBe(1)
+		expect(arbolit.data.actionsUsed).toEqual(['SomePower'])
+		expect(arbolit.data.energyLostThisTurn).toBe(2)
+		expect(arbolit.data.wasAttacked).toBe(true)
+		expect(arbolit.data.defeatedCreature).toBe(true)
+		expect(staffOfHyren.data.actionsUsed).toEqual(['HealingLight'])
+		expect(grega.data.actionsUsed).toEqual(['Flame Geyser'])
+
+		const unmaker = new Unmaker(gameState)
+
+		// Apply START_OF_TURN directly (not through START_TURN)
+		const effect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_START_OF_TURN,
+			player: ACTIVE_PLAYER,
+			generatedBy: grega.id,
+		}
+
+		gameState.update(effect);
+
+		// Find the START_OF_TURN un-action
+		const startOfTurnUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_START_OF_TURN)
+		expect(startOfTurnUnActions).toHaveLength(1)
+		expect(startOfTurnUnActions[0].player).toBe(ACTIVE_PLAYER)
+
+		// Verify card flags were captured
+		expect(startOfTurnUnActions[0].cardFlags[arbolit.id]).toBeDefined()
+		expect(startOfTurnUnActions[0].cardFlags[arbolit.id].hasAttacked).toBe(true)
+		expect(startOfTurnUnActions[0].cardFlags[arbolit.id].attacked).toBe(1)
+		expect(startOfTurnUnActions[0].cardFlags[arbolit.id].actionsUsed).toEqual(['SomePower'])
+		expect(startOfTurnUnActions[0].cardFlags[arbolit.id].energyLostThisTurn).toBe(2)
+		expect(startOfTurnUnActions[0].cardFlags[arbolit.id].wasAttacked).toBe(true)
+		expect(startOfTurnUnActions[0].cardFlags[arbolit.id].defeatedCreature).toBe(true)
+		expect(startOfTurnUnActions[0].cardFlags[staffOfHyren.id]).toBeDefined()
+		expect(startOfTurnUnActions[0].cardFlags[staffOfHyren.id].actionsUsed).toEqual(['HealingLight'])
+		expect(startOfTurnUnActions[0].cardFlags[grega.id]).toBeDefined()
+		expect(startOfTurnUnActions[0].cardFlags[grega.id].actionsUsed).toEqual(['Flame Geyser'])
+
+		// Verify card flags were cleared by START_OF_TURN
+		const arbolitInPlay = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)
+		expect(arbolitInPlay.data.hasAttacked).toBe(false)
+		expect(arbolitInPlay.data.attacked).toBe(0)
+		expect(arbolitInPlay.data.actionsUsed).toEqual([])
+		expect(arbolitInPlay.data.energyLostThisTurn).toBe(0)
+		expect(arbolitInPlay.data.wasAttacked).toBe(false)
+		expect(arbolitInPlay.data.defeatedCreature).toBe(false)
+
+		const staffInPlay = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(staffOfHyren.id)
+		expect(staffInPlay.data.actionsUsed).toEqual([])
+
+		const gregaActive = gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card
+		expect(gregaActive.data.actionsUsed).toEqual([])
+
+		// Apply un-action
+		unmaker.applyUnAction(gameState, startOfTurnUnActions[0]);
+
+		// Verify card flags were restored
+		const arbolitRestored = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)
+		expect(arbolitRestored.data.hasAttacked).toBe(true)
+		expect(arbolitRestored.data.attacked).toBe(1)
+		expect(arbolitRestored.data.actionsUsed).toEqual(['SomePower'])
+		expect(arbolitRestored.data.energyLostThisTurn).toBe(2)
+		expect(arbolitRestored.data.wasAttacked).toBe(true)
+		expect(arbolitRestored.data.defeatedCreature).toBe(true)
+
+		const staffRestored = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(staffOfHyren.id)
+		expect(staffRestored.data.actionsUsed).toEqual(['HealingLight'])
+
+		const gregaRestored = gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card
+		expect(gregaRestored.data.actionsUsed).toEqual(['Flame Geyser'])
+	})
+
 	it('Start step action', () => {
 		const ACTIVE_PLAYER = 0;
 		const NON_ACTIVE_PLAYER = 2;
@@ -733,6 +880,7 @@ describe('Unmaking state action', () => {
 		const initialStep = gameState.state.step;
 
 		const unmaker = new Unmaker(gameState)
+		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData)
 
 		// Apply START_STEP to advance to step 2 (Attack)
 		const effect = {
@@ -758,6 +906,7 @@ describe('Unmaking state action', () => {
 
 		// Verify step was restored
 		expect(gameState.state.step).toBe(initialStep)
+		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData))
 	})
 
 	it('Rearrange cards of zone action', () => {
@@ -1062,7 +1211,7 @@ describe('Unmaking state action', () => {
 		gameState.turn = 1;
 
 		// Verify initial energy
-		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id).data.energy).toBe(5)
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(5)
 
 		const unmaker = new Unmaker(gameState)
 
@@ -1084,13 +1233,13 @@ describe('Unmaking state action', () => {
 		expect(addEnergyUnActions[0].creatures[0].energy).toBe(5) // Previous energy before add
 
 		// Verify energy was added
-		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id).data.energy).toBe(8)
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(8)
 
 		// Apply un-action
 		unmaker.applyUnAction(gameState, addEnergyUnActions[0]);
 
 		// Verify energy was restored
-		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id).data.energy).toBe(5)
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(5)
 	})
 
 	it('Add energy to multiple creatures action', () => {
@@ -1134,8 +1283,8 @@ describe('Unmaking state action', () => {
 		gameState.turn = 1;
 
 		// Verify initial energy
-		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id).data.energy).toBe(5)
-		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(quorPup.id).data.energy).toBe(2)
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(5)
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(quorPup.id)).toHaveEnergy(2)
 
 		const unmaker = new Unmaker(gameState)
 
@@ -1159,15 +1308,15 @@ describe('Unmaking state action', () => {
 		expect(addEnergyUnActions[0].creatures[1].energy).toBe(2)
 
 		// Verify energy was added to both
-		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id).data.energy).toBe(9)
-		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(quorPup.id).data.energy).toBe(6)
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(9)
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(quorPup.id)).toHaveEnergy(6)
 
 		// Apply un-action
 		unmaker.applyUnAction(gameState, addEnergyUnActions[0]);
 
 		// Verify energy was restored for both
-		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id).data.energy).toBe(5)
-		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(quorPup.id).data.energy).toBe(2)
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(5)
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(quorPup.id)).toHaveEnergy(2)
 
 		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
 	})
@@ -1208,7 +1357,7 @@ describe('Unmaking state action', () => {
 		gameState.turn = 1;
 
 		// Verify initial energy
-		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toBe(10)
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card).toHaveEnergy(10)
 
 		const unmaker = new Unmaker(gameState)
 
@@ -1232,14 +1381,1239 @@ describe('Unmaking state action', () => {
 		expect(addEnergyUnActions[0].magi[0].energy).toBe(10) // Previous energy before add
 
 		// Verify energy was added
-		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toBe(15)
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card).toHaveEnergy(15)
 
 		// Apply un-action
 		unmaker.applyUnAction(gameState, addEnergyUnActions[0]);
 
 		// Verify energy was restored
-		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toBe(10)
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card).toHaveEnergy(10)
 
 		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+	})
+
+	it('Before damage action', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+
+		// Create attacker creature
+		const fireChogo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER).addEnergy(2);
+		fireChogo.data.controller = ACTIVE_PLAYER;
+		// Initial state: has not attacked yet
+		fireChogo.data.hasAttacked = false;
+		fireChogo.data.attacked = 0;
+
+		// Create defender creature
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(5);
+		arbolit.data.controller = NON_ACTIVE_PLAYER;
+		// Initial state: has not been attacked yet
+		arbolit.data.wasAttacked = false;
+
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const tryn = new CardInGame(byName('Tryn'), NON_ACTIVE_PLAYER);
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('NAP Magi pile', ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER).add([tryn]),
+			new Zone('NAP Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('NAP hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('NAP deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('NAP discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY).add([fireChogo, arbolit]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.turn = 1;
+
+		// Verify initial flags
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id).data.hasAttacked).toBe(false)
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id).data.attacked).toBe(0)
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id).data.wasAttacked).toBe(false)
+
+		const unmaker = new Unmaker(gameState)
+
+		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
+
+		// Apply BEFORE_DAMAGE effect directly
+		const effect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_BEFORE_DAMAGE,
+			source: fireChogo,
+			sourceAtStart: fireChogo.copy(),
+			target: arbolit,
+			targetAtStart: arbolit.copy(),
+			generatedBy: fireChogo.id,
+		}
+
+		gameState.update(effect);
+
+		// Find the BEFORE_DAMAGE un-action
+		const beforeDamageUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE)
+		expect(beforeDamageUnActions).toHaveLength(1)
+		expect(beforeDamageUnActions[0].sourceId).toBe(fireChogo.id)
+		expect(beforeDamageUnActions[0].sourceHasAttacked).toBe(false)
+		expect(beforeDamageUnActions[0].sourceAttacked).toBe(0)
+		expect(beforeDamageUnActions[0].targetId).toBe(arbolit.id)
+		expect(beforeDamageUnActions[0].targetWasAttacked).toBe(false)
+
+		// Verify flags were changed by BEFORE_DAMAGE
+		const fireChogoAfter = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)
+		expect(fireChogoAfter.data.hasAttacked).toBe(true)
+		expect(fireChogoAfter.data.attacked).toBe(1)
+
+		const arbolitAfter = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)
+		expect(arbolitAfter.data.wasAttacked).toBe(true)
+
+		// Apply un-action
+		unmaker.applyUnAction(gameState, beforeDamageUnActions[0]);
+
+		// Verify flags were restored
+		const fireChogoRestored = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)
+		expect(fireChogoRestored.data.hasAttacked).toBe(false)
+		expect(fireChogoRestored.data.attacked).toBe(0)
+
+		const arbolitRestored = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)
+		expect(arbolitRestored.data.wasAttacked).toBe(false)
+		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+	})
+
+	it('Before damage action (with existing attack state)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+
+		// Create attacker creature that has already attacked once
+		const fireChogo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER).addEnergy(2);
+		fireChogo.data.controller = ACTIVE_PLAYER;
+		fireChogo.data.hasAttacked = true;
+		fireChogo.data.attacked = 1;
+
+		// Create defender creature that has already been attacked
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(5);
+		arbolit.data.controller = NON_ACTIVE_PLAYER;
+		arbolit.data.wasAttacked = true;
+
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const tryn = new CardInGame(byName('Tryn'), NON_ACTIVE_PLAYER);
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('NAP Magi pile', ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER).add([tryn]),
+			new Zone('NAP Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('NAP hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('NAP deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('NAP discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY).add([fireChogo, arbolit]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.turn = 1;
+
+		// Verify initial flags (creature has already attacked once)
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id).data.hasAttacked).toBe(true)
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id).data.attacked).toBe(1)
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id).data.wasAttacked).toBe(true)
+
+		const unmaker = new Unmaker(gameState)
+		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
+
+		// Apply BEFORE_DAMAGE effect for a second attack
+		const effect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_BEFORE_DAMAGE,
+			source: fireChogo,
+			sourceAtStart: fireChogo.copy(),
+			target: arbolit,
+			targetAtStart: arbolit.copy(),
+			generatedBy: fireChogo.id,
+		}
+
+		gameState.update(effect);
+
+		// Find the BEFORE_DAMAGE un-action
+		const beforeDamageUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE)
+		expect(beforeDamageUnActions).toHaveLength(1)
+		// Should capture state before the second attack
+		expect(beforeDamageUnActions[0].sourceHasAttacked).toBe(true)
+		expect(beforeDamageUnActions[0].sourceAttacked).toBe(1)
+		expect(beforeDamageUnActions[0].targetWasAttacked).toBe(true)
+
+		// Verify flags were updated (attacked incremented to 2)
+		const fireChogoAfter = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)
+		expect(fireChogoAfter.data.hasAttacked).toBe(true)
+		expect(fireChogoAfter.data.attacked).toBe(2)
+
+		// Apply un-action
+		unmaker.applyUnAction(gameState, beforeDamageUnActions[0]);
+
+		// Verify flags were restored to state before second attack
+		const fireChogoRestored = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)
+		expect(fireChogoRestored.data.hasAttacked).toBe(true)
+		expect(fireChogoRestored.data.attacked).toBe(1)
+		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+	})
+
+	it('Creature defeats creature action', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+
+		// Create attacker creature
+		const fireChogo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER).addEnergy(2);
+		fireChogo.data.controller = ACTIVE_PLAYER;
+		// Initial state: has not defeated a creature yet
+		fireChogo.data.defeatedCreature = false;
+
+		// Create defeated creature (0 energy)
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(0);
+		arbolit.data.controller = NON_ACTIVE_PLAYER;
+
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const tryn = new CardInGame(byName('Tryn'), NON_ACTIVE_PLAYER);
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('NAP Magi pile', ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER).add([tryn]),
+			new Zone('NAP Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('NAP hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('NAP deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('NAP discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY).add([fireChogo, arbolit]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.turn = 1;
+
+		// Verify initial flag
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id).data.defeatedCreature).toBe(false)
+
+		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
+		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
+		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData)
+
+		// Apply CREATURE_DEFEATS_CREATURE effect directly
+		const effect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
+			source: fireChogo,
+			target: arbolit,
+			attack: true,
+			asAttacker: true,
+			player: ACTIVE_PLAYER,
+			generatedBy: fireChogo.id,
+		}
+
+		gameState.update(effect);
+
+		// Find the CREATURE_DEFEATS_CREATURE un-action
+		const creatureDefeatsUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE)
+		expect(creatureDefeatsUnActions).toHaveLength(1)
+		expect(creatureDefeatsUnActions[0].sourceId).toBe(fireChogo.id)
+		expect(creatureDefeatsUnActions[0].sourceDefeatedCreature).toBe(false)
+
+		// Verify flag was changed by CREATURE_DEFEATS_CREATURE
+		const fireChogoAfter = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)
+		expect(fireChogoAfter.data.defeatedCreature).toBe(true)
+
+		// Apply un-actions
+		unmaker.revertToCheckpoint(gameState);
+
+		// Verify flag was restored
+		const fireChogoRestored = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)
+		expect(fireChogoRestored.data.defeatedCreature).toBe(false)
+		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData))
+	})
+
+	it('Creature defeats creature action (creature already defeated another)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+
+		// Create attacker creature that has already defeated a creature
+		const fireChogo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER).addEnergy(2);
+		fireChogo.data.controller = ACTIVE_PLAYER;
+		fireChogo.data.defeatedCreature = true;
+
+		// Create defeated creature (0 energy)
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(0);
+		arbolit.data.controller = NON_ACTIVE_PLAYER;
+
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const tryn = new CardInGame(byName('Tryn'), NON_ACTIVE_PLAYER);
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('NAP Magi pile', ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER).add([tryn]),
+			new Zone('NAP Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('NAP hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('NAP deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('NAP discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY).add([fireChogo, arbolit]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.turn = 1;
+
+		// Verify initial flag (already true)
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id).data.defeatedCreature).toBe(true)
+
+		const unmaker = new Unmaker(gameState)
+
+		// Apply CREATURE_DEFEATS_CREATURE effect
+		const effect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
+			source: fireChogo,
+			target: arbolit,
+			attack: true,
+			asAttacker: true,
+			player: ACTIVE_PLAYER,
+			generatedBy: fireChogo.id,
+		}
+
+		gameState.update(effect);
+
+		// Find the CREATURE_DEFEATS_CREATURE un-action
+		const creatureDefeatsUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE)
+		expect(creatureDefeatsUnActions).toHaveLength(1)
+		// Should capture state as true (already defeated a creature before)
+		expect(creatureDefeatsUnActions[0].sourceDefeatedCreature).toBe(true)
+
+		// Flag should still be true
+		const fireChogoAfter = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)
+		expect(fireChogoAfter.data.defeatedCreature).toBe(true)
+
+		// Apply un-action
+		unmaker.applyUnAction(gameState, creatureDefeatsUnActions[0]);
+
+		// Verify flag was restored (still true)
+		const fireChogoRestored = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)
+		expect(fireChogoRestored.data.defeatedCreature).toBe(true)
+	})
+
+	it('Move energy action', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+
+		// Source creature with 8 energy
+		const fireChogo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER).addEnergy(8);
+		fireChogo.data.controller = ACTIVE_PLAYER;
+
+		// Target creature with 3 energy
+		const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER).addEnergy(3);
+		quorPup.data.controller = ACTIVE_PLAYER;
+
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('NAP Magi pile', ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER),
+			new Zone('NAP Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('NAP hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('NAP deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('NAP discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY).add([fireChogo, quorPup]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.turn = 1;
+
+		// Verify initial energy
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)).toHaveEnergy(8)
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(quorPup.id)).toHaveEnergy(3)
+
+		const unmaker = new Unmaker(gameState)
+
+		// Move 5 energy from fireChogo to quorPup
+		const effect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_MOVE_ENERGY,
+			source: fireChogo,
+			target: quorPup,
+			amount: 5,
+			generatedBy: grega.id,
+		}
+
+		gameState.update(effect);
+
+		// Verify un-action was captured
+		const moveEnergyUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_MOVE_ENERGY)
+		expect(moveEnergyUnActions).toHaveLength(1)
+		expect(moveEnergyUnActions[0].sourceId).toBe(fireChogo.id)
+		expect(moveEnergyUnActions[0].targetId).toBe(quorPup.id)
+		expect(moveEnergyUnActions[0].sourceEnergy).toBe(8) // Previous energy before move
+		expect(moveEnergyUnActions[0].targetEnergy).toBe(3) // Previous energy before move
+
+		// Verify energy was moved
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)).toHaveEnergy(3)
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(quorPup.id)).toHaveEnergy(8)
+
+		// Apply un-action
+		unmaker.applyUnAction(gameState, moveEnergyUnActions[0]);
+
+		// Verify energy was restored
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)).toHaveEnergy(8)
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(quorPup.id)).toHaveEnergy(3)
+	})
+
+	it('Move energy action with checkpoint', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+
+		// Source creature with 10 energy
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER).addEnergy(10);
+		arbolit.data.controller = ACTIVE_PLAYER;
+
+		// Target creature with 2 energy
+		const fireChogo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER).addEnergy(2);
+		fireChogo.data.controller = ACTIVE_PLAYER;
+
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('NAP Magi pile', ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER),
+			new Zone('NAP Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('NAP hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('NAP deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('NAP discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY).add([arbolit, fireChogo]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.turn = 1;
+
+		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
+
+		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
+		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData)
+
+		// Move 4 energy from arbolit to fireChogo
+		const effect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_MOVE_ENERGY,
+			source: arbolit,
+			target: fireChogo,
+			amount: 4,
+			generatedBy: grega.id,
+		}
+
+		gameState.update(effect);
+		// Verify energy was moved
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(6)
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)).toHaveEnergy(6)
+
+		// Revert to checkpoint
+		unmaker.revertToCheckpoint(gameState)
+
+		// Verify energy was restored
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(10)
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)).toHaveEnergy(2)
+
+		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData))
+	})
+
+	it('Remove energy from creature action', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+
+		// Creature with 8 energy
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER).addEnergy(8);
+		arbolit.data.controller = ACTIVE_PLAYER;
+
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('NAP Magi pile', ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER),
+			new Zone('NAP Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('NAP hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('NAP deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('NAP discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY).add([arbolit]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.turn = 1;
+
+		// Verify initial energy
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id).data.energy).toBe(8)
+
+		const unmaker = new Unmaker(gameState)
+
+		// Remove 3 energy from arbolit
+		const effect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
+			target: arbolit,
+			amount: 3,
+			generatedBy: grega.id,
+		}
+
+		gameState.update(effect);
+
+		// Verify un-action was captured
+		const removeEnergyUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE)
+		expect(removeEnergyUnActions).toHaveLength(1)
+		expect(removeEnergyUnActions[0].creatureId).toBe(arbolit.id)
+		expect(removeEnergyUnActions[0].energy).toBe(8) // Previous energy before removal
+
+		// Verify energy was removed
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id).data.energy).toBe(5)
+
+		// Apply un-action
+		unmaker.applyUnAction(gameState, removeEnergyUnActions[0]);
+
+		// Verify energy was restored
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id).data.energy).toBe(8)
+	})
+
+	it('Remove energy from creature action with checkpoint', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+
+		// Creature with 12 energy
+		const fireChogo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER).addEnergy(12);
+		fireChogo.data.controller = ACTIVE_PLAYER;
+
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('NAP Magi pile', ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER),
+			new Zone('NAP Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('NAP hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('NAP deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('NAP discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY).add([fireChogo]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.turn = 1;
+
+		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
+
+		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
+
+		// Remove 5 energy from fireChogo
+		const effect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
+			target: fireChogo,
+			amount: 5,
+			generatedBy: grega.id,
+		}
+
+		gameState.update(effect);
+
+		// Verify energy was removed
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id).data.energy).toBe(7)
+
+		// Revert to checkpoint
+		unmaker.revertToCheckpoint(gameState)
+
+		// Verify energy was restored
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id).data.energy).toBe(12)
+
+		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+	})
+
+	it('Remove energy from magi action', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(15);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const tryn = new CardInGame(byName('Tryn'), NON_ACTIVE_PLAYER);
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('NAP Magi pile', ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER).add([tryn]),
+			new Zone('NAP Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('NAP hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('NAP deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('NAP discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.turn = 1;
+
+		// Verify initial energy
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toBe(15)
+
+		const unmaker = new Unmaker(gameState)
+
+		// Remove 4 energy from grega
+		const effect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
+			target: grega,
+			amount: 4,
+			generatedBy: yaki.id,
+		}
+
+		gameState.update(effect);
+
+		// Verify un-action was captured
+		const removeEnergyUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI)
+		expect(removeEnergyUnActions).toHaveLength(1)
+		expect(removeEnergyUnActions[0].magiId).toBe(grega.id)
+		expect(removeEnergyUnActions[0].owner).toBe(ACTIVE_PLAYER)
+		expect(removeEnergyUnActions[0].energy).toBe(15) // Previous energy before removal
+
+		// Verify energy was removed
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toBe(11)
+
+		// Apply un-action
+		unmaker.applyUnAction(gameState, removeEnergyUnActions[0]);
+
+		// Verify energy was restored
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toBe(15)
+	})
+
+	it('Remove energy from magi action with checkpoint', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(12);
+		const tryn = new CardInGame(byName('Tryn'), NON_ACTIVE_PLAYER);
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('NAP Magi pile', ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER).add([tryn]),
+			new Zone('NAP Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('NAP hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('NAP deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('NAP discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: NON_ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.turn = 1;
+
+		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
+
+		const serializedState = gameState.serializeData(NON_ACTIVE_PLAYER, false)
+
+		// Remove 5 energy from yaki (the active player's magi)
+		const effect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
+			target: yaki,
+			amount: 5,
+			generatedBy: grega.id,
+		}
+
+		gameState.update(effect);
+
+		// Verify energy was removed
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).card.data.energy).toBe(7)
+
+		// Revert to checkpoint
+		unmaker.revertToCheckpoint(gameState)
+
+		// Verify energy was restored
+		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).card.data.energy).toBe(12)
+
+		expect(serializedState).toEqual(gameState.serializeData(NON_ACTIVE_PLAYER, false))
+	})
+
+	it('Prompt entered action', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER).addEnergy(5);
+		arbolit.data.controller = ACTIVE_PLAYER;
+
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const tryn = new CardInGame(byName('Tryn'), NON_ACTIVE_PLAYER);
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('NAP Magi pile', ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER).add([tryn]),
+			new Zone('NAP Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('NAP hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('NAP deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('NAP discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY).add([arbolit]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.turn = 1;
+
+		// Verify initial prompt state
+		expect(gameState.state.prompt).toBe(false)
+
+		const unmaker = new Unmaker(gameState)
+
+		// Enter a number prompt
+		const effect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: EFFECT_TYPE_PROMPT_ENTERED,
+			promptType: PROMPT_TYPE_NUMBER,
+			player: ACTIVE_PLAYER,
+			message: 'Choose a number',
+			variable: 'chosen_number',
+			promptParams: {
+				min: 1,
+				max: 5,
+			},
+			generatedBy: grega.id,
+		}
+
+		gameState.update(effect);
+
+		// Verify un-action was captured
+		const promptEnteredUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_PROMPT_ENTERED)
+		expect(promptEnteredUnActions).toHaveLength(1)
+		expect(promptEnteredUnActions[0].previousPrompt).toBe(false)
+
+		// Verify prompt state was set
+		expect(gameState.state.prompt).toBe(true)
+		expect(gameState.state.promptType).toBe(PROMPT_TYPE_NUMBER)
+		expect(gameState.state.promptPlayer).toBe(ACTIVE_PLAYER)
+		expect(gameState.state.promptMessage).toBe('Choose a number')
+		expect(gameState.state.promptVariable).toBe('chosen_number')
+
+		// Apply un-action
+		unmaker.applyUnAction(gameState, promptEnteredUnActions[0]);
+
+		// Verify prompt state was restored
+		expect(gameState.state.prompt).toBe(false)
+	})
+
+	it('Prompt entered action with checkpoint', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER).addEnergy(5);
+		arbolit.data.controller = ACTIVE_PLAYER;
+
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const tryn = new CardInGame(byName('Tryn'), NON_ACTIVE_PLAYER);
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('NAP Magi pile', ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER).add([tryn]),
+			new Zone('NAP Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('NAP hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('NAP deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('NAP discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY).add([arbolit]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.turn = 1;
+
+		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
+
+		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
+
+		// Enter a creature selection prompt
+		const effect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: EFFECT_TYPE_PROMPT_ENTERED,
+			promptType: PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
+			player: ACTIVE_PLAYER,
+			source: arbolit,
+			message: 'Choose a creature',
+			variable: 'target_creature',
+			generatedBy: grega.id,
+		}
+
+		gameState.update(effect);
+
+		// Verify prompt state was set
+		expect(gameState.state.prompt).toBe(true)
+		expect(gameState.state.promptType).toBe(PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE)
+
+		// Revert to checkpoint
+		unmaker.revertToCheckpoint(gameState)
+
+		// Verify prompt state was restored
+		expect(gameState.state.prompt).toBe(false)
+
+		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+	})
+
+	it('Find starting cards action', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+
+		// Cards in deck that can be found
+		const fireChogo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER);
+		const flameGeyser = new CardInGame(byName('Flame Geyser'), ACTIVE_PLAYER);
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
+
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const tryn = new CardInGame(byName('Tryn'), NON_ACTIVE_PLAYER);
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER).add([fireChogo, flameGeyser, arbolit]),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('NAP Magi pile', ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER).add([tryn]),
+			new Zone('NAP Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('NAP hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('NAP deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('NAP discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.turn = 1;
+
+		// Verify initial state - no foundCards metadata
+		expect(gameState.getSpellMetadata(grega.id)?.foundCards).toBeUndefined()
+
+		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
+		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
+		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData)
+
+		// Find starting cards
+		const effect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: EFFECT_TYPE_FIND_STARTING_CARDS,
+			player: ACTIVE_PLAYER,
+			cards: ['Fire Chogo', 'Flame Geyser'],
+			generatedBy: grega.id,
+		}
+
+		gameState.update(effect);
+
+		// Verify un-action was captured
+		const findStartingCardsUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS)
+		expect(findStartingCardsUnActions).toHaveLength(1)
+		expect(findStartingCardsUnActions[0].spellId).toBe(grega.id)
+		expect(findStartingCardsUnActions[0].previousFoundCards).toBeUndefined()
+
+		// Verify foundCards metadata was set
+		expect(gameState.getSpellMetadata(grega.id)?.foundCards).toEqual(['Fire Chogo', 'Flame Geyser'])
+
+		// Apply un-action
+		unmaker.revertToCheckpoint(gameState)
+
+		// Verify foundCards metadata was restored (removed)
+		expect(gameState.getSpellMetadata(grega.id)?.foundCards).toBeUndefined()
+
+		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData))
+	})
+
+	it('Find starting cards action with checkpoint', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+
+		// Cards in deck that can be found
+		const fireChogo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER);
+		const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER);
+
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const tryn = new CardInGame(byName('Tryn'), NON_ACTIVE_PLAYER);
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER).add([fireChogo, quorPup]),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('NAP Magi pile', ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER).add([tryn]),
+			new Zone('NAP Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('NAP hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('NAP deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('NAP discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.turn = 1;
+
+		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
+
+		// Find starting cards
+		const effect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: EFFECT_TYPE_FIND_STARTING_CARDS,
+			player: ACTIVE_PLAYER,
+			cards: ['Fire Chogo'],
+			generatedBy: grega.id,
+		}
+
+		gameState.update(effect);
+
+		// Verify foundCards metadata was set
+		expect(gameState.getSpellMetadata(grega.id)?.foundCards).toEqual(['Fire Chogo'])
+
+		// Revert to checkpoint
+		unmaker.revertToCheckpoint(gameState)
+
+		// Verify foundCards metadata was restored (removed)
+		expect(gameState.getSpellMetadata(grega.id)?.foundCards).toBeUndefined()
+	})
+
+	it('Reshuffle discard action', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+
+		// Cards in deck
+		const fireChogo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER);
+		const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER);
+
+		// Cards in discard
+		const flameGeyser = new CardInGame(byName('Flame Geyser'), ACTIVE_PLAYER);
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
+
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const tryn = new CardInGame(byName('Tryn'), NON_ACTIVE_PLAYER);
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER).add([fireChogo, quorPup]),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER).add([flameGeyser, arbolit]),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('NAP Magi pile', ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER).add([tryn]),
+			new Zone('NAP Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('NAP hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('NAP deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('NAP discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.turn = 1;
+
+		// Verify initial state
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).cards.length).toBe(2)
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).cards.length).toBe(2)
+		const originalDeckCardIds = gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).cards.map(c => c.id)
+		const originalDiscardCardIds = gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).cards.map(c => c.id)
+
+		const unmaker = new Unmaker(gameState)
+
+		// Reshuffle discard into deck
+		const effect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: EFFECT_TYPE_RESHUFFLE_DISCARD,
+			player: ACTIVE_PLAYER,
+			generatedBy: grega.id,
+		}
+
+		gameState.update(effect);
+
+		// Verify un-action was captured
+		const reshuffleUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD)
+		expect(reshuffleUnActions).toHaveLength(1)
+		expect(reshuffleUnActions[0].player).toBe(ACTIVE_PLAYER)
+		expect(reshuffleUnActions[0].previousDeckCards.map(c => c.id)).toEqual(originalDeckCardIds)
+		expect(reshuffleUnActions[0].previousDiscardCards.map(c => c.id)).toEqual(originalDiscardCardIds)
+
+		// Verify discard was emptied and deck now has 4 cards
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).cards.length).toBe(0)
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).cards.length).toBe(4)
+
+		// Apply un-action
+		unmaker.applyUnAction(gameState, reshuffleUnActions[0]);
+
+		// Verify deck and discard were restored
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).cards.length).toBe(2)
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).cards.length).toBe(2)
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).cards.map(c => c.id)).toEqual(originalDeckCardIds)
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).cards.map(c => c.id)).toEqual(originalDiscardCardIds)
+	})
+
+	it('Reshuffle discard action with checkpoint', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+
+		// Cards in deck
+		const fireChogo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER);
+
+		// Cards in discard
+		const flameGeyser = new CardInGame(byName('Flame Geyser'), ACTIVE_PLAYER);
+		const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER);
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
+
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const tryn = new CardInGame(byName('Tryn'), NON_ACTIVE_PLAYER);
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER).add([fireChogo]),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER).add([flameGeyser, quorPup, arbolit]),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('NAP Magi pile', ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER).add([tryn]),
+			new Zone('NAP Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('NAP hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('NAP deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('NAP discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.turn = 1;
+
+		// Capture original state
+		const originalDeckCardIds = gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).cards.map(c => c.id)
+		const originalDiscardCardIds = gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).cards.map(c => c.id)
+
+		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
+
+		// Reshuffle discard into deck
+		const effect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: EFFECT_TYPE_RESHUFFLE_DISCARD,
+			player: ACTIVE_PLAYER,
+			generatedBy: grega.id,
+		}
+
+		gameState.update(effect);
+
+		// Verify discard was emptied and deck now has 4 cards
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).cards.length).toBe(0)
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).cards.length).toBe(4)
+
+		// Revert to checkpoint
+		unmaker.revertToCheckpoint(gameState)
+
+		// Verify deck and discard were restored
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).cards.length).toBe(1)
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).cards.length).toBe(3)
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).cards.map(c => c.id)).toEqual(originalDeckCardIds)
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).cards.map(c => c.id)).toEqual(originalDiscardCardIds)
 	})
 })
