@@ -14,7 +14,8 @@
         "outDir": "dist/esm",
     },
     "include": [
-        "src/index.ts"
+        "src/index.ts",
+        "src/unmaker/unmaker.ts"
     ],
     "tsc-alias": {
         "resolveFullPaths": true,
