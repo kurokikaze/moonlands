@@ -788,12 +788,25 @@ export class Unmaker {
                 break
             }
             case UNMAKE_SELECT: {
-                console.log(`Unmake select`)
                 if (unaction.wasEmpty) {
-                    console.log(`Value ${unaction.variable} was empty, resetting`)
                     this.state.clearSpellMetaDataField(unaction.variable, unaction.generatedBy)
                 } else {
-                    console.log(`Value ${unaction.variable} was set, restoring`)
+                    this.state.setSpellMetaDataField(unaction.variable, unaction.previousValue, unaction.generatedBy)
+                }
+                break;
+            }
+            case UNMAKE_CALCULATION: {
+                if (unaction.wasEmpty) {
+                    this.state.clearSpellMetaDataField(unaction.variable, unaction.generatedBy)
+                } else {
+                    this.state.setSpellMetaDataField(unaction.variable, unaction.previousValue, unaction.generatedBy)
+                }
+                break;
+            }
+            case UNMAKE_PROPERTY: {
+                if (unaction.wasEmpty) {
+                    this.state.clearSpellMetaDataField(unaction.variable, unaction.generatedBy)
+                } else {
                     this.state.setSpellMetaDataField(unaction.variable, unaction.previousValue, unaction.generatedBy)
                 }
                 break;

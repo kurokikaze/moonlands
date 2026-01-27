@@ -588,7 +588,7 @@ describe('Unmaking state action', () => {
 		expect(gameState.getSpellMetadata(spellId).roll_result).toBe(2)
 	})
 
-	it.only('Start turn action', () => {
+	it('Start turn action', () => {
 		const ACTIVE_PLAYER = 0;
 		const NON_ACTIVE_PLAYER = 2;
 
