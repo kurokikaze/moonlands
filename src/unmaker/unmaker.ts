@@ -1,7 +1,7 @@
 import CardInGame from '../classes/CardInGame';
-import { ACTION_EFFECT, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_PROMPT_ENTERED, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_START_TURN, State, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_IN_PLAY } from '../index'
+import { ACTION_EFFECT, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_PROMPT_ENTERED, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_START_TURN, State, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_IN_PLAY, ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE } from '../index'
 import { AnyEffectType } from '../types'
-import { CardFlagsSnapshot, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI, UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE, UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, UNMAKE_EFFECT_TYPE_DIE_ROLLED, UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS, UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_ENERGY, UNMAKE_EFFECT_TYPE_PROMPT_ENTERED, UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD, UNMAKE_EFFECT_TYPE_START_OF_TURN, UNMAKE_EFFECT_TYPE_START_STEP, UNMAKE_EFFECT_TYPE_START_TURN, UnAction } from './types';
+import { CardFlagsSnapshot, UNMAKE_CALCULATION, UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI, UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE, UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, UNMAKE_EFFECT_TYPE_DIE_ROLLED, UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS, UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_ENERGY, UNMAKE_EFFECT_TYPE_PROMPT_ENTERED, UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD, UNMAKE_EFFECT_TYPE_START_OF_TURN, UNMAKE_EFFECT_TYPE_START_STEP, UNMAKE_EFFECT_TYPE_START_TURN, UNMAKE_PROPERTY, UNMAKE_SELECT, UnAction } from './types';
 export class Unmaker {
     public unActions: UnAction[] = [];
 
@@ -12,7 +12,7 @@ export class Unmaker {
             if (unAction) {
                 this.unActions.push(unAction)
             }
-        })
+        }, true)
     }
 
     public setCheckpoint() {
@@ -384,6 +384,108 @@ export class Unmaker {
                             previousDiscardCards: [...discard.cards],
                         }
                     }
+                    case EFFECT_TYPE_ADD_DELAYED_TRIGGER: {
+                        return {
+                            type: UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER,
+                            previousLength: this.state.state.delayedTriggers.length,
+                        }
+                    }
+                    case EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES: {
+                        const energyArrangement: Record<string, number> = this.state.getMetaValue(action.energyOnCreatures, action.generatedBy)
+                        const affectedCreatureIds = Object.keys(energyArrangement)
+                        const inPlay = this.state.getZone(ZONE_TYPE_IN_PLAY)
+                        const creatures: { id: string, energy: number }[] = []
+                        for (const creatureId of affectedCreatureIds) {
+                            const creature = inPlay.byId(creatureId)
+                            if (creature) {
+                                creatures.push({
+                                    id: creature.id,
+                                    energy: creature.data.energy,
+                                })
+                            }
+                        }
+                        return {
+                            type: UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
+                            creatures,
+                        }
+                    }
+                    case EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
+                        const energyArrangement: Record<string, number> = this.state.getMetaValue(action.energyOnCreatures, action.generatedBy)
+                        const affectedCreatureIds = Object.keys(energyArrangement)
+                        const inPlay = this.state.getZone(ZONE_TYPE_IN_PLAY)
+                        const creatures: { id: string, energy: number }[] = []
+                        for (const creatureId of affectedCreatureIds) {
+                            const creature = inPlay.byId(creatureId)
+                            if (creature) {
+                                creatures.push({
+                                    id: creature.id,
+                                    energy: creature.data.energy,
+                                })
+                            }
+                        }
+                        return {
+                            type: UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
+                            creatures,
+                        }
+                    }
+                    case EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE: {
+                        const targets: CardInGame[] | CardInGame = this.state.getMetaValue(action.target, action.generatedBy)
+                        const creatures: { id: string, attacked: number }[] = []
+                        if (targets instanceof CardInGame) {
+                            creatures.push({
+                                id: targets.id,
+                                attacked: targets.data.attacked,
+                            })
+                        } else if (targets instanceof Array) {
+                            for (const target of targets) {
+                                creatures.push({
+                                    id: target.id,
+                                    attacked: target.data.attacked,
+                                })
+                            }
+                        }
+                        return {
+                            type: UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
+                            creatures,
+                        }
+                    }
+                }
+                break
+            }
+            case ACTION_CALCULATE: {
+                const generatedBy = action?.generatedBy || 'thegame'
+                const previousMetadata = this.state.state.spellMetaData[generatedBy]
+                const wasEmpty = !previousMetadata || !action.variable || !(action.variable in previousMetadata)
+                return {
+                    type: UNMAKE_CALCULATION,
+                    generatedBy,
+                    variable: action.variable || '',
+                    wasEmpty,
+                    previousValue: wasEmpty ? null : previousMetadata[action.variable!]
+                }
+            }
+            case ACTION_SELECT: {
+                const generatedBy = action?.generatedBy || 'thegame'
+                const previousMetadata = this.state.state.spellMetaData[generatedBy]
+                const wasEmpty = !previousMetadata || !action.variable || !(action.variable in previousMetadata)
+                return {
+                    type: UNMAKE_SELECT,
+                    generatedBy,
+                    variable: action.variable || '',
+                    wasEmpty,
+                    previousValue: wasEmpty ? null : previousMetadata[action.variable!]
+                }
+            }
+            case ACTION_GET_PROPERTY_VALUE: {
+                const generatedBy = action?.generatedBy || 'thegame'
+                const previousMetadata = this.state.state.spellMetaData[generatedBy]
+                const wasEmpty = !previousMetadata || !action.variable || !(action.variable in previousMetadata)
+                return {
+                    type: UNMAKE_PROPERTY,
+                    generatedBy,
+                    variable: action.variable || '',
+                    wasEmpty,
+                    previousValue: wasEmpty ? null : previousMetadata[action.variable!]
                 }
             }
         }
@@ -646,6 +748,55 @@ export class Unmaker {
                 // Restore discard to its previous state
                 discard.cards = [...unaction.previousDiscardCards]
                 break
+            }
+            case UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER: {
+                // Remove all delayed triggers added after the captured length
+                state.state = {
+                    ...state.state,
+                    delayedTriggers: state.state.delayedTriggers.slice(0, unaction.previousLength),
+                }
+                break
+            }
+            case UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES: {
+                const inPlay = state.getZone(ZONE_TYPE_IN_PLAY)
+                unaction.creatures.forEach(({ id, energy }) => {
+                    const creature = inPlay.byId(id)
+                    if (creature) {
+                        creature.data.energy = energy
+                    }
+                })
+                break
+            }
+            case UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
+                const inPlay = state.getZone(ZONE_TYPE_IN_PLAY)
+                unaction.creatures.forEach(({ id, energy }) => {
+                    const creature = inPlay.byId(id)
+                    if (creature) {
+                        creature.data.energy = energy
+                    }
+                })
+                break
+            }
+            case UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE: {
+                const inPlay = state.getZone(ZONE_TYPE_IN_PLAY)
+                unaction.creatures.forEach(({ id, attacked }) => {
+                    const creature = inPlay.byId(id)
+                    if (creature) {
+                        creature.data.attacked = attacked
+                    }
+                })
+                break
+            }
+            case UNMAKE_SELECT: {
+                console.log(`Unmake select`)
+                if (unaction.wasEmpty) {
+                    console.log(`Value ${unaction.variable} was empty, resetting`)
+                    this.state.clearSpellMetaDataField(unaction.variable, unaction.generatedBy)
+                } else {
+                    console.log(`Value ${unaction.variable} was set, restoring`)
+                    this.state.setSpellMetaDataField(unaction.variable, unaction.previousValue, unaction.generatedBy)
+                }
+                break;
             }
         }
     }

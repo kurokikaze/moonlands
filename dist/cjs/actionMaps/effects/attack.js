@@ -91,7 +91,7 @@ const applyAttackEffect = function (action, transform) {
     transform(...attackSequence);
 };
 exports.applyAttackEffect = applyAttackEffect;
-const applyBeforeDamageEffect = function (action) {
+const applyBeforeDamageEffect = function (action, transform, _state) {
     action.source.markAttackDone();
     action.target.markAttackReceived();
 };

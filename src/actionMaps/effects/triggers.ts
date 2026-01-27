@@ -11,7 +11,7 @@ import { oneOrSeveral } from "../actionMapUtils";
 import { ActionTransformer } from "../actionMapTypes";
 
 // Should rework into continuous effect with duration
-export const applyForbidAttackToCreatureEffect: ActionTransformer<typeof EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE> = function (action, transform) {
+export const applyForbidAttackToCreatureEffect: ActionTransformer<typeof EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE> = function (action, _transform) {
   const targets = this.getMetaValue(action.target, action.generatedBy);
   oneOrSeveral(targets, target => target.forbidAttacks());
 }

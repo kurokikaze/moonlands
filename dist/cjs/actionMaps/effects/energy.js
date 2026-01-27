@@ -62,7 +62,7 @@ const applyEnergizeEffect = function (action, transform) {
     });
 };
 exports.applyEnergizeEffect = applyEnergizeEffect;
-const applyMoveEnergyEffect = function (action, transform) {
+const applyMoveEnergyEffect = function (action, transform, _state) {
     const moveMultiSource = this.getMetaValue(action.source, action.generatedBy);
     const moveSource = (moveMultiSource instanceof Array) ? moveMultiSource[0] : moveMultiSource;
     const moveMultiTarget = this.getMetaValue(action.target, action.generatedBy);

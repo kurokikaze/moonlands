@@ -22,7 +22,7 @@ import CardInGame from "../../classes/CardInGame.js";
 import { SELECTOR_CREATURES_OF_PLAYER, SELECTOR_ID, } from "../../const.js";
 import { oneOrSeveral } from "../actionMapUtils.js";
 // Should rework into continuous effect with duration
-export var applyForbidAttackToCreatureEffect = function (action, transform) {
+export var applyForbidAttackToCreatureEffect = function (action, _transform) {
     var targets = this.getMetaValue(action.target, action.generatedBy);
     oneOrSeveral(targets, function (target) { return target.forbidAttacks(); });
 };

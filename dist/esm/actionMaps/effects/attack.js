@@ -97,7 +97,7 @@ export var applyAttackEffect = function (action, transform) {
     }
     transform.apply(void 0, attackSequence);
 };
-export var applyBeforeDamageEffect = function (action) {
+export var applyBeforeDamageEffect = function (action, transform, _state) {
     action.source.markAttackDone();
     action.target.markAttackReceived();
 };

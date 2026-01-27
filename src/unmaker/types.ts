@@ -28,8 +28,13 @@ export const UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI = 20
 export const UNMAKE_EFFECT_TYPE_PROMPT_ENTERED = 21
 export const UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS = 22
 export const UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD = 23
-
-export type SavedMetaDataValue = Record<string, Record<string, any>>
+export const UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER = 24
+export const UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES = 25
+export const UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES = 26
+export const UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE = 27
+export const UNMAKE_CALCULATION = 28
+export const UNMAKE_SELECT = 29
+export const UNMAKE_PROPERTY = 30
 
 export type UnActionDiscardEnergyFromCreature = {
     type: typeof UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE
@@ -185,7 +190,51 @@ export type UnActionReshuffleDiscard = {
     previousDiscardCards: CardInGame[]
 }
 
-export type UnAction = UnActionDiscardEnergyFromCreature | UnActionDiscardEnergyFromMagi | UnActionMoveCardBetweenZones | UnActionDieRolled | UnActionStartTurn | UnActionStartStep | UnActionRearrangeCardsOfZone | UnActionCreateContinuousEffect | UnActionAddEnergyToCreature | UnActionAddEnergyToMagi | UnActionStartOfTurn | UnActionBeforeDamage | UnActionCreatureDefeatsCreature | UnActionDiscardCreatureFromPlay | UnActionMoveEnergy | UnActionRemoveEnergyFromCreature | UnActionRemoveEnergyFromMagi | UnActionPromptEntered | UnActionFindStartingCards | UnActionReshuffleDiscard
+export type UnActionAddDelayedTrigger = {
+    type: typeof UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER
+    previousLength: number
+}
+
+export type UnActionRearrangeEnergyOnCreatures = {
+    type: typeof UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES
+    creatures: { id: string, energy: number }[]
+}
+
+export type UnActionDistributeEnergyOnCreatures = {
+    type: typeof UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES
+    creatures: { id: string, energy: number }[]
+}
+
+export type UnActionForbidAttackToCreature = {
+    type: typeof UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE
+    creatures: { id: string, attacked: number }[]
+}
+
+export type UnActionCalculate = {
+    type: typeof UNMAKE_CALCULATION
+    generatedBy: string
+    variable: string
+    wasEmpty: boolean
+    previousValue?: any
+}
+
+export type UnActionSelect = {
+    type: typeof UNMAKE_SELECT
+    generatedBy: string
+    variable: string
+    wasEmpty: boolean
+    previousValue?: any
+}
+
+export type UnActionProperty = {
+    type: typeof UNMAKE_PROPERTY
+    generatedBy: string
+    variable: string
+    wasEmpty: boolean
+    previousValue?: any
+}
+
+export type UnAction = UnActionDiscardEnergyFromCreature | UnActionDiscardEnergyFromMagi | UnActionMoveCardBetweenZones | UnActionDieRolled | UnActionStartTurn | UnActionStartStep | UnActionRearrangeCardsOfZone | UnActionCreateContinuousEffect | UnActionAddEnergyToCreature | UnActionAddEnergyToMagi | UnActionStartOfTurn | UnActionBeforeDamage | UnActionCreatureDefeatsCreature | UnActionDiscardCreatureFromPlay | UnActionMoveEnergy | UnActionRemoveEnergyFromCreature | UnActionRemoveEnergyFromMagi | UnActionPromptEntered | UnActionFindStartingCards | UnActionReshuffleDiscard | UnActionAddDelayedTrigger | UnActionRearrangeEnergyOnCreatures | UnActionDistributeEnergyOnCreatures | UnActionForbidAttackToCreature | UnActionCalculate | UnActionSelect | UnActionProperty
 
 export type UnActionRestoreValue = {
     type: typeof UNMAKE_RESTORE_VALUE,

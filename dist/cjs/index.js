@@ -4,8 +4,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SELECTOR_CARDS_WITH_ENERGIZE_RATE = exports.SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE = exports.SELECTOR_MAGI_NOT_OF_REGION = exports.SELECTOR_OPPONENT_ID = exports.SELECTOR_MAGI_OF_REGION = exports.SELECTOR_TOP_MAGI_OF_PILE = exports.SELECTOR_ENEMY_CREATURES = exports.SELECTOR_OWN_CREATURES = exports.SELECTOR_CREATURES_NOT_OF_REGION = exports.SELECTOR_CREATURES_OF_REGION = exports.SELECTOR_ENEMY_MAGI = exports.SELECTOR_OWN_MAGI = exports.SELECTOR_CREATURES_AND_MAGI = exports.SELECTOR_CREATURES = exports.CALCULATION_MULTIPLY = exports.CALCULATION_MAX = exports.CALCULATION_MIN = exports.CALCULATION_HALVE_ROUND_UP = exports.CALCULATION_HALVE_ROUND_DOWN = exports.CALCULATION_SUBTRACT = exports.CALCULATION_ADD = exports.CALCULATION_DOUBLE = exports.CALCULATION_SET = exports.PROPERTY_CAN_ATTACK_MAGI_DIRECTLY = exports.PROPERTY_ATTACKS_PER_TURN = exports.PROPERTY_MAGI_STARTING_ENERGY = exports.PROPERTY_ENERGIZE = exports.PROPERTY_COST = exports.PROPERTY_REGION = exports.PROPERTY_ENERGY_COUNT = exports.PROPERTY_CONTROLLER = exports.PROPERTY_TYPE = exports.PROPERTY_ID = exports.ACTION_PLAYER_WINS = exports.ACTION_ATTACK = exports.ACTION_GET_PROPERTY_VALUE = exports.ACTION_RESOLVE_PROMPT = exports.ACTION_ENTER_PROMPT = exports.ACTION_CALCULATE = exports.ACTION_SELECT = exports.ACTION_EFFECT = exports.ACTION_POWER = exports.ACTION_PLAY = exports.ACTION_PASS = exports.TYPE_SPELL = exports.TYPE_RELIC = exports.TYPE_MAGI = exports.TYPE_CREATURE = exports.State = exports.DEFAULT_PROMPT_VARIABLE = void 0;
-exports.REGION_UNIVERSAL = exports.EFFECT_TYPE_DRAW_REST_OF_CARDS = exports.EFFECT_TYPE_FIND_STARTING_CARDS = exports.EFFECT_TYPE_MAGI_FLIPPED = exports.EFFECT_TYPE_END_OF_TURN = exports.EFFECT_TYPE_START_OF_TURN = exports.EFFECT_TYPE_CREATURE_IS_ATTACKED = exports.EFFECT_TYPE_CREATURE_ATTACKS = exports.EFFECT_TYPE_AFTER_DAMAGE = exports.EFFECT_TYPE_DEAL_DAMAGE = exports.EFFECT_TYPE_BEFORE_DAMAGE = exports.EFFECT_TYPE_CREATURE_IS_DEFEATED = exports.EFFECT_TYPE_CREATURE_DEFEATS_CREATURE = exports.EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI = exports.EFFECT_TYPE_PAYING_ENERGY_FOR_POWER = exports.EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY = exports.EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY = exports.EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY = exports.EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC = exports.EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE = exports.EFFECT_TYPE_ENERGIZE = exports.EFFECT_TYPE_ADD_ENERGY_TO_MAGI = exports.EFFECT_TYPE_ADD_ENERGY_TO_CREATURE = exports.EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI = exports.EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE = exports.EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES = exports.EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL = exports.EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC = exports.EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE = exports.EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI = exports.EFFECT_TYPE_MAGI_IS_DEFEATED = exports.EFFECT_TYPE_RELIC_ENTERS_PLAY = exports.EFFECT_TYPE_CREATURE_ENTERS_PLAY = exports.EFFECT_TYPE_PLAY_SPELL = exports.EFFECT_TYPE_PLAY_RELIC = exports.EFFECT_TYPE_PLAY_CREATURE = exports.EFFECT_TYPE_ROLL_DIE = exports.EFFECT_TYPE_MOVE_ENERGY = exports.EFFECT_TYPE_RESHUFFLE_DISCARD = exports.EFFECT_TYPE_DRAW = exports.PROMPT_TYPE_CHOOSE_CARDS = exports.PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE = exports.PROMPT_TYPE_SINGLE_MAGI = exports.PROMPT_TYPE_SINGLE_CREATURE = exports.PROMPT_TYPE_NUMBER = exports.PRIORITY_CREATURES = exports.PRIORITY_ATTACK = exports.PRIORITY_PRS = exports.NO_PRIORITY = exports.SELECTOR_OWN_CARDS_IN_PLAY = void 0;
-exports.ZONE_TYPE_DEFEATED_MAGI = exports.ZONE_TYPE_DECK = exports.ZONE_TYPE_MAGI_PILE = exports.ZONE_TYPE_ACTIVE_MAGI = exports.ZONE_TYPE_DISCARD = exports.ZONE_TYPE_IN_PLAY = exports.ZONE_TYPE_HAND = exports.COST_X_PLUS_ONE = exports.COST_X = void 0;
+exports.EFFECT_TYPE_CREATURE_ATTACKS = exports.EFFECT_TYPE_AFTER_DAMAGE = exports.EFFECT_TYPE_DEAL_DAMAGE = exports.EFFECT_TYPE_BEFORE_DAMAGE = exports.EFFECT_TYPE_CREATURE_IS_DEFEATED = exports.EFFECT_TYPE_CREATURE_DEFEATS_CREATURE = exports.EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI = exports.EFFECT_TYPE_PAYING_ENERGY_FOR_POWER = exports.EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY = exports.EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY = exports.EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY = exports.EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC = exports.EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI = exports.EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE = exports.EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE = exports.EFFECT_TYPE_ENERGIZE = exports.EFFECT_TYPE_ADD_ENERGY_TO_MAGI = exports.EFFECT_TYPE_ADD_ENERGY_TO_CREATURE = exports.EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI = exports.EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE = exports.EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES = exports.EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL = exports.EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC = exports.EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE = exports.EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI = exports.EFFECT_TYPE_MAGI_IS_DEFEATED = exports.EFFECT_TYPE_RELIC_ENTERS_PLAY = exports.EFFECT_TYPE_CREATURE_ENTERS_PLAY = exports.EFFECT_TYPE_PLAY_SPELL = exports.EFFECT_TYPE_PLAY_RELIC = exports.EFFECT_TYPE_PLAY_CREATURE = exports.EFFECT_TYPE_DIE_ROLLED = exports.EFFECT_TYPE_ROLL_DIE = exports.EFFECT_TYPE_MOVE_ENERGY = exports.EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE = exports.EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES = exports.EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES = exports.EFFECT_TYPE_ADD_DELAYED_TRIGGER = exports.EFFECT_TYPE_RESHUFFLE_DISCARD = exports.EFFECT_TYPE_DRAW = exports.PROMPT_TYPE_CHOOSE_CARDS = exports.PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE = exports.PROMPT_TYPE_SINGLE_MAGI = exports.PROMPT_TYPE_SINGLE_CREATURE = exports.PROMPT_TYPE_NUMBER = exports.PRIORITY_CREATURES = exports.PRIORITY_ATTACK = exports.PRIORITY_PRS = exports.NO_PRIORITY = exports.SELECTOR_OWN_CARDS_IN_PLAY = void 0;
+exports.ZONE_TYPE_DEFEATED_MAGI = exports.ZONE_TYPE_DECK = exports.ZONE_TYPE_MAGI_PILE = exports.ZONE_TYPE_ACTIVE_MAGI = exports.ZONE_TYPE_DISCARD = exports.ZONE_TYPE_IN_PLAY = exports.ZONE_TYPE_HAND = exports.COST_X_PLUS_ONE = exports.COST_X = exports.REGION_UNIVERSAL = exports.EFFECT_TYPE_PROMPT_ENTERED = exports.EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT = exports.EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE = exports.EFFECT_TYPE_DRAW_REST_OF_CARDS = exports.EFFECT_TYPE_FIND_STARTING_CARDS = exports.EFFECT_TYPE_MAGI_FLIPPED = exports.EFFECT_TYPE_END_OF_TURN = exports.EFFECT_TYPE_START_STEP = exports.EFFECT_TYPE_START_TURN = exports.EFFECT_TYPE_START_OF_TURN = exports.EFFECT_TYPE_CREATURE_IS_ATTACKED = void 0;
 const nanoid_1 = require("nanoid");
 const mersenneTwister_1 = require("./mersenneTwister");
 const const_1 = require("./const");
@@ -66,8 +66,14 @@ Object.defineProperty(exports, "NO_PRIORITY", { enumerable: true, get: function 
 Object.defineProperty(exports, "PRIORITY_PRS", { enumerable: true, get: function () { return const_1.PRIORITY_PRS; } });
 Object.defineProperty(exports, "PRIORITY_ATTACK", { enumerable: true, get: function () { return const_1.PRIORITY_ATTACK; } });
 Object.defineProperty(exports, "PRIORITY_CREATURES", { enumerable: true, get: function () { return const_1.PRIORITY_CREATURES; } });
+Object.defineProperty(exports, "EFFECT_TYPE_START_TURN", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_START_TURN; } });
+Object.defineProperty(exports, "EFFECT_TYPE_START_STEP", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_START_STEP; } });
 Object.defineProperty(exports, "EFFECT_TYPE_DRAW", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_DRAW; } });
 Object.defineProperty(exports, "EFFECT_TYPE_RESHUFFLE_DISCARD", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_RESHUFFLE_DISCARD; } });
+Object.defineProperty(exports, "EFFECT_TYPE_ADD_DELAYED_TRIGGER", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_ADD_DELAYED_TRIGGER; } });
+Object.defineProperty(exports, "EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES; } });
+Object.defineProperty(exports, "EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES; } });
+Object.defineProperty(exports, "EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE; } });
 Object.defineProperty(exports, "EFFECT_TYPE_MOVE_ENERGY", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_MOVE_ENERGY; } });
 Object.defineProperty(exports, "EFFECT_TYPE_ROLL_DIE", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_ROLL_DIE; } });
 Object.defineProperty(exports, "EFFECT_TYPE_PLAY_CREATURE", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_PLAY_CREATURE; } });
@@ -87,6 +93,8 @@ Object.defineProperty(exports, "EFFECT_TYPE_ADD_ENERGY_TO_CREATURE", { enumerabl
 Object.defineProperty(exports, "EFFECT_TYPE_ADD_ENERGY_TO_MAGI", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_ADD_ENERGY_TO_MAGI; } });
 Object.defineProperty(exports, "EFFECT_TYPE_ENERGIZE", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_ENERGIZE; } });
 Object.defineProperty(exports, "EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE; } });
+Object.defineProperty(exports, "EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE; } });
+Object.defineProperty(exports, "EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI; } });
 Object.defineProperty(exports, "EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC; } });
 Object.defineProperty(exports, "EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY; } });
 Object.defineProperty(exports, "EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY; } });
@@ -105,6 +113,8 @@ Object.defineProperty(exports, "EFFECT_TYPE_END_OF_TURN", { enumerable: true, ge
 Object.defineProperty(exports, "EFFECT_TYPE_MAGI_FLIPPED", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_MAGI_FLIPPED; } });
 Object.defineProperty(exports, "EFFECT_TYPE_FIND_STARTING_CARDS", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_FIND_STARTING_CARDS; } });
 Object.defineProperty(exports, "EFFECT_TYPE_DRAW_REST_OF_CARDS", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_DRAW_REST_OF_CARDS; } });
+Object.defineProperty(exports, "EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE; } });
+Object.defineProperty(exports, "EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT; } });
 Object.defineProperty(exports, "REGION_UNIVERSAL", { enumerable: true, get: function () { return const_1.REGION_UNIVERSAL; } });
 Object.defineProperty(exports, "COST_X", { enumerable: true, get: function () { return const_1.COST_X; } });
 Object.defineProperty(exports, "COST_X_PLUS_ONE", { enumerable: true, get: function () { return const_1.COST_X_PLUS_ONE; } });
@@ -116,6 +126,8 @@ Object.defineProperty(exports, "ZONE_TYPE_MAGI_PILE", { enumerable: true, get: f
 Object.defineProperty(exports, "ZONE_TYPE_DECK", { enumerable: true, get: function () { return const_1.ZONE_TYPE_DECK; } });
 Object.defineProperty(exports, "ZONE_TYPE_DEFEATED_MAGI", { enumerable: true, get: function () { return const_1.ZONE_TYPE_DEFEATED_MAGI; } });
 Object.defineProperty(exports, "CALCULATION_MULTIPLY", { enumerable: true, get: function () { return const_1.CALCULATION_MULTIPLY; } });
+Object.defineProperty(exports, "EFFECT_TYPE_DIE_ROLLED", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_DIE_ROLLED; } });
+Object.defineProperty(exports, "EFFECT_TYPE_PROMPT_ENTERED", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_PROMPT_ENTERED; } });
 const effects_1 = require("./actionMaps/effects");
 const logAction_1 = require("./logAction");
 const clone_1 = __importDefault(require("./clone"));
@@ -297,6 +309,7 @@ class State {
     actionsOne;
     actionsTwo;
     onAction = null;
+    onFullAction = null;
     turnTimer = null;
     timerEnabled;
     turnTimeout;
@@ -327,18 +340,23 @@ class State {
         });
         this.nanoid = seeded_nanoid;
     }
-    setOnAction(callback) {
-        this.onAction = callback;
+    setOnAction(callback, fullStream = false) {
+        if (fullStream) {
+            this.onFullAction = callback;
+        }
+        else {
+            this.onAction = callback;
+        }
     }
     addActionToStream(action) {
         const actionWithValues = this.addValuesToAction(action);
         // Do not send outside CALCULATE, SELECT and so on
         if (![const_1.ACTION_CALCULATE, const_1.ACTION_SELECT, const_1.ACTION_GET_PROPERTY_VALUE].includes(action.type) && this.onAction) {
             this.onAction(actionWithValues);
-            // this.actionStreamOne.emit('action', actionWithValues);
-            // this.actionStreamTwo.emit('action', actionWithValues);
         }
-        // this.logStream.emit('action', actionWithValues);
+        if (this.onFullAction) {
+            this.onFullAction(actionWithValues);
+        }
     }
     addValuesToAction(action) {
         switch (action.type) {
@@ -878,6 +896,15 @@ class State {
             ...metaData,
             [field]: value,
         }, spellId);
+    }
+    clearSpellMetaDataField(field, spellId) {
+        const spellMetaData = this.state.spellMetaData[spellId];
+        if (spellMetaData && field in spellMetaData) {
+            delete spellMetaData[field];
+        }
+        if (Object.keys(spellMetaData).length === 0) {
+            delete this.state.spellMetaData[spellId];
+        }
     }
     getMetaValue(value, spellId) {
         if (typeof value == 'string' &&

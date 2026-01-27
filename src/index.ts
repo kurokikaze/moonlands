@@ -112,6 +112,10 @@ import {
 	EFFECT_TYPE_DRAW,
 	EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI,
 	EFFECT_TYPE_RESHUFFLE_DISCARD,
+	EFFECT_TYPE_ADD_DELAYED_TRIGGER,
+	EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
+	EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
+	EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
 	EFFECT_TYPE_MOVE_ENERGY,
 	EFFECT_TYPE_ROLL_DIE,
 	EFFECT_TYPE_PLAY_CREATURE,
@@ -131,6 +135,8 @@ import {
 	EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
 	EFFECT_TYPE_ENERGIZE,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+	EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
+	EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
 	EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC,
 	EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
 	EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
@@ -619,6 +625,7 @@ export class State {
 	actionsOne: any[];
 	actionsTwo: any[];
 	onAction: Function | null = null;
+	onFullAction: Function | null = null;
 	turnTimer: number | null = null;
 	timerEnabled: boolean;
 	turnTimeout: ReturnType<typeof setTimeout> | null;
@@ -656,8 +663,12 @@ export class State {
 		this.nanoid = seeded_nanoid
 	}
 
-	setOnAction(callback: (e: AnyEffectType) => void) {
-		this.onAction = callback
+	setOnAction(callback: (e: AnyEffectType) => void, fullStream = false) {
+		if (fullStream) {
+			this.onFullAction = callback
+		} else {
+			this.onAction = callback
+		}
 	}
 
 	addActionToStream(action: AnyEffectType): void {
@@ -666,11 +677,11 @@ export class State {
 		// Do not send outside CALCULATE, SELECT and so on
 		if (![ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE].includes(action.type) && this.onAction) {
 			this.onAction(actionWithValues);
-			// this.actionStreamOne.emit('action', actionWithValues);
-			// this.actionStreamTwo.emit('action', actionWithValues);
 		}
 
-		// this.logStream.emit('action', actionWithValues);
+		if (this.onFullAction) {
+			this.onFullAction(actionWithValues)
+		}
 	}
 
 	addValuesToAction(action: AnyEffectType): AnyEffectType {
@@ -1252,6 +1263,17 @@ export class State {
 			...metaData,
 			[field]: value,
 		}, spellId);
+	}
+
+	clearSpellMetaDataField(field: string, spellId: string): void {
+		const spellMetaData = this.state.spellMetaData[spellId]
+		if (spellMetaData && field in spellMetaData) {
+			delete spellMetaData[field]
+		}
+
+		if (Object.keys(spellMetaData).length === 0) {
+			delete this.state.spellMetaData[spellId]
+		}
 	}
 
 	getMetaValue<T>(value: string | T, spellId: string | undefined): T | any {
@@ -3944,6 +3966,10 @@ export {
 
 	EFFECT_TYPE_DRAW,
 	EFFECT_TYPE_RESHUFFLE_DISCARD,
+	EFFECT_TYPE_ADD_DELAYED_TRIGGER,
+	EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
+	EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
+	EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
 	EFFECT_TYPE_MOVE_ENERGY,
 	EFFECT_TYPE_ROLL_DIE,
 	EFFECT_TYPE_DIE_ROLLED,
@@ -3964,6 +3990,8 @@ export {
 	EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
 	EFFECT_TYPE_ENERGIZE,
 	EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
+	EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
+	EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
 	EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC,
 	EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
 	EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
@@ -3986,6 +4014,7 @@ export {
 	EFFECT_TYPE_DRAW_REST_OF_CARDS,
 	EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
 	EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+	EFFECT_TYPE_PROMPT_ENTERED,
 
 	REGION_UNIVERSAL,
 

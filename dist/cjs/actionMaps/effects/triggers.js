@@ -8,7 +8,7 @@ const CardInGame_1 = __importDefault(require("../../classes/CardInGame"));
 const const_1 = require("../../const");
 const actionMapUtils_1 = require("../actionMapUtils");
 // Should rework into continuous effect with duration
-const applyForbidAttackToCreatureEffect = function (action, transform) {
+const applyForbidAttackToCreatureEffect = function (action, _transform) {
     const targets = this.getMetaValue(action.target, action.generatedBy);
     (0, actionMapUtils_1.oneOrSeveral)(targets, target => target.forbidAttacks());
 };
