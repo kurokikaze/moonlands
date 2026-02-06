@@ -312,15 +312,17 @@ class Unmaker {
                         };
                     }
                     case index_1.EFFECT_TYPE_MOVE_ENERGY: {
-                        const source = this.state.getMetaValue(action.source, action.generatedBy);
-                        const target = this.state.getMetaValue(action.target, action.generatedBy);
+                        const moveMultiSource = this.state.getMetaValue(action.source, action.generatedBy);
+                        const moveSource = (moveMultiSource instanceof Array) ? moveMultiSource[0] : moveMultiSource;
+                        const moveMultiTarget = this.state.getMetaValue(action.target, action.generatedBy);
+                        const moveTarget = (moveMultiTarget instanceof Array) ? moveMultiTarget[0] : moveMultiTarget;
                         return {
                             type: types_1.UNMAKE_EFFECT_TYPE_MOVE_ENERGY,
-                            sourceId: source.id,
-                            targetId: target.id,
-                            sourceEnergy: source.data.energy,
-                            sourceEnergyLost: source.data.energyLostThisTurn,
-                            targetEnergy: target.data.energy,
+                            sourceId: moveSource.id,
+                            targetId: moveTarget.id,
+                            sourceEnergy: moveSource.data.energy,
+                            sourceEnergyLost: moveSource.data.energyLostThisTurn,
+                            targetEnergy: moveTarget.data.energy,
                         };
                     }
                     case index_1.EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE: {

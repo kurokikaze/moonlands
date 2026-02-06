@@ -3,7 +3,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = clone;
 const cards_1 = require("./cards");
 const CardInGame_1 = __importDefault(require("./classes/CardInGame"));
 const Zone_1 = __importDefault(require("./classes/Zone"));
@@ -79,4 +78,5 @@ function clone(item, cardsGenerated = {}) {
     }
     return result;
 }
+exports.default = clone;
 //# sourceMappingURL=clone.js.map

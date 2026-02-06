@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.default = performCalculation;
 const const_1 = require("../const");
 function performCalculation(operator, operandOne, operandTwo) {
     let result;
@@ -48,4 +47,5 @@ function performCalculation(operator, operandOne, operandTwo) {
     }
     return result;
 }
+exports.default = performCalculation;
 //# sourceMappingURL=performCalculation.js.map
