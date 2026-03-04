@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.Unmaker = void 0;
 const CardInGame_1 = __importDefault(require("../classes/CardInGame"));
+const const_1 = require("../const");
 const index_1 = require("../index");
 const types_1 = require("./types");
 class Unmaker {
@@ -39,8 +40,56 @@ class Unmaker {
     }
     generateUnAction(action) {
         switch (action.type) {
+            case index_1.ACTION_RESOLVE_PROMPT: {
+                return {
+                    type: types_1.UNMAKE_PROMPT_LEAVE,
+                    promptType: this.state.state.promptType,
+                    promptGeneratedBy: this.state.state.promptGeneratedBy,
+                    promptMessage: this.state.state.promptMessage,
+                    promptParams: this.state.state.promptParams,
+                    savedActions: [...this.state.state.savedActions],
+                    player: this.state.state.promptPlayer,
+                };
+            }
+            case index_1.ACTION_POWER: {
+                return {
+                    type: types_1.UNMAKE_POWER_ACTIVATION,
+                    magi: action.source.card.type == index_1.TYPE_MAGI,
+                    player: action.source.owner,
+                    source: action.source.id,
+                    power: action.power.name,
+                };
+            }
+            case index_1.ACTION_PLAYER_WINS: {
+                return {
+                    type: types_1.UNMAKE_EFFECT_TYPE_PLAYER_WINS,
+                    actions: [],
+                };
+            }
             case index_1.ACTION_EFFECT: {
                 switch (action.effectType) {
+                    case index_1.EFFECT_TYPE_BEFORE_DAMAGE: {
+                        return {
+                            type: types_1.UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE,
+                            sourceId: action.source.id,
+                            targetId: action.target.id,
+                            targetMagi: action.target.card.type == index_1.TYPE_MAGI,
+                            targetPlayer: action.target.owner,
+                            sourceHasAttacked: action.source.data.hasAttacked,
+                            sourceAttacked: action.source.data.attacked,
+                            targetWasAttacked: action.target.data.wasAttacked,
+                        };
+                    }
+                    case const_1.EFFECT_TYPE_EXECUTE_POWER_EFFECTS: {
+                        const source = this.state.getMetaValue(action.source, action.generatedBy);
+                        return {
+                            type: types_1.UNMAKE_POWER_USE,
+                            magi: source.card.type == index_1.TYPE_MAGI,
+                            player: source.owner,
+                            source: source.id,
+                            power: typeof action.power == 'string' ? action.power : action.power.name,
+                        };
+                    }
                     case index_1.EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE:
                         const creatures = this.state.getMetaValue(action.target, action.generatedBy);
                         if (creatures instanceof CardInGame_1.default) {
@@ -286,18 +335,18 @@ class Unmaker {
                             magi: magiTargets.map(magi => ({ id: magi.id, owner: magi.owner, energy: magi.data.energy }))
                         };
                     }
-                    case index_1.EFFECT_TYPE_BEFORE_DAMAGE: {
-                        const source = action.source;
-                        const target = action.target;
+                    /* case EFFECT_TYPE_BEFORE_DAMAGE: {
+                        const source = action.source
+                        const target = action.target
                         return {
-                            type: types_1.UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE,
+                            type: UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE,
                             sourceId: source.id,
                             sourceHasAttacked: source.data.hasAttacked,
                             sourceAttacked: source.data.attacked,
                             targetId: target.id,
                             targetWasAttacked: target.data.wasAttacked,
-                        };
-                    }
+                        }
+                    } */
                     case index_1.EFFECT_TYPE_CREATURE_DEFEATS_CREATURE: {
                         const source = action.source;
                         return {
@@ -484,6 +533,10 @@ class Unmaker {
     }
     applyUnAction(state, unaction) {
         switch (unaction.type) {
+            case types_1.UNMAKE_EFFECT_TYPE_PLAYER_WINS: {
+                state.unsetWinner();
+                break;
+            }
             case types_1.UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
                 const inPlay = state.getZone(index_1.ZONE_TYPE_IN_PLAY);
                 unaction.creatures.forEach(({ id, energy, energyLostThisTurn }) => {

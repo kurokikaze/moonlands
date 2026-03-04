@@ -19,8 +19,9 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 import CardInGame from '../classes/CardInGame.js';
-import { ACTION_EFFECT, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_PROMPT_ENTERED, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_START_TURN, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_IN_PLAY, ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE } from '../index.js';
-import { UNMAKE_CALCULATION, UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI, UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE, UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, UNMAKE_EFFECT_TYPE_DIE_ROLLED, UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS, UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_ENERGY, UNMAKE_EFFECT_TYPE_PROMPT_ENTERED, UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD, UNMAKE_EFFECT_TYPE_START_OF_TURN, UNMAKE_EFFECT_TYPE_START_STEP, UNMAKE_EFFECT_TYPE_START_TURN, UNMAKE_PROPERTY, UNMAKE_SELECT } from './types.js';
+import { EFFECT_TYPE_EXECUTE_POWER_EFFECTS } from '../const.js';
+import { ACTION_EFFECT, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_PROMPT_ENTERED, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_START_TURN, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_IN_PLAY, ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE, ACTION_PLAYER_WINS, ACTION_POWER, ACTION_RESOLVE_PROMPT, TYPE_MAGI } from '../index.js';
+import { UNMAKE_CALCULATION, UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI, UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE, UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, UNMAKE_EFFECT_TYPE_DIE_ROLLED, UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS, UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_ENERGY, UNMAKE_EFFECT_TYPE_PLAYER_WINS, UNMAKE_EFFECT_TYPE_PROMPT_ENTERED, UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD, UNMAKE_EFFECT_TYPE_START_OF_TURN, UNMAKE_EFFECT_TYPE_START_STEP, UNMAKE_EFFECT_TYPE_START_TURN, UNMAKE_POWER_ACTIVATION, UNMAKE_POWER_USE, UNMAKE_PROMPT_LEAVE, UNMAKE_PROPERTY, UNMAKE_SELECT } from './types.js';
 var Unmaker = /** @class */ (function () {
     function Unmaker(state) {
         var _this = this;
@@ -54,8 +55,56 @@ var Unmaker = /** @class */ (function () {
     Unmaker.prototype.generateUnAction = function (action) {
         var _a, _b;
         switch (action.type) {
+            case ACTION_RESOLVE_PROMPT: {
+                return {
+                    type: UNMAKE_PROMPT_LEAVE,
+                    promptType: this.state.state.promptType,
+                    promptGeneratedBy: this.state.state.promptGeneratedBy,
+                    promptMessage: this.state.state.promptMessage,
+                    promptParams: this.state.state.promptParams,
+                    savedActions: __spreadArray([], this.state.state.savedActions, true),
+                    player: this.state.state.promptPlayer,
+                };
+            }
+            case ACTION_POWER: {
+                return {
+                    type: UNMAKE_POWER_ACTIVATION,
+                    magi: action.source.card.type == TYPE_MAGI,
+                    player: action.source.owner,
+                    source: action.source.id,
+                    power: action.power.name,
+                };
+            }
+            case ACTION_PLAYER_WINS: {
+                return {
+                    type: UNMAKE_EFFECT_TYPE_PLAYER_WINS,
+                    actions: [],
+                };
+            }
             case ACTION_EFFECT: {
                 switch (action.effectType) {
+                    case EFFECT_TYPE_BEFORE_DAMAGE: {
+                        return {
+                            type: UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE,
+                            sourceId: action.source.id,
+                            targetId: action.target.id,
+                            targetMagi: action.target.card.type == TYPE_MAGI,
+                            targetPlayer: action.target.owner,
+                            sourceHasAttacked: action.source.data.hasAttacked,
+                            sourceAttacked: action.source.data.attacked,
+                            targetWasAttacked: action.target.data.wasAttacked,
+                        };
+                    }
+                    case EFFECT_TYPE_EXECUTE_POWER_EFFECTS: {
+                        var source = this.state.getMetaValue(action.source, action.generatedBy);
+                        return {
+                            type: UNMAKE_POWER_USE,
+                            magi: source.card.type == TYPE_MAGI,
+                            player: source.owner,
+                            source: source.id,
+                            power: typeof action.power == 'string' ? action.power : action.power.name,
+                        };
+                    }
                     case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE:
                         var creatures = this.state.getMetaValue(action.target, action.generatedBy);
                         if (creatures instanceof CardInGame) {
@@ -305,9 +354,9 @@ var Unmaker = /** @class */ (function () {
                             magi: magiTargets_1.map(function (magi) { return ({ id: magi.id, owner: magi.owner, energy: magi.data.energy }); })
                         };
                     }
-                    case EFFECT_TYPE_BEFORE_DAMAGE: {
-                        var source = action.source;
-                        var target = action.target;
+                    /* case EFFECT_TYPE_BEFORE_DAMAGE: {
+                        const source = action.source
+                        const target = action.target
                         return {
                             type: UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE,
                             sourceId: source.id,
@@ -315,8 +364,8 @@ var Unmaker = /** @class */ (function () {
                             sourceAttacked: source.data.attacked,
                             targetId: target.id,
                             targetWasAttacked: target.data.wasAttacked,
-                        };
-                    }
+                        }
+                    } */
                     case EFFECT_TYPE_CREATURE_DEFEATS_CREATURE: {
                         var source = action.source;
                         return {
@@ -507,6 +556,10 @@ var Unmaker = /** @class */ (function () {
     Unmaker.prototype.applyUnAction = function (state, unaction) {
         var _a, _b;
         switch (unaction.type) {
+            case UNMAKE_EFFECT_TYPE_PLAYER_WINS: {
+                state.unsetWinner();
+                break;
+            }
             case UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
                 var inPlay_1 = state.getZone(ZONE_TYPE_IN_PLAY);
                 unaction.creatures.forEach(function (_a) {

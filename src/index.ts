@@ -759,6 +759,10 @@ export class State {
 		this.rollDebugValue = null;
 	}
 
+    unsetWinner() {
+        this.winner = false;
+    }
+
 	setWinner(player: number) {
 		this.winner = player;
 	}

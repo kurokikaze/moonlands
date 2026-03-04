@@ -31,6 +31,12 @@ export declare const UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE = 27;
 export declare const UNMAKE_CALCULATION = 28;
 export declare const UNMAKE_SELECT = 29;
 export declare const UNMAKE_PROPERTY = 30;
+export declare const UNMAKE_LOG_ENTRY = 31;
+export declare const UNMAKE_PROMPT_LEAVE = 32;
+export declare const UNMAKE_POWER_USE = 33;
+export declare const UNMAKE_POWER_PAY = 34;
+export declare const UNMAKE_POWER_ACTIVATION = 36;
+export declare const UNMAKE_EFFECT_TYPE_PLAYER_WINS = 37;
 export type UnActionDiscardEnergyFromCreature = {
     type: typeof UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE;
     creatures: {
@@ -124,6 +130,8 @@ export type UnActionBeforeDamage = {
     sourceHasAttacked: boolean;
     sourceAttacked: number;
     targetId: string;
+    targetMagi: boolean;
+    targetPlayer: number;
     targetWasAttacked: boolean;
 };
 export type UnActionCreatureDefeatsCreature = {
@@ -222,7 +230,6 @@ export type UnActionProperty = {
     wasEmpty: boolean;
     previousValue?: any;
 };
-export type UnAction = UnActionDiscardEnergyFromCreature | UnActionDiscardEnergyFromMagi | UnActionMoveCardBetweenZones | UnActionDieRolled | UnActionStartTurn | UnActionStartStep | UnActionRearrangeCardsOfZone | UnActionCreateContinuousEffect | UnActionAddEnergyToCreature | UnActionAddEnergyToMagi | UnActionStartOfTurn | UnActionBeforeDamage | UnActionCreatureDefeatsCreature | UnActionDiscardCreatureFromPlay | UnActionMoveEnergy | UnActionRemoveEnergyFromCreature | UnActionRemoveEnergyFromMagi | UnActionPromptEntered | UnActionFindStartingCards | UnActionReshuffleDiscard | UnActionAddDelayedTrigger | UnActionRearrangeEnergyOnCreatures | UnActionDistributeEnergyOnCreatures | UnActionForbidAttackToCreature | UnActionCalculate | UnActionSelect | UnActionProperty;
 export type UnActionRestoreValue = {
     type: typeof UNMAKE_RESTORE_VALUE;
     path: string;
@@ -241,3 +248,31 @@ export type UnActionRemoveElement = {
     path: string;
     index: number;
 };
+export type UnActionPromptLeave = {
+    type: typeof UNMAKE_PROMPT_LEAVE;
+    promptType: PromptTypeType | null;
+    promptGeneratedBy?: string;
+    promptMessage?: string;
+    promptParams: PromptParamsType;
+    savedActions: any[];
+    player?: number;
+};
+export type UnActionPower = {
+    type: typeof UNMAKE_POWER_ACTIVATION;
+    magi: boolean;
+    player: number;
+    source: string;
+    power: string;
+};
+export type UnActionPlayerWins = {
+    type: typeof UNMAKE_EFFECT_TYPE_PLAYER_WINS;
+    actions: any[];
+};
+export type UnActionExecutePowerEffects = {
+    type: typeof UNMAKE_POWER_USE;
+    magi: boolean;
+    player: number;
+    source: string;
+    power: string;
+};
+export type UnAction = UnActionDiscardEnergyFromCreature | UnActionDiscardEnergyFromMagi | UnActionMoveCardBetweenZones | UnActionDieRolled | UnActionStartTurn | UnActionStartStep | UnActionRearrangeCardsOfZone | UnActionCreateContinuousEffect | UnActionAddEnergyToCreature | UnActionAddEnergyToMagi | UnActionStartOfTurn | UnActionBeforeDamage | UnActionCreatureDefeatsCreature | UnActionDiscardCreatureFromPlay | UnActionMoveEnergy | UnActionRemoveEnergyFromCreature | UnActionRemoveEnergyFromMagi | UnActionPromptEntered | UnActionFindStartingCards | UnActionReshuffleDiscard | UnActionAddDelayedTrigger | UnActionRearrangeEnergyOnCreatures | UnActionDistributeEnergyOnCreatures | UnActionForbidAttackToCreature | UnActionCalculate | UnActionSelect | UnActionProperty | UnActionPromptLeave | UnActionPower | UnActionPlayerWins | UnActionExecutePowerEffects;

@@ -294,6 +294,9 @@ var State = /** @class */ (function () {
     State.prototype.resetRollDebugValue = function () {
         this.rollDebugValue = null;
     };
+    State.prototype.unsetWinner = function () {
+        this.winner = false;
+    };
     State.prototype.setWinner = function (player) {
         this.winner = player;
     };

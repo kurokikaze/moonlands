@@ -430,6 +430,9 @@ class State {
     resetRollDebugValue() {
         this.rollDebugValue = null;
     }
+    unsetWinner() {
+        this.winner = false;
+    }
     setWinner(player) {
         this.winner = player;
     }
