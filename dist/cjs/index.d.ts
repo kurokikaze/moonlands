@@ -123,6 +123,7 @@ export declare class State {
     serializeZones(playerId: number, hideZones?: boolean): SerializedZones;
     setup(): void;
     getOpponent(player: number): number;
+    zoneHash: Map<string, Zone>;
     getZone(type: ZoneType, player?: number | null): Zone;
     getCurrentStep(): number | null;
     getActivePlayer(): number;

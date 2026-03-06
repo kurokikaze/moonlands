@@ -1,14 +1,3 @@
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 import { PROMPT_TYPE_ALTERNATIVE, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_CHOOSE_CARDS, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_NUMBER, PROMPT_TYPE_PAYMENT_SOURCE, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, ZONE_TYPE_IN_PLAY, } from "../../const.js";
 var convertCard = function (cardInGame) { return ({
     id: cardInGame.id,
@@ -213,6 +202,12 @@ export var applyPromptEnteredEffect = function (action) {
             break;
         }
     }
-    this.state = __assign(__assign({}, this.state), { prompt: true, promptMessage: ('message' in action) ? action.message : '', promptPlayer: promptPlayer, promptType: action.promptType, promptVariable: action.variable, promptGeneratedBy: action.generatedBy, promptParams: promptParams });
+    this.state.prompt = true;
+    this.state.promptMessage = ('message' in action) ? action.message : '';
+    this.state.promptPlayer = promptPlayer;
+    this.state.promptType = action.promptType;
+    this.state.promptVariable = action.variable;
+    this.state.promptGeneratedBy = action.generatedBy;
+    this.state.promptParams = promptParams;
 };
 //# sourceMappingURL=prompt.js.map

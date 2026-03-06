@@ -1193,14 +1193,11 @@ export class State {
 		const randomValue = this.twister ? this.twister.random() : Math.random();
 		const goesFirst = this.players[(randomValue > 0.5 ? 0 : 1)];
 
-		this.state = {
-			...this.state,
-			zones,
-			step: null,
-			turn: 1,
-			goesFirst,
-			activePlayer: goesFirst,
-		};
+        this.state.zones = zones;
+        this.state.step = null;
+        this.state.turn = 1;
+        this.state.goesFirst = goesFirst;
+        this.state.activePlayer = goesFirst;
 	}
 
 	getOpponent(player: number): number {
@@ -1208,8 +1205,15 @@ export class State {
 		return opponent || 0
 	}
 
+    zoneHash: Map<string, Zone> = new Map()
 	getZone(type: ZoneType, player: number | null = null): Zone {
-		return this.state.zones.find(zone => zone.type === type && (zone.player == player || player == null)) || new Zone('Empty zone', ZONE_TYPE_DECK);
+        const key = `${type}${player}`
+        if (this.zoneHash.has(key)) {
+            return this.zoneHash.get(key)!
+        }
+		const result = this.state.zones.find(zone => zone.type === type && (zone.player == player || player == null)) || new Zone('Empty zone', ZONE_TYPE_DECK);
+        this.zoneHash.set(key, result)
+        return result
 	}
 
 	getCurrentStep() {
@@ -1245,17 +1249,11 @@ export class State {
 	}
 
 	setSpellMetadata(metadata: any, spellId: string): void {
-		this.state = {
-			...this.state,
-			spellMetaData: {
-				...this.state.spellMetaData,
-				[spellId]: metadata,
-			}
-		};
+        this.state.spellMetaData[spellId] = metadata;
 	}
 
 	getSpellMetadata(spellId: string): MetaDataRecord {
-		return this.state.spellMetaData[spellId] ? this.state.spellMetaData[spellId] : {};
+		return this.state.spellMetaData[spellId] || {};
 	}
 
 	setSpellMetaDataField(field: string, value: any, spellId: string): void {
@@ -3083,39 +3081,23 @@ export class State {
 					}
 
 					if (!skipPrompt) {
-						this.state = {
-							...this.state,
-							savedActions,
-							// This will be the only action to fire after entering the prompt
-							actions: [this.convertPromptActionToEffect(action as PromptType & { source: CardInGame })],
-//							prompt: true,
-//							promptMessage: ('message' in action) ? action.message : '',
-//							promptPlayer,
-//							promptType: action.promptType,
-//							promptVariable: action.variable,
-//							promptGeneratedBy: action.generatedBy,
-//							promptParams,
-						};
+                        this.state.savedActions = savedActions;
+                        this.state.actions = [this.convertPromptActionToEffect(action as PromptType & { source: CardInGame })]
 					}
 					break;
 				}
 				case ACTION_EXIT_PROMPTS: {
-					this.state = {
-						...this.state,
-						actions: [],
-						savedActions: [],
-						mayEffectActions: [],
-						fallbackActions: [],
-						prompt: false,
-						promptType: null,
-						promptMessage: undefined,
-						promptGeneratedBy: undefined,
-						promptVariable: undefined,
-						promptParams: {},
-						spellMetaData: {
-							...this.state.spellMetaData,
-						},
-					};
+                    this.state.actions = []
+                    this.state.savedActions = []
+                    this.state.mayEffectActions = []
+                    this.state.fallbackActions = []
+                    this.state.prompt = false
+                    this.state.promptType = null
+					this.state.promptMessage = undefined
+					this.state.promptGeneratedBy = undefined
+					this.state.promptVariable = undefined
+					this.state.promptParams = {}
+					
 					break;
 				}
 				case ACTION_RESOLVE_PROMPT: {
@@ -3126,23 +3108,17 @@ export class State {
 
 						const actions = action.useEffect ? [...mayEffectActions, ...savedActions] : [...fallbackActions, ...savedActions];
 
-						this.state = {
-							...this.state,
-							actions,
-							savedActions: [],
-							mayEffectActions: [],
-							fallbackActions: [],
-							prompt: false,
-							promptType: null,
-							promptMessage: undefined,
-							promptGeneratedBy: undefined,
-							promptVariable: undefined,
-							promptParams: {},
-							spellMetaData: {
-								...this.state.spellMetaData,
-							},
-						};
-					} else {
+                        this.state.actions = actions;
+                        this.state.savedActions = [];
+                        this.state.mayEffectActions = [];
+                        this.state.fallbackActions = [];
+                        this.state.prompt = false
+                        this.state.promptType = null
+                        this.state.promptMessage = undefined
+                        this.state.promptGeneratedBy = undefined
+                        this.state.promptVariable = undefined
+                        this.state.promptParams = {}
+                    } else {
 						const generatedBy = action.generatedBy || this.state.promptGeneratedBy || this.nanoid();
 						const variable = action.variable || this.state.promptVariable;
 						let currentActionMetaData = this.state.spellMetaData[generatedBy] || {};
@@ -3341,21 +3317,15 @@ export class State {
 							}
 						}
 						const actions = this.state.savedActions || [];
-						this.state = {
-							...this.state,
-							actions,
-							savedActions: [],
-							prompt: false,
-							promptType: null,
-							promptMessage: undefined,
-							promptGeneratedBy: undefined,
-							promptVariable: undefined,
-							promptParams: {},
-							spellMetaData: {
-								...this.state.spellMetaData,
-								[generatedBy]: currentActionMetaData,
-							},
-						};
+                        this.state.actions = actions;
+                        this.state.savedActions = [];
+                        this.state.prompt = false;
+                        this.state.promptType = null;
+                        this.state.promptMessage =  undefined;
+						this.state.promptGeneratedBy = undefined;
+						this.state.promptVariable = undefined;
+						this.state.promptParams = {};
+                        this.state.spellMetaData[generatedBy] = currentActionMetaData;
 					}
 					break;
 				}

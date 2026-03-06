@@ -118,12 +118,9 @@ export const applyStartTurnEffect: ActionTransformer<typeof EFFECT_TYPE_START_TU
     }
   );
 
-  this.state = {
-    ...this.state,
-    continuousEffects: this.state.continuousEffects.map(updateContinuousEffects(action.player)).filter(Boolean) as ContinuousEffectType[],
-    activePlayer: action.player,
-    step: 0,
-  };
+  this.state.continuousEffects = this.state.continuousEffects.map(updateContinuousEffects(action.player)).filter(Boolean) as ContinuousEffectType[],
+  this.state.activePlayer = action.player;
+  this.state.step = 0
 }
 
 export const applyDrawCardsInDrawStep: ActionTransformer<typeof EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP> = function (action, transform) {
@@ -250,10 +247,7 @@ export const applyStartStepEffect: ActionTransformer<typeof EFFECT_TYPE_START_ST
     this.startTurnTimer()
   }
 
-  this.state = {
-    ...this.state,
-    step: action.step,
-  };
+  this.state.step = action.step
 }
 
 export const applyAddDelayedTriggerEffect: ActionTransformer<typeof EFFECT_TYPE_ADD_DELAYED_TRIGGER> = function (action, _transform, _state, seeded_nanoid) {
@@ -261,17 +255,12 @@ export const applyAddDelayedTriggerEffect: ActionTransformer<typeof EFFECT_TYPE_
   // "new_card" fallback is for "defeated" triggers
   if ('source' in metaData || 'new_card' in metaData) {
     const self = metaData.source as CardInGame || metaData.new_card as CardInGame;
-    this.state = {
-      ...this.state,
-      delayedTriggers: [
-        ...this.state.delayedTriggers,
-        {
+
+    this.state.delayedTriggers.push({
           id: seeded_nanoid(),
           self,
           ...action.delayedTrigger,
-        }
-      ],
-    };
+        })
   }
 }
 

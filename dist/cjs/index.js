@@ -838,21 +838,25 @@ class State {
         // @ts-ignore
         const randomValue = this.twister ? this.twister.random() : Math.random();
         const goesFirst = this.players[(randomValue > 0.5 ? 0 : 1)];
-        this.state = {
-            ...this.state,
-            zones,
-            step: null,
-            turn: 1,
-            goesFirst,
-            activePlayer: goesFirst,
-        };
+        this.state.zones = zones;
+        this.state.step = null;
+        this.state.turn = 1;
+        this.state.goesFirst = goesFirst;
+        this.state.activePlayer = goesFirst;
     }
     getOpponent(player) {
         const opponent = this.players.find(pl => pl != player);
         return opponent || 0;
     }
+    zoneHash = new Map();
     getZone(type, player = null) {
-        return this.state.zones.find(zone => zone.type === type && (zone.player == player || player == null)) || new Zone_1.default('Empty zone', const_1.ZONE_TYPE_DECK);
+        const key = `${type}${player}`;
+        if (this.zoneHash.has(key)) {
+            return this.zoneHash.get(key);
+        }
+        const result = this.state.zones.find(zone => zone.type === type && (zone.player == player || player == null)) || new Zone_1.default('Empty zone', const_1.ZONE_TYPE_DECK);
+        this.zoneHash.set(key, result);
+        return result;
     }
     getCurrentStep() {
         return this.state.step;
@@ -879,16 +883,10 @@ class State {
         return this.state.actions.length > 0;
     }
     setSpellMetadata(metadata, spellId) {
-        this.state = {
-            ...this.state,
-            spellMetaData: {
-                ...this.state.spellMetaData,
-                [spellId]: metadata,
-            }
-        };
+        this.state.spellMetaData[spellId] = metadata;
     }
     getSpellMetadata(spellId) {
-        return this.state.spellMetaData[spellId] ? this.state.spellMetaData[spellId] : {};
+        return this.state.spellMetaData[spellId] || {};
     }
     setSpellMetaDataField(field, value, spellId) {
         if (!spellId) {
@@ -2433,39 +2431,22 @@ class State {
                         }
                     }
                     if (!skipPrompt) {
-                        this.state = {
-                            ...this.state,
-                            savedActions,
-                            // This will be the only action to fire after entering the prompt
-                            actions: [this.convertPromptActionToEffect(action)],
-                            //							prompt: true,
-                            //							promptMessage: ('message' in action) ? action.message : '',
-                            //							promptPlayer,
-                            //							promptType: action.promptType,
-                            //							promptVariable: action.variable,
-                            //							promptGeneratedBy: action.generatedBy,
-                            //							promptParams,
-                        };
+                        this.state.savedActions = savedActions;
+                        this.state.actions = [this.convertPromptActionToEffect(action)];
                     }
                     break;
                 }
                 case const_1.ACTION_EXIT_PROMPTS: {
-                    this.state = {
-                        ...this.state,
-                        actions: [],
-                        savedActions: [],
-                        mayEffectActions: [],
-                        fallbackActions: [],
-                        prompt: false,
-                        promptType: null,
-                        promptMessage: undefined,
-                        promptGeneratedBy: undefined,
-                        promptVariable: undefined,
-                        promptParams: {},
-                        spellMetaData: {
-                            ...this.state.spellMetaData,
-                        },
-                    };
+                    this.state.actions = [];
+                    this.state.savedActions = [];
+                    this.state.mayEffectActions = [];
+                    this.state.fallbackActions = [];
+                    this.state.prompt = false;
+                    this.state.promptType = null;
+                    this.state.promptMessage = undefined;
+                    this.state.promptGeneratedBy = undefined;
+                    this.state.promptVariable = undefined;
+                    this.state.promptParams = {};
                     break;
                 }
                 case const_1.ACTION_RESOLVE_PROMPT: {
@@ -2474,22 +2455,16 @@ class State {
                         const fallbackActions = this.state.fallbackActions || [];
                         const savedActions = this.state.savedActions || [];
                         const actions = action.useEffect ? [...mayEffectActions, ...savedActions] : [...fallbackActions, ...savedActions];
-                        this.state = {
-                            ...this.state,
-                            actions,
-                            savedActions: [],
-                            mayEffectActions: [],
-                            fallbackActions: [],
-                            prompt: false,
-                            promptType: null,
-                            promptMessage: undefined,
-                            promptGeneratedBy: undefined,
-                            promptVariable: undefined,
-                            promptParams: {},
-                            spellMetaData: {
-                                ...this.state.spellMetaData,
-                            },
-                        };
+                        this.state.actions = actions;
+                        this.state.savedActions = [];
+                        this.state.mayEffectActions = [];
+                        this.state.fallbackActions = [];
+                        this.state.prompt = false;
+                        this.state.promptType = null;
+                        this.state.promptMessage = undefined;
+                        this.state.promptGeneratedBy = undefined;
+                        this.state.promptVariable = undefined;
+                        this.state.promptParams = {};
                     }
                     else {
                         const generatedBy = action.generatedBy || this.state.promptGeneratedBy || this.nanoid();
@@ -2689,21 +2664,15 @@ class State {
                             }
                         }
                         const actions = this.state.savedActions || [];
-                        this.state = {
-                            ...this.state,
-                            actions,
-                            savedActions: [],
-                            prompt: false,
-                            promptType: null,
-                            promptMessage: undefined,
-                            promptGeneratedBy: undefined,
-                            promptVariable: undefined,
-                            promptParams: {},
-                            spellMetaData: {
-                                ...this.state.spellMetaData,
-                                [generatedBy]: currentActionMetaData,
-                            },
-                        };
+                        this.state.actions = actions;
+                        this.state.savedActions = [];
+                        this.state.prompt = false;
+                        this.state.promptType = null;
+                        this.state.promptMessage = undefined;
+                        this.state.promptGeneratedBy = undefined;
+                        this.state.promptVariable = undefined;
+                        this.state.promptParams = {};
+                        this.state.spellMetaData[generatedBy] = currentActionMetaData;
                     }
                     break;
                 }

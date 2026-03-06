@@ -6,7 +6,7 @@ const applyAttackEffect = function (action, transform) {
     const source = this.getMetaValue(action.source, action.generatedBy);
     const target = this.getMetaValue(action.target, action.generatedBy);
     const additionalAttackers = this.getMetaValue(action.additionalAttackers, action.generatedBy);
-    let attackSequence = [
+    const attackSequence = [
         {
             type: const_1.ACTION_EFFECT,
             effectType: const_1.EFFECT_TYPE_CREATURE_ATTACKS,
@@ -129,8 +129,8 @@ const applyDamageStepEffect = function (action, transform) {
             generatedBy: attackSource.id,
         }
     ];
-    const damageActions = (attackTarget.card.type === const_1.TYPE_CREATURE && !action.packHuntAttack) ? [
-        ...attackerDamageActions, {
+    if (attackTarget.card.type === const_1.TYPE_CREATURE && !action.packHuntAttack) {
+        attackerDamageActions.push({
             type: const_1.ACTION_EFFECT,
             effectType: const_1.EFFECT_TYPE_DEFENDER_DEALS_DAMAGE,
             source: attackTarget,
@@ -141,8 +141,7 @@ const applyDamageStepEffect = function (action, transform) {
             sourceBeforeDamage: attackTarget.copy(),
             targetBeforeDamage: attackSource.copy(),
             generatedBy: attackSource.id,
-        },
-        {
+        }, {
             type: const_1.ACTION_EFFECT,
             effectType: const_1.EFFECT_TYPE_DEFENDER_DAMAGE_DEALT,
             source: attackTarget,
@@ -153,9 +152,9 @@ const applyDamageStepEffect = function (action, transform) {
             sourceBeforeDamage: attackTarget.copy(),
             targetBeforeDamage: attackSource.copy(),
             generatedBy: attackSource.id,
-        }
-    ] : attackerDamageActions;
-    transform(...damageActions);
+        });
+    }
+    transform(...attackerDamageActions);
 };
 exports.applyDamageStepEffect = applyDamageStepEffect;
 const applyAttackerDealsDamageEffect = function (action, transform) {

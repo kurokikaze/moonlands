@@ -9,15 +9,6 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 import { ACTION_EFFECT, ACTION_ENTER_PROMPT, ACTION_PASS, ACTION_SELECT, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI, EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP, EFFECT_TYPE_DRAW, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_DRAW_REST_OF_CARDS, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_STEP, NO_PRIORITY, PRIORITY_ATTACK, PRIORITY_CREATURES, PRIORITY_PRS, PROMPT_TYPE_CHOOSE_CARDS, PROPERTY_MAGI_STARTING_ENERGY, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_MAGI, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, ZONE_TYPE_DISCARD, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_MAGI_PILE, } from "../../const.js";
 import { oneOrSeveral, updateContinuousEffects } from "../actionMapUtils.js";
 var steps = [
@@ -94,7 +85,9 @@ export var applyStartTurnEffect = function (action, transform) {
         player: action.player,
         generatedBy: action.generatedBy,
     });
-    this.state = __assign(__assign({}, this.state), { continuousEffects: this.state.continuousEffects.map(updateContinuousEffects(action.player)).filter(Boolean), activePlayer: action.player, step: 0 });
+    this.state.continuousEffects = this.state.continuousEffects.map(updateContinuousEffects(action.player)).filter(Boolean),
+        this.state.activePlayer = action.player;
+    this.state.step = 0;
 };
 export var applyDrawCardsInDrawStep = function (action, transform) {
     var numberOfCards = action.numberOfCards;
@@ -196,16 +189,14 @@ export var applyStartStepEffect = function (action) {
     if (action.step === 1 && this.timerEnabled) {
         this.startTurnTimer();
     }
-    this.state = __assign(__assign({}, this.state), { step: action.step });
+    this.state.step = action.step;
 };
 export var applyAddDelayedTriggerEffect = function (action, _transform, _state, seeded_nanoid) {
     var metaData = this.getSpellMetadata(action.generatedBy);
     // "new_card" fallback is for "defeated" triggers
     if ('source' in metaData || 'new_card' in metaData) {
         var self = metaData.source || metaData.new_card;
-        this.state = __assign(__assign({}, this.state), { delayedTriggers: __spreadArray(__spreadArray([], this.state.delayedTriggers, true), [
-                __assign({ id: seeded_nanoid(), self: self }, action.delayedTrigger)
-            ], false) });
+        this.state.delayedTriggers.push(__assign({ id: seeded_nanoid(), self: self }, action.delayedTrigger));
     }
 };
 export var applyFindStartingCardsEffect = function (action, transform) {

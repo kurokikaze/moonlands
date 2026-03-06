@@ -84,13 +84,7 @@ const applyCreateContinuousEffect = function (action, _transform, _state, seeded
         player: action.player || 0,
         id,
     };
-    this.state = {
-        ...this.state,
-        continuousEffects: [
-            ...this.state.continuousEffects,
-            continuousEffect,
-        ],
-    };
+    this.state.continuousEffects.push(continuousEffect);
 };
 exports.applyCreateContinuousEffect = applyCreateContinuousEffect;
 //# sourceMappingURL=triggers.js.map

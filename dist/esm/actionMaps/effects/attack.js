@@ -1,12 +1,3 @@
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 import { ACTION_EFFECT, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_ATTACKER_DAMAGE_DEALT, EFFECT_TYPE_ATTACKER_DEALS_DAMAGE, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_CREATURE_IS_DEFEATED, EFFECT_TYPE_DAMAGE_STEP, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_DEFENDER_DAMAGE_DEALT, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, TYPE_CREATURE, } from "../../const.js";
 export var applyAttackEffect = function (action, transform) {
     var source = this.getMetaValue(action.source, action.generatedBy);
@@ -134,8 +125,8 @@ export var applyDamageStepEffect = function (action, transform) {
             generatedBy: attackSource.id,
         }
     ];
-    var damageActions = (attackTarget.card.type === TYPE_CREATURE && !action.packHuntAttack) ? __spreadArray(__spreadArray([], attackerDamageActions, true), [
-        {
+    if (attackTarget.card.type === TYPE_CREATURE && !action.packHuntAttack) {
+        attackerDamageActions.push({
             type: ACTION_EFFECT,
             effectType: EFFECT_TYPE_DEFENDER_DEALS_DAMAGE,
             source: attackTarget,
@@ -146,8 +137,7 @@ export var applyDamageStepEffect = function (action, transform) {
             sourceBeforeDamage: attackTarget.copy(),
             targetBeforeDamage: attackSource.copy(),
             generatedBy: attackSource.id,
-        },
-        {
+        }, {
             type: ACTION_EFFECT,
             effectType: EFFECT_TYPE_DEFENDER_DAMAGE_DEALT,
             source: attackTarget,
@@ -158,9 +148,9 @@ export var applyDamageStepEffect = function (action, transform) {
             sourceBeforeDamage: attackTarget.copy(),
             targetBeforeDamage: attackSource.copy(),
             generatedBy: attackSource.id,
-        }
-    ], false) : attackerDamageActions;
-    transform.apply(void 0, damageActions);
+        });
+    }
+    transform.apply(void 0, attackerDamageActions);
 };
 export var applyAttackerDealsDamageEffect = function (action, transform) {
     transform({

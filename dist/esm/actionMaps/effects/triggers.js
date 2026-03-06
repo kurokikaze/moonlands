@@ -9,15 +9,6 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 import CardInGame from "../../classes/CardInGame.js";
 import { SELECTOR_CREATURES_OF_PLAYER, SELECTOR_ID, } from "../../const.js";
 import { oneOrSeveral } from "../actionMapUtils.js";
@@ -87,8 +78,6 @@ export var applyCreateContinuousEffect = function (action, _transform, _state, s
         player: action.player || 0,
         id: id,
     };
-    this.state = __assign(__assign({}, this.state), { continuousEffects: __spreadArray(__spreadArray([], this.state.continuousEffects, true), [
-            continuousEffect,
-        ], false) });
+    this.state.continuousEffects.push(continuousEffect);
 };
 //# sourceMappingURL=triggers.js.map

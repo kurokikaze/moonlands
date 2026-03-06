@@ -96,11 +96,5 @@ export const applyCreateContinuousEffect: ActionTransformer<typeof EFFECT_TYPE_C
     id,
   };
 
-  this.state = {
-    ...this.state,
-    continuousEffects: [
-      ...this.state.continuousEffects,
-      continuousEffect,
-    ],
-  };
+  this.state.continuousEffects.push(continuousEffect)
 }

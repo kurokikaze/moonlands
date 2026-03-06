@@ -193,6 +193,7 @@ var State = /** @class */ (function () {
         this.onAction = null;
         this.onFullAction = null;
         this.turnTimer = null;
+        this.zoneHash = new Map();
         this.state = __assign(__assign({}, clone(defaultState)), state);
         this.decks = [];
         this.winner = false;
@@ -709,7 +710,11 @@ var State = /** @class */ (function () {
         // @ts-ignore
         var randomValue = this.twister ? this.twister.random() : Math.random();
         var goesFirst = this.players[(randomValue > 0.5 ? 0 : 1)];
-        this.state = __assign(__assign({}, this.state), { zones: zones, step: null, turn: 1, goesFirst: goesFirst, activePlayer: goesFirst });
+        this.state.zones = zones;
+        this.state.step = null;
+        this.state.turn = 1;
+        this.state.goesFirst = goesFirst;
+        this.state.activePlayer = goesFirst;
     };
     State.prototype.getOpponent = function (player) {
         var opponent = this.players.find(function (pl) { return pl != player; });
@@ -717,7 +722,13 @@ var State = /** @class */ (function () {
     };
     State.prototype.getZone = function (type, player) {
         if (player === void 0) { player = null; }
-        return this.state.zones.find(function (zone) { return zone.type === type && (zone.player == player || player == null); }) || new Zone('Empty zone', ZONE_TYPE_DECK);
+        var key = "".concat(type).concat(player);
+        if (this.zoneHash.has(key)) {
+            return this.zoneHash.get(key);
+        }
+        var result = this.state.zones.find(function (zone) { return zone.type === type && (zone.player == player || player == null); }) || new Zone('Empty zone', ZONE_TYPE_DECK);
+        this.zoneHash.set(key, result);
+        return result;
     };
     State.prototype.getCurrentStep = function () {
         return this.state.step;
@@ -757,11 +768,10 @@ var State = /** @class */ (function () {
         return this.state.actions.length > 0;
     };
     State.prototype.setSpellMetadata = function (metadata, spellId) {
-        var _a;
-        this.state = __assign(__assign({}, this.state), { spellMetaData: __assign(__assign({}, this.state.spellMetaData), (_a = {}, _a[spellId] = metadata, _a)) });
+        this.state.spellMetaData[spellId] = metadata;
     };
     State.prototype.getSpellMetadata = function (spellId) {
-        return this.state.spellMetaData[spellId] ? this.state.spellMetaData[spellId] : {};
+        return this.state.spellMetaData[spellId] || {};
     };
     State.prototype.setSpellMetaDataField = function (field, value, spellId) {
         var _a;
@@ -1808,7 +1818,6 @@ var State = /** @class */ (function () {
         }
         this.addActions(initialAction);
         var _loop_1 = function () {
-            var _l;
             var rawAction = this_1.getNextAction();
             var replacedActions = this_1.replaceByReplacementEffect(rawAction);
             var action = replacedActions[0];
@@ -2210,14 +2219,22 @@ var State = /** @class */ (function () {
                         }
                     }
                     if (!skipPrompt) {
-                        this_1.state = __assign(__assign({}, this_1.state), { savedActions: savedActions, 
-                            // This will be the only action to fire after entering the prompt
-                            actions: [this_1.convertPromptActionToEffect(action)] });
+                        this_1.state.savedActions = savedActions;
+                        this_1.state.actions = [this_1.convertPromptActionToEffect(action)];
                     }
                     break;
                 }
                 case ACTION_EXIT_PROMPTS: {
-                    this_1.state = __assign(__assign({}, this_1.state), { actions: [], savedActions: [], mayEffectActions: [], fallbackActions: [], prompt: false, promptType: null, promptMessage: undefined, promptGeneratedBy: undefined, promptVariable: undefined, promptParams: {}, spellMetaData: __assign({}, this_1.state.spellMetaData) });
+                    this_1.state.actions = [];
+                    this_1.state.savedActions = [];
+                    this_1.state.mayEffectActions = [];
+                    this_1.state.fallbackActions = [];
+                    this_1.state.prompt = false;
+                    this_1.state.promptType = null;
+                    this_1.state.promptMessage = undefined;
+                    this_1.state.promptGeneratedBy = undefined;
+                    this_1.state.promptVariable = undefined;
+                    this_1.state.promptParams = {};
                     break;
                 }
                 case ACTION_RESOLVE_PROMPT: {
@@ -2226,7 +2243,16 @@ var State = /** @class */ (function () {
                         var fallbackActions = this_1.state.fallbackActions || [];
                         var savedActions = this_1.state.savedActions || [];
                         var actions = action.useEffect ? __spreadArray(__spreadArray([], mayEffectActions, true), savedActions, true) : __spreadArray(__spreadArray([], fallbackActions, true), savedActions, true);
-                        this_1.state = __assign(__assign({}, this_1.state), { actions: actions, savedActions: [], mayEffectActions: [], fallbackActions: [], prompt: false, promptType: null, promptMessage: undefined, promptGeneratedBy: undefined, promptVariable: undefined, promptParams: {}, spellMetaData: __assign({}, this_1.state.spellMetaData) });
+                        this_1.state.actions = actions;
+                        this_1.state.savedActions = [];
+                        this_1.state.mayEffectActions = [];
+                        this_1.state.fallbackActions = [];
+                        this_1.state.prompt = false;
+                        this_1.state.promptType = null;
+                        this_1.state.promptMessage = undefined;
+                        this_1.state.promptGeneratedBy = undefined;
+                        this_1.state.promptVariable = undefined;
+                        this_1.state.promptParams = {};
                     }
                     else {
                         var generatedBy = action.generatedBy || this_1.state.promptGeneratedBy || this_1.nanoid();
@@ -2432,7 +2458,15 @@ var State = /** @class */ (function () {
                             }
                         }
                         var actions = this_1.state.savedActions || [];
-                        this_1.state = __assign(__assign({}, this_1.state), { actions: actions, savedActions: [], prompt: false, promptType: null, promptMessage: undefined, promptGeneratedBy: undefined, promptVariable: undefined, promptParams: {}, spellMetaData: __assign(__assign({}, this_1.state.spellMetaData), (_l = {}, _l[generatedBy] = currentActionMetaData, _l)) });
+                        this_1.state.actions = actions;
+                        this_1.state.savedActions = [];
+                        this_1.state.prompt = false;
+                        this_1.state.promptType = null;
+                        this_1.state.promptMessage = undefined;
+                        this_1.state.promptGeneratedBy = undefined;
+                        this_1.state.promptVariable = undefined;
+                        this_1.state.promptParams = {};
+                        this_1.state.spellMetaData[generatedBy] = currentActionMetaData;
                     }
                     break;
                 }
