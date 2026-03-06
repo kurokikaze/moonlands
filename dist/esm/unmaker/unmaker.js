@@ -150,12 +150,13 @@ var Unmaker = /** @class */ (function () {
                                         id: magiTargets.id,
                                         owner: magiTargets.owner,
                                         energy: magiTargets.data.energy,
+                                        energyLost: magiTargets.data.energyLostThisTurn,
                                     }]
                             };
                         }
                         return {
                             type: UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
-                            magi: magiTargets.map(function (magi) { return ({ id: magi.id, owner: magi.owner, energy: magi.data.energy }); })
+                            magi: magiTargets.map(function (magi) { return ({ id: magi.id, owner: magi.owner, energy: magi.data.energy, energyLost: magi.data.energyLostThisTurn }); })
                         };
                     case EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES: {
                         var zoneChangingTarget = this.state.getMetaValue(action.target, action.generatedBy);
@@ -408,7 +409,11 @@ var Unmaker = /** @class */ (function () {
                         return {
                             type: UNMAKE_EFFECT_TYPE_MOVE_ENERGY,
                             sourceId: moveSource.id,
+                            sourceMagi: moveSource.card.type == TYPE_MAGI,
+                            sourcePlayer: moveSource.owner,
                             targetId: moveTarget.id,
+                            targetMagi: moveTarget.card.type == TYPE_MAGI,
+                            targetPlayer: moveTarget.owner,
                             sourceEnergy: moveSource.data.energy,
                             sourceEnergyLost: moveSource.data.energyLostThisTurn,
                             targetEnergy: moveTarget.data.energy,
@@ -581,6 +586,69 @@ var Unmaker = /** @class */ (function () {
                 state.unsetWinner();
                 break;
             }
+            /*case UNMAKE_POWER_PAY: {
+                var target;
+                if (unaction.magi) {
+                    var zone = state.getZone(ZONE_TYPE_ACTIVE_MAGI, unaction.player)
+                    target = zone.card
+                    if (target.id !== unaction.source) {
+                        console.error(`Unmaking power use but ID doesn't match type and player: ${target.id} != ${unaction.source}`)
+                    }
+                } else {
+                    target = state.getZone(ZONE_TYPE_IN_PLAY).byId(unaction.source)
+                }
+                if (target) {
+                    target.data.energy = target.data.energy + unaction.cost
+                    target.data.energyLostThisTurn = target.data.energyLostThisTurn - unaction.cost
+                }
+                break;
+            }*/
+            case UNMAKE_POWER_ACTIVATION: {
+                var target;
+                if (unaction.magi) {
+                    var zone = state.getZone(ZONE_TYPE_ACTIVE_MAGI, unaction.player);
+                    target = zone.card;
+                    if (target && target.id !== unaction.source) {
+                        console.error("Unmaking power use but ID doesn't match type and player: ".concat(target.id, " != ").concat(unaction.source));
+                    }
+                }
+                else {
+                    target = state.getZone(ZONE_TYPE_IN_PLAY).byId(unaction.source);
+                }
+                if (target) {
+                    target.data.actionsUsed = target.data.actionsUsed.filter(function (action) { return action != unaction.power; });
+                    state.state.log.pop();
+                }
+                break;
+            }
+            case UNMAKE_POWER_USE: {
+                var target;
+                if (unaction.magi) {
+                    var zone = state.getZone(ZONE_TYPE_ACTIVE_MAGI, unaction.player);
+                    target = zone.card;
+                    if (target && target.id !== unaction.source) {
+                        console.error("Unmaking power use but ID doesn't match type and player: ".concat(target.id, " != ").concat(unaction.source));
+                    }
+                }
+                else {
+                    target = state.getZone(ZONE_TYPE_IN_PLAY).byId(unaction.source);
+                }
+                if (target) {
+                    target.data.actionsUsed = target.data.actionsUsed.filter(function (action) { return action != unaction.power; });
+                }
+                break;
+            }
+            case UNMAKE_PROMPT_LEAVE: {
+                state.state.prompt = true;
+                state.state.promptType = unaction.promptType;
+                state.state.promptGeneratedBy = unaction.promptGeneratedBy;
+                state.state.promptPlayer = unaction.player;
+                state.state.promptMessage = unaction.promptMessage;
+                state.state.promptParams = unaction.promptParams;
+                state.state.savedActions = unaction.savedActions;
+                state.state.log.pop();
+                break;
+            }
             case UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
                 var inPlay_1 = state.getZone(ZONE_TYPE_IN_PLAY);
                 unaction.creatures.forEach(function (_a) {
@@ -595,15 +663,16 @@ var Unmaker = /** @class */ (function () {
                 break;
             }
             case UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI: {
-                unaction.magi.forEach(function (_a) {
-                    var id = _a.id, owner = _a.owner, energy = _a.energy;
+                for (var _i = 0, _c = unaction.magi; _i < _c.length; _i++) {
+                    var _d = _c[_i], id = _d.id, owner = _d.owner, energy = _d.energy, energyLost = _d.energyLost;
                     var activeMagi = state.getZone(ZONE_TYPE_ACTIVE_MAGI, owner);
                     var magiCard = activeMagi.byId(id);
                     if (magiCard) {
                         magiCard.data.energy = energy;
+                        magiCard.data.energyLostThisTurn = energyLost;
                     }
                     state.state.log.pop();
-                });
+                }
                 break;
             }
             case UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES: {
@@ -619,8 +688,8 @@ var Unmaker = /** @class */ (function () {
                 // Re-add original card at its original position in source zone
                 sourceZone.cards.splice(unaction.position, 0, unaction.card);
                 // Restore spellMetaData fields to their previous values
-                for (var _i = 0, _c = unaction.metaDataEntries; _i < _c.length; _i++) {
-                    var entry = _c[_i];
+                for (var _e = 0, _f = unaction.metaDataEntries; _e < _f.length; _e++) {
+                    var entry = _f[_e];
                     var currentMeta = state.getSpellMetadata(entry.spellId);
                     if (entry.previousValue === undefined) {
                         // Field didn't exist before, remove it
@@ -649,14 +718,14 @@ var Unmaker = /** @class */ (function () {
                 state.turn = unaction.previousTurn;
                 state.state = __assign(__assign({}, state.state), { activePlayer: unaction.previousActivePlayer, step: unaction.previousStep, continuousEffects: unaction.previousContinuousEffects });
                 // Restore card flags
-                for (var _d = 0, _e = Object.entries(unaction.cardFlags); _d < _e.length; _d++) {
-                    var _f = _e[_d], cardId = _f[0], flags = _f[1];
+                for (var _g = 0, _h = Object.entries(unaction.cardFlags); _g < _h.length; _g++) {
+                    var _j = _h[_g], cardId = _j[0], flags = _j[1];
                     // Try to find the card in play (creatures and relics)
                     var card = state.getZone(ZONE_TYPE_IN_PLAY).byId(cardId);
                     // If not in play, check all players' active magi zones
                     if (!card) {
-                        for (var _g = 0, _h = state.players; _g < _h.length; _g++) {
-                            var player = _h[_g];
+                        for (var _k = 0, _l = state.players; _k < _l.length; _k++) {
+                            var player = _l[_k];
                             card = (_a = state.getZone(ZONE_TYPE_ACTIVE_MAGI, player)) === null || _a === void 0 ? void 0 : _a.byId(cardId);
                             if (card)
                                 break;
@@ -675,14 +744,14 @@ var Unmaker = /** @class */ (function () {
             }
             case UNMAKE_EFFECT_TYPE_START_OF_TURN: {
                 // Restore card flags
-                for (var _j = 0, _k = Object.entries(unaction.cardFlags); _j < _k.length; _j++) {
-                    var _l = _k[_j], cardId = _l[0], flags = _l[1];
+                for (var _m = 0, _o = Object.entries(unaction.cardFlags); _m < _o.length; _m++) {
+                    var _p = _o[_m], cardId = _p[0], flags = _p[1];
                     // Try to find the card in play (creatures and relics)
                     var card = state.getZone(ZONE_TYPE_IN_PLAY).byId(cardId);
                     // If not in play, check all players' active magi zones
                     if (!card) {
-                        for (var _m = 0, _o = state.players; _m < _o.length; _m++) {
-                            var player = _o[_m];
+                        for (var _q = 0, _r = state.players; _q < _r.length; _q++) {
+                            var player = _r[_q];
                             card = (_b = state.getZone(ZONE_TYPE_ACTIVE_MAGI, player)) === null || _b === void 0 ? void 0 : _b.byId(cardId);
                             if (card)
                                 break;
@@ -755,9 +824,15 @@ var Unmaker = /** @class */ (function () {
                     source.data.hasAttacked = unaction.sourceHasAttacked;
                     source.data.attacked = unaction.sourceAttacked;
                 }
-                var target = inPlay.byId(unaction.targetId);
-                if (target) {
-                    target.data.wasAttacked = unaction.targetWasAttacked;
+                var target_1;
+                if (unaction.targetMagi) {
+                    target_1 = state.getZone(ZONE_TYPE_ACTIVE_MAGI, unaction.targetPlayer).card;
+                }
+                else {
+                    target_1 = inPlay.byId(unaction.targetId);
+                }
+                if (target_1) {
+                    target_1.data.wasAttacked = unaction.targetWasAttacked;
                 }
                 break;
             }
@@ -779,14 +854,20 @@ var Unmaker = /** @class */ (function () {
             }
             case UNMAKE_EFFECT_TYPE_MOVE_ENERGY: {
                 var inPlay = state.getZone(ZONE_TYPE_IN_PLAY);
-                var source = inPlay.byId(unaction.sourceId);
+                var source = void 0;
+                if (unaction.sourceMagi) {
+                    source = state.getZone(ZONE_TYPE_ACTIVE_MAGI, unaction.sourcePlayer).card;
+                }
+                else {
+                    source = inPlay.byId(unaction.sourceId);
+                }
                 if (source) {
                     source.data.energy = unaction.sourceEnergy;
                     source.data.energyLostThisTurn = unaction.sourceEnergyLost;
                 }
-                var target = inPlay.byId(unaction.targetId);
-                if (target) {
-                    target.data.energy = unaction.targetEnergy;
+                var target_2 = inPlay.byId(unaction.targetId);
+                if (target_2) {
+                    target_2.data.energy = unaction.targetEnergy;
                 }
                 break;
             }

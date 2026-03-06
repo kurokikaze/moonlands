@@ -135,12 +135,13 @@ class Unmaker {
                                         id: magiTargets.id,
                                         owner: magiTargets.owner,
                                         energy: magiTargets.data.energy,
+                                        energyLost: magiTargets.data.energyLostThisTurn,
                                     }]
                             };
                         }
                         return {
                             type: types_1.UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
-                            magi: magiTargets.map(magi => ({ id: magi.id, owner: magi.owner, energy: magi.data.energy }))
+                            magi: magiTargets.map(magi => ({ id: magi.id, owner: magi.owner, energy: magi.data.energy, energyLost: magi.data.energyLostThisTurn }))
                         };
                     case index_1.EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES: {
                         const zoneChangingTarget = this.state.getMetaValue(action.target, action.generatedBy);
@@ -389,7 +390,11 @@ class Unmaker {
                         return {
                             type: types_1.UNMAKE_EFFECT_TYPE_MOVE_ENERGY,
                             sourceId: moveSource.id,
+                            sourceMagi: moveSource.card.type == index_1.TYPE_MAGI,
+                            sourcePlayer: moveSource.owner,
                             targetId: moveTarget.id,
+                            targetMagi: moveTarget.card.type == index_1.TYPE_MAGI,
+                            targetPlayer: moveTarget.owner,
                             sourceEnergy: moveSource.data.energy,
                             sourceEnergyLost: moveSource.data.energyLostThisTurn,
                             targetEnergy: moveTarget.data.energy,
@@ -558,6 +563,69 @@ class Unmaker {
                 state.unsetWinner();
                 break;
             }
+            /*case UNMAKE_POWER_PAY: {
+                var target;
+                if (unaction.magi) {
+                    var zone = state.getZone(ZONE_TYPE_ACTIVE_MAGI, unaction.player)
+                    target = zone.card
+                    if (target.id !== unaction.source) {
+                        console.error(`Unmaking power use but ID doesn't match type and player: ${target.id} != ${unaction.source}`)
+                    }
+                } else {
+                    target = state.getZone(ZONE_TYPE_IN_PLAY).byId(unaction.source)
+                }
+                if (target) {
+                    target.data.energy = target.data.energy + unaction.cost
+                    target.data.energyLostThisTurn = target.data.energyLostThisTurn - unaction.cost
+                }
+                break;
+            }*/
+            case types_1.UNMAKE_POWER_ACTIVATION: {
+                var target;
+                if (unaction.magi) {
+                    var zone = state.getZone(index_1.ZONE_TYPE_ACTIVE_MAGI, unaction.player);
+                    target = zone.card;
+                    if (target && target.id !== unaction.source) {
+                        console.error(`Unmaking power use but ID doesn't match type and player: ${target.id} != ${unaction.source}`);
+                    }
+                }
+                else {
+                    target = state.getZone(index_1.ZONE_TYPE_IN_PLAY).byId(unaction.source);
+                }
+                if (target) {
+                    target.data.actionsUsed = target.data.actionsUsed.filter(action => action != unaction.power);
+                    state.state.log.pop();
+                }
+                break;
+            }
+            case types_1.UNMAKE_POWER_USE: {
+                var target;
+                if (unaction.magi) {
+                    var zone = state.getZone(index_1.ZONE_TYPE_ACTIVE_MAGI, unaction.player);
+                    target = zone.card;
+                    if (target && target.id !== unaction.source) {
+                        console.error(`Unmaking power use but ID doesn't match type and player: ${target.id} != ${unaction.source}`);
+                    }
+                }
+                else {
+                    target = state.getZone(index_1.ZONE_TYPE_IN_PLAY).byId(unaction.source);
+                }
+                if (target) {
+                    target.data.actionsUsed = target.data.actionsUsed.filter(action => action != unaction.power);
+                }
+                break;
+            }
+            case types_1.UNMAKE_PROMPT_LEAVE: {
+                state.state.prompt = true;
+                state.state.promptType = unaction.promptType;
+                state.state.promptGeneratedBy = unaction.promptGeneratedBy;
+                state.state.promptPlayer = unaction.player;
+                state.state.promptMessage = unaction.promptMessage;
+                state.state.promptParams = unaction.promptParams;
+                state.state.savedActions = unaction.savedActions;
+                state.state.log.pop();
+                break;
+            }
             case types_1.UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
                 const inPlay = state.getZone(index_1.ZONE_TYPE_IN_PLAY);
                 unaction.creatures.forEach(({ id, energy, energyLostThisTurn }) => {
@@ -571,14 +639,15 @@ class Unmaker {
                 break;
             }
             case types_1.UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI: {
-                unaction.magi.forEach(({ id, owner, energy }) => {
+                for (const { id, owner, energy, energyLost } of unaction.magi) {
                     const activeMagi = state.getZone(index_1.ZONE_TYPE_ACTIVE_MAGI, owner);
                     let magiCard = activeMagi.byId(id);
                     if (magiCard) {
                         magiCard.data.energy = energy;
+                        magiCard.data.energyLostThisTurn = energyLost;
                     }
                     state.state.log.pop();
-                });
+                }
                 break;
             }
             case types_1.UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES: {
@@ -737,7 +806,13 @@ class Unmaker {
                     source.data.hasAttacked = unaction.sourceHasAttacked;
                     source.data.attacked = unaction.sourceAttacked;
                 }
-                const target = inPlay.byId(unaction.targetId);
+                let target;
+                if (unaction.targetMagi) {
+                    target = state.getZone(index_1.ZONE_TYPE_ACTIVE_MAGI, unaction.targetPlayer).card;
+                }
+                else {
+                    target = inPlay.byId(unaction.targetId);
+                }
                 if (target) {
                     target.data.wasAttacked = unaction.targetWasAttacked;
                 }
@@ -761,7 +836,13 @@ class Unmaker {
             }
             case types_1.UNMAKE_EFFECT_TYPE_MOVE_ENERGY: {
                 const inPlay = state.getZone(index_1.ZONE_TYPE_IN_PLAY);
-                const source = inPlay.byId(unaction.sourceId);
+                let source;
+                if (unaction.sourceMagi) {
+                    source = state.getZone(index_1.ZONE_TYPE_ACTIVE_MAGI, unaction.sourcePlayer).card;
+                }
+                else {
+                    source = inPlay.byId(unaction.sourceId);
+                }
                 if (source) {
                     source.data.energy = unaction.sourceEnergy;
                     source.data.energyLostThisTurn = unaction.sourceEnergyLost;

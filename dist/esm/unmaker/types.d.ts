@@ -51,6 +51,7 @@ export type UnActionDiscardEnergyFromMagi = {
         id: string;
         owner: number;
         energy: number;
+        energyLost: number;
     }[];
 };
 export type MetaDataEntry = {
@@ -146,9 +147,13 @@ export type UnActionDiscardCreatureFromPlay = {
 export type UnActionMoveEnergy = {
     type: typeof UNMAKE_EFFECT_TYPE_MOVE_ENERGY;
     sourceId: string;
+    sourceMagi: boolean;
+    sourcePlayer: number;
     sourceEnergy: number;
     sourceEnergyLost: number;
     targetId: string;
+    targetMagi: boolean;
+    targetPlayer: number;
     targetEnergy: number;
 };
 export type UnActionRemoveEnergyFromCreature = {
