@@ -39,7 +39,9 @@ export default class CardInGame {
     markAttackDone(): void;
     forbidAttacks(): void;
     markAttackReceived(): void;
+    unmarkAttackReceived(): void;
     markDefeatedCreature(): void;
+    unmarkDefeatedCreature(): void;
     wasActionUsed(actionName: string): boolean;
     setActionUsed(actionName: string): void;
     clearActionsUsed(): void;

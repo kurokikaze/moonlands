@@ -143,6 +143,7 @@ export type UnActionBeforeDamage = {
 export type UnActionCreatureDefeatsCreature = {
     type: typeof UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE
     sourceId: string
+    source: CardInGame
     sourceDefeatedCreature: boolean
 }
 
@@ -294,4 +295,8 @@ export type UnActionExecutePowerEffects = {
     power: string
 }
 
-export type UnAction = UnActionDiscardEnergyFromCreature | UnActionDiscardEnergyFromMagi | UnActionMoveCardBetweenZones | UnActionDieRolled | UnActionStartTurn | UnActionStartStep | UnActionRearrangeCardsOfZone | UnActionCreateContinuousEffect | UnActionAddEnergyToCreature | UnActionAddEnergyToMagi | UnActionStartOfTurn | UnActionBeforeDamage | UnActionCreatureDefeatsCreature | UnActionDiscardCreatureFromPlay | UnActionMoveEnergy | UnActionRemoveEnergyFromCreature | UnActionRemoveEnergyFromMagi | UnActionPromptEntered | UnActionFindStartingCards | UnActionReshuffleDiscard | UnActionAddDelayedTrigger | UnActionRearrangeEnergyOnCreatures | UnActionDistributeEnergyOnCreatures | UnActionForbidAttackToCreature | UnActionCalculate | UnActionSelect | UnActionProperty | UnActionPromptLeave | UnActionPower | UnActionPlayerWins | UnActionExecutePowerEffects
+export type UnActionLogEntry = {
+    type: typeof UNMAKE_LOG_ENTRY
+}
+
+export type UnAction = UnActionDiscardEnergyFromCreature | UnActionDiscardEnergyFromMagi | UnActionMoveCardBetweenZones | UnActionDieRolled | UnActionStartTurn | UnActionStartStep | UnActionRearrangeCardsOfZone | UnActionCreateContinuousEffect | UnActionAddEnergyToCreature | UnActionAddEnergyToMagi | UnActionStartOfTurn | UnActionBeforeDamage | UnActionCreatureDefeatsCreature | UnActionDiscardCreatureFromPlay | UnActionMoveEnergy | UnActionRemoveEnergyFromCreature | UnActionRemoveEnergyFromMagi | UnActionPromptEntered | UnActionFindStartingCards | UnActionReshuffleDiscard | UnActionAddDelayedTrigger | UnActionRearrangeEnergyOnCreatures | UnActionDistributeEnergyOnCreatures | UnActionForbidAttackToCreature | UnActionCalculate | UnActionSelect | UnActionProperty | UnActionPromptLeave | UnActionPower | UnActionPlayerWins | UnActionExecutePowerEffects | UnActionLogEntry

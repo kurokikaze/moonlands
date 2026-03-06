@@ -88,8 +88,16 @@ export default class CardInGame {
         this.data.wasAttacked = true;
     }
 
+    unmarkAttackReceived() {
+        this.data.wasAttacked = false;
+    }
+
     markDefeatedCreature() {
         this.data.defeatedCreature = true;
+    }
+
+    unmarkDefeatedCreature() {
+        this.data.defeatedCreature = false;
     }
 
     // In future, refer to actions by ID, not name

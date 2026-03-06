@@ -66,8 +66,28 @@ class Unmaker {
                     actions: [],
                 };
             }
+            case const_1.ACTION_PLAY: {
+                return {
+                    type: types_1.UNMAKE_LOG_ENTRY,
+                };
+            }
             case index_1.ACTION_EFFECT: {
                 switch (action.effectType) {
+                    case const_1.EFFECT_TYPE_DRAW: {
+                        return {
+                            type: types_1.UNMAKE_LOG_ENTRY,
+                        };
+                    }
+                    case const_1.EFFECT_TYPE_CREATURE_ATTACKS: {
+                        return {
+                            type: types_1.UNMAKE_LOG_ENTRY,
+                        };
+                    }
+                    case const_1.EFFECT_TYPE_MAGI_IS_DEFEATED: {
+                        return {
+                            type: types_1.UNMAKE_LOG_ENTRY,
+                        };
+                    }
                     case index_1.EFFECT_TYPE_BEFORE_DAMAGE: {
                         return {
                             type: types_1.UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE,
@@ -352,6 +372,7 @@ class Unmaker {
                         return {
                             type: types_1.UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
                             sourceId: source.id,
+                            source: source,
                             sourceDefeatedCreature: source.data.defeatedCreature,
                         };
                     }
@@ -660,6 +681,10 @@ class Unmaker {
                 };
                 break;
             }
+            case types_1.UNMAKE_LOG_ENTRY: {
+                state.state.log.pop();
+                break;
+            }
             case types_1.UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE: {
                 const zoneContent = state.getZone(unaction.zone, unaction.zoneOwner).cards;
                 const cardsToRearrange = {};
@@ -723,6 +748,10 @@ class Unmaker {
                 const source = inPlay.byId(unaction.sourceId);
                 if (source) {
                     source.data.defeatedCreature = unaction.sourceDefeatedCreature;
+                }
+                else {
+                    // Sometimes the status changes after the card is moved to the discard (on the original action card)
+                    unaction.source.data.defeatedCreature = unaction.sourceDefeatedCreature;
                 }
                 break;
             }

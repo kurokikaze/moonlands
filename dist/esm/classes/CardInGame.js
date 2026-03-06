@@ -62,8 +62,14 @@ var CardInGame = /** @class */ (function () {
     CardInGame.prototype.markAttackReceived = function () {
         this.data.wasAttacked = true;
     };
+    CardInGame.prototype.unmarkAttackReceived = function () {
+        this.data.wasAttacked = false;
+    };
     CardInGame.prototype.markDefeatedCreature = function () {
         this.data.defeatedCreature = true;
+    };
+    CardInGame.prototype.unmarkDefeatedCreature = function () {
+        this.data.defeatedCreature = false;
     };
     // In future, refer to actions by ID, not name
     CardInGame.prototype.wasActionUsed = function (actionName) {

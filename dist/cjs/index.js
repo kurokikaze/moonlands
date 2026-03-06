@@ -905,7 +905,7 @@ class State {
         if (spellMetaData && field in spellMetaData) {
             delete spellMetaData[field];
         }
-        if (Object.keys(spellMetaData).length === 0) {
+        if (spellId in this.state.spellMetaData && Object.keys(spellMetaData).length === 0) {
             delete this.state.spellMetaData[spellId];
         }
     }
