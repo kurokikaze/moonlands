@@ -31,12 +31,19 @@ export type HiddenConvertedCard = {
     data: {};
 }
 
+const FLAG_DEFEATED_CREATURE = 1;
+const FLAG_WAS_ATTACKED = 2;
+const FLAG_HAS_ATTACKED = 4;
+const FLAG_BURROWED = 8;
+const FLAG_ABLE_TO_ATTACK = 16;
+
 export default class CardInGame {
     private _card: Card;
     id: string;
     data: InGameData;
     owner: number;
     modifiedCard: Card;
+    flags: number = 0;
     constructor(card: Card, owner: number, seeded_nanoid: () => string = nanoid) {
         this._card = card;
         this.modifiedCard = clone(card)
@@ -76,6 +83,7 @@ export default class CardInGame {
     }
 
     markAttackDone() {
+        this.flags = this.flags | FLAG_HAS_ATTACKED;
         this.data.hasAttacked = true;
         this.data.attacked += 1;
     }
@@ -85,18 +93,22 @@ export default class CardInGame {
     }
 
     markAttackReceived() {
+        this.flags = this.flags | FLAG_WAS_ATTACKED;
         this.data.wasAttacked = true;
     }
 
     unmarkAttackReceived() {
+        this.flags = this.flags & ~FLAG_HAS_ATTACKED;
         this.data.wasAttacked = false;
     }
 
     markDefeatedCreature() {
+        this.flags = this.flags | FLAG_DEFEATED_CREATURE;
         this.data.defeatedCreature = true;
     }
 
     unmarkDefeatedCreature() {
+        this.flags = this.flags & ~FLAG_DEFEATED_CREATURE;
         this.data.defeatedCreature = false;
     }
 

@@ -31,6 +31,7 @@ export default class CardInGame {
     data: InGameData;
     owner: number;
     modifiedCard: Card;
+    flags: number;
     constructor(card: Card, owner: number, seeded_nanoid?: () => string);
     get card(): Card;
     addEnergy(amount?: number): this;

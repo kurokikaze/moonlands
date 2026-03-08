@@ -11,9 +11,15 @@ var __assign = (this && this.__assign) || function () {
 };
 import { nanoid } from 'nanoid';
 import clone from '../clone.js';
+var FLAG_DEFEATED_CREATURE = 1;
+var FLAG_WAS_ATTACKED = 2;
+var FLAG_HAS_ATTACKED = 4;
+var FLAG_BURROWED = 8;
+var FLAG_ABLE_TO_ATTACK = 16;
 var CardInGame = /** @class */ (function () {
     function CardInGame(card, owner, seeded_nanoid) {
         if (seeded_nanoid === void 0) { seeded_nanoid = nanoid; }
+        this.flags = 0;
         this._card = card;
         this.modifiedCard = clone(card);
         this.id = seeded_nanoid();
@@ -53,6 +59,7 @@ var CardInGame = /** @class */ (function () {
         this.data.energy = amount;
     };
     CardInGame.prototype.markAttackDone = function () {
+        this.flags = this.flags | FLAG_HAS_ATTACKED;
         this.data.hasAttacked = true;
         this.data.attacked += 1;
     };
@@ -60,15 +67,19 @@ var CardInGame = /** @class */ (function () {
         this.data.attacked = 100; // Hack, but will work for now
     };
     CardInGame.prototype.markAttackReceived = function () {
+        this.flags = this.flags | FLAG_WAS_ATTACKED;
         this.data.wasAttacked = true;
     };
     CardInGame.prototype.unmarkAttackReceived = function () {
+        this.flags = this.flags & ~FLAG_HAS_ATTACKED;
         this.data.wasAttacked = false;
     };
     CardInGame.prototype.markDefeatedCreature = function () {
+        this.flags = this.flags | FLAG_DEFEATED_CREATURE;
         this.data.defeatedCreature = true;
     };
     CardInGame.prototype.unmarkDefeatedCreature = function () {
+        this.flags = this.flags & ~FLAG_DEFEATED_CREATURE;
         this.data.defeatedCreature = false;
     };
     // In future, refer to actions by ID, not name

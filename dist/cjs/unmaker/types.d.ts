@@ -272,7 +272,6 @@ export type UnActionPower = {
 };
 export type UnActionPlayerWins = {
     type: typeof UNMAKE_EFFECT_TYPE_PLAYER_WINS;
-    actions: any[];
 };
 export type UnActionExecutePowerEffects = {
     type: typeof UNMAKE_POWER_USE;

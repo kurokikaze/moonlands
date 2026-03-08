@@ -138,8 +138,144 @@ expect.extend({
 	}
 })  
 
+describe('Unmake state action (TypedArray)', () => {
+    it('Simple power with prompting and no cost', () => {
+        const ACTIVE_PLAYER = 0;
+        const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
+        const quorPup = new CardInGame(byName('Quor Pup'), ACTIVE_PLAYER);
+
+        const gameState = new moonlands.State({
+            zones: [
+                new Zone('Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+                new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit, quorPup]),
+            ],
+            step: STEP_PRS_SECOND,
+            activePlayer: ACTIVE_PLAYER,
+        });
+
+        const powerAction = {
+            type: moonlands.ACTION_POWER,
+            source: arbolit,
+            power: arbolit.card.data.powers[0],
+            player: ACTIVE_PLAYER,
+        };
+
+        const targetingAction = {
+            type: moonlands.ACTION_RESOLVE_PROMPT,
+            promptType: moonlands.PROMPT_TYPE_SINGLE_CREATURE,
+            target: quorPup,
+            generatedBy: arbolit.id,
+        };
+
+        const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
+		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData)
+
+        const unmaker = new Unmaker(gameState);
+        unmaker.setCheckpoint()
+        gameState.update(powerAction);
+
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Two creatures in play');
+        expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(0, 'No creatures in discard');
+        expect(gameState.state.prompt).toEqual(true, 'Waiting for prompt');
+
+        gameState.update(targetingAction);
+
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(1, 'One creature in play');
+        expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(1, 'One creature in discard');
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.card.name).toEqual('Quor Pup', 'Creature is Quor Pup');
+        expect(gameState.getZone(ZONE_TYPE_IN_PLAY).card.data.energy).toEqual(2, 'Quor Pup has 2 energy');
+        gameState.closeStreams();
+
+        unmaker.revertToCheckpoint(gameState)
+
+        expect(gameState.winner).toBe(false)
+		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+    });
+
+    it('Creature defeats creature action', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 2;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const sinder = new CardInGame(byName('Sinder'), ACTIVE_PLAYER);
+
+		// Create attacker creature
+		const fireChogo = new CardInGame(byName('Fire Chogo'), ACTIVE_PLAYER).addEnergy(2);
+		fireChogo.data.controller = ACTIVE_PLAYER;
+		// Initial state: has not defeated a creature yet
+		fireChogo.data.defeatedCreature = false;
+
+		// Create defeated creature (0 energy)
+		const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(0);
+		arbolit.data.controller = NON_ACTIVE_PLAYER;
+
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(10);
+		const tryn = new CardInGame(byName('Tryn'), NON_ACTIVE_PLAYER);
+
+		const zones = [
+			new Zone('Active player current magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('Active player Magi pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER).add([sinder]),
+			new Zone('Active player Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('Active player hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('Active player deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+			new Zone('Active player discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP current magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('NAP Magi pile', ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER).add([tryn]),
+			new Zone('NAP Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('NAP hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('NAP deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('NAP discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY).add([fireChogo, arbolit]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_ATTACK,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.turn = 1;
+
+		// Verify initial flag
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id).data.defeatedCreature).toBe(false)
+
+		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
+		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
+		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData)
+
+		// Apply CREATURE_DEFEATS_CREATURE effect directly
+		const effect = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: moonlands.EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
+			source: fireChogo,
+			target: arbolit,
+			attack: true,
+			asAttacker: true,
+			player: ACTIVE_PLAYER,
+			generatedBy: fireChogo.id,
+		}
+
+		gameState.update(effect);
+
+		// Verify flag was changed by CREATURE_DEFEATS_CREATURE
+		const fireChogoAfter = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)
+		expect(fireChogoAfter.data.defeatedCreature).toBe(true)
+
+		// Apply un-actions
+		unmaker.revertToCheckpoint(gameState);
+
+		// Verify flag was restored
+		const fireChogoRestored = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)
+		expect(fireChogoRestored.data.defeatedCreature).toBe(false)
+		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData))
+	})
+})
+
 describe('Unmaking state action', () => {
-    it.only('Winning action', () => {
+    it('Winning action', () => {
         const ACTIVE_PLAYER = 0;
         const NON_ACTIVE_PLAYER = 2;
 
@@ -495,7 +631,7 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Verify action was captured
-		expect(unmaker.unActions).toHaveLength(1)
+		expect(unmaker.unActions).toHaveLength(3)
 		expect(unmaker.unActions[0].type).toBe(UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES)
 		expect(unmaker.unActions[0].card.id).toBe(quorOne.id)
 		expect(unmaker.unActions[0].bottom).toBe(true)

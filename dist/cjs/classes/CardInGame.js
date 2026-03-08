@@ -5,12 +5,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const nanoid_1 = require("nanoid");
 const clone_1 = __importDefault(require("../clone"));
+const FLAG_DEFEATED_CREATURE = 1;
+const FLAG_WAS_ATTACKED = 2;
+const FLAG_HAS_ATTACKED = 4;
+const FLAG_BURROWED = 8;
+const FLAG_ABLE_TO_ATTACK = 16;
 class CardInGame {
     _card;
     id;
     data;
     owner;
     modifiedCard;
+    flags = 0;
     constructor(card, owner, seeded_nanoid = nanoid_1.nanoid) {
         this._card = card;
         this.modifiedCard = (0, clone_1.default)(card);
@@ -45,6 +51,7 @@ class CardInGame {
         this.data.energy = amount;
     }
     markAttackDone() {
+        this.flags = this.flags | FLAG_HAS_ATTACKED;
         this.data.hasAttacked = true;
         this.data.attacked += 1;
     }
@@ -52,15 +59,19 @@ class CardInGame {
         this.data.attacked = 100; // Hack, but will work for now
     }
     markAttackReceived() {
+        this.flags = this.flags | FLAG_WAS_ATTACKED;
         this.data.wasAttacked = true;
     }
     unmarkAttackReceived() {
+        this.flags = this.flags & ~FLAG_HAS_ATTACKED;
         this.data.wasAttacked = false;
     }
     markDefeatedCreature() {
+        this.flags = this.flags | FLAG_DEFEATED_CREATURE;
         this.data.defeatedCreature = true;
     }
     unmarkDefeatedCreature() {
+        this.flags = this.flags & ~FLAG_DEFEATED_CREATURE;
         this.data.defeatedCreature = false;
     }
     // In future, refer to actions by ID, not name

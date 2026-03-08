@@ -568,9 +568,17 @@ class State {
                             const target = this.getMetaValue(action.target, action.generatedBy);
                             if (Array.isArray(target)) {
                                 if (target.length) {
+                                    for (let i = 0; i < target.length - 1; i++) {
+                                        const tgt = target[i];
+                                        this.state.log.push({
+                                            type: const_1.LOG_ENTRY_CREATURE_ENERGY_GAIN,
+                                            card: tgt.card.name,
+                                            amount: this.getMetaValue(action.amount, action.generatedBy),
+                                        });
+                                    }
                                     newLogEntry = {
                                         type: const_1.LOG_ENTRY_CREATURE_ENERGY_GAIN,
-                                        card: target[0].card.name,
+                                        card: target[target.length - 1].card.name,
                                         amount: this.getMetaValue(action.amount, action.generatedBy),
                                     };
                                 }
@@ -749,10 +757,7 @@ class State {
             // console.dir(e);
         }
         if (newLogEntry) {
-            this.state.log = [
-                ...this.state.log,
-                newLogEntry,
-            ];
+            this.state.log.push(newLogEntry);
         }
     }
     createZones() {

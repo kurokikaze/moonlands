@@ -437,9 +437,17 @@ var State = /** @class */ (function () {
                             var target = this.getMetaValue(action.target, action.generatedBy);
                             if (Array.isArray(target)) {
                                 if (target.length) {
+                                    for (var i = 0; i < target.length - 1; i++) {
+                                        var tgt = target[i];
+                                        this.state.log.push({
+                                            type: LOG_ENTRY_CREATURE_ENERGY_GAIN,
+                                            card: tgt.card.name,
+                                            amount: this.getMetaValue(action.amount, action.generatedBy),
+                                        });
+                                    }
                                     newLogEntry = {
                                         type: LOG_ENTRY_CREATURE_ENERGY_GAIN,
-                                        card: target[0].card.name,
+                                        card: target[target.length - 1].card.name,
                                         amount: this.getMetaValue(action.amount, action.generatedBy),
                                     };
                                 }
@@ -618,9 +626,7 @@ var State = /** @class */ (function () {
             // console.dir(e);
         }
         if (newLogEntry) {
-            this.state.log = __spreadArray(__spreadArray([], this.state.log, true), [
-                newLogEntry,
-            ], false);
+            this.state.log.push(newLogEntry);
         }
     };
     State.prototype.createZones = function () {
