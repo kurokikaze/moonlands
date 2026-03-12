@@ -273,11 +273,11 @@ var Unmaker = /** @class */ (function () {
                         var creatures = this.state.getMetaValue(action.target, action.generatedBy);
                         var creatureArray = [];
                         if (creatures instanceof CardInGame) {
-                            creatureArray = [{
-                                    id: creatures.id,
-                                    energy: creatures.data.energy,
-                                    energyLostThisTurn: creatures.data.energyLostThisTurn
-                                }];
+                            creatureArray.push({
+                                id: creatures.id,
+                                energy: creatures.data.energy,
+                                energyLostThisTurn: creatures.data.energyLostThisTurn
+                            });
                         }
                         else {
                             for (var i = 0; i < creatures.length; i++) {
@@ -299,12 +299,12 @@ var Unmaker = /** @class */ (function () {
                         var magiTargets = this.state.getMetaValue(action.target, action.generatedBy);
                         var magiArray = [];
                         if (magiTargets instanceof CardInGame) {
-                            magiArray = [{
-                                    id: magiTargets.id,
-                                    owner: magiTargets.owner,
-                                    energy: magiTargets.data.energy,
-                                    energyLost: magiTargets.data.energyLostThisTurn,
-                                }];
+                            magiArray.push({
+                                id: magiTargets.id,
+                                owner: magiTargets.owner,
+                                energy: magiTargets.data.energy,
+                                energyLost: magiTargets.data.energyLostThisTurn,
+                            });
                         }
                         else {
                             for (var i = 0; i < magiTargets.length; i++) {
@@ -1178,7 +1178,13 @@ var Unmaker = /** @class */ (function () {
                     source.data.energy = sourceEnergy;
                     source.data.energyLostThisTurn = sourceEnergyLost;
                 }
-                var target_2 = inPlay.byId(targetId);
+                var target_2;
+                if (targetIsMagi) {
+                    target_2;
+                }
+                else {
+                    target_2 = inPlay.byId(targetId);
+                }
                 if (target_2) {
                     target_2.data.energy = targetEnergy;
                 }
