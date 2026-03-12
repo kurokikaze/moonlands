@@ -4,7 +4,7 @@ import { UnAction } from './types.js';
 export declare class Unmaker {
     private state;
     unActions: UnAction[];
-    dataBlob: Uint32Array<ArrayBuffer>;
+    dataBlob: Uint32Array;
     pointer: number;
     numberOfUnActions: number;
     private strings;
