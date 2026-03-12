@@ -8,7 +8,7 @@ import {
     PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
     PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
     PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
-    PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
+    PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
     PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
     PROMPT_TYPE_MAY_ABILITY,
     PROMPT_TYPE_NUMBER,
@@ -161,7 +161,7 @@ export type RearrangeCardsOfZonePromptParams = {
 }
 
 export type DistributeCardsInZonesPromptParams = {
-    promptType: typeof PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES
+    promptType: typeof PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES
     promptParams: {
         sourceZone: ZoneType | string
         sourceZoneOwner: ZoneType | string

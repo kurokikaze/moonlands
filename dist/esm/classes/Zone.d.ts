@@ -22,7 +22,7 @@ export default class Zone {
     removeById(id: string): void;
     shuffle(): void;
     getCardsByRestriction(restrictions: RestrictionObjectType[], state: State): CardInGame[];
-    _shuffle<T>(array: T[]): T[];
+    private _shuffle;
     empty(): void;
     serialize<T>(hidden: T): T extends true ? HiddenConvertedCard[] : ConvertedCard[];
     serialize(): ConvertedCard[];

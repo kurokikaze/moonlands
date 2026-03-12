@@ -25,12 +25,48 @@ import { UNMAKE_CALCULATION, UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER, UNMAKE_EFFE
 var FLAG_WAS_ATTACKED = 1;
 var FLAG_HAS_ATTACKED = 2;
 var FLAG_IS_MAGI = 4;
+var actionNames = {
+    1: 'UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE',
+    2: 'UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI',
+    3: 'UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES',
+    4: 'UNMAKE_RESTORE_VALUE',
+    7: 'UNMAKE_EFFECT_TYPE_DIE_ROLLED',
+    8: 'UNMAKE_EFFECT_TYPE_START_TURN',
+    9: 'UNMAKE_EFFECT_TYPE_START_STEP',
+    10: 'UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE',
+    11: 'UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT',
+    12: 'UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE',
+    13: 'UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI',
+    14: 'UNMAKE_EFFECT_TYPE_START_OF_TURN',
+    15: 'UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE',
+    16: 'UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE',
+    17: 'UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY',
+    18: 'UNMAKE_EFFECT_TYPE_MOVE_ENERGY',
+    19: 'UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE',
+    20: 'UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI',
+    21: 'UNMAKE_EFFECT_TYPE_PROMPT_ENTERED',
+    22: 'UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS',
+    23: 'UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD',
+    24: 'UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER',
+    25: 'UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES',
+    26: 'UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES',
+    27: 'UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE',
+    28: 'UNMAKE_CALCULATION',
+    29: 'UNMAKE_SELECT',
+    30: 'UNMAKE_PROPERTY',
+    31: 'UNMAKE_LOG_ENTRY',
+    32: 'UNMAKE_PROMPT_LEAVE',
+    33: 'UNMAKE_POWER_USE',
+    34: 'UNMAKE_POWER_PAY',
+    36: 'UNMAKE_POWER_ACTIVATION',
+    37: 'UNMAKE_EFFECT_TYPE_PLAYER_WINS'
+};
 var Unmaker = /** @class */ (function () {
     function Unmaker(state) {
         var _this = this;
         this.state = state;
         this.unActions = [];
-        this.dataBlob = new Uint32Array(500);
+        this.dataBlob = new Uint16Array(300);
         this.pointer = 0;
         this.numberOfUnActions = 0;
         this.strings = [];
@@ -43,43 +79,52 @@ var Unmaker = /** @class */ (function () {
             }
         }, true);
     }
-    Unmaker.prototype.setCheckpointOld = function () {
-        this.historyStack.push(this.unActions.length);
-    };
+    /*public setCheckpointOld() {
+        this.historyStack.push(this.unActions.length)
+    }*/
     Unmaker.prototype.setCheckpoint = function () {
         this.historyStack.push(this.numberOfUnActions);
     };
-    Unmaker.prototype.revertToCheckpointOld = function (state) {
+    Unmaker.prototype.outputDebug = function () {
+        console.log("Objects storage length: ".concat(this.objects.length));
+        console.log("Strings storage length: ".concat(this.strings.length));
+    };
+    /*public revertToCheckpointOld(state: State) {
         if (this.historyStack.length) {
-            var target = this.historyStack.pop();
+            const target = this.historyStack.pop()
             if (typeof target !== 'number' || target > this.unActions.length) {
-                console.error("Target: ".concat(target));
-                console.error("Actions: ".concat(this.unActions.length));
-                throw new Error();
+                console.error(`Target: ${target}`)
+                console.error(`Actions: ${this.unActions.length}`)
+                throw new Error()
             }
-            var numberOfSteps = this.unActions.length - target;
-            for (var i = 0; i < numberOfSteps; i++) {
-                this.applyUnAction(state, this.unActions.pop());
+
+            const numberOfSteps = this.unActions.length - target;
+            for (let i = 0; i < numberOfSteps; i++) {
+                this.applyUnAction(state, this.unActions.pop()!)
             }
         }
-    };
-    Unmaker.prototype.revertToCheckpoint = function (state) {
+    }*/
+    Unmaker.prototype.revertToCheckpoint = function () {
         if (this.historyStack.length) {
             var target = this.historyStack.pop();
             if (typeof target !== 'number' || target > this.numberOfUnActions) {
                 console.error("Target: ".concat(target));
-                console.error("Actions: ".concat(this.unActions.length));
+                console.error("Actions: ".concat(this.numberOfUnActions));
                 throw new Error();
             }
-            var numberOfSteps = this.unActions.length - target;
+            var numberOfSteps = this.numberOfUnActions - target;
             for (var i = 0; i < numberOfSteps; i++) {
-                this.readAndApplyUnAction(state);
+                this.readAndApplyUnAction(this.state);
             }
         }
     };
     Unmaker.prototype.saveNumber = function (n) {
         this.dataBlob[this.pointer] = n;
         this.pointer++;
+    };
+    Unmaker.prototype.saveActionType = function (t) {
+        this.saveNumber(t);
+        this.numberOfUnActions++;
     };
     Unmaker.prototype.readNumber = function () {
         this.pointer--;
@@ -93,7 +138,12 @@ var Unmaker = /** @class */ (function () {
     Unmaker.prototype.readString = function () {
         var strPointer = this.readNumber();
         var str = this.strings[strPointer];
-        delete this.strings[strPointer];
+        if (strPointer == this.strings.length - 1) {
+            this.strings.length--;
+        }
+        else {
+            delete this.strings[strPointer];
+        }
         return str;
     };
     Unmaker.prototype.saveObject = function (obj) {
@@ -104,7 +154,12 @@ var Unmaker = /** @class */ (function () {
     Unmaker.prototype.readObject = function () {
         var objPointer = this.readNumber();
         var obj = this.objects[objPointer];
-        delete this.objects[objPointer];
+        if (objPointer == this.objects.length - 1) {
+            this.objects.length--;
+        }
+        else {
+            delete this.objects[objPointer];
+        }
         return obj;
     };
     Unmaker.prototype.generateUnAction = function (action) {
@@ -117,8 +172,7 @@ var Unmaker = /** @class */ (function () {
                 this.saveString(this.state.state.promptMessage);
                 this.saveString(this.state.state.promptGeneratedBy);
                 this.saveString(this.state.state.promptType);
-                this.saveNumber(UNMAKE_PROMPT_LEAVE);
-                this.numberOfUnActions++;
+                this.saveActionType(UNMAKE_PROMPT_LEAVE);
                 return {
                     type: UNMAKE_PROMPT_LEAVE,
                     promptType: this.state.state.promptType,
@@ -134,8 +188,7 @@ var Unmaker = /** @class */ (function () {
                 this.saveString(action.source.id);
                 this.saveNumber(action.source.owner);
                 this.saveNumber(action.source.card.type == TYPE_MAGI ? 1 : 0);
-                this.saveNumber(UNMAKE_POWER_ACTIVATION);
-                this.numberOfUnActions++;
+                this.saveActionType(UNMAKE_POWER_ACTIVATION);
                 return {
                     type: UNMAKE_POWER_ACTIVATION,
                     magi: action.source.card.type == TYPE_MAGI,
@@ -145,15 +198,13 @@ var Unmaker = /** @class */ (function () {
                 };
             }
             case ACTION_PLAYER_WINS: {
-                this.saveNumber(UNMAKE_EFFECT_TYPE_PLAYER_WINS);
-                this.numberOfUnActions++;
+                this.saveActionType(UNMAKE_EFFECT_TYPE_PLAYER_WINS);
                 return {
                     type: UNMAKE_EFFECT_TYPE_PLAYER_WINS,
                 };
             }
             case ACTION_PLAY: {
-                this.saveNumber(UNMAKE_LOG_ENTRY);
-                this.numberOfUnActions++;
+                this.saveActionType(UNMAKE_LOG_ENTRY);
                 return {
                     type: UNMAKE_LOG_ENTRY,
                 };
@@ -161,22 +212,19 @@ var Unmaker = /** @class */ (function () {
             case ACTION_EFFECT: {
                 switch (action.effectType) {
                     case EFFECT_TYPE_DRAW: {
-                        this.saveNumber(UNMAKE_LOG_ENTRY);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_LOG_ENTRY);
                         return {
                             type: UNMAKE_LOG_ENTRY,
                         };
                     }
                     case EFFECT_TYPE_CREATURE_ATTACKS: {
-                        this.saveNumber(UNMAKE_LOG_ENTRY);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_LOG_ENTRY);
                         return {
                             type: UNMAKE_LOG_ENTRY,
                         };
                     }
                     case EFFECT_TYPE_MAGI_IS_DEFEATED: {
-                        this.saveNumber(UNMAKE_LOG_ENTRY);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_LOG_ENTRY);
                         return {
                             type: UNMAKE_LOG_ENTRY,
                         };
@@ -194,8 +242,7 @@ var Unmaker = /** @class */ (function () {
                         this.saveNumber(action.target.owner);
                         this.saveString(action.target.id);
                         this.saveString(action.source.id);
-                        this.saveNumber(UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE);
                         return {
                             type: UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE,
                             sourceId: action.source.id,
@@ -213,8 +260,7 @@ var Unmaker = /** @class */ (function () {
                         this.saveString(source.id);
                         this.saveNumber(source.owner);
                         this.saveNumber(source.card.type == TYPE_MAGI ? 1 : 0);
-                        this.saveNumber(UNMAKE_POWER_USE);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_POWER_USE);
                         return {
                             type: UNMAKE_POWER_USE,
                             magi: source.card.type == TYPE_MAGI,
@@ -244,8 +290,7 @@ var Unmaker = /** @class */ (function () {
                             }
                         }
                         this.saveObject(creatureArray);
-                        this.saveNumber(UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE);
                         return {
                             type: UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
                             creatures: creatureArray
@@ -273,8 +318,7 @@ var Unmaker = /** @class */ (function () {
                             }
                         }
                         this.saveObject(magiArray);
-                        this.saveNumber(UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI);
                         return {
                             type: UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
                             magi: magiArray
@@ -310,8 +354,7 @@ var Unmaker = /** @class */ (function () {
                             this.saveNumber(zoneChangingCard_1.owner);
                             this.saveString(sourceZoneType);
                             this.saveObject(zoneChangingCard_1);
-                            this.saveNumber(UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES);
-                            this.numberOfUnActions++;
+                            this.saveActionType(UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES);
                             return {
                                 type: UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
                                 card: zoneChangingCard_1,
@@ -329,8 +372,7 @@ var Unmaker = /** @class */ (function () {
                             var currentMeta = this.state.getSpellMetadata(action.generatedBy);
                             this.saveNumber(currentMeta === null || currentMeta === void 0 ? void 0 : currentMeta.roll_result);
                             this.saveString(action.generatedBy);
-                            this.saveNumber(UNMAKE_EFFECT_TYPE_DIE_ROLLED);
-                            this.numberOfUnActions++;
+                            this.saveActionType(UNMAKE_EFFECT_TYPE_DIE_ROLLED);
                             return {
                                 type: UNMAKE_EFFECT_TYPE_DIE_ROLLED,
                                 spellId: action.generatedBy,
@@ -390,8 +432,7 @@ var Unmaker = /** @class */ (function () {
                         this.saveNumber(this.state.state.step);
                         this.saveNumber(this.state.state.activePlayer);
                         this.saveNumber(this.state.turn);
-                        this.saveNumber(UNMAKE_EFFECT_TYPE_START_TURN);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_START_TURN);
                         return {
                             type: UNMAKE_EFFECT_TYPE_START_TURN,
                             previousTurn: this.state.turn,
@@ -450,8 +491,7 @@ var Unmaker = /** @class */ (function () {
                         }
                         this.saveObject(cardFlags);
                         this.saveNumber(player_2);
-                        this.saveNumber(UNMAKE_EFFECT_TYPE_START_OF_TURN);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_START_OF_TURN);
                         return {
                             type: UNMAKE_EFFECT_TYPE_START_OF_TURN,
                             player: player_2,
@@ -460,8 +500,7 @@ var Unmaker = /** @class */ (function () {
                     }
                     case EFFECT_TYPE_START_STEP: {
                         this.saveNumber(this.state.state.step);
-                        this.saveNumber(UNMAKE_EFFECT_TYPE_START_STEP);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_START_STEP);
                         return {
                             type: UNMAKE_EFFECT_TYPE_START_STEP,
                             previousStep: this.state.state.step,
@@ -480,8 +519,7 @@ var Unmaker = /** @class */ (function () {
                         this.saveObject(previousOrder);
                         this.saveNumber(zoneOwner);
                         this.saveString(zone);
-                        this.saveNumber(UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE);
                         return {
                             type: UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE,
                             zone: zone,
@@ -491,8 +529,7 @@ var Unmaker = /** @class */ (function () {
                     }
                     case EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT: {
                         this.saveNumber(this.state.state.continuousEffects.length);
-                        this.saveNumber(UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT);
                         return {
                             type: UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
                             previousLength: this.state.state.continuousEffects.length,
@@ -517,8 +554,7 @@ var Unmaker = /** @class */ (function () {
                             }
                         }
                         this.saveObject(creaturesArray);
-                        this.saveNumber(UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE);
                         return {
                             type: UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
                             creatures: creaturesArray
@@ -545,8 +581,7 @@ var Unmaker = /** @class */ (function () {
                             }
                         }
                         this.saveObject(magiArray_1);
-                        this.saveNumber(UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI);
                         return {
                             type: UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
                             magi: magiArray_1
@@ -557,8 +592,7 @@ var Unmaker = /** @class */ (function () {
                         this.saveNumber(source.data.defeatedCreature ? 1 : 0);
                         this.saveObject(source);
                         this.saveString(source.id);
-                        this.saveNumber(UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE);
                         return {
                             type: UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
                             sourceId: source.id,
@@ -567,8 +601,7 @@ var Unmaker = /** @class */ (function () {
                         };
                     }
                     case EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY: {
-                        this.saveNumber(UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY);
                         return {
                             type: UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY
                         };
@@ -587,7 +620,7 @@ var Unmaker = /** @class */ (function () {
                         this.saveNumber(moveSource.data.energy);
                         this.saveNumber(moveSource.data.energyLostThisTurn);
                         this.saveNumber(moveTarget.data.energy);
-                        this.saveNumber(UNMAKE_EFFECT_TYPE_MOVE_ENERGY);
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_MOVE_ENERGY);
                         return {
                             type: UNMAKE_EFFECT_TYPE_MOVE_ENERGY,
                             sourceId: moveSource.id,
@@ -606,8 +639,7 @@ var Unmaker = /** @class */ (function () {
                         this.saveNumber(creature.data.energyLostThisTurn);
                         this.saveNumber(creature.data.energy);
                         this.saveString(creature.id);
-                        this.saveNumber(UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE);
                         return {
                             type: UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
                             creatureId: creature.id,
@@ -621,8 +653,7 @@ var Unmaker = /** @class */ (function () {
                         this.saveNumber(magi.data.energy);
                         this.saveNumber(magi.owner);
                         this.saveString(magi.id);
-                        this.saveNumber(UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI);
                         return {
                             type: UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
                             magiId: magi.id,
@@ -639,8 +670,7 @@ var Unmaker = /** @class */ (function () {
                         this.saveNumber(this.state.state.promptPlayer);
                         this.saveString(this.state.state.promptMessage);
                         this.saveNumber(this.state.state.prompt ? 1 : 0);
-                        this.saveNumber(UNMAKE_EFFECT_TYPE_PROMPT_ENTERED);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_PROMPT_ENTERED);
                         return {
                             type: UNMAKE_EFFECT_TYPE_PROMPT_ENTERED,
                             previousPrompt: this.state.state.prompt,
@@ -656,8 +686,7 @@ var Unmaker = /** @class */ (function () {
                         var currentMeta = this.state.getSpellMetadata(action.generatedBy);
                         this.saveObject(currentMeta === null || currentMeta === void 0 ? void 0 : currentMeta.foundCards);
                         this.saveString(action.generatedBy);
-                        this.saveNumber(UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS);
                         return {
                             type: UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS,
                             spellId: action.generatedBy,
@@ -671,7 +700,7 @@ var Unmaker = /** @class */ (function () {
                         this.saveObject(__spreadArray([], deck.cards, true));
                         this.saveObject(__spreadArray([], discard.cards, true));
                         this.saveNumber(player);
-                        this.saveNumber(UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD);
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD);
                         return {
                             type: UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD,
                             player: player,
@@ -681,8 +710,7 @@ var Unmaker = /** @class */ (function () {
                     }
                     case EFFECT_TYPE_ADD_DELAYED_TRIGGER: {
                         this.saveNumber(this.state.state.delayedTriggers.length);
-                        this.saveNumber(UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER);
                         return {
                             type: UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER,
                             previousLength: this.state.state.delayedTriggers.length,
@@ -704,8 +732,7 @@ var Unmaker = /** @class */ (function () {
                             }
                         }
                         this.saveObject(creatures_6);
-                        this.saveNumber(UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES);
                         return {
                             type: UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
                             creatures: creatures_6,
@@ -727,8 +754,7 @@ var Unmaker = /** @class */ (function () {
                             }
                         }
                         this.saveObject(creatures_7);
-                        this.saveNumber(UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES);
                         return {
                             type: UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
                             creatures: creatures_7,
@@ -753,8 +779,7 @@ var Unmaker = /** @class */ (function () {
                             }
                         }
                         this.saveObject(creatures_8);
-                        this.saveNumber(UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE);
-                        this.numberOfUnActions++;
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE);
                         return {
                             type: UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
                             creatures: creatures_8,
@@ -771,8 +796,7 @@ var Unmaker = /** @class */ (function () {
                 this.saveNumber(wasEmpty ? 1 : 0);
                 this.saveString(action.variable || '');
                 this.saveString(generatedBy);
-                this.saveNumber(UNMAKE_CALCULATION);
-                this.numberOfUnActions++;
+                this.saveActionType(UNMAKE_CALCULATION);
                 return {
                     type: UNMAKE_CALCULATION,
                     generatedBy: generatedBy,
@@ -789,8 +813,7 @@ var Unmaker = /** @class */ (function () {
                 this.saveNumber(wasEmpty ? 1 : 0);
                 this.saveString(action.variable || '');
                 this.saveString(generatedBy);
-                this.saveNumber(UNMAKE_SELECT);
-                this.numberOfUnActions++;
+                this.saveActionType(UNMAKE_SELECT);
                 return {
                     type: UNMAKE_SELECT,
                     generatedBy: generatedBy,
@@ -807,8 +830,7 @@ var Unmaker = /** @class */ (function () {
                 this.saveNumber(wasEmpty ? 1 : 0);
                 this.saveString(action.variable || '');
                 this.saveString(generatedBy);
-                this.saveNumber(UNMAKE_PROPERTY);
-                this.numberOfUnActions++;
+                this.saveActionType(UNMAKE_PROPERTY);
                 return {
                     type: UNMAKE_PROPERTY,
                     generatedBy: generatedBy,
@@ -1048,6 +1070,7 @@ var Unmaker = /** @class */ (function () {
                 // Restore to the previous order
                 var newZoneContent = __spreadArray(__spreadArray([], previousOrder.map(function (id) { return cardsToRearrange_1[id]; }), true), zoneContent.slice(previousOrder.length), true);
                 state.getZone(zone_1, owner).cards = newZoneContent;
+                break;
             }
             case UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE: {
                 var sourceId = this.readString();
@@ -1074,8 +1097,8 @@ var Unmaker = /** @class */ (function () {
                 magiArray.forEach(function (_a) {
                     var id = _a.id, owner = _a.owner, energy = _a.energy;
                     var activeMagi = state.getZone(ZONE_TYPE_ACTIVE_MAGI, owner);
-                    var magiCard = activeMagi.card;
-                    if (magiCard && magiCard.id == id) {
+                    var magiCard = activeMagi.byId(id);
+                    if (magiCard) {
                         magiCard.data.energy = energy;
                     }
                     state.state.log.length--;
@@ -1301,23 +1324,6 @@ var Unmaker = /** @class */ (function () {
                 state.unsetWinner();
                 break;
             }
-            /*case UNMAKE_POWER_PAY: {
-                var target;
-                if (unaction.magi) {
-                    var zone = state.getZone(ZONE_TYPE_ACTIVE_MAGI, unaction.player)
-                    target = zone.card
-                    if (target.id !== unaction.source) {
-                        console.error(`Unmaking power use but ID doesn't match type and player: ${target.id} != ${unaction.source}`)
-                    }
-                } else {
-                    target = state.getZone(ZONE_TYPE_IN_PLAY).byId(unaction.source)
-                }
-                if (target) {
-                    target.data.energy = target.data.energy + unaction.cost
-                    target.data.energyLostThisTurn = target.data.energyLostThisTurn - unaction.cost
-                }
-                break;
-            }*/
             case UNMAKE_POWER_ACTIVATION: {
                 var target;
                 if (unaction.magi) {

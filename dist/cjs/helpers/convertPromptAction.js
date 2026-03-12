@@ -139,7 +139,7 @@ function convertPromptActionToEffect(action, state) {
             };
             return effect;
         }
-        case const_1.PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES: {
+        case const_1.PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES: {
             const effect = {
                 ...action,
                 type: const_1.ACTION_EFFECT,

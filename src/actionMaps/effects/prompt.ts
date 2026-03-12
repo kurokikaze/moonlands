@@ -8,7 +8,7 @@ import {
   PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
   PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
   PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
-  PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
+  PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
   PROMPT_TYPE_MAY_ABILITY,
   PROMPT_TYPE_NUMBER,
   PROMPT_TYPE_PAYMENT_SOURCE,
@@ -211,7 +211,7 @@ export const applyPromptEnteredEffect: ActionTransformer<typeof EFFECT_TYPE_PROM
       }
       break;
     }
-    case PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES: {
+    case PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES: {
       // console.dir(this.getSpellMetadata(action.generatedBy))
       const sourceZone = this.getMetaValue(action.promptParams.sourceZone, action.generatedBy);
       const sourceZoneOwner = this.getMetaValue(action.promptParams.sourceZoneOwner, action.generatedBy);

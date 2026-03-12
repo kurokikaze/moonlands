@@ -240,7 +240,7 @@ import {
 	EFFECT_TYPE_PLAY_FINISHED,
 	EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED,
 	EFFECT_TYPE_POWER_FINISHED,
-	PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
+	PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
 	EFFECT_TYPE_PROMPT_ENTERED,
 } from './const';
 
@@ -421,7 +421,7 @@ export const DEFAULT_PROMPT_VARIABLE: Record<PromptTypeType, string> = {
 	[PROMPT_TYPE_POWER_ON_MAGI]: 'chosenPower',
 	[PROMPT_TYPE_ALTERNATIVE]: 'alternative',
 	[PROMPT_TYPE_PAYMENT_SOURCE]: 'paymentSource',
-	[PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES]: 'cardsInZones',
+	[PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES]: 'cardsInZones',
 	[PROMPT_TYPE_MAY_ABILITY]: '', // Special case, doesn't use variables
 };
 
@@ -2261,6 +2261,7 @@ export class State {
 				console.error('Failure checking condition');
 				console.dir(condition);
 			}
+            
 			return result;
 		});
 
@@ -3068,7 +3069,7 @@ export class State {
 							}
 							break;
 						}
-						case PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES: {
+						case PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES: {
 							const sourceZone = this.getMetaValue(action.promptParams.sourceZone, action.generatedBy);
 							const sourceZoneOwner = this.getMetaValue(action.promptParams.sourceZoneOwner, action.generatedBy);
 							const numberOfCards = this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
@@ -3156,7 +3157,7 @@ export class State {
 								}
 								break;
 							}
-							case PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES: {
+							case PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES: {
 								if ('cards' in action && action.cards) {
 									const totalCards = Object.values(action.cards).flat()
 									if (this.state.promptParams && this.state.promptParams.cards && this.state.promptParams.cards.length !== totalCards.length) {

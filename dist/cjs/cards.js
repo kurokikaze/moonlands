@@ -41,7 +41,7 @@ const prompt = (data) => {
                 ...data,
             };
         }
-        case const_1.PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES: {
+        case const_1.PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES: {
             const promptAction = {
                 type: const_1.ACTION_ENTER_PROMPT,
                 ...data,
@@ -1413,7 +1413,7 @@ exports.cards = [
     new Card_1.default('Abaquist', const_1.TYPE_CREATURE, const_1.REGION_OROTHE, 1, {
         powers: [
             {
-                name: 'Posess',
+                name: 'Possess',
                 cost: 0,
                 text: 'Choose any one Creature in play with less energy than Abaquist. Discard Abaquist from play. Gain control of the chosen Creature. That Creature may not attack this turn.',
                 effects: [
@@ -5920,7 +5920,7 @@ exports.cards = [
                 text: 'Look at the top two cards of your deck. You may discard either or both of these cards, or put them back on top of your deck in any order.',
                 effects: [
                     prompt({
-                        promptType: const_1.PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
+                        promptType: const_1.PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
                         promptParams: {
                             sourceZone: const_1.ZONE_TYPE_DECK,
                             sourceZoneOwner: '$player',

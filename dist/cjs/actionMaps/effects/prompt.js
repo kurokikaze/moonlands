@@ -184,7 +184,7 @@ const applyPromptEnteredEffect = function (action) {
             }
             break;
         }
-        case const_1.PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES: {
+        case const_1.PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES: {
             // console.dir(this.getSpellMetadata(action.generatedBy))
             const sourceZone = this.getMetaValue(action.promptParams.sourceZone, action.generatedBy);
             const sourceZoneOwner = this.getMetaValue(action.promptParams.sourceZoneOwner, action.generatedBy);

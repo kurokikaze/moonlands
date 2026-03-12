@@ -1,26 +1,6 @@
 import CardInGame, { ConvertedCard, HiddenConvertedCard } from "./CardInGame";
 import { MercenneFixed, RestrictionObjectType, ZoneType } from "../types";
-import { MersenneTwister } from "../mersenneTwister";
 import { State } from "..";
-
-function shuffle<T>(array: T[]): T[] {
-	var currentIndex = array.length, temporaryValue, randomIndex;
-
-	// While there remain elements to shuffle...
-	while (0 !== currentIndex) {
-
-		// Pick a remaining element...
-		randomIndex = Math.floor(Math.random() * currentIndex);
-		currentIndex -= 1;
-
-		// And swap it with the current element.
-		temporaryValue = array[currentIndex];
-		array[currentIndex] = array[randomIndex];
-		array[randomIndex] = temporaryValue;
-	}
-
-	return array;
-}
 
 export default class Zone {
 	_name: string;
@@ -96,7 +76,7 @@ export default class Zone {
 		return restrictions ? this.cards.filter(state.makeCardFilter(restrictions)) : this.cards;
 	}
 
-	_shuffle<T>(array: T[]): T[] {
+	private _shuffle<T>(array: T[]): T[] {
 		var currentIndex = array.length, temporaryValue, randomIndex;
 
 		// While there remain elements to shuffle...

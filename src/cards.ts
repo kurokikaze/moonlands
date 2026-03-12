@@ -150,7 +150,7 @@ import {
 	PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
 	PROMPT_TYPE_POWER_ON_MAGI,
 	PROMPT_TYPE_ALTERNATIVE,
-	PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
+	PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
 
 	PROTECTION_FROM_SPELLS,
 	PROTECTION_TYPE_GENERAL,
@@ -297,7 +297,7 @@ const prompt = (data: PromptParamsType & { message?: string }): PromptType => {
 				...data,
 			};
 		}
-		case PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES: {
+		case PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES: {
 			const promptAction: PromptTypeDistributeCardsInZones = {
 				type: ACTION_ENTER_PROMPT,
 				...data,
@@ -1675,7 +1675,7 @@ export const cards = [
 	new Card('Abaquist', TYPE_CREATURE, REGION_OROTHE, 1, {
 		powers: [
 			{
-				name: 'Posess',
+				name: 'Possess',
 				cost: 0,
 				text: 'Choose any one Creature in play with less energy than Abaquist. Discard Abaquist from play. Gain control of the chosen Creature. That Creature may not attack this turn.',
 				effects: [
@@ -6183,7 +6183,7 @@ export const cards = [
 			text: 'Look at the top two cards of your deck. You may discard either or both of these cards, or put them back on top of your deck in any order.',
 			effects: [
 				prompt({
-					promptType: PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
+					promptType: PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
 					promptParams: {
 						sourceZone: ZONE_TYPE_DECK,
 						sourceZoneOwner: '$player',
