@@ -219,11 +219,11 @@ export class Unmaker {
                         const creatures: CardInGame[] | CardInGame = this.state.getMetaValue(action.target, action.generatedBy)
                         let creatureArray = []
                         if (creatures instanceof CardInGame) {
-                            creatureArray = [{
+                            creatureArray.push({
                                     id: creatures.id,
                                     energy: creatures.data.energy,
                                     energyLostThisTurn: creatures.data.energyLostThisTurn
-                                }]
+                                })
                         } else {
                             for (let i = 0; i < creatures.length; i++) {
                                 const creature = creatures[i]
@@ -245,12 +245,12 @@ export class Unmaker {
                         const magiTargets: CardInGame[] | CardInGame = this.state.getMetaValue(action.target, action.generatedBy)
                         let magiArray = []
                         if (magiTargets instanceof CardInGame) {
-                            magiArray = [{
+                            magiArray.push({
                                     id: magiTargets.id,
                                     owner: magiTargets.owner,
                                     energy: magiTargets.data.energy,
                                     energyLost: magiTargets.data.energyLostThisTurn,
-                            }]
+                            })
                         } else {
                             for (let i = 0; i < magiTargets.length; i++) {
                                 const magi = magiTargets[i]
@@ -1151,7 +1151,12 @@ export class Unmaker {
                     source.data.energy = sourceEnergy
                     source.data.energyLostThisTurn = sourceEnergyLost
                 }
-                const target = inPlay.byId(targetId)
+                let target
+                if (targetIsMagi) {
+                    target
+                } else {
+                    target = inPlay.byId(targetId)
+                }
                 if (target) {
                     target.data.energy = targetEnergy
                 }
