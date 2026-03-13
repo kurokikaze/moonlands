@@ -194,6 +194,7 @@ var State = /** @class */ (function () {
         this.onFullAction = null;
         this.turnTimer = null;
         this.zoneHash = new Map();
+        this.modifiedCardDataCache = new Map();
         this.state = __assign(__assign({}, clone(defaultState)), state);
         this.decks = [];
         this.winner = false;
@@ -726,6 +727,9 @@ var State = /** @class */ (function () {
         var opponent = this.players.find(function (pl) { return pl != player; });
         return opponent || 0;
     };
+    State.prototype.clearModifiedCardDataCache = function () {
+        this.modifiedCardDataCache.clear();
+    };
     State.prototype.getZone = function (type, player) {
         if (player === void 0) { player = null; }
         var key = "".concat(type).concat(player);
@@ -1129,6 +1133,16 @@ var State = /** @class */ (function () {
         if (!target) {
             return null;
         }
+        var cached = this.modifiedCardDataCache.get(target.id);
+        if (cached) {
+            // Reuse the expensive modifiedCard/static-ability computation.
+            // Start from cached.data (preserves values written by the reducer such as
+            // `burrowed` and `controller` set by continuous effects), then overwrite the
+            // purely mutable live fields so things like energy and attack flags are fresh.
+            var freshData = __assign(__assign({}, cached.data), { energy: target.data.energy, attacked: target.data.attacked, actionsUsed: target.data.actionsUsed, energyLostThisTurn: target.data.energyLostThisTurn, defeatedCreature: target.data.defeatedCreature, hasAttacked: target.data.hasAttacked, wasAttacked: target.data.wasAttacked, attachedTo: target.data.attachedTo });
+            // @ts-ignore
+            return this.getByProperty(__assign(__assign({}, cached), { data: freshData }), property, subProperty);
+        }
         var PLAYER_ONE = this.players[0];
         var PLAYER_TWO = this.players[1];
         var gameStaticAbilities = [
@@ -1182,6 +1196,7 @@ var State = /** @class */ (function () {
         // Okay, sooner or later this should be rewritten
         // Here we should construct new CardInGame object containing new Card object (both with new values)
         var modifiedCardData = staticAbilities.reduce(this.layeredDataReducer.bind(this), initialCardData);
+        this.modifiedCardDataCache.set(target.id, modifiedCardData);
         // @ts-ignore
         return this.getByProperty(modifiedCardData, property, subProperty);
     };

@@ -85,6 +85,7 @@ const applyCreateContinuousEffect = function (action, _transform, _state, seeded
         id,
     };
     this.state.continuousEffects.push(continuousEffect);
+    this.clearModifiedCardDataCache();
 };
 exports.applyCreateContinuousEffect = applyCreateContinuousEffect;
 //# sourceMappingURL=triggers.js.map

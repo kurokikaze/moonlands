@@ -4,7 +4,7 @@ import { UnAction } from './types';
 export declare class Unmaker {
     private state;
     unActions: UnAction[];
-    dataBlob: Uint16Array<ArrayBuffer>;
+    dataBlob: Uint16Array;
     pointer: number;
     numberOfUnActions: number;
     private strings;

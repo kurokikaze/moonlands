@@ -39,6 +39,9 @@ export var applyMoveCardsBetweenZonesEffect = function (action, transform, _stat
         var sourceZone_1 = this.getZone(sourceZoneType_1, sourceZoneType_1 === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
         var destinationZoneType_1 = this.getMetaValue(action.destinationZone, action.generatedBy);
         var destinationZone_1 = this.getZone(destinationZoneType_1, destinationZoneType_1 === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
+        if (sourceZoneType_1 === ZONE_TYPE_IN_PLAY || destinationZoneType_1 === ZONE_TYPE_IN_PLAY) {
+            this.clearModifiedCardDataCache();
+        }
         var newCards_1 = [];
         oneOrSeveral(zoneChangingTargets, function (zoneChangingCard) {
             var newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner, seeded_nanoid);
@@ -77,6 +80,9 @@ export var applyMoveCardBetweenZonesEffect = function (action, transform, _state
         var destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
         var destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
         var sourceZone = this.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
+        if (sourceZoneType === ZONE_TYPE_IN_PLAY || destinationZoneType === ZONE_TYPE_IN_PLAY) {
+            this.clearModifiedCardDataCache();
+        }
         var newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner, seeded_nanoid);
         if (action.bottom) {
             destinationZone.add([newObject]);

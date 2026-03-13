@@ -854,6 +854,10 @@ class State {
         return opponent || 0;
     }
     zoneHash = new Map();
+    modifiedCardDataCache = new Map();
+    clearModifiedCardDataCache() {
+        this.modifiedCardDataCache.clear();
+    }
     getZone(type, player = null) {
         const key = `${type}${player}`;
         if (this.zoneHash.has(key)) {
@@ -1227,6 +1231,26 @@ class State {
         if (!target) {
             return null;
         }
+        const cached = this.modifiedCardDataCache.get(target.id);
+        if (cached) {
+            // Reuse the expensive modifiedCard/static-ability computation.
+            // Start from cached.data (preserves values written by the reducer such as
+            // `burrowed` and `controller` set by continuous effects), then overwrite the
+            // purely mutable live fields so things like energy and attack flags are fresh.
+            const freshData = {
+                ...cached.data,
+                energy: target.data.energy,
+                attacked: target.data.attacked,
+                actionsUsed: target.data.actionsUsed,
+                energyLostThisTurn: target.data.energyLostThisTurn,
+                defeatedCreature: target.data.defeatedCreature,
+                hasAttacked: target.data.hasAttacked,
+                wasAttacked: target.data.wasAttacked,
+                attachedTo: target.data.attachedTo,
+            };
+            // @ts-ignore
+            return this.getByProperty({ ...cached, data: freshData }, property, subProperty);
+        }
         const PLAYER_ONE = this.players[0];
         const PLAYER_TWO = this.players[1];
         const gameStaticAbilities = [
@@ -1297,6 +1321,7 @@ class State {
         // Okay, sooner or later this should be rewritten
         // Here we should construct new CardInGame object containing new Card object (both with new values)
         const modifiedCardData = staticAbilities.reduce(this.layeredDataReducer.bind(this), initialCardData);
+        this.modifiedCardDataCache.set(target.id, modifiedCardData);
         // @ts-ignore
         return this.getByProperty(modifiedCardData, property, subProperty);
     }

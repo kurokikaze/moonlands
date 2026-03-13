@@ -77,8 +77,9 @@ const applyStartTurnEffect = function (action, transform) {
         player: action.player,
         generatedBy: action.generatedBy,
     });
-    this.state.continuousEffects = this.state.continuousEffects.map((0, actionMapUtils_1.updateContinuousEffects)(action.player)).filter(Boolean),
-        this.state.activePlayer = action.player;
+    this.state.continuousEffects = this.state.continuousEffects.map((0, actionMapUtils_1.updateContinuousEffects)(action.player)).filter(Boolean);
+    this.clearModifiedCardDataCache();
+    this.state.activePlayer = action.player;
     this.state.step = 0;
 };
 exports.applyStartTurnEffect = applyStartTurnEffect;

@@ -46,6 +46,11 @@ export const applyMoveCardsBetweenZonesEffect: ActionTransformer<typeof EFFECT_T
     const sourceZone = this.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
     const destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
     const destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
+
+    if (sourceZoneType === ZONE_TYPE_IN_PLAY || destinationZoneType === ZONE_TYPE_IN_PLAY) {
+      this.clearModifiedCardDataCache();
+    }
+
     const newCards: CardInGame[] = [];
 
     oneOrSeveral(zoneChangingTargets, zoneChangingCard => {
@@ -86,6 +91,11 @@ export const applyMoveCardBetweenZonesEffect: ActionTransformer<typeof EFFECT_TY
     const destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
     const destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
     const sourceZone = this.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
+
+    if (sourceZoneType === ZONE_TYPE_IN_PLAY || destinationZoneType === ZONE_TYPE_IN_PLAY) {
+      this.clearModifiedCardDataCache();
+    }
+
     const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner, seeded_nanoid);
     if (action.bottom) {
       destinationZone.add([newObject]);

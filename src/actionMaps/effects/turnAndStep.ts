@@ -118,7 +118,8 @@ export const applyStartTurnEffect: ActionTransformer<typeof EFFECT_TYPE_START_TU
     }
   );
 
-  this.state.continuousEffects = this.state.continuousEffects.map(updateContinuousEffects(action.player)).filter(Boolean) as ContinuousEffectType[],
+  this.state.continuousEffects = this.state.continuousEffects.map(updateContinuousEffects(action.player)).filter(Boolean) as ContinuousEffectType[];
+  this.clearModifiedCardDataCache();
   this.state.activePlayer = action.player;
   this.state.step = 0
 }
