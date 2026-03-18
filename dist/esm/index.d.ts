@@ -99,7 +99,7 @@ export declare class State {
     timerEnabled: boolean;
     turnTimeout: ReturnType<typeof setTimeout> | null;
     turnNotifyTimeout: ReturnType<typeof setTimeout> | null;
-    constructor(state: StateShape);
+    constructor(state?: StateShape);
     closeStreams(): void;
     initiatePRNG(seed: number): void;
     setOnAction(callback: (e: AnyEffectType) => void, fullStream?: boolean): void;

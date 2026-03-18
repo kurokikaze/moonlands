@@ -138,7 +138,7 @@ expect.extend({
 	}
 })  
 
-describe.skip('Unmake state action (TypedArray)', () => {
+describe('Unmake state action (TypedArray)', () => {
     it('Simple power with prompting and no cost', () => {
         const ACTIVE_PLAYER = 0;
         const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
@@ -649,7 +649,7 @@ describe.skip('Unmake state action (TypedArray)', () => {
 	})
 })
 
-describe.skip('Unmaking state action', () => {
+describe('Unmaking state action', () => {
     it('Winning action', () => {
         const ACTIVE_PLAYER = 0;
         const NON_ACTIVE_PLAYER = 2;

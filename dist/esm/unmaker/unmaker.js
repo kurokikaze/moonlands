@@ -931,6 +931,9 @@ var Unmaker = /** @class */ (function () {
                         state.setSpellMetaDataField(entry.field, entry.previousValue, entry.spellId);
                     }
                 }
+                if (sourceZoneType === ZONE_TYPE_IN_PLAY || destinationZoneType === ZONE_TYPE_IN_PLAY) {
+                    state.clearModifiedCardDataCache();
+                }
                 break;
             }
             case UNMAKE_POWER_USE: {
@@ -1027,6 +1030,7 @@ var Unmaker = /** @class */ (function () {
                 state.state.activePlayer = activePlayer;
                 state.state.step = step;
                 state.state.continuousEffects = continuousEffect;
+                state.clearModifiedCardDataCache();
                 // Restore card flags
                 var flagEntries = Object.entries(cardFlags);
                 for (var i = 0; i < flagEntries.length; i++) {
@@ -1090,6 +1094,7 @@ var Unmaker = /** @class */ (function () {
             case UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT: {
                 var effectsLength = this.readNumber();
                 state.state.continuousEffects = state.state.continuousEffects.slice(0, effectsLength);
+                state.clearModifiedCardDataCache();
                 break;
             }
             case UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI: {
@@ -1427,6 +1432,9 @@ var Unmaker = /** @class */ (function () {
                         state.setSpellMetaDataField(entry.field, entry.previousValue, entry.spellId);
                     }
                 }
+                if (unaction.sourceZone === ZONE_TYPE_IN_PLAY || unaction.destinationZone === ZONE_TYPE_IN_PLAY) {
+                    state.clearModifiedCardDataCache();
+                }
                 break;
             }
             case UNMAKE_EFFECT_TYPE_DIE_ROLLED: {
@@ -1446,6 +1454,7 @@ var Unmaker = /** @class */ (function () {
                 state.state.activePlayer = unaction.previousActivePlayer;
                 state.state.step = unaction.previousStep;
                 state.state.continuousEffects = unaction.previousContinuousEffects;
+                state.clearModifiedCardDataCache();
                 // Restore card flags
                 for (var _g = 0, _h = Object.entries(unaction.cardFlags); _g < _h.length; _g++) {
                     var _j = _h[_g], cardId = _j[0], flags = _j[1];
@@ -1520,6 +1529,7 @@ var Unmaker = /** @class */ (function () {
             case UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT: {
                 // Remove all continuous effects added after the captured length
                 state.state.continuousEffects = state.state.continuousEffects.slice(0, unaction.previousLength);
+                state.clearModifiedCardDataCache();
                 break;
             }
             case UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE: {

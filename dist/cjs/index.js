@@ -243,58 +243,6 @@ const defaultState = {
     attachedTo: {},
     cardsAttached: {},
 };
-const oneOrSeveral = (targets, callback) => {
-    if (targets instanceof Array) {
-        if (targets.length > 0) {
-            targets.forEach(target => callback(target));
-        }
-    }
-    else {
-        callback(targets);
-    }
-};
-const updateContinuousEffects = (player) => (effect) => {
-    switch (effect.expiration.type) {
-        case const_1.EXPIRATION_ANY_TURNS: {
-            const turnCount = effect.expiration.turns;
-            if (turnCount > 1) {
-                return {
-                    ...effect,
-                    expiration: {
-                        type: effect.expiration.type,
-                        turns: turnCount - 1,
-                    }
-                };
-            }
-            else {
-                return null;
-            }
-        }
-        case const_1.EXPIRATION_OPPONENT_TURNS: {
-            const turnCount = effect.expiration.turns;
-            if (player !== effect.player) {
-                if (turnCount > 0) {
-                    return {
-                        ...effect,
-                        expiration: {
-                            type: effect.expiration.type,
-                            turns: turnCount - 1,
-                        }
-                    };
-                }
-                else {
-                    return null;
-                }
-            }
-            else {
-                return effect;
-            }
-        }
-        case const_1.EXPIRATION_NEVER: {
-            return effect;
-        }
-    }
-};
 class State {
     state;
     players = [0, 1];
@@ -314,7 +262,7 @@ class State {
     timerEnabled;
     turnTimeout;
     turnNotifyTimeout;
-    constructor(state) {
+    constructor(state = defaultState) {
         this.state = {
             ...(0, clone_1.default)(defaultState),
             ...state,

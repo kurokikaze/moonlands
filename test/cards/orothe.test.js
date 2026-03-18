@@ -40,7 +40,7 @@ import {
   ZONE_TYPE_IN_PLAY,
   ZONE_TYPE_DISCARD,
   ZONE_TYPE_HAND,
-  PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES,
+  PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
 } from '../../src/const.ts';
 
 import {
@@ -608,7 +608,7 @@ describe('Orothean Goggles', () => {
     gameState.update(powerAction);
 
     expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
-    expect(gameState.state.promptType).toEqual(PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES, 'Prompt type is correct');
+    expect(gameState.state.promptType).toEqual(PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES, 'Prompt type is correct');
 
     const resolvePromptAction = {
       type: ACTION_RESOLVE_PROMPT,
@@ -668,7 +668,7 @@ describe('Orothean Goggles', () => {
     gameState.update(powerAction);
 
     expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
-    expect(gameState.state.promptType).toEqual(PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES, 'Prompt type is correct');
+    expect(gameState.state.promptType).toEqual(PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES, 'Prompt type is correct');
 
     const resolvePromptAction = {
       type: ACTION_RESOLVE_PROMPT,
@@ -730,7 +730,7 @@ describe('Orothean Goggles', () => {
     gameState.update(powerAction);
 
     expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
-    expect(gameState.state.promptType).toEqual(PROMPT_TYPE_DISTRUBUTE_CARDS_IN_ZONES, 'Prompt type is correct');
+    expect(gameState.state.promptType).toEqual(PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES, 'Prompt type is correct');
 
     const resolvePromptAction = {
       type: ACTION_RESOLVE_PROMPT,

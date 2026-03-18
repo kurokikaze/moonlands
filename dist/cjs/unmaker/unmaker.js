@@ -907,6 +907,9 @@ class Unmaker {
                         state.setSpellMetaDataField(entry.field, entry.previousValue, entry.spellId);
                     }
                 }
+                if (sourceZoneType === index_1.ZONE_TYPE_IN_PLAY || destinationZoneType === index_1.ZONE_TYPE_IN_PLAY) {
+                    state.clearModifiedCardDataCache();
+                }
                 break;
             }
             case types_1.UNMAKE_POWER_USE: {
@@ -1002,6 +1005,7 @@ class Unmaker {
                 state.state.activePlayer = activePlayer;
                 state.state.step = step;
                 state.state.continuousEffects = continuousEffect;
+                state.clearModifiedCardDataCache();
                 // Restore card flags
                 const flagEntries = Object.entries(cardFlags);
                 for (let i = 0; i < flagEntries.length; i++) {
@@ -1067,6 +1071,7 @@ class Unmaker {
             case types_1.UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT: {
                 const effectsLength = this.readNumber();
                 state.state.continuousEffects = state.state.continuousEffects.slice(0, effectsLength);
+                state.clearModifiedCardDataCache();
                 break;
             }
             case types_1.UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI: {
@@ -1394,6 +1399,9 @@ class Unmaker {
                         state.setSpellMetaDataField(entry.field, entry.previousValue, entry.spellId);
                     }
                 }
+                if (unaction.sourceZone === index_1.ZONE_TYPE_IN_PLAY || unaction.destinationZone === index_1.ZONE_TYPE_IN_PLAY) {
+                    state.clearModifiedCardDataCache();
+                }
                 break;
             }
             case types_1.UNMAKE_EFFECT_TYPE_DIE_ROLLED: {
@@ -1413,6 +1421,7 @@ class Unmaker {
                 state.state.activePlayer = unaction.previousActivePlayer;
                 state.state.step = unaction.previousStep;
                 state.state.continuousEffects = unaction.previousContinuousEffects;
+                state.clearModifiedCardDataCache();
                 // Restore card flags
                 for (const [cardId, flags] of Object.entries(unaction.cardFlags)) {
                     // Try to find the card in play (creatures and relics)
@@ -1486,6 +1495,7 @@ class Unmaker {
             case types_1.UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT: {
                 // Remove all continuous effects added after the captured length
                 state.state.continuousEffects = state.state.continuousEffects.slice(0, unaction.previousLength);
+                state.clearModifiedCardDataCache();
                 break;
             }
             case types_1.UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE: {
