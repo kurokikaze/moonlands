@@ -1,5 +1,4 @@
 import {
-	SELECTOR_OWN_MAGI,
 	PROPERTY_COST,
 	REGION_UNIVERSAL,
 } from './const';

@@ -42,6 +42,7 @@ Object.defineProperty(exports, "CALCULATION_HALVE_ROUND_DOWN", { enumerable: tru
 Object.defineProperty(exports, "CALCULATION_HALVE_ROUND_UP", { enumerable: true, get: function () { return const_1.CALCULATION_HALVE_ROUND_UP; } });
 Object.defineProperty(exports, "CALCULATION_MIN", { enumerable: true, get: function () { return const_1.CALCULATION_MIN; } });
 Object.defineProperty(exports, "CALCULATION_MAX", { enumerable: true, get: function () { return const_1.CALCULATION_MAX; } });
+Object.defineProperty(exports, "CALCULATION_MULTIPLY", { enumerable: true, get: function () { return const_1.CALCULATION_MULTIPLY; } });
 Object.defineProperty(exports, "SELECTOR_CREATURES", { enumerable: true, get: function () { return const_1.SELECTOR_CREATURES; } });
 Object.defineProperty(exports, "SELECTOR_CREATURES_AND_MAGI", { enumerable: true, get: function () { return const_1.SELECTOR_CREATURES_AND_MAGI; } });
 Object.defineProperty(exports, "SELECTOR_OWN_MAGI", { enumerable: true, get: function () { return const_1.SELECTOR_OWN_MAGI; } });
@@ -115,6 +116,8 @@ Object.defineProperty(exports, "EFFECT_TYPE_FIND_STARTING_CARDS", { enumerable: 
 Object.defineProperty(exports, "EFFECT_TYPE_DRAW_REST_OF_CARDS", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_DRAW_REST_OF_CARDS; } });
 Object.defineProperty(exports, "EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE; } });
 Object.defineProperty(exports, "EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT; } });
+Object.defineProperty(exports, "EFFECT_TYPE_DIE_ROLLED", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_DIE_ROLLED; } });
+Object.defineProperty(exports, "EFFECT_TYPE_PROMPT_ENTERED", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_PROMPT_ENTERED; } });
 Object.defineProperty(exports, "REGION_UNIVERSAL", { enumerable: true, get: function () { return const_1.REGION_UNIVERSAL; } });
 Object.defineProperty(exports, "COST_X", { enumerable: true, get: function () { return const_1.COST_X; } });
 Object.defineProperty(exports, "COST_X_PLUS_ONE", { enumerable: true, get: function () { return const_1.COST_X_PLUS_ONE; } });
@@ -125,15 +128,14 @@ Object.defineProperty(exports, "ZONE_TYPE_ACTIVE_MAGI", { enumerable: true, get:
 Object.defineProperty(exports, "ZONE_TYPE_MAGI_PILE", { enumerable: true, get: function () { return const_1.ZONE_TYPE_MAGI_PILE; } });
 Object.defineProperty(exports, "ZONE_TYPE_DECK", { enumerable: true, get: function () { return const_1.ZONE_TYPE_DECK; } });
 Object.defineProperty(exports, "ZONE_TYPE_DEFEATED_MAGI", { enumerable: true, get: function () { return const_1.ZONE_TYPE_DEFEATED_MAGI; } });
-Object.defineProperty(exports, "CALCULATION_MULTIPLY", { enumerable: true, get: function () { return const_1.CALCULATION_MULTIPLY; } });
-Object.defineProperty(exports, "EFFECT_TYPE_DIE_ROLLED", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_DIE_ROLLED; } });
-Object.defineProperty(exports, "EFFECT_TYPE_PROMPT_ENTERED", { enumerable: true, get: function () { return const_1.EFFECT_TYPE_PROMPT_ENTERED; } });
 const effects_1 = require("./actionMaps/effects");
 const logAction_1 = require("./logAction");
 const clone_1 = __importDefault(require("./clone"));
 const cards_1 = require("./cards");
 const CardInGame_1 = __importDefault(require("./classes/CardInGame"));
 const Zone_1 = __importDefault(require("./classes/Zone"));
+const SelectorEngine_1 = require("./SelectorEngine");
+const PromptValidator_1 = require("./PromptValidator");
 const convertPromptAction_1 = __importDefault(require("./helpers/convertPromptAction"));
 const performCalculation_1 = __importDefault(require("./helpers/performCalculation"));
 const convertCard = (cardInGame) => ({
@@ -262,6 +264,8 @@ class State {
     timerEnabled;
     turnTimeout;
     turnNotifyTimeout;
+    selectorEngine;
+    promptValidator;
     constructor(state = defaultState) {
         this.state = {
             ...(0, clone_1.default)(defaultState),
@@ -277,6 +281,22 @@ class State {
         this.rollDebugValue = null,
             this.actionsOne = [];
         this.actionsTwo = [];
+        const self = this;
+        this.selectorEngine = new SelectorEngine_1.SelectorEngine({
+            getZone: (type, player = null) => this.getZone(type, player),
+            getOpponent: (player) => this.getOpponent(player),
+            get players() { return self.players; },
+            getContinuousEffects: () => this.state.continuousEffects,
+            getTwister: () => this.twister,
+        });
+        this.promptValidator = new PromptValidator_1.PromptValidator({
+            getZone: (type, player = null) => this.getZone(type, player),
+            modifyByStaticAbilities: (target, property, subProperty) => this.modifyByStaticAbilities(target, property, subProperty),
+            getOpponent: (player) => this.getOpponent(player),
+            getMetaValue: (value, sourceId) => this.getMetaValue(value, sourceId),
+            checkAnyCardForRestrictions: (cards, restrictions) => this.checkAnyCardForRestrictions(cards, restrictions),
+            checkAnyCardForRestriction: (cards, restriction, restrictionValue) => this.checkAnyCardForRestriction(cards, restriction, restrictionValue),
+        });
     }
     // @deprecated
     closeStreams() { }
@@ -802,9 +822,11 @@ class State {
         return opponent || 0;
     }
     zoneHash = new Map();
-    modifiedCardDataCache = new Map();
     clearModifiedCardDataCache() {
-        this.modifiedCardDataCache.clear();
+        this.selectorEngine.clearModifiedCardDataCache();
+    }
+    get modifiedCardDataCache() {
+        return this.selectorEngine.modifiedCardDataCache;
     }
     getZone(type, player = null) {
         const key = `${type}${player}`;
@@ -899,170 +921,16 @@ class State {
         }
     }
     selectNthCardOfZone(player, zoneType, cardNumber, restrictions) {
-        const zoneCards = this.getZone(zoneType, player).cards;
-        const filteredCards = (restrictions && restrictions.length) ? zoneCards.filter(this.makeCardFilter(restrictions)) : zoneCards;
-        const index = cardNumber - 1; // 1-based indexing, for better card data readability
-        if (filteredCards.length < index + 1) {
-            return [];
-        }
-        else {
-            return [filteredCards[index]];
-        }
+        return this.selectorEngine.selectNthCardOfZone(player, zoneType, cardNumber, restrictions);
     }
     selectRandomCardOfZone(player, zoneType) {
-        const zoneCards = this.getZone(zoneType, player).cards;
-        // const filteredCards = (restrictions && restrictions.length) ? zoneCards.filter(this.makeCardFilter(restrictions)) : zoneCards;
-        // @ts-ignore
-        const randomValue = this.twister ? this.twister.random() : Math.random();
-        const index = Math.floor(randomValue * zoneCards.length);
-        if (zoneCards.length == 0) {
-            return [];
-        }
-        else {
-            return [zoneCards[index]];
-        }
+        return this.selectorEngine.selectRandomCardOfZone(player, zoneType);
     }
     useSelector(selector, player, argument) {
-        switch (selector) {
-            case const_1.SELECTOR_OWN_CARDS_IN_PLAY: {
-                return this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards
-                    .filter(card => this.modifyByStaticAbilities(card, const_1.PROPERTY_CONTROLLER) == player);
-            }
-            case const_1.SELECTOR_RELICS: {
-                return this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.type == const_1.TYPE_RELIC);
-            }
-            case const_1.SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE: {
-                return [
-                    ...this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards
-                        .filter(card => this.modifyByStaticAbilities(card, const_1.PROPERTY_CONTROLLER) == player && this.modifyByStaticAbilities(card, const_1.PROPERTY_ENERGIZE) > 0),
-                    ...this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, player).cards
-                        .filter(card => this.modifyByStaticAbilities(card, const_1.PROPERTY_ENERGIZE) > 0),
-                ];
-            }
-            case const_1.SELECTOR_CARDS_WITH_ENERGIZE_RATE: {
-                return [
-                    ...this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, const_1.PROPERTY_ENERGIZE) > 0),
-                    ...this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, this.players[0]).cards.filter(card => this.modifyByStaticAbilities(card, const_1.PROPERTY_ENERGIZE) > 0),
-                    ...this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, this.players[1]).cards.filter(card => this.modifyByStaticAbilities(card, const_1.PROPERTY_ENERGIZE) > 0),
-                ];
-            }
-            case const_1.SELECTOR_OPPONENT_ID:
-                return this.players.find(id => id != argument) || 999;
-            case const_1.SELECTOR_CREATURES:
-                return this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.type == const_1.TYPE_CREATURE);
-            case const_1.SELECTOR_MAGI:
-                return [
-                    ...this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, this.players[0]).cards,
-                    ...this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, this.players[1]).cards,
-                ].filter(Boolean);
-            case const_1.SELECTOR_TOP_MAGI_OF_PILE: {
-                const topMagi = this.getZone(const_1.ZONE_TYPE_MAGI_PILE, player).cards[0];
-                return [topMagi]; // Selectors always have to return array
-            }
-            case const_1.SELECTOR_OWN_MAGI:
-                return this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, player).cards;
-            // case SELECTOR_OWN_MAGI_SINGLE:
-            // 	return this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card;
-            case const_1.SELECTOR_OWN_SPELLS_IN_HAND:
-                return this.getZone(const_1.ZONE_TYPE_HAND, player).cards.filter(card => card.card.type == const_1.TYPE_SPELL);
-            case const_1.SELECTOR_ENEMY_MAGI:
-                return this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, this.getOpponent(player || 0)).cards;
-            case const_1.SELECTOR_OWN_CREATURES:
-                return this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, const_1.PROPERTY_CONTROLLER) == player && card.card.type == const_1.TYPE_CREATURE);
-            case const_1.SELECTOR_ENEMY_CREATURES:
-                return this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, const_1.PROPERTY_CONTROLLER) != player && card.card.type == const_1.TYPE_CREATURE);
-            case const_1.SELECTOR_CREATURES_OF_REGION:
-                return this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, const_1.PROPERTY_REGION) == argument && card.card.type == const_1.TYPE_CREATURE);
-            case const_1.SELECTOR_CREATURES_NOT_OF_REGION:
-                return this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, const_1.PROPERTY_REGION) != argument && card.card.type == const_1.TYPE_CREATURE);
-            case const_1.SELECTOR_CREATURES_OF_TYPE:
-                return this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.name.split(' ').includes(argument) && card.card.type == const_1.TYPE_CREATURE);
-            case const_1.SELECTOR_CREATURES_NOT_OF_TYPE:
-                return this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.filter(card => !card.card.name.split(' ').includes(argument) && card.card.type == const_1.TYPE_CREATURE);
-            case const_1.SELECTOR_OWN_CREATURES_OF_TYPE:
-                return this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, const_1.PROPERTY_CONTROLLER) == player &&
-                    card.card.type == const_1.TYPE_CREATURE &&
-                    card.card.name.split(' ').includes(argument));
-            case const_1.SELECTOR_STATUS:
-                return this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, const_1.PROPERTY_STATUS, argument));
-            case const_1.SELECTOR_CREATURES_WITHOUT_STATUS:
-                return this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards
-                    .filter(card => card.card.type == const_1.TYPE_CREATURE)
-                    .filter(card => !this.modifyByStaticAbilities(card, const_1.PROPERTY_STATUS, argument));
-            default:
-                return [];
-        }
+        return this.selectorEngine.useSelectorAny(selector, player, argument);
     }
     getByProperty(target, property, subProperty = null) {
-        switch (property) {
-            case const_1.PROPERTY_ID:
-                return target.id;
-            case const_1.PROPERTY_TYPE:
-                return target.card.type;
-            case const_1.PROPERTY_CREATURE_TYPES:
-                return target.card.name.split(' ');
-            case const_1.PROPERTY_CREATURE_NAME:
-                return target.card.name;
-            case const_1.PROPERTY_MAGI_NAME:
-                return target.card.name;
-            case const_1.PROPERTY_CONTROLLER:
-                return target.data.controller;
-            case const_1.PROPERTY_ENERGY_COUNT:
-                return target.data.energy;
-            case const_1.PROPERTY_ATTACKS_PER_TURN:
-                return target.modifiedCard ?
-                    target.modifiedCard.data.attacksPerTurn :
-                    target.card.data.attacksPerTurn;
-            case const_1.PROPERTY_COST:
-                return target.modifiedCard ?
-                    target.modifiedCard.cost :
-                    target.card.cost;
-            case const_1.PROPERTY_ENERGIZE:
-                return target.modifiedCard ?
-                    target.modifiedCard.data.energize :
-                    target.card.data.energize;
-            case const_1.PROPERTY_REGION:
-                return target.card.region;
-            case const_1.PROPERTY_CAN_ATTACK_MAGI_DIRECTLY:
-                return target.modifiedCard ?
-                    target.modifiedCard.data.canAttackMagiDirectly :
-                    target.card.data.canAttackMagiDirectly;
-            case const_1.PROPERTY_MAGI_STARTING_ENERGY:
-                return target.modifiedCard ?
-                    target.modifiedCard.data.startingEnergy :
-                    target.card.data.startingEnergy;
-            case const_1.PROPERTY_POWER_COST:
-                const powers = target.modifiedCard ? target.modifiedCard.data?.powers : target.card.data.powers;
-                return (powers && powers.length) ? powers.find(({ name }) => name === subProperty)?.cost : 0;
-            case const_1.PROPERTY_STATUS_WAS_ATTACKED:
-                return target.data.wasAttacked || false;
-            case const_1.PROPERTY_CAN_BE_ATTACKED:
-                return target.modifiedCard.data.canBeAttacked;
-            case const_1.PROPERTY_STATUS_DEFEATED_CREATURE:
-                return target.data.defeatedCreature || false;
-            case const_1.PROPERTY_PROTECTION:
-                return target.modifiedCard ?
-                    target.modifiedCard.data.protection :
-                    target.card.data.protection;
-            case const_1.PROPERTY_STATUS: {
-                switch (subProperty) {
-                    case const_1.STATUS_BURROWED:
-                        return Object.hasOwnProperty.call(target.data, 'burrowed') ?
-                            target.data.burrowed :
-                            target.card.data.burrowed;
-                    default:
-                        return false;
-                }
-            }
-            // These properties can only be modified by static abilities / continuous effects
-            case const_1.PROPERTY_ENERGY_LOSS_THRESHOLD:
-                return target.modifiedCard ?
-                    target.modifiedCard.data.energyLossThreshold : 0;
-            case const_1.PROPERTY_ABLE_TO_ATTACK:
-                const defaultValue = 'ableToAttack' in target.card.data ? target.card.data.ableToAttack : true;
-                return target.modifiedCard ?
-                    target.modifiedCard.data.ableToAttack : defaultValue;
-        }
+        return this.selectorEngine.getByPropertyAny(target, property, subProperty);
     }
     isCardAffectedByEffect(card, effect) {
         const protection = this.modifyByStaticAbilities(card, const_1.PROPERTY_PROTECTION);
@@ -1124,429 +992,28 @@ class State {
         return true;
     }
     isCardAffectedByStaticAbility(card, staticAbility) {
-        switch (staticAbility.selector) {
-            case const_1.SELECTOR_ID: {
-                return card.id === staticAbility.selectorParameter;
-            }
-            case const_1.SELECTOR_SELF_AND_STATUS: {
-                return 'card' in staticAbility &&
-                    staticAbility.card &&
-                    card.id === staticAbility.card.id &&
-                    this.getByProperty(card, const_1.PROPERTY_STATUS, staticAbility.selectorParameter);
-            }
-            case const_1.SELECTOR_CREATURES: {
-                return card.card.type === const_1.TYPE_CREATURE &&
-                    this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.some(({ id }) => id === card.id);
-            }
-            case const_1.SELECTOR_OWN_CREATURES: {
-                return card.card.type === const_1.TYPE_CREATURE &&
-                    this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.some(({ id }) => id === card.id) &&
-                    card.data.controller === staticAbility.player;
-            }
-            case const_1.SELECTOR_OWN_CREATURES_OF_TYPE: {
-                return card.card.type === const_1.TYPE_CREATURE &&
-                    this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.some(({ id }) => id === card.id) &&
-                    card.data.controller === staticAbility.player &&
-                    card.card.name.split(' ').includes(staticAbility?.selectorParameter?.toString() || 'no matches');
-            }
-            case const_1.SELECTOR_CREATURES_OF_PLAYER: {
-                return card.card.type === const_1.TYPE_CREATURE &&
-                    this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.some(({ id }) => id === card.id) &&
-                    card.data.controller == staticAbility.selectorParameter;
-            }
-            case const_1.SELECTOR_OWN_MAGI: {
-                return card.card.type === const_1.TYPE_MAGI &&
-                    this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, staticAbility.player).cards.length === 1 &&
-                    this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, staticAbility.player)?.card?.id === card.id;
-            }
-            case const_1.SELECTOR_STATUS: {
-                return this.getByProperty(card, const_1.PROPERTY_STATUS, staticAbility.selectorParameter);
-            }
-            case const_1.SELECTOR_OWN_CREATURES_WITH_STATUS: {
-                return this.getByProperty(card, const_1.PROPERTY_STATUS, staticAbility.selectorParameter) &&
-                    card.data.controller === staticAbility.player;
-            }
-            case const_1.SELECTOR_OWN_SPELLS_IN_HAND: {
-                return this.getZone(const_1.ZONE_TYPE_HAND, staticAbility.player).cards.some(({ id }) => id === card.id && card.card.type == const_1.TYPE_SPELL);
-            }
-            default: {
-                console.error(`Unknown static ability selector: ${staticAbility.selector}`);
-                return false;
-            }
-        }
+        return this.selectorEngine.isCardAffectedByStaticAbility(card, staticAbility);
     }
     modifyByStaticAbilities(target, property, subProperty = null) {
-        if (!target) {
-            return null;
-        }
-        const cached = this.modifiedCardDataCache.get(target.id);
-        if (cached) {
-            // Reuse the expensive modifiedCard/static-ability computation.
-            // Start from cached.data (preserves values written by the reducer such as
-            // `burrowed` and `controller` set by continuous effects), then overwrite the
-            // purely mutable live fields so things like energy and attack flags are fresh.
-            const freshData = {
-                ...cached.data,
-                energy: target.data.energy,
-                attacked: target.data.attacked,
-                actionsUsed: target.data.actionsUsed,
-                energyLostThisTurn: target.data.energyLostThisTurn,
-                defeatedCreature: target.data.defeatedCreature,
-                hasAttacked: target.data.hasAttacked,
-                wasAttacked: target.data.wasAttacked,
-                attachedTo: target.data.attachedTo,
-            };
-            // @ts-ignore
-            return this.getByProperty({ ...cached, data: freshData }, property, subProperty);
-        }
-        const PLAYER_ONE = this.players[0];
-        const PLAYER_TWO = this.players[1];
-        const gameStaticAbilities = [
-            {
-                name: 'Burrowed - Energy loss',
-                text: 'Your burrowed creatures may not lose more than 2 energy each turn',
-                selector: const_1.SELECTOR_STATUS,
-                selectorParameter: const_1.STATUS_BURROWED,
-                property: const_1.PROPERTY_ENERGY_LOSS_THRESHOLD,
-                modifier: {
-                    operator: const_1.CALCULATION_SET,
-                    operandOne: 2,
-                },
-            },
-            {
-                name: 'Burrowed - Ability to attack',
-                text: 'Your burrowed creatures cannot attack',
-                selector: const_1.SELECTOR_STATUS,
-                selectorParameter: const_1.STATUS_BURROWED,
-                property: const_1.PROPERTY_ABLE_TO_ATTACK,
-                modifier: {
-                    operator: const_1.CALCULATION_SET,
-                    operandOne: false,
-                },
-            },
-        ];
-        // gathering static abilities from the field, adding players Magi to them
-        const allZonesCards = [
-            ...this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards,
-            ...this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE).cards,
-            ...this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO).cards,
-        ];
-        const continuousStaticAbilities = this.state.continuousEffects.map(effect => effect.staticAbilities?.map(a => ({ ...a, player: effect.player })) || []).flat();
-        const propertyLayers = {
-            [const_1.PROPERTY_CONTROLLER]: 0,
-            [const_1.PROPERTY_POWER_COST]: 1,
-            [const_1.PROPERTY_COST]: 1,
-            [const_1.PROPERTY_ENERGIZE]: 2,
-            [const_1.PROPERTY_STATUS]: 3,
-            [const_1.PROPERTY_ATTACKS_PER_TURN]: 4,
-            [const_1.PROPERTY_CAN_ATTACK_MAGI_DIRECTLY]: 5,
-            [const_1.PROPERTY_ENERGY_LOSS_THRESHOLD]: 6,
-            [const_1.PROPERTY_ABLE_TO_ATTACK]: 7,
-            [const_1.PROPERTY_PROTECTION]: 8,
-        };
-        const zoneAbilities = allZonesCards.reduce((acc, cardInPlay) => cardInPlay.card.data.staticAbilities ? [
-            ...acc,
-            ...(cardInPlay.card.data.staticAbilities.map(a => ({ ...a, player: cardInPlay.data.controller, card: cardInPlay })))
-        ] : acc, []);
-        const staticAbilities = [...gameStaticAbilities, ...zoneAbilities, ...continuousStaticAbilities].sort((a, b) => propertyLayers[a.property] - propertyLayers[b.property]);
-        let initialCardData = {
-            card: target.card,
-            modifiedCard: {
-                ...target.card,
-                data: {
-                    protection: undefined,
-                    ...target.card.data,
-                    energyLossThreshold: 0,
-                    ableToAttack: 'ableToAttack' in target.card.data ? target.card.data.ableToAttack : true,
-                },
-            },
-            data: {
-                ...target.data,
-            },
-            id: target.id,
-            owner: target.owner,
-        };
-        // Okay, sooner or later this should be rewritten
-        // Here we should construct new CardInGame object containing new Card object (both with new values)
-        const modifiedCardData = staticAbilities.reduce(this.layeredDataReducer.bind(this), initialCardData);
-        this.modifiedCardDataCache.set(target.id, modifiedCardData);
-        // @ts-ignore
-        return this.getByProperty(modifiedCardData, property, subProperty);
+        return this.selectorEngine.modifyByStaticAbilities(target, property, subProperty);
     }
     layeredDataReducer(currentCard, staticAbility) {
-        if (this.isCardAffectedByStaticAbility(currentCard, staticAbility)) {
-            switch (staticAbility.property) {
-                case const_1.PROPERTY_COST: {
-                    const initialValue = this.getByProperty(currentCard, const_1.PROPERTY_COST);
-                    const { operator, operandOne } = staticAbility.modifier;
-                    if (typeof initialValue !== 'number') {
-                        return {
-                            ...currentCard,
-                            modifiedCard: {
-                                ...currentCard.modifiedCard,
-                                cost: initialValue,
-                            },
-                        };
-                    }
-                    const resultValue = (operator === const_1.CALCULATION_SUBTRACT || operator === const_1.CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-                        this.performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
-                        this.performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
-                    return {
-                        ...currentCard,
-                        modifiedCard: {
-                            ...currentCard.modifiedCard,
-                            cost: resultValue,
-                        },
-                    };
-                }
-                case const_1.PROPERTY_ENERGIZE: {
-                    const initialValue = this.getByProperty(currentCard, const_1.PROPERTY_ENERGIZE);
-                    const { operator, operandOne } = staticAbility.modifier;
-                    const resultValue = (operator === const_1.CALCULATION_SUBTRACT || operator === const_1.CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-                        this.performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
-                        this.performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
-                    return {
-                        ...currentCard,
-                        modifiedCard: {
-                            ...currentCard.modifiedCard,
-                            data: {
-                                ...currentCard.modifiedCard.data,
-                                energize: resultValue,
-                            },
-                        },
-                    };
-                }
-                case const_1.PROPERTY_ATTACKS_PER_TURN: {
-                    const initialValue = this.getByProperty(currentCard, const_1.PROPERTY_ATTACKS_PER_TURN);
-                    const { operator, operandOne } = staticAbility.modifier;
-                    const resultValue = (operator === const_1.CALCULATION_SUBTRACT || operator === const_1.CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-                        this.performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
-                        this.performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
-                    return {
-                        ...currentCard,
-                        modifiedCard: {
-                            ...currentCard.modifiedCard,
-                            data: {
-                                ...currentCard.modifiedCard.data,
-                                attacksPerTurn: resultValue,
-                            },
-                        },
-                    };
-                }
-                case const_1.PROPERTY_ENERGY_LOSS_THRESHOLD: {
-                    const initialValue = this.getByProperty(currentCard, const_1.PROPERTY_ENERGIZE);
-                    const { operator, operandOne } = staticAbility.modifier;
-                    const resultValue = (operator === const_1.CALCULATION_SUBTRACT || operator === const_1.CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-                        this.performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
-                        this.performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
-                    return {
-                        ...currentCard,
-                        modifiedCard: {
-                            ...currentCard.modifiedCard,
-                            data: {
-                                ...currentCard.modifiedCard.data,
-                                energyLossThreshold: resultValue,
-                            },
-                        },
-                    };
-                }
-                case const_1.PROPERTY_ABLE_TO_ATTACK: {
-                    const initialValue = this.getByProperty(currentCard, const_1.PROPERTY_ABLE_TO_ATTACK);
-                    const { operator, operandOne } = staticAbility.modifier;
-                    const resultValue = (operator === const_1.CALCULATION_SET) ? operandOne : initialValue;
-                    if (typeof resultValue == 'boolean') {
-                        return {
-                            ...currentCard,
-                            modifiedCard: {
-                                ...currentCard.modifiedCard,
-                                data: {
-                                    ...currentCard.modifiedCard.data,
-                                    ableToAttack: resultValue,
-                                },
-                            },
-                        };
-                    }
-                    else {
-                        return { ...currentCard };
-                    }
-                }
-                case const_1.PROPERTY_CAN_BE_ATTACKED: {
-                    const initialValue = this.getByProperty(currentCard, const_1.PROPERTY_CAN_BE_ATTACKED);
-                    const { operator, operandOne } = staticAbility.modifier;
-                    const resultValue = (operator === const_1.CALCULATION_SET) ? operandOne : initialValue;
-                    if (typeof resultValue == 'boolean') {
-                        return {
-                            ...currentCard,
-                            modifiedCard: {
-                                ...currentCard.modifiedCard,
-                                data: {
-                                    ...currentCard.modifiedCard.data,
-                                    canBeAttacked: resultValue,
-                                },
-                            },
-                        };
-                    }
-                    else {
-                        return {
-                            ...currentCard,
-                        };
-                    }
-                }
-                case const_1.PROPERTY_CONTROLLER: {
-                    const initialValue = this.getByProperty(currentCard, const_1.PROPERTY_CONTROLLER);
-                    const { operator, operandOne } = staticAbility.modifier;
-                    const resultValue = (operator === const_1.CALCULATION_SET) ? operandOne : initialValue;
-                    if (typeof resultValue == 'number') {
-                        return {
-                            ...currentCard,
-                            data: {
-                                ...currentCard.data,
-                                controller: resultValue,
-                            },
-                        };
-                    }
-                    else {
-                        return { ...currentCard };
-                    }
-                }
-                case const_1.PROPERTY_STATUS: {
-                    const initialValue = this.getByProperty(currentCard, const_1.PROPERTY_STATUS, staticAbility.subProperty);
-                    const { operator, operandOne } = staticAbility.modifier;
-                    const resultValue = (operator === const_1.CALCULATION_SET) ? operandOne : initialValue;
-                    if (typeof resultValue == 'boolean') {
-                        switch (staticAbility.subProperty) {
-                            case const_1.STATUS_BURROWED: {
-                                return {
-                                    ...currentCard,
-                                    data: {
-                                        ...currentCard.data,
-                                        burrowed: resultValue,
-                                    },
-                                };
-                            }
-                            default: {
-                                return currentCard;
-                            }
-                        }
-                    }
-                    else {
-                        return { ...currentCard };
-                    }
-                }
-                case const_1.PROPERTY_PROTECTION: {
-                    const initialValue = this.getByProperty(currentCard, const_1.PROPERTY_PROTECTION);
-                    const { operator, operandOne } = staticAbility.modifier;
-                    const resultValue = (operator === const_1.CALCULATION_SET) ? operandOne : initialValue;
-                    if (typeof resultValue == 'object' && 'from' in resultValue) {
-                        return {
-                            ...currentCard,
-                            modifiedCard: {
-                                ...currentCard.modifiedCard,
-                                data: {
-                                    ...currentCard.modifiedCard.data,
-                                    protection: resultValue,
-                                },
-                            }
-                        };
-                    }
-                    else {
-                        return {
-                            ...currentCard,
-                        };
-                    }
-                }
-                case const_1.PROPERTY_POWER_COST: {
-                    if (currentCard.modifiedCard.data.powers) {
-                        const updatedPowers = currentCard.modifiedCard.data.powers.map(power => {
-                            const initialValue = this.getByProperty(currentCard, const_1.PROPERTY_POWER_COST, power.name);
-                            const { operator, operandOne } = staticAbility.modifier;
-                            const resultValue = (operator === const_1.CALCULATION_SUBTRACT || operator === const_1.CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-                                this.performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
-                                this.performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
-                            return {
-                                ...power,
-                                cost: resultValue,
-                            };
-                        });
-                        return {
-                            ...currentCard,
-                            modifiedCard: {
-                                ...currentCard.modifiedCard,
-                                data: {
-                                    ...currentCard.modifiedCard.data,
-                                    powers: updatedPowers,
-                                },
-                            },
-                        };
-                    }
-                    return currentCard;
-                }
-                default: {
-                    return currentCard;
-                }
-            }
-        }
-        return currentCard;
+        return this.selectorEngine.layeredDataReducer(currentCard, staticAbility);
     }
     makeChecker(restriction, restrictionValue) {
-        switch (restriction) {
-            case const_1.RESTRICTION_CREATURE_NAME:
-                return (card) => card.card.name === restrictionValue;
-            case const_1.RESTRICTION_CREATURE_TYPE:
-                if (restrictionValue instanceof Array) {
-                    return (card) => card.card.name.split(' ').some(type => restrictionValue.includes(type));
-                }
-                return (card) => card.card.name.split(' ').includes(restrictionValue);
-            case const_1.RESTRICTION_TYPE:
-                return (card) => card.card.type === restrictionValue;
-            case const_1.RESTRICTION_PLAYABLE:
-                return (card) => {
-                    const magi = this.useSelector(const_1.SELECTOR_OWN_MAGI, card.owner)[0];
-                    const cardCost = this.calculateTotalCost(card);
-                    return magi.data.energy >= cardCost;
-                };
-            case const_1.RESTRICTION_MAGI_WITHOUT_CREATURES:
-                return (card) => {
-                    if (card.card.type !== const_1.TYPE_MAGI)
-                        return false;
-                    const creatures = this.useSelector(const_1.SELECTOR_OWN_CREATURES, card.owner);
-                    return (creatures && creatures instanceof Array && creatures.length === 0);
-                };
-            case const_1.RESTRICTION_REGION:
-                return (card) => card.card.region === restrictionValue;
-            case const_1.RESTRICTION_REGION_IS_NOT:
-                return (card) => card.card.region !== restrictionValue;
-            case const_1.RESTRICTION_ENERGY_LESS_THAN_STARTING:
-                return (card) => Boolean(card.card.type === const_1.TYPE_CREATURE && card.card.cost && typeof card.card.cost == 'number' && card.data.energy < card.card.cost);
-            case const_1.RESTRICTION_ENERGY_LESS_THAN:
-                return (card) => card.card.type === const_1.TYPE_CREATURE && card.data.energy < restrictionValue;
-            case const_1.RESTRICTION_CREATURE_WAS_ATTACKED:
-                return (card) => card.card.type === const_1.TYPE_CREATURE && card.data.wasAttacked === true;
-            // For own and opponents creatures we pass effect controller as restrictionValue
-            case const_1.RESTRICTION_OWN_CREATURE:
-                return (card) => card.data.controller === restrictionValue;
-            case const_1.RESTRICTION_OPPONENT_CREATURE:
-                return (card) => card.data.controller !== restrictionValue;
-            case const_1.RESTRICTION_STATUS:
-                return (card) => this.modifyByStaticAbilities(card, const_1.PROPERTY_STATUS, restrictionValue);
-            case const_1.RESTRICTION_ENERGY_EQUALS:
-                return (card) => card.card.type === const_1.TYPE_CREATURE && card.data.energy === restrictionValue;
-            default:
-                return () => true;
-        }
+        return this.selectorEngine.makeChecker(restriction, restrictionValue);
     }
     checkAnyCardForRestriction(cards, restriction, restrictionValue) {
-        return cards.some(this.makeChecker(restriction, restrictionValue));
+        return this.selectorEngine.checkAnyCardForRestriction(cards, restriction, restrictionValue);
     }
     checkAnyCardForRestrictions(cards, restrictions) {
-        return cards.some(this.makeCardFilter(restrictions));
+        return this.selectorEngine.checkAnyCardForRestrictions(cards, restrictions);
     }
     checkCardsForRestriction(cards, restriction, restrictionValue) {
-        return cards.every(this.makeChecker(restriction, restrictionValue));
+        return this.selectorEngine.checkCardsForRestriction(cards, restriction, restrictionValue);
     }
     makeCardFilter(restrictions = []) {
-        const checkers = restrictions.map(({ type, value }) => this.makeChecker(type, value));
-        return card => checkers.every(checker => checker(card)); // combine checkers
+        return this.selectorEngine.makeCardFilter(restrictions);
     }
     getObjectOrSelf(action, self, object, property) {
         if (typeof object === 'boolean' || typeof object === 'number') {
@@ -1849,14 +1316,7 @@ class State {
         return (0, performCalculation_1.default)(operator, operandOne, operandTwo);
     }
     calculateTotalCost(card) {
-        const activeMagiSelected = this.useSelector(const_1.SELECTOR_OWN_MAGI, card.owner);
-        if (activeMagiSelected instanceof Array && activeMagiSelected.length) {
-            const activeMagi = activeMagiSelected[0];
-            const baseCost = this.modifyByStaticAbilities(card, const_1.PROPERTY_COST);
-            const regionPenalty = (activeMagi.card.region == card.card.region || card.card.region == const_1.REGION_UNIVERSAL) ? 0 : 1;
-            return baseCost + regionPenalty;
-        }
-        return 0;
+        return this.selectorEngine.calculateTotalCost(card);
     }
     getAvailableCards(player, topMagi) {
         const deckCards = this.getZone(const_1.ZONE_TYPE_DECK, player).cards.map(({ card }) => card.name);
@@ -1866,138 +1326,7 @@ class State {
         return availableCards;
     }
     checkPrompts(source, preparedActions, isPower = false, powerCost = 0) {
-        const testedActions = [...preparedActions];
-        // Calculate if prompts are resolvable
-        // If source is Magi, it will not be filtered out, being in another zone
-        const creatureWillSurvive = !isPower || source.data.energy > powerCost;
-        const ourCardsInPlay = this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.filter(card => (creatureWillSurvive ? true : card.id !== source.id) && this.modifyByStaticAbilities(card, const_1.PROPERTY_CONTROLLER) === source.data.controller);
-        const allCardsInPlay = this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.filter(card => creatureWillSurvive ? true : card.id !== source.id);
-        const metaValues = {
-            '$source': source,
-            '$sourceCreature': source,
-        };
-        while (testedActions.length && testedActions[0].type === const_1.ACTION_GET_PROPERTY_VALUE) {
-            const valueGetter = testedActions[0];
-            testedActions.shift();
-            const multiTarget = valueGetter.source;
-            const target = (multiTarget instanceof Array) ? multiTarget[0] : multiTarget;
-            const property = this.getMetaValue(valueGetter.property, valueGetter.generatedBy);
-            const modifiedResult = this.modifyByStaticAbilities(target, property);
-            const variable = valueGetter.variable || 'result';
-            metaValues[`$${variable}`] = modifiedResult;
-        }
-        // powerPromptsDoable
-        const testablePrompts = [
-            const_1.PROMPT_TYPE_SINGLE_CREATURE,
-            const_1.PROMPT_TYPE_RELIC,
-            const_1.PROMPT_TYPE_OWN_SINGLE_CREATURE,
-            const_1.PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-            const_1.PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
-            const_1.PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
-            const_1.PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
-            const_1.PROMPT_TYPE_POWER_ON_MAGI,
-        ];
-        const testablePromptFilter = (action) => action.type === const_1.ACTION_ENTER_PROMPT && testablePrompts.includes(action.promptType);
-        const allPrompts = testedActions.filter(testablePromptFilter);
-        const allPromptsAreDoable = allPrompts.every(promptAction => {
-            switch (promptAction.promptType) {
-                case const_1.PROMPT_TYPE_SINGLE_CREATURE:
-                    return allCardsInPlay.some(card => card.card.type === const_1.TYPE_CREATURE);
-                case const_1.PROMPT_TYPE_MAGI_WITHOUT_CREATURES:
-                    const opponent = this.getOpponent(source.data.controller);
-                    const magi = [...this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, source.data.controller).cards, ...this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, opponent).cards];
-                    return magi.some(magi => !allCardsInPlay.some(card => card.card.type === const_1.TYPE_CREATURE && this.modifyByStaticAbilities(card, const_1.PROPERTY_CONTROLLER) === magi.data.controller));
-                case const_1.PROMPT_TYPE_RELIC:
-                    return allCardsInPlay.some(card => card.card.type === const_1.TYPE_RELIC);
-                case const_1.PROMPT_TYPE_OWN_SINGLE_CREATURE:
-                    return ourCardsInPlay.some(card => card.card.type === const_1.TYPE_CREATURE);
-                case const_1.PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
-                    return this.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.some(card => card.id !== source.id);
-                }
-                case const_1.PROMPT_TYPE_POWER_ON_MAGI: {
-                    const magi = this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, source.data.controller).cards;
-                    return magi.some(magi => magi.card.data.powers && magi.card.data.powers.some(power => power.cost === const_1.COST_X || (power.cost <= magi.data.energy + 2)));
-                }
-                case const_1.PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-                    if ('restrictions' in promptAction.promptParams && promptAction.promptParams.restrictions) {
-                        const restrictionsWithValues = promptAction.promptParams.restrictions.map(({ type, value }) => {
-                            const restrictionValue = (typeof value === 'string' &&
-                                value in metaValues) ? metaValues[value] : value;
-                            return {
-                                type,
-                                value: restrictionValue,
-                            };
-                        });
-                        return this.checkAnyCardForRestrictions(allCardsInPlay.filter(card => card.card.type === const_1.TYPE_CREATURE), restrictionsWithValues);
-                    }
-                    else if ('restriction' in promptAction.promptParams) {
-                        switch (promptAction.promptParams.restriction) {
-                            case const_1.RESTRICTION_OWN_CREATURE: {
-                                return this.checkAnyCardForRestriction(allCardsInPlay.filter(card => card.card.type === const_1.TYPE_CREATURE), promptAction.promptParams.restriction, source.data.controller);
-                            }
-                            case const_1.RESTRICTION_OPPONENT_CREATURE: {
-                                return this.checkAnyCardForRestriction(allCardsInPlay.filter(card => card.card.type === const_1.TYPE_CREATURE), promptAction.promptParams.restriction, source.data.controller);
-                            }
-                            default: {
-                                const restrictionValue = (typeof promptAction.promptParams.restrictionValue === 'string' &&
-                                    promptAction.promptParams.restrictionValue in metaValues) ? metaValues[promptAction.promptParams.restrictionValue] : promptAction.promptParams.restrictionValue;
-                                return this.checkAnyCardForRestriction(allCardsInPlay.filter(card => card.card.type === const_1.TYPE_CREATURE), promptAction.promptParams.restriction, restrictionValue);
-                            }
-                        }
-                    }
-                    return true;
-                }
-                case const_1.PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
-                    const zoneOwner = this.getMetaValue(promptAction.promptParams.zoneOwner, source.id);
-                    const cardsInZone = this.getZone(promptAction.promptParams.zone, zoneOwner).cards;
-                    const numberOfCards = this.getMetaValue(promptAction.promptParams.numberOfCards, source.id);
-                    // if (cardsInZone.length < numberOfCards) {
-                    //	 return false;
-                    // }
-                    if (promptAction.promptParams.restrictions) {
-                        return this.checkAnyCardForRestrictions(cardsInZone, promptAction.promptParams.restrictions);
-                    }
-                    else if (promptAction.promptParams.restriction) {
-                        switch (promptAction.promptParams.restriction) {
-                            case const_1.RESTRICTION_OWN_CREATURE: {
-                                return this.checkAnyCardForRestriction(cardsInZone.filter(card => card.card.type === const_1.TYPE_CREATURE), promptAction.promptParams.restriction, source.data.controller);
-                            }
-                            case const_1.RESTRICTION_OPPONENT_CREATURE: {
-                                return this.checkAnyCardForRestriction(cardsInZone.filter(card => card.card.type === const_1.TYPE_CREATURE), promptAction.promptParams.restriction, source.data.controller);
-                            }
-                            default: {
-                                return this.checkAnyCardForRestriction(cardsInZone.filter(card => card.card.type === const_1.TYPE_CREATURE), promptAction.promptParams.restriction, promptAction.promptParams.restrictionValue);
-                            }
-                        }
-                    }
-                    return true;
-                }
-                case const_1.PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
-                    const zoneOwner = this.getMetaValue(promptAction.promptParams.zoneOwner, source.id);
-                    const cardsInZone = this.getZone(promptAction.promptParams.zone, zoneOwner).cards;
-                    if (promptAction.promptParams.restrictions) {
-                        return this.checkAnyCardForRestrictions(cardsInZone, promptAction.promptParams.restrictions);
-                    }
-                    else if (promptAction.promptParams.restriction) {
-                        switch (promptAction.promptParams.restriction) {
-                            case const_1.RESTRICTION_OWN_CREATURE: {
-                                return this.checkAnyCardForRestriction(cardsInZone.filter(card => card.card.type === const_1.TYPE_CREATURE), promptAction.promptParams.restriction, source.data.controller);
-                            }
-                            case const_1.RESTRICTION_OPPONENT_CREATURE: {
-                                return this.checkAnyCardForRestriction(cardsInZone.filter(card => card.card.type === const_1.TYPE_CREATURE), promptAction.promptParams.restriction, source.data.controller);
-                            }
-                            default: {
-                                return this.checkAnyCardForRestriction(cardsInZone.filter(card => card.card.type === const_1.TYPE_CREATURE), promptAction.promptParams.restriction, promptAction.promptParams.restrictionValue);
-                            }
-                        }
-                    }
-                    return true;
-                }
-                default:
-                    return true;
-            }
-        });
-        return allPromptsAreDoable;
+        return this.promptValidator.checkPrompts(source, preparedActions, isPower, powerCost);
     }
     update(initialAction) {
         if (this.hasWinner()) {

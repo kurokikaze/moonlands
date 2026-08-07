@@ -4,7 +4,7 @@ import { ResolvePromptType } from './resolvePrompt';
 import { SelectorTypeType, SelectType } from './select';
 import { EffectTypeType, EffectType } from './effect';
 import { PromptType } from './prompt';
-import { PropertyType, ConditionType, ExpirationObjectType, RestrictionObjectType, PromptTypeType } from './common';
+import { PropertyType, ConditionType, ExpirationObjectType, RestrictionObjectType, PromptTypeType, Region } from './common';
 import { AttackEffect } from './attack';
 import { LogEntryType } from './log';
 import { PromptParamsType } from '..';
@@ -225,3 +225,5 @@ export type SerializedState = {
 export type MercenneFixed = {
     random: () => number;
 };
+export type MetaDataValue = CardInGame | CardInGame[] | Region | number | Record<string, number> | string;
+export type MetaDataRecord = Record<string, MetaDataValue>;
