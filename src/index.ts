@@ -35,26 +35,24 @@ import {
 	PROPERTY_CAN_ATTACK_MAGI_DIRECTLY,
 	PROPERTY_POWER_COST,
 	PROPERTY_CREATURE_TYPES,
-	PROPERTY_STATUS_WAS_ATTACKED,
-	PROPERTY_STATUS_DEFEATED_CREATURE,
-	PROPERTY_ENERGY_LOSS_THRESHOLD,
 	PROPERTY_STATUS,
 	PROPERTY_ABLE_TO_ATTACK,
 	PROPERTY_MAGI_NAME,
 	PROPERTY_CAN_BE_ATTACKED,
-
+	PROPERTY_PROTECTION,
+	PROPERTY_CREATURE_NAME,
+	
 	CALCULATION_SET,
 	CALCULATION_DOUBLE,
 	CALCULATION_ADD,
 	CALCULATION_SUBTRACT,
-	CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE,
 	CALCULATION_HALVE_ROUND_DOWN,
 	CALCULATION_HALVE_ROUND_UP,
 	CALCULATION_MIN,
 	CALCULATION_MAX,
+	CALCULATION_MULTIPLY,
 
 	SELECTOR_CREATURES,
-	SELECTOR_MAGI,
 	SELECTOR_CREATURES_AND_MAGI,
 	SELECTOR_RELICS,
 	SELECTOR_OWN_MAGI,
@@ -67,7 +65,6 @@ import {
 	SELECTOR_MAGI_OF_REGION,
 	SELECTOR_OPPONENT_ID,
 	SELECTOR_MAGI_NOT_OF_REGION,
-	SELECTOR_OWN_SPELLS_IN_HAND,
 	SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE,
 	SELECTOR_CARDS_WITH_ENERGIZE_RATE,
 	SELECTOR_OWN_CARDS_IN_PLAY,
@@ -76,11 +73,15 @@ import {
 	SELECTOR_OWN_CREATURES_OF_TYPE,
 	SELECTOR_OTHER_CREATURES_OF_TYPE,
 	SELECTOR_STATUS,
-	SELECTOR_OWN_CREATURES_WITH_STATUS,
 	SELECTOR_CREATURES_WITHOUT_STATUS,
 	SELECTOR_ID,
 	SELECTOR_CREATURES_OF_PLAYER,
 	SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY,
+	SELECTOR_NTH_CARD_OF_ZONE,
+	SELECTOR_OWN_CARDS_IN_HAND,
+	SELECTOR_CARDS_IN_HAND,
+	SELECTOR_MAGI_OF_PLAYER,
+	SELECTOR_RANDOM_CARD_IN_HAND,
 
 	STATUS_BURROWED,
 
@@ -101,6 +102,13 @@ import {
 	PROMPT_TYPE_MAY_ABILITY,
 	PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
 	PROMPT_TYPE_PLAYER,
+	PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
+	PROMPT_TYPE_NUMBER_OF_CREATURES,
+	PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED,
+	PROMPT_TYPE_POWER_ON_MAGI,
+	PROMPT_TYPE_ALTERNATIVE,
+	PROMPT_TYPE_PAYMENT_SOURCE,
+	PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
 
 	NO_PRIORITY,
 	PRIORITY_PRS,
@@ -159,21 +167,18 @@ import {
 	EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP,
 	EFFECT_TYPE_ATTACK,
 	EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+	EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP,
+	EFFECT_TYPE_DIE_ROLLED,
+	EFFECT_TYPE_EXECUTE_POWER_EFFECTS,
+	EFFECT_TYPE_DISCARD_CARD_FROM_HAND,
+	EFFECT_TYPE_PLAY_FINISHED,
+	EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED,
+	EFFECT_TYPE_POWER_FINISHED,
+	EFFECT_TYPE_PROMPT_ENTERED,
 
 	REGION_UNIVERSAL,
 
-	RESTRICTION_TYPE,
-	RESTRICTION_REGION,
-	RESTRICTION_ENERGY_LESS_THAN_STARTING,
-	RESTRICTION_ENERGY_LESS_THAN,
-	RESTRICTION_CREATURE_TYPE,
 	RESTRICTION_OWN_CREATURE,
-	RESTRICTION_OPPONENT_CREATURE,
-	RESTRICTION_PLAYABLE,
-	RESTRICTION_CREATURE_WAS_ATTACKED,
-	RESTRICTION_MAGI_WITHOUT_CREATURES,
-	RESTRICTION_STATUS,
-	RESTRICTION_REGION_IS_NOT,
 	RESTRICTION_ENERGY_EQUALS,
 
 	COST_X,
@@ -201,47 +206,19 @@ import {
 	LOG_ENTRY_CREATURE_ENERGY_GAIN,
 	LOG_ENTRY_MAGI_ENERGY_GAIN,
 	LOG_ENTRY_MAGI_DEFEATED,
+	LOG_ENTRY_DIE_ROLLED,
+	LOG_ENTRY_CARD_DISCARDED_FROM_HAND,
 
 	ACTION_NONE,
-
-	EXPIRATION_ANY_TURNS,
-	EXPIRATION_NEVER,
-	EXPIRATION_OPPONENT_TURNS,
 
 	PROTECTION_FROM_POWERS,
 	PROTECTION_FROM_SPELLS,
 	PROTECTION_TYPE_DISCARDING_FROM_PLAY,
 	PROTECTION_TYPE_GENERAL,
-	CARD_COUNT,
-	PROPERTY_PROTECTION,
 	PROTECTION_FROM_ATTACKS,
-	CALCULATION_MULTIPLY,
-	EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP,
 	PROTECTION_TYPE_ENERGY_LOSS,
-	PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
-	SELECTOR_NTH_CARD_OF_ZONE,
-	EFFECT_TYPE_DIE_ROLLED,
-	LOG_ENTRY_DIE_ROLLED,
-	PROPERTY_CREATURE_NAME,
-	RESTRICTION_CREATURE_NAME,
-	PROMPT_TYPE_NUMBER_OF_CREATURES,
-	PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED,
-	SELECTOR_SELF_AND_STATUS,
-	EFFECT_TYPE_EXECUTE_POWER_EFFECTS,
-	PROMPT_TYPE_POWER_ON_MAGI,
-	PROMPT_TYPE_ALTERNATIVE,
-	SELECTOR_OWN_CARDS_IN_HAND,
-	SELECTOR_CARDS_IN_HAND,
-	PROMPT_TYPE_PAYMENT_SOURCE,
-	EFFECT_TYPE_DISCARD_CARD_FROM_HAND,
-	LOG_ENTRY_CARD_DISCARDED_FROM_HAND,
-	SELECTOR_MAGI_OF_PLAYER,
-	SELECTOR_RANDOM_CARD_IN_HAND,
-	EFFECT_TYPE_PLAY_FINISHED,
-	EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED,
-	EFFECT_TYPE_POWER_FINISHED,
-	PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
-	EFFECT_TYPE_PROMPT_ENTERED,
+
+	CARD_COUNT,
 } from './const';
 
 import { actionMap } from './actionMaps/effects';
@@ -250,9 +227,12 @@ import { showAction } from './logAction';
 import clone from './clone';
 
 import { byName } from './cards';
-import CardInGame, { ConvertedCard, InGameData } from './classes/CardInGame';
-import Card, { CostType, ModifiedCardType } from './classes/Card';
+import CardInGame, { ConvertedCard } from './classes/CardInGame';
+import { CostType } from './classes/Card';
 import Zone from './classes/Zone';
+import { SelectorEngine } from './SelectorEngine';
+import { PromptValidator } from './PromptValidator';
+import { CardWithModification, EnrichedStaticAbilityType, GameStaticAbility } from './LayeredModificationEngine';
 import {
 	AnyEffectType,
 	PromptTypeType,
@@ -263,7 +243,6 @@ import {
 	PropertyType,
 	PromptType,
 	EnrichedAction,
-	StaticAbilityType,
 	OperatorType,
 	ConditionType,
 	FindType,
@@ -271,7 +250,6 @@ import {
 	ReplacementEffectType,
 	ContinuousEffectType,
 	EffectType,
-	PropertyGetterType,
 	ZoneType,
 	Region,
 	ProtectionType,
@@ -280,6 +258,7 @@ import {
 	SerializedState,
 	SerializedZones,
 	MercenneFixed,
+	MetaDataRecord,
 } from './types';
 import {
 	AnyPromptEnteredEffect,
@@ -300,15 +279,6 @@ const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
 	card: cardInGame.card.name,
 	data: cardInGame.data,
 });
-
-type EnrichedStaticAbilityType = StaticAbilityType & {
-	player: number;
-	card?: CardInGame;
-}
-
-type GameStaticAbility = StaticAbilityType & {
-	selector: typeof SELECTOR_STATUS;
-}
 
 type PriorityType = typeof NO_PRIORITY | typeof PRIORITY_PRS | typeof PRIORITY_ATTACK | typeof PRIORITY_CREATURES;
 
@@ -384,14 +354,6 @@ type StepType = {
 	priority: PriorityType;
 	automatic: boolean;
 	effects?: ProtoEffectType[]
-}
-
-type CardWithModification = {
-	card: Card;
-	data: InGameData;
-	modifiedCard: ModifiedCardType;
-	id: string;
-	owner: number;
 }
 
 type ExpandRecursively<T> = T extends object
@@ -528,8 +490,6 @@ export type PromptParamsType = {
 	alternatives?: AlternativeType[]
 }
 
-export type MetaDataValue = CardInGame | CardInGame[] | Region | number | Record<string, number> | string;
-export type MetaDataRecord = Record<string, MetaDataValue>
 export type StateShape = {
 	step: number | null;
 	turn?: number;
@@ -580,6 +540,8 @@ export class State {
 	timerEnabled: boolean;
 	turnTimeout: ReturnType<typeof setTimeout> | null;
 	turnNotifyTimeout: ReturnType<typeof setTimeout> | null;
+	selectorEngine: SelectorEngine;
+	promptValidator: PromptValidator;
 
 	constructor(state: StateShape = defaultState) {
 		this.state = {
@@ -599,6 +561,24 @@ export class State {
 
 			this.actionsOne = [];
 		this.actionsTwo = [];
+
+		const self = this;
+		this.selectorEngine = new SelectorEngine({
+			getZone: (type, player = null) => this.getZone(type, player),
+			getOpponent: (player) => this.getOpponent(player),
+			get players() { return self.players; },
+			getContinuousEffects: () => this.state.continuousEffects,
+			getTwister: () => this.twister,
+		});
+
+		this.promptValidator = new PromptValidator({
+			getZone: (type, player = null) => this.getZone(type, player),
+			modifyByStaticAbilities: (target, property, subProperty) => this.modifyByStaticAbilities(target, property, subProperty),
+			getOpponent: (player) => this.getOpponent(player),
+			getMetaValue: (value, sourceId) => this.getMetaValue(value, sourceId),
+			checkAnyCardForRestrictions: (cards, restrictions) => this.checkAnyCardForRestrictions(cards, restrictions),
+			checkAnyCardForRestriction: (cards, restriction, restrictionValue) => this.checkAnyCardForRestriction(cards, restriction, restrictionValue),
+		});
 	}
 
 	// @deprecated
@@ -1161,10 +1141,13 @@ export class State {
 	}
 
     zoneHash: Map<string, Zone> = new Map()
-	modifiedCardDataCache: Map<string, CardWithModification> = new Map()
 
 	clearModifiedCardDataCache(): void {
-		this.modifiedCardDataCache.clear();
+		this.selectorEngine.clearModifiedCardDataCache();
+	}
+
+	get modifiedCardDataCache(): Map<string, CardWithModification> {
+		return this.selectorEngine.modifiedCardDataCache;
 	}
 
 	getZone(type: ZoneType, player: number | null = null): Zone {
@@ -1279,31 +1262,11 @@ export class State {
 	}
 
 	selectNthCardOfZone(player: number, zoneType: ZoneType, cardNumber: number, restrictions?: RestrictionObjectType[]): CardInGame[] {
-		const zoneCards = this.getZone(zoneType, player).cards;
-		const filteredCards = (restrictions && restrictions.length) ? zoneCards.filter(this.makeCardFilter(restrictions)) : zoneCards;
-		const index = cardNumber - 1; // 1-based indexing, for better card data readability
-
-		if (filteredCards.length < index + 1) {
-			return []
-		} else {
-			return [filteredCards[index]];
-		}
+		return this.selectorEngine.selectNthCardOfZone(player, zoneType, cardNumber, restrictions);
 	}
 
 	selectRandomCardOfZone(player: number, zoneType: ZoneType): CardInGame[] {
-		const zoneCards = this.getZone(zoneType, player).cards;
-		// const filteredCards = (restrictions && restrictions.length) ? zoneCards.filter(this.makeCardFilter(restrictions)) : zoneCards;
-
-		// @ts-ignore
-		const randomValue = this.twister ? this.twister.random() : Math.random();
-
-		const index = Math.floor(randomValue * zoneCards.length);
-
-		if (zoneCards.length == 0) {
-			return []
-		} else {
-			return [zoneCards[index]];
-		}
+		return this.selectorEngine.selectRandomCardOfZone(player, zoneType);
 	}
 
 	useSelector(selector: typeof SELECTOR_STATUS, player: null, argument: StatusType): CardInGame[]
@@ -1326,79 +1289,7 @@ export class State {
 	useSelector(selector: typeof SELECTOR_RELICS, player: null): CardInGame[]
 	useSelector(selector: typeof SELECTOR_RANDOM_CARD_IN_HAND, player: null): CardInGame[]
 	useSelector(selector: SelectorTypeType, player: number | null, argument?: any): CardInGame[] | number {
-		switch (selector) {
-			case SELECTOR_OWN_CARDS_IN_PLAY: {
-				return this.getZone(ZONE_TYPE_IN_PLAY).cards
-					.filter(card => this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player);
-			}
-			case SELECTOR_RELICS: {
-				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.type == TYPE_RELIC);
-			}
-			case SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE: {
-				return [
-					...this.getZone(ZONE_TYPE_IN_PLAY).cards
-						.filter(card => this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player && this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0),
-					...this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).cards
-						.filter(card => this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0),
-				];
-			}
-			case SELECTOR_CARDS_WITH_ENERGIZE_RATE: {
-				return [
-					...this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0),
-					...this.getZone(ZONE_TYPE_ACTIVE_MAGI, this.players[0]).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0),
-					...this.getZone(ZONE_TYPE_ACTIVE_MAGI, this.players[1]).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0),
-				];
-			}
-			case SELECTOR_OPPONENT_ID:
-				return this.players.find(id => id != argument) || 999;
-			case SELECTOR_CREATURES:
-				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.type == TYPE_CREATURE);
-			case SELECTOR_MAGI:
-				return [
-					...this.getZone(ZONE_TYPE_ACTIVE_MAGI, this.players[0]).cards,
-					...this.getZone(ZONE_TYPE_ACTIVE_MAGI, this.players[1]).cards,
-				].filter(Boolean);
-			case SELECTOR_TOP_MAGI_OF_PILE: {
-				const topMagi = this.getZone(ZONE_TYPE_MAGI_PILE, player).cards[0];
-				return [topMagi]; // Selectors always have to return array
-			}
-			case SELECTOR_OWN_MAGI:
-				return this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).cards;
-			// case SELECTOR_OWN_MAGI_SINGLE:
-			// 	return this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card;
-			case SELECTOR_OWN_SPELLS_IN_HAND:
-				return this.getZone(ZONE_TYPE_HAND, player).cards.filter(card => card.card.type == TYPE_SPELL);
-			case SELECTOR_ENEMY_MAGI:
-				return this.getZone(ZONE_TYPE_ACTIVE_MAGI, this.getOpponent(player || 0)).cards;
-			case SELECTOR_OWN_CREATURES:
-				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player && card.card.type == TYPE_CREATURE);
-			case SELECTOR_ENEMY_CREATURES:
-				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) != player && card.card.type == TYPE_CREATURE);
-			case SELECTOR_CREATURES_OF_REGION:
-				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_REGION) == argument && card.card.type == TYPE_CREATURE);
-			case SELECTOR_CREATURES_NOT_OF_REGION:
-				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_REGION) != argument && card.card.type == TYPE_CREATURE);
-			case SELECTOR_CREATURES_OF_TYPE:
-				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.name.split(' ').includes(argument) && card.card.type == TYPE_CREATURE);
-			case SELECTOR_CREATURES_NOT_OF_TYPE:
-				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => !card.card.name.split(' ').includes(argument) && card.card.type == TYPE_CREATURE);
-			case SELECTOR_OWN_CREATURES_OF_TYPE:
-				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card =>
-					this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player &&
-					card.card.type == TYPE_CREATURE &&
-					card.card.name.split(' ').includes(argument)
-				);
-			case SELECTOR_STATUS:
-				return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card =>
-					this.modifyByStaticAbilities(card, PROPERTY_STATUS, argument),
-				);
-			case SELECTOR_CREATURES_WITHOUT_STATUS:
-				return this.getZone(ZONE_TYPE_IN_PLAY).cards
-					.filter(card => card.card.type == TYPE_CREATURE)
-					.filter(card => !this.modifyByStaticAbilities(card, PROPERTY_STATUS, argument));
-			default:
-				return []
-		}
+		return this.selectorEngine.useSelectorAny(selector, player, argument);
 	}
 
 	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_ABLE_TO_ATTACK): boolean
@@ -1417,75 +1308,7 @@ export class State {
 	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_COST): CostType
 	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_STATUS, subProperty: typeof STATUS_BURROWED): boolean
 	getByProperty(target: CardInGame | CardWithModification, property: PropertyType, subProperty: null | typeof STATUS_BURROWED | string = null): any {
-		switch (property) {
-			case PROPERTY_ID:
-				return target.id;
-			case PROPERTY_TYPE:
-				return target.card.type;
-			case PROPERTY_CREATURE_TYPES:
-				return target.card.name.split(' ');
-			case PROPERTY_CREATURE_NAME:
-				return target.card.name;
-			case PROPERTY_MAGI_NAME:
-				return target.card.name;
-			case PROPERTY_CONTROLLER:
-				return target.data.controller;
-			case PROPERTY_ENERGY_COUNT:
-				return target.data.energy;
-			case PROPERTY_ATTACKS_PER_TURN:
-				return target.modifiedCard ?
-					target.modifiedCard.data.attacksPerTurn :
-					target.card.data.attacksPerTurn;
-			case PROPERTY_COST:
-				return target.modifiedCard ?
-					target.modifiedCard.cost :
-					target.card.cost;
-			case PROPERTY_ENERGIZE:
-				return target.modifiedCard ?
-					target.modifiedCard.data.energize :
-					target.card.data.energize;
-			case PROPERTY_REGION:
-				return target.card.region;
-			case PROPERTY_CAN_ATTACK_MAGI_DIRECTLY:
-				return target.modifiedCard ?
-					target.modifiedCard.data.canAttackMagiDirectly :
-					target.card.data.canAttackMagiDirectly;
-			case PROPERTY_MAGI_STARTING_ENERGY:
-				return target.modifiedCard ?
-					target.modifiedCard.data.startingEnergy :
-					target.card.data.startingEnergy;
-			case PROPERTY_POWER_COST:
-				const powers = target.modifiedCard ? target.modifiedCard.data?.powers : target.card.data.powers;
-				return (powers && powers.length) ? powers.find(({ name }) => name === subProperty)?.cost : 0;
-			case PROPERTY_STATUS_WAS_ATTACKED:
-				return target.data.wasAttacked || false;
-			case PROPERTY_CAN_BE_ATTACKED:
-				return target.modifiedCard.data.canBeAttacked;
-			case PROPERTY_STATUS_DEFEATED_CREATURE:
-				return target.data.defeatedCreature || false;
-			case PROPERTY_PROTECTION:
-				return target.modifiedCard ?
-					target.modifiedCard.data.protection :
-					target.card.data.protection;
-			case PROPERTY_STATUS: {
-				switch (subProperty) {
-					case STATUS_BURROWED:
-						return Object.hasOwnProperty.call(target.data, 'burrowed') ?
-							target.data.burrowed :
-							target.card.data.burrowed;
-					default:
-						return false;
-				}
-			}
-			// These properties can only be modified by static abilities / continuous effects
-			case PROPERTY_ENERGY_LOSS_THRESHOLD:
-				return target.modifiedCard ?
-					target.modifiedCard.data.energyLossThreshold : 0;
-			case PROPERTY_ABLE_TO_ATTACK:
-				const defaultValue = 'ableToAttack' in target.card.data ? target.card.data.ableToAttack : true;
-				return target.modifiedCard ?
-					target.modifiedCard.data.ableToAttack : defaultValue;
-		}
+		return this.selectorEngine.getByPropertyAny(target, property, subProperty);
 	}
 
 	isCardAffectedByEffect(card: CardInGame, effect: EnrichedAction & EffectType) {
@@ -1567,472 +1390,35 @@ export class State {
 	}
 
 	isCardAffectedByStaticAbility(card: CardInGame | CardWithModification, staticAbility: EnrichedStaticAbilityType | GameStaticAbility) {
-		switch (staticAbility.selector) {
-			case SELECTOR_ID: {
-				return card.id === staticAbility.selectorParameter;
-			}
-			case SELECTOR_SELF_AND_STATUS: {
-				return 'card' in staticAbility &&
-					staticAbility.card &&
-					card.id === staticAbility.card.id &&
-					this.getByProperty(card, PROPERTY_STATUS, staticAbility.selectorParameter as StatusType);
-			}
-			case SELECTOR_CREATURES: {
-				return card.card.type === TYPE_CREATURE &&
-					this.getZone(ZONE_TYPE_IN_PLAY).cards.some(({ id }) => id === card.id);
-			}
-			case SELECTOR_OWN_CREATURES: {
-				return card.card.type === TYPE_CREATURE &&
-					this.getZone(ZONE_TYPE_IN_PLAY).cards.some(({ id }) => id === card.id) &&
-					card.data.controller === staticAbility.player;
-			}
-			case SELECTOR_OWN_CREATURES_OF_TYPE: {
-				return card.card.type === TYPE_CREATURE &&
-					this.getZone(ZONE_TYPE_IN_PLAY).cards.some(({ id }) => id === card.id) &&
-					card.data.controller === staticAbility.player &&
-					card.card.name.split(' ').includes(staticAbility?.selectorParameter?.toString() || 'no matches');
-			}
-			case SELECTOR_CREATURES_OF_PLAYER: {
-				return card.card.type === TYPE_CREATURE &&
-					this.getZone(ZONE_TYPE_IN_PLAY).cards.some(({ id }) => id === card.id) &&
-					card.data.controller == staticAbility.selectorParameter;
-			}
-			case SELECTOR_OWN_MAGI: {
-				return card.card.type === TYPE_MAGI &&
-					this.getZone(ZONE_TYPE_ACTIVE_MAGI, staticAbility.player).cards.length === 1 &&
-					this.getZone(ZONE_TYPE_ACTIVE_MAGI, staticAbility.player)?.card?.id === card.id;
-			}
-			case SELECTOR_STATUS: {
-				return this.getByProperty(card, PROPERTY_STATUS, staticAbility.selectorParameter as StatusType);
-			}
-			case SELECTOR_OWN_CREATURES_WITH_STATUS: {
-				return this.getByProperty(card, PROPERTY_STATUS, staticAbility.selectorParameter as StatusType) &&
-					card.data.controller === staticAbility.player;
-			}
-			case SELECTOR_OWN_SPELLS_IN_HAND: {
-				return this.getZone(ZONE_TYPE_HAND, staticAbility.player).cards.some(({ id }) => id === card.id && card.card.type == TYPE_SPELL);
-			}
-			default: {
-				console.error(`Unknown static ability selector: ${staticAbility.selector}`)
-				return false;
-			}
-		}
+		return this.selectorEngine.isCardAffectedByStaticAbility(card, staticAbility);
 	}
 
 	modifyByStaticAbilities(target: CardInGame, property: PropertyType, subProperty: string | null | undefined = null): any {
-		if (!target) {
-			return null;
-		}
-
-		const cached = this.modifiedCardDataCache.get(target.id);
-		if (cached) {
-			// Reuse the expensive modifiedCard/static-ability computation.
-			// Start from cached.data (preserves values written by the reducer such as
-			// `burrowed` and `controller` set by continuous effects), then overwrite the
-			// purely mutable live fields so things like energy and attack flags are fresh.
-			const freshData = {
-				...cached.data,
-				energy: target.data.energy,
-				attacked: target.data.attacked,
-				actionsUsed: target.data.actionsUsed,
-				energyLostThisTurn: target.data.energyLostThisTurn,
-				defeatedCreature: target.data.defeatedCreature,
-				hasAttacked: target.data.hasAttacked,
-				wasAttacked: target.data.wasAttacked,
-				attachedTo: target.data.attachedTo,
-			};
-			// @ts-ignore
-			return this.getByProperty({ ...cached, data: freshData }, property, subProperty);
-		}
-
-		const PLAYER_ONE = this.players[0];
-		const PLAYER_TWO = this.players[1];
-
-		const gameStaticAbilities: GameStaticAbility[] = [
-			{
-				name: 'Burrowed - Energy loss',
-				text: 'Your burrowed creatures may not lose more than 2 energy each turn',
-				selector: SELECTOR_STATUS,
-				selectorParameter: STATUS_BURROWED,
-				property: PROPERTY_ENERGY_LOSS_THRESHOLD,
-				modifier: {
-					operator: CALCULATION_SET,
-					operandOne: 2,
-				},
-			},
-			{
-				name: 'Burrowed - Ability to attack',
-				text: 'Your burrowed creatures cannot attack',
-				selector: SELECTOR_STATUS,
-				selectorParameter: STATUS_BURROWED,
-				property: PROPERTY_ABLE_TO_ATTACK,
-				modifier: {
-					operator: CALCULATION_SET,
-					operandOne: false,
-				},
-			},
-		];
-
-		// gathering static abilities from the field, adding players Magi to them
-		const allZonesCards = [
-			...this.getZone(ZONE_TYPE_IN_PLAY).cards,
-			...this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE).cards,
-			...this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO).cards,
-		];
-
-		const continuousStaticAbilities: EnrichedStaticAbilityType[] = this.state.continuousEffects.map(
-			effect => effect.staticAbilities?.map(a => ({ ...a, player: effect.player })) || []
-		).flat();
-
-		const propertyLayers = {
-			[PROPERTY_CONTROLLER]: 0,
-			[PROPERTY_POWER_COST]: 1,
-			[PROPERTY_COST]: 1,
-			[PROPERTY_ENERGIZE]: 2,
-			[PROPERTY_STATUS]: 3,
-			[PROPERTY_ATTACKS_PER_TURN]: 4,
-			[PROPERTY_CAN_ATTACK_MAGI_DIRECTLY]: 5,
-			[PROPERTY_ENERGY_LOSS_THRESHOLD]: 6,
-			[PROPERTY_ABLE_TO_ATTACK]: 7,
-			[PROPERTY_PROTECTION]: 8,
-		};
-
-		const zoneAbilities: EnrichedStaticAbilityType[] = allZonesCards.reduce<EnrichedStaticAbilityType[]>(
-			(acc, cardInPlay) => cardInPlay.card.data.staticAbilities ? [
-				...acc,
-				...(cardInPlay.card.data.staticAbilities.map(a => ({ ...a, player: cardInPlay.data.controller, card: cardInPlay })))
-			] : acc,
-			[],
-		);
-
-		const staticAbilities = [...gameStaticAbilities, ...zoneAbilities, ...continuousStaticAbilities].sort((a, b) => propertyLayers[a.property as keyof typeof propertyLayers] - propertyLayers[b.property as keyof typeof propertyLayers]);
-
-		let initialCardData: CardWithModification = {
-			card: target.card,
-			modifiedCard: {
-				...target.card,
-				data: {
-					protection: undefined,
-					...target.card.data,
-					energyLossThreshold: 0,
-					ableToAttack: 'ableToAttack' in target.card.data ? target.card.data.ableToAttack : true,
-				},
-			},
-			data: {
-				...target.data,
-			},
-			id: target.id,
-			owner: target.owner,
-		};
-
-		// Okay, sooner or later this should be rewritten
-		// Here we should construct new CardInGame object containing new Card object (both with new values)
-		const modifiedCardData: CardWithModification = staticAbilities.reduce<CardWithModification>(this.layeredDataReducer.bind(this), initialCardData);
-
-		this.modifiedCardDataCache.set(target.id, modifiedCardData);
-
-		// @ts-ignore
-		return this.getByProperty(modifiedCardData, property, subProperty);
+		return this.selectorEngine.modifyByStaticAbilities(target, property, subProperty);
 	}
 
 	layeredDataReducer(currentCard: CardWithModification, staticAbility: EnrichedStaticAbilityType | GameStaticAbility): CardWithModification {
-		if (this.isCardAffectedByStaticAbility(currentCard, staticAbility)) {
-			switch (staticAbility.property) {
-				case PROPERTY_COST: {
-					const initialValue = this.getByProperty(currentCard, PROPERTY_COST);
-					const { operator, operandOne } = staticAbility.modifier;
-
-					if (typeof initialValue !== 'number') {
-						return {
-							...currentCard,
-							modifiedCard: {
-								...currentCard.modifiedCard,
-								cost: initialValue,
-							},
-						}
-					}
-					const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-						this.performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
-						this.performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
-
-					return {
-						...currentCard,
-						modifiedCard: {
-							...currentCard.modifiedCard,
-							cost: resultValue,
-						},
-					};
-				}
-				case PROPERTY_ENERGIZE: {
-					const initialValue = this.getByProperty(currentCard, PROPERTY_ENERGIZE);
-					const { operator, operandOne } = staticAbility.modifier;
-
-					const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-						this.performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
-						this.performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
-
-					return {
-						...currentCard,
-						modifiedCard: {
-							...currentCard.modifiedCard,
-							data: {
-								...currentCard.modifiedCard.data,
-								energize: resultValue,
-							},
-						},
-					};
-				}
-				case PROPERTY_ATTACKS_PER_TURN: {
-					const initialValue = this.getByProperty(currentCard, PROPERTY_ATTACKS_PER_TURN);
-					const { operator, operandOne } = staticAbility.modifier;
-
-					const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-						this.performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
-						this.performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
-
-					return {
-						...currentCard,
-						modifiedCard: {
-							...currentCard.modifiedCard,
-							data: {
-								...currentCard.modifiedCard.data,
-								attacksPerTurn: resultValue,
-							},
-						},
-					};
-				}
-				case PROPERTY_ENERGY_LOSS_THRESHOLD: {
-					const initialValue = this.getByProperty(currentCard, PROPERTY_ENERGIZE);
-					const { operator, operandOne } = staticAbility.modifier;
-
-					const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-						this.performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
-						this.performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
-
-					return {
-						...currentCard,
-						modifiedCard: {
-							...currentCard.modifiedCard,
-							data: {
-								...currentCard.modifiedCard.data,
-								energyLossThreshold: resultValue,
-							},
-						},
-					};
-				}
-				case PROPERTY_ABLE_TO_ATTACK: {
-					const initialValue = this.getByProperty(currentCard, PROPERTY_ABLE_TO_ATTACK);
-					const { operator, operandOne } = staticAbility.modifier;
-
-					const resultValue = (operator === CALCULATION_SET) ? operandOne : initialValue;
-
-					if (typeof resultValue == 'boolean') {
-						return {
-							...currentCard,
-							modifiedCard: {
-								...currentCard.modifiedCard,
-								data: {
-									...currentCard.modifiedCard.data,
-									ableToAttack: resultValue,
-								},
-							},
-						};
-					} else {
-						return { ...currentCard }
-					}
-				}
-				case PROPERTY_CAN_BE_ATTACKED: {
-					const initialValue = this.getByProperty(currentCard, PROPERTY_CAN_BE_ATTACKED);
-					const { operator, operandOne } = staticAbility.modifier;
-
-					const resultValue = (operator === CALCULATION_SET) ? operandOne : initialValue;
-
-					if (typeof resultValue == 'boolean') {
-						return {
-							...currentCard,
-							modifiedCard: {
-								...currentCard.modifiedCard,
-								data: {
-									...currentCard.modifiedCard.data,
-									canBeAttacked: resultValue,
-								},
-							},
-						};
-					} else {
-						return {
-							...currentCard,
-						};
-					}
-				}
-				case PROPERTY_CONTROLLER: {
-					const initialValue = this.getByProperty(currentCard, PROPERTY_CONTROLLER);
-					const { operator, operandOne } = staticAbility.modifier;
-					const resultValue = (operator === CALCULATION_SET) ? operandOne : initialValue;
-
-					if (typeof resultValue == 'number') {
-						return {
-							...currentCard,
-							data: {
-								...currentCard.data,
-								controller: resultValue,
-							},
-						};
-					} else {
-						return { ...currentCard }
-					}
-				}
-				case PROPERTY_STATUS: {
-					const initialValue = this.getByProperty(currentCard, PROPERTY_STATUS, staticAbility.subProperty as StatusType);
-					const { operator, operandOne } = staticAbility.modifier;
-
-					const resultValue = (operator === CALCULATION_SET) ? operandOne : initialValue;
-
-					if (typeof resultValue == 'boolean') {
-						switch (staticAbility.subProperty) {
-							case STATUS_BURROWED: {
-								return {
-									...currentCard,
-									data: {
-										...currentCard.data,
-										burrowed: resultValue,
-									},
-								};
-							}
-							default: {
-								return currentCard;
-							}
-						}
-					} else {
-						return { ...currentCard }
-					}
-				}
-				case PROPERTY_PROTECTION: {
-					const initialValue = this.getByProperty(currentCard, PROPERTY_PROTECTION);
-					const { operator, operandOne } = staticAbility.modifier;
-
-					const resultValue = (operator === CALCULATION_SET) ? operandOne as ProtectionType[] : initialValue;
-
-					if (typeof resultValue == 'object' && 'from' in resultValue) {
-						return {
-							...currentCard,
-							modifiedCard: {
-								...currentCard.modifiedCard,
-								data: {
-									...currentCard.modifiedCard.data,
-									protection: resultValue,
-								},
-							}
-						};
-					} else {
-						return {
-							...currentCard,
-						}
-					}
-				}
-				case PROPERTY_POWER_COST: {
-					if (currentCard.modifiedCard.data.powers) {
-						const updatedPowers = currentCard.modifiedCard.data.powers.map(power => {
-							const initialValue = this.getByProperty(currentCard, PROPERTY_POWER_COST, power.name);
-							const { operator, operandOne } = staticAbility.modifier;
-
-							const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
-								this.performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :
-								this.performCalculation(operator, (typeof operandOne === 'number') ? operandOne : 0, initialValue);
-
-							return {
-								...power,
-								cost: resultValue,
-							};
-						});
-
-						return {
-							...currentCard,
-							modifiedCard: {
-								...currentCard.modifiedCard,
-								data: {
-									...currentCard.modifiedCard.data,
-									powers: updatedPowers,
-								},
-							},
-						};
-					}
-
-					return currentCard;
-				}
-				default: {
-					return currentCard;
-				}
-			}
-		}
-
-		return currentCard;
+		return this.selectorEngine.layeredDataReducer(currentCard, staticAbility);
 	}
 
 	makeChecker(restriction: RestrictionType, restrictionValue: any): (card: CardInGame) => boolean {
-		switch (restriction) {
-			case RESTRICTION_CREATURE_NAME:
-				return (card: CardInGame) => card.card.name === restrictionValue;
-			case RESTRICTION_CREATURE_TYPE:
-				if (restrictionValue instanceof Array) {
-					return (card: CardInGame) => card.card.name.split(' ').some(type => restrictionValue.includes(type));
-				}
-				return (card: CardInGame) => card.card.name.split(' ').includes(restrictionValue);
-			case RESTRICTION_TYPE:
-				return (card: CardInGame) => card.card.type === restrictionValue;
-			case RESTRICTION_PLAYABLE:
-				return (card: CardInGame) => {
-					const magi = this.useSelector(SELECTOR_OWN_MAGI, card.owner)[0];
-					const cardCost = this.calculateTotalCost(card);
-
-					return magi.data.energy >= cardCost;
-				};
-			case RESTRICTION_MAGI_WITHOUT_CREATURES:
-				return (card: CardInGame): boolean => {
-					if (card.card.type !== TYPE_MAGI) return false;
-					const creatures = this.useSelector(SELECTOR_OWN_CREATURES, card.owner);
-
-					return (creatures && creatures instanceof Array && creatures.length === 0);
-				};
-			case RESTRICTION_REGION:
-				return (card: CardInGame) => card.card.region === restrictionValue;
-			case RESTRICTION_REGION_IS_NOT:
-				return (card: CardInGame) => card.card.region !== restrictionValue;
-			case RESTRICTION_ENERGY_LESS_THAN_STARTING:
-				return (card: CardInGame) => Boolean(card.card.type === TYPE_CREATURE && card.card.cost && typeof card.card.cost == 'number' && card.data.energy < card.card.cost);
-			case RESTRICTION_ENERGY_LESS_THAN:
-				return (card: CardInGame) => card.card.type === TYPE_CREATURE && card.data.energy < restrictionValue;
-			case RESTRICTION_CREATURE_WAS_ATTACKED:
-				return (card: CardInGame) => card.card.type === TYPE_CREATURE && card.data.wasAttacked === true;
-			// For own and opponents creatures we pass effect controller as restrictionValue
-			case RESTRICTION_OWN_CREATURE:
-				return (card: CardInGame) => card.data.controller === restrictionValue;
-			case RESTRICTION_OPPONENT_CREATURE:
-				return (card: CardInGame) => card.data.controller !== restrictionValue;
-			case RESTRICTION_STATUS:
-				return (card: CardInGame) => this.modifyByStaticAbilities(card, PROPERTY_STATUS, restrictionValue);
-			case RESTRICTION_ENERGY_EQUALS:
-				return (card: CardInGame) => card.card.type === TYPE_CREATURE && card.data.energy === restrictionValue;
-			default:
-				return () => true;
-		}
+		return this.selectorEngine.makeChecker(restriction, restrictionValue);
 	}
 
 	checkAnyCardForRestriction(cards: CardInGame[], restriction: RestrictionType, restrictionValue: any) {
-		return cards.some(this.makeChecker(restriction, restrictionValue));
+		return this.selectorEngine.checkAnyCardForRestriction(cards, restriction, restrictionValue);
 	}
 
 	checkAnyCardForRestrictions(cards: CardInGame[], restrictions: RestrictionObjectType[]) {
-		return cards.some(this.makeCardFilter(restrictions));
+		return this.selectorEngine.checkAnyCardForRestrictions(cards, restrictions);
 	}
 
 	checkCardsForRestriction(cards: CardInGame[], restriction: RestrictionType, restrictionValue: any) {
-		return cards.every(this.makeChecker(restriction, restrictionValue));
+		return this.selectorEngine.checkCardsForRestriction(cards, restriction, restrictionValue);
 	}
 
 	makeCardFilter(restrictions: RestrictionObjectType[] = []): (c: CardInGame) => boolean {
-		const checkers = restrictions.map(({ type, value }) => this.makeChecker(type, value));
-		return card =>
-			checkers.every(checker => checker(card)); // combine checkers
+		return this.selectorEngine.makeCardFilter(restrictions);
 	}
 
 	getObjectOrSelf(action: AnyEffectType, self: CardInGame, object: string | number | boolean, property: boolean) {
@@ -2404,16 +1790,7 @@ export class State {
 	}
 
 	calculateTotalCost(card: CardInGame): number {
-		const activeMagiSelected = this.useSelector(SELECTOR_OWN_MAGI, card.owner);
-		if (activeMagiSelected instanceof Array && activeMagiSelected.length) {
-			const activeMagi = activeMagiSelected[0];
-			const baseCost = this.modifyByStaticAbilities(card, PROPERTY_COST);
-			const regionPenalty = (activeMagi.card.region == card.card.region || card.card.region == REGION_UNIVERSAL) ? 0 : 1;
-
-			return baseCost + regionPenalty;
-		}
-
-		return 0;
+		return this.selectorEngine.calculateTotalCost(card);
 	}
 
 	getAvailableCards(player: number, topMagi: CardInGame) {
@@ -2427,189 +1804,7 @@ export class State {
 	}
 
 	checkPrompts(source: CardInGame, preparedActions: AnyEffectType[], isPower: boolean = false, powerCost: number = 0): boolean {
-		const testedActions = [...preparedActions];
-		// Calculate if prompts are resolvable
-		// If source is Magi, it will not be filtered out, being in another zone
-		const creatureWillSurvive = !isPower || source.data.energy > powerCost;
-
-		const ourCardsInPlay = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => (creatureWillSurvive ? true : card.id !== source.id) && this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === source.data.controller);
-		const allCardsInPlay = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => creatureWillSurvive ? true : card.id !== source.id);
-
-		const metaValues: MetaDataRecord = {
-			'$source': source,
-			'$sourceCreature': source,
-		}
-
-		while (testedActions.length && testedActions[0].type === ACTION_GET_PROPERTY_VALUE) {
-			const valueGetter: PropertyGetterType = testedActions[0];
-			testedActions.shift()
-
-			const multiTarget = valueGetter.source;
-			const target = (multiTarget instanceof Array) ? multiTarget[0] : multiTarget;
-			const property = this.getMetaValue(valueGetter.property, valueGetter.generatedBy);
-
-			const modifiedResult = this.modifyByStaticAbilities(target, property);
-
-			const variable = valueGetter.variable || 'result';
-			metaValues[`$${variable}`] = modifiedResult;
-		}
-
-		// powerPromptsDoable
-		const testablePrompts: PromptTypeType[] = [
-			PROMPT_TYPE_SINGLE_CREATURE,
-			PROMPT_TYPE_RELIC,
-			PROMPT_TYPE_OWN_SINGLE_CREATURE,
-			PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
-			PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
-			PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
-			PROMPT_TYPE_MAGI_WITHOUT_CREATURES,
-			PROMPT_TYPE_POWER_ON_MAGI,
-		];
-
-		const testablePromptFilter = (action: AnyEffectType): action is PromptType =>
-			action.type === ACTION_ENTER_PROMPT && testablePrompts.includes(action.promptType);
-
-		const allPrompts = testedActions.filter(testablePromptFilter);
-
-		const allPromptsAreDoable = allPrompts.every(promptAction => {
-			switch (promptAction.promptType) {
-				case PROMPT_TYPE_SINGLE_CREATURE:
-					return allCardsInPlay.some(card => card.card.type === TYPE_CREATURE);
-				case PROMPT_TYPE_MAGI_WITHOUT_CREATURES:
-					const opponent = this.getOpponent(source.data.controller);
-					const magi = [...this.getZone(ZONE_TYPE_ACTIVE_MAGI, source.data.controller).cards, ...this.getZone(ZONE_TYPE_ACTIVE_MAGI, opponent).cards];
-					return magi.some(magi => !allCardsInPlay.some(card => card.card.type === TYPE_CREATURE && this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === magi.data.controller));
-				case PROMPT_TYPE_RELIC:
-					return allCardsInPlay.some(card => card.card.type === TYPE_RELIC);
-				case PROMPT_TYPE_OWN_SINGLE_CREATURE:
-					return ourCardsInPlay.some(card => card.card.type === TYPE_CREATURE);
-				case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
-					return this.getZone(ZONE_TYPE_IN_PLAY).cards.some(card => card.id !== source.id);
-				}
-				case PROMPT_TYPE_POWER_ON_MAGI: {
-					const magi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, source.data.controller).cards;
-					return magi.some(magi => magi.card.data.powers && magi.card.data.powers.some(power => power.cost === COST_X || (power.cost <= magi.data.energy + 2)));
-				}
-				case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-					if ('restrictions' in promptAction.promptParams && promptAction.promptParams.restrictions) {
-						const restrictionsWithValues = promptAction.promptParams.restrictions.map(({ type, value }: RestrictionObjectType) => {
-							const restrictionValue = (
-								typeof value === 'string' &&
-								value in metaValues
-							) ? metaValues[value] : value;
-
-							return {
-								type,
-								value: restrictionValue,
-							};
-						});
-						return this.checkAnyCardForRestrictions(allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE), restrictionsWithValues as RestrictionObjectType[]);
-					} else if ('restriction' in promptAction.promptParams) {
-						switch (promptAction.promptParams.restriction) {
-							case RESTRICTION_OWN_CREATURE: {
-								return this.checkAnyCardForRestriction(
-									allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE),
-									promptAction.promptParams.restriction,
-									source.data.controller,
-								);
-							}
-							case RESTRICTION_OPPONENT_CREATURE: {
-								return this.checkAnyCardForRestriction(
-									allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE),
-									promptAction.promptParams.restriction,
-									source.data.controller,
-								);
-							}
-							default: {
-								const restrictionValue = (
-									typeof promptAction.promptParams.restrictionValue === 'string' &&
-									promptAction.promptParams.restrictionValue in metaValues
-								) ? metaValues[promptAction.promptParams.restrictionValue] : promptAction.promptParams.restrictionValue;
-
-								return this.checkAnyCardForRestriction(
-									allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE),
-									promptAction.promptParams.restriction,
-									restrictionValue,
-								);
-							}
-						}
-					}
-					return true;
-				}
-				case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
-					const zoneOwner = this.getMetaValue(promptAction.promptParams.zoneOwner, source.id);
-					const cardsInZone = this.getZone(promptAction.promptParams.zone as ZoneType, zoneOwner).cards;
-					const numberOfCards = this.getMetaValue(promptAction.promptParams.numberOfCards, source.id);
-					// if (cardsInZone.length < numberOfCards) {
-					//	 return false;
-					// }
-					if (promptAction.promptParams.restrictions) {
-						return this.checkAnyCardForRestrictions(cardsInZone, promptAction.promptParams.restrictions);
-					} else if (promptAction.promptParams.restriction) {
-						switch (promptAction.promptParams.restriction) {
-							case RESTRICTION_OWN_CREATURE: {
-								return this.checkAnyCardForRestriction(
-									cardsInZone.filter(card => card.card.type === TYPE_CREATURE),
-									promptAction.promptParams.restriction,
-									source.data.controller,
-								);
-							}
-							case RESTRICTION_OPPONENT_CREATURE: {
-								return this.checkAnyCardForRestriction(
-									cardsInZone.filter(card => card.card.type === TYPE_CREATURE),
-									promptAction.promptParams.restriction,
-									source.data.controller,
-								);
-							}
-							default: {
-								return this.checkAnyCardForRestriction(
-									cardsInZone.filter(card => card.card.type === TYPE_CREATURE),
-									promptAction.promptParams.restriction,
-									promptAction.promptParams.restrictionValue,
-								);
-							}
-						}
-					}
-					return true;
-				}
-				case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
-					const zoneOwner = this.getMetaValue(promptAction.promptParams.zoneOwner, source.id);
-					const cardsInZone = this.getZone(promptAction.promptParams.zone, zoneOwner).cards;
-					if (promptAction.promptParams.restrictions) {
-						return this.checkAnyCardForRestrictions(cardsInZone, promptAction.promptParams.restrictions);
-					} else if (promptAction.promptParams.restriction) {
-						switch (promptAction.promptParams.restriction) {
-							case RESTRICTION_OWN_CREATURE: {
-								return this.checkAnyCardForRestriction(
-									cardsInZone.filter(card => card.card.type === TYPE_CREATURE),
-									promptAction.promptParams.restriction,
-									source.data.controller,
-								);
-							}
-							case RESTRICTION_OPPONENT_CREATURE: {
-								return this.checkAnyCardForRestriction(
-									cardsInZone.filter(card => card.card.type === TYPE_CREATURE),
-									promptAction.promptParams.restriction,
-									source.data.controller,
-								);
-							}
-							default: {
-								return this.checkAnyCardForRestriction(
-									cardsInZone.filter(card => card.card.type === TYPE_CREATURE),
-									promptAction.promptParams.restriction,
-									promptAction.promptParams.restrictionValue,
-								);
-							}
-						}
-					}
-					return true;
-				}
-				default:
-					return true;
-			}
-		});
-
-		return allPromptsAreDoable;
+		return this.promptValidator.checkPrompts(source, preparedActions, isPower, powerCost);
 	}
 
 	update(initialAction: AnyEffectType) {
