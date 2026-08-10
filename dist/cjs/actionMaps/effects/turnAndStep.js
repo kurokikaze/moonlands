@@ -80,6 +80,7 @@ const applyStartTurnEffect = function (action, transform) {
     this.state.continuousEffects = this.state.continuousEffects.map((0, actionMapUtils_1.updateContinuousEffects)(action.player)).filter(Boolean);
     this.clearModifiedCardDataCache();
     this.state.activePlayer = action.player;
+    this.state.controllingPlayer = action.player;
     this.state.step = 0;
 };
 exports.applyStartTurnEffect = applyStartTurnEffect;

@@ -105,7 +105,7 @@ describe('Motash\'s Staff', () => {
 	});
 });
 
-describe('Crystal Arbol', () => {
+describe('Crystal Arboll', () => {
 	it('Healing Light (Underneath creature)', () => {
 		const ACTIVE_PLAYER = 422;
 		const NON_ACTIVE_PLAYER = 1310;
@@ -1668,5 +1668,52 @@ describe('Bisiwog', () => {
 
 		expect(gameState.modifyByStaticAbilities(bisiwog, PROPERTY_STATUS, STATUS_BURROWED)).toEqual(true, 'Bisiwog is burrowed');
 		expect(gameState.modifyByStaticAbilities(bisiwog, PROPERTY_ABLE_TO_ATTACK)).toEqual(true, 'Bisiwog still can attack');
+	});
+});
+
+describe('Agovo', () => {
+	it('Lore (draws a card only for the controller)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const ulk = new CardInGame(byName('Ulk'), ACTIVE_PLAYER).addEnergy(10);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const agovo = new CardInGame(byName('Agovo'), ACTIVE_PLAYER).addEnergy(4);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [agovo], [ulk]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+		gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).add([
+			new CardInGame(byName('Weebo'), ACTIVE_PLAYER),
+			new CardInGame(byName('Furok'), ACTIVE_PLAYER),
+		]);
+		gameState.getZone(ZONE_TYPE_DECK, NON_ACTIVE_PLAYER).add([
+			new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER),
+		]);
+
+		const powerAction = {
+			type: ACTION_POWER,
+			source: agovo,
+			power: agovo.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		};
+
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(0, 'Active player starts with no cards in hand');
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).length).toEqual(2, 'Active player has 2 cards in deck');
+
+		gameState.update(powerAction);
+
+		expect(agovo.data.energy).toEqual(2, 'Agovo spent 2 energy on Lore');
+		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toEqual(1, 'Active player drew 1 card');
+		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).length).toEqual(1, 'Active player has 1 card left in deck');
+		expect(gameState.getZone(ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).length).toEqual(0, 'Opponent drew no cards');
+		expect(gameState.getZone(ZONE_TYPE_DECK, NON_ACTIVE_PLAYER).length).toEqual(1, 'Opponent deck is unchanged');
 	});
 });

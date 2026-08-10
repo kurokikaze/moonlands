@@ -98,6 +98,7 @@ import {
 	PROPERTY_ENERGY_LOSS_THRESHOLD,
 	PROPERTY_STATUS,
 	PROPERTY_ABLE_TO_ATTACK,
+	PROPERTY_CONTROLLING_PLAYER,
 
 	EXPIRATION_ANY_TURNS,
 	EXPIRATION_NEVER,
@@ -6014,3 +6015,164 @@ describe('ENTER_PROMPT to PROMPT_ENTERED', () => {
 		expect(result.generatedBy).toEqual(lavaArboll.id)
 	})
 })
+
+describe('controllingPlayer', () => {
+	it('defaults to activePlayer', () => {
+		const ACTIVE_PLAYER = 10;
+		const NON_ACTIVE_PLAYER = 20;
+
+		const gameState = new moonlands.State({
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		expect(gameState.state.controllingPlayer).toEqual(ACTIVE_PLAYER);
+		expect(gameState.getControllingPlayer()).toEqual(ACTIVE_PLAYER);
+	});
+
+	it('stays in sync with activePlayer across turns', () => {
+		const ACTIVE_PLAYER = 10;
+		const NON_ACTIVE_PLAYER = 20;
+
+		const gameState = new moonlands.State({
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		expect(gameState.getActivePlayer()).toEqual(ACTIVE_PLAYER);
+		expect(gameState.getControllingPlayer()).toEqual(ACTIVE_PLAYER);
+
+		gameState.update({ type: ACTION_PASS, player: ACTIVE_PLAYER });
+
+		expect(gameState.getActivePlayer()).toEqual(NON_ACTIVE_PLAYER);
+		expect(gameState.getControllingPlayer()).toEqual(NON_ACTIVE_PLAYER);
+	});
+
+	it('getControllingPlayer() returns override from continuous effect', () => {
+		const ACTIVE_PLAYER = 10;
+		const NON_ACTIVE_PLAYER = 20;
+
+		const gameState = new moonlands.State({
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const createEffectAction = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+			staticAbilities: [{
+				name: 'Will of Orothe',
+				text: 'Opponent controls this turn',
+				selector: SELECTOR_CREATURES,
+				property: PROPERTY_CONTROLLING_PLAYER,
+				modifier: {
+					operator: CALCULATION_SET,
+					operandOne: NON_ACTIVE_PLAYER,
+				},
+			}],
+			triggerEffects: [],
+			expiration: {
+				type: EXPIRATION_ANY_TURNS,
+				turns: 1,
+			},
+			player: ACTIVE_PLAYER,
+			generatedBy: 'willOfOrotheTest',
+		};
+
+		gameState.update(createEffectAction);
+
+		expect(gameState.getActivePlayer()).toEqual(ACTIVE_PLAYER, 'Active player is unchanged');
+		expect(gameState.getControllingPlayer()).toEqual(NON_ACTIVE_PLAYER, 'Controlling player is the opponent');
+	});
+
+	it('getControllingPlayer() reverts to activePlayer when continuous effect expires', () => {
+		const ACTIVE_PLAYER = 10;
+		const NON_ACTIVE_PLAYER = 20;
+
+		const gameState = new moonlands.State({
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const createEffectAction = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+			staticAbilities: [{
+				name: 'Will of Orothe',
+				text: 'Opponent controls this turn',
+				selector: SELECTOR_CREATURES,
+				property: PROPERTY_CONTROLLING_PLAYER,
+				modifier: {
+					operator: CALCULATION_SET,
+					operandOne: NON_ACTIVE_PLAYER,
+				},
+			}],
+			triggerEffects: [],
+			expiration: {
+				type: EXPIRATION_ANY_TURNS,
+				turns: 1,
+			},
+			player: ACTIVE_PLAYER,
+			generatedBy: 'willOfOrotheTest',
+		};
+
+		gameState.update(createEffectAction);
+
+		expect(gameState.getControllingPlayer()).toEqual(NON_ACTIVE_PLAYER, 'Controlling player is the opponent');
+
+		gameState.update({ type: ACTION_PASS, player: ACTIVE_PLAYER });
+
+		expect(gameState.getActivePlayer()).toEqual(NON_ACTIVE_PLAYER, 'It is now the opponents turn');
+		expect(gameState.state.continuousEffects.length).toEqual(0, 'Continuous effect has expired');
+		expect(gameState.getControllingPlayer()).toEqual(NON_ACTIVE_PLAYER, 'Controlling player reverts to the new active player');
+	});
+
+	it('getControllingPlayer() override is communicated via continuousEffects in serialized state', () => {
+		const ACTIVE_PLAYER = 10;
+		const NON_ACTIVE_PLAYER = 20;
+
+		const gameState = new moonlands.State({
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const createEffectAction = {
+			type: moonlands.ACTION_EFFECT,
+			effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+			staticAbilities: [{
+				name: 'Will of Orothe',
+				text: 'Opponent controls this turn',
+				selector: SELECTOR_CREATURES,
+				property: PROPERTY_CONTROLLING_PLAYER,
+				modifier: {
+					operator: CALCULATION_SET,
+					operandOne: NON_ACTIVE_PLAYER,
+				},
+			}],
+			triggerEffects: [],
+			expiration: {
+				type: EXPIRATION_ANY_TURNS,
+				turns: 1,
+			},
+			player: ACTIVE_PLAYER,
+			generatedBy: 'willOfOrotheTest',
+		};
+
+		gameState.update(createEffectAction);
+
+		const serialized = gameState.serializeData(ACTIVE_PLAYER);
+
+		expect(serialized.continuousEffects).toHaveLength(1, 'One continuous effect in serialized state');
+		const effect = serialized.continuousEffects[0];
+		console.dir(effect, { depth: null });
+		expect(effect.staticAbilities[0].property).toEqual(PROPERTY_CONTROLLING_PLAYER, 'Effect targets PROPERTY_CONTROLLING_PLAYER');
+		expect(effect.staticAbilities[0].modifier.operandOne).toEqual(NON_ACTIVE_PLAYER, 'Effect sets controlling player to the opponent');
+		expect(effect.expiration.type).toEqual(EXPIRATION_ANY_TURNS, 'Effect expires after turns');
+		expect(effect.expiration.turns).toEqual(1, 'Effect expires after 1 turn');
+	});
+});

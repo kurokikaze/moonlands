@@ -83,6 +83,7 @@ import {
     CARD_COUNT,
     PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES,
     PROPERTY_PROTECTION,
+    PROPERTY_CONTROLLING_PLAYER,
     PROMPT_TYPE_PLAYER,
     PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
     PROPERTY_CREATURE_NAME,
@@ -132,6 +133,7 @@ export type PropertyType = typeof PROPERTY_MAGI_STARTING_ENERGY |
     typeof PROPERTY_TYPE |
     typeof PROPERTY_CAN_BE_ATTACKED |
     typeof PROPERTY_PROTECTION |
+    typeof PROPERTY_CONTROLLING_PLAYER |
     typeof CARD_COUNT | // Special case of property getter
     typeof ACTION_PROPERTY; // Special case of property getter
 

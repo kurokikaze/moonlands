@@ -87,6 +87,7 @@ export type UnActionStartTurn = {
     type: typeof UNMAKE_EFFECT_TYPE_START_TURN;
     previousTurn: number | null;
     previousActivePlayer: number;
+    previousControllingPlayer: number;
     previousStep: number | null;
     previousContinuousEffects: ContinuousEffectType[];
     cardFlags: Record<string, CardFlagsSnapshot>;

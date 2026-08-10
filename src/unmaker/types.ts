@@ -89,6 +89,7 @@ export type UnActionStartTurn = {
     type: typeof UNMAKE_EFFECT_TYPE_START_TURN
     previousTurn: number | null
     previousActivePlayer: number
+    previousControllingPlayer: number
     previousStep: number | null
     previousContinuousEffects: ContinuousEffectType[]
     // Card flags that get cleared by START_OF_TURN

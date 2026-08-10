@@ -6,6 +6,7 @@ import { CostType } from './classes/Card';
 import Zone from './classes/Zone';
 import { SelectorEngine } from './SelectorEngine';
 import { PromptValidator } from './PromptValidator';
+import { LogEngine } from './LogEngine';
 import { CardWithModification, EnrichedStaticAbilityType, GameStaticAbility } from './LayeredModificationEngine';
 import { AnyEffectType, PromptTypeType, RestrictionObjectType, RestrictionType, LogEntryType, PropertyType, PromptType, EnrichedAction, OperatorType, ConditionType, FindType, ContinuousEffectType, EffectType, ZoneType, Region, ProtectionType, SerializedState, SerializedZones, MercenneFixed, MetaDataRecord } from './types';
 import { AnyPromptEnteredEffect, EnhancedDelayedTriggerType } from './types/effect';
@@ -50,6 +51,7 @@ export type StateShape = {
     promptVariable?: string;
     promptParams: PromptParamsType;
     activePlayer: number;
+    controllingPlayer: number;
     goesFirst?: number;
     zones: Zone[];
     log: LogEntryType[];
@@ -88,6 +90,7 @@ export declare class State {
     turnNotifyTimeout: ReturnType<typeof setTimeout> | null;
     selectorEngine: SelectorEngine;
     promptValidator: PromptValidator;
+    logEngine: LogEngine;
     constructor(state?: StateShape);
     closeStreams(): void;
     initiatePRNG(seed: number): void;
@@ -119,6 +122,7 @@ export declare class State {
     getZone(type: ZoneType, player?: number | null): Zone;
     getCurrentStep(): number | null;
     getActivePlayer(): number;
+    getControllingPlayer(): number;
     getCurrentPriority(): PriorityType;
     addActions(...args: AnyEffectType[]): void;
     transformIntoActions(...args: AnyEffectType[]): void;

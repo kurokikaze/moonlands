@@ -1,187 +1,245 @@
-Done: **178** cards out of **190**
+Done: **181** cards out of **191**
 
 # Done, tested
 
+- Abaquist
 - Adis
+- Agovo
 - Alaban
 - Amulet of Ombor
+- Ancestral Flute
 - Arbolit
 - Arboll
+- Arderial's Crown
 - Ashgar
 - Ayebaw
 - Balamant
+- Balamant Pup
+- Baloo Root
+- Barak
 - Bhatar
+- Bisiwog
+- Blu
 - Book of Ages
 - Bwill
 - Carillion
 - Cave Hyren
 - Cave Rudwot
+- Cloud Narth
+- Cloud Sceptre
 - Colossus
 - Coral Hyren
+- Corf
+- Crystal Arboll
 - Deep Hyren
 - Diobor
 - Drakan
+- Eclipse
 - Eebit
+- Epik
 - Evu
+- Eye of the Storm
+- Fire Grag
+- Flame Control
 - Flame Geyser
+- Flame Hyren
+- Fog Bank
+- Fossik
 - Furok
+- Gar
 - Giant Carillion
 - Giant Parathin
+- Giant Vulbor
 - Grega
+- Gum-Gum
+- Hubdra's Spear
 - Hyren's Call
+- Korrit
 - Lava Aq
 - Lava Balamant
+- Lightning
+- Lovian
+- Magam
 - Magma Armor
 - Magma Hyren
 - Megathan
+- Mirror Pendant
 - Mobis
-- Ora
-- Orothean Gloves
-- Orwin's Gaze
+- Motash
+- Motash's Staff
+- Nimbulo
 - O'Qua
+- Ora
+- Orathan
+- Orathan Flyer
+- Orish
+- Orlon
+- Orothean Gloves
+- Orothean Goggles
+- Orpus
+- Orthea
+- Orwin's Gaze
+- Pack Korrit
+- Parmalag
+- Plith
 - Pruitt
 - Quor
 - Quor Pup
+- Raxis
 - Robe of Vines
 - Robes of the Ages
 - Rudwot
-- Sinder
-- Staff of Hyren
-- Stagadan
-- Timber Hyren
-- Undertow
-- Valkan
-- Vortex of Knowledge
-- Weebo
-- Whall
-- Xyx
-- Yaki
-- Magam
-- Cloud Narth
-- Wellisk Pup
-- Balamant Pup
-- Korrit
-- Pack Korrit
-- Nimbulo
-- Updraft
-- Warrior's Boots
-- Xyx Elder
-- Corf
-- Crystal Arboll
-- Digging Goggles
-- Motash
-- Motash's Staff
-- Enrich
-- Strag
-- Vellup
-- Orpus
-- Orathan
-- Wellisk
-- Fire Chogo
-- Gum-Gum
-- Eclipse
-- Plith
-- Staff of Korrits
+- Scroll of Fire
 - Shimmer
-- Lovian
 - Shockwave
-- Abaquist
-- Fog Bank
-- Fossik
-- Hubdra's Spear
-- Flame Control
-- Flame Hyren
-- Ancestral Flute
-- Orlon
-- Parmalag
-- Thunderquake
-- Orthea
+- Sinder
+- Staff of Korrits
+- Stagadan
 - Storm Ring
-- Vinoc
-- Heat Lens
-- Epik
-- Vulbor
-- Gar
-- Barak
+- Stradus
+- Strag
+- Thunderquake
+- Timber Hyren
 - Twee
 - Ulk
-- Bisiwog
-- Mirror Pendant
-- Lightning
-- Eye of the Storm
-- Raxis
-- Orish
-- Orothean Goggles
+- Undertow
+- Updraft
+- Valkan
+- Vellup
+- Vinoc
+- Vortex of Knowledge
+- Vulbor
+- Warrior's Boots
+- Weebo
+- Wellisk
+- Wellisk Pup
+- Whall
+- Xyx
+- Xyx Elder
+- Yaki
 
 # Done, not tested
 
-- Agovo
-- Arderial's Crown
-- Baloo Root
 - Book of Life
+- Bottomless Pit
+- Brub
+- Burrow
+- Carnivorous Cave
 - Cave In
 - Channeler's Gloves
+- Corf Pearl
 - Cyclone Vashp
+- Digging Goggles
+- Dream Balm
 - Ebylon
+- Enrich
 - Fire Ball
+- Fire Chogo
 - Fire Flow
-- Fire Grag
+- Flood of Energy
 - Giant Korrit
+- Giant Parmalag
+- Gloves of Crystal
+- Gogor
+- Gorgle's Ring
 - Greater Vaal
-- Grow
+- Green Stuff
 - Ground Breaker
+- Grow
 - Gruk
+- Heat Lens
+- Implosion
 - Jaela
 - Kelthet
 - Lasada
 - Lava Arboll
 - Leaf Hyren
+- Lightning Hyren
+- Mushroom Hyren
+- Ormagon
+- Orothean Belt
+- Orwin
 - Orwin's Staff
 - Paralit
 - Pharan
+- Platheus
 - Poad
+- Relic Mirror
+- Relic Stalker
 - Ring of Secrets
-- Scroll of Fire
+- Rod of Coals
+- Sap of Life
 - Sea Barl
 - Shooting Star
 - Sphor
+- Spirit of the Flame
+- Staff of Hyren
 - Storm Cloud
 - Submerge
 - Syphon Stone
 - Thermal Blast
 - Thunder Hyren
 - Thunder Vashp
+- Tidal Wave
 - Trug
 - Tryn
 - Typhoon
 - Water of Life
-- Orwin
-- Lightning Hyren
-- Mushroom Hyren
-- Ormagon
-- Relic Stalker
-- Sap of Life
-- Dream Balm
 - Xyx Minor
-- Brub
-- Bottomless Pit
-- Gorgle's Ring
-- Orothean Belt
-- Corf Pearl
-- Carnivorous Cave
-- Gloves of Crystal
-- Stradus
-- Platheus
-- Gogor
-- Blu
-- Flood of Energy
-- Relic Mirror
-- Giant Parmalag
-- Implosion
-- Spirit of the Flame
-- Cloud Sceptre
-- Burrow
-- Giant Vulbor
+
+# Not done yet
+
+- Energy Band (using only before attack, must attack if able)
+- Entangle ([in]ability to play spells)
+- Hood of Hiding (ability to use power)
+- Karak (exiling under creature, ability to play named relics)
+- Mask of Abwyn (looking at hand)
+- Syphon Vortex (Cost X plus 4)
+- Tap Roots (selecting two creatures)
+- Vaal (not losing energy from attack)
+- Wence (showing cards to opponent)
+- Will of Orothe (controlling other player)
+
+# Replacement effect
+
+- Orathan Flyer (also custom prompts)
+
+# Relic stuff (discarding, etc)
+
+- Raxis (also custom prompts, prompting opponent)
+
+## Continuous effects
+
+- Vaal
+
+## Statuses
+
+- Burrow (X + 1 cost)
+
+## Ability to play certain cards
+
+- Karak
+
+## Ability to attack
+
+- Energy Band
+
+## Ability to play spells
+
+- Entangle (also continuous effects)
+
+## Additional selectors
+
+- Bisiwog (selector of card itself)
+- Twee (next card in the zone)
+
+# Ability to use certain power
+
+- Hood of Hiding (also continuous effects)
+
+# Controlling another player
+
+- Will of Orothe
 
 # Possible sample decks:
 
@@ -281,87 +339,3 @@ Done: **178** cards out of **190**
 - 3 Warrior's Boots
 - 2 Staff of Hyren
 - 2 Ormagon
-
-# Not done yet
-
-- Energy Band (using only before attack, must attack if able)
-- Entangle ([in]ability to play spells)
-- Hood of Hiding (ability to use power)
-- Karak (exiling under creature, ability to play named relics)
-- Mask of Abwyn (looking at hand)
-- Orathan Flyer (paying for creature from creature)
-- Syphon Vortex (Cost X plus 4)
-- Tap Roots (selecting two creatures)
-- Tidal Wave (additional cost while spell resolves)
-- Vaal (not losing energy from attack)
-- Wence (showing cards to opponent)
-- Will of Orothe (controlling other player)
-
-# Cost reduction/increase
-
-- Tidal Wave (additional cost while spell resolves)
-
-# "X + Number" cost
-
-- Syphon Vortex
-
-# Custom prompts
-
-- Raxis (choosing between two alternatives)
-- Tap Roots (creature not selected in previous prompt)
-
-# Discarding from hand
-
-- Cloud Scepter
-- Orish
-- Spirit of the Flame
-- Vinoc
-
-# Looking at hands
-
-- Mask of Abwyn
-
-## Delayed triggers
-
-- Wence (also drawing, showing cards to opponent)
-
-# Replacement effect
-
-- Orathan Flyer (also custom prompts)
-
-# Relic stuff (discarding, etc)
-
-- Raxis (also custom prompts, prompting opponent)
-
-## Continuous effects
-
-- Vaal
-
-## Statuses
-
-- Burrow (X + 1 cost)
-
-## Ability to play certain cards
-
-- Karak
-
-## Ability to attack
-
-- Energy Band
-
-## Ability to play spells
-
-- Entangle (also continuous effects)
-
-## Additional selectors
-
-- Bisiwog (selector of card itself)
-- Twee (next card in the zone)
-
-# Ability to use certain power
-
-- Hood of Hiding (also continuous effects)
-
-# Controlling another player
-
-- Will of Orothe

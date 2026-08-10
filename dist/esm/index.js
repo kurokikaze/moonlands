@@ -22,7 +22,7 @@ var _a;
 import { nanoid, customRandom, urlAlphabet } from 'nanoid';
 import { MersenneTwister } from './mersenneTwister.js';
 import { TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, ACTION_PASS, ACTION_PLAY, ACTION_POWER, ACTION_EFFECT, ACTION_SELECT, ACTION_CALCULATE, ACTION_ENTER_PROMPT, ACTION_RESOLVE_PROMPT, ACTION_GET_PROPERTY_VALUE, ACTION_ATTACK, ACTION_PLAYER_WINS, ACTION_CONCEDE, ACTION_TIME_NOTIFICATION, ACTION_EXIT_PROMPTS, ACTION_PROPERTY, PROPERTY_ID, PROPERTY_TYPE, PROPERTY_CONTROLLER, PROPERTY_ENERGY_COUNT, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, PROPERTY_POWER_COST, PROPERTY_ABLE_TO_ATTACK, PROPERTY_CAN_BE_ATTACKED, PROPERTY_PROTECTION, CALCULATION_SET, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_HALVE_ROUND_DOWN, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_MAX, CALCULATION_MULTIPLY, SELECTOR_CREATURES, SELECTOR_CREATURES_AND_MAGI, SELECTOR_OWN_MAGI, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_MAGI_OF_REGION, SELECTOR_OPPONENT_ID, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, SELECTOR_CREATURES_OF_TYPE, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_OTHER_CREATURES_OF_TYPE, SELECTOR_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_ID, SELECTOR_CREATURES_OF_PLAYER, SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY, SELECTOR_NTH_CARD_OF_ZONE, SELECTOR_OWN_CARDS_IN_HAND, SELECTOR_CARDS_IN_HAND, SELECTOR_MAGI_OF_PLAYER, SELECTOR_RANDOM_CARD_IN_HAND, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_RELIC, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_OWN_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_CHOOSE_CARDS, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_MAGI_WITHOUT_CREATURES, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_PLAYER, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, PROMPT_TYPE_NUMBER_OF_CREATURES, PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_ALTERNATIVE, PROMPT_TYPE_PAYMENT_SOURCE, PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES, NO_PRIORITY, PRIORITY_PRS, PRIORITY_ATTACK, PRIORITY_CREATURES, EFFECT_TYPE_START_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_DRAW, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_PLAY_CREATURE, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_RELIC_ENTERS_PLAY, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE, EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC, EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_PAYING_ENERGY_FOR_POWER, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_CREATURE_IS_DEFEATED, // Possibly redundant
-EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_IS_ATTACKED, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_DRAW_REST_OF_CARDS, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_ATTACK, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, EFFECT_TYPE_DISCARD_CARD_FROM_HAND, EFFECT_TYPE_PLAY_FINISHED, EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED, EFFECT_TYPE_POWER_FINISHED, EFFECT_TYPE_PROMPT_ENTERED, REGION_UNIVERSAL, RESTRICTION_OWN_CREATURE, RESTRICTION_ENERGY_EQUALS, COST_X, COST_X_PLUS_ONE, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, LOG_ENTRY_PLAY, LOG_ENTRY_DRAW, LOG_ENTRY_CHOOSES_STARTING_CARDS, LOG_ENTRY_POWER_ACTIVATION, LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY, LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY, LOG_ENTRY_TARGETING, LOG_ENTRY_NUMBER_CHOICE, LOG_ENTRY_ATTACK, LOG_ENTRY_CREATURE_ENERGY_LOSS, LOG_ENTRY_MAGI_ENERGY_LOSS, LOG_ENTRY_CREATURE_ENERGY_GAIN, LOG_ENTRY_MAGI_ENERGY_GAIN, LOG_ENTRY_MAGI_DEFEATED, LOG_ENTRY_DIE_ROLLED, LOG_ENTRY_CARD_DISCARDED_FROM_HAND, ACTION_NONE, PROTECTION_FROM_POWERS, PROTECTION_FROM_SPELLS, PROTECTION_TYPE_DISCARDING_FROM_PLAY, PROTECTION_TYPE_GENERAL, PROTECTION_FROM_ATTACKS, PROTECTION_TYPE_ENERGY_LOSS, CARD_COUNT, } from './const.js';
+EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_IS_ATTACKED, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_DRAW_REST_OF_CARDS, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_ATTACK, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, EFFECT_TYPE_PLAY_FINISHED, EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED, EFFECT_TYPE_POWER_FINISHED, EFFECT_TYPE_PROMPT_ENTERED, REGION_UNIVERSAL, RESTRICTION_OWN_CREATURE, RESTRICTION_ENERGY_EQUALS, COST_X, COST_X_PLUS_ONE, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, ACTION_NONE, PROTECTION_FROM_POWERS, PROTECTION_FROM_SPELLS, PROTECTION_TYPE_DISCARDING_FROM_PLAY, PROTECTION_TYPE_GENERAL, PROTECTION_FROM_ATTACKS, PROTECTION_TYPE_ENERGY_LOSS, CARD_COUNT, PROPERTY_CONTROLLING_PLAYER, } from './const.js';
 import { actionMap } from './actionMaps/effects.js';
 import { showAction } from './logAction.js';
 import clone from './clone.js';
@@ -31,6 +31,7 @@ import CardInGame from './classes/CardInGame.js';
 import Zone from './classes/Zone.js';
 import { SelectorEngine } from './SelectorEngine.js';
 import { PromptValidator } from './PromptValidator.js';
+import { LogEngine } from './LogEngine.js';
 import convertPromptActionToEffect from './helpers/convertPromptAction.js';
 import performCalculation from './helpers/performCalculation.js';
 var convertCard = function (cardInGame) { return ({
@@ -128,6 +129,7 @@ var defaultState = {
     fallbackActions: [],
     continuousEffects: [],
     activePlayer: 0,
+    controllingPlayer: 0,
     prompt: false,
     promptType: null,
     promptParams: {},
@@ -153,6 +155,9 @@ var State = /** @class */ (function () {
         this.turnTimer = null;
         this.zoneHash = new Map();
         this.state = __assign(__assign({}, clone(defaultState)), state);
+        if (!('controllingPlayer' in state)) {
+            this.state.controllingPlayer = this.state.activePlayer;
+        }
         this.decks = [];
         this.winner = false;
         this.debug = false;
@@ -184,6 +189,11 @@ var State = /** @class */ (function () {
             getMetaValue: function (value, sourceId) { return _this.getMetaValue(value, sourceId); },
             checkAnyCardForRestrictions: function (cards, restrictions) { return _this.checkAnyCardForRestrictions(cards, restrictions); },
             checkAnyCardForRestriction: function (cards, restriction, restrictionValue) { return _this.checkAnyCardForRestriction(cards, restriction, restrictionValue); },
+        });
+        this.logEngine = new LogEngine({
+            getMetaValue: function (value, spellId) { return _this.getMetaValue(value, spellId); },
+            getLog: function () { return _this.state.log; },
+            getPromptType: function () { return _this.state.promptType; },
         });
     }
     // @deprecated
@@ -352,262 +362,7 @@ var State = /** @class */ (function () {
         }
     };
     State.prototype.addActionToLog = function (action) {
-        var _a, _b;
-        var newLogEntry = false;
-        try {
-            switch (action.type) {
-                case ACTION_PLAY: {
-                    if ('payload' in action) {
-                        newLogEntry = {
-                            type: LOG_ENTRY_PLAY,
-                            card: action.payload.card.card.name,
-                            player: action.player,
-                        };
-                    }
-                    else {
-                        var metaValue = this.getMetaValue(action.card, action.generatedBy);
-                        var metaCard = Array.isArray(metaValue) ? metaValue[0] : metaValue;
-                        newLogEntry = {
-                            type: LOG_ENTRY_PLAY,
-                            card: metaCard.card.name,
-                            player: Number(action.player),
-                        };
-                    }
-                    break;
-                }
-                case ACTION_POWER: {
-                    newLogEntry = {
-                        type: LOG_ENTRY_POWER_ACTIVATION,
-                        card: action.source.card.name,
-                        name: action.power.name,
-                        player: action.player,
-                    };
-                    break;
-                }
-                case ACTION_EFFECT: {
-                    switch (action.effectType) {
-                        case EFFECT_TYPE_DRAW: {
-                            newLogEntry = {
-                                type: LOG_ENTRY_DRAW,
-                                player: this.getMetaValue(action.player, action.generatedBy),
-                            };
-                            break;
-                        }
-                        case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
-                            var target = this.getMetaValue(action.target, action.generatedBy);
-                            if (Array.isArray(target)) {
-                                if (target.length) {
-                                    newLogEntry = {
-                                        type: LOG_ENTRY_CREATURE_ENERGY_LOSS,
-                                        card: target[0].card.name,
-                                        amount: this.getMetaValue(action.amount, action.generatedBy),
-                                    };
-                                }
-                            }
-                            else {
-                                newLogEntry = {
-                                    type: LOG_ENTRY_CREATURE_ENERGY_LOSS,
-                                    card: target.card.name,
-                                    amount: this.getMetaValue(action.amount, action.generatedBy),
-                                };
-                            }
-                            break;
-                        }
-                        case EFFECT_TYPE_ADD_ENERGY_TO_CREATURE: {
-                            var target = this.getMetaValue(action.target, action.generatedBy);
-                            if (Array.isArray(target)) {
-                                if (target.length) {
-                                    for (var i = 0; i < target.length - 1; i++) {
-                                        var tgt = target[i];
-                                        this.state.log.push({
-                                            type: LOG_ENTRY_CREATURE_ENERGY_GAIN,
-                                            card: tgt.card.name,
-                                            amount: this.getMetaValue(action.amount, action.generatedBy),
-                                        });
-                                    }
-                                    newLogEntry = {
-                                        type: LOG_ENTRY_CREATURE_ENERGY_GAIN,
-                                        card: target[target.length - 1].card.name,
-                                        amount: this.getMetaValue(action.amount, action.generatedBy),
-                                    };
-                                }
-                            }
-                            else {
-                                newLogEntry = {
-                                    type: LOG_ENTRY_CREATURE_ENERGY_GAIN,
-                                    card: target.card.name,
-                                    amount: this.getMetaValue(action.amount, action.generatedBy),
-                                };
-                            }
-                            break;
-                        }
-                        case EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI: {
-                            var target = this.getMetaValue(action.target, action.generatedBy);
-                            if (Array.isArray(target)) {
-                                if (target.length) {
-                                    newLogEntry = {
-                                        type: LOG_ENTRY_MAGI_ENERGY_LOSS,
-                                        card: target[0].card.name,
-                                        amount: this.getMetaValue(action.amount, action.generatedBy),
-                                    };
-                                }
-                            }
-                            else {
-                                newLogEntry = {
-                                    type: LOG_ENTRY_MAGI_ENERGY_LOSS,
-                                    card: target.card.name,
-                                    amount: this.getMetaValue(action.amount, action.generatedBy),
-                                };
-                            }
-                            break;
-                        }
-                        case EFFECT_TYPE_DIE_ROLLED: {
-                            newLogEntry = {
-                                type: LOG_ENTRY_DIE_ROLLED,
-                                result: action.result,
-                                player: action.player,
-                            };
-                            break;
-                        }
-                        case EFFECT_TYPE_ADD_ENERGY_TO_MAGI: {
-                            var target = this.getMetaValue(action.target, action.generatedBy);
-                            if (Array.isArray(target)) {
-                                if (target.length) {
-                                    newLogEntry = {
-                                        type: LOG_ENTRY_MAGI_ENERGY_GAIN,
-                                        card: target[0].card.name,
-                                        amount: this.getMetaValue(action.amount, action.generatedBy),
-                                    };
-                                }
-                            }
-                            else {
-                                newLogEntry = {
-                                    type: LOG_ENTRY_MAGI_ENERGY_GAIN,
-                                    card: target.card.name,
-                                    amount: this.getMetaValue(action.amount, action.generatedBy),
-                                };
-                            }
-                            break;
-                        }
-                        case EFFECT_TYPE_FIND_STARTING_CARDS: {
-                            newLogEntry = {
-                                type: LOG_ENTRY_CHOOSES_STARTING_CARDS,
-                                player: action.player || 0,
-                            };
-                            break;
-                        }
-                        case EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY: {
-                            var target = this.getMetaValue(action.target, action.generatedBy);
-                            if (!Array.isArray(target)) {
-                                newLogEntry = {
-                                    type: LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY,
-                                    card: target.card.name,
-                                    player: action.player,
-                                };
-                            }
-                            break;
-                        }
-                        case EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY: {
-                            var target = this.getMetaValue(action.target, action.generatedBy);
-                            if (Array.isArray(target)) {
-                                if (target.length) {
-                                    newLogEntry = {
-                                        type: LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,
-                                        card: target[0].card.name,
-                                        player: action.player,
-                                    };
-                                }
-                            }
-                            else {
-                                newLogEntry = {
-                                    type: LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,
-                                    card: target.card.name,
-                                    player: action.player,
-                                };
-                            }
-                            break;
-                        }
-                        case EFFECT_TYPE_MAGI_IS_DEFEATED: {
-                            newLogEntry = {
-                                type: LOG_ENTRY_MAGI_DEFEATED,
-                                card: this.getMetaValue(action.target, action.generatedBy).card.name,
-                                player: action.player,
-                            };
-                            break;
-                        }
-                        case EFFECT_TYPE_CREATURE_ATTACKS: {
-                            newLogEntry = {
-                                type: LOG_ENTRY_ATTACK,
-                                source: this.getMetaValue(action.source, action.generatedBy).card.name,
-                                target: this.getMetaValue(action.target, action.generatedBy).card.name,
-                                packHuntAttack: Boolean(action.packHuntAttack),
-                            };
-                            break;
-                        }
-                        case EFFECT_TYPE_DISCARD_CARD_FROM_HAND: {
-                            newLogEntry = {
-                                type: LOG_ENTRY_CARD_DISCARDED_FROM_HAND,
-                                card: this.getMetaValue(action.target, action.generatedBy).card.name,
-                                player: action.player || 1,
-                            };
-                            break;
-                        }
-                        case EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT: {
-                            // This requires the useSelector method to accept SELECTOR_ID type, so I will do it a bit later
-                            break;
-                            /*if (action.staticAbilities) {
-                                for (let staticAbility of action.staticAbilities) {
-                                    // Targeting gets a little complicated here because we aren't explicitly saying "this creature is burrowed for X turns"
-                                    // Rather, we create a continuous effect of "creatures satisfying this selector have this property modified in this way with such-and-such expiration conditions"
-                                    // if (staticAbility.property === PROPERTY_STATUS && staticAbility.selector == SELECTOR_ID) {
-                                    // 	const id = this.getMetaValue(staticAbility.selectorParameter, action.generatedBy);
-                                    // 	const target = this.useSelector(SELECTOR_ID, action.player, id);
-                                    // 	if (target) {
-                                    // 		newLogEntry = {
-                                    // 			type: LOG_ENTRY_CONTINUOUS_EFFECT_CREATED,
-                                    // 			property: PROPERTY_STATUS,
-                                    // 			turns: this.getMetaValue(action.expiration.turns, action.generatedBy),
-                                    // 		}
-                                    // 	}
-                                    // }
-                                }
-                            }
-                            break;*/
-                        }
-                    }
-                    break;
-                }
-                case ACTION_RESOLVE_PROMPT: {
-                    if ((this.state.promptType === PROMPT_TYPE_SINGLE_CREATURE ||
-                        this.state.promptType === PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE ||
-                        this.state.promptType === PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI ||
-                        this.state.promptType === PROMPT_TYPE_OWN_SINGLE_CREATURE ||
-                        this.state.promptType === PROMPT_TYPE_SINGLE_MAGI) && 'target' in action) {
-                        newLogEntry = {
-                            type: LOG_ENTRY_TARGETING,
-                            card: ((_b = (_a = action.target) === null || _a === void 0 ? void 0 : _a.card) === null || _b === void 0 ? void 0 : _b.name) || 'unknown card',
-                            player: action.player,
-                        };
-                    }
-                    if (this.state.promptType === PROMPT_TYPE_NUMBER && 'number' in action) {
-                        newLogEntry = {
-                            type: LOG_ENTRY_NUMBER_CHOICE,
-                            number: (typeof action.number === 'number') ? action.number : parseInt(action.number || '0', 10),
-                            player: action.player,
-                        };
-                    }
-                    break;
-                }
-            }
-        }
-        catch (e) {
-            console.error('Log entry creation failed');
-            console.dir(action);
-            // console.dir(e);
-        }
-        if (newLogEntry) {
-            this.state.log.push(newLogEntry);
-        }
+        this.logEngine.addActionToLog(action);
     };
     State.prototype.createZones = function () {
         var _a = this.players, playerOne = _a[0], playerTwo = _a[1];
@@ -701,6 +456,7 @@ var State = /** @class */ (function () {
         this.state.turn = 1;
         this.state.goesFirst = goesFirst;
         this.state.activePlayer = goesFirst;
+        this.state.controllingPlayer = goesFirst;
     };
     State.prototype.getOpponent = function (player) {
         var opponent = this.players.find(function (pl) { return pl != player; });
@@ -731,6 +487,22 @@ var State = /** @class */ (function () {
     };
     State.prototype.getActivePlayer = function () {
         return this.state.activePlayer;
+    };
+    State.prototype.getControllingPlayer = function () {
+        var _a;
+        for (var _i = 0, _b = this.state.continuousEffects; _i < _b.length; _i++) {
+            var effect = _b[_i];
+            for (var _c = 0, _d = ((_a = effect.staticAbilities) !== null && _a !== void 0 ? _a : []); _c < _d.length; _c++) {
+                var ability = _d[_c];
+                if (ability.property === PROPERTY_CONTROLLING_PLAYER) {
+                    var value = this.getMetaValue(ability.modifier.operandOne, effect.id);
+                    if (typeof value === 'number') {
+                        return value;
+                    }
+                }
+            }
+        }
+        return this.state.controllingPlayer;
     };
     State.prototype.getCurrentPriority = function () {
         return this.state.step === null ? 0 : steps[this.state.step].priority;

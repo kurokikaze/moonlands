@@ -424,6 +424,7 @@ export class Unmaker {
                         this.saveObject(cardFlags)
                         this.saveObject([...this.state.state.continuousEffects])
                         this.saveNumber(this.state.state.step as number)
+                        this.saveNumber(this.state.state.controllingPlayer)
                         this.saveNumber(this.state.state.activePlayer)
                         this.saveNumber(this.state.turn as number)
                         this.saveActionType(UNMAKE_EFFECT_TYPE_START_TURN)
@@ -431,6 +432,7 @@ export class Unmaker {
                             type: UNMAKE_EFFECT_TYPE_START_TURN,
                             previousTurn: this.state.turn,
                             previousActivePlayer: this.state.state.activePlayer,
+                            previousControllingPlayer: this.state.state.controllingPlayer,
                             previousStep: this.state.state.step,
                             previousContinuousEffects: [...this.state.state.continuousEffects],
                             cardFlags,
@@ -1016,12 +1018,14 @@ export class Unmaker {
             case UNMAKE_EFFECT_TYPE_START_TURN: {
                 const turn = this.readNumber()
                 const activePlayer = this.readNumber()
+                const controllingPlayer = this.readNumber()
                 const step = this.readNumber()
                 const continuousEffect = this.readObject<any[]>()
                 const cardFlags = this.readObject<Record<string, { wasAttacked: boolean, hasAttacked: boolean, attacked: number, actionsUsed: string[], defeatedCreature: boolean, energyLostThisTurn: number}>>()
 
                 state.turn = turn
                 state.state.activePlayer = activePlayer
+                state.state.controllingPlayer = controllingPlayer
                 state.state.step = step
                 state.state.continuousEffects = continuousEffect;
                 state.clearModifiedCardDataCache()
@@ -1437,6 +1441,7 @@ export class Unmaker {
             case UNMAKE_EFFECT_TYPE_START_TURN: {
                 state.turn = unaction.previousTurn
                 state.state.activePlayer = unaction.previousActivePlayer
+                state.state.controllingPlayer = unaction.previousControllingPlayer
                 state.state.step = unaction.previousStep
                 state.state.continuousEffects = unaction.previousContinuousEffects;
                 state.clearModifiedCardDataCache()

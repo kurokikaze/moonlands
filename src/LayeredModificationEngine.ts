@@ -20,6 +20,7 @@ import {
 	PROPERTY_CAN_BE_ATTACKED,
 	PROPERTY_PROTECTION,
 	PROPERTY_CREATURE_NAME,
+	PROPERTY_CONTROLLING_PLAYER,
 
 	CALCULATION_SET,
 	CALCULATION_SUBTRACT,
@@ -72,6 +73,7 @@ export class LayeredModificationEngine {
 	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_ENERGY_COUNT): number
 	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_POWER_COST, subProperty: string): number
 	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CONTROLLER): number
+	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CONTROLLING_PLAYER): number
 	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_PROTECTION): ProtectionType | undefined
 	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_MAGI_NAME): string
 	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_TYPE): CardType
@@ -150,6 +152,8 @@ export class LayeredModificationEngine {
 				return target.modifiedCard ?
 					target.modifiedCard.data.ableToAttack : defaultValue;
 			}
+			case PROPERTY_CONTROLLING_PLAYER:
+				return target.modifiedCard?.data.controllingPlayer ?? 0;
 		}
 	}
 
@@ -355,6 +359,24 @@ export class LayeredModificationEngine {
 						...currentCard,
 					};
 				}
+			}
+			case PROPERTY_CONTROLLING_PLAYER: {
+				const { operator, operandOne } = staticAbility.modifier;
+				const resultValue = (operator === CALCULATION_SET) ? operandOne : 0;
+
+				if (typeof resultValue === 'number') {
+					return {
+						...currentCard,
+						modifiedCard: {
+							...currentCard.modifiedCard,
+							data: {
+								...currentCard.modifiedCard.data,
+								controllingPlayer: resultValue,
+							},
+						},
+					};
+				}
+				return currentCard;
 			}
 			case PROPERTY_POWER_COST: {
 				if (currentCard.modifiedCard.data.powers) {

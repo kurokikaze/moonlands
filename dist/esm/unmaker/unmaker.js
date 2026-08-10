@@ -430,6 +430,7 @@ var Unmaker = /** @class */ (function () {
                         this.saveObject(cardFlags);
                         this.saveObject(__spreadArray([], this.state.state.continuousEffects, true));
                         this.saveNumber(this.state.state.step);
+                        this.saveNumber(this.state.state.controllingPlayer);
                         this.saveNumber(this.state.state.activePlayer);
                         this.saveNumber(this.state.turn);
                         this.saveActionType(UNMAKE_EFFECT_TYPE_START_TURN);
@@ -437,6 +438,7 @@ var Unmaker = /** @class */ (function () {
                             type: UNMAKE_EFFECT_TYPE_START_TURN,
                             previousTurn: this.state.turn,
                             previousActivePlayer: this.state.state.activePlayer,
+                            previousControllingPlayer: this.state.state.controllingPlayer,
                             previousStep: this.state.state.step,
                             previousContinuousEffects: __spreadArray([], this.state.state.continuousEffects, true),
                             cardFlags: cardFlags,
@@ -1023,11 +1025,13 @@ var Unmaker = /** @class */ (function () {
             case UNMAKE_EFFECT_TYPE_START_TURN: {
                 var turn = this.readNumber();
                 var activePlayer = this.readNumber();
+                var controllingPlayer = this.readNumber();
                 var step = this.readNumber();
                 var continuousEffect = this.readObject();
                 var cardFlags = this.readObject();
                 state.turn = turn;
                 state.state.activePlayer = activePlayer;
+                state.state.controllingPlayer = controllingPlayer;
                 state.state.step = step;
                 state.state.continuousEffects = continuousEffect;
                 state.clearModifiedCardDataCache();
@@ -1452,6 +1456,7 @@ var Unmaker = /** @class */ (function () {
             case UNMAKE_EFFECT_TYPE_START_TURN: {
                 state.turn = unaction.previousTurn;
                 state.state.activePlayer = unaction.previousActivePlayer;
+                state.state.controllingPlayer = unaction.previousControllingPlayer;
                 state.state.step = unaction.previousStep;
                 state.state.continuousEffects = unaction.previousContinuousEffects;
                 state.clearModifiedCardDataCache();

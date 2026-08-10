@@ -136,6 +136,7 @@ const CardInGame_1 = __importDefault(require("./classes/CardInGame"));
 const Zone_1 = __importDefault(require("./classes/Zone"));
 const SelectorEngine_1 = require("./SelectorEngine");
 const PromptValidator_1 = require("./PromptValidator");
+const LogEngine_1 = require("./LogEngine");
 const convertPromptAction_1 = __importDefault(require("./helpers/convertPromptAction"));
 const performCalculation_1 = __importDefault(require("./helpers/performCalculation"));
 const convertCard = (cardInGame) => ({
@@ -233,6 +234,7 @@ const defaultState = {
     fallbackActions: [],
     continuousEffects: [],
     activePlayer: 0,
+    controllingPlayer: 0,
     prompt: false,
     promptType: null,
     promptParams: {},
@@ -266,11 +268,15 @@ class State {
     turnNotifyTimeout;
     selectorEngine;
     promptValidator;
+    logEngine;
     constructor(state = defaultState) {
         this.state = {
             ...(0, clone_1.default)(defaultState),
             ...state,
         };
+        if (!('controllingPlayer' in state)) {
+            this.state.controllingPlayer = this.state.activePlayer;
+        }
         this.decks = [];
         this.winner = false;
         this.debug = false;
@@ -296,6 +302,11 @@ class State {
             getMetaValue: (value, sourceId) => this.getMetaValue(value, sourceId),
             checkAnyCardForRestrictions: (cards, restrictions) => this.checkAnyCardForRestrictions(cards, restrictions),
             checkAnyCardForRestriction: (cards, restriction, restrictionValue) => this.checkAnyCardForRestriction(cards, restriction, restrictionValue),
+        });
+        this.logEngine = new LogEngine_1.LogEngine({
+            getMetaValue: (value, spellId) => this.getMetaValue(value, spellId),
+            getLog: () => this.state.log,
+            getPromptType: () => this.state.promptType,
         });
     }
     // @deprecated
@@ -472,261 +483,7 @@ class State {
         }
     }
     addActionToLog(action) {
-        var newLogEntry = false;
-        try {
-            switch (action.type) {
-                case const_1.ACTION_PLAY: {
-                    if ('payload' in action) {
-                        newLogEntry = {
-                            type: const_1.LOG_ENTRY_PLAY,
-                            card: action.payload.card.card.name,
-                            player: action.player,
-                        };
-                    }
-                    else {
-                        const metaValue = this.getMetaValue(action.card, action.generatedBy);
-                        const metaCard = Array.isArray(metaValue) ? metaValue[0] : metaValue;
-                        newLogEntry = {
-                            type: const_1.LOG_ENTRY_PLAY,
-                            card: metaCard.card.name,
-                            player: Number(action.player),
-                        };
-                    }
-                    break;
-                }
-                case const_1.ACTION_POWER: {
-                    newLogEntry = {
-                        type: const_1.LOG_ENTRY_POWER_ACTIVATION,
-                        card: action.source.card.name,
-                        name: action.power.name,
-                        player: action.player,
-                    };
-                    break;
-                }
-                case const_1.ACTION_EFFECT: {
-                    switch (action.effectType) {
-                        case const_1.EFFECT_TYPE_DRAW: {
-                            newLogEntry = {
-                                type: const_1.LOG_ENTRY_DRAW,
-                                player: this.getMetaValue(action.player, action.generatedBy),
-                            };
-                            break;
-                        }
-                        case const_1.EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
-                            const target = this.getMetaValue(action.target, action.generatedBy);
-                            if (Array.isArray(target)) {
-                                if (target.length) {
-                                    newLogEntry = {
-                                        type: const_1.LOG_ENTRY_CREATURE_ENERGY_LOSS,
-                                        card: target[0].card.name,
-                                        amount: this.getMetaValue(action.amount, action.generatedBy),
-                                    };
-                                }
-                            }
-                            else {
-                                newLogEntry = {
-                                    type: const_1.LOG_ENTRY_CREATURE_ENERGY_LOSS,
-                                    card: target.card.name,
-                                    amount: this.getMetaValue(action.amount, action.generatedBy),
-                                };
-                            }
-                            break;
-                        }
-                        case const_1.EFFECT_TYPE_ADD_ENERGY_TO_CREATURE: {
-                            const target = this.getMetaValue(action.target, action.generatedBy);
-                            if (Array.isArray(target)) {
-                                if (target.length) {
-                                    for (let i = 0; i < target.length - 1; i++) {
-                                        const tgt = target[i];
-                                        this.state.log.push({
-                                            type: const_1.LOG_ENTRY_CREATURE_ENERGY_GAIN,
-                                            card: tgt.card.name,
-                                            amount: this.getMetaValue(action.amount, action.generatedBy),
-                                        });
-                                    }
-                                    newLogEntry = {
-                                        type: const_1.LOG_ENTRY_CREATURE_ENERGY_GAIN,
-                                        card: target[target.length - 1].card.name,
-                                        amount: this.getMetaValue(action.amount, action.generatedBy),
-                                    };
-                                }
-                            }
-                            else {
-                                newLogEntry = {
-                                    type: const_1.LOG_ENTRY_CREATURE_ENERGY_GAIN,
-                                    card: target.card.name,
-                                    amount: this.getMetaValue(action.amount, action.generatedBy),
-                                };
-                            }
-                            break;
-                        }
-                        case const_1.EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI: {
-                            const target = this.getMetaValue(action.target, action.generatedBy);
-                            if (Array.isArray(target)) {
-                                if (target.length) {
-                                    newLogEntry = {
-                                        type: const_1.LOG_ENTRY_MAGI_ENERGY_LOSS,
-                                        card: target[0].card.name,
-                                        amount: this.getMetaValue(action.amount, action.generatedBy),
-                                    };
-                                }
-                            }
-                            else {
-                                newLogEntry = {
-                                    type: const_1.LOG_ENTRY_MAGI_ENERGY_LOSS,
-                                    card: target.card.name,
-                                    amount: this.getMetaValue(action.amount, action.generatedBy),
-                                };
-                            }
-                            break;
-                        }
-                        case const_1.EFFECT_TYPE_DIE_ROLLED: {
-                            newLogEntry = {
-                                type: const_1.LOG_ENTRY_DIE_ROLLED,
-                                result: action.result,
-                                player: action.player,
-                            };
-                            break;
-                        }
-                        case const_1.EFFECT_TYPE_ADD_ENERGY_TO_MAGI: {
-                            const target = this.getMetaValue(action.target, action.generatedBy);
-                            if (Array.isArray(target)) {
-                                if (target.length) {
-                                    newLogEntry = {
-                                        type: const_1.LOG_ENTRY_MAGI_ENERGY_GAIN,
-                                        card: target[0].card.name,
-                                        amount: this.getMetaValue(action.amount, action.generatedBy),
-                                    };
-                                }
-                            }
-                            else {
-                                newLogEntry = {
-                                    type: const_1.LOG_ENTRY_MAGI_ENERGY_GAIN,
-                                    card: target.card.name,
-                                    amount: this.getMetaValue(action.amount, action.generatedBy),
-                                };
-                            }
-                            break;
-                        }
-                        case const_1.EFFECT_TYPE_FIND_STARTING_CARDS: {
-                            newLogEntry = {
-                                type: const_1.LOG_ENTRY_CHOOSES_STARTING_CARDS,
-                                player: action.player || 0,
-                            };
-                            break;
-                        }
-                        case const_1.EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY: {
-                            const target = this.getMetaValue(action.target, action.generatedBy);
-                            if (!Array.isArray(target)) {
-                                newLogEntry = {
-                                    type: const_1.LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY,
-                                    card: target.card.name,
-                                    player: action.player,
-                                };
-                            }
-                            break;
-                        }
-                        case const_1.EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY: {
-                            const target = this.getMetaValue(action.target, action.generatedBy);
-                            if (Array.isArray(target)) {
-                                if (target.length) {
-                                    newLogEntry = {
-                                        type: const_1.LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,
-                                        card: target[0].card.name,
-                                        player: action.player,
-                                    };
-                                }
-                            }
-                            else {
-                                newLogEntry = {
-                                    type: const_1.LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,
-                                    card: target.card.name,
-                                    player: action.player,
-                                };
-                            }
-                            break;
-                        }
-                        case const_1.EFFECT_TYPE_MAGI_IS_DEFEATED: {
-                            newLogEntry = {
-                                type: const_1.LOG_ENTRY_MAGI_DEFEATED,
-                                card: this.getMetaValue(action.target, action.generatedBy).card.name,
-                                player: action.player,
-                            };
-                            break;
-                        }
-                        case const_1.EFFECT_TYPE_CREATURE_ATTACKS: {
-                            newLogEntry = {
-                                type: const_1.LOG_ENTRY_ATTACK,
-                                source: this.getMetaValue(action.source, action.generatedBy).card.name,
-                                target: this.getMetaValue(action.target, action.generatedBy).card.name,
-                                packHuntAttack: Boolean(action.packHuntAttack),
-                            };
-                            break;
-                        }
-                        case const_1.EFFECT_TYPE_DISCARD_CARD_FROM_HAND: {
-                            newLogEntry = {
-                                type: const_1.LOG_ENTRY_CARD_DISCARDED_FROM_HAND,
-                                card: this.getMetaValue(action.target, action.generatedBy).card.name,
-                                player: action.player || 1,
-                            };
-                            break;
-                        }
-                        case const_1.EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT: {
-                            // This requires the useSelector method to accept SELECTOR_ID type, so I will do it a bit later
-                            break;
-                            /*if (action.staticAbilities) {
-                                for (let staticAbility of action.staticAbilities) {
-                                    // Targeting gets a little complicated here because we aren't explicitly saying "this creature is burrowed for X turns"
-                                    // Rather, we create a continuous effect of "creatures satisfying this selector have this property modified in this way with such-and-such expiration conditions"
-                                    // if (staticAbility.property === PROPERTY_STATUS && staticAbility.selector == SELECTOR_ID) {
-                                    // 	const id = this.getMetaValue(staticAbility.selectorParameter, action.generatedBy);
-                                    // 	const target = this.useSelector(SELECTOR_ID, action.player, id);
-                                    // 	if (target) {
-                                    // 		newLogEntry = {
-                                    // 			type: LOG_ENTRY_CONTINUOUS_EFFECT_CREATED,
-                                    // 			property: PROPERTY_STATUS,
-                                    // 			turns: this.getMetaValue(action.expiration.turns, action.generatedBy),
-                                    // 		}
-                                    // 	}
-                                    // }
-                                }
-                            }
-                            break;*/
-                        }
-                    }
-                    break;
-                }
-                case const_1.ACTION_RESOLVE_PROMPT: {
-                    if ((this.state.promptType === const_1.PROMPT_TYPE_SINGLE_CREATURE ||
-                        this.state.promptType === const_1.PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE ||
-                        this.state.promptType === const_1.PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI ||
-                        this.state.promptType === const_1.PROMPT_TYPE_OWN_SINGLE_CREATURE ||
-                        this.state.promptType === const_1.PROMPT_TYPE_SINGLE_MAGI) && 'target' in action) {
-                        newLogEntry = {
-                            type: const_1.LOG_ENTRY_TARGETING,
-                            card: action.target?.card?.name || 'unknown card',
-                            player: action.player,
-                        };
-                    }
-                    if (this.state.promptType === const_1.PROMPT_TYPE_NUMBER && 'number' in action) {
-                        newLogEntry = {
-                            type: const_1.LOG_ENTRY_NUMBER_CHOICE,
-                            number: (typeof action.number === 'number') ? action.number : parseInt(action.number || '0', 10),
-                            player: action.player,
-                        };
-                    }
-                    break;
-                }
-            }
-        }
-        catch (e) {
-            console.error('Log entry creation failed');
-            console.dir(action);
-            // console.dir(e);
-        }
-        if (newLogEntry) {
-            this.state.log.push(newLogEntry);
-        }
+        this.logEngine.addActionToLog(action);
     }
     createZones() {
         const [playerOne, playerTwo] = this.players;
@@ -816,6 +573,7 @@ class State {
         this.state.turn = 1;
         this.state.goesFirst = goesFirst;
         this.state.activePlayer = goesFirst;
+        this.state.controllingPlayer = goesFirst;
     }
     getOpponent(player) {
         const opponent = this.players.find(pl => pl != player);
@@ -842,6 +600,19 @@ class State {
     }
     getActivePlayer() {
         return this.state.activePlayer;
+    }
+    getControllingPlayer() {
+        for (const effect of this.state.continuousEffects) {
+            for (const ability of (effect.staticAbilities ?? [])) {
+                if (ability.property === const_1.PROPERTY_CONTROLLING_PLAYER) {
+                    const value = this.getMetaValue(ability.modifier.operandOne, effect.id);
+                    if (typeof value === 'number') {
+                        return value;
+                    }
+                }
+            }
+        }
+        return this.state.controllingPlayer;
     }
     getCurrentPriority() {
         return this.state.step === null ? 0 : steps[this.state.step].priority;

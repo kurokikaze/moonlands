@@ -865,7 +865,7 @@ describe('Adis', () => {
 	});
 });
 
-describe('Stradius', () => {
+describe('Stradus', () => {
 	it('Attacking', () => {
 		const ACTIVE_PLAYER = 422;
 		const NON_ACTIVE_PLAYER = 1310;
@@ -2115,5 +2115,84 @@ describe('Orathan Flyer', () => {
 		expect(gameState.state.prompt).toEqual(false);
 		expect(lasada.data.energy).toEqual(1);
 		expect(flyingOrathan.data.energy).toEqual(7);
+	});
+});
+
+describe('Arderial\'s Crown', () => {
+	it('Strengthen (prompts for a creature at start of controller\'s turn and adds 1 energy)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const jaela = new CardInGame(byName('Jaela'), ACTIVE_PLAYER).addEnergy(10);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const arderialsCrown = new CardInGame(byName("Arderial's Crown"), ACTIVE_PLAYER);
+		const pharan = new CardInGame(byName('Pharan'), ACTIVE_PLAYER).addEnergy(3);
+		const vellup = new CardInGame(byName('Vellup'), NON_ACTIVE_PLAYER).addEnergy(2);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arderialsCrown, pharan, vellup], [jaela]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: NON_ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		const passAction = {
+			type: ACTION_PASS,
+			player: NON_ACTIVE_PLAYER,
+		};
+
+		gameState.update(passAction);
+
+		expect(gameState.state.prompt).toEqual(true, 'Game is in prompt state');
+		expect(gameState.state.promptType).toEqual(PROMPT_TYPE_SINGLE_CREATURE, 'Game is prompting for a creature');
+
+		const targetingAction = {
+			type: ACTION_RESOLVE_PROMPT,
+			promptType: PROMPT_TYPE_SINGLE_CREATURE,
+			target: pharan,
+			generatedBy: gameState.state.promptGeneratedBy,
+		};
+
+		gameState.update(targetingAction);
+
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+		expect(pharan.data.energy).toEqual(4, 'Pharan gained 1 energy from Arderial\'s Crown');
+		expect(vellup.data.energy).toEqual(2, 'Opponent\'s Vellup was not affected');
+	});
+
+	it('Strengthen (does not trigger on opponent\'s turn)', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const jaela = new CardInGame(byName('Jaela'), ACTIVE_PLAYER).addEnergy(10);
+		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const arderialsCrown = new CardInGame(byName("Arderial's Crown"), ACTIVE_PLAYER);
+		const pharan = new CardInGame(byName('Pharan'), ACTIVE_PLAYER).addEnergy(3);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arderialsCrown, pharan], [jaela]);
+
+		const gameState = new State({
+			zones,
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+
+		const passAction = {
+			type: ACTION_PASS,
+			player: ACTIVE_PLAYER,
+		};
+
+		gameState.update(passAction);
+
+		expect(gameState.state.activePlayer).toEqual(NON_ACTIVE_PLAYER, 'Opponent\'s turn has started');
+		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
+		expect(pharan.data.energy).toEqual(3, 'Pharan energy is unchanged');
 	});
 });

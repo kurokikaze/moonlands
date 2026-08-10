@@ -41,6 +41,7 @@ export type CardData = {
     ableToAttack?: boolean;
     canBeAttacked?: boolean;
     burrowed?: boolean;
+    controllingPlayer?: number;
     maxCostX?: number;
 };
 export interface EnrichedAction {
