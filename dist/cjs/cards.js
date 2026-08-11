@@ -4809,6 +4809,55 @@ exports.cards = [
             },
         ],
     }),
+    new Card_1.default('Will of Orothe', const_1.TYPE_SPELL, const_1.REGION_OROTHE, 6, {
+        text: 'Choose any one opponent. During his or her next turn, the chosen opponent\'s Creatures may not use Powers. During the chosen opponent\'s Attack Step, you decide whether or not his or her Creatures attack, and which Creatures they attack.',
+        effects: [
+            prompt({
+                promptType: const_1.PROMPT_TYPE_PLAYER,
+                message: 'Choose an opponent to control during their next turn.',
+            }),
+            // Opponent's creatures cannot use powers for their next turn
+            effect({
+                effectType: const_1.EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+                staticAbilities: [{
+                        name: 'Will of Orothe',
+                        text: 'Opponent\'s Creatures may not use Powers',
+                        selector: const_1.SELECTOR_CREATURES_OF_PLAYER,
+                        selectorParameter: '$targetPlayer',
+                        property: const_1.PROPERTY_ABLE_TO_USE_POWERS,
+                        modifier: {
+                            operator: const_1.CALCULATION_SET,
+                            operandOne: false,
+                        },
+                    }],
+                triggerEffects: [],
+                expiration: {
+                    type: const_1.EXPIRATION_OPPONENT_TURNS,
+                    turns: 1,
+                },
+            }),
+            // Caster controls the opponent's decisions during their next turn
+            effect({
+                effectType: const_1.EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+                staticAbilities: [{
+                        name: 'Will of Orothe',
+                        text: 'Caster controls the opponent\'s decisions',
+                        selector: const_1.SELECTOR_CREATURES_OF_PLAYER,
+                        selectorParameter: '$targetPlayer',
+                        property: const_1.PROPERTY_CONTROLLING_PLAYER,
+                        modifier: {
+                            operator: const_1.CALCULATION_SET,
+                            operandOne: '$player',
+                        },
+                    }],
+                triggerEffects: [],
+                expiration: {
+                    type: const_1.EXPIRATION_OPPONENT_TURNS,
+                    turns: 1,
+                },
+            }),
+        ],
+    }),
     new Card_1.default('Typhoon', const_1.TYPE_SPELL, const_1.REGION_OROTHE, 8, {
         text: 'Roll one die. Discard energy equal to the die roll from each non-Orothe Creature in play',
         effects: [

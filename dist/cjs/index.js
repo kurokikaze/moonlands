@@ -1218,10 +1218,12 @@ class State {
                 }
                 case const_1.ACTION_POWER: {
                     const powerCost = this.modifyByStaticAbilities(action.source, const_1.PROPERTY_POWER_COST, action.power.name || '');
+                    const ableToUsePowers = this.modifyByStaticAbilities(action.source, const_1.PROPERTY_ABLE_TO_USE_POWERS);
                     const payingCard = (action.source.card.type === const_1.TYPE_RELIC) ?
                         this.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, action.source.owner).card :
                         action.source;
                     if (payingCard &&
+                        ableToUsePowers &&
                         !action.source.wasActionUsed(action.power.name) &&
                         (payingCard.data.energy >= powerCost ||
                             (payingCard.data.energy > 0 && powerCost === const_1.COST_X))) {

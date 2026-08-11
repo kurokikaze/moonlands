@@ -36,6 +36,7 @@ export var PROPERTY_POWER_COST = 'properties/power_cost'; // NOT FOR PROPERTY GE
 export var PROPERTY_ENERGY_LOSS_THRESHOLD = 'properties/energy_loss_threshold';
 export var PROPERTY_PROTECTION = 'properties/protection';
 export var PROPERTY_CONTROLLING_PLAYER = 'properties/controlling_player';
+export var PROPERTY_ABLE_TO_USE_POWERS = 'properties/able_to_use_powers';
 // Maybe make statuses into separate category
 export var PROPERTY_STATUS_DEFEATED_CREATURE = 'properties/status/defeated_creature';
 export var PROPERTY_STATUS_WAS_ATTACKED = 'properties/status/was_attacked';

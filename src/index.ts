@@ -203,6 +203,7 @@ import {
 
 	CARD_COUNT,
 	PROPERTY_CONTROLLING_PLAYER,
+	PROPERTY_ABLE_TO_USE_POWERS,
 } from './const';
 
 import { actionMap } from './actionMaps/effects';
@@ -1702,12 +1703,14 @@ export class State {
 				}
 				case ACTION_POWER: {
 					const powerCost = this.modifyByStaticAbilities(action.source, PROPERTY_POWER_COST, action.power.name || '');
+					const ableToUsePowers = this.modifyByStaticAbilities(action.source, PROPERTY_ABLE_TO_USE_POWERS);
 
 					const payingCard = (action.source.card.type === TYPE_RELIC) ?
 						this.getZone(ZONE_TYPE_ACTIVE_MAGI, action.source.owner).card :
 						action.source;
 
 					if (payingCard &&
+						ableToUsePowers &&
 						!action.source.wasActionUsed(action.power.name) &&
 						(
 							payingCard.data.energy >= powerCost ||

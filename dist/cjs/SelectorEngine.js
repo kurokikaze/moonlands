@@ -250,7 +250,8 @@ class SelectorEngine extends LayeredModificationEngine_1.LayeredModificationEngi
             [const_1.PROPERTY_CAN_ATTACK_MAGI_DIRECTLY]: 5,
             [const_1.PROPERTY_ENERGY_LOSS_THRESHOLD]: 6,
             [const_1.PROPERTY_ABLE_TO_ATTACK]: 7,
-            [const_1.PROPERTY_PROTECTION]: 8,
+            [const_1.PROPERTY_ABLE_TO_USE_POWERS]: 8,
+            [const_1.PROPERTY_PROTECTION]: 9,
         };
         const zoneAbilities = allZonesCards.reduce((acc, cardInPlay) => cardInPlay.card.data.staticAbilities ? [
             ...acc,

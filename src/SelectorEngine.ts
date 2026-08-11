@@ -49,6 +49,7 @@ import {
 	PROPERTY_ENERGY_LOSS_THRESHOLD,
 	PROPERTY_STATUS,
 	PROPERTY_ABLE_TO_ATTACK,
+	PROPERTY_ABLE_TO_USE_POWERS,
 	PROPERTY_MAGI_NAME,
 	PROPERTY_CAN_BE_ATTACKED,
 	PROPERTY_PROTECTION,
@@ -65,8 +66,7 @@ import {
 	ZONE_TYPE_DECK,
 } from './const';
 
-import CardInGame, { InGameData } from './classes/CardInGame';
-import Card, { CostType, ModifiedCardType } from './classes/Card';
+import CardInGame from './classes/CardInGame';
 import Zone from './classes/Zone';
 import { CostEngine } from './CostEngine';
 import { RestrictionEngine } from './RestrictionEngine';
@@ -77,15 +77,12 @@ import {
 	PropertyType,
 	RestrictionType,
 	RestrictionObjectType,
-	ProtectionType,
-	StaticAbilityType,
 	ContinuousEffectType,
-	OperatorType,
 	ZoneType,
 	Region,
 	MercenneFixed,
 } from './types';
-import { CardType, StatusType } from './types/common';
+import { StatusType } from './types/common';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -397,7 +394,8 @@ export class SelectorEngine extends LayeredModificationEngine {
 			[PROPERTY_CAN_ATTACK_MAGI_DIRECTLY]: 5,
 			[PROPERTY_ENERGY_LOSS_THRESHOLD]: 6,
 			[PROPERTY_ABLE_TO_ATTACK]: 7,
-			[PROPERTY_PROTECTION]: 8,
+			[PROPERTY_ABLE_TO_USE_POWERS]: 8,
+			[PROPERTY_PROTECTION]: 9,
 		};
 
 		const zoneAbilities: EnrichedStaticAbilityType[] = allZonesCards.reduce<EnrichedStaticAbilityType[]>(

@@ -6169,7 +6169,6 @@ describe('controllingPlayer', () => {
 
 		expect(serialized.continuousEffects).toHaveLength(1, 'One continuous effect in serialized state');
 		const effect = serialized.continuousEffects[0];
-		console.dir(effect, { depth: null });
 		expect(effect.staticAbilities[0].property).toEqual(PROPERTY_CONTROLLING_PLAYER, 'Effect targets PROPERTY_CONTROLLING_PLAYER');
 		expect(effect.staticAbilities[0].modifier.operandOne).toEqual(NON_ACTIVE_PLAYER, 'Effect sets controlling player to the opponent');
 		expect(effect.expiration.type).toEqual(EXPIRATION_ANY_TURNS, 'Effect expires after turns');

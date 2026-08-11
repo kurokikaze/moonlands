@@ -41,6 +41,9 @@ import {
   ZONE_TYPE_DISCARD,
   ZONE_TYPE_HAND,
   PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
+  PROMPT_TYPE_PLAYER,
+  PROMPT_TYPE_SINGLE_CREATURE,
+  PROPERTY_ABLE_TO_USE_POWERS,
 } from '../../src/const.ts';
 
 import {
@@ -2410,5 +2413,154 @@ describe('Orthea', () => {
 
     expect(gameState.state.prompt).toEqual(false);
     expect(orthea.data.energy).toBeLessThan(12); // Orthea still loses energy
+  });
+});
+
+describe('Will of Orothe', () => {
+  it('Prompts for a player, blocks their creatures from using powers, and sets controllingPlayer', () => {
+    const ACTIVE_PLAYER = 422;
+    const NON_ACTIVE_PLAYER = 1310;
+
+    const ebylon = new CardInGame(byName('Ebylon'), ACTIVE_PLAYER).addEnergy(10);
+    const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(5);
+    const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(1);
+    const quorPup = new CardInGame(byName('Quor Pup'), NON_ACTIVE_PLAYER).addEnergy(3);
+    const willOfOrothe = new CardInGame(byName('Will of Orothe'), ACTIVE_PLAYER);
+
+    const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arbolit, quorPup], [ebylon]);
+
+    const gameState = new State({
+      zones,
+      step: STEP_PRS_SECOND,
+      activePlayer: ACTIVE_PLAYER,
+    });
+
+    gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+    gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+    gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([willOfOrothe]);
+
+    // Cast Will of Orothe
+    gameState.update({
+      type: ACTION_PLAY,
+      payload: { card: willOfOrothe, player: ACTIVE_PLAYER },
+    });
+
+    expect(gameState.state.prompt).toEqual(true, 'Game is prompting for a player');
+    expect(gameState.state.promptType).toEqual(PROMPT_TYPE_PLAYER, 'Prompt type is PLAYER');
+
+    gameState.update({
+      type: ACTION_RESOLVE_PROMPT,
+      targetPlayer: NON_ACTIVE_PLAYER,
+      generatedBy: willOfOrothe.id,
+    });
+
+    expect(gameState.state.prompt).toEqual(false, 'Prompt resolved');
+    expect(gameState.state.continuousEffects.length).toEqual(2, 'Two continuous effects created');
+
+    // Pass to the opponent's turn
+    gameState.update({ type: ACTION_PASS, player: ACTIVE_PLAYER });
+
+    expect(gameState.state.activePlayer).toEqual(NON_ACTIVE_PLAYER, 'It is now the opponent\'s turn');
+    expect(gameState.getControllingPlayer()).toEqual(ACTIVE_PLAYER, 'Caster controls the opponent\'s decisions');
+
+    // Opponent's creature should be blocked from using powers
+    expect(gameState.modifyByStaticAbilities(arbolit, PROPERTY_ABLE_TO_USE_POWERS)).toEqual(false, 'Arbolit cannot use powers');
+    expect(gameState.modifyByStaticAbilities(quorPup, PROPERTY_ABLE_TO_USE_POWERS)).toEqual(false, 'Quor Pup cannot use powers');
+
+    // Try to use Arbolit's power — should be silently ignored
+    gameState.update({
+      type: ACTION_POWER,
+      source: arbolit,
+      power: arbolit.card.data.powers[0],
+      player: NON_ACTIVE_PLAYER,
+    });
+
+    expect(gameState.state.prompt).toEqual(false, 'Power was blocked — no prompt appeared');
+    expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Arbolit is still in play (power not used)');
+    expect(arbolit.data.energy).toEqual(1, 'Arbolit energy is unchanged');
+  });
+
+  it('Effects expire after the target\'s turn ends, restoring power use', () => {
+    const ACTIVE_PLAYER = 422;
+    const NON_ACTIVE_PLAYER = 1310;
+
+    const ebylon = new CardInGame(byName('Ebylon'), ACTIVE_PLAYER).addEnergy(10);
+    const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(5);
+    const arbolit = new CardInGame(byName('Arbolit'), NON_ACTIVE_PLAYER).addEnergy(1);
+    const quorPup = new CardInGame(byName('Quor Pup'), NON_ACTIVE_PLAYER).addEnergy(3);
+    const willOfOrothe = new CardInGame(byName('Will of Orothe'), ACTIVE_PLAYER);
+
+    const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arbolit, quorPup], [ebylon]);
+
+    const gameState = new State({
+      zones,
+      step: STEP_PRS_SECOND,
+      activePlayer: ACTIVE_PLAYER,
+    });
+
+    gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+    gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([grega]);
+    gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([willOfOrothe]);
+
+    // Cast Will of Orothe targeting the opponent
+    gameState.update({
+      type: ACTION_PLAY,
+      payload: { card: willOfOrothe, player: ACTIVE_PLAYER },
+    });
+    gameState.update({
+      type: ACTION_RESOLVE_PROMPT,
+      targetPlayer: NON_ACTIVE_PLAYER,
+      generatedBy: willOfOrothe.id,
+    });
+
+    const passAP = { type: ACTION_PASS, player: ACTIVE_PLAYER };
+    const passNAP = { type: ACTION_PASS, player: NON_ACTIVE_PLAYER };
+
+    // Pass to opponent's first turn (effect ticks to 0, stays active)
+    gameState.update(passAP);
+    expect(gameState.state.activePlayer).toEqual(NON_ACTIVE_PLAYER);
+    expect(gameState.state.continuousEffects.length).toEqual(2, 'Effects still active during opponent turn 1');
+
+    // Pass opponent's full turn: PRS1 → ATTACK → CREATURES → PRS2 → (back to caster)
+    gameState.update(passNAP); // → ATTACK
+    gameState.update(passNAP); // → CREATURES
+    gameState.update(passNAP); // → PRS2
+    gameState.update(passNAP); // → ACTIVE_PLAYER PRS1
+
+    expect(gameState.state.activePlayer).toEqual(ACTIVE_PLAYER, 'Back to caster\'s turn');
+
+    // Pass caster's full turn: PRS1 → ATTACK → CREATURES → PRS2 → opponent's second turn
+    gameState.update(passAP); // → ATTACK
+    gameState.update(passAP); // → CREATURES
+    gameState.update(passAP); // → PRS2
+    gameState.update(passAP); // → NON_ACTIVE_PLAYER PRS1 (effect removed at turn start)
+
+    expect(gameState.state.activePlayer).toEqual(NON_ACTIVE_PLAYER, 'Opponent\'s second turn');
+    expect(gameState.state.continuousEffects.length).toEqual(0, 'Both effects expired');
+    expect(gameState.getControllingPlayer()).toEqual(NON_ACTIVE_PLAYER, 'Controlling player back to the active player');
+    expect(gameState.modifyByStaticAbilities(arbolit, PROPERTY_ABLE_TO_USE_POWERS)).toEqual(true, 'Arbolit can use powers again');
+
+    // Use Arbolit's power — should succeed now
+    gameState.update({
+      type: ACTION_POWER,
+      source: arbolit,
+      power: arbolit.card.data.powers[0],
+      player: NON_ACTIVE_PLAYER,
+    });
+
+    expect(gameState.state.prompt).toEqual(true, 'Power activated — prompt for target creature');
+    expect(gameState.state.promptType).toEqual(PROMPT_TYPE_SINGLE_CREATURE);
+
+    gameState.update({
+      type: ACTION_RESOLVE_PROMPT,
+      promptType: PROMPT_TYPE_SINGLE_CREATURE,
+      target: quorPup,
+      generatedBy: arbolit.id,
+    });
+
+    expect(gameState.state.prompt).toEqual(false, 'Power resolved');
+    expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).length).toEqual(1, 'Arbolit discarded');
+    expect(gameState.getZone(ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER).card.card.name).toEqual('Arbolit');
+    expect(quorPup.data.energy).toEqual(5, 'Quor Pup gained 2 energy from Healing Flame');
   });
 });

@@ -38,6 +38,7 @@ export const PROPERTY_POWER_COST = 'properties/power_cost'; // NOT FOR PROPERTY 
 export const PROPERTY_ENERGY_LOSS_THRESHOLD = 'properties/energy_loss_threshold';
 export const PROPERTY_PROTECTION = 'properties/protection';
 export const PROPERTY_CONTROLLING_PLAYER = 'properties/controlling_player';
+export const PROPERTY_ABLE_TO_USE_POWERS = 'properties/able_to_use_powers';
 // Maybe make statuses into separate category
 export const PROPERTY_STATUS_DEFEATED_CREATURE = 'properties/status/defeated_creature';
 export const PROPERTY_STATUS_WAS_ATTACKED = 'properties/status/was_attacked';

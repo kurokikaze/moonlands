@@ -36,6 +36,7 @@ export declare const PROPERTY_POWER_COST = "properties/power_cost";
 export declare const PROPERTY_ENERGY_LOSS_THRESHOLD = "properties/energy_loss_threshold";
 export declare const PROPERTY_PROTECTION = "properties/protection";
 export declare const PROPERTY_CONTROLLING_PLAYER = "properties/controlling_player";
+export declare const PROPERTY_ABLE_TO_USE_POWERS = "properties/able_to_use_powers";
 export declare const PROPERTY_STATUS_DEFEATED_CREATURE = "properties/status/defeated_creature";
 export declare const PROPERTY_STATUS_WAS_ATTACKED = "properties/status/was_attacked";
 export declare const PROPERTY_STATUS = "properties/status";

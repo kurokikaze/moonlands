@@ -1,4 +1,4 @@
-Done: **181** cards out of **191**
+Done: **182** cards out of **191**
 
 # Done, tested
 
@@ -114,6 +114,7 @@ Done: **181** cards out of **191**
 - Wellisk
 - Wellisk Pup
 - Whall
+- Will of Orothe
 - Xyx
 - Xyx Elder
 - Yaki
@@ -198,7 +199,6 @@ Done: **181** cards out of **191**
 - Tap Roots (selecting two creatures)
 - Vaal (not losing energy from attack)
 - Wence (showing cards to opponent)
-- Will of Orothe (controlling other player)
 
 # Replacement effect
 

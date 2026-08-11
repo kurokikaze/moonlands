@@ -37,6 +37,8 @@ import {
 	PROPERTY_CAN_BE_ATTACKED,
 	ACTION_PROPERTY,
 	CARD_COUNT,
+	PROPERTY_CONTROLLING_PLAYER,
+	PROPERTY_ABLE_TO_USE_POWERS,
 
 	REGION_ARDERIAL,
 	REGION_CALD,
@@ -5070,6 +5072,55 @@ export const cards = [
 					}),
 				],
 			},
+		],
+	}),
+	new Card('Will of Orothe', TYPE_SPELL, REGION_OROTHE, 6, {
+		text: 'Choose any one opponent. During his or her next turn, the chosen opponent\'s Creatures may not use Powers. During the chosen opponent\'s Attack Step, you decide whether or not his or her Creatures attack, and which Creatures they attack.',
+		effects: [
+			prompt({
+				promptType: PROMPT_TYPE_PLAYER,
+				message: 'Choose an opponent to control during their next turn.',
+			}),
+			// Opponent's creatures cannot use powers for their next turn
+			effect({
+				effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+				staticAbilities: [{
+					name: 'Will of Orothe',
+					text: 'Opponent\'s Creatures may not use Powers',
+					selector: SELECTOR_CREATURES_OF_PLAYER,
+					selectorParameter: '$targetPlayer',
+					property: PROPERTY_ABLE_TO_USE_POWERS,
+					modifier: {
+						operator: CALCULATION_SET,
+						operandOne: false,
+					},
+				}],
+				triggerEffects: [],
+				expiration: {
+					type: EXPIRATION_OPPONENT_TURNS,
+					turns: 1,
+				},
+			}),
+			// Caster controls the opponent's decisions during their next turn
+			effect({
+				effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+				staticAbilities: [{
+					name: 'Will of Orothe',
+					text: 'Caster controls the opponent\'s decisions',
+					selector: SELECTOR_CREATURES_OF_PLAYER,
+					selectorParameter: '$targetPlayer',
+					property: PROPERTY_CONTROLLING_PLAYER,
+					modifier: {
+						operator: CALCULATION_SET,
+						operandOne: '$player',
+					},
+				}],
+				triggerEffects: [],
+				expiration: {
+					type: EXPIRATION_OPPONENT_TURNS,
+					turns: 1,
+				},
+			}),
 		],
 	}),
 	new Card('Typhoon', TYPE_SPELL, REGION_OROTHE, 8, {

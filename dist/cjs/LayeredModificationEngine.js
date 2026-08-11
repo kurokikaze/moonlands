@@ -81,6 +81,8 @@ class LayeredModificationEngine {
             }
             case const_1.PROPERTY_CONTROLLING_PLAYER:
                 return target.modifiedCard?.data.controllingPlayer ?? 0;
+            case const_1.PROPERTY_ABLE_TO_USE_POWERS:
+                return target.modifiedCard?.data.ableToUsePowers ?? true;
         }
     }
     getByPropertyAny(target, property, subProperty = null) {
@@ -282,6 +284,23 @@ class LayeredModificationEngine {
                             data: {
                                 ...currentCard.modifiedCard.data,
                                 controllingPlayer: resultValue,
+                            },
+                        },
+                    };
+                }
+                return currentCard;
+            }
+            case const_1.PROPERTY_ABLE_TO_USE_POWERS: {
+                const { operator, operandOne } = staticAbility.modifier;
+                const resultValue = (operator === const_1.CALCULATION_SET) ? operandOne : true;
+                if (typeof resultValue === 'boolean') {
+                    return {
+                        ...currentCard,
+                        modifiedCard: {
+                            ...currentCard.modifiedCard,
+                            data: {
+                                ...currentCard.modifiedCard.data,
+                                ableToUsePowers: resultValue,
                             },
                         },
                     };

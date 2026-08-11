@@ -9,14 +9,14 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
-import { PROPERTY_ID, PROPERTY_TYPE, PROPERTY_CONTROLLER, PROPERTY_ENERGY_COUNT, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, PROPERTY_POWER_COST, PROPERTY_CREATURE_TYPES, PROPERTY_STATUS_WAS_ATTACKED, PROPERTY_STATUS_DEFEATED_CREATURE, PROPERTY_ENERGY_LOSS_THRESHOLD, PROPERTY_STATUS, PROPERTY_ABLE_TO_ATTACK, PROPERTY_MAGI_NAME, PROPERTY_CAN_BE_ATTACKED, PROPERTY_PROTECTION, PROPERTY_CREATURE_NAME, PROPERTY_CONTROLLING_PLAYER, CALCULATION_SET, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, STATUS_BURROWED, } from './const.js';
+import { PROPERTY_ID, PROPERTY_TYPE, PROPERTY_CONTROLLER, PROPERTY_ENERGY_COUNT, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, PROPERTY_POWER_COST, PROPERTY_CREATURE_TYPES, PROPERTY_STATUS_WAS_ATTACKED, PROPERTY_STATUS_DEFEATED_CREATURE, PROPERTY_ENERGY_LOSS_THRESHOLD, PROPERTY_STATUS, PROPERTY_ABLE_TO_ATTACK, PROPERTY_MAGI_NAME, PROPERTY_CAN_BE_ATTACKED, PROPERTY_PROTECTION, PROPERTY_CREATURE_NAME, PROPERTY_CONTROLLING_PLAYER, PROPERTY_ABLE_TO_USE_POWERS, CALCULATION_SET, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, STATUS_BURROWED, } from './const.js';
 import performCalculation from './helpers/performCalculation.js';
 // ─── LayeredModificationEngine ───────────────────────────────────────────────
 var LayeredModificationEngine = /** @class */ (function () {
     function LayeredModificationEngine() {
     }
     LayeredModificationEngine.prototype.getByProperty = function (target, property, subProperty) {
-        var _a, _b, _c, _d;
+        var _a, _b, _c, _d, _e, _f;
         if (subProperty === void 0) { subProperty = null; }
         switch (property) {
             case PROPERTY_ID:
@@ -93,6 +93,8 @@ var LayeredModificationEngine = /** @class */ (function () {
             }
             case PROPERTY_CONTROLLING_PLAYER:
                 return (_d = (_c = target.modifiedCard) === null || _c === void 0 ? void 0 : _c.data.controllingPlayer) !== null && _d !== void 0 ? _d : 0;
+            case PROPERTY_ABLE_TO_USE_POWERS:
+                return (_f = (_e = target.modifiedCard) === null || _e === void 0 ? void 0 : _e.data.ableToUsePowers) !== null && _f !== void 0 ? _f : true;
         }
     };
     LayeredModificationEngine.prototype.getByPropertyAny = function (target, property, subProperty) {
@@ -208,6 +210,14 @@ var LayeredModificationEngine = /** @class */ (function () {
                 var resultValue = (operator === CALCULATION_SET) ? operandOne : 0;
                 if (typeof resultValue === 'number') {
                     return __assign(__assign({}, currentCard), { modifiedCard: __assign(__assign({}, currentCard.modifiedCard), { data: __assign(__assign({}, currentCard.modifiedCard.data), { controllingPlayer: resultValue }) }) });
+                }
+                return currentCard;
+            }
+            case PROPERTY_ABLE_TO_USE_POWERS: {
+                var _l = staticAbility.modifier, operator = _l.operator, operandOne = _l.operandOne;
+                var resultValue = (operator === CALCULATION_SET) ? operandOne : true;
+                if (typeof resultValue === 'boolean') {
+                    return __assign(__assign({}, currentCard), { modifiedCard: __assign(__assign({}, currentCard.modifiedCard), { data: __assign(__assign({}, currentCard.modifiedCard.data), { ableToUsePowers: resultValue }) }) });
                 }
                 return currentCard;
             }

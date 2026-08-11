@@ -21,6 +21,7 @@ import {
 	PROPERTY_PROTECTION,
 	PROPERTY_CREATURE_NAME,
 	PROPERTY_CONTROLLING_PLAYER,
+	PROPERTY_ABLE_TO_USE_POWERS,
 
 	CALCULATION_SET,
 	CALCULATION_SUBTRACT,
@@ -74,6 +75,7 @@ export class LayeredModificationEngine {
 	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_POWER_COST, subProperty: string): number
 	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CONTROLLER): number
 	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CONTROLLING_PLAYER): number
+	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_ABLE_TO_USE_POWERS): boolean
 	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_PROTECTION): ProtectionType | undefined
 	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_MAGI_NAME): string
 	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_TYPE): CardType
@@ -154,6 +156,8 @@ export class LayeredModificationEngine {
 			}
 			case PROPERTY_CONTROLLING_PLAYER:
 				return target.modifiedCard?.data.controllingPlayer ?? 0;
+			case PROPERTY_ABLE_TO_USE_POWERS:
+				return target.modifiedCard?.data.ableToUsePowers ?? true;
 		}
 	}
 
@@ -372,6 +376,24 @@ export class LayeredModificationEngine {
 							data: {
 								...currentCard.modifiedCard.data,
 								controllingPlayer: resultValue,
+							},
+						},
+					};
+				}
+				return currentCard;
+			}
+			case PROPERTY_ABLE_TO_USE_POWERS: {
+				const { operator, operandOne } = staticAbility.modifier;
+				const resultValue = (operator === CALCULATION_SET) ? operandOne : true;
+
+				if (typeof resultValue === 'boolean') {
+					return {
+						...currentCard,
+						modifiedCard: {
+							...currentCard.modifiedCard,
+							data: {
+								...currentCard.modifiedCard.data,
+								ableToUsePowers: resultValue,
 							},
 						},
 					};
