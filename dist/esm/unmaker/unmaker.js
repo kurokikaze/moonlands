@@ -72,6 +72,8 @@ var Unmaker = /** @class */ (function () {
         this.strings = [];
         this.objects = [];
         this.historyStack = [];
+        this.prngCheckpoints = [];
+        this.actionsUsedCheckpoints = [];
         this.state.setOnAction(function (action) {
             var unAction = _this.generateUnAction(action);
             if (unAction) {
@@ -84,6 +86,23 @@ var Unmaker = /** @class */ (function () {
     }*/
     Unmaker.prototype.setCheckpoint = function () {
         this.historyStack.push(this.numberOfUnActions);
+        // Snapshot PRNG state so die rolls can be fully reversed
+        var twister = this.state.twister;
+        this.prngCheckpoints.push(twister ? { mt: __spreadArray([], twister.mt, true), mti: twister.mti } : null);
+        // Snapshot actionsUsed for every in-play card and each active magi
+        var snapshot = {};
+        for (var _i = 0, _a = this.state.getZone(ZONE_TYPE_IN_PLAY).cards; _i < _a.length; _i++) {
+            var card = _a[_i];
+            snapshot[card.id] = __spreadArray([], card.data.actionsUsed, true);
+        }
+        for (var _b = 0, _c = this.state.players; _b < _c.length; _b++) {
+            var player = _c[_b];
+            var magi = this.state.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card;
+            if (magi) {
+                snapshot[magi.id] = __spreadArray([], magi.data.actionsUsed, true);
+            }
+        }
+        this.actionsUsedCheckpoints.push(snapshot);
     };
     Unmaker.prototype.outputDebug = function () {
         console.log("Objects storage length: ".concat(this.objects.length));
@@ -105,6 +124,7 @@ var Unmaker = /** @class */ (function () {
         }
     }*/
     Unmaker.prototype.revertToCheckpoint = function () {
+        var _a, _b;
         if (this.historyStack.length) {
             var target = this.historyStack.pop();
             if (typeof target !== 'number' || target > this.numberOfUnActions) {
@@ -115,6 +135,28 @@ var Unmaker = /** @class */ (function () {
             var numberOfSteps = this.numberOfUnActions - target;
             for (var i = 0; i < numberOfSteps; i++) {
                 this.readAndApplyUnAction(this.state);
+            }
+            // Restore PRNG state to the checkpoint position
+            var prngState = this.prngCheckpoints.pop();
+            var twister = this.state.twister;
+            if (prngState && twister) {
+                twister.mt = __spreadArray([], prngState.mt, true);
+                twister.mti = prngState.mti;
+            }
+            // Restore actionsUsed for all in-play cards and active magi
+            var actionsUsedSnapshot = this.actionsUsedCheckpoints.pop();
+            if (actionsUsedSnapshot) {
+                for (var _i = 0, _c = this.state.getZone(ZONE_TYPE_IN_PLAY).cards; _i < _c.length; _i++) {
+                    var card = _c[_i];
+                    card.data.actionsUsed = __spreadArray([], ((_a = actionsUsedSnapshot[card.id]) !== null && _a !== void 0 ? _a : []), true);
+                }
+                for (var _d = 0, _e = this.state.players; _d < _e.length; _d++) {
+                    var player = _e[_d];
+                    var magi = this.state.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card;
+                    if (magi) {
+                        magi.data.actionsUsed = __spreadArray([], ((_b = actionsUsedSnapshot[magi.id]) !== null && _b !== void 0 ? _b : []), true);
+                    }
+                }
             }
         }
     };

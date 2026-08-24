@@ -10,6 +10,8 @@ export declare class Unmaker {
     private strings;
     private objects;
     private historyStack;
+    private prngCheckpoints;
+    private actionsUsedCheckpoints;
     constructor(state: State);
     setCheckpoint(): void;
     outputDebug(): void;

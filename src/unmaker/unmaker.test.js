@@ -73,6 +73,7 @@ import {
 	PROMPT_TYPE_NUMBER,
 	PROMPT_TYPE_ALTERNATIVE,
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
+	PROMPT_TYPE_SINGLE_MAGI,
 
 	RESTRICTION_REGION,
 	RESTRICTION_TYPE,
@@ -3860,4 +3861,107 @@ describe('Unmaking state action', () => {
 
 		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
 	})
+
+	it('Grow spell - PRNG state is restored after revert', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const furok = new CardInGame(byName('Furok'), ACTIVE_PLAYER).addEnergy(3);
+		furok.data.controller = ACTIVE_PLAYER;
+		const grow = new CardInGame(byName('Grow'), ACTIVE_PLAYER);
+
+		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [furok], [grega]);
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.initiatePRNG(12345);
+		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([grow]);
+
+		const unmaker = new Unmaker(gameState);
+
+		// Capture PRNG state before the checkpoint
+		const prngMtBefore = [...gameState.twister.mt];
+		const prngMtiBefore = gameState.twister.mti;
+
+		unmaker.setCheckpoint();
+
+		// Play Grow: rolls a die (PRNG advances) then enters a creature-target prompt
+		gameState.update({ type: ACTION_PLAY, payload: { card: grow, player: ACTIVE_PLAYER } });
+
+		expect(gameState.state.prompt).toBe(true);
+		// Die was rolled - PRNG must have advanced
+		expect(gameState.twister.mti).not.toEqual(prngMtiBefore);
+
+		unmaker.revertToCheckpoint();
+
+		// PRNG must be restored to the pre-checkpoint position
+		expect(gameState.twister.mti).toEqual(prngMtiBefore);
+		expect([...gameState.twister.mt]).toEqual(prngMtBefore);
+	});
+
+	it('Arboll Life Channel - actionsUsed and prompt state are restored after revert', () => {
+		const ACTIVE_PLAYER = 0;
+		const NON_ACTIVE_PLAYER = 1;
+
+		const grega = new CardInGame(byName('Grega'), ACTIVE_PLAYER).addEnergy(10);
+		const yaki = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER).addEnergy(5);
+		const arboll = new CardInGame(byName('Arboll'), ACTIVE_PLAYER).addEnergy(2);
+		arboll.data.controller = ACTIVE_PLAYER;
+
+		const zones = [
+			new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER),
+			new Zone('NAP Hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER),
+			new Zone('AP Deck', ZONE_TYPE_DECK, ACTIVE_PLAYER),
+			new Zone('NAP Deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER),
+			new Zone('AP Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			new Zone('NAP Discard', ZONE_TYPE_DISCARD, NON_ACTIVE_PLAYER),
+			new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
+			new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).add([yaki]),
+			new Zone('AP Magi Pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER),
+			new Zone('NAP Magi Pile', ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER),
+			new Zone('AP Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, ACTIVE_PLAYER),
+			new Zone('NAP Defeated Magi', ZONE_TYPE_DEFEATED_MAGI, NON_ACTIVE_PLAYER),
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arboll]),
+		];
+
+		const gameState = new moonlands.State({
+			zones,
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+		gameState.turn = 1;
+
+		const serializedStateBefore = gameState.serializeData(ACTIVE_PLAYER, false);
+
+		const unmaker = new Unmaker(gameState);
+		unmaker.setCheckpoint();
+
+		// Activate Life Channel - prompts for a magi target and marks the power as used
+		gameState.update({
+			type: ACTION_POWER,
+			source: arboll,
+			power: arboll.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		});
+
+		expect(arboll.data.actionsUsed).toContain('Life Channel');
+		expect(gameState.state.prompt).toBe(true);
+		expect(gameState.state.promptType).toBe(PROMPT_TYPE_SINGLE_MAGI);
+
+		unmaker.revertToCheckpoint();
+
+		// actionsUsed must be cleared
+		expect(arboll.data.actionsUsed).not.toContain('Life Channel');
+		// Prompt state must be cleared
+		expect(gameState.state.prompt).toBe(false);
+		expect(gameState.state.promptType).toBeNull();
+		// Full serialized state must match the pre-power snapshot
+		expect(serializedStateBefore).toEqual(gameState.serializeData(ACTIVE_PLAYER, false));
+	});
 })

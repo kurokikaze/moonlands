@@ -55,6 +55,8 @@ export class Unmaker {
     private objects: any[] = []
 
     private historyStack: number[] = [];
+    private prngCheckpoints: Array<{ mt: number[], mti: number } | null> = [];
+    private actionsUsedCheckpoints: Array<Record<string, string[]>> = [];
 
     constructor(private state: State) {
         this.state.setOnAction(action => {
@@ -71,6 +73,23 @@ export class Unmaker {
 
     public setCheckpoint() {
         this.historyStack.push(this.numberOfUnActions)
+
+        // Snapshot PRNG state so die rolls can be fully reversed
+        const twister = this.state.twister as any
+        this.prngCheckpoints.push(twister ? { mt: [...twister.mt as number[]], mti: twister.mti as number } : null)
+
+        // Snapshot actionsUsed for every in-play card and each active magi
+        const snapshot: Record<string, string[]> = {}
+        for (const card of this.state.getZone(ZONE_TYPE_IN_PLAY).cards) {
+            snapshot[card.id] = [...card.data.actionsUsed]
+        }
+        for (const player of this.state.players) {
+            const magi = this.state.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card
+            if (magi) {
+                snapshot[magi.id] = [...magi.data.actionsUsed]
+            }
+        }
+        this.actionsUsedCheckpoints.push(snapshot)
     }
 
     public outputDebug() {
@@ -105,6 +124,28 @@ export class Unmaker {
             const numberOfSteps = this.numberOfUnActions - target;
             for (let i = 0; i < numberOfSteps; i++) {
                 this.readAndApplyUnAction(this.state)
+            }
+
+            // Restore PRNG state to the checkpoint position
+            const prngState = this.prngCheckpoints.pop()
+            const twister = this.state.twister as any
+            if (prngState && twister) {
+                twister.mt = [...prngState.mt]
+                twister.mti = prngState.mti
+            }
+
+            // Restore actionsUsed for all in-play cards and active magi
+            const actionsUsedSnapshot = this.actionsUsedCheckpoints.pop()
+            if (actionsUsedSnapshot) {
+                for (const card of this.state.getZone(ZONE_TYPE_IN_PLAY).cards) {
+                    card.data.actionsUsed = [...(actionsUsedSnapshot[card.id] ?? [])]
+                }
+                for (const player of this.state.players) {
+                    const magi = this.state.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card
+                    if (magi) {
+                        magi.data.actionsUsed = [...(actionsUsedSnapshot[magi.id] ?? [])]
+                    }
+                }
             }
         }
     }
