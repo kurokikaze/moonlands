@@ -55,6 +55,9 @@ exports.applyStartingEnergyOnCreatureEffect = applyStartingEnergyOnCreatureEffec
 const applyPlayAttachedToCreatureEffect = function (action, transform) {
     const card = this.getMetaValue(action.target, action.generatedBy);
     const attachmentTarget = this.getMetaValue(action.attachmentTarget, action.generatedBy);
+    if (!card || !attachmentTarget) {
+        return; // no valid card or target – skip the play entirely
+    }
     transform({
         type: const_1.ACTION_EFFECT,
         effectType: const_1.EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
@@ -75,6 +78,9 @@ exports.applyPlayAttachedToCreatureEffect = applyPlayAttachedToCreatureEffect;
 const applyAttachCardToCardEffect = function (action, transform) {
     const card = this.getMetaValue(action.target, action.generatedBy);
     const attachmentTarget = this.getMetaValue(action.attachmentTarget, action.generatedBy);
+    if (!card || !attachmentTarget) {
+        return;
+    }
     this.attachCard(card.id, attachmentTarget.id);
     this.transformIntoActions({
         type: const_1.ACTION_EFFECT,

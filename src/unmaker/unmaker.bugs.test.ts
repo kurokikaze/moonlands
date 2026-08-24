@@ -198,3 +198,31 @@ describe('Unmaker bug - PLAY with roll_die (Grow)', () => {
         expect(secondRoll).toBe(firstRoll);
     });
 });
+
+describe('Engine bug - PLAY Fog Bank attached to creature when no creatures in play', () => {
+    it('does not crash when Fog Bank prompt is resolved with no own creatures', () => {
+        const fogBank = new CardInGame(byName('Fog Bank') as Card, PLAYER);
+        const adis    = new CardInGame(byName('Adis') as Card, PLAYER).addEnergy(15);
+        const sinder  = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(6);
+
+        // No PLAYER creatures in play – '$target' will be null after prompt resolves.
+        const state = makeState(STEP_PRS1, [], [fogBank], [], adis, sinder);
+
+        const fogBankCard = state.getZone(ZONE_TYPE_HAND, PLAYER).byId(fogBank.id)!;
+        state.update({ type: ACTION_PLAY, payload: { card: fogBankCard, player: PLAYER }, forcePriority: false, player: PLAYER } as any);
+
+        // Resolving the own_creature prompt with null/empty selection should not crash.
+        expect(() => {
+            state.update({
+                type: ACTION_RESOLVE_PROMPT,
+                cards: [],
+                generatedBy: (state.state as any).promptGeneratedBy,
+                player: PLAYER,
+            } as any);
+        }).not.toThrow();
+
+        // Fog Bank should NOT be in play (play was aborted due to no valid target).
+        const fogBankInPlay = state.getZone(ZONE_TYPE_IN_PLAY).cards.find((c: any) => c.card.name === 'Fog Bank');
+        expect(fogBankInPlay).toBeUndefined();
+    });
+});

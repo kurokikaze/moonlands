@@ -71,6 +71,9 @@ export const applyStartingEnergyOnCreatureEffect: ActionTransformer<typeof EFFEC
 export const applyPlayAttachedToCreatureEffect: ActionTransformer<typeof EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE> = function (action, transform) {
   const card: CardInGame = this.getMetaValue(action.target, action.generatedBy);
   const attachmentTarget = this.getMetaValue(action.attachmentTarget, action.generatedBy);
+  if (!card || !attachmentTarget) {
+    return; // no valid card or target – skip the play entirely
+  }
   transform({
     type: ACTION_EFFECT,
     effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
@@ -91,7 +94,9 @@ export const applyPlayAttachedToCreatureEffect: ActionTransformer<typeof EFFECT_
 export const applyAttachCardToCardEffect: ActionTransformer<typeof EFFECT_TYPE_ATTACH_CARD_TO_CARD> = function (action, transform) {
   const card = this.getMetaValue(action.target, action.generatedBy);
   const attachmentTarget = this.getMetaValue(action.attachmentTarget, action.generatedBy);
-
+  if (!card || !attachmentTarget) {
+    return;
+  }
   this.attachCard(card.id, attachmentTarget.id)
 
   this.transformIntoActions({
