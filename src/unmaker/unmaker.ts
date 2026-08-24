@@ -1,6 +1,6 @@
 import CardInGame from '../classes/CardInGame';
-import { ACTION_PLAY, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_DRAW, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, EFFECT_TYPE_MAGI_IS_DEFEATED } from '../const';
-import { ACTION_EFFECT, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_PROMPT_ENTERED, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_START_TURN, State, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_IN_PLAY, ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE, ACTION_PLAYER_WINS, ACTION_POWER, ACTION_RESOLVE_PROMPT, TYPE_MAGI } from '../index'
+import { ACTION_PLAY, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_DRAW, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_OWN_SINGLE_CREATURE, EFFECT_TYPE_MAGI_IS_DEFEATED } from '../const';
+import { ACTION_EFFECT, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_PROMPT_ENTERED, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_START_TURN, State, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_IN_PLAY, ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE, ACTION_PLAYER_WINS, ACTION_POWER, ACTION_RESOLVE_PROMPT, TYPE_MAGI, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_NUMBER } from '../index'
 import { AnyEffectType, PromptTypeType, ZoneType } from '../types'
 import { CardFlagsSnapshot, UNMAKE_CALCULATION, UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI, UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE, UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, UNMAKE_EFFECT_TYPE_DIE_ROLLED, UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS, UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_ENERGY, UNMAKE_EFFECT_TYPE_PLAYER_WINS, UNMAKE_EFFECT_TYPE_PROMPT_ENTERED, UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD, UNMAKE_EFFECT_TYPE_START_OF_TURN, UNMAKE_EFFECT_TYPE_START_STEP, UNMAKE_EFFECT_TYPE_START_TURN, UNMAKE_LOG_ENTRY, UNMAKE_POWER_ACTIVATION, UNMAKE_POWER_PAY, UNMAKE_POWER_USE, UNMAKE_PROMPT_LEAVE, UNMAKE_PROPERTY, UNMAKE_SELECT, UnAction } from './types';
 
@@ -202,12 +202,17 @@ export class Unmaker {
     public generateUnAction(action: AnyEffectType): UnAction | undefined {
         switch (action.type) {
             case ACTION_RESOLVE_PROMPT: {
+                const targetingPromptTypes: string[] = [PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_OWN_SINGLE_CREATURE, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_SINGLE_MAGI]
+                const willCreateLogEntry = (
+                    targetingPromptTypes.includes(this.state.state.promptType as string) && 'target' in action
+                ) || (this.state.state.promptType === PROMPT_TYPE_NUMBER && 'number' in action)
                 this.saveNumber(this.state.state.promptPlayer as number)
                 this.saveObject([...this.state.state.savedActions])
                 this.saveObject(this.state.state.promptParams)
                 this.saveString(this.state.state.promptMessage as string)
                 this.saveString(this.state.state.promptGeneratedBy as string)
                 this.saveString(this.state.state.promptType as string)
+                this.saveNumber(willCreateLogEntry ? 1 : 0)
                 this.saveActionType(UNMAKE_PROMPT_LEAVE)
                 return {
                     type: UNMAKE_PROMPT_LEAVE,
@@ -307,10 +312,10 @@ export class Unmaker {
                         let creatureArray = []
                         if (creatures instanceof CardInGame) {
                             creatureArray.push({
-                                    id: creatures.id,
-                                    energy: creatures.data.energy,
-                                    energyLostThisTurn: creatures.data.energyLostThisTurn
-                                })
+                                id: creatures.id,
+                                energy: creatures.data.energy,
+                                energyLostThisTurn: creatures.data.energyLostThisTurn
+                            })
                         } else {
                             for (let i = 0; i < creatures.length; i++) {
                                 const creature = creatures[i]
@@ -319,7 +324,7 @@ export class Unmaker {
                                     energy: creature.data.energy,
                                     energyLostThisTurn: creature.data.energyLostThisTurn
                                 })
-                            }                            
+                            }
                         }
                         this.saveObject(creatureArray)
                         this.saveActionType(UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE)
@@ -332,10 +337,10 @@ export class Unmaker {
                         let magiArray = []
                         if (magiTargets instanceof CardInGame) {
                             magiArray.push({
-                                    id: magiTargets.id,
-                                    owner: magiTargets.owner,
-                                    energy: magiTargets.data.energy,
-                                    energyLost: magiTargets.data.energyLostThisTurn,
+                                id: magiTargets.id,
+                                owner: magiTargets.owner,
+                                energy: magiTargets.data.energy,
+                                energyLost: magiTargets.data.energyLostThisTurn,
                             })
                         } else {
                             for (let i = 0; i < magiTargets.length; i++) {
@@ -549,7 +554,9 @@ export class Unmaker {
                         const zone = this.state.getMetaValue(action.zone, action.generatedBy)
                         const zoneOwner = this.state.getMetaValue(action.zoneOwner, action.generatedBy)
                         const zoneContent = this.state.getZone(zone, zoneOwner).cards
-                        const cardsOrder: string[] = this.state.getMetaValue(action.cards, action.generatedBy)
+                        const cardsOrder: string[] | null = this.state.getMetaValue(action.cards, action.generatedBy)
+
+                        if (!cardsOrder) return undefined
 
                         // Capture the original order of the cards that will be rearranged
                         const previousOrder: string[] = []
@@ -881,7 +888,7 @@ export class Unmaker {
 
     public readAndApplyUnAction(state: State) {
         const unAction = this.readNumber() as UnAction['type']
-        switch(unAction) {
+        switch (unAction) {
             case UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY:
             case UNMAKE_LOG_ENTRY:
                 state.state.log.length--;
@@ -890,6 +897,7 @@ export class Unmaker {
                 state.unsetWinner();
                 break;
             case UNMAKE_PROMPT_LEAVE: {
+                const willHaveLogEntry = this.readNumber() === 1
                 const promptType = this.readString() as PromptTypeType
                 const promptGeneratedBy = this.readString()
                 const promptMessage = this.readString()
@@ -905,7 +913,9 @@ export class Unmaker {
                 state.state.promptParams = promptParams
                 state.state.savedActions = savedActions
 
-                state.state.log.length--
+                if (willHaveLogEntry) {
+                    state.state.log.length--
+                }
                 break;
             }
             case UNMAKE_EFFECT_TYPE_PROMPT_ENTERED: {
@@ -927,10 +937,10 @@ export class Unmaker {
                 break;
             }
             case UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE: {
-                const creatures = this.readObject<{id: string, energy: number}[]>()
+                const creatures = this.readObject<{ id: string, energy: number }[]>()
                 const inPlay = state.getZone(ZONE_TYPE_IN_PLAY)
                 for (let i = 0; i < creatures.length; i++) {
-                    const {id, energy} = creatures[i]
+                    const { id, energy } = creatures[i]
                     let creatureCard = inPlay.byId(id)
                     if (creatureCard) {
                         creatureCard.data.energy = energy
@@ -946,7 +956,7 @@ export class Unmaker {
                 const destinationZoneType = this.readString() as unknown as ZoneType
                 const position = this.readNumber()
                 const bottom = this.readNumber() == 1
-                const metaDataEntries = this.readObject<{spellId: string, field: string, previousValue: any}[]>()
+                const metaDataEntries = this.readObject<{ spellId: string, field: string, previousValue: any }[]>()
 
                 const destZone = state.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : cardOwner)
                 const sourceZone = state.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : cardOwner)
@@ -1018,7 +1028,7 @@ export class Unmaker {
                 break;
             }
             case UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
-                const creatures = this.readObject<{id: string, energy: number, energyLostThisTurn: number}[]>()
+                const creatures = this.readObject<{ id: string, energy: number, energyLostThisTurn: number }[]>()
                 const inPlay = state.getZone(ZONE_TYPE_IN_PLAY)
                 for (let i = 0; i < creatures.length; i++) {
                     const { id, energy, energyLostThisTurn } = creatures[i]
@@ -1032,7 +1042,7 @@ export class Unmaker {
                 break;
             }
             case UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI: {
-                const magi = this.readObject<{id: string, owner: number, energy: number, energyLost: number}[]>()
+                const magi = this.readObject<{ id: string, owner: number, energy: number, energyLost: number }[]>()
                 for (const { id, owner, energy, energyLost } of magi) {
                     const activeMagi = state.getZone(ZONE_TYPE_ACTIVE_MAGI, owner)
                     let magiCard = activeMagi.byId(id)
@@ -1045,15 +1055,14 @@ export class Unmaker {
                 break;
             }
             case UNMAKE_EFFECT_TYPE_DIE_ROLLED: {
-               const generatedBy = this.readString()
-               const previousRollResult = this.readNumber()
-               if (previousRollResult === undefined) {
-                    // Field didn't exist before, remove it
+                const generatedBy = this.readString()
+                const previousRollResult = this.readNumber()
+                if (previousRollResult === undefined) {
                     state.clearSpellMetaDataField('roll_result', generatedBy)
                 } else {
-                    // Restore to previous value
                     state.setSpellMetaDataField('roll_result', previousRollResult, generatedBy)
                 }
+                state.state.log.length--
                 break;
             }
             case UNMAKE_EFFECT_TYPE_START_TURN: {
@@ -1062,7 +1071,7 @@ export class Unmaker {
                 const controllingPlayer = this.readNumber()
                 const step = this.readNumber()
                 const continuousEffect = this.readObject<any[]>()
-                const cardFlags = this.readObject<Record<string, { wasAttacked: boolean, hasAttacked: boolean, attacked: number, actionsUsed: string[], defeatedCreature: boolean, energyLostThisTurn: number}>>()
+                const cardFlags = this.readObject<Record<string, { wasAttacked: boolean, hasAttacked: boolean, attacked: number, actionsUsed: string[], defeatedCreature: boolean, energyLostThisTurn: number }>>()
 
                 state.turn = turn
                 state.state.activePlayer = activePlayer
@@ -1143,7 +1152,7 @@ export class Unmaker {
                 break;
             }
             case UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI: {
-                const magiArray = this.readObject<{id: string, owner: number, energy: number}[]>()
+                const magiArray = this.readObject<{ id: string, owner: number, energy: number }[]>()
                 magiArray.forEach(({ id, owner, energy }) => {
                     const activeMagi = state.getZone(ZONE_TYPE_ACTIVE_MAGI, owner)
                     let magiCard = activeMagi.byId(id)
@@ -1156,7 +1165,7 @@ export class Unmaker {
             }
             case UNMAKE_EFFECT_TYPE_START_OF_TURN: {
                 const player = this.readNumber()
-                const cardFlags = this.readObject<Record<string, {actionsUsed: string[],wasAttacked: boolean, hasAttacked: boolean, attacked: number, defeatedCreature: boolean,energyLostThisTurn:number}>>()
+                const cardFlags = this.readObject<Record<string, { actionsUsed: string[], wasAttacked: boolean, hasAttacked: boolean, attacked: number, defeatedCreature: boolean, energyLostThisTurn: number }>>()
                 for (const [cardId, flags] of Object.entries(cardFlags)) {
                     // Try to find the card in play (creatures and relics)
                     let card = state.getZone(ZONE_TYPE_IN_PLAY).byId(cardId)
@@ -1263,7 +1272,7 @@ export class Unmaker {
             }
             case UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS: {
                 const generatedBy = this.readString()
-                const foundCards = this.readObject<string[]|undefined>()
+                const foundCards = this.readObject<string[] | undefined>()
                 state.state.log.length--
                 if (foundCards === undefined) {
                     state.clearSpellMetaDataField('foundCards', generatedBy)
@@ -1292,7 +1301,7 @@ export class Unmaker {
                 break
             }
             case UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES: {
-                const creatures = this.readObject<{id: string, energy: number}[]>()
+                const creatures = this.readObject<{ id: string, energy: number }[]>()
                 const inPlay = state.getZone(ZONE_TYPE_IN_PLAY)
                 creatures.forEach(({ id, energy }) => {
                     const creature = inPlay.byId(id)
@@ -1303,7 +1312,7 @@ export class Unmaker {
                 break
             }
             case UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
-                const creatures = this.readObject<{id: string, energy: number}[]>()
+                const creatures = this.readObject<{ id: string, energy: number }[]>()
                 const inPlay = state.getZone(ZONE_TYPE_IN_PLAY)
                 creatures.forEach(({ id, energy }) => {
                     const creature = inPlay.byId(id)
@@ -1314,7 +1323,7 @@ export class Unmaker {
                 break;
             }
             case UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE: {
-                const creatures = this.readObject<{id: string, attacked: number}[]>()
+                const creatures = this.readObject<{ id: string, attacked: number }[]>()
                 const inPlay = state.getZone(ZONE_TYPE_IN_PLAY)
                 creatures.forEach(({ id, attacked }) => {
                     const creature = inPlay.byId(id)

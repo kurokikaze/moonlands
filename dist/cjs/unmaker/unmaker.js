@@ -188,12 +188,15 @@ class Unmaker {
     generateUnAction(action) {
         switch (action.type) {
             case index_1.ACTION_RESOLVE_PROMPT: {
+                const targetingPromptTypes = [index_1.PROMPT_TYPE_SINGLE_CREATURE, const_1.PROMPT_TYPE_OWN_SINGLE_CREATURE, index_1.PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, const_1.PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, index_1.PROMPT_TYPE_SINGLE_MAGI];
+                const willCreateLogEntry = (targetingPromptTypes.includes(this.state.state.promptType) && 'target' in action) || (this.state.state.promptType === index_1.PROMPT_TYPE_NUMBER && 'number' in action);
                 this.saveNumber(this.state.state.promptPlayer);
                 this.saveObject([...this.state.state.savedActions]);
                 this.saveObject(this.state.state.promptParams);
                 this.saveString(this.state.state.promptMessage);
                 this.saveString(this.state.state.promptGeneratedBy);
                 this.saveString(this.state.state.promptType);
+                this.saveNumber(willCreateLogEntry ? 1 : 0);
                 this.saveActionType(types_1.UNMAKE_PROMPT_LEAVE);
                 return {
                     type: types_1.UNMAKE_PROMPT_LEAVE,
@@ -531,6 +534,8 @@ class Unmaker {
                         const zoneOwner = this.state.getMetaValue(action.zoneOwner, action.generatedBy);
                         const zoneContent = this.state.getZone(zone, zoneOwner).cards;
                         const cardsOrder = this.state.getMetaValue(action.cards, action.generatedBy);
+                        if (!cardsOrder)
+                            return undefined;
                         // Capture the original order of the cards that will be rearranged
                         const previousOrder = [];
                         for (let i = 0; i < cardsOrder.length && i < zoneContent.length; i++) {
@@ -869,6 +874,7 @@ class Unmaker {
                 state.unsetWinner();
                 break;
             case types_1.UNMAKE_PROMPT_LEAVE: {
+                const willHaveLogEntry = this.readNumber() === 1;
                 const promptType = this.readString();
                 const promptGeneratedBy = this.readString();
                 const promptMessage = this.readString();
@@ -882,7 +888,9 @@ class Unmaker {
                 state.state.promptMessage = promptMessage;
                 state.state.promptParams = promptParams;
                 state.state.savedActions = savedActions;
-                state.state.log.length--;
+                if (willHaveLogEntry) {
+                    state.state.log.length--;
+                }
                 break;
             }
             case types_1.UNMAKE_EFFECT_TYPE_PROMPT_ENTERED: {
@@ -1025,13 +1033,12 @@ class Unmaker {
                 const generatedBy = this.readString();
                 const previousRollResult = this.readNumber();
                 if (previousRollResult === undefined) {
-                    // Field didn't exist before, remove it
                     state.clearSpellMetaDataField('roll_result', generatedBy);
                 }
                 else {
-                    // Restore to previous value
                     state.setSpellMetaDataField('roll_result', previousRollResult, generatedBy);
                 }
+                state.state.log.length--;
                 break;
             }
             case types_1.UNMAKE_EFFECT_TYPE_START_TURN: {
