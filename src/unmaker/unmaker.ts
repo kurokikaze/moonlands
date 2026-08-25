@@ -1,8 +1,8 @@
 import CardInGame from '../classes/CardInGame';
-import { ACTION_PLAY, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_DRAW, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_OWN_SINGLE_CREATURE, EFFECT_TYPE_MAGI_IS_DEFEATED } from '../const';
+import { ACTION_PLAY, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_DRAW, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_OWN_SINGLE_CREATURE, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES } from '../const';
 import { ACTION_EFFECT, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_PROMPT_ENTERED, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_START_TURN, State, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_IN_PLAY, ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE, ACTION_PLAYER_WINS, ACTION_POWER, ACTION_RESOLVE_PROMPT, TYPE_MAGI, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_NUMBER } from '../index'
 import { AnyEffectType, PromptTypeType, ZoneType } from '../types'
-import { CardFlagsSnapshot, UNMAKE_CALCULATION, UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI, UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE, UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, UNMAKE_EFFECT_TYPE_DIE_ROLLED, UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS, UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_ENERGY, UNMAKE_EFFECT_TYPE_PLAYER_WINS, UNMAKE_EFFECT_TYPE_PROMPT_ENTERED, UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD, UNMAKE_EFFECT_TYPE_START_OF_TURN, UNMAKE_EFFECT_TYPE_START_STEP, UNMAKE_EFFECT_TYPE_START_TURN, UNMAKE_LOG_ENTRY, UNMAKE_POWER_ACTIVATION, UNMAKE_POWER_PAY, UNMAKE_POWER_USE, UNMAKE_PROMPT_LEAVE, UNMAKE_PROPERTY, UNMAKE_SELECT, UnAction } from './types';
+import { CardFlagsSnapshot, UNMAKE_CALCULATION, UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI, UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE, UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, UNMAKE_EFFECT_TYPE_DIE_ROLLED, UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS, UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_ENERGY, UNMAKE_EFFECT_TYPE_PLAYER_WINS, UNMAKE_EFFECT_TYPE_PROMPT_ENTERED, UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD, UNMAKE_EFFECT_TYPE_START_OF_TURN, UNMAKE_EFFECT_TYPE_START_STEP, UNMAKE_EFFECT_TYPE_START_TURN, UNMAKE_LOG_ENTRY, UNMAKE_POWER_ACTIVATION, UNMAKE_POWER_PAY, UNMAKE_POWER_USE, UNMAKE_PROMPT_LEAVE, UNMAKE_PROPERTY, UNMAKE_SELECT, UnAction } from './types';
 
 const FLAG_WAS_ATTACKED = 1
 const FLAG_HAS_ATTACKED = 2
@@ -42,7 +42,8 @@ const actionNames = {
     33: 'UNMAKE_POWER_USE',
     34: 'UNMAKE_POWER_PAY',
     36: 'UNMAKE_POWER_ACTIVATION',
-    37: 'UNMAKE_EFFECT_TYPE_PLAYER_WINS'
+    37: 'UNMAKE_EFFECT_TYPE_PLAYER_WINS',
+    38: 'UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES',
 }
 
 export class Unmaker {
@@ -403,6 +404,48 @@ export class Unmaker {
                                 bottom: action.bottom || false,
                                 metaDataEntries,
                             }
+                        }
+                    }
+                    case EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES: {
+                        const targets: CardInGame[] = this.state.getMetaValue(action.target, action.generatedBy) || []
+                        if (!targets || targets.length === 0) return undefined
+
+                        const sourceZoneType = this.state.getMetaValue(action.sourceZone, action.generatedBy)
+                        const destZoneType = this.state.getMetaValue(action.destinationZone, action.generatedBy)
+                        const zoneOwner = targets[0].owner
+                        const sourceZone = this.state.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner)
+
+                        const cardsWithPositions = targets.map((card: CardInGame) => ({
+                            card,
+                            position: sourceZone.cards.findIndex((c: CardInGame) => c.id === card.id),
+                        }))
+
+                        const metaDataEntries: { spellId: string, field: string, previousValue: any }[] = targets.map((card: CardInGame) => ({
+                            spellId: card.id,
+                            field: 'new_card',
+                            previousValue: (this.state.getSpellMetadata(card.id) as any)?.new_card,
+                        }))
+                        metaDataEntries.push({
+                            spellId: action.generatedBy,
+                            field: 'new_cards',
+                            previousValue: (this.state.getSpellMetadata(action.generatedBy) as any)?.new_cards,
+                        })
+
+                        this.saveObject(metaDataEntries)
+                        this.saveNumber(action.bottom ? 1 : 0)
+                        this.saveString(destZoneType)
+                        this.saveNumber(zoneOwner)
+                        this.saveString(sourceZoneType)
+                        this.saveObject(cardsWithPositions)
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES)
+                        return {
+                            type: UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+                            cards: cardsWithPositions,
+                            sourceZone: sourceZoneType,
+                            zoneOwner,
+                            destinationZone: destZoneType,
+                            bottom: action.bottom || false,
+                            metaDataEntries,
                         }
                     }
                     case EFFECT_TYPE_DIE_ROLLED: {
@@ -946,6 +989,45 @@ export class Unmaker {
                         creatureCard.data.energy = energy
                     }
                     state.state.log.length--
+                }
+                break;
+            }
+            case UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES: {
+                const cardsWithPositions = this.readObject<{ card: CardInGame, position: number }[]>()
+                const sourceZoneType = this.readString() as ZoneType
+                const zoneOwner = this.readNumber()
+                const destZoneType = this.readString() as ZoneType
+                const bottom = this.readNumber() === 1
+                const metaDataEntries = this.readObject<{ spellId: string, field: string, previousValue: any }[]>()
+
+                const destZone = state.getZone(destZoneType, destZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner)
+                const sourceZone = state.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner)
+
+                // Remove the newly-created copies from destination (added to top one at a time)
+                for (let i = 0; i < cardsWithPositions.length; i++) {
+                    if (bottom) {
+                        destZone.cards.pop()
+                    } else {
+                        destZone.cards.shift()
+                    }
+                }
+
+                // Re-insert original cards at their original positions (ascending order preserves positions)
+                const sortedByPosition = [...cardsWithPositions].sort((a, b) => a.position - b.position)
+                for (const { card, position } of sortedByPosition) {
+                    sourceZone.cards.splice(position, 0, card)
+                }
+
+                for (const entry of metaDataEntries) {
+                    if (entry.previousValue === undefined) {
+                        state.clearSpellMetaDataField(entry.field, entry.spellId)
+                    } else {
+                        state.setSpellMetaDataField(entry.field, entry.previousValue, entry.spellId)
+                    }
+                }
+
+                if (sourceZoneType === ZONE_TYPE_IN_PLAY || destZoneType === ZONE_TYPE_IN_PLAY) {
+                    state.clearModifiedCardDataCache()
                 }
                 break;
             }

@@ -37,6 +37,7 @@ export declare const UNMAKE_POWER_USE = 33;
 export declare const UNMAKE_POWER_PAY = 34;
 export declare const UNMAKE_POWER_ACTIVATION = 36;
 export declare const UNMAKE_EFFECT_TYPE_PLAYER_WINS = 37;
+export declare const UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES = 38;
 export type UnActionDiscardEnergyFromCreature = {
     type: typeof UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE;
     creatures: {
@@ -284,4 +285,16 @@ export type UnActionExecutePowerEffects = {
 export type UnActionLogEntry = {
     type: typeof UNMAKE_LOG_ENTRY;
 };
-export type UnAction = UnActionDiscardEnergyFromCreature | UnActionDiscardEnergyFromMagi | UnActionMoveCardBetweenZones | UnActionDieRolled | UnActionStartTurn | UnActionStartStep | UnActionRearrangeCardsOfZone | UnActionCreateContinuousEffect | UnActionAddEnergyToCreature | UnActionAddEnergyToMagi | UnActionStartOfTurn | UnActionBeforeDamage | UnActionCreatureDefeatsCreature | UnActionDiscardCreatureFromPlay | UnActionMoveEnergy | UnActionRemoveEnergyFromCreature | UnActionRemoveEnergyFromMagi | UnActionPromptEntered | UnActionFindStartingCards | UnActionReshuffleDiscard | UnActionAddDelayedTrigger | UnActionRearrangeEnergyOnCreatures | UnActionDistributeEnergyOnCreatures | UnActionForbidAttackToCreature | UnActionCalculate | UnActionSelect | UnActionProperty | UnActionPromptLeave | UnActionPower | UnActionPlayerWins | UnActionExecutePowerEffects | UnActionLogEntry;
+export type UnActionMoveCardsBetweenZones = {
+    type: typeof UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES;
+    cards: {
+        card: CardInGame;
+        position: number;
+    }[];
+    sourceZone: ZoneType;
+    zoneOwner: number;
+    destinationZone: ZoneType;
+    bottom: boolean;
+    metaDataEntries: MetaDataEntry[];
+};
+export type UnAction = UnActionDiscardEnergyFromCreature | UnActionDiscardEnergyFromMagi | UnActionMoveCardBetweenZones | UnActionDieRolled | UnActionStartTurn | UnActionStartStep | UnActionRearrangeCardsOfZone | UnActionCreateContinuousEffect | UnActionAddEnergyToCreature | UnActionAddEnergyToMagi | UnActionStartOfTurn | UnActionBeforeDamage | UnActionCreatureDefeatsCreature | UnActionDiscardCreatureFromPlay | UnActionMoveEnergy | UnActionRemoveEnergyFromCreature | UnActionRemoveEnergyFromMagi | UnActionPromptEntered | UnActionFindStartingCards | UnActionReshuffleDiscard | UnActionAddDelayedTrigger | UnActionRearrangeEnergyOnCreatures | UnActionDistributeEnergyOnCreatures | UnActionForbidAttackToCreature | UnActionCalculate | UnActionSelect | UnActionProperty | UnActionPromptLeave | UnActionPower | UnActionPlayerWins | UnActionExecutePowerEffects | UnActionLogEntry | UnActionMoveCardsBetweenZones;

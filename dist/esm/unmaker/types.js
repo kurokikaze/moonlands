@@ -37,4 +37,5 @@ export var UNMAKE_POWER_USE = 33;
 export var UNMAKE_POWER_PAY = 34;
 export var UNMAKE_POWER_ACTIVATION = 36;
 export var UNMAKE_EFFECT_TYPE_PLAYER_WINS = 37;
+export var UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES = 38;
 //# sourceMappingURL=types.js.map

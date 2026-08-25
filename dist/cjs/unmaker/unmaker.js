@@ -45,7 +45,8 @@ const actionNames = {
     33: 'UNMAKE_POWER_USE',
     34: 'UNMAKE_POWER_PAY',
     36: 'UNMAKE_POWER_ACTIVATION',
-    37: 'UNMAKE_EFFECT_TYPE_PLAYER_WINS'
+    37: 'UNMAKE_EFFECT_TYPE_PLAYER_WINS',
+    38: 'UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES',
 };
 class Unmaker {
     state;
@@ -391,6 +392,45 @@ class Unmaker {
                                 metaDataEntries,
                             };
                         }
+                    }
+                    case const_1.EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES: {
+                        const targets = this.state.getMetaValue(action.target, action.generatedBy) || [];
+                        if (!targets || targets.length === 0)
+                            return undefined;
+                        const sourceZoneType = this.state.getMetaValue(action.sourceZone, action.generatedBy);
+                        const destZoneType = this.state.getMetaValue(action.destinationZone, action.generatedBy);
+                        const zoneOwner = targets[0].owner;
+                        const sourceZone = this.state.getZone(sourceZoneType, sourceZoneType === index_1.ZONE_TYPE_IN_PLAY ? null : zoneOwner);
+                        const cardsWithPositions = targets.map((card) => ({
+                            card,
+                            position: sourceZone.cards.findIndex((c) => c.id === card.id),
+                        }));
+                        const metaDataEntries = targets.map((card) => ({
+                            spellId: card.id,
+                            field: 'new_card',
+                            previousValue: this.state.getSpellMetadata(card.id)?.new_card,
+                        }));
+                        metaDataEntries.push({
+                            spellId: action.generatedBy,
+                            field: 'new_cards',
+                            previousValue: this.state.getSpellMetadata(action.generatedBy)?.new_cards,
+                        });
+                        this.saveObject(metaDataEntries);
+                        this.saveNumber(action.bottom ? 1 : 0);
+                        this.saveString(destZoneType);
+                        this.saveNumber(zoneOwner);
+                        this.saveString(sourceZoneType);
+                        this.saveObject(cardsWithPositions);
+                        this.saveActionType(types_1.UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES);
+                        return {
+                            type: types_1.UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+                            cards: cardsWithPositions,
+                            sourceZone: sourceZoneType,
+                            zoneOwner,
+                            destinationZone: destZoneType,
+                            bottom: action.bottom || false,
+                            metaDataEntries,
+                        };
                     }
                     case index_1.EFFECT_TYPE_DIE_ROLLED: {
                         if (action.generatedBy) {
@@ -920,6 +960,42 @@ class Unmaker {
                         creatureCard.data.energy = energy;
                     }
                     state.state.log.length--;
+                }
+                break;
+            }
+            case types_1.UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES: {
+                const cardsWithPositions = this.readObject();
+                const sourceZoneType = this.readString();
+                const zoneOwner = this.readNumber();
+                const destZoneType = this.readString();
+                const bottom = this.readNumber() === 1;
+                const metaDataEntries = this.readObject();
+                const destZone = state.getZone(destZoneType, destZoneType === index_1.ZONE_TYPE_IN_PLAY ? null : zoneOwner);
+                const sourceZone = state.getZone(sourceZoneType, sourceZoneType === index_1.ZONE_TYPE_IN_PLAY ? null : zoneOwner);
+                // Remove the newly-created copies from destination (added to top one at a time)
+                for (let i = 0; i < cardsWithPositions.length; i++) {
+                    if (bottom) {
+                        destZone.cards.pop();
+                    }
+                    else {
+                        destZone.cards.shift();
+                    }
+                }
+                // Re-insert original cards at their original positions (ascending order preserves positions)
+                const sortedByPosition = [...cardsWithPositions].sort((a, b) => a.position - b.position);
+                for (const { card, position } of sortedByPosition) {
+                    sourceZone.cards.splice(position, 0, card);
+                }
+                for (const entry of metaDataEntries) {
+                    if (entry.previousValue === undefined) {
+                        state.clearSpellMetaDataField(entry.field, entry.spellId);
+                    }
+                    else {
+                        state.setSpellMetaDataField(entry.field, entry.previousValue, entry.spellId);
+                    }
+                }
+                if (sourceZoneType === index_1.ZONE_TYPE_IN_PLAY || destZoneType === index_1.ZONE_TYPE_IN_PLAY) {
+                    state.clearModifiedCardDataCache();
                 }
                 break;
             }
