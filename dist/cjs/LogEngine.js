@@ -163,7 +163,7 @@ class LogEngine {
                         // Log entries: 0 or 1 (0 when target is an array)
                         case const_1.EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY: {
                             const target = getMetaValue(action.target, action.generatedBy);
-                            if (!Array.isArray(target)) {
+                            if (!Array.isArray(target) && target?.card?.name) {
                                 entries.push({
                                     type: const_1.LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY,
                                     card: target.card.name,
@@ -175,7 +175,7 @@ class LogEngine {
                         // Log entries: 0 or 1
                         case const_1.EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY: {
                             const target = getMetaValue(action.target, action.generatedBy);
-                            if (Array.isArray(target)) {
+                            if (Array.isArray(target) && target.length && target[0]?.card?.name) {
                                 if (target.length) {
                                     entries.push({
                                         type: const_1.LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,

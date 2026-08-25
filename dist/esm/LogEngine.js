@@ -12,8 +12,8 @@ var LogEngine = /** @class */ (function () {
         }
     };
     LogEngine.prototype.shouldCreateLog = function (action) {
-        var _a, _b;
-        var _c = this.context, getMetaValue = _c.getMetaValue, getPromptType = _c.getPromptType;
+        var _a, _b, _c, _d, _e;
+        var _f = this.context, getMetaValue = _f.getMetaValue, getPromptType = _f.getPromptType;
         var entries = [];
         try {
             switch (action.type) {
@@ -162,7 +162,7 @@ var LogEngine = /** @class */ (function () {
                         // Log entries: 0 or 1 (0 when target is an array)
                         case EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY: {
                             var target = getMetaValue(action.target, action.generatedBy);
-                            if (!Array.isArray(target)) {
+                            if (!Array.isArray(target) && ((_a = target === null || target === void 0 ? void 0 : target.card) === null || _a === void 0 ? void 0 : _a.name)) {
                                 entries.push({
                                     type: LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY,
                                     card: target.card.name,
@@ -174,7 +174,7 @@ var LogEngine = /** @class */ (function () {
                         // Log entries: 0 or 1
                         case EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY: {
                             var target = getMetaValue(action.target, action.generatedBy);
-                            if (Array.isArray(target)) {
+                            if (Array.isArray(target) && target.length && ((_c = (_b = target[0]) === null || _b === void 0 ? void 0 : _b.card) === null || _c === void 0 ? void 0 : _c.name)) {
                                 if (target.length) {
                                     entries.push({
                                         type: LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,
@@ -236,7 +236,7 @@ var LogEngine = /** @class */ (function () {
                         getPromptType() === PROMPT_TYPE_SINGLE_MAGI) && 'target' in action) {
                         entries.push({
                             type: LOG_ENTRY_TARGETING,
-                            card: ((_b = (_a = action.target) === null || _a === void 0 ? void 0 : _a.card) === null || _b === void 0 ? void 0 : _b.name) || 'unknown card',
+                            card: ((_e = (_d = action.target) === null || _d === void 0 ? void 0 : _d.card) === null || _e === void 0 ? void 0 : _e.name) || 'unknown card',
                             player: action.player,
                         });
                     }
