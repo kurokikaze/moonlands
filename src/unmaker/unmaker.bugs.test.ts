@@ -372,3 +372,49 @@ describe('Unmaker bug – POWER with move_cards_between_zones discard hand (Eye 
         expect(snapshot(state)).toBe(before);
     });
 });
+
+// ---------------------------------------------------------------------------
+// cards.js bug – Cyclone Vashp's Cyclone power
+//   The third effect has target: 'ownCreature' (missing '$' prefix) instead of
+//   target: '$ownCreature'.  When the engine dispatches DISCARD_CREATURE_FROM_PLAY
+//   with this raw string as target, convertServerCommand does:
+//     'length' in 'ownCreature'  →  TypeError (cannot use 'in' on primitive).
+// ---------------------------------------------------------------------------
+describe('cards.js bug – Cyclone Vashp Cyclone: DISCARD_CREATURE_FROM_PLAY with target $ownCreature', () => {
+    it('reverts state correctly after Cyclone fully resolves', () => {
+        const vashp   = new CardInGame(byName('Cyclone Vashp') as Card, PLAYER).addEnergy(5);
+        const target  = new CardInGame(byName('Furok')         as Card, OPPONENT).addEnergy(4);
+        const adis    = new CardInGame(byName('Adis')          as Card, PLAYER).addEnergy(10);
+        const sinder  = new CardInGame(byName('Sinder')        as Card, OPPONENT).addEnergy(6);
+
+        const state = makeState(STEP_PRS1, [vashp, target], [], [], adis, sinder);
+        const before = snapshot(state);
+
+        const power = (vashp.card.data.powers as any[]).find(p => p.name === 'Cyclone');
+        const unmaker = new Unmaker(state);
+        unmaker.setCheckpoint();
+
+        state.update({ type: ACTION_POWER, source: vashp, power, player: PLAYER } as any);
+
+        // Resolve first prompt: choose own creature (Vashp itself)
+        const ownTarget = state.getZone(ZONE_TYPE_IN_PLAY).byId(vashp.id)!;
+        state.update({
+            type: ACTION_RESOLVE_PROMPT,
+            target: ownTarget,
+            generatedBy: (state.state as any).promptGeneratedBy,
+            player: PLAYER,
+        } as any);
+
+        // Resolve second prompt: choose opponent's creature
+        const oppTarget = state.getZone(ZONE_TYPE_IN_PLAY).byId(target.id)!;
+        state.update({
+            type: ACTION_RESOLVE_PROMPT,
+            target: oppTarget,
+            generatedBy: (state.state as any).promptGeneratedBy,
+            player: PLAYER,
+        } as any);
+
+        unmaker.revertToCheckpoint();
+        expect(snapshot(state)).toBe(before);
+    });
+});

@@ -5477,7 +5477,7 @@ exports.cards = [
                     }),
                     effect({
                         effectType: const_1.EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-                        target: 'ownCreature',
+                        target: '$ownCreature',
                     }),
                 ],
             },

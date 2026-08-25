@@ -5450,7 +5450,7 @@ export var cards = [
                     }),
                     effect({
                         effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-                        target: 'ownCreature',
+                        target: '$ownCreature',
                     }),
                 ],
             },
