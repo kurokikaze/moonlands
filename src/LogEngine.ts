@@ -212,7 +212,7 @@ export class LogEngine {
 						// Log entries: 0 or 1 (0 when target is an array)
 						case EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY: {
 							const target = getMetaValue(action.target, action.generatedBy);
-							if (!Array.isArray(target) && target?.card?.name) {
+							if (target != null &&!Array.isArray(target) && target?.card?.name) {
 								entries.push({
 									type: LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY,
 									card: target.card.name,
