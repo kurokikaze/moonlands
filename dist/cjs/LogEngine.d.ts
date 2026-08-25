@@ -8,4 +8,5 @@ export declare class LogEngine {
     private context;
     constructor(context: LogEngineContext);
     addActionToLog(action: AnyEffectType): void;
+    shouldCreateLog(action: AnyEffectType): LogEntryType[];
 }

@@ -59,208 +59,224 @@ export class LogEngine {
 	}
 
 	addActionToLog(action: AnyEffectType) {
-		const { getMetaValue, getLog, getPromptType } = this.context;
-		var newLogEntry: LogEntryType | boolean = false;
+		const entries = this.shouldCreateLog(action);
+		const log = this.context.getLog();
+		for (const entry of entries) {
+			log.push(entry);
+		}
+	}
+
+	public shouldCreateLog(action: AnyEffectType): LogEntryType[] {
+		const { getMetaValue, getPromptType } = this.context;
+		const entries: LogEntryType[] = [];
 
 		try {
 			switch (action.type) {
+				// Log entries: 1
 				case ACTION_PLAY: {
 					if ('payload' in action) {
-						newLogEntry = {
+						entries.push({
 							type: LOG_ENTRY_PLAY,
 							card: action.payload.card.card.name,
 							player: action.player,
-						};
+						});
 					} else {
 						const metaValue = getMetaValue(action.card, action.generatedBy);
 						const metaCard = Array.isArray(metaValue) ? metaValue[0] : metaValue;
 
-						newLogEntry = {
+						entries.push({
 							type: LOG_ENTRY_PLAY,
 							card: metaCard.card.name,
 							player: Number(action.player),
-						};
+						});
 					}
 					break;
 				}
+				// Log entries: 1
 				case ACTION_POWER: {
-					newLogEntry = {
+					entries.push({
 						type: LOG_ENTRY_POWER_ACTIVATION,
 						card: action.source.card.name,
 						name: action.power.name,
 						player: action.player,
-					};
+					});
 					break;
 				}
 				case ACTION_EFFECT: {
 					switch (action.effectType) {
+						// Log entries: 1
 						case EFFECT_TYPE_DRAW: {
-							newLogEntry = {
+							entries.push({
 								type: LOG_ENTRY_DRAW,
 								player: getMetaValue(action.player, action.generatedBy),
-							};
+							});
 							break;
 						}
+						// Log entries: 0 or 1
 						case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
 							const target = getMetaValue(action.target, action.generatedBy);
 							if (Array.isArray(target)) {
 								if (target.length) {
-									newLogEntry = {
+									entries.push({
 										type: LOG_ENTRY_CREATURE_ENERGY_LOSS,
 										card: target[0].card.name,
 										amount: getMetaValue(action.amount, action.generatedBy),
-									};
+									});
 								}
 							} else {
-								newLogEntry = {
+								entries.push({
 									type: LOG_ENTRY_CREATURE_ENERGY_LOSS,
 									card: target.card.name,
 									amount: getMetaValue(action.amount, action.generatedBy),
-								};
+								});
 							}
 							break;
 						}
+						// Log entries: 0 or target.length (one per creature)
 						case EFFECT_TYPE_ADD_ENERGY_TO_CREATURE: {
 							const target = getMetaValue(action.target, action.generatedBy);
 							if (Array.isArray(target)) {
-								if (target.length) {
-                                    for (let i = 0; i < target.length - 1; i++) {
-                                        const tgt = target[i]
-                                        getLog().push({
-                                            type: LOG_ENTRY_CREATURE_ENERGY_GAIN,
-                                            card: tgt.card.name,
-                                            amount: getMetaValue(action.amount, action.generatedBy),
-                                        });
-                                    }
-                                    newLogEntry = {
-                                            type: LOG_ENTRY_CREATURE_ENERGY_GAIN,
-                                            card: target[target.length - 1].card.name,
-                                            amount: getMetaValue(action.amount, action.generatedBy),
-                                        }
+								for (const tgt of target) {
+									entries.push({
+										type: LOG_ENTRY_CREATURE_ENERGY_GAIN,
+										card: tgt.card.name,
+										amount: getMetaValue(action.amount, action.generatedBy),
+									});
 								}
 							} else {
-								newLogEntry = {
+								entries.push({
 									type: LOG_ENTRY_CREATURE_ENERGY_GAIN,
 									card: target.card.name,
 									amount: getMetaValue(action.amount, action.generatedBy),
-								};
+								});
 							}
 							break;
 						}
+						// Log entries: 0 or 1
 						case EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI: {
 							const target = getMetaValue(action.target, action.generatedBy);
 							if (Array.isArray(target)) {
 								if (target.length) {
-									newLogEntry = {
+									entries.push({
 										type: LOG_ENTRY_MAGI_ENERGY_LOSS,
 										card: target[0].card.name,
 										amount: getMetaValue(action.amount, action.generatedBy),
-									};
+									});
 								}
 							} else {
-								newLogEntry = {
+								entries.push({
 									type: LOG_ENTRY_MAGI_ENERGY_LOSS,
 									card: target.card.name,
 									amount: getMetaValue(action.amount, action.generatedBy),
-								};
+								});
 							}
 							break;
 						}
+						// Log entries: 1
 						case EFFECT_TYPE_DIE_ROLLED: {
-							newLogEntry = {
+							entries.push({
 								type: LOG_ENTRY_DIE_ROLLED,
 								result: action.result,
 								player: action.player,
-							}
+							});
 							break;
 						}
+						// Log entries: 0 or 1
 						case EFFECT_TYPE_ADD_ENERGY_TO_MAGI: {
 							const target = getMetaValue(action.target, action.generatedBy);
 							if (Array.isArray(target)) {
 								if (target.length) {
-									newLogEntry = {
+									entries.push({
 										type: LOG_ENTRY_MAGI_ENERGY_GAIN,
 										card: target[0].card.name,
 										amount: getMetaValue(action.amount, action.generatedBy),
-									};
+									});
 								}
 							} else {
-								newLogEntry = {
+								entries.push({
 									type: LOG_ENTRY_MAGI_ENERGY_GAIN,
 									card: target.card.name,
 									amount: getMetaValue(action.amount, action.generatedBy),
-								};
+								});
 							}
 							break;
 						}
+						// Log entries: 1
 						case EFFECT_TYPE_FIND_STARTING_CARDS: {
-							newLogEntry = {
+							entries.push({
 								type: LOG_ENTRY_CHOOSES_STARTING_CARDS,
 								player: action.player || 0,
-							};
+							});
 							break;
 						}
+						// Log entries: 0 or 1 (0 when target is an array)
 						case EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY: {
 							const target = getMetaValue(action.target, action.generatedBy);
 							if (!Array.isArray(target)) {
-								newLogEntry = {
+								entries.push({
 									type: LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY,
 									card: target.card.name,
 									player: action.player,
-								};
+								});
 							}
 							break;
 						}
+						// Log entries: 0 or 1
 						case EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY: {
 							const target = getMetaValue(action.target, action.generatedBy);
 							if (Array.isArray(target)) {
 								if (target.length) {
-									newLogEntry = {
+									entries.push({
 										type: LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,
 										card: target[0].card.name,
 										player: action.player,
-									};
+									});
 								}
 							} else {
-								newLogEntry = {
+								entries.push({
 									type: LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,
 									card: target.card.name,
 									player: action.player,
-								};
+								});
 							}
 							break;
 						}
+						// Log entries: 1
 						case EFFECT_TYPE_MAGI_IS_DEFEATED: {
-							newLogEntry = {
+							entries.push({
 								type: LOG_ENTRY_MAGI_DEFEATED,
 								card: getMetaValue(action.target, action.generatedBy).card.name,
 								player: action.player,
-							};
+							});
 							break;
 						}
+						// Log entries: 1
 						case EFFECT_TYPE_CREATURE_ATTACKS: {
-							newLogEntry = {
+							entries.push({
 								type: LOG_ENTRY_ATTACK,
 								source: getMetaValue(action.source, action.generatedBy).card.name,
 								target: getMetaValue(action.target, action.generatedBy).card.name,
 								packHuntAttack: Boolean(action.packHuntAttack),
-							};
+							});
 							break;
 						}
+						// Log entries: 1
 						case EFFECT_TYPE_DISCARD_CARD_FROM_HAND: {
-							newLogEntry = {
+							entries.push({
 								type: LOG_ENTRY_CARD_DISCARDED_FROM_HAND,
 								card: getMetaValue(action.target, action.generatedBy).card.name,
 								player: action.player || 1,
-							}
+							});
 							break;
 						}
+						// Log entries: 0
 						case EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT: {
 							break;
 						}
 					}
 					break;
 				}
+				// Log entries: 0 or 1 (1 for single-target and number prompts only)
 				case ACTION_RESOLVE_PROMPT: {
 					if (
 						(
@@ -271,18 +287,18 @@ export class LogEngine {
 							getPromptType() === PROMPT_TYPE_SINGLE_MAGI
 						) && 'target' in action
 					) {
-						newLogEntry = {
+						entries.push({
 							type: LOG_ENTRY_TARGETING,
 							card: action.target?.card?.name || 'unknown card',
 							player: action.player,
-						};
+						});
 					}
 					if (getPromptType() === PROMPT_TYPE_NUMBER && 'number' in action) {
-						newLogEntry = {
+						entries.push({
 							type: LOG_ENTRY_NUMBER_CHOICE,
 							number: (typeof action.number === 'number') ? action.number : parseInt(action.number || '0', 10),
 							player: action.player,
-						};
+						});
 					}
 					break;
 				}
@@ -292,8 +308,6 @@ export class LogEngine {
 			console.dir(action);
 		}
 
-		if (newLogEntry) {
-			getLog().push(newLogEntry as LogEntryType);
-		}
+		return entries;
 	}
 }

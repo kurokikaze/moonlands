@@ -51,7 +51,7 @@ const actionNames = {
 class Unmaker {
     state;
     unActions = [];
-    dataBlob = new Uint16Array(300);
+    dataBlob = new Uint16Array(5000);
     pointer = 0;
     numberOfUnActions = 0;
     strings = [];
@@ -189,15 +189,14 @@ class Unmaker {
     generateUnAction(action) {
         switch (action.type) {
             case index_1.ACTION_RESOLVE_PROMPT: {
-                const targetingPromptTypes = [index_1.PROMPT_TYPE_SINGLE_CREATURE, const_1.PROMPT_TYPE_OWN_SINGLE_CREATURE, index_1.PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, const_1.PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, index_1.PROMPT_TYPE_SINGLE_MAGI];
-                const willCreateLogEntry = (targetingPromptTypes.includes(this.state.state.promptType) && 'target' in action) || (this.state.state.promptType === index_1.PROMPT_TYPE_NUMBER && 'number' in action);
+                const logCount = this.state.logEngine.shouldCreateLog(action).length;
                 this.saveNumber(this.state.state.promptPlayer);
                 this.saveObject([...this.state.state.savedActions]);
                 this.saveObject(this.state.state.promptParams);
                 this.saveString(this.state.state.promptMessage);
                 this.saveString(this.state.state.promptGeneratedBy);
                 this.saveString(this.state.state.promptType);
-                this.saveNumber(willCreateLogEntry ? 1 : 0);
+                this.saveNumber(logCount);
                 this.saveActionType(types_1.UNMAKE_PROMPT_LEAVE);
                 return {
                     type: types_1.UNMAKE_PROMPT_LEAVE,
@@ -210,10 +209,12 @@ class Unmaker {
                 };
             }
             case index_1.ACTION_POWER: {
+                const logCount = this.state.logEngine.shouldCreateLog(action).length;
                 this.saveString(action.power.name);
                 this.saveString(action.source.id);
                 this.saveNumber(action.source.owner);
                 this.saveNumber(action.source.card.type == index_1.TYPE_MAGI ? 1 : 0);
+                this.saveNumber(logCount);
                 this.saveActionType(types_1.UNMAKE_POWER_ACTIVATION);
                 return {
                     type: types_1.UNMAKE_POWER_ACTIVATION,
@@ -230,6 +231,7 @@ class Unmaker {
                 };
             }
             case const_1.ACTION_PLAY: {
+                this.saveNumber(this.state.logEngine.shouldCreateLog(action).length);
                 this.saveActionType(types_1.UNMAKE_LOG_ENTRY);
                 return {
                     type: types_1.UNMAKE_LOG_ENTRY,
@@ -238,18 +240,21 @@ class Unmaker {
             case index_1.ACTION_EFFECT: {
                 switch (action.effectType) {
                     case const_1.EFFECT_TYPE_DRAW: {
+                        this.saveNumber(this.state.logEngine.shouldCreateLog(action).length);
                         this.saveActionType(types_1.UNMAKE_LOG_ENTRY);
                         return {
                             type: types_1.UNMAKE_LOG_ENTRY,
                         };
                     }
                     case const_1.EFFECT_TYPE_CREATURE_ATTACKS: {
+                        this.saveNumber(this.state.logEngine.shouldCreateLog(action).length);
                         this.saveActionType(types_1.UNMAKE_LOG_ENTRY);
                         return {
                             type: types_1.UNMAKE_LOG_ENTRY,
                         };
                     }
                     case const_1.EFFECT_TYPE_MAGI_IS_DEFEATED: {
+                        this.saveNumber(this.state.logEngine.shouldCreateLog(action).length);
                         this.saveActionType(types_1.UNMAKE_LOG_ENTRY);
                         return {
                             type: types_1.UNMAKE_LOG_ENTRY,
@@ -316,6 +321,7 @@ class Unmaker {
                             }
                         }
                         this.saveObject(creatureArray);
+                        this.saveNumber(this.state.logEngine.shouldCreateLog(action).length);
                         this.saveActionType(types_1.UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE);
                         return {
                             type: types_1.UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
@@ -344,6 +350,7 @@ class Unmaker {
                             }
                         }
                         this.saveObject(magiArray);
+                        this.saveNumber(this.state.logEngine.shouldCreateLog(action).length);
                         this.saveActionType(types_1.UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI);
                         return {
                             type: types_1.UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
@@ -392,6 +399,7 @@ class Unmaker {
                                 metaDataEntries,
                             };
                         }
+                        break;
                     }
                     case const_1.EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES: {
                         const targets = this.state.getMetaValue(action.target, action.generatedBy) || [];
@@ -437,6 +445,7 @@ class Unmaker {
                             const currentMeta = this.state.getSpellMetadata(action.generatedBy);
                             this.saveNumber(currentMeta?.roll_result);
                             this.saveString(action.generatedBy);
+                            this.saveNumber(this.state.logEngine.shouldCreateLog(action).length);
                             this.saveActionType(types_1.UNMAKE_EFFECT_TYPE_DIE_ROLLED);
                             return {
                                 type: types_1.UNMAKE_EFFECT_TYPE_DIE_ROLLED,
@@ -444,6 +453,7 @@ class Unmaker {
                                 previousRollResult: currentMeta?.roll_result,
                             };
                         }
+                        break;
                     }
                     case index_1.EFFECT_TYPE_START_TURN: {
                         // Capture card flags for creatures, relics, and magi that will be cleared by START_OF_TURN
@@ -619,6 +629,7 @@ class Unmaker {
                             }
                         }
                         this.saveObject(creaturesArray);
+                        this.saveNumber(this.state.logEngine.shouldCreateLog(action).length);
                         this.saveActionType(types_1.UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE);
                         return {
                             type: types_1.UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
@@ -646,6 +657,7 @@ class Unmaker {
                             }
                         }
                         this.saveObject(magiArray);
+                        this.saveNumber(this.state.logEngine.shouldCreateLog(action).length);
                         this.saveActionType(types_1.UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI);
                         return {
                             type: types_1.UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI,
@@ -666,6 +678,7 @@ class Unmaker {
                         };
                     }
                     case index_1.EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY: {
+                        this.saveNumber(this.state.logEngine.shouldCreateLog(action).length);
                         this.saveActionType(types_1.UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY);
                         return {
                             type: types_1.UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY
@@ -751,6 +764,7 @@ class Unmaker {
                         const currentMeta = this.state.getSpellMetadata(action.generatedBy);
                         this.saveObject(currentMeta?.foundCards);
                         this.saveString(action.generatedBy);
+                        this.saveNumber(this.state.logEngine.shouldCreateLog(action).length);
                         this.saveActionType(types_1.UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS);
                         return {
                             type: types_1.UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS,
@@ -906,15 +920,19 @@ class Unmaker {
     readAndApplyUnAction(state) {
         const unAction = this.readNumber();
         switch (unAction) {
+            // Log entries: 1
             case types_1.UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY:
-            case types_1.UNMAKE_LOG_ENTRY:
-                state.state.log.length--;
+            case types_1.UNMAKE_LOG_ENTRY: {
+                const logCount = this.readNumber();
+                state.state.log.length -= logCount;
                 break;
+            }
             case types_1.UNMAKE_EFFECT_TYPE_PLAYER_WINS:
                 state.unsetWinner();
                 break;
+            // Log entries: 0 or 1 (1 for single-target and number prompts only)
             case types_1.UNMAKE_PROMPT_LEAVE: {
-                const willHaveLogEntry = this.readNumber() === 1;
+                const logCount = this.readNumber();
                 const promptType = this.readString();
                 const promptGeneratedBy = this.readString();
                 const promptMessage = this.readString();
@@ -928,9 +946,7 @@ class Unmaker {
                 state.state.promptMessage = promptMessage;
                 state.state.promptParams = promptParams;
                 state.state.savedActions = savedActions;
-                if (willHaveLogEntry) {
-                    state.state.log.length--;
-                }
+                state.state.log.length -= logCount;
                 break;
             }
             case types_1.UNMAKE_EFFECT_TYPE_PROMPT_ENTERED: {
@@ -950,17 +966,18 @@ class Unmaker {
                 state.state.promptParams = promptParams;
                 break;
             }
+            // Log entries: 0 or target.length (one per creature)
             case types_1.UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE: {
+                const logCount = this.readNumber();
                 const creatures = this.readObject();
                 const inPlay = state.getZone(index_1.ZONE_TYPE_IN_PLAY);
-                for (let i = 0; i < creatures.length; i++) {
-                    const { id, energy } = creatures[i];
-                    let creatureCard = inPlay.byId(id);
+                for (const { id, energy } of creatures) {
+                    const creatureCard = inPlay.byId(id);
                     if (creatureCard) {
                         creatureCard.data.energy = energy;
                     }
-                    state.state.log.length--;
                 }
+                state.state.log.length -= logCount;
                 break;
             }
             case types_1.UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES: {
@@ -1056,7 +1073,9 @@ class Unmaker {
                 }
                 break;
             }
+            // Log entries: 1
             case types_1.UNMAKE_POWER_ACTIVATION: {
+                const logCount = this.readNumber();
                 const isMagi = this.readNumber() == 1;
                 const owner = this.readNumber();
                 const sourceId = this.readString();
@@ -1074,38 +1093,43 @@ class Unmaker {
                 }
                 if (target) {
                     target.data.actionsUsed = target.data.actionsUsed.filter(action => action != powerName);
-                    state.state.log.length--;
                 }
+                state.state.log.length -= logCount;
                 break;
             }
+            // Log entries: 0 or 1
             case types_1.UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
+                const logCount = this.readNumber();
                 const creatures = this.readObject();
                 const inPlay = state.getZone(index_1.ZONE_TYPE_IN_PLAY);
-                for (let i = 0; i < creatures.length; i++) {
-                    const { id, energy, energyLostThisTurn } = creatures[i];
-                    let creatureCard = inPlay.byId(id);
+                for (const { id, energy, energyLostThisTurn } of creatures) {
+                    const creatureCard = inPlay.byId(id);
                     if (creatureCard) {
                         creatureCard.data.energy = energy;
                         creatureCard.data.energyLostThisTurn = energyLostThisTurn;
                     }
-                    state.state.log.length--;
                 }
+                state.state.log.length -= logCount;
                 break;
             }
+            // Log entries: 0 or 1
             case types_1.UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI: {
+                const logCount = this.readNumber();
                 const magi = this.readObject();
                 for (const { id, owner, energy, energyLost } of magi) {
                     const activeMagi = state.getZone(index_1.ZONE_TYPE_ACTIVE_MAGI, owner);
-                    let magiCard = activeMagi.byId(id);
+                    const magiCard = activeMagi.byId(id);
                     if (magiCard) {
                         magiCard.data.energy = energy;
                         magiCard.data.energyLostThisTurn = energyLost;
                     }
-                    state.state.log.length--;
                 }
+                state.state.log.length -= logCount;
                 break;
             }
+            // Log entries: 1
             case types_1.UNMAKE_EFFECT_TYPE_DIE_ROLLED: {
+                const logCount = this.readNumber();
                 const generatedBy = this.readString();
                 const previousRollResult = this.readNumber();
                 if (previousRollResult === undefined) {
@@ -1114,7 +1138,7 @@ class Unmaker {
                 else {
                     state.setSpellMetaDataField('roll_result', previousRollResult, generatedBy);
                 }
-                state.state.log.length--;
+                state.state.log.length -= logCount;
                 break;
             }
             case types_1.UNMAKE_EFFECT_TYPE_START_TURN: {
@@ -1198,16 +1222,18 @@ class Unmaker {
                 state.clearModifiedCardDataCache();
                 break;
             }
+            // Log entries: 0 or 1
             case types_1.UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI: {
+                const logCount = this.readNumber();
                 const magiArray = this.readObject();
-                magiArray.forEach(({ id, owner, energy }) => {
+                for (const { id, owner, energy } of magiArray) {
                     const activeMagi = state.getZone(index_1.ZONE_TYPE_ACTIVE_MAGI, owner);
-                    let magiCard = activeMagi.byId(id);
+                    const magiCard = activeMagi.byId(id);
                     if (magiCard) {
                         magiCard.data.energy = energy;
                     }
-                    state.state.log.length--;
-                });
+                }
+                state.state.log.length -= logCount;
                 break;
             }
             case types_1.UNMAKE_EFFECT_TYPE_START_OF_TURN: {
@@ -1318,15 +1344,16 @@ class Unmaker {
                 }
                 break;
             }
+            // Log entries: 1
             case types_1.UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS: {
+                const logCount = this.readNumber();
                 const generatedBy = this.readString();
                 const foundCards = this.readObject();
-                state.state.log.length--;
+                state.state.log.length -= logCount;
                 if (foundCards === undefined) {
                     state.clearSpellMetaDataField('foundCards', generatedBy);
                 }
                 else {
-                    // Restore to previous value
                     state.setSpellMetaDataField('foundCards', foundCards, generatedBy);
                 }
                 break;
