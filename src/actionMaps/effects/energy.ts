@@ -254,7 +254,7 @@ export const applyDiscardEnergyFromCreatureEffect: ActionTransformer<typeof EFFE
   oneOrSeveral(
     multiTarget,
     target => {
-      if (this.isCardAffectedByEffect(target, action)) {
+      if (target && this.isCardAffectedByEffect(target, action)) {
         var energyToLose = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
         const energyLossThreshold = this.modifyByStaticAbilities(target, PROPERTY_ENERGY_LOSS_THRESHOLD);
         const energyLostAlready = target.data.energyLostThisTurn;

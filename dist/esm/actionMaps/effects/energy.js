@@ -189,7 +189,7 @@ export var applyDiscardEnergyFromCreatureEffect = function (action, transform) {
     var multiTarget = this.getMetaValue(action.target, action.generatedBy);
     var totalEnergyLost = 0;
     oneOrSeveral(multiTarget, function (target) {
-        if (_this.isCardAffectedByEffect(target, action)) {
+        if (target && _this.isCardAffectedByEffect(target, action)) {
             var energyToLose = parseInt(_this.getMetaValue(action.amount, action.generatedBy), 10);
             var energyLossThreshold = _this.modifyByStaticAbilities(target, PROPERTY_ENERGY_LOSS_THRESHOLD);
             var energyLostAlready = target.data.energyLostThisTurn;
