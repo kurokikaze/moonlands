@@ -211,7 +211,7 @@ exports.applyDiscardRelicFromPlayEffect = applyDiscardRelicFromPlayEffect;
 const applyDiscardCreatureFromPlayEffect = function (action, transform) {
     const creatureDiscardTarget = this.getMetaValue(action.target, action.generatedBy);
     (0, actionMapUtils_1.oneOrSeveral)(creatureDiscardTarget, creature => {
-        if (this.isCardAffectedByEffect(creature, action)) {
+        if (creature != null && this.isCardAffectedByEffect(creature, action)) {
             const effect = {
                 type: const_1.ACTION_EFFECT,
                 effectType: const_1.EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,

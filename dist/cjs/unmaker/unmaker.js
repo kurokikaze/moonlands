@@ -321,7 +321,7 @@ class Unmaker {
                                 energyLostThisTurn: creatures.data.energyLostThisTurn
                             });
                         }
-                        else {
+                        else if (creatures instanceof Array) {
                             for (let i = 0; i < creatures.length; i++) {
                                 const creature = creatures[i];
                                 creatureArray.push({
@@ -349,7 +349,7 @@ class Unmaker {
                                 energyLost: magiTargets.data.energyLostThisTurn,
                             });
                         }
-                        else {
+                        else if (magiTargets instanceof Array) {
                             for (let i = 0; i < magiTargets.length; i++) {
                                 const magi = magiTargets[i];
                                 magiArray.push({
@@ -630,7 +630,7 @@ class Unmaker {
                                 energy: creatures.data.energy,
                             });
                         }
-                        else {
+                        else if (creatures instanceof Array) {
                             for (let i = 0; i < creatures.length; i++) {
                                 const creature = creatures[i];
                                 creaturesArray.push({
@@ -657,7 +657,7 @@ class Unmaker {
                                 energy: magiTargets.data.energy,
                             });
                         }
-                        else {
+                        else if (magiTargets instanceof Array) {
                             for (let i = 0; i < magiTargets.length; i++) {
                                 const magi = magiTargets[i];
                                 magiArray.push({

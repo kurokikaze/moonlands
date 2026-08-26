@@ -215,7 +215,7 @@ export var applyDiscardCreatureFromPlayEffect = function (action, transform) {
     var _this = this;
     var creatureDiscardTarget = this.getMetaValue(action.target, action.generatedBy);
     oneOrSeveral(creatureDiscardTarget, function (creature) {
-        if (_this.isCardAffectedByEffect(creature, action)) {
+        if (creature != null && _this.isCardAffectedByEffect(creature, action)) {
             var effect = {
                 type: ACTION_EFFECT,
                 effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,

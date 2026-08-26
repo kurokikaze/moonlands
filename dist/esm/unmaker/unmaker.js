@@ -342,7 +342,7 @@ var Unmaker = /** @class */ (function () {
                                 energyLostThisTurn: creatures.data.energyLostThisTurn
                             });
                         }
-                        else {
+                        else if (creatures instanceof Array) {
                             for (var i = 0; i < creatures.length; i++) {
                                 var creature = creatures[i];
                                 creatureArray.push({
@@ -370,7 +370,7 @@ var Unmaker = /** @class */ (function () {
                                 energyLost: magiTargets.data.energyLostThisTurn,
                             });
                         }
-                        else {
+                        else if (magiTargets instanceof Array) {
                             for (var i = 0; i < magiTargets.length; i++) {
                                 var magi = magiTargets[i];
                                 magiArray.push({
@@ -658,7 +658,7 @@ var Unmaker = /** @class */ (function () {
                                 energy: creatures_5.data.energy,
                             });
                         }
-                        else {
+                        else if (creatures_5 instanceof Array) {
                             for (var i = 0; i < creatures_5.length; i++) {
                                 var creature = creatures_5[i];
                                 creaturesArray.push({
@@ -685,7 +685,7 @@ var Unmaker = /** @class */ (function () {
                                 energy: magiTargets_1.data.energy,
                             });
                         }
-                        else {
+                        else if (magiTargets_1 instanceof Array) {
                             for (var i = 0; i < magiTargets_1.length; i++) {
                                 var magi = magiTargets_1[i];
                                 magiArray_1.push({

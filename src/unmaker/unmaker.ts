@@ -332,7 +332,7 @@ export class Unmaker {
                                 energy: creatures.data.energy,
                                 energyLostThisTurn: creatures.data.energyLostThisTurn
                             })
-                        } else {
+                        } else if (creatures instanceof Array) {
                             for (let i = 0; i < creatures.length; i++) {
                                 const creature = creatures[i]
                                 creatureArray.push({
@@ -359,7 +359,7 @@ export class Unmaker {
                                 energy: magiTargets.data.energy,
                                 energyLost: magiTargets.data.energyLostThisTurn,
                             })
-                        } else {
+                        } else if (magiTargets instanceof Array) {
                             for (let i = 0; i < magiTargets.length; i++) {
                                 const magi = magiTargets[i]
                                 magiArray.push({
@@ -654,7 +654,7 @@ export class Unmaker {
                                 id: creatures.id,
                                 energy: creatures.data.energy,
                             })
-                        } else {
+                        } else if (creatures instanceof Array) {
                             for (let i = 0; i < creatures.length; i++) {
                                 const creature = creatures[i]
                                 creaturesArray.push({
@@ -680,7 +680,7 @@ export class Unmaker {
                                 owner: magiTargets.owner,
                                 energy: magiTargets.data.energy,
                             })
-                        } else {
+                        } else if (magiTargets instanceof Array) {
                             for (let i = 0; i < magiTargets.length; i++) {
                                 const magi = magiTargets[i]
                                 magiArray.push({

@@ -243,7 +243,7 @@ export const applyDiscardRelicFromPlayEffect: ActionTransformer<typeof EFFECT_TY
 export const applyDiscardCreatureFromPlayEffect: ActionTransformer<typeof EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY> = function (action, transform) {
   const creatureDiscardTarget: CardInGame | CardInGame[] = this.getMetaValue(action.target, action.generatedBy);
   oneOrSeveral(creatureDiscardTarget, creature => {
-    if (this.isCardAffectedByEffect(creature, action)) {
+    if (creature != null && this.isCardAffectedByEffect(creature, action)) {
       const effect: MoveCardBetwenZonesEffect = {
         type: ACTION_EFFECT,
         effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
