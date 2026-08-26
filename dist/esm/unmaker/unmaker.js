@@ -1031,6 +1031,8 @@ var Unmaker = /** @class */ (function () {
                 var destZoneType = this.readString('EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/destZoneType');
                 var bottom = this.readNumber('EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/bottom') === 1;
                 var metaDataEntries = this.readObject('EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/metaDataEntries');
+                if (!cardsWithPositions || !metaDataEntries)
+                    break;
                 var destZone = state.getZone(destZoneType, destZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
                 var sourceZone = state.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
                 // Remove the newly-created copies from destination (added to top one at a time)
@@ -1148,6 +1150,10 @@ var Unmaker = /** @class */ (function () {
             case UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
                 var logCount = this.readNumber('EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE/logCount');
                 var creatures = this.readObject('EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE/creatures');
+                if (!creatures) {
+                    state.state.log.length -= logCount;
+                    break;
+                }
                 var inPlay = state.getZone(ZONE_TYPE_IN_PLAY);
                 for (var _h = 0, creatures_10 = creatures; _h < creatures_10.length; _h++) {
                     var _j = creatures_10[_h], id = _j.id, energy = _j.energy, energyLostThisTurn = _j.energyLostThisTurn;
@@ -1164,6 +1170,10 @@ var Unmaker = /** @class */ (function () {
             case UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI: {
                 var logCount = this.readNumber('EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI/logCount');
                 var magi = this.readObject('EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI/magi');
+                if (!magi) {
+                    state.state.log.length -= logCount;
+                    break;
+                }
                 for (var _k = 0, magi_1 = magi; _k < magi_1.length; _k++) {
                     var _l = magi_1[_k], id = _l.id, owner = _l.owner, energy = _l.energy, energyLost = _l.energyLost;
                     var activeMagi = state.getZone(ZONE_TYPE_ACTIVE_MAGI, owner);
@@ -1197,6 +1207,8 @@ var Unmaker = /** @class */ (function () {
                 var step = this.readNumber('EFFECT_TYPE_START_TURN/step');
                 var continuousEffect = this.readObject('EFFECT_TYPE_START_TURN/continuousEffects');
                 var cardFlags = this.readObject('EFFECT_TYPE_START_TURN/cardFlags');
+                if (!cardFlags)
+                    break;
                 state.turn = turn;
                 state.state.activePlayer = activePlayer;
                 state.state.controllingPlayer = controllingPlayer;
@@ -1273,6 +1285,10 @@ var Unmaker = /** @class */ (function () {
             case UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI: {
                 var logCount = this.readNumber('EFFECT_TYPE_ADD_ENERGY_TO_MAGI/logLength');
                 var magiArray = this.readObject('EFFECT_TYPE_ADD_ENERGY_TO_MAGI/magiArray');
+                if (!magiArray) {
+                    state.state.log.length -= logCount;
+                    break;
+                }
                 for (var _q = 0, magiArray_2 = magiArray; _q < magiArray_2.length; _q++) {
                     var _r = magiArray_2[_q], id = _r.id, owner = _r.owner, energy = _r.energy;
                     var activeMagi = state.getZone(ZONE_TYPE_ACTIVE_MAGI, owner);

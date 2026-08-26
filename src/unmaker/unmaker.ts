@@ -1027,6 +1027,8 @@ export class Unmaker {
                 const bottom = this.readNumber('EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/bottom') === 1
                 const metaDataEntries = this.readObject<{ spellId: string, field: string, previousValue: any }[]>('EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/metaDataEntries')
 
+                if (!cardsWithPositions || !metaDataEntries) break;
+
                 const destZone = state.getZone(destZoneType, destZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner)
                 const sourceZone = state.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner)
 
@@ -1142,6 +1144,7 @@ export class Unmaker {
             case UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
                 const logCount = this.readNumber('EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE/logCount')
                 const creatures = this.readObject<{ id: string, energy: number, energyLostThisTurn: number }[]>('EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE/creatures')
+                if (!creatures) { state.state.log.length -= logCount; break; }
                 const inPlay = state.getZone(ZONE_TYPE_IN_PLAY)
                 for (const { id, energy, energyLostThisTurn } of creatures) {
                     const creatureCard = inPlay.byId(id)
@@ -1157,6 +1160,7 @@ export class Unmaker {
             case UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI: {
                 const logCount = this.readNumber('EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI/logCount')
                 const magi = this.readObject<{ id: string, owner: number, energy: number, energyLost: number }[]>('EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI/magi')
+                if (!magi) { state.state.log.length -= logCount; break; }
                 for (const { id, owner, energy, energyLost } of magi) {
                     const activeMagi = state.getZone(ZONE_TYPE_ACTIVE_MAGI, owner)
                     const magiCard = activeMagi.byId(id)
@@ -1188,6 +1192,8 @@ export class Unmaker {
                 const step = this.readNumber('EFFECT_TYPE_START_TURN/step')
                 const continuousEffect = this.readObject<any[]>('EFFECT_TYPE_START_TURN/continuousEffects')
                 const cardFlags = this.readObject<Record<string, { wasAttacked: boolean, hasAttacked: boolean, attacked: number, actionsUsed: string[], defeatedCreature: boolean, energyLostThisTurn: number }>>('EFFECT_TYPE_START_TURN/cardFlags')
+
+                if (!cardFlags) break;
 
                 state.turn = turn
                 state.state.activePlayer = activePlayer
@@ -1271,6 +1277,7 @@ export class Unmaker {
             case UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI: {
                 const logCount = this.readNumber('EFFECT_TYPE_ADD_ENERGY_TO_MAGI/logLength')
                 const magiArray = this.readObject<{ id: string, owner: number, energy: number }[]>('EFFECT_TYPE_ADD_ENERGY_TO_MAGI/magiArray')
+                if (!magiArray) { state.state.log.length -= logCount; break; }
                 for (const { id, owner, energy } of magiArray) {
                     const activeMagi = state.getZone(ZONE_TYPE_ACTIVE_MAGI, owner)
                     const magiCard = activeMagi.byId(id)
