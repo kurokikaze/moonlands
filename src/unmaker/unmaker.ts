@@ -49,7 +49,8 @@ const actionNames = {
 export class Unmaker {
     public unActions: UnAction[] = [];
 
-    public dataBlob = new Uint16Array(5000)
+    private blobSize = 50000
+    public dataBlob = new Uint16Array(this.blobSize)
     public pointer = 0;
     public numberOfUnActions = 0;
     private strings: string[] = []
@@ -154,6 +155,9 @@ export class Unmaker {
     private dataTags: string[] = [];
 
     private saveNumber(n: number, tag: string) {
+        if (this.pointer > this.blobSize - 1) {
+            throw new Error(`Data blob overflow: pointer ${this.pointer} exceeds blob size ${this.blobSize}`)
+        }
         this.dataBlob[this.pointer] = n
         this.dataTags.push(tag)
         this.pointer++
@@ -174,6 +178,9 @@ export class Unmaker {
     }
 
     private saveString(str: string, tag: string) {
+        if (this.pointer > this.blobSize - 1) {
+            throw new Error(`Data blob overflow: pointer ${this.pointer} exceeds blob size ${this.blobSize}`)
+        }
         this.dataTags.push(tag)
         const strPointer = this.strings.length
         this.strings.push(str)
@@ -196,6 +203,9 @@ export class Unmaker {
     }
 
     private saveObject(obj: any, tag: string) {
+        if (this.pointer > this.blobSize - 1) {
+            throw new Error(`Data blob overflow: pointer ${this.pointer} exceeds blob size ${this.blobSize}`)
+        }
         const objPointer = this.objects.length
         this.objects.push(obj)
         this.saveNumber(objPointer, `${tag}/objPos`)
@@ -956,7 +966,7 @@ export class Unmaker {
     public readAndApplyUnAction(state: State) {
         const unAction = this.readNumber('UnActionType') as UnAction['type']
         switch (unAction) {
-        // Log entries: 1
+            // Log entries: 1
             case UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY:
             case UNMAKE_LOG_ENTRY: {
                 const logCount = this.readNumber('logCount')

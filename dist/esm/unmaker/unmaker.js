@@ -67,7 +67,8 @@ var Unmaker = /** @class */ (function () {
         var _this = this;
         this.state = state;
         this.unActions = [];
-        this.dataBlob = new Uint16Array(5000);
+        this.blobSize = 50000;
+        this.dataBlob = new Uint16Array(this.blobSize);
         this.pointer = 0;
         this.numberOfUnActions = 0;
         this.strings = [];
@@ -163,6 +164,9 @@ var Unmaker = /** @class */ (function () {
         }
     };
     Unmaker.prototype.saveNumber = function (n, tag) {
+        if (this.pointer > this.blobSize - 1) {
+            throw new Error("Data blob overflow: pointer ".concat(this.pointer, " exceeds blob size ").concat(this.blobSize));
+        }
         this.dataBlob[this.pointer] = n;
         this.dataTags.push(tag);
         this.pointer++;
@@ -180,6 +184,9 @@ var Unmaker = /** @class */ (function () {
         return this.dataBlob[this.pointer];
     };
     Unmaker.prototype.saveString = function (str, tag) {
+        if (this.pointer > this.blobSize - 1) {
+            throw new Error("Data blob overflow: pointer ".concat(this.pointer, " exceeds blob size ").concat(this.blobSize));
+        }
         this.dataTags.push(tag);
         var strPointer = this.strings.length;
         this.strings.push(str);
@@ -201,6 +208,9 @@ var Unmaker = /** @class */ (function () {
         return str;
     };
     Unmaker.prototype.saveObject = function (obj, tag) {
+        if (this.pointer > this.blobSize - 1) {
+            throw new Error("Data blob overflow: pointer ".concat(this.pointer, " exceeds blob size ").concat(this.blobSize));
+        }
         var objPointer = this.objects.length;
         this.objects.push(obj);
         this.saveNumber(objPointer, "".concat(tag, "/objPos"));

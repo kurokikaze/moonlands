@@ -51,7 +51,8 @@ const actionNames = {
 class Unmaker {
     state;
     unActions = [];
-    dataBlob = new Uint16Array(5000);
+    blobSize = 50000;
+    dataBlob = new Uint16Array(this.blobSize);
     pointer = 0;
     numberOfUnActions = 0;
     strings = [];
@@ -144,6 +145,9 @@ class Unmaker {
     }
     dataTags = [];
     saveNumber(n, tag) {
+        if (this.pointer > this.blobSize - 1) {
+            throw new Error(`Data blob overflow: pointer ${this.pointer} exceeds blob size ${this.blobSize}`);
+        }
         this.dataBlob[this.pointer] = n;
         this.dataTags.push(tag);
         this.pointer++;
@@ -161,6 +165,9 @@ class Unmaker {
         return this.dataBlob[this.pointer];
     }
     saveString(str, tag) {
+        if (this.pointer > this.blobSize - 1) {
+            throw new Error(`Data blob overflow: pointer ${this.pointer} exceeds blob size ${this.blobSize}`);
+        }
         this.dataTags.push(tag);
         const strPointer = this.strings.length;
         this.strings.push(str);
@@ -182,6 +189,9 @@ class Unmaker {
         return str;
     }
     saveObject(obj, tag) {
+        if (this.pointer > this.blobSize - 1) {
+            throw new Error(`Data blob overflow: pointer ${this.pointer} exceeds blob size ${this.blobSize}`);
+        }
         const objPointer = this.objects.length;
         this.objects.push(obj);
         this.saveNumber(objPointer, `${tag}/objPos`);
