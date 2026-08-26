@@ -123,7 +123,7 @@ export class LogEngine {
 										amount: getMetaValue(action.amount, action.generatedBy),
 									});
 								}
-							} else {
+							} else if (target?.card?.name) {
 								entries.push({
 									type: LOG_ENTRY_CREATURE_ENERGY_LOSS,
 									card: target.card.name,

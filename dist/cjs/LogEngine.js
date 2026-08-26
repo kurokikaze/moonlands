@@ -71,7 +71,7 @@ class LogEngine {
                                     });
                                 }
                             }
-                            else {
+                            else if (target?.card?.name) {
                                 entries.push({
                                     type: const_1.LOG_ENTRY_CREATURE_ENERGY_LOSS,
                                     card: target.card.name,
