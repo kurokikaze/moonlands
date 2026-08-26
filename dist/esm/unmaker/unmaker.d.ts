@@ -16,6 +16,7 @@ export declare class Unmaker {
     setCheckpoint(): void;
     outputDebug(): void;
     revertToCheckpoint(): void;
+    private dataTags;
     private saveNumber;
     private saveActionType;
     private readNumber;
