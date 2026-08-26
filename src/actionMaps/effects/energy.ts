@@ -349,7 +349,7 @@ export const applyAddEnergyToCreatureEffect: ActionTransformer<typeof EFFECT_TYP
   const addTargets = this.getMetaValue(action.target, action.generatedBy);
 
   oneOrSeveral(addTargets, addTarget => {
-    if (this.isCardAffectedByEffect(addTarget, action)) {
+    if (addTarget && this.isCardAffectedByEffect(addTarget, action)) {
       addTarget.addEnergy(parseInt(this.getMetaValue(action.amount, action.generatedBy), 10));
     }
   });
@@ -358,7 +358,11 @@ export const applyAddEnergyToCreatureEffect: ActionTransformer<typeof EFFECT_TYP
 export const applyAddEnergyToMagiEffect: ActionTransformer<typeof EFFECT_TYPE_ADD_ENERGY_TO_MAGI> = function (action) {
   const magiTarget = this.getMetaValue(action.target, action.generatedBy);
 
-  oneOrSeveral(magiTarget, target => target.addEnergy(parseInt(this.getMetaValue(action.amount, action.generatedBy)), 10));
+  oneOrSeveral(magiTarget, target => {
+    if (target) {
+      target.addEnergy(parseInt(this.getMetaValue(action.amount, action.generatedBy), 10));
+    }
+  });
 }
 
 export const applyRearrangeEnergyOnCreaturesEffect: ActionTransformer<typeof EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES> = function (action, transform) {

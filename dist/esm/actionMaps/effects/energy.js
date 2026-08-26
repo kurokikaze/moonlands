@@ -272,7 +272,7 @@ export var applyAddEnergyToCreatureEffect = function (action) {
     var _this = this;
     var addTargets = this.getMetaValue(action.target, action.generatedBy);
     oneOrSeveral(addTargets, function (addTarget) {
-        if (_this.isCardAffectedByEffect(addTarget, action)) {
+        if (addTarget && _this.isCardAffectedByEffect(addTarget, action)) {
             addTarget.addEnergy(parseInt(_this.getMetaValue(action.amount, action.generatedBy), 10));
         }
     });
@@ -280,7 +280,11 @@ export var applyAddEnergyToCreatureEffect = function (action) {
 export var applyAddEnergyToMagiEffect = function (action) {
     var _this = this;
     var magiTarget = this.getMetaValue(action.target, action.generatedBy);
-    oneOrSeveral(magiTarget, function (target) { return target.addEnergy(parseInt(_this.getMetaValue(action.amount, action.generatedBy)), 10); });
+    oneOrSeveral(magiTarget, function (target) {
+        if (target) {
+            target.addEnergy(parseInt(_this.getMetaValue(action.amount, action.generatedBy), 10));
+        }
+    });
 };
 export var applyRearrangeEnergyOnCreaturesEffect = function (action, transform) {
     var energyArrangement = this.getMetaValue(action.energyOnCreatures, action.generatedBy);

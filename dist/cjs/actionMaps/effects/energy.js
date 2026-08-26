@@ -292,7 +292,7 @@ exports.applyRestoreCreatureToStartingEnergyEffect = applyRestoreCreatureToStart
 const applyAddEnergyToCreatureEffect = function (action) {
     const addTargets = this.getMetaValue(action.target, action.generatedBy);
     (0, actionMapUtils_1.oneOrSeveral)(addTargets, addTarget => {
-        if (this.isCardAffectedByEffect(addTarget, action)) {
+        if (addTarget && this.isCardAffectedByEffect(addTarget, action)) {
             addTarget.addEnergy(parseInt(this.getMetaValue(action.amount, action.generatedBy), 10));
         }
     });
@@ -300,7 +300,11 @@ const applyAddEnergyToCreatureEffect = function (action) {
 exports.applyAddEnergyToCreatureEffect = applyAddEnergyToCreatureEffect;
 const applyAddEnergyToMagiEffect = function (action) {
     const magiTarget = this.getMetaValue(action.target, action.generatedBy);
-    (0, actionMapUtils_1.oneOrSeveral)(magiTarget, target => target.addEnergy(parseInt(this.getMetaValue(action.amount, action.generatedBy)), 10));
+    (0, actionMapUtils_1.oneOrSeveral)(magiTarget, target => {
+        if (target) {
+            target.addEnergy(parseInt(this.getMetaValue(action.amount, action.generatedBy), 10));
+        }
+    });
 };
 exports.applyAddEnergyToMagiEffect = applyAddEnergyToMagiEffect;
 const applyRearrangeEnergyOnCreaturesEffect = function (action, transform) {
