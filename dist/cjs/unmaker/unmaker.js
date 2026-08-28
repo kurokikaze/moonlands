@@ -175,23 +175,14 @@ class Unmaker {
         this.dataTags.push(tag);
         const strPointer = this.strings.length;
         this.strings.push(str);
-        this.saveNumber(strPointer, `${tag}/strPos`);
     }
     readString(expectedTag) {
-        const strPointer = this.readNumber(`${expectedTag}/strPos`);
         const tag = this.dataTags.pop();
         if (tag != expectedTag) {
             throw new Error(`Expected tag ${expectedTag} but found ${tag}`);
         }
-        const str = this.strings[strPointer];
-        if (strPointer == this.strings.length - 1) {
-            this.strings.length--;
-        }
-        else {
-            delete this.strings[strPointer];
-            console.error('Warning: String storage is not being used in a stack-like manner. This may indicate a bug in the unmaker.');
-        }
-        return str;
+        const str = this.strings.pop();
+        return str || '';
     }
     saveObject(obj, tag) {
         if (this.pointer > this.blobSize - 1) {
@@ -199,19 +190,13 @@ class Unmaker {
         }
         const objPointer = this.objects.length;
         this.objects.push(obj);
-        this.saveNumber(objPointer, `${tag}/objPos`);
     }
     readObject(expectedTag) {
-        const objPointer = this.readNumber(`${expectedTag}/objPos`);
-        const obj = this.objects[objPointer];
-        if (objPointer == this.objects.length - 1) {
-            this.objects.length--;
-        }
-        else {
-            delete this.objects[objPointer];
-            console.error('Warning: Object storage is not being used in a stack-like manner. This may indicate a bug in the unmaker.');
-        }
+        const obj = this.objects.pop();
         return obj;
+    }
+    hasSpace() {
+        return this.pointer < this.blobSize - 10;
     }
     generateUnAction(action) {
         switch (action.type) {

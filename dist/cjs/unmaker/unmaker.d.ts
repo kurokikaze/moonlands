@@ -25,6 +25,7 @@ export declare class Unmaker {
     private readString;
     private saveObject;
     private readObject;
+    hasSpace(): boolean;
     generateUnAction(action: AnyEffectType): UnAction | undefined;
     readAndApplyUnAction(state: State): void;
     applyUnAction(state: State, unaction: UnAction): void;

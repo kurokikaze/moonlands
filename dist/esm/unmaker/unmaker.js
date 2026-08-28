@@ -191,23 +191,14 @@ var Unmaker = /** @class */ (function () {
         this.dataTags.push(tag);
         var strPointer = this.strings.length;
         this.strings.push(str);
-        this.saveNumber(strPointer, "".concat(tag, "/strPos"));
     };
     Unmaker.prototype.readString = function (expectedTag) {
-        var strPointer = this.readNumber("".concat(expectedTag, "/strPos"));
         var tag = this.dataTags.pop();
         if (tag != expectedTag) {
             throw new Error("Expected tag ".concat(expectedTag, " but found ").concat(tag));
         }
-        var str = this.strings[strPointer];
-        if (strPointer == this.strings.length - 1) {
-            this.strings.length--;
-        }
-        else {
-            delete this.strings[strPointer];
-            console.error('Warning: String storage is not being used in a stack-like manner. This may indicate a bug in the unmaker.');
-        }
-        return str;
+        var str = this.strings.pop();
+        return str || '';
     };
     Unmaker.prototype.saveObject = function (obj, tag) {
         if (this.pointer > this.blobSize - 1) {
@@ -215,19 +206,13 @@ var Unmaker = /** @class */ (function () {
         }
         var objPointer = this.objects.length;
         this.objects.push(obj);
-        this.saveNumber(objPointer, "".concat(tag, "/objPos"));
     };
     Unmaker.prototype.readObject = function (expectedTag) {
-        var objPointer = this.readNumber("".concat(expectedTag, "/objPos"));
-        var obj = this.objects[objPointer];
-        if (objPointer == this.objects.length - 1) {
-            this.objects.length--;
-        }
-        else {
-            delete this.objects[objPointer];
-            console.error('Warning: Object storage is not being used in a stack-like manner. This may indicate a bug in the unmaker.');
-        }
+        var obj = this.objects.pop();
         return obj;
+    };
+    Unmaker.prototype.hasSpace = function () {
+        return this.pointer < this.blobSize - 10;
     };
     Unmaker.prototype.generateUnAction = function (action) {
         var _this = this;
