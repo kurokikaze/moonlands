@@ -46,7 +46,7 @@ function makeState(step = STEP_PRS1, inPlay = [], hand = [], deck = [], activeMa
         state.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, PLAYER).add([activeMagi]);
     if (opponentMagi)
         state.getZone(const_1.ZONE_TYPE_ACTIVE_MAGI, OPPONENT).add([opponentMagi]);
-    state.enableDebug();
+    // state.enableDebug();
     return state;
 }
 function snapshot(state) {

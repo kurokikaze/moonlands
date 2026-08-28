@@ -60,8 +60,12 @@ class Unmaker {
     historyStack = [];
     prngCheckpoints = [];
     actionsUsedCheckpoints = [];
-    constructor(state) {
+    constructor(state, blobSize) {
         this.state = state;
+        if (blobSize) {
+            this.blobSize = blobSize;
+            this.dataBlob = new Uint16Array(this.blobSize);
+        }
         this.state.setOnAction(action => {
             const unAction = this.generateUnAction(action);
             if (unAction) {
@@ -129,18 +133,18 @@ class Unmaker {
                 twister.mti = prngState.mti;
             }
             // Restore actionsUsed for all in-play cards and active magi
-            const actionsUsedSnapshot = this.actionsUsedCheckpoints.pop();
+            /*const actionsUsedSnapshot = this.actionsUsedCheckpoints.pop()
             if (actionsUsedSnapshot) {
-                for (const card of this.state.getZone(index_1.ZONE_TYPE_IN_PLAY).cards) {
-                    card.data.actionsUsed = [...(actionsUsedSnapshot[card.id] ?? [])];
+                for (const card of this.state.getZone(ZONE_TYPE_IN_PLAY).cards) {
+                    card.data.actionsUsed = [...(actionsUsedSnapshot[card.id] ?? [])]
                 }
                 for (const player of this.state.players) {
-                    const magi = this.state.getZone(index_1.ZONE_TYPE_ACTIVE_MAGI, player).card;
+                    const magi = this.state.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card
                     if (magi) {
-                        magi.data.actionsUsed = [...(actionsUsedSnapshot[magi.id] ?? [])];
+                        magi.data.actionsUsed = [...(actionsUsedSnapshot[magi.id] ?? [])]
                     }
                 }
-            }
+            }*/
         }
     }
     dataTags = [];
@@ -185,6 +189,7 @@ class Unmaker {
         }
         else {
             delete this.strings[strPointer];
+            console.error('Warning: String storage is not being used in a stack-like manner. This may indicate a bug in the unmaker.');
         }
         return str;
     }
@@ -204,6 +209,7 @@ class Unmaker {
         }
         else {
             delete this.objects[objPointer];
+            console.error('Warning: Object storage is not being used in a stack-like manner. This may indicate a bug in the unmaker.');
         }
         return obj;
     }

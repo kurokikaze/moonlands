@@ -60,7 +60,11 @@ export class Unmaker {
     private prngCheckpoints: Array<{ mt: number[], mti: number } | null> = [];
     private actionsUsedCheckpoints: Array<Record<string, string[]>> = [];
 
-    constructor(private state: State) {
+    constructor(private state: State, blobSize?: number) {
+        if (blobSize) {
+            this.blobSize = blobSize
+            this.dataBlob = new Uint16Array(this.blobSize)
+        }
         this.state.setOnAction(action => {
             const unAction = this.generateUnAction(action)
             if (unAction) {
@@ -137,7 +141,7 @@ export class Unmaker {
             }
 
             // Restore actionsUsed for all in-play cards and active magi
-            const actionsUsedSnapshot = this.actionsUsedCheckpoints.pop()
+            /*const actionsUsedSnapshot = this.actionsUsedCheckpoints.pop()
             if (actionsUsedSnapshot) {
                 for (const card of this.state.getZone(ZONE_TYPE_IN_PLAY).cards) {
                     card.data.actionsUsed = [...(actionsUsedSnapshot[card.id] ?? [])]
@@ -148,7 +152,7 @@ export class Unmaker {
                         magi.data.actionsUsed = [...(actionsUsedSnapshot[magi.id] ?? [])]
                     }
                 }
-            }
+            }*/
         }
     }
 
@@ -198,6 +202,7 @@ export class Unmaker {
             this.strings.length--
         } else {
             delete this.strings[strPointer]
+            console.error('Warning: String storage is not being used in a stack-like manner. This may indicate a bug in the unmaker.')
         }
         return str
     }
@@ -218,6 +223,7 @@ export class Unmaker {
             this.objects.length--
         } else {
             delete this.objects[objPointer]
+            console.error('Warning: Object storage is not being used in a stack-like manner. This may indicate a bug in the unmaker.')
         }
         return obj
     }

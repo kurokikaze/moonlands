@@ -63,7 +63,7 @@ var actionNames = {
     38: 'UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES',
 };
 var Unmaker = /** @class */ (function () {
-    function Unmaker(state) {
+    function Unmaker(state, blobSize) {
         var _this = this;
         this.state = state;
         this.unActions = [];
@@ -77,6 +77,10 @@ var Unmaker = /** @class */ (function () {
         this.prngCheckpoints = [];
         this.actionsUsedCheckpoints = [];
         this.dataTags = [];
+        if (blobSize) {
+            this.blobSize = blobSize;
+            this.dataBlob = new Uint16Array(this.blobSize);
+        }
         this.state.setOnAction(function (action) {
             var unAction = _this.generateUnAction(action);
             if (unAction) {
@@ -127,7 +131,6 @@ var Unmaker = /** @class */ (function () {
         }
     }*/
     Unmaker.prototype.revertToCheckpoint = function () {
-        var _a, _b;
         if (this.historyStack.length) {
             var target = this.historyStack.pop();
             if (typeof target !== 'number' || target > this.numberOfUnActions) {
@@ -147,20 +150,18 @@ var Unmaker = /** @class */ (function () {
                 twister.mti = prngState.mti;
             }
             // Restore actionsUsed for all in-play cards and active magi
-            var actionsUsedSnapshot = this.actionsUsedCheckpoints.pop();
+            /*const actionsUsedSnapshot = this.actionsUsedCheckpoints.pop()
             if (actionsUsedSnapshot) {
-                for (var _i = 0, _c = this.state.getZone(ZONE_TYPE_IN_PLAY).cards; _i < _c.length; _i++) {
-                    var card = _c[_i];
-                    card.data.actionsUsed = __spreadArray([], ((_a = actionsUsedSnapshot[card.id]) !== null && _a !== void 0 ? _a : []), true);
+                for (const card of this.state.getZone(ZONE_TYPE_IN_PLAY).cards) {
+                    card.data.actionsUsed = [...(actionsUsedSnapshot[card.id] ?? [])]
                 }
-                for (var _d = 0, _e = this.state.players; _d < _e.length; _d++) {
-                    var player = _e[_d];
-                    var magi = this.state.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card;
+                for (const player of this.state.players) {
+                    const magi = this.state.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card
                     if (magi) {
-                        magi.data.actionsUsed = __spreadArray([], ((_b = actionsUsedSnapshot[magi.id]) !== null && _b !== void 0 ? _b : []), true);
+                        magi.data.actionsUsed = [...(actionsUsedSnapshot[magi.id] ?? [])]
                     }
                 }
-            }
+            }*/
         }
     };
     Unmaker.prototype.saveNumber = function (n, tag) {
@@ -204,6 +205,7 @@ var Unmaker = /** @class */ (function () {
         }
         else {
             delete this.strings[strPointer];
+            console.error('Warning: String storage is not being used in a stack-like manner. This may indicate a bug in the unmaker.');
         }
         return str;
     };
@@ -223,6 +225,7 @@ var Unmaker = /** @class */ (function () {
         }
         else {
             delete this.objects[objPointer];
+            console.error('Warning: Object storage is not being used in a stack-like manner. This may indicate a bug in the unmaker.');
         }
         return obj;
     };

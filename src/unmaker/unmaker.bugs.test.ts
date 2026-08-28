@@ -62,7 +62,7 @@ function makeState(
     if (activeMagi)   state.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER).add([activeMagi]);
     if (opponentMagi) state.getZone(ZONE_TYPE_ACTIVE_MAGI, OPPONENT).add([opponentMagi]);
 
-    state.enableDebug();
+    // state.enableDebug();
     return state;
 }
 
