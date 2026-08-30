@@ -205,11 +205,15 @@ class Unmaker {
         switch (action.type) {
             case index_1.ACTION_RESOLVE_PROMPT: {
                 const logCount = this.state.logEngine.shouldCreateLog(action).length;
+                const generatedBy = this.state.state.promptGeneratedBy;
+                const variable = this.state.state.promptVariable || index_1.DEFAULT_PROMPT_VARIABLE[this.state.state.promptType] || 'promptResult';
+                const oldMetaData = this.state.getSpellMetadata(generatedBy)[variable];
+                this.saveObject(oldMetaData, 'promptOldMetaData');
                 this.saveNumber(this.state.state.promptPlayer, 'promptPlayer');
                 this.saveObject([...this.state.state.savedActions], 'savedActions');
                 this.saveObject(this.state.state.promptParams, 'promptParams');
                 this.saveString(this.state.state.promptMessage, 'promptMessage');
-                this.saveString(this.state.state.promptGeneratedBy, 'promptGeneratedBy');
+                this.saveString(generatedBy, 'promptGeneratedBy');
                 this.saveString(this.state.state.promptType, 'promptType');
                 this.saveNumber(logCount, 'logCount');
                 this.saveActionType(types_1.UNMAKE_PROMPT_LEAVE, 'ACTION_RESOLVE_PROMPT');
@@ -225,6 +229,12 @@ class Unmaker {
             }
             case index_1.ACTION_POWER: {
                 const logCount = this.state.logEngine.shouldCreateLog(action).length;
+                const sourceId = action.source.id;
+                const oldMetaData = this.state.getSpellMetadata(sourceId);
+                this.saveObject(oldMetaData.sourcePlayer, 'POWER_ACTIVATION/oldMetaDataSourcePlayer');
+                this.saveObject(oldMetaData.sourcePower, 'POWER_ACTIVATION/oldMetaDataSourcePower');
+                this.saveObject(oldMetaData.sourceCreature, 'POWER_ACTIVATION/oldMetaDataSourceCreature');
+                this.saveObject(oldMetaData.source, 'POWER_ACTIVATION/oldMetaDataSource');
                 this.saveString(action.power.name, 'POWER_ACTIVATION/powerName');
                 this.saveString(action.source.id, 'POWER_ACTIVATION/sourceId');
                 this.saveNumber(action.source.owner, 'POWER_ACTIVATION/sourceOwner');
@@ -302,6 +312,7 @@ class Unmaker {
                     }
                     case const_1.EFFECT_TYPE_EXECUTE_POWER_EFFECTS: {
                         const source = this.state.getMetaValue(action.source, action.generatedBy);
+                        const sourceObject = this.state.getMetaValue(action.source, action.generatedBy);
                         this.saveString(typeof action.power == 'string' ? action.power : action.power.name, 'POWER_USE/power');
                         this.saveString(source.id, 'POWER_USE/sourceId');
                         this.saveNumber(source.owner, 'POWER_USE/sourcePlayer');
@@ -958,6 +969,7 @@ class Unmaker {
                 const promptParams = this.readObject('promptParams');
                 const savedActions = this.readObject('savedActions');
                 const promptPlayer = this.readNumber('promptPlayer');
+                const oldMetaData = this.readObject('promptOldMetaData');
                 state.state.prompt = true;
                 state.state.promptType = promptType;
                 state.state.promptGeneratedBy = promptGeneratedBy;
@@ -965,6 +977,13 @@ class Unmaker {
                 state.state.promptMessage = promptMessage;
                 state.state.promptParams = promptParams;
                 state.state.savedActions = savedActions;
+                const variable = this.state.state.promptVariable || index_1.DEFAULT_PROMPT_VARIABLE[promptType] || 'promptResult';
+                if (oldMetaData == undefined) {
+                    state.clearSpellMetaDataField(variable, promptGeneratedBy);
+                }
+                else {
+                    state.setSpellMetaDataField(variable, oldMetaData, promptGeneratedBy);
+                }
                 state.state.log.length -= logCount;
                 break;
             }
@@ -1113,6 +1132,38 @@ class Unmaker {
                 const owner = this.readNumber('POWER_ACTIVATION/sourceOwner');
                 const sourceId = this.readString('POWER_ACTIVATION/sourceId');
                 const powerName = this.readString('POWER_ACTIVATION/powerName');
+                const oldMetadataSource = this.readObject('POWER_ACTIVATION/oldMetaDataSource');
+                const oldMetadataSourceCreature = this.readObject('POWER_ACTIVATION/oldMetaDataSourceCreature');
+                const oldMetadataPower = this.readObject('POWER_ACTIVATION/oldMetaDataPower');
+                const oldMetadataPlayer = this.readObject('POWER_ACTIVATION/oldMetaDataSourcePlayer');
+                if (oldMetadataSource == undefined) {
+                    state.clearSpellMetaDataField('source', sourceId);
+                }
+                else {
+                    state.setSpellMetaDataField('source', oldMetadataSource, sourceId);
+                }
+                if (oldMetadataSourceCreature == undefined) {
+                    state.clearSpellMetaDataField('sourceCreature', sourceId);
+                }
+                else {
+                    state.setSpellMetaDataField('sourceCreature', oldMetadataSourceCreature, sourceId);
+                }
+                if (oldMetadataPower == undefined) {
+                    state.clearSpellMetaDataField('sourcePower', sourceId);
+                }
+                else {
+                    state.setSpellMetaDataField('sourcePower', oldMetadataPower, sourceId);
+                }
+                if (oldMetadataPlayer == undefined) {
+                    state.clearSpellMetaDataField('player', sourceId);
+                }
+                else {
+                    state.setSpellMetaDataField('player', oldMetadataPlayer, sourceId);
+                }
+                // Clear the metadata record if it's empty after restoring the previous values
+                if (Object.keys(state.getSpellMetadata(sourceId) || {}).length === 0) {
+                    delete state.state.spellMetaData[sourceId];
+                }
                 var target;
                 if (isMagi) {
                     var zone = state.getZone(index_1.ZONE_TYPE_ACTIVE_MAGI, owner);

@@ -20,7 +20,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
 };
 import CardInGame from '../classes/CardInGame.js';
 import { ACTION_PLAY, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_DRAW, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES } from '../const.js';
-import { ACTION_EFFECT, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_PROMPT_ENTERED, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_START_TURN, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_IN_PLAY, ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE, ACTION_PLAYER_WINS, ACTION_POWER, ACTION_RESOLVE_PROMPT, TYPE_MAGI } from '../index.js';
+import { ACTION_EFFECT, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_PROMPT_ENTERED, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_START_TURN, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_IN_PLAY, ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE, ACTION_PLAYER_WINS, ACTION_POWER, ACTION_RESOLVE_PROMPT, TYPE_MAGI, DEFAULT_PROMPT_VARIABLE } from '../index.js';
 import { UNMAKE_CALCULATION, UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI, UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE, UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, UNMAKE_EFFECT_TYPE_DIE_ROLLED, UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS, UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_ENERGY, UNMAKE_EFFECT_TYPE_PLAYER_WINS, UNMAKE_EFFECT_TYPE_PROMPT_ENTERED, UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD, UNMAKE_EFFECT_TYPE_START_OF_TURN, UNMAKE_EFFECT_TYPE_START_STEP, UNMAKE_EFFECT_TYPE_START_TURN, UNMAKE_LOG_ENTRY, UNMAKE_POWER_ACTIVATION, UNMAKE_POWER_USE, UNMAKE_PROMPT_LEAVE, UNMAKE_PROPERTY, UNMAKE_SELECT } from './types.js';
 var FLAG_WAS_ATTACKED = 1;
 var FLAG_HAS_ATTACKED = 2;
@@ -223,11 +223,15 @@ var Unmaker = /** @class */ (function () {
         switch (action.type) {
             case ACTION_RESOLVE_PROMPT: {
                 var logCount = this.state.logEngine.shouldCreateLog(action).length;
+                var generatedBy = this.state.state.promptGeneratedBy;
+                var variable = this.state.state.promptVariable || DEFAULT_PROMPT_VARIABLE[this.state.state.promptType] || 'promptResult';
+                var oldMetaData = this.state.getSpellMetadata(generatedBy)[variable];
+                this.saveObject(oldMetaData, 'promptOldMetaData');
                 this.saveNumber(this.state.state.promptPlayer, 'promptPlayer');
                 this.saveObject(__spreadArray([], this.state.state.savedActions, true), 'savedActions');
                 this.saveObject(this.state.state.promptParams, 'promptParams');
                 this.saveString(this.state.state.promptMessage, 'promptMessage');
-                this.saveString(this.state.state.promptGeneratedBy, 'promptGeneratedBy');
+                this.saveString(generatedBy, 'promptGeneratedBy');
                 this.saveString(this.state.state.promptType, 'promptType');
                 this.saveNumber(logCount, 'logCount');
                 this.saveActionType(UNMAKE_PROMPT_LEAVE, 'ACTION_RESOLVE_PROMPT');
@@ -243,6 +247,12 @@ var Unmaker = /** @class */ (function () {
             }
             case ACTION_POWER: {
                 var logCount = this.state.logEngine.shouldCreateLog(action).length;
+                var sourceId = action.source.id;
+                var oldMetaData = this.state.getSpellMetadata(sourceId);
+                this.saveObject(oldMetaData.sourcePlayer, 'POWER_ACTIVATION/oldMetaDataSourcePlayer');
+                this.saveObject(oldMetaData.sourcePower, 'POWER_ACTIVATION/oldMetaDataSourcePower');
+                this.saveObject(oldMetaData.sourceCreature, 'POWER_ACTIVATION/oldMetaDataSourceCreature');
+                this.saveObject(oldMetaData.source, 'POWER_ACTIVATION/oldMetaDataSource');
                 this.saveString(action.power.name, 'POWER_ACTIVATION/powerName');
                 this.saveString(action.source.id, 'POWER_ACTIVATION/sourceId');
                 this.saveNumber(action.source.owner, 'POWER_ACTIVATION/sourceOwner');
@@ -320,6 +330,7 @@ var Unmaker = /** @class */ (function () {
                     }
                     case EFFECT_TYPE_EXECUTE_POWER_EFFECTS: {
                         var source = this.state.getMetaValue(action.source, action.generatedBy);
+                        var sourceObject = this.state.getMetaValue(action.source, action.generatedBy);
                         this.saveString(typeof action.power == 'string' ? action.power : action.power.name, 'POWER_USE/power');
                         this.saveString(source.id, 'POWER_USE/sourceId');
                         this.saveNumber(source.owner, 'POWER_USE/sourcePlayer');
@@ -987,6 +998,7 @@ var Unmaker = /** @class */ (function () {
                 var promptParams = this.readObject('promptParams');
                 var savedActions = this.readObject('savedActions');
                 var promptPlayer = this.readNumber('promptPlayer');
+                var oldMetaData = this.readObject('promptOldMetaData');
                 state.state.prompt = true;
                 state.state.promptType = promptType;
                 state.state.promptGeneratedBy = promptGeneratedBy;
@@ -994,6 +1006,13 @@ var Unmaker = /** @class */ (function () {
                 state.state.promptMessage = promptMessage;
                 state.state.promptParams = promptParams;
                 state.state.savedActions = savedActions;
+                var variable = this.state.state.promptVariable || DEFAULT_PROMPT_VARIABLE[promptType] || 'promptResult';
+                if (oldMetaData == undefined) {
+                    state.clearSpellMetaDataField(variable, promptGeneratedBy);
+                }
+                else {
+                    state.setSpellMetaDataField(variable, oldMetaData, promptGeneratedBy);
+                }
                 state.state.log.length -= logCount;
                 break;
             }
@@ -1146,6 +1165,38 @@ var Unmaker = /** @class */ (function () {
                 var owner = this.readNumber('POWER_ACTIVATION/sourceOwner');
                 var sourceId = this.readString('POWER_ACTIVATION/sourceId');
                 var powerName_2 = this.readString('POWER_ACTIVATION/powerName');
+                var oldMetadataSource = this.readObject('POWER_ACTIVATION/oldMetaDataSource');
+                var oldMetadataSourceCreature = this.readObject('POWER_ACTIVATION/oldMetaDataSourceCreature');
+                var oldMetadataPower = this.readObject('POWER_ACTIVATION/oldMetaDataPower');
+                var oldMetadataPlayer = this.readObject('POWER_ACTIVATION/oldMetaDataSourcePlayer');
+                if (oldMetadataSource == undefined) {
+                    state.clearSpellMetaDataField('source', sourceId);
+                }
+                else {
+                    state.setSpellMetaDataField('source', oldMetadataSource, sourceId);
+                }
+                if (oldMetadataSourceCreature == undefined) {
+                    state.clearSpellMetaDataField('sourceCreature', sourceId);
+                }
+                else {
+                    state.setSpellMetaDataField('sourceCreature', oldMetadataSourceCreature, sourceId);
+                }
+                if (oldMetadataPower == undefined) {
+                    state.clearSpellMetaDataField('sourcePower', sourceId);
+                }
+                else {
+                    state.setSpellMetaDataField('sourcePower', oldMetadataPower, sourceId);
+                }
+                if (oldMetadataPlayer == undefined) {
+                    state.clearSpellMetaDataField('player', sourceId);
+                }
+                else {
+                    state.setSpellMetaDataField('player', oldMetadataPlayer, sourceId);
+                }
+                // Clear the metadata record if it's empty after restoring the previous values
+                if (Object.keys(state.getSpellMetadata(sourceId) || {}).length === 0) {
+                    delete state.state.spellMetaData[sourceId];
+                }
                 var target;
                 if (isMagi) {
                     var zone = state.getZone(ZONE_TYPE_ACTIVE_MAGI, owner);

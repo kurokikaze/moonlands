@@ -191,6 +191,7 @@ describe('Unmake state action (TypedArray)', () => {
 
         expect(gameState.winner).toBe(false)
 		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData))
     });
 
     it('Creature defeats creature action', () => {

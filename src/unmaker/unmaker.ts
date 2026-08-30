@@ -1,6 +1,6 @@
 import CardInGame from '../classes/CardInGame';
 import { ACTION_PLAY, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_DRAW, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_OWN_SINGLE_CREATURE, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES } from '../const';
-import { ACTION_EFFECT, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_PROMPT_ENTERED, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_START_TURN, State, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_IN_PLAY, ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE, ACTION_PLAYER_WINS, ACTION_POWER, ACTION_RESOLVE_PROMPT, TYPE_MAGI, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_NUMBER } from '../index'
+import { ACTION_EFFECT, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_PROMPT_ENTERED, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_START_TURN, State, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_IN_PLAY, ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE, ACTION_PLAYER_WINS, ACTION_POWER, ACTION_RESOLVE_PROMPT, TYPE_MAGI, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_NUMBER, DEFAULT_PROMPT_VARIABLE } from '../index'
 import { AnyEffectType, PromptTypeType, ZoneType } from '../types'
 import { CardFlagsSnapshot, UNMAKE_CALCULATION, UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI, UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE, UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, UNMAKE_EFFECT_TYPE_DIE_ROLLED, UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS, UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_ENERGY, UNMAKE_EFFECT_TYPE_PLAYER_WINS, UNMAKE_EFFECT_TYPE_PROMPT_ENTERED, UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD, UNMAKE_EFFECT_TYPE_START_OF_TURN, UNMAKE_EFFECT_TYPE_START_STEP, UNMAKE_EFFECT_TYPE_START_TURN, UNMAKE_LOG_ENTRY, UNMAKE_POWER_ACTIVATION, UNMAKE_POWER_PAY, UNMAKE_POWER_USE, UNMAKE_PROMPT_LEAVE, UNMAKE_PROPERTY, UNMAKE_SELECT, UnAction } from './types';
 
@@ -225,11 +225,15 @@ export class Unmaker {
         switch (action.type) {
             case ACTION_RESOLVE_PROMPT: {
                 const logCount = this.state.logEngine.shouldCreateLog(action).length
+                const generatedBy = this.state.state.promptGeneratedBy as string;
+                const variable = this.state.state.promptVariable as string || DEFAULT_PROMPT_VARIABLE[this.state.state.promptType as PromptTypeType] || 'promptResult';
+                const oldMetaData = this.state.getSpellMetadata(generatedBy)[variable]
+                this.saveObject(oldMetaData, 'promptOldMetaData')
                 this.saveNumber(this.state.state.promptPlayer as number, 'promptPlayer')
                 this.saveObject([...this.state.state.savedActions], 'savedActions')
                 this.saveObject(this.state.state.promptParams, 'promptParams')
                 this.saveString(this.state.state.promptMessage as string, 'promptMessage')
-                this.saveString(this.state.state.promptGeneratedBy as string, 'promptGeneratedBy')
+                this.saveString(generatedBy as string, 'promptGeneratedBy')
                 this.saveString(this.state.state.promptType as string, 'promptType')
                 this.saveNumber(logCount, 'logCount')
                 this.saveActionType(UNMAKE_PROMPT_LEAVE, 'ACTION_RESOLVE_PROMPT')
@@ -245,6 +249,12 @@ export class Unmaker {
             }
             case ACTION_POWER: {
                 const logCount = this.state.logEngine.shouldCreateLog(action).length
+                const sourceId = action.source.id
+                const oldMetaData = this.state.getSpellMetadata(sourceId)
+                this.saveObject(oldMetaData.sourcePlayer, 'POWER_ACTIVATION/oldMetaDataSourcePlayer')
+                this.saveObject(oldMetaData.sourcePower, 'POWER_ACTIVATION/oldMetaDataSourcePower')
+                this.saveObject(oldMetaData.sourceCreature, 'POWER_ACTIVATION/oldMetaDataSourceCreature')
+                this.saveObject(oldMetaData.source, 'POWER_ACTIVATION/oldMetaDataSource')
                 this.saveString(action.power.name, 'POWER_ACTIVATION/powerName')
                 this.saveString(action.source.id, 'POWER_ACTIVATION/sourceId')
                 this.saveNumber(action.source.owner, 'POWER_ACTIVATION/sourceOwner')
@@ -319,6 +329,7 @@ export class Unmaker {
                     }
                     case EFFECT_TYPE_EXECUTE_POWER_EFFECTS: {
                         const source: CardInGame = this.state.getMetaValue(action.source, action.generatedBy)
+                        const sourceObject = this.state.getMetaValue(action.source, action.generatedBy)
                         this.saveString(typeof action.power == 'string' ? action.power : action.power.name, 'POWER_USE/power')
                         this.saveString(source.id, 'POWER_USE/sourceId')
                         this.saveNumber(source.owner, 'POWER_USE/sourcePlayer')
@@ -988,6 +999,7 @@ export class Unmaker {
                 const promptParams = this.readObject<Object>('promptParams')
                 const savedActions = this.readObject<any[]>('savedActions')
                 const promptPlayer = this.readNumber('promptPlayer')
+                const oldMetaData = this.readObject<Object>('promptOldMetaData')
 
                 state.state.prompt = true
                 state.state.promptType = promptType
@@ -996,6 +1008,12 @@ export class Unmaker {
                 state.state.promptMessage = promptMessage
                 state.state.promptParams = promptParams
                 state.state.savedActions = savedActions
+                const variable = this.state.state.promptVariable as string || DEFAULT_PROMPT_VARIABLE[promptType] || 'promptResult'
+                if (oldMetaData == undefined) {
+                    state.clearSpellMetaDataField(variable, promptGeneratedBy)
+                } else {
+                    state.setSpellMetaDataField(variable, oldMetaData, promptGeneratedBy)
+                }
 
                 state.state.log.length -= logCount
                 break;
@@ -1151,6 +1169,35 @@ export class Unmaker {
                 const owner = this.readNumber('POWER_ACTIVATION/sourceOwner')
                 const sourceId = this.readString('POWER_ACTIVATION/sourceId')
                 const powerName = this.readString('POWER_ACTIVATION/powerName')
+                const oldMetadataSource = this.readObject<{ spellId: string, field: string, previousValue: any }[]>('POWER_ACTIVATION/oldMetaDataSource')
+                const oldMetadataSourceCreature = this.readObject('POWER_ACTIVATION/oldMetaDataSourceCreature')
+                const oldMetadataPower = this.readObject('POWER_ACTIVATION/oldMetaDataPower')
+                const oldMetadataPlayer = this.readObject('POWER_ACTIVATION/oldMetaDataSourcePlayer')
+                if(oldMetadataSource == undefined) {
+                    state.clearSpellMetaDataField('source', sourceId)
+                } else {
+                    state.setSpellMetaDataField('source', oldMetadataSource, sourceId)
+                }
+                if (oldMetadataSourceCreature == undefined) {
+                    state.clearSpellMetaDataField('sourceCreature', sourceId)
+                } else {
+                    state.setSpellMetaDataField('sourceCreature', oldMetadataSourceCreature, sourceId)
+                }
+                if (oldMetadataPower == undefined) {
+                    state.clearSpellMetaDataField('sourcePower', sourceId)
+                } else {
+                    state.setSpellMetaDataField('sourcePower', oldMetadataPower, sourceId)
+                }
+                if (oldMetadataPlayer == undefined) {
+                    state.clearSpellMetaDataField('player', sourceId)
+                } else {
+                    state.setSpellMetaDataField('player', oldMetadataPlayer, sourceId)
+                }
+                // Clear the metadata record if it's empty after restoring the previous values
+                if (Object.keys(state.getSpellMetadata(sourceId) || {}).length === 0) {
+                    delete state.state.spellMetaData[sourceId]
+                }
+
                 var target;
                 if (isMagi) {
                     var zone = state.getZone(ZONE_TYPE_ACTIVE_MAGI, owner)
