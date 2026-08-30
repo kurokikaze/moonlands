@@ -891,6 +891,19 @@ class Unmaker {
                             creatures,
                         };
                     }
+                    case const_1.EFFECT_TYPE_ATTACH_CARD_TO_CARD: {
+                        const target = this.state.getMetaValue(action.target, action.generatedBy);
+                        const attachmentTarget = this.state.getMetaValue(action.attachmentTarget, action.generatedBy);
+                        this.saveString(target.id, 'EFFECT_TYPE_ATTACH_CARD_TO_CARD/targetId');
+                        this.saveString(attachmentTarget.id, 'EFFECT_TYPE_ATTACH_CARD_TO_CARD/attachmentTargetId');
+                        this.saveObject(target.data.attachedTo || null, 'EFFECT_TYPE_ATTACH_CARD_TO_CARD/previousAttachment');
+                        return {
+                            type: types_1.UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD,
+                            targetId: target.id,
+                            attachmentTargetId: attachmentTarget.id,
+                            previousAttachment: target.data.attachedTo || null,
+                        };
+                    }
                 }
                 break;
             }
@@ -1933,6 +1946,15 @@ class Unmaker {
                     this.state.setSpellMetaDataField(unaction.variable, unaction.previousValue, unaction.generatedBy);
                 }
                 break;
+            }
+            case types_1.UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD: {
+                const previousAttachment = this.readObject('EFFECT_TYPE_ATTACH_CARD_TO_CARD/previousAttachment');
+                const attachmentTargetId = this.readString('EFFECT_TYPE_ATTACH_CARD_TO_CARD/attachmentTargetId');
+                const targetId = this.readString('EFFECT_TYPE_ATTACH_CARD_TO_CARD/targetId');
+                this.state.detachCard(targetId);
+                if (previousAttachment) {
+                    this.state.attachCard(previousAttachment, targetId);
+                }
             }
         }
     }
