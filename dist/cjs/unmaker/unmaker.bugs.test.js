@@ -492,7 +492,7 @@ describe.only('Engine invariant - MOVE_CARD_BETWEEN_ZONES with stale source id',
         expect(unmaker.numberOfUnActions).toBe(checkpointUnActions);
         expect(snapshot(state)).toBe(before);
     });
-    it.only('Playing Fog Bank and then reverting to checkpoint breaks the state', () => {
+    it('Playing Fog Bank and then reverting to checkpoint breaks the state', () => {
         const ora = new CardInGame_1.default((0, cards_1.byName)('Ora'), PLAYER).addEnergy(12);
         const sinder = new CardInGame_1.default((0, cards_1.byName)('Sinder'), OPPONENT).addEnergy(8);
         const fogBank = new CardInGame_1.default((0, cards_1.byName)('Fog Bank'), PLAYER);
@@ -515,6 +515,41 @@ describe.only('Engine invariant - MOVE_CARD_BETWEEN_ZONES with stale source id',
         expect(() => state.update({
             type: const_1.ACTION_RESOLVE_PROMPT,
             target: vellup,
+            generatedBy: state.state.promptGeneratedBy,
+            player: PLAYER,
+        })).not.toThrow();
+        expect(() => unmaker.revertToCheckpoint()).not.toThrow();
+        expect(snapshot(state)).toBe(before2);
+        expect(() => unmaker.revertToCheckpoint()).not.toThrow();
+        expect(unmaker.getPointer()).toBe(checkpointPointer);
+        expect(unmaker.numberOfUnActions).toBe(checkpointUnActions);
+        expect(snapshot(state)).toBe(before);
+    });
+    it.only('Arbolit Healing Flame is not rolled back correctly', () => {
+        const ora = new CardInGame_1.default((0, cards_1.byName)('Ora'), PLAYER).addEnergy(12);
+        const sinder = new CardInGame_1.default((0, cards_1.byName)('Sinder'), OPPONENT).addEnergy(8);
+        const arbolit = new CardInGame_1.default((0, cards_1.byName)('Arbolit'), PLAYER).addEnergy(5);
+        const vellup = new CardInGame_1.default((0, cards_1.byName)('Vellup'), PLAYER).addEnergy(1);
+        const vellup2 = new CardInGame_1.default((0, cards_1.byName)('Vellup'), PLAYER).addEnergy(3);
+        vellup.data.energyLostThisTurn = 2;
+        const state = makeState(STEP_PRS1, [arbolit, vellup, vellup2], [], [], ora, sinder);
+        state.enableDebug();
+        const before = snapshot(state);
+        const unmaker = new unmaker_1.Unmaker(state);
+        unmaker.setCheckpoint();
+        const checkpointPointer = unmaker.getPointer();
+        const checkpointUnActions = unmaker.numberOfUnActions;
+        expect(() => state.update({
+            type: const_1.ACTION_POWER,
+            source: arbolit,
+            power: arbolit.card.data.powers.find(p => p.name === 'Healing Flame'),
+            player: PLAYER,
+        })).not.toThrow();
+        const before2 = snapshot(state);
+        unmaker.setCheckpoint();
+        expect(() => state.update({
+            type: const_1.ACTION_RESOLVE_PROMPT,
+            target: arbolit,
             generatedBy: state.state.promptGeneratedBy,
             player: PLAYER,
         })).not.toThrow();

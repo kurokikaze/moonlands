@@ -190,8 +190,9 @@ export var applyDiscardEnergyFromCreatureEffect = function (action, transform) {
     var _this = this;
     var multiTarget = this.getMetaValue(action.target, action.generatedBy);
     var totalEnergyLost = 0;
+    var inPlay = this.getZone(ZONE_TYPE_IN_PLAY);
     oneOrSeveral(multiTarget, function (target) {
-        if (target && _this.isCardAffectedByEffect(target, action)) {
+        if (target && inPlay.containsId(target.id) && _this.isCardAffectedByEffect(target, action)) {
             var energyToLose = parseInt(_this.getMetaValue(action.amount, action.generatedBy), 10);
             var energyLossThreshold = _this.modifyByStaticAbilities(target, PROPERTY_ENERGY_LOSS_THRESHOLD);
             var energyLostAlready = target.data.energyLostThisTurn;
@@ -273,8 +274,9 @@ export var applyRestoreCreatureToStartingEnergyEffect = function (action, transf
 export var applyAddEnergyToCreatureEffect = function (action) {
     var _this = this;
     var addTargets = this.getMetaValue(action.target, action.generatedBy);
+    var inPlay = this.getZone(ZONE_TYPE_IN_PLAY);
     oneOrSeveral(addTargets, function (addTarget) {
-        if (addTarget && _this.isCardAffectedByEffect(addTarget, action)) {
+        if (addTarget && inPlay.containsId(addTarget.id) && _this.isCardAffectedByEffect(addTarget, action)) {
             addTarget.addEnergy(parseInt(_this.getMetaValue(action.amount, action.generatedBy), 10));
         }
     });

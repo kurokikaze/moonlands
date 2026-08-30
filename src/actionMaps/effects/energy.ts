@@ -253,10 +253,11 @@ export const applyDiscardEnergyFromCreaturesEffect: ActionTransformer<typeof EFF
 export const applyDiscardEnergyFromCreatureEffect: ActionTransformer<typeof EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE> = function (action, transform) {
   const multiTarget: CardInGame | CardInGame[] = this.getMetaValue(action.target, action.generatedBy);
   var totalEnergyLost = 0;
+  const inPlay = this.getZone(ZONE_TYPE_IN_PLAY);
   oneOrSeveral(
     multiTarget,
     target => {
-      if (target && this.isCardAffectedByEffect(target, action)) {
+      if (target && inPlay.containsId(target.id) && this.isCardAffectedByEffect(target, action)) {
         var energyToLose = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
         const energyLossThreshold = this.modifyByStaticAbilities(target, PROPERTY_ENERGY_LOSS_THRESHOLD);
         const energyLostAlready = target.data.energyLostThisTurn;
@@ -349,9 +350,9 @@ export const applyRestoreCreatureToStartingEnergyEffect: ActionTransformer<typeo
 
 export const applyAddEnergyToCreatureEffect: ActionTransformer<typeof EFFECT_TYPE_ADD_ENERGY_TO_CREATURE> = function (action) {
   const addTargets = this.getMetaValue(action.target, action.generatedBy);
-
+  const inPlay = this.getZone(ZONE_TYPE_IN_PLAY);
   oneOrSeveral(addTargets, addTarget => {
-    if (addTarget && this.isCardAffectedByEffect(addTarget, action)) {
+    if (addTarget && inPlay.containsId(addTarget.id) && this.isCardAffectedByEffect(addTarget, action)) {
       addTarget.addEnergy(parseInt(this.getMetaValue(action.amount, action.generatedBy), 10));
     }
   });
