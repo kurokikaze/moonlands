@@ -897,6 +897,7 @@ class Unmaker {
                         this.saveString(target.id, 'EFFECT_TYPE_ATTACH_CARD_TO_CARD/targetId');
                         this.saveString(attachmentTarget.id, 'EFFECT_TYPE_ATTACH_CARD_TO_CARD/attachmentTargetId');
                         this.saveObject(target.data.attachedTo || null, 'EFFECT_TYPE_ATTACH_CARD_TO_CARD/previousAttachment');
+                        this.saveActionType(types_1.UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD, 'EFFECT_TYPE_ATTACH_CARD_TO_CARD');
                         return {
                             type: types_1.UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD,
                             targetId: target.id,
