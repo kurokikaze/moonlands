@@ -20,18 +20,20 @@ import {
 
 import {caldDeck, naroomDeck} from './testData';
 import { AnyEffectType } from '../src/types';
+import Zone from '../src/classes/Zone';
 
 describe('Stream of actions', () => {
 	it('Streams actions', () => {
 		const PLAYER_ONE = 10;
 		const PLAYER_TWO = 12;
 
-		const zones = [];
+		const zones: Zone[] = [];
 
 		const gameState = new moonlands.State({
 			zones,
 			step: null,
 			activePlayer: PLAYER_ONE,
+			controllingPlayer: PLAYER_ONE,
 			prompt: false,
 			promptType: null,
 			promptParams: {},
@@ -101,12 +103,13 @@ describe('Stream of actions', () => {
 		const PLAYER_ONE = 10;
 		const PLAYER_TWO = 12;
 
-		const zones = [];
+		const zones: Zone[] = [];
 
 		const gameState = new moonlands.State({
 			zones,
 			step: null,
 			activePlayer: PLAYER_ONE,
+			controllingPlayer: PLAYER_ONE,
 			prompt: false,
 			promptType: null,
 			promptParams: {},
@@ -152,12 +155,13 @@ describe('Stream of actions', () => {
 		const PLAYER_ONE = 10;
 		const PLAYER_TWO = 12;
 
-		const zones = [];
+		const zones: Zone[] = [];
 
 		const gameState = new moonlands.State({
 			zones,
 			step: null,
 			activePlayer: PLAYER_ONE,
+			controllingPlayer: PLAYER_ONE,
 			prompt: false,
 			promptType: null,
 			promptParams: {},
@@ -202,7 +206,7 @@ describe('Stream of actions', () => {
 		const PLAYER_ONE = 10;
 		const PLAYER_TWO = 12;
 
-		const zones = [];
+		const zones: Zone[] = [];
 
 		const gameState = new moonlands.State({
 			zones,
@@ -221,6 +225,7 @@ describe('Stream of actions', () => {
 			spellMetaData: {},
 			delayedTriggers: [],
 			attachedTo: {},
+			controllingPlayer: PLAYER_ONE,
 			cardsAttached: {}
 		});
 
@@ -252,12 +257,13 @@ describe('Stream of actions', () => {
 		const PLAYER_ONE = 10;
 		const PLAYER_TWO = 12;
 
-		const zones = [];
+		const zones: Zone[] = [];
 
 		const gameState = new moonlands.State({
 			zones,
 			step: null,
 			activePlayer: PLAYER_ONE,
+			controllingPlayer: PLAYER_ONE,
 			prompt: false,
 			promptType: null,
 			promptParams: {},

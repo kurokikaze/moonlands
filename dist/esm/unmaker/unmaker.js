@@ -130,6 +130,9 @@ var Unmaker = /** @class */ (function () {
             }
         }
     }*/
+    Unmaker.prototype.getPointer = function () {
+        return this.pointer;
+    };
     Unmaker.prototype.revertToCheckpoint = function () {
         if (this.historyStack.length) {
             var target = this.historyStack.pop();
@@ -394,6 +397,8 @@ var Unmaker = /** @class */ (function () {
                             var destinationZoneType = this.state.getMetaValue(action.destinationZone, action.generatedBy);
                             var sourceZone = this.state.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard_1.owner);
                             var position = sourceZone.cards.findIndex(function (card) { return card.id === zoneChangingCard_1.id; });
+                            // Uint16Array cannot represent -1; encode "not found" as 0 and real indices as index + 1.
+                            var encodedPosition = position + 1;
                             // Capture the current spellMetaData values that will be modified
                             var metaDataEntries = [];
                             if (action.generatedBy) {
@@ -412,7 +417,7 @@ var Unmaker = /** @class */ (function () {
                             });
                             this.saveObject(metaDataEntries, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/metaDataEntries');
                             this.saveNumber(action.bottom ? 1 : 0, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/bottom');
-                            this.saveNumber(position, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/position');
+                            this.saveNumber(encodedPosition, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/position');
                             this.saveString(destinationZoneType, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/destinationZoneType');
                             this.saveNumber(zoneChangingCard_1.owner, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/cardOwner');
                             this.saveString(sourceZoneType, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/sourceZoneType');
@@ -855,18 +860,20 @@ var Unmaker = /** @class */ (function () {
                         };
                     }
                     case EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
-                        var energyArrangement = this.state.getMetaValue(action.energyOnCreatures, action.generatedBy);
-                        var affectedCreatureIds = Object.keys(energyArrangement);
                         var inPlay = this.state.getZone(ZONE_TYPE_IN_PLAY);
                         var creatures_7 = [];
-                        for (var _h = 0, affectedCreatureIds_2 = affectedCreatureIds; _h < affectedCreatureIds_2.length; _h++) {
-                            var creatureId = affectedCreatureIds_2[_h];
-                            var creature = inPlay.byId(creatureId);
-                            if (creature) {
-                                creatures_7.push({
-                                    id: creature.id,
-                                    energy: creature.data.energy,
-                                });
+                        var energyArrangement = this.state.getMetaValue(action.energyOnCreatures, action.generatedBy);
+                        if (energyArrangement) {
+                            var affectedCreatureIds = Object.keys(energyArrangement);
+                            for (var _h = 0, affectedCreatureIds_2 = affectedCreatureIds; _h < affectedCreatureIds_2.length; _h++) {
+                                var creatureId = affectedCreatureIds_2[_h];
+                                var creature = inPlay.byId(creatureId);
+                                if (creature) {
+                                    creatures_7.push({
+                                        id: creature.id,
+                                        energy: creature.data.energy,
+                                    });
+                                }
                             }
                         }
                         this.saveObject(creatures_7, 'EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES/creatures');
@@ -958,7 +965,7 @@ var Unmaker = /** @class */ (function () {
         }
     };
     Unmaker.prototype.readAndApplyUnAction = function (state) {
-        var _a, _b;
+        var _a, _b, _c, _d;
         var unAction = this.readNumber('UnActionType');
         switch (unAction) {
             // Log entries: 1
@@ -1001,7 +1008,8 @@ var Unmaker = /** @class */ (function () {
                 state.state.prompt = prompt;
                 state.state.promptMessage = promptMessage;
                 state.state.promptPlayer = promptPlayer;
-                state.state.promptType = promptType;
+                // Empty string is used to represent null for promptType, so we convert it back to null here
+                state.state.promptType = promptType == '' ? null : promptType;
                 state.state.promptVariable = promptVariable;
                 state.state.promptGeneratedBy = promptGeneratedBy;
                 state.state.promptParams = promptParams;
@@ -1013,7 +1021,7 @@ var Unmaker = /** @class */ (function () {
                 var creatures = this.readObject('EFFECT_TYPE_ADD_ENERGY_TO_CREATURE/creatures');
                 var inPlay = state.getZone(ZONE_TYPE_IN_PLAY);
                 for (var _i = 0, creatures_9 = creatures; _i < creatures_9.length; _i++) {
-                    var _c = creatures_9[_i], id = _c.id, energy = _c.energy;
+                    var _e = creatures_9[_i], id = _e.id, energy = _e.energy;
                     var creatureCard = inPlay.byId(id);
                     if (creatureCard) {
                         creatureCard.data.energy = energy;
@@ -1035,21 +1043,26 @@ var Unmaker = /** @class */ (function () {
                 var sourceZone = state.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
                 // Remove the newly-created copies from destination (added to top one at a time)
                 for (var i = 0; i < cardsWithPositions.length; i++) {
-                    if (bottom) {
-                        destZone.cards.pop();
-                    }
-                    else {
-                        destZone.cards.shift();
+                    var removedCard = bottom ? destZone.cards.pop() : destZone.cards.shift();
+                    if (removedCard) {
+                        var attachmentTargetId = state.state.attachedTo[removedCard.id];
+                        state.detachCard(removedCard.id);
+                        if (attachmentTargetId && ((_a = state.state.cardsAttached[attachmentTargetId]) === null || _a === void 0 ? void 0 : _a.length) === 0) {
+                            delete state.state.cardsAttached[attachmentTargetId];
+                        }
+                        state.removeAttachments(removedCard.id);
                     }
                 }
                 // Re-insert original cards at their original positions (ascending order preserves positions)
                 var sortedByPosition = __spreadArray([], cardsWithPositions, true).sort(function (a, b) { return a.position - b.position; });
-                for (var _d = 0, sortedByPosition_1 = sortedByPosition; _d < sortedByPosition_1.length; _d++) {
-                    var _e = sortedByPosition_1[_d], card = _e.card, position = _e.position;
-                    sourceZone.cards.splice(position, 0, card);
+                for (var _f = 0, sortedByPosition_1 = sortedByPosition; _f < sortedByPosition_1.length; _f++) {
+                    var _g = sortedByPosition_1[_f], card = _g.card, position = _g.position;
+                    if (position >= 0) {
+                        sourceZone.cards.splice(position, 0, card);
+                    }
                 }
-                for (var _f = 0, metaDataEntries_1 = metaDataEntries; _f < metaDataEntries_1.length; _f++) {
-                    var entry = metaDataEntries_1[_f];
+                for (var _h = 0, metaDataEntries_1 = metaDataEntries; _h < metaDataEntries_1.length; _h++) {
+                    var entry = metaDataEntries_1[_h];
                     if (entry.previousValue === undefined) {
                         state.clearSpellMetaDataField(entry.field, entry.spellId);
                     }
@@ -1067,23 +1080,29 @@ var Unmaker = /** @class */ (function () {
                 var sourceZoneType = this.readString('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/sourceZoneType');
                 var cardOwner = this.readNumber('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/cardOwner');
                 var destinationZoneType = this.readString('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/destinationZoneType');
-                var position = this.readNumber('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/position');
+                var encodedPosition = this.readNumber('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/position');
+                var position = encodedPosition - 1;
                 var bottom = this.readNumber('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/bottom') == 1;
                 var metaDataEntries = this.readObject('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/metaDataEntries');
                 var destZone = state.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : cardOwner);
                 var sourceZone = state.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : cardOwner);
                 // Remove the new card from destination zone
-                if (bottom) {
-                    destZone.cards.pop();
+                var removedCard = bottom ? destZone.cards.pop() : destZone.cards.shift();
+                if (removedCard) {
+                    var attachmentTargetId = state.state.attachedTo[removedCard.id];
+                    state.detachCard(removedCard.id);
+                    if (attachmentTargetId && ((_b = state.state.cardsAttached[attachmentTargetId]) === null || _b === void 0 ? void 0 : _b.length) === 0) {
+                        delete state.state.cardsAttached[attachmentTargetId];
+                    }
+                    state.removeAttachments(removedCard.id);
                 }
-                else {
-                    destZone.cards.shift();
+                // Re-add original card only if it existed in the declared source zone.
+                if (position >= 0) {
+                    sourceZone.cards.splice(position, 0, zoneChangingCard);
                 }
-                // Re-add original card at its original position in source zone
-                sourceZone.cards.splice(position, 0, zoneChangingCard);
                 // Restore spellMetaData fields to their previous values
-                for (var _g = 0, metaDataEntries_2 = metaDataEntries; _g < metaDataEntries_2.length; _g++) {
-                    var entry = metaDataEntries_2[_g];
+                for (var _j = 0, metaDataEntries_2 = metaDataEntries; _j < metaDataEntries_2.length; _j++) {
+                    var entry = metaDataEntries_2[_j];
                     // const currentMeta = state.getSpellMetadata(entry.spellId)
                     if (entry.previousValue === undefined) {
                         // Field didn't exist before, remove it
@@ -1153,8 +1172,8 @@ var Unmaker = /** @class */ (function () {
                     break;
                 }
                 var inPlay = state.getZone(ZONE_TYPE_IN_PLAY);
-                for (var _h = 0, creatures_10 = creatures; _h < creatures_10.length; _h++) {
-                    var _j = creatures_10[_h], id = _j.id, energy = _j.energy, energyLostThisTurn = _j.energyLostThisTurn;
+                for (var _k = 0, creatures_10 = creatures; _k < creatures_10.length; _k++) {
+                    var _l = creatures_10[_k], id = _l.id, energy = _l.energy, energyLostThisTurn = _l.energyLostThisTurn;
                     var creatureCard = inPlay.byId(id);
                     if (creatureCard) {
                         creatureCard.data.energy = energy;
@@ -1172,8 +1191,8 @@ var Unmaker = /** @class */ (function () {
                     state.state.log.length -= logCount;
                     break;
                 }
-                for (var _k = 0, magi_1 = magi; _k < magi_1.length; _k++) {
-                    var _l = magi_1[_k], id = _l.id, owner = _l.owner, energy = _l.energy, energyLost = _l.energyLost;
+                for (var _m = 0, magi_1 = magi; _m < magi_1.length; _m++) {
+                    var _o = magi_1[_m], id = _o.id, owner = _o.owner, energy = _o.energy, energyLost = _o.energyLost;
                     var activeMagi = state.getZone(ZONE_TYPE_ACTIVE_MAGI, owner);
                     var magiCard = activeMagi.byId(id);
                     if (magiCard) {
@@ -1216,14 +1235,14 @@ var Unmaker = /** @class */ (function () {
                 // Restore card flags
                 var flagEntries = Object.entries(cardFlags);
                 for (var i = 0; i < flagEntries.length; i++) {
-                    var _m = flagEntries[i], cardId = _m[0], flags = _m[1];
+                    var _p = flagEntries[i], cardId = _p[0], flags = _p[1];
                     // Try to find the card in play (creatures and relics)
                     var card = state.getZone(ZONE_TYPE_IN_PLAY).byId(cardId);
                     // If not in play, check all players' active magi zones
                     if (!card) {
-                        for (var _o = 0, _p = state.players; _o < _p.length; _o++) {
-                            var player = _p[_o];
-                            card = (_a = state.getZone(ZONE_TYPE_ACTIVE_MAGI, player)) === null || _a === void 0 ? void 0 : _a.byId(cardId);
+                        for (var _q = 0, _r = state.players; _q < _r.length; _q++) {
+                            var player = _r[_q];
+                            card = (_c = state.getZone(ZONE_TYPE_ACTIVE_MAGI, player)) === null || _c === void 0 ? void 0 : _c.byId(cardId);
                             if (card)
                                 break;
                         }
@@ -1287,8 +1306,8 @@ var Unmaker = /** @class */ (function () {
                     state.state.log.length -= logCount;
                     break;
                 }
-                for (var _q = 0, magiArray_2 = magiArray; _q < magiArray_2.length; _q++) {
-                    var _r = magiArray_2[_q], id = _r.id, owner = _r.owner, energy = _r.energy;
+                for (var _s = 0, magiArray_2 = magiArray; _s < magiArray_2.length; _s++) {
+                    var _t = magiArray_2[_s], id = _t.id, owner = _t.owner, energy = _t.energy;
                     var activeMagi = state.getZone(ZONE_TYPE_ACTIVE_MAGI, owner);
                     var magiCard = activeMagi.byId(id);
                     if (magiCard) {
@@ -1301,15 +1320,15 @@ var Unmaker = /** @class */ (function () {
             case UNMAKE_EFFECT_TYPE_START_OF_TURN: {
                 var player = this.readNumber('EFFECT_TYPE_START_TURN/player');
                 var cardFlags = this.readObject('EFFECT_TYPE_START_TURN/cardFlags');
-                for (var _s = 0, _t = Object.entries(cardFlags); _s < _t.length; _s++) {
-                    var _u = _t[_s], cardId = _u[0], flags = _u[1];
+                for (var _u = 0, _v = Object.entries(cardFlags); _u < _v.length; _u++) {
+                    var _w = _v[_u], cardId = _w[0], flags = _w[1];
                     // Try to find the card in play (creatures and relics)
                     var card = state.getZone(ZONE_TYPE_IN_PLAY).byId(cardId);
                     // If not in play, check all players' active magi zones
                     if (!card) {
-                        for (var _v = 0, _w = state.players; _v < _w.length; _v++) {
-                            var player_3 = _w[_v];
-                            card = (_b = state.getZone(ZONE_TYPE_ACTIVE_MAGI, player_3)) === null || _b === void 0 ? void 0 : _b.byId(cardId);
+                        for (var _x = 0, _y = state.players; _x < _y.length; _x++) {
+                            var player_3 = _y[_x];
+                            card = (_d = state.getZone(ZONE_TYPE_ACTIVE_MAGI, player_3)) === null || _d === void 0 ? void 0 : _d.byId(cardId);
                             if (card)
                                 break;
                         }

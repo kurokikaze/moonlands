@@ -16,6 +16,7 @@ export declare class Unmaker {
     constructor(state: State, blobSize?: number);
     setCheckpoint(): void;
     outputDebug(): void;
+    getPointer(): number;
     revertToCheckpoint(): void;
     private dataTags;
     private saveNumber;

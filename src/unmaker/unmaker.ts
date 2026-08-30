@@ -118,6 +118,10 @@ export class Unmaker {
         }
     }*/
 
+    public getPointer() {
+        return this.pointer;
+    }
+
     public revertToCheckpoint() {
         if (this.historyStack.length) {
             const target = this.historyStack.pop()
@@ -196,6 +200,7 @@ export class Unmaker {
             throw new Error(`Expected tag ${expectedTag} but found ${tag}`)
         }
         const str = this.strings.pop();
+
         return str || ''
     }
 
@@ -389,6 +394,8 @@ export class Unmaker {
                             const destinationZoneType = this.state.getMetaValue(action.destinationZone, action.generatedBy)
                             const sourceZone = this.state.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner)
                             const position = sourceZone.cards.findIndex(card => card.id === zoneChangingCard.id)
+                            // Uint16Array cannot represent -1; encode "not found" as 0 and real indices as index + 1.
+                            const encodedPosition = position + 1
 
                             // Capture the current spellMetaData values that will be modified
                             const metaDataEntries = []
@@ -409,7 +416,7 @@ export class Unmaker {
 
                             this.saveObject(metaDataEntries, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/metaDataEntries')
                             this.saveNumber(action.bottom ? 1 : 0, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/bottom')
-                            this.saveNumber(position, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/position')
+                            this.saveNumber(encodedPosition, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/position')
                             this.saveString(destinationZoneType, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/destinationZoneType')
                             this.saveNumber(zoneChangingCard.owner, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/cardOwner')
                             this.saveString(sourceZoneType, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/sourceZoneType')
@@ -857,17 +864,19 @@ export class Unmaker {
                         }
                     }
                     case EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
-                        const energyArrangement: Record<string, number> = this.state.getMetaValue(action.energyOnCreatures, action.generatedBy)
-                        const affectedCreatureIds = Object.keys(energyArrangement)
                         const inPlay = this.state.getZone(ZONE_TYPE_IN_PLAY)
                         const creatures: { id: string, energy: number }[] = []
-                        for (const creatureId of affectedCreatureIds) {
-                            const creature = inPlay.byId(creatureId)
-                            if (creature) {
-                                creatures.push({
-                                    id: creature.id,
-                                    energy: creature.data.energy,
-                                })
+                        const energyArrangement: Record<string, number> = this.state.getMetaValue(action.energyOnCreatures, action.generatedBy)
+                        if (energyArrangement) {
+                            const affectedCreatureIds = Object.keys(energyArrangement)
+                            for (const creatureId of affectedCreatureIds) {
+                                const creature = inPlay.byId(creatureId)
+                                if (creature) {
+                                    creatures.push({
+                                        id: creature.id,
+                                        energy: creature.data.energy,
+                                    })
+                                }
                             }
                         }
                         this.saveObject(creatures, 'EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES/creatures')
@@ -995,7 +1004,7 @@ export class Unmaker {
                 const prompt = this.readNumber('EFFECT_TYPE_PROMPT_ENTERED/prompt') == 1;
                 const promptMessage = this.readString('EFFECT_TYPE_PROMPT_ENTERED/promptMessage')
                 const promptPlayer = this.readNumber('EFFECT_TYPE_PROMPT_ENTERED/promptPlayer')
-                const promptType = this.readString('EFFECT_TYPE_PROMPT_ENTERED/promptType') as PromptTypeType
+                const promptType = this.readString('EFFECT_TYPE_PROMPT_ENTERED/promptType') as PromptTypeType|''
                 const promptVariable = this.readString('EFFECT_TYPE_PROMPT_ENTERED/promptVariable')
                 const promptGeneratedBy = this.readString('EFFECT_TYPE_PROMPT_ENTERED/promptGeneratedBy')
                 const promptParams = this.readObject<Object>('EFFECT_TYPE_PROMPT_ENTERED/promptParams')
@@ -1003,7 +1012,8 @@ export class Unmaker {
                 state.state.prompt = prompt
                 state.state.promptMessage = promptMessage
                 state.state.promptPlayer = promptPlayer
-                state.state.promptType = promptType
+                // Empty string is used to represent null for promptType, so we convert it back to null here
+                state.state.promptType = promptType == '' ? null : promptType
                 state.state.promptVariable = promptVariable
                 state.state.promptGeneratedBy = promptGeneratedBy
                 state.state.promptParams = promptParams
@@ -1038,17 +1048,23 @@ export class Unmaker {
 
                 // Remove the newly-created copies from destination (added to top one at a time)
                 for (let i = 0; i < cardsWithPositions.length; i++) {
-                    if (bottom) {
-                        destZone.cards.pop()
-                    } else {
-                        destZone.cards.shift()
+                    const removedCard = bottom ? destZone.cards.pop() : destZone.cards.shift()
+                    if (removedCard) {
+                        const attachmentTargetId = state.state.attachedTo[removedCard.id]
+                        state.detachCard(removedCard.id)
+                        if (attachmentTargetId && state.state.cardsAttached[attachmentTargetId]?.length === 0) {
+                            delete state.state.cardsAttached[attachmentTargetId]
+                        }
+                        state.removeAttachments(removedCard.id)
                     }
                 }
 
                 // Re-insert original cards at their original positions (ascending order preserves positions)
                 const sortedByPosition = [...cardsWithPositions].sort((a, b) => a.position - b.position)
                 for (const { card, position } of sortedByPosition) {
-                    sourceZone.cards.splice(position, 0, card)
+                    if (position >= 0) {
+                        sourceZone.cards.splice(position, 0, card)
+                    }
                 }
 
                 for (const entry of metaDataEntries) {
@@ -1069,20 +1085,27 @@ export class Unmaker {
                 const sourceZoneType = this.readString('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/sourceZoneType') as unknown as ZoneType
                 const cardOwner = this.readNumber('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/cardOwner')
                 const destinationZoneType = this.readString('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/destinationZoneType') as unknown as ZoneType
-                const position = this.readNumber('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/position')
+                const encodedPosition = this.readNumber('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/position')
+                const position = encodedPosition - 1
                 const bottom = this.readNumber('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/bottom') == 1
                 const metaDataEntries = this.readObject<{ spellId: string, field: string, previousValue: any }[]>('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/metaDataEntries')
 
                 const destZone = state.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : cardOwner)
                 const sourceZone = state.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : cardOwner)
                 // Remove the new card from destination zone
-                if (bottom) {
-                    destZone.cards.pop()
-                } else {
-                    destZone.cards.shift()
+                const removedCard = bottom ? destZone.cards.pop() : destZone.cards.shift()
+                if (removedCard) {
+                    const attachmentTargetId = state.state.attachedTo[removedCard.id]
+                    state.detachCard(removedCard.id)
+                    if (attachmentTargetId && state.state.cardsAttached[attachmentTargetId]?.length === 0) {
+                        delete state.state.cardsAttached[attachmentTargetId]
+                    }
+                    state.removeAttachments(removedCard.id)
                 }
-                // Re-add original card at its original position in source zone
-                sourceZone.cards.splice(position, 0, zoneChangingCard)
+                // Re-add original card only if it existed in the declared source zone.
+                if (position >= 0) {
+                    sourceZone.cards.splice(position, 0, zoneChangingCard)
+                }
 
                 // Restore spellMetaData fields to their previous values
                 for (const entry of metaDataEntries) {

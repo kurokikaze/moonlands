@@ -50,7 +50,7 @@ function makeState(step = STEP_PRS1, inPlay = [], hand = [], deck = [], activeMa
     return state;
 }
 function snapshot(state) {
-    return JSON.stringify(state.serializeData(PLAYER, false));
+    return JSON.stringify(state.serializeData(PLAYER, false), null, 2);
 }
 // ---------------------------------------------------------------------------
 // Bug 1 – POWER: Arboll's Life Channel
@@ -328,6 +328,201 @@ describe('cards.js bug – Cyclone Vashp Cyclone: DISCARD_CREATURE_FROM_PLAY wit
             player: PLAYER,
         });
         unmaker.revertToCheckpoint();
+        expect(snapshot(state)).toBe(before);
+    });
+});
+// ---------------------------------------------------------------------------
+// Unmaker regression – Firestorm checkpoint stability
+//   Firestorm chains prompt + discard creature + region-based selects and
+//   discard energy effects. Repeating this branch many times should not cause
+//   pointer/unaction drift after each revert.
+// ---------------------------------------------------------------------------
+describe('Unmaker bug – Firestorm repeated branch does not leak unmake state', () => {
+    it('keeps pointer and unaction counts stable across repeated power+prompt reverts', () => {
+        const lavaAq = new CardInGame_1.default((0, cards_1.byName)('Lava Aq'), PLAYER).addEnergy(6);
+        const arbolit = new CardInGame_1.default((0, cards_1.byName)('Arbolit'), PLAYER).addEnergy(2);
+        const weebo = new CardInGame_1.default((0, cards_1.byName)('Weebo'), OPPONENT).addEnergy(2);
+        const arboll = new CardInGame_1.default((0, cards_1.byName)('Arboll'), OPPONENT).addEnergy(2);
+        const grega = new CardInGame_1.default((0, cards_1.byName)('Grega'), PLAYER).addEnergy(8);
+        const pruitt = new CardInGame_1.default((0, cards_1.byName)('Pruitt'), OPPONENT).addEnergy(8);
+        const state = makeState(STEP_PRS1, [lavaAq, arbolit, weebo, arboll], [], [], grega, pruitt);
+        const normalizePromptType = (data) => {
+            if (data && data.promptType === '') {
+                data.promptType = null;
+            }
+            return data;
+        };
+        const before = normalizePromptType(state.serializeData(PLAYER, false));
+        const firestorm = lavaAq.card.data.powers.find(p => p.name === 'Firestorm');
+        expect(firestorm).toBeTruthy();
+        const unmaker = new unmaker_1.Unmaker(state);
+        for (let i = 0; i < 25; i++) {
+            const checkpointPointer = unmaker.getPointer();
+            const checkpointUnActions = unmaker.numberOfUnActions;
+            unmaker.setCheckpoint();
+            state.update({ type: const_1.ACTION_POWER, source: lavaAq, power: firestorm, player: PLAYER });
+            const target = state.getZone(const_1.ZONE_TYPE_IN_PLAY).byId(arbolit.id);
+            expect(target).toBeTruthy();
+            state.update({
+                type: const_1.ACTION_RESOLVE_PROMPT,
+                target,
+                generatedBy: state.state.promptGeneratedBy,
+                player: PLAYER,
+            });
+            const branchExpansion = unmaker.numberOfUnActions - checkpointUnActions;
+            expect(branchExpansion).toBeGreaterThan(6);
+            unmaker.revertToCheckpoint();
+            expect(unmaker.getPointer()).toBe(checkpointPointer);
+            expect(unmaker.numberOfUnActions).toBe(checkpointUnActions);
+            const after = normalizePromptType(state.serializeData(PLAYER, false));
+            expect(after).toEqual(before);
+        }
+    });
+    it('does not leak unmake storage after revert as Firestorm hits more non-Cald cards', () => {
+        const runScenario = (extraOppCreatures) => {
+            const lavaAq = new CardInGame_1.default((0, cards_1.byName)('Lava Aq'), PLAYER).addEnergy(6);
+            const arbolit = new CardInGame_1.default((0, cards_1.byName)('Arbolit'), PLAYER).addEnergy(2);
+            const weebo = new CardInGame_1.default((0, cards_1.byName)('Weebo'), OPPONENT).addEnergy(2);
+            const baseInPlay = [lavaAq, arbolit, weebo];
+            for (let i = 0; i < extraOppCreatures; i++) {
+                baseInPlay.push(new CardInGame_1.default((0, cards_1.byName)('Arboll'), OPPONENT).addEnergy(2));
+            }
+            const grega = new CardInGame_1.default((0, cards_1.byName)('Grega'), PLAYER).addEnergy(8);
+            const pruitt = new CardInGame_1.default((0, cards_1.byName)('Pruitt'), OPPONENT).addEnergy(8);
+            const state = makeState(STEP_PRS1, baseInPlay, [], [], grega, pruitt);
+            const firestorm = lavaAq.card.data.powers.find(p => p.name === 'Firestorm');
+            expect(firestorm).toBeTruthy();
+            const unmaker = new unmaker_1.Unmaker(state);
+            const beforePointer = unmaker.getPointer();
+            const beforeUnActions = unmaker.numberOfUnActions;
+            const beforeObjects = unmaker.objects.length;
+            const beforeStrings = unmaker.strings.length;
+            unmaker.setCheckpoint();
+            state.update({ type: const_1.ACTION_POWER, source: lavaAq, power: firestorm, player: PLAYER });
+            const target = state.getZone(const_1.ZONE_TYPE_IN_PLAY).byId(arbolit.id);
+            expect(target).toBeTruthy();
+            state.update({
+                type: const_1.ACTION_RESOLVE_PROMPT,
+                target,
+                generatedBy: state.state.promptGeneratedBy,
+                player: PLAYER,
+            });
+            const actionDelta = unmaker.numberOfUnActions - beforeUnActions;
+            const pointerDelta = unmaker.getPointer() - beforePointer;
+            unmaker.revertToCheckpoint();
+            const postRevertPointerDelta = unmaker.getPointer() - beforePointer;
+            const postRevertActionDelta = unmaker.numberOfUnActions - beforeUnActions;
+            const postRevertObjectDelta = unmaker.objects.length - beforeObjects;
+            const postRevertStringDelta = unmaker.strings.length - beforeStrings;
+            expect(postRevertPointerDelta).toBe(0);
+            expect(postRevertActionDelta).toBe(0);
+            expect(postRevertObjectDelta).toBe(0);
+            expect(postRevertStringDelta).toBe(0);
+            return {
+                actionDelta,
+                pointerDelta,
+                postRevertActionDelta,
+                postRevertPointerDelta,
+                postRevertObjectDelta,
+                postRevertStringDelta,
+            };
+        };
+        const smallBoard = runScenario(0);
+        const largeBoard = runScenario(4);
+        expect(largeBoard.actionDelta).toBeGreaterThan(smallBoard.actionDelta);
+        expect(largeBoard.pointerDelta).toBeGreaterThanOrEqual(smallBoard.pointerDelta);
+        expect(largeBoard.postRevertActionDelta).toBe(0);
+        expect(largeBoard.postRevertPointerDelta).toBe(0);
+        expect(largeBoard.postRevertObjectDelta).toBe(0);
+        expect(largeBoard.postRevertStringDelta).toBe(0);
+    });
+});
+// ---------------------------------------------------------------------------
+// Engine regression signal – stale move target id
+//   Reproduces the deterministic failure where a move action references a card
+//   id that is not present in the declared source zone.
+// ---------------------------------------------------------------------------
+describe.only('Engine invariant - MOVE_CARD_BETWEEN_ZONES with stale source id', () => {
+    it('throws MOVE_ZONE_MISSING_SOURCE and does not clone card into destination', () => {
+        const grega = new CardInGame_1.default((0, cards_1.byName)('Grega'), PLAYER).addEnergy(12);
+        const sinder = new CardInGame_1.default((0, cards_1.byName)('Sinder'), OPPONENT).addEnergy(8);
+        const handFogBank = new CardInGame_1.default((0, cards_1.byName)('Fog Bank'), PLAYER);
+        const staleFogBank = new CardInGame_1.default((0, cards_1.byName)('Fog Bank'), PLAYER);
+        const state = makeState(STEP_PRS1, [], [handFogBank], [], grega, sinder);
+        const handBefore = state.getZone(const_1.ZONE_TYPE_HAND, PLAYER).cards.map((card) => card.id);
+        const inPlayBefore = state.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.map((card) => card.id);
+        expect(() => state.update({
+            type: const_1.ACTION_EFFECT,
+            effectType: const_1.EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+            target: staleFogBank,
+            sourceZone: const_1.ZONE_TYPE_HAND,
+            destinationZone: const_1.ZONE_TYPE_IN_PLAY,
+            generatedBy: staleFogBank.id,
+            bottom: false,
+        })).toThrow('[MOVE_ZONE_MISSING_SOURCE]');
+        const handAfter = state.getZone(const_1.ZONE_TYPE_HAND, PLAYER).cards.map((card) => card.id);
+        const inPlayAfter = state.getZone(const_1.ZONE_TYPE_IN_PLAY).cards.map((card) => card.id);
+        expect(handAfter).toEqual(handBefore);
+        expect(inPlayAfter).toEqual(inPlayBefore);
+        expect(state.getZone(const_1.ZONE_TYPE_HAND, PLAYER).containsId(handFogBank.id)).toBe(true);
+        expect(state.getZone(const_1.ZONE_TYPE_IN_PLAY).containsId(staleFogBank.id)).toBe(false);
+    });
+    it('keeps Unmaker checkpoint revert safe after stale move throw', () => {
+        const grega = new CardInGame_1.default((0, cards_1.byName)('Grega'), PLAYER).addEnergy(12);
+        const sinder = new CardInGame_1.default((0, cards_1.byName)('Sinder'), OPPONENT).addEnergy(8);
+        const handFogBank = new CardInGame_1.default((0, cards_1.byName)('Fog Bank'), PLAYER);
+        const staleFogBank = new CardInGame_1.default((0, cards_1.byName)('Fog Bank'), PLAYER);
+        const state = makeState(STEP_PRS1, [], [handFogBank], [], grega, sinder);
+        const before = snapshot(state);
+        const unmaker = new unmaker_1.Unmaker(state);
+        unmaker.setCheckpoint();
+        const checkpointPointer = unmaker.getPointer();
+        const checkpointUnActions = unmaker.numberOfUnActions;
+        expect(() => state.update({
+            type: const_1.ACTION_EFFECT,
+            effectType: const_1.EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+            target: staleFogBank,
+            sourceZone: const_1.ZONE_TYPE_HAND,
+            destinationZone: const_1.ZONE_TYPE_IN_PLAY,
+            generatedBy: staleFogBank.id,
+            bottom: false,
+        })).toThrow('[MOVE_ZONE_MISSING_SOURCE]');
+        expect(() => unmaker.revertToCheckpoint()).not.toThrow();
+        expect(unmaker.getPointer()).toBe(checkpointPointer);
+        expect(unmaker.numberOfUnActions).toBe(checkpointUnActions);
+        expect(snapshot(state)).toBe(before);
+    });
+    it.only('Playing Fog Bank and then reverting to checkpoint breaks the state', () => {
+        const ora = new CardInGame_1.default((0, cards_1.byName)('Ora'), PLAYER).addEnergy(12);
+        const sinder = new CardInGame_1.default((0, cards_1.byName)('Sinder'), OPPONENT).addEnergy(8);
+        const fogBank = new CardInGame_1.default((0, cards_1.byName)('Fog Bank'), PLAYER);
+        const vellup = new CardInGame_1.default((0, cards_1.byName)('Vellup'), PLAYER).addEnergy(1);
+        const fogBank2 = new CardInGame_1.default((0, cards_1.byName)('Fog Bank'), PLAYER);
+        const vellup2 = new CardInGame_1.default((0, cards_1.byName)('Vellup'), PLAYER);
+        vellup.data.energyLostThisTurn = 2;
+        const state = makeState(STEP_PRS1, [vellup], [fogBank2, vellup2, fogBank], [], ora, sinder);
+        const before = snapshot(state);
+        const unmaker = new unmaker_1.Unmaker(state);
+        unmaker.setCheckpoint();
+        const checkpointPointer = unmaker.getPointer();
+        const checkpointUnActions = unmaker.numberOfUnActions;
+        expect(() => state.update({
+            type: const_1.ACTION_PLAY,
+            payload: { card: fogBank, player: PLAYER },
+        })).not.toThrow();
+        const before2 = snapshot(state);
+        unmaker.setCheckpoint();
+        expect(() => state.update({
+            type: const_1.ACTION_RESOLVE_PROMPT,
+            target: vellup,
+            generatedBy: state.state.promptGeneratedBy,
+            player: PLAYER,
+        })).not.toThrow();
+        expect(() => unmaker.revertToCheckpoint()).not.toThrow();
+        expect(snapshot(state)).toBe(before2);
+        expect(() => unmaker.revertToCheckpoint()).not.toThrow();
+        expect(unmaker.getPointer()).toBe(checkpointPointer);
+        expect(unmaker.numberOfUnActions).toBe(checkpointUnActions);
         expect(snapshot(state)).toBe(before);
     });
 });

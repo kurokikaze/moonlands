@@ -113,6 +113,9 @@ class Unmaker {
             }
         }
     }*/
+    getPointer() {
+        return this.pointer;
+    }
     revertToCheckpoint() {
         if (this.historyStack.length) {
             const target = this.historyStack.pop();
@@ -376,6 +379,8 @@ class Unmaker {
                             const destinationZoneType = this.state.getMetaValue(action.destinationZone, action.generatedBy);
                             const sourceZone = this.state.getZone(sourceZoneType, sourceZoneType === index_1.ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
                             const position = sourceZone.cards.findIndex(card => card.id === zoneChangingCard.id);
+                            // Uint16Array cannot represent -1; encode "not found" as 0 and real indices as index + 1.
+                            const encodedPosition = position + 1;
                             // Capture the current spellMetaData values that will be modified
                             const metaDataEntries = [];
                             if (action.generatedBy) {
@@ -394,7 +399,7 @@ class Unmaker {
                             });
                             this.saveObject(metaDataEntries, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/metaDataEntries');
                             this.saveNumber(action.bottom ? 1 : 0, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/bottom');
-                            this.saveNumber(position, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/position');
+                            this.saveNumber(encodedPosition, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/position');
                             this.saveString(destinationZoneType, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/destinationZoneType');
                             this.saveNumber(zoneChangingCard.owner, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/cardOwner');
                             this.saveString(sourceZoneType, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/sourceZoneType');
@@ -829,17 +834,19 @@ class Unmaker {
                         };
                     }
                     case index_1.EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
-                        const energyArrangement = this.state.getMetaValue(action.energyOnCreatures, action.generatedBy);
-                        const affectedCreatureIds = Object.keys(energyArrangement);
                         const inPlay = this.state.getZone(index_1.ZONE_TYPE_IN_PLAY);
                         const creatures = [];
-                        for (const creatureId of affectedCreatureIds) {
-                            const creature = inPlay.byId(creatureId);
-                            if (creature) {
-                                creatures.push({
-                                    id: creature.id,
-                                    energy: creature.data.energy,
-                                });
+                        const energyArrangement = this.state.getMetaValue(action.energyOnCreatures, action.generatedBy);
+                        if (energyArrangement) {
+                            const affectedCreatureIds = Object.keys(energyArrangement);
+                            for (const creatureId of affectedCreatureIds) {
+                                const creature = inPlay.byId(creatureId);
+                                if (creature) {
+                                    creatures.push({
+                                        id: creature.id,
+                                        energy: creature.data.energy,
+                                    });
+                                }
                             }
                         }
                         this.saveObject(creatures, 'EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES/creatures');
@@ -972,7 +979,8 @@ class Unmaker {
                 state.state.prompt = prompt;
                 state.state.promptMessage = promptMessage;
                 state.state.promptPlayer = promptPlayer;
-                state.state.promptType = promptType;
+                // Empty string is used to represent null for promptType, so we convert it back to null here
+                state.state.promptType = promptType == '' ? null : promptType;
                 state.state.promptVariable = promptVariable;
                 state.state.promptGeneratedBy = promptGeneratedBy;
                 state.state.promptParams = promptParams;
@@ -1005,17 +1013,22 @@ class Unmaker {
                 const sourceZone = state.getZone(sourceZoneType, sourceZoneType === index_1.ZONE_TYPE_IN_PLAY ? null : zoneOwner);
                 // Remove the newly-created copies from destination (added to top one at a time)
                 for (let i = 0; i < cardsWithPositions.length; i++) {
-                    if (bottom) {
-                        destZone.cards.pop();
-                    }
-                    else {
-                        destZone.cards.shift();
+                    const removedCard = bottom ? destZone.cards.pop() : destZone.cards.shift();
+                    if (removedCard) {
+                        const attachmentTargetId = state.state.attachedTo[removedCard.id];
+                        state.detachCard(removedCard.id);
+                        if (attachmentTargetId && state.state.cardsAttached[attachmentTargetId]?.length === 0) {
+                            delete state.state.cardsAttached[attachmentTargetId];
+                        }
+                        state.removeAttachments(removedCard.id);
                     }
                 }
                 // Re-insert original cards at their original positions (ascending order preserves positions)
                 const sortedByPosition = [...cardsWithPositions].sort((a, b) => a.position - b.position);
                 for (const { card, position } of sortedByPosition) {
-                    sourceZone.cards.splice(position, 0, card);
+                    if (position >= 0) {
+                        sourceZone.cards.splice(position, 0, card);
+                    }
                 }
                 for (const entry of metaDataEntries) {
                     if (entry.previousValue === undefined) {
@@ -1035,20 +1048,26 @@ class Unmaker {
                 const sourceZoneType = this.readString('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/sourceZoneType');
                 const cardOwner = this.readNumber('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/cardOwner');
                 const destinationZoneType = this.readString('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/destinationZoneType');
-                const position = this.readNumber('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/position');
+                const encodedPosition = this.readNumber('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/position');
+                const position = encodedPosition - 1;
                 const bottom = this.readNumber('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/bottom') == 1;
                 const metaDataEntries = this.readObject('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/metaDataEntries');
                 const destZone = state.getZone(destinationZoneType, destinationZoneType === index_1.ZONE_TYPE_IN_PLAY ? null : cardOwner);
                 const sourceZone = state.getZone(sourceZoneType, sourceZoneType === index_1.ZONE_TYPE_IN_PLAY ? null : cardOwner);
                 // Remove the new card from destination zone
-                if (bottom) {
-                    destZone.cards.pop();
+                const removedCard = bottom ? destZone.cards.pop() : destZone.cards.shift();
+                if (removedCard) {
+                    const attachmentTargetId = state.state.attachedTo[removedCard.id];
+                    state.detachCard(removedCard.id);
+                    if (attachmentTargetId && state.state.cardsAttached[attachmentTargetId]?.length === 0) {
+                        delete state.state.cardsAttached[attachmentTargetId];
+                    }
+                    state.removeAttachments(removedCard.id);
                 }
-                else {
-                    destZone.cards.shift();
+                // Re-add original card only if it existed in the declared source zone.
+                if (position >= 0) {
+                    sourceZone.cards.splice(position, 0, zoneChangingCard);
                 }
-                // Re-add original card at its original position in source zone
-                sourceZone.cards.splice(position, 0, zoneChangingCard);
                 // Restore spellMetaData fields to their previous values
                 for (const entry of metaDataEntries) {
                     // const currentMeta = state.getSpellMetadata(entry.spellId)

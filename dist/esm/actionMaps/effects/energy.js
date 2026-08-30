@@ -156,10 +156,12 @@ export var applyDiscardEnergyFromCreatureOrMagiEffect = function (action, transf
 export var applyDiscardEnergyFromMagiEffect = function (action, transform) {
     var _this = this;
     oneOrSeveral(this.getMetaValue(action.target, action.generatedBy), function (target) {
-        var energyToRemove = Math.min(_this.getMetaValue(action.amount, action.generatedBy), target.data.energy);
-        target.removeEnergy(energyToRemove);
-        if (energyToRemove > 0) {
-            transform(__assign(__assign({}, action), { effectType: EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI, amount: energyToRemove }));
+        if (target) {
+            var energyToRemove = Math.min(_this.getMetaValue(action.amount, action.generatedBy), target.data.energy);
+            target.removeEnergy(energyToRemove);
+            if (energyToRemove > 0) {
+                transform(__assign(__assign({}, action), { effectType: EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI, amount: energyToRemove }));
+            }
         }
     });
 };

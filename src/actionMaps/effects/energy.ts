@@ -209,14 +209,16 @@ export const applyDiscardEnergyFromMagiEffect: ActionTransformer<typeof EFFECT_T
   oneOrSeveral(
     this.getMetaValue(action.target, action.generatedBy),
     target => {
-      const energyToRemove = Math.min(this.getMetaValue(action.amount, action.generatedBy), target.data.energy);
-      target.removeEnergy(energyToRemove);
-      if (energyToRemove > 0) {
-        transform({
-          ...action,
-          effectType: EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
-          amount: energyToRemove,
-        });
+      if (target) {
+        const energyToRemove = Math.min(this.getMetaValue(action.amount, action.generatedBy), target.data.energy);
+        target.removeEnergy(energyToRemove);
+        if (energyToRemove > 0) {
+          transform({
+            ...action,
+            effectType: EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
+            amount: energyToRemove,
+          });
+        }
       }
     },
   );
