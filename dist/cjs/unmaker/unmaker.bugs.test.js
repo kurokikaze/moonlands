@@ -525,7 +525,7 @@ describe.only('Engine invariant - MOVE_CARD_BETWEEN_ZONES with stale source id',
         expect(unmaker.numberOfUnActions).toBe(checkpointUnActions);
         expect(snapshot(state)).toBe(before);
     });
-    it.only('Arbolit Healing Flame is not rolled back correctly', () => {
+    it('Arbolit Healing Flame is not rolled back correctly', () => {
         const ora = new CardInGame_1.default((0, cards_1.byName)('Ora'), PLAYER).addEnergy(12);
         const sinder = new CardInGame_1.default((0, cards_1.byName)('Sinder'), OPPONENT).addEnergy(8);
         const arbolit = new CardInGame_1.default((0, cards_1.byName)('Arbolit'), PLAYER).addEnergy(5);
@@ -550,6 +550,39 @@ describe.only('Engine invariant - MOVE_CARD_BETWEEN_ZONES with stale source id',
         expect(() => state.update({
             type: const_1.ACTION_RESOLVE_PROMPT,
             target: arbolit,
+            generatedBy: state.state.promptGeneratedBy,
+            player: PLAYER,
+        })).not.toThrow();
+        expect(() => unmaker.revertToCheckpoint()).not.toThrow();
+        expect(snapshot(state)).toBe(before2);
+        expect(() => unmaker.revertToCheckpoint()).not.toThrow();
+        expect(unmaker.getPointer()).toBe(checkpointPointer);
+        expect(unmaker.numberOfUnActions).toBe(checkpointUnActions);
+        expect(snapshot(state)).toBe(before);
+    });
+    it.only('Fog Bank attachment', () => {
+        const ora = new CardInGame_1.default((0, cards_1.byName)('Ora'), PLAYER).addEnergy(12);
+        const sinder = new CardInGame_1.default((0, cards_1.byName)('Sinder'), OPPONENT).addEnergy(8);
+        const fogBank = new CardInGame_1.default((0, cards_1.byName)('Fog Bank'), PLAYER).addEnergy(5);
+        const vellup = new CardInGame_1.default((0, cards_1.byName)('Vellup'), PLAYER).addEnergy(3);
+        vellup.data.energyLostThisTurn = 2;
+        const state = makeState(STEP_PRS1, [vellup], [fogBank], [], ora, sinder);
+        state.enableDebug();
+        const before = snapshot(state);
+        const unmaker = new unmaker_1.Unmaker(state);
+        unmaker.setCheckpoint();
+        const checkpointPointer = unmaker.getPointer();
+        const checkpointUnActions = unmaker.numberOfUnActions;
+        expect(() => state.update({
+            type: const_1.ACTION_PLAY,
+            payload: { card: fogBank, player: PLAYER },
+            player: PLAYER,
+        })).not.toThrow();
+        const before2 = snapshot(state);
+        unmaker.setCheckpoint();
+        expect(() => state.update({
+            type: const_1.ACTION_RESOLVE_PROMPT,
+            target: vellup,
             generatedBy: state.state.promptGeneratedBy,
             player: PLAYER,
         })).not.toThrow();

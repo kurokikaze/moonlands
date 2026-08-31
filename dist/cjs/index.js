@@ -1081,6 +1081,9 @@ class State {
             delete this.state.attachedTo[cardId];
             this.state.cardsAttached[attachedTargetId] =
                 this.state.cardsAttached[attachedTargetId].filter(attachedCard => attachedCard !== cardId);
+            if (this.state.cardsAttached[attachedTargetId].length === 0) {
+                delete this.state.cardsAttached[attachedTargetId];
+            }
         }
     }
     performCalculation(operator, operandOne, operandTwo) {

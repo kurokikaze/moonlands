@@ -18,7 +18,7 @@ export declare class Unmaker {
     outputDebug(): void;
     getPointer(): number;
     revertToCheckpoint(): void;
-    private dataTags;
+    dataTags: string[];
     private saveNumber;
     private saveActionType;
     private readNumber;

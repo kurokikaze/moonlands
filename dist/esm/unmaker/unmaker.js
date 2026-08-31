@@ -61,6 +61,7 @@ var actionNames = {
     36: 'UNMAKE_POWER_ACTIVATION',
     37: 'UNMAKE_EFFECT_TYPE_PLAYER_WINS',
     38: 'UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES',
+    39: 'UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD',
 };
 var Unmaker = /** @class */ (function () {
     function Unmaker(state, blobSize) {
@@ -82,10 +83,10 @@ var Unmaker = /** @class */ (function () {
             this.dataBlob = new Uint16Array(this.blobSize);
         }
         this.state.setOnAction(function (action) {
-            var unAction = _this.generateUnAction(action);
-            if (unAction) {
-                _this.unActions.push(unAction);
-            }
+            _this.generateUnAction(action);
+            /*if (unAction) {
+                this.unActions.push(unAction)
+            }*/
         }, true);
     }
     /*public setCheckpointOld() {
@@ -139,7 +140,7 @@ var Unmaker = /** @class */ (function () {
             if (typeof target !== 'number' || target > this.numberOfUnActions) {
                 console.error("Target: ".concat(target));
                 console.error("Actions: ".concat(this.numberOfUnActions));
-                throw new Error();
+                throw new Error('Invalid checkpoint target');
             }
             var numberOfSteps = this.numberOfUnActions - target;
             for (var i = 0; i < numberOfSteps; i++) {
@@ -168,6 +169,7 @@ var Unmaker = /** @class */ (function () {
         }
     };
     Unmaker.prototype.saveNumber = function (n, tag) {
+        // console.log(`Writing number ${tag}`)
         if (this.pointer > this.blobSize - 1) {
             throw new Error("Data blob overflow: pointer ".concat(this.pointer, " exceeds blob size ").concat(this.blobSize));
         }
@@ -180,6 +182,7 @@ var Unmaker = /** @class */ (function () {
         this.numberOfUnActions++;
     };
     Unmaker.prototype.readNumber = function (expectedTag) {
+        // console.log(`Reading number ${expectedTag}`)
         var tag = this.dataTags.pop();
         if (tag != expectedTag) {
             throw new Error("Expected tag ".concat(expectedTag, " but found ").concat(tag));
@@ -1598,6 +1601,16 @@ var Unmaker = /** @class */ (function () {
                 }
                 break;
             }
+            case UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD: {
+                var previousAttachment = this.readObject('EFFECT_TYPE_ATTACH_CARD_TO_CARD/previousAttachment');
+                var attachmentTargetId = this.readString('EFFECT_TYPE_ATTACH_CARD_TO_CARD/attachmentTargetId');
+                var targetId = this.readString('EFFECT_TYPE_ATTACH_CARD_TO_CARD/targetId');
+                this.state.detachCard(targetId);
+                if (previousAttachment) {
+                    this.state.attachCard(previousAttachment, targetId);
+                }
+                break;
+            }
         }
         this.numberOfUnActions--;
     };
@@ -2005,6 +2018,7 @@ var Unmaker = /** @class */ (function () {
                 if (previousAttachment) {
                     this.state.attachCard(previousAttachment, targetId);
                 }
+                break;
             }
         }
     };

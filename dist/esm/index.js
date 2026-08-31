@@ -962,6 +962,9 @@ var State = /** @class */ (function () {
             delete this.state.attachedTo[cardId];
             this.state.cardsAttached[attachedTargetId] =
                 this.state.cardsAttached[attachedTargetId].filter(function (attachedCard) { return attachedCard !== cardId; });
+            if (this.state.cardsAttached[attachedTargetId].length === 0) {
+                delete this.state.cardsAttached[attachedTargetId];
+            }
         }
     };
     State.prototype.performCalculation = function (operator, operandOne, operandTwo) {

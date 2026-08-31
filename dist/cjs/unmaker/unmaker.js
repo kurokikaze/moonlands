@@ -47,6 +47,7 @@ const actionNames = {
     36: 'UNMAKE_POWER_ACTIVATION',
     37: 'UNMAKE_EFFECT_TYPE_PLAYER_WINS',
     38: 'UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES',
+    39: 'UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD',
 };
 class Unmaker {
     state;
@@ -67,10 +68,10 @@ class Unmaker {
             this.dataBlob = new Uint16Array(this.blobSize);
         }
         this.state.setOnAction(action => {
-            const unAction = this.generateUnAction(action);
-            if (unAction) {
-                this.unActions.push(unAction);
-            }
+            this.generateUnAction(action);
+            /*if (unAction) {
+                this.unActions.push(unAction)
+            }*/
         }, true);
     }
     /*public setCheckpointOld() {
@@ -122,7 +123,7 @@ class Unmaker {
             if (typeof target !== 'number' || target > this.numberOfUnActions) {
                 console.error(`Target: ${target}`);
                 console.error(`Actions: ${this.numberOfUnActions}`);
-                throw new Error();
+                throw new Error('Invalid checkpoint target');
             }
             const numberOfSteps = this.numberOfUnActions - target;
             for (let i = 0; i < numberOfSteps; i++) {
@@ -152,6 +153,7 @@ class Unmaker {
     }
     dataTags = [];
     saveNumber(n, tag) {
+        // console.log(`Writing number ${tag}`)
         if (this.pointer > this.blobSize - 1) {
             throw new Error(`Data blob overflow: pointer ${this.pointer} exceeds blob size ${this.blobSize}`);
         }
@@ -164,6 +166,7 @@ class Unmaker {
         this.numberOfUnActions++;
     }
     readNumber(expectedTag) {
+        // console.log(`Reading number ${expectedTag}`)
         const tag = this.dataTags.pop();
         if (tag != expectedTag) {
             throw new Error(`Expected tag ${expectedTag} but found ${tag}`);
@@ -1559,6 +1562,16 @@ class Unmaker {
                 }
                 break;
             }
+            case types_1.UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD: {
+                const previousAttachment = this.readObject('EFFECT_TYPE_ATTACH_CARD_TO_CARD/previousAttachment');
+                const attachmentTargetId = this.readString('EFFECT_TYPE_ATTACH_CARD_TO_CARD/attachmentTargetId');
+                const targetId = this.readString('EFFECT_TYPE_ATTACH_CARD_TO_CARD/targetId');
+                this.state.detachCard(targetId);
+                if (previousAttachment) {
+                    this.state.attachCard(previousAttachment, targetId);
+                }
+                break;
+            }
         }
         this.numberOfUnActions--;
     }
@@ -1956,6 +1969,7 @@ class Unmaker {
                 if (previousAttachment) {
                     this.state.attachCard(previousAttachment, targetId);
                 }
+                break;
             }
         }
     }
