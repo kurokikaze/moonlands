@@ -560,7 +560,7 @@ describe.only('Engine invariant - MOVE_CARD_BETWEEN_ZONES with stale source id',
         expect(unmaker.numberOfUnActions).toBe(checkpointUnActions);
         expect(snapshot(state)).toBe(before);
     });
-    it.only('Fog Bank attachment', () => {
+    it('Fog Bank attachment', () => {
         const ora = new CardInGame_1.default((0, cards_1.byName)('Ora'), PLAYER).addEnergy(12);
         const sinder = new CardInGame_1.default((0, cards_1.byName)('Sinder'), OPPONENT).addEnergy(8);
         const fogBank = new CardInGame_1.default((0, cards_1.byName)('Fog Bank'), PLAYER).addEnergy(5);
@@ -591,6 +591,42 @@ describe.only('Engine invariant - MOVE_CARD_BETWEEN_ZONES with stale source id',
         expect(() => unmaker.revertToCheckpoint()).not.toThrow();
         expect(unmaker.getPointer()).toBe(checkpointPointer);
         expect(unmaker.numberOfUnActions).toBe(checkpointUnActions);
+        expect(snapshot(state)).toBe(before);
+    });
+    it.only('Attack with the card attached', () => {
+        const ora = new CardInGame_1.default((0, cards_1.byName)('Ora'), PLAYER).addEnergy(12);
+        const sinder = new CardInGame_1.default((0, cards_1.byName)('Sinder'), OPPONENT).addEnergy(8);
+        const fogBank = new CardInGame_1.default((0, cards_1.byName)('Fog Bank'), PLAYER).addEnergy(5);
+        const flameHyren = new CardInGame_1.default((0, cards_1.byName)('Flame Hyren'), OPPONENT).addEnergy(15);
+        const vellup = new CardInGame_1.default((0, cards_1.byName)('Vellup'), PLAYER).addEnergy(3);
+        vellup.data.energyLostThisTurn = 2;
+        const state = makeState(STEP_PRS1, [vellup, flameHyren], [fogBank], [], ora, sinder);
+        const unmaker = new unmaker_1.Unmaker(state);
+        unmaker.setCheckpoint();
+        expect(() => state.update({
+            type: const_1.ACTION_PLAY,
+            payload: { card: fogBank, player: PLAYER },
+            player: PLAYER,
+        })).not.toThrow();
+        expect(() => state.update({
+            type: const_1.ACTION_RESOLVE_PROMPT,
+            target: vellup,
+            generatedBy: state.state.promptGeneratedBy,
+            player: PLAYER,
+        })).not.toThrow();
+        expect(() => state.update({
+            type: const_1.ACTION_PASS,
+            player: PLAYER,
+        })).not.toThrow();
+        unmaker.setCheckpoint();
+        const before = snapshot(state);
+        expect(() => state.update({
+            type: const_1.ACTION_ATTACK,
+            source: vellup,
+            target: flameHyren,
+            player: PLAYER,
+        })).not.toThrow();
+        unmaker.revertToCheckpoint();
         expect(snapshot(state)).toBe(before);
     });
 });

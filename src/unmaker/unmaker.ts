@@ -164,7 +164,6 @@ export class Unmaker {
     public dataTags: string[] = [];
 
     private saveNumber(n: number, tag: string) {
-        // console.log(`Writing number ${tag}`)
         if (this.pointer > this.blobSize - 1) {
             throw new Error(`Data blob overflow: pointer ${this.pointer} exceeds blob size ${this.blobSize}`)
         }
@@ -179,7 +178,6 @@ export class Unmaker {
     }
 
     private readNumber(expectedTag: string): number {
-        // console.log(`Reading number ${expectedTag}`)
         const tag = this.dataTags.pop()
         if (tag != expectedTag) {
             throw new Error(`Expected tag ${expectedTag} but found ${tag}`)
@@ -427,7 +425,9 @@ export class Unmaker {
                                 field: 'new_card',
                                 previousValue: cardIdMeta?.new_card,
                             })
+                            const attachedCards = zoneChangingCard.id in this.state.state.cardsAttached ? [...this.state.state.cardsAttached[zoneChangingCard.id]] : null
 
+                            this.saveObject(attachedCards, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/attachedCards')
                             this.saveObject(metaDataEntries, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/metaDataEntries')
                             this.saveNumber(action.bottom ? 1 : 0, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/bottom')
                             this.saveNumber(encodedPosition, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/position')
@@ -461,6 +461,7 @@ export class Unmaker {
                         const cardsWithPositions = targets.map((card: CardInGame) => ({
                             card,
                             position: sourceZone.cards.findIndex((c: CardInGame) => c.id === card.id),
+                            attachedCards: [...this.state.state.cardsAttached[card.id] || []],
                         }))
 
                         const metaDataEntries: { spellId: string, field: string, previousValue: any }[] = targets.map((card: CardInGame) => ({
@@ -474,6 +475,7 @@ export class Unmaker {
                             previousValue: (this.state.getSpellMetadata(action.generatedBy) as any)?.new_cards,
                         })
 
+                        const attachments = [...this.state.state.cardsAttached[action.generatedBy]]
                         this.saveObject(metaDataEntries, 'EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/metaDataEntries')
                         this.saveNumber(action.bottom ? 1 : 0, 'EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/bottom')
                         this.saveString(destZoneType, 'EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/destZoneType')
@@ -1113,6 +1115,7 @@ export class Unmaker {
                 if (sourceZoneType === ZONE_TYPE_IN_PLAY || destZoneType === ZONE_TYPE_IN_PLAY) {
                     state.clearModifiedCardDataCache()
                 }
+
                 break;
             }
             case UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES: {
@@ -1124,6 +1127,7 @@ export class Unmaker {
                 const position = encodedPosition - 1
                 const bottom = this.readNumber('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/bottom') == 1
                 const metaDataEntries = this.readObject<{ spellId: string, field: string, previousValue: any }[]>('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/metaDataEntries')
+                const attachedCards = this.readObject<string[] | null>('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/attachedCards')
 
                 const destZone = state.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : cardOwner)
                 const sourceZone = state.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : cardOwner)
@@ -1142,6 +1146,11 @@ export class Unmaker {
                     sourceZone.cards.splice(position, 0, zoneChangingCard)
                 }
 
+                if (attachedCards) {
+                    for (const attachedCardId of attachedCards) {
+                        state.attachCard(attachedCardId, zoneChangingCard.id)
+                    }
+                }
                 // Restore spellMetaData fields to their previous values
                 for (const entry of metaDataEntries) {
                     // const currentMeta = state.getSpellMetadata(entry.spellId)

@@ -153,7 +153,6 @@ class Unmaker {
     }
     dataTags = [];
     saveNumber(n, tag) {
-        // console.log(`Writing number ${tag}`)
         if (this.pointer > this.blobSize - 1) {
             throw new Error(`Data blob overflow: pointer ${this.pointer} exceeds blob size ${this.blobSize}`);
         }
@@ -166,7 +165,6 @@ class Unmaker {
         this.numberOfUnActions++;
     }
     readNumber(expectedTag) {
-        // console.log(`Reading number ${expectedTag}`)
         const tag = this.dataTags.pop();
         if (tag != expectedTag) {
             throw new Error(`Expected tag ${expectedTag} but found ${tag}`);
@@ -411,6 +409,8 @@ class Unmaker {
                                 field: 'new_card',
                                 previousValue: cardIdMeta?.new_card,
                             });
+                            const attachedCards = zoneChangingCard.id in this.state.state.cardsAttached ? [...this.state.state.cardsAttached[zoneChangingCard.id]] : null;
+                            this.saveObject(attachedCards, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/attachedCards');
                             this.saveObject(metaDataEntries, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/metaDataEntries');
                             this.saveNumber(action.bottom ? 1 : 0, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/bottom');
                             this.saveNumber(encodedPosition, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/position');
@@ -443,6 +443,7 @@ class Unmaker {
                         const cardsWithPositions = targets.map((card) => ({
                             card,
                             position: sourceZone.cards.findIndex((c) => c.id === card.id),
+                            attachedCards: [...this.state.state.cardsAttached[card.id] || []],
                         }));
                         const metaDataEntries = targets.map((card) => ({
                             spellId: card.id,
@@ -454,6 +455,7 @@ class Unmaker {
                             field: 'new_cards',
                             previousValue: this.state.getSpellMetadata(action.generatedBy)?.new_cards,
                         });
+                        const attachments = [...this.state.state.cardsAttached[action.generatedBy]];
                         this.saveObject(metaDataEntries, 'EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/metaDataEntries');
                         this.saveNumber(action.bottom ? 1 : 0, 'EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/bottom');
                         this.saveString(destZoneType, 'EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/destZoneType');
@@ -1088,6 +1090,7 @@ class Unmaker {
                 const position = encodedPosition - 1;
                 const bottom = this.readNumber('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/bottom') == 1;
                 const metaDataEntries = this.readObject('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/metaDataEntries');
+                const attachedCards = this.readObject('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/attachedCards');
                 const destZone = state.getZone(destinationZoneType, destinationZoneType === index_1.ZONE_TYPE_IN_PLAY ? null : cardOwner);
                 const sourceZone = state.getZone(sourceZoneType, sourceZoneType === index_1.ZONE_TYPE_IN_PLAY ? null : cardOwner);
                 // Remove the new card from destination zone
@@ -1103,6 +1106,11 @@ class Unmaker {
                 // Re-add original card only if it existed in the declared source zone.
                 if (position >= 0) {
                     sourceZone.cards.splice(position, 0, zoneChangingCard);
+                }
+                if (attachedCards) {
+                    for (const attachedCardId of attachedCards) {
+                        state.attachCard(attachedCardId, zoneChangingCard.id);
+                    }
                 }
                 // Restore spellMetaData fields to their previous values
                 for (const entry of metaDataEntries) {
