@@ -230,6 +230,7 @@ export class Unmaker {
                 const variable = this.state.state.promptVariable as string || DEFAULT_PROMPT_VARIABLE[this.state.state.promptType as PromptTypeType] || 'promptResult';
                 const oldMetaData = this.state.getSpellMetadata(generatedBy)[variable]
                 this.saveObject(oldMetaData, 'promptOldMetaData')
+                this.saveString(variable, 'promptVariable')
                 this.saveNumber(this.state.state.promptPlayer as number, 'promptPlayer')
                 this.saveObject([...this.state.state.savedActions], 'savedActions')
                 this.saveObject(this.state.state.promptParams, 'promptParams')
@@ -1018,6 +1019,7 @@ export class Unmaker {
                 const promptParams = this.readObject<Object>('promptParams')
                 const savedActions = this.readObject<any[]>('savedActions')
                 const promptPlayer = this.readNumber('promptPlayer')
+                const promptVariable = this.readString('promptVariable')
                 const oldMetaData = this.readObject<Object>('promptOldMetaData')
 
                 state.state.prompt = true
@@ -1026,6 +1028,7 @@ export class Unmaker {
                 state.state.promptPlayer = promptPlayer
                 state.state.promptMessage = promptMessage
                 state.state.promptParams = promptParams
+                state.state.promptVariable = promptVariable
                 state.state.savedActions = savedActions
                 const variable = this.state.state.promptVariable as string || DEFAULT_PROMPT_VARIABLE[promptType] || 'promptResult'
                 if (oldMetaData == undefined) {

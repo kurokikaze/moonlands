@@ -230,18 +230,19 @@ class LogEngine {
                 }
                 // Log entries: 0 or 1 (1 for single-target and number prompts only)
                 case const_1.ACTION_RESOLVE_PROMPT: {
-                    if ((getPromptType() === const_1.PROMPT_TYPE_SINGLE_CREATURE ||
-                        getPromptType() === const_1.PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE ||
-                        getPromptType() === const_1.PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI ||
-                        getPromptType() === const_1.PROMPT_TYPE_OWN_SINGLE_CREATURE ||
-                        getPromptType() === const_1.PROMPT_TYPE_SINGLE_MAGI) && 'target' in action) {
+                    const promptType = getPromptType();
+                    if ((promptType === const_1.PROMPT_TYPE_SINGLE_CREATURE ||
+                        promptType === const_1.PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE ||
+                        promptType === const_1.PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI ||
+                        promptType === const_1.PROMPT_TYPE_OWN_SINGLE_CREATURE ||
+                        promptType === const_1.PROMPT_TYPE_SINGLE_MAGI) && 'target' in action) {
                         entries.push({
                             type: const_1.LOG_ENTRY_TARGETING,
                             card: action.target?.card?.name || 'unknown card',
                             player: action.player,
                         });
                     }
-                    if (getPromptType() === const_1.PROMPT_TYPE_NUMBER && 'number' in action) {
+                    if (promptType === const_1.PROMPT_TYPE_NUMBER && 'number' in action) {
                         entries.push({
                             type: const_1.LOG_ENTRY_NUMBER_CHOICE,
                             number: (typeof action.number === 'number') ? action.number : parseInt(action.number || '0', 10),

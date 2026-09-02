@@ -754,7 +754,7 @@ describe.only('Engine invariant - MOVE_CARD_BETWEEN_ZONES with stale source id',
         expect(snapshot(state)).toBe(before);
     });
 
-    it.only('Attack with the card attached', () => {
+    it('Attack with the card attached', () => {
         const ora = new CardInGame(byName('Ora') as Card, PLAYER).addEnergy(12);
         const sinder = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(8);
 
@@ -793,6 +793,42 @@ describe.only('Engine invariant - MOVE_CARD_BETWEEN_ZONES with stale source id',
 			type: ACTION_ATTACK,
 			source: vellup,
 			target: flameHyren,
+            player: PLAYER,
+        } as any)).not.toThrow();
+
+        unmaker.revertToCheckpoint();
+        expect(snapshot(state)).toBe(before);
+    });
+
+    it.only('Attack with the card attached', () => {
+        const ora = new CardInGame(byName('Ora') as Card, PLAYER).addEnergy(12);
+        const sinder = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(8);
+
+        const diobor = new CardInGame(byName('Diobor') as Card, PLAYER).addEnergy(6);
+        const flameHyren = new CardInGame(byName('Flame Hyren') as Card, OPPONENT).addEnergy(15);
+        const vellup = new CardInGame(byName('Vellup') as Card, PLAYER).addEnergy(3);
+        vellup.data.energyLostThisTurn = 2;
+
+        const state = makeState(STEP_PRS1, [vellup, flameHyren], [diobor], [], ora, sinder);
+
+        const unmaker = new Unmaker(state);
+        unmaker.setCheckpoint();
+
+        const dioborPower = diobor.card.data.powers?.find((p: any) => p.name === 'Fireball');
+        expect(() => state.update({
+            type: ACTION_POWER,
+            source: diobor,
+            power: dioborPower,
+            player: PLAYER,
+        } as any)).not.toThrow();
+
+        unmaker.setCheckpoint();
+        const before = snapshot(state);
+
+        expect(() => state.update({
+            type: ACTION_RESOLVE_PROMPT,
+            target: diobor,
+            generatedBy: (state.state as any).promptGeneratedBy,
             player: PLAYER,
         } as any)).not.toThrow();
 

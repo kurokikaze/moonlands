@@ -228,6 +228,7 @@ var Unmaker = /** @class */ (function () {
                 var variable = this.state.state.promptVariable || DEFAULT_PROMPT_VARIABLE[this.state.state.promptType] || 'promptResult';
                 var oldMetaData = this.state.getSpellMetadata(generatedBy)[variable];
                 this.saveObject(oldMetaData, 'promptOldMetaData');
+                this.saveString(variable, 'promptVariable');
                 this.saveNumber(this.state.state.promptPlayer, 'promptPlayer');
                 this.saveObject(__spreadArray([], this.state.state.savedActions, true), 'savedActions');
                 this.saveObject(this.state.state.promptParams, 'promptParams');
@@ -1017,6 +1018,7 @@ var Unmaker = /** @class */ (function () {
                 var promptParams = this.readObject('promptParams');
                 var savedActions = this.readObject('savedActions');
                 var promptPlayer = this.readNumber('promptPlayer');
+                var promptVariable = this.readString('promptVariable');
                 var oldMetaData = this.readObject('promptOldMetaData');
                 state.state.prompt = true;
                 state.state.promptType = promptType;
@@ -1024,6 +1026,7 @@ var Unmaker = /** @class */ (function () {
                 state.state.promptPlayer = promptPlayer;
                 state.state.promptMessage = promptMessage;
                 state.state.promptParams = promptParams;
+                state.state.promptVariable = promptVariable;
                 state.state.savedActions = savedActions;
                 var variable = this.state.state.promptVariable || DEFAULT_PROMPT_VARIABLE[promptType] || 'promptResult';
                 if (oldMetaData == undefined) {
