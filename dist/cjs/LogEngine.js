@@ -60,7 +60,7 @@ class LogEngine {
                             break;
                         }
                         // Log entries: 0 or 1
-                        case const_1.EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
+                        case const_1.EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE: {
                             const target = getMetaValue(action.target, action.generatedBy);
                             if (Array.isArray(target)) {
                                 if (target.length) {

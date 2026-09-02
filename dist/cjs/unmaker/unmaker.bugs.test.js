@@ -632,13 +632,27 @@ describe.only('Engine invariant - MOVE_CARD_BETWEEN_ZONES with stale source id',
     it.only('Attack with the card attached', () => {
         const ora = new CardInGame_1.default((0, cards_1.byName)('Ora'), PLAYER).addEnergy(12);
         const sinder = new CardInGame_1.default((0, cards_1.byName)('Sinder'), OPPONENT).addEnergy(8);
+        const arbolit = new CardInGame_1.default((0, cards_1.byName)('Arbolit'), PLAYER).addEnergy(3);
         const diobor = new CardInGame_1.default((0, cards_1.byName)('Diobor'), PLAYER).addEnergy(6);
         const flameHyren = new CardInGame_1.default((0, cards_1.byName)('Flame Hyren'), OPPONENT).addEnergy(15);
         const vellup = new CardInGame_1.default((0, cards_1.byName)('Vellup'), PLAYER).addEnergy(3);
         vellup.data.energyLostThisTurn = 2;
-        const state = makeState(STEP_PRS1, [vellup, flameHyren], [diobor], [], ora, sinder);
+        const state = makeState(STEP_PRS1, [vellup, flameHyren], [arbolit, diobor], [], ora, sinder);
         const unmaker = new unmaker_1.Unmaker(state);
         unmaker.setCheckpoint();
+        const arbolitPower = arbolit.card.data.powers?.find((p) => p.name === 'Healing Flame');
+        expect(() => state.update({
+            type: const_1.ACTION_POWER,
+            source: arbolit,
+            power: arbolitPower,
+            player: PLAYER,
+        })).not.toThrow();
+        expect(() => state.update({
+            type: const_1.ACTION_RESOLVE_PROMPT,
+            target: arbolit,
+            generatedBy: state.state.promptGeneratedBy,
+            player: PLAYER,
+        })).not.toThrow();
         const dioborPower = diobor.card.data.powers?.find((p) => p.name === 'Fireball');
         expect(() => state.update({
             type: const_1.ACTION_POWER,
