@@ -19,7 +19,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 import CardInGame from '../classes/CardInGame.js';
-import { ACTION_PLAY, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_DRAW, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, EFFECT_TYPE_ATTACH_CARD_TO_CARD } from '../const.js';
+import { ACTION_PLAY, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_DRAW, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, EFFECT_TYPE_ATTACH_CARD_TO_CARD, EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE } from '../const.js';
 import { ACTION_EFFECT, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_PROMPT_ENTERED, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_START_TURN, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_IN_PLAY, ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE, ACTION_PLAYER_WINS, ACTION_POWER, ACTION_RESOLVE_PROMPT, TYPE_MAGI, DEFAULT_PROMPT_VARIABLE } from '../index.js';
 import { UNMAKE_CALCULATION, UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI, UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE, UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, UNMAKE_EFFECT_TYPE_DIE_ROLLED, UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS, UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_ENERGY, UNMAKE_EFFECT_TYPE_PLAYER_WINS, UNMAKE_EFFECT_TYPE_PROMPT_ENTERED, UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD, UNMAKE_EFFECT_TYPE_START_OF_TURN, UNMAKE_EFFECT_TYPE_START_STEP, UNMAKE_EFFECT_TYPE_START_TURN, UNMAKE_LOG_ENTRY, UNMAKE_POWER_ACTIVATION, UNMAKE_POWER_USE, UNMAKE_PROMPT_LEAVE, UNMAKE_PROPERTY, UNMAKE_SELECT, UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD } from './types.js';
 var FLAG_WAS_ATTACKED = 1;
@@ -346,7 +346,7 @@ var Unmaker = /** @class */ (function () {
                             power: typeof action.power == 'string' ? action.power : action.power.name,
                         };
                     }
-                    case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE:
+                    case EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
                         var creatures = this.state.getMetaValue(action.target, action.generatedBy);
                         var creatureArray = [];
                         if (creatures instanceof CardInGame) {
@@ -367,12 +367,18 @@ var Unmaker = /** @class */ (function () {
                             }
                         }
                         this.saveObject(creatureArray, 'EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE/creatures');
-                        this.saveNumber(this.state.logEngine.shouldCreateLog(action).length, 'EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE/logCount');
+                        // this.saveNumber(this.state.logEngine.shouldCreateLog(action).length, 'EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE/logCount')
                         this.saveActionType(UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, 'EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE');
                         return {
                             type: UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
                             creatures: creatureArray
                         };
+                    }
+                    case EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE: {
+                        this.saveNumber(this.state.logEngine.shouldCreateLog(action).length, 'logCount');
+                        this.saveActionType(UNMAKE_LOG_ENTRY, 'ACTION_PLAY');
+                        break;
+                    }
                     case EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI:
                         var magiTargets = this.state.getMetaValue(action.target, action.generatedBy);
                         var magiArray = [];
@@ -515,9 +521,9 @@ var Unmaker = /** @class */ (function () {
                         var cardFlags = {};
                         var player_1 = action.player;
                         // Capture creature flags (creatures controlled by the player)
-                        var creatures_3 = this.state.getZone(ZONE_TYPE_IN_PLAY).cards
+                        var creatures = this.state.getZone(ZONE_TYPE_IN_PLAY).cards
                             .filter(function (card) { return card.card.type === TYPE_CREATURE && card.data.controller === player_1; });
-                        for (var _i = 0, creatures_1 = creatures_3; _i < creatures_1.length; _i++) {
+                        for (var _i = 0, creatures_1 = creatures; _i < creatures_1.length; _i++) {
                             var creature = creatures_1[_i];
                             cardFlags[creature.id] = {
                                 id: creature.id,
@@ -579,9 +585,9 @@ var Unmaker = /** @class */ (function () {
                         var cardFlags = {};
                         var player_2 = action.player;
                         // Capture creature flags (creatures controlled by the player)
-                        var creatures_4 = this.state.getZone(ZONE_TYPE_IN_PLAY).cards
+                        var creatures = this.state.getZone(ZONE_TYPE_IN_PLAY).cards
                             .filter(function (card) { return card.card.type === TYPE_CREATURE && card.data.controller === player_2; });
-                        for (var _e = 0, creatures_2 = creatures_4; _e < creatures_2.length; _e++) {
+                        for (var _e = 0, creatures_2 = creatures; _e < creatures_2.length; _e++) {
                             var creature = creatures_2[_e];
                             cardFlags[creature.id] = {
                                 id: creature.id,
@@ -670,17 +676,17 @@ var Unmaker = /** @class */ (function () {
                         };
                     }
                     case EFFECT_TYPE_ADD_ENERGY_TO_CREATURE: {
-                        var creatures_5 = this.state.getMetaValue(action.target, action.generatedBy);
+                        var creatures = this.state.getMetaValue(action.target, action.generatedBy);
                         var creaturesArray = [];
-                        if (creatures_5 instanceof CardInGame) {
+                        if (creatures instanceof CardInGame) {
                             creaturesArray.push({
-                                id: creatures_5.id,
-                                energy: creatures_5.data.energy,
+                                id: creatures.id,
+                                energy: creatures.data.energy,
                             });
                         }
-                        else if (creatures_5 instanceof Array) {
-                            for (var i = 0; i < creatures_5.length; i++) {
-                                var creature = creatures_5[i];
+                        else if (creatures instanceof Array) {
+                            for (var i = 0; i < creatures.length; i++) {
+                                var creature = creatures[i];
                                 creaturesArray.push({
                                     id: creature.id,
                                     energy: creature.data.energy
@@ -858,27 +864,27 @@ var Unmaker = /** @class */ (function () {
                         var energyArrangement = this.state.getMetaValue(action.energyOnCreatures, action.generatedBy);
                         var affectedCreatureIds = Object.keys(energyArrangement);
                         var inPlay = this.state.getZone(ZONE_TYPE_IN_PLAY);
-                        var creatures_6 = [];
+                        var creatures = [];
                         for (var _g = 0, affectedCreatureIds_1 = affectedCreatureIds; _g < affectedCreatureIds_1.length; _g++) {
                             var creatureId = affectedCreatureIds_1[_g];
                             var creature = inPlay.byId(creatureId);
                             if (creature) {
-                                creatures_6.push({
+                                creatures.push({
                                     id: creature.id,
                                     energy: creature.data.energy,
                                 });
                             }
                         }
-                        this.saveObject(creatures_6, 'EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES/creatures');
+                        this.saveObject(creatures, 'EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES/creatures');
                         this.saveActionType(UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, 'EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES');
                         return {
                             type: UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
-                            creatures: creatures_6,
+                            creatures: creatures,
                         };
                     }
                     case EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
                         var inPlay = this.state.getZone(ZONE_TYPE_IN_PLAY);
-                        var creatures_7 = [];
+                        var creatures = [];
                         var energyArrangement = this.state.getMetaValue(action.energyOnCreatures, action.generatedBy);
                         if (energyArrangement) {
                             var affectedCreatureIds = Object.keys(energyArrangement);
@@ -886,25 +892,25 @@ var Unmaker = /** @class */ (function () {
                                 var creatureId = affectedCreatureIds_2[_h];
                                 var creature = inPlay.byId(creatureId);
                                 if (creature) {
-                                    creatures_7.push({
+                                    creatures.push({
                                         id: creature.id,
                                         energy: creature.data.energy,
                                     });
                                 }
                             }
                         }
-                        this.saveObject(creatures_7, 'EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES/creatures');
+                        this.saveObject(creatures, 'EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES/creatures');
                         this.saveActionType(UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, 'EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES');
                         return {
                             type: UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES,
-                            creatures: creatures_7,
+                            creatures: creatures,
                         };
                     }
                     case EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE: {
                         var targets = this.state.getMetaValue(action.target, action.generatedBy);
-                        var creatures_8 = [];
+                        var creatures = [];
                         if (targets instanceof CardInGame) {
-                            creatures_8.push({
+                            creatures.push({
                                 id: targets.id,
                                 attacked: targets.data.attacked,
                             });
@@ -912,17 +918,17 @@ var Unmaker = /** @class */ (function () {
                         else if (targets instanceof Array) {
                             for (var _j = 0, targets_1 = targets; _j < targets_1.length; _j++) {
                                 var target = targets_1[_j];
-                                creatures_8.push({
+                                creatures.push({
                                     id: target.id,
                                     attacked: target.data.attacked,
                                 });
                             }
                         }
-                        this.saveObject(creatures_8, 'EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE/creatures');
+                        this.saveObject(creatures, 'EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE/creatures');
                         this.saveActionType(UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, 'EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE');
                         return {
                             type: UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
-                            creatures: creatures_8,
+                            creatures: creatures,
                         };
                     }
                     case EFFECT_TYPE_ATTACH_CARD_TO_CARD: {
@@ -1061,8 +1067,8 @@ var Unmaker = /** @class */ (function () {
                 var logCount = this.readNumber('EFFECT_TYPE_ADD_ENERGY_TO_CREATURE/logLength');
                 var creatures = this.readObject('EFFECT_TYPE_ADD_ENERGY_TO_CREATURE/creatures');
                 var inPlay = state.getZone(ZONE_TYPE_IN_PLAY);
-                for (var _i = 0, creatures_9 = creatures; _i < creatures_9.length; _i++) {
-                    var _e = creatures_9[_i], id = _e.id, energy = _e.energy;
+                for (var _i = 0, creatures_3 = creatures; _i < creatures_3.length; _i++) {
+                    var _e = creatures_3[_i], id = _e.id, energy = _e.energy;
                     var creatureCard = inPlay.byId(id);
                     if (creatureCard) {
                         creatureCard.data.energy = energy;
@@ -1245,22 +1251,19 @@ var Unmaker = /** @class */ (function () {
             }
             // Log entries: 0 or 1
             case UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
-                var logCount = this.readNumber('EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE/logCount');
+                // const logCount = this.readNumber('EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE/logCount')
                 var creatures = this.readObject('EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE/creatures');
-                if (!creatures) {
-                    state.state.log.length -= logCount;
-                    break;
-                }
+                // if (!creatures) { state.state.log.length -= logCount; break; }
                 var inPlay = state.getZone(ZONE_TYPE_IN_PLAY);
-                for (var _l = 0, creatures_10 = creatures; _l < creatures_10.length; _l++) {
-                    var _m = creatures_10[_l], id = _m.id, energy = _m.energy, energyLostThisTurn = _m.energyLostThisTurn;
+                for (var _l = 0, creatures_4 = creatures; _l < creatures_4.length; _l++) {
+                    var _m = creatures_4[_l], id = _m.id, energy = _m.energy, energyLostThisTurn = _m.energyLostThisTurn;
                     var creatureCard = inPlay.byId(id);
                     if (creatureCard) {
                         creatureCard.data.energy = energy;
                         creatureCard.data.energyLostThisTurn = energyLostThisTurn;
                     }
                 }
-                state.state.log.length -= logCount;
+                // state.state.log.length -= logCount
                 break;
             }
             // Log entries: 0 or 1

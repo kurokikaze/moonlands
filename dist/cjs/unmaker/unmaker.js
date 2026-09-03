@@ -328,7 +328,7 @@ class Unmaker {
                             power: typeof action.power == 'string' ? action.power : action.power.name,
                         };
                     }
-                    case index_1.EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE:
+                    case index_1.EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
                         const creatures = this.state.getMetaValue(action.target, action.generatedBy);
                         let creatureArray = [];
                         if (creatures instanceof CardInGame_1.default) {
@@ -349,12 +349,18 @@ class Unmaker {
                             }
                         }
                         this.saveObject(creatureArray, 'EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE/creatures');
-                        this.saveNumber(this.state.logEngine.shouldCreateLog(action).length, 'EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE/logCount');
+                        // this.saveNumber(this.state.logEngine.shouldCreateLog(action).length, 'EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE/logCount')
                         this.saveActionType(types_1.UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, 'EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE');
                         return {
                             type: types_1.UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE,
                             creatures: creatureArray
                         };
+                    }
+                    case const_1.EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE: {
+                        this.saveNumber(this.state.logEngine.shouldCreateLog(action).length, 'logCount');
+                        this.saveActionType(types_1.UNMAKE_LOG_ENTRY, 'ACTION_PLAY');
+                        break;
+                    }
                     case index_1.EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI:
                         const magiTargets = this.state.getMetaValue(action.target, action.generatedBy);
                         let magiArray = [];
@@ -1211,12 +1217,9 @@ class Unmaker {
             }
             // Log entries: 0 or 1
             case types_1.UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE: {
-                const logCount = this.readNumber('EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE/logCount');
+                // const logCount = this.readNumber('EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE/logCount')
                 const creatures = this.readObject('EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE/creatures');
-                if (!creatures) {
-                    state.state.log.length -= logCount;
-                    break;
-                }
+                // if (!creatures) { state.state.log.length -= logCount; break; }
                 const inPlay = state.getZone(index_1.ZONE_TYPE_IN_PLAY);
                 for (const { id, energy, energyLostThisTurn } of creatures) {
                     const creatureCard = inPlay.byId(id);
@@ -1225,7 +1228,7 @@ class Unmaker {
                         creatureCard.data.energyLostThisTurn = energyLostThisTurn;
                     }
                 }
-                state.state.log.length -= logCount;
+                // state.state.log.length -= logCount
                 break;
             }
             // Log entries: 0 or 1
