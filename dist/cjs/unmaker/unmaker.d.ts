@@ -13,6 +13,7 @@ export declare class Unmaker {
     private historyStack;
     private prngCheckpoints;
     private actionsUsedCheckpoints;
+    private promptStateCheckpoints;
     constructor(state: State, blobSize?: number);
     setCheckpoint(): void;
     outputDebug(): void;

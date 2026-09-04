@@ -559,7 +559,7 @@ describe('Unmaker bug – Firestorm repeated branch does not leak unmake state',
 //   Reproduces the deterministic failure where a move action references a card
 //   id that is not present in the declared source zone.
 // ---------------------------------------------------------------------------
-describe.only('Engine invariant - MOVE_CARD_BETWEEN_ZONES with stale source id', () => {
+describe('Engine invariant - MOVE_CARD_BETWEEN_ZONES with stale source id', () => {
     it('throws MOVE_ZONE_MISSING_SOURCE and does not clone card into destination', () => {
         const grega = new CardInGame(byName('Grega') as Card, PLAYER).addEnergy(12);
         const sinder = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(8);
@@ -850,6 +850,86 @@ describe.only('Engine invariant - MOVE_CARD_BETWEEN_ZONES with stale source id',
 
         unmaker.revertToCheckpoint();
         expect(snapshot(state)).toBe(before);
+    });
+});
+
+// ---------------------------------------------------------------------------
+// Moonlands regression signal – Raxis relic prompt + Unmaker revert
+//   A checkpoint taken before Shatterfire should restore prompt internals.
+//   Current behavior leaves stale savedActions / promptPlayer after revert,
+//   which can later surface as "Non-prompt action in the prompt state" in
+//   deep simulation branches.
+// ---------------------------------------------------------------------------
+describe.only('Moonlands regression – prompt internals must be restored after Shatterfire revert', () => {
+    it('restores savedActions and promptPlayer after reverting a relic prompt branch', () => {
+        const adis = new CardInGame(byName('Adis') as Card, OPPONENT).addEnergy(12);
+        const sinder = new CardInGame(byName('Sinder') as Card, PLAYER).addEnergy(12);
+
+        const raxis = new CardInGame(byName('Raxis') as Card, PLAYER).addEnergy(5);
+        const magmaArmor = new CardInGame(byName('Magma Armor') as Card, PLAYER);
+        const crown = new CardInGame(byName("Arderial's Crown") as Card, OPPONENT);
+
+        const state = makeState(STEP_PRS1, [raxis, magmaArmor, crown], [], [], sinder, adis);
+        const unmaker = new Unmaker(state);
+
+        const before = {
+            prompt: (state.state as any).prompt,
+            promptType: (state.state as any).promptType,
+            promptPlayer: (state.state as any).promptPlayer,
+            savedActionsLength: ((state.state as any).savedActions ?? []).length,
+        };
+
+        const shatterfire = (raxis.card.data.powers as any[]).find((p: any) => p.name === 'Shatterfire');
+        expect(shatterfire).toBeTruthy();
+
+        unmaker.setCheckpoint();
+
+        state.update({ type: ACTION_POWER, source: raxis, power: shatterfire, player: PLAYER } as any);
+        state.update({
+            type: ACTION_RESOLVE_PROMPT,
+            target: state.getZone(ZONE_TYPE_IN_PLAY).byId(magmaArmor.id),
+            generatedBy: (state.state as any).promptGeneratedBy,
+            player: (state.state as any).promptPlayer,
+        } as any);
+
+        unmaker.revertToCheckpoint();
+
+        expect((state.state as any).prompt).toBe(before.prompt);
+        expect((state.state as any).promptType).toBe(before.promptType);
+        expect((state.state as any).promptPlayer).toBe(before.promptPlayer);
+        expect(((state.state as any).savedActions ?? []).length).toBe(before.savedActionsLength);
+    });
+
+    it('restores savedActions content to the pre-prompt checkpoint baseline', () => {
+        const adis = new CardInGame(byName('Adis') as Card, OPPONENT).addEnergy(12);
+        const sinder = new CardInGame(byName('Sinder') as Card, PLAYER).addEnergy(12);
+
+        const raxis = new CardInGame(byName('Raxis') as Card, PLAYER).addEnergy(5);
+        const magmaArmor = new CardInGame(byName('Magma Armor') as Card, PLAYER);
+        const crown = new CardInGame(byName("Arderial's Crown") as Card, OPPONENT);
+
+        const state = makeState(STEP_PRS1, [raxis, magmaArmor, crown], [], [], sinder, adis);
+        const unmaker = new Unmaker(state);
+
+        const beforeSavedActions = JSON.parse(JSON.stringify((state.state as any).savedActions ?? []));
+
+        const shatterfire = (raxis.card.data.powers as any[]).find((p: any) => p.name === 'Shatterfire');
+        expect(shatterfire).toBeTruthy();
+
+        unmaker.setCheckpoint();
+
+        state.update({ type: ACTION_POWER, source: raxis, power: shatterfire, player: PLAYER } as any);
+        state.update({
+            type: ACTION_RESOLVE_PROMPT,
+            target: state.getZone(ZONE_TYPE_IN_PLAY).byId(magmaArmor.id),
+            generatedBy: (state.state as any).promptGeneratedBy,
+            player: (state.state as any).promptPlayer,
+        } as any);
+
+        unmaker.revertToCheckpoint();
+
+        const afterSavedActions = JSON.parse(JSON.stringify((state.state as any).savedActions ?? []));
+        expect(afterSavedActions).toEqual(beforeSavedActions);
     });
 });
 

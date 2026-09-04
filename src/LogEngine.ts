@@ -143,7 +143,7 @@ export class LogEngine {
 										amount: getMetaValue(action.amount, action.generatedBy),
 									});
 								}
-							} else {
+							} else if (target?.card?.name) {
 								entries.push({
 									type: LOG_ENTRY_CREATURE_ENERGY_GAIN,
 									card: target.card.name,
@@ -163,7 +163,7 @@ export class LogEngine {
 										amount: getMetaValue(action.amount, action.generatedBy),
 									});
 								}
-							} else {
+							} else if (target?.card?.name) {
 								entries.push({
 									type: LOG_ENTRY_MAGI_ENERGY_LOSS,
 									card: target.card.name,
@@ -192,7 +192,7 @@ export class LogEngine {
 										amount: getMetaValue(action.amount, action.generatedBy),
 									});
 								}
-							} else {
+							} else if (target?.card?.name) {
 								entries.push({
 									type: LOG_ENTRY_MAGI_ENERGY_GAIN,
 									card: target.card.name,
@@ -232,7 +232,7 @@ export class LogEngine {
 										player: action.player,
 									});
 								}
-							} else {
+							} else if (target?.card?.name) {
 								entries.push({
 									type: LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,
 									card: target.card.name,

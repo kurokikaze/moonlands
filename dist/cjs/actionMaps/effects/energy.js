@@ -68,6 +68,7 @@ const applyMoveEnergyEffect = function (action, transform, _state) {
     const moveMultiTarget = this.getMetaValue(action.target, action.generatedBy);
     const moveTarget = (moveMultiTarget instanceof Array) ? moveMultiTarget[0] : moveMultiTarget;
     const amountToMove = this.getMetaValue(action.amount, action.generatedBy);
+    console.dir(_state.spellMetaData[action.generatedBy], { depth: null });
     if (moveSource.data.energy >= amountToMove) {
         moveSource.removeEnergy(amountToMove);
         moveTarget.addEnergy(amountToMove);
@@ -246,7 +247,7 @@ exports.applyDiscardEnergyFromCreatureEffect = applyDiscardEnergyFromCreatureEff
 const applyRemoveEnergyFromCreatureEffect = function (action, transform) {
     const target = this.getMetaValue(action.target, action.generatedBy);
     const energyToLose = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
-    if (target.card.type === const_1.TYPE_CREATURE) {
+    if (target && target.card.type === const_1.TYPE_CREATURE) {
         target.removeEnergy(energyToLose);
         if (target.data.energy === 0) {
             transform({
@@ -269,26 +270,28 @@ exports.applyRemoveEnergyFromCreatureEffect = applyRemoveEnergyFromCreatureEffec
 const applyRemoveEnergyFromMagiEffect = function (action) {
     const target = this.getMetaValue(action.target, action.generatedBy);
     const energyToLose = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
-    if (target.card.type === const_1.TYPE_MAGI) {
+    if (target && target.card.type === const_1.TYPE_MAGI) {
         target.removeEnergy(energyToLose);
     }
 };
 exports.applyRemoveEnergyFromMagiEffect = applyRemoveEnergyFromMagiEffect;
 const applyRestoreCreatureToStartingEnergyEffect = function (action, transform) {
     const restoreTarget = this.getMetaValue(action.target, action.generatedBy);
-    const restoreAmount = restoreTarget.card.cost - restoreTarget.data.energy;
-    if (restoreAmount > 0) {
-        transform({
-            type: const_1.ACTION_EFFECT,
-            effectType: const_1.EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
-            source: action.source || undefined,
-            power: action.power || false,
-            spell: action.spell || false,
-            target: restoreTarget,
-            amount: restoreAmount,
-            player: action.player,
-            generatedBy: action.generatedBy,
-        });
+    if (restoreTarget && restoreTarget.card.type === const_1.TYPE_CREATURE) {
+        const restoreAmount = restoreTarget.card.cost - restoreTarget.data.energy;
+        if (restoreAmount > 0) {
+            transform({
+                type: const_1.ACTION_EFFECT,
+                effectType: const_1.EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+                source: action.source || undefined,
+                power: action.power || false,
+                spell: action.spell || false,
+                target: restoreTarget,
+                amount: restoreAmount,
+                player: action.player,
+                generatedBy: action.generatedBy,
+            });
+        }
     }
 };
 exports.applyRestoreCreatureToStartingEnergyEffect = applyRestoreCreatureToStartingEnergyEffect;

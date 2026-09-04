@@ -92,7 +92,7 @@ class LogEngine {
                                     });
                                 }
                             }
-                            else {
+                            else if (target?.card?.name) {
                                 entries.push({
                                     type: const_1.LOG_ENTRY_CREATURE_ENERGY_GAIN,
                                     card: target.card.name,
@@ -113,7 +113,7 @@ class LogEngine {
                                     });
                                 }
                             }
-                            else {
+                            else if (target?.card?.name) {
                                 entries.push({
                                     type: const_1.LOG_ENTRY_MAGI_ENERGY_LOSS,
                                     card: target.card.name,
@@ -143,7 +143,7 @@ class LogEngine {
                                     });
                                 }
                             }
-                            else {
+                            else if (target?.card?.name) {
                                 entries.push({
                                     type: const_1.LOG_ENTRY_MAGI_ENERGY_GAIN,
                                     card: target.card.name,
@@ -184,7 +184,7 @@ class LogEngine {
                                     });
                                 }
                             }
-                            else {
+                            else if (target?.card?.name) {
                                 entries.push({
                                     type: const_1.LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,
                                     card: target.card.name,

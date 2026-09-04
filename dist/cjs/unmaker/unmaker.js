@@ -47,7 +47,7 @@ const actionNames = {
     36: 'UNMAKE_POWER_ACTIVATION',
     37: 'UNMAKE_EFFECT_TYPE_PLAYER_WINS',
     38: 'UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES',
-    39: 'UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD',
+    39: 'UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD'
 };
 class Unmaker {
     state;
@@ -61,6 +61,7 @@ class Unmaker {
     historyStack = [];
     prngCheckpoints = [];
     actionsUsedCheckpoints = [];
+    promptStateCheckpoints = [];
     constructor(state, blobSize) {
         this.state = state;
         if (blobSize) {
@@ -94,6 +95,20 @@ class Unmaker {
             }
         }
         this.actionsUsedCheckpoints.push(snapshot);
+        // Snapshot prompt internals and queued actions to avoid prompt branch leaks after rollback
+        this.promptStateCheckpoints.push({
+            prompt: this.state.state.prompt,
+            promptType: this.state.state.promptType,
+            promptMessage: this.state.state.promptMessage,
+            promptGeneratedBy: this.state.state.promptGeneratedBy,
+            promptVariable: this.state.state.promptVariable,
+            promptParams: { ...this.state.state.promptParams },
+            promptPlayer: this.state.state.promptPlayer,
+            actions: [...(this.state.state.actions || [])],
+            savedActions: [...(this.state.state.savedActions || [])],
+            mayEffectActions: [...(this.state.state.mayEffectActions || [])],
+            fallbackActions: [...(this.state.state.fallbackActions || [])],
+        });
     }
     outputDebug() {
         console.log(`Objects storage length: ${this.objects.length}`);
@@ -136,6 +151,20 @@ class Unmaker {
                 twister.mt = [...prngState.mt];
                 twister.mti = prngState.mti;
             }
+            const promptState = this.promptStateCheckpoints.pop();
+            if (promptState) {
+                this.state.state.prompt = promptState.prompt;
+                this.state.state.promptType = promptState.promptType;
+                this.state.state.promptMessage = promptState.promptMessage;
+                this.state.state.promptGeneratedBy = promptState.promptGeneratedBy;
+                this.state.state.promptVariable = promptState.promptVariable;
+                this.state.state.promptParams = { ...promptState.promptParams };
+                this.state.state.promptPlayer = promptState.promptPlayer;
+                this.state.state.actions = [...promptState.actions];
+                this.state.state.savedActions = [...promptState.savedActions];
+                this.state.state.mayEffectActions = [...promptState.mayEffectActions];
+                this.state.state.fallbackActions = [...promptState.fallbackActions];
+            }
             // Restore actionsUsed for all in-play cards and active magi
             /*const actionsUsedSnapshot = this.actionsUsedCheckpoints.pop()
             if (actionsUsedSnapshot) {
@@ -177,7 +206,6 @@ class Unmaker {
             throw new Error(`Data blob overflow: pointer ${this.pointer} exceeds blob size ${this.blobSize}`);
         }
         this.dataTags.push(tag);
-        const strPointer = this.strings.length;
         this.strings.push(str);
     }
     readString(expectedTag) {
@@ -188,14 +216,13 @@ class Unmaker {
         const str = this.strings.pop();
         return str || '';
     }
-    saveObject(obj, tag) {
+    saveObject(obj, _tag) {
         if (this.pointer > this.blobSize - 1) {
             throw new Error(`Data blob overflow: pointer ${this.pointer} exceeds blob size ${this.blobSize}`);
         }
-        const objPointer = this.objects.length;
         this.objects.push(obj);
     }
-    readObject(expectedTag) {
+    readObject(_expectedTag) {
         const obj = this.objects.pop();
         return obj;
     }
@@ -208,7 +235,7 @@ class Unmaker {
                 const logCount = this.state.logEngine.shouldCreateLog(action).length;
                 const generatedBy = this.state.state.promptGeneratedBy;
                 const variable = this.state.state.promptVariable || index_1.DEFAULT_PROMPT_VARIABLE[this.state.state.promptType] || 'promptResult';
-                const oldMetaData = this.state.getSpellMetadata(generatedBy)[variable];
+                const oldMetaData = this.state.getMetaValue(variable, generatedBy);
                 this.saveObject(oldMetaData, 'promptOldMetaData');
                 this.saveString(variable, 'promptVariable');
                 this.saveNumber(this.state.state.promptPlayer, 'promptPlayer');
@@ -724,33 +751,28 @@ class Unmaker {
                             type: types_1.UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY
                         };
                     }
+                    case const_1.EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY: {
+                        this.saveNumber(this.state.logEngine.shouldCreateLog(action).length, 'logCount');
+                        this.saveActionType(types_1.UNMAKE_LOG_ENTRY, 'EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY');
+                        break;
+                    }
                     case index_1.EFFECT_TYPE_MOVE_ENERGY: {
                         const moveMultiSource = this.state.getMetaValue(action.source, action.generatedBy);
                         const moveSource = (moveMultiSource instanceof Array) ? moveMultiSource[0] : moveMultiSource;
                         const moveMultiTarget = this.state.getMetaValue(action.target, action.generatedBy);
                         const moveTarget = (moveMultiTarget instanceof Array) ? moveMultiTarget[0] : moveMultiTarget;
-                        this.saveString(moveSource.id, 'EFFECT_TYPE_MOVE_ENERGY/sourceId');
-                        this.saveNumber(moveSource.card.type == index_1.TYPE_MAGI ? 1 : 0, 'EFFECT_TYPE_MOVE_ENERGY/sourceIsMagi');
-                        this.saveNumber(moveSource.owner, 'EFFECT_TYPE_MOVE_ENERGY/sourceOwner');
-                        this.saveString(moveTarget.id, 'EFFECT_TYPE_MOVE_ENERGY/targetId');
-                        this.saveNumber(moveTarget.card.type == index_1.TYPE_MAGI ? 1 : 0, 'EFFECT_TYPE_MOVE_ENERGY/targetIsMagi');
-                        this.saveNumber(moveTarget.owner, 'EFFECT_TYPE_MOVE_ENERGY/targetOwner');
-                        this.saveNumber(moveSource.data.energy, 'EFFECT_TYPE_MOVE_ENERGY/sourceEnergy');
-                        this.saveNumber(moveSource.data.energyLostThisTurn, 'EFFECT_TYPE_MOVE_ENERGY/sourceEnergyLost');
-                        this.saveNumber(moveTarget.data.energy, 'EFFECT_TYPE_MOVE_ENERGY/moveEnergy');
-                        this.saveActionType(types_1.UNMAKE_EFFECT_TYPE_MOVE_ENERGY, 'EFFECT_TYPE_MOVE_ENERGY');
-                        return {
-                            type: types_1.UNMAKE_EFFECT_TYPE_MOVE_ENERGY,
-                            sourceId: moveSource.id,
-                            sourceMagi: moveSource.card.type == index_1.TYPE_MAGI,
-                            sourcePlayer: moveSource.owner,
-                            targetId: moveTarget.id,
-                            targetMagi: moveTarget.card.type == index_1.TYPE_MAGI,
-                            targetPlayer: moveTarget.owner,
-                            sourceEnergy: moveSource.data.energy,
-                            sourceEnergyLost: moveSource.data.energyLostThisTurn,
-                            targetEnergy: moveTarget.data.energy,
-                        };
+                        if (moveSource == null || moveTarget == null) {
+                            this.saveString(moveSource.id, 'EFFECT_TYPE_MOVE_ENERGY/sourceId');
+                            this.saveNumber(moveSource.card.type == index_1.TYPE_MAGI ? 1 : 0, 'EFFECT_TYPE_MOVE_ENERGY/sourceIsMagi');
+                            this.saveNumber(moveSource.owner, 'EFFECT_TYPE_MOVE_ENERGY/sourceOwner');
+                            this.saveString(moveTarget.id, 'EFFECT_TYPE_MOVE_ENERGY/targetId');
+                            this.saveNumber(moveTarget.card.type == index_1.TYPE_MAGI ? 1 : 0, 'EFFECT_TYPE_MOVE_ENERGY/targetIsMagi');
+                            this.saveNumber(moveTarget.owner, 'EFFECT_TYPE_MOVE_ENERGY/targetOwner');
+                            this.saveNumber(moveSource.data.energy, 'EFFECT_TYPE_MOVE_ENERGY/sourceEnergy');
+                            this.saveNumber(moveSource.data.energyLostThisTurn, 'EFFECT_TYPE_MOVE_ENERGY/sourceEnergyLost');
+                            this.saveNumber(moveTarget.data.energy, 'EFFECT_TYPE_MOVE_ENERGY/moveEnergy');
+                            this.saveActionType(types_1.UNMAKE_EFFECT_TYPE_MOVE_ENERGY, 'EFFECT_TYPE_MOVE_ENERGY');
+                        }
                     }
                     case index_1.EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE: {
                         const creature = this.state.getMetaValue(action.target, action.generatedBy);
@@ -781,11 +803,15 @@ class Unmaker {
                         };
                     }
                     case index_1.EFFECT_TYPE_PROMPT_ENTERED: {
+                        const promptPlayer = this.state.state.promptPlayer;
+                        const hasPromptPlayer = typeof promptPlayer === 'number';
+                        this.saveObject([...(this.state.state.savedActions || [])], 'EFFECT_TYPE_PROMPT_ENTERED/savedActions');
                         this.saveObject({ ...this.state.state.promptParams }, 'EFFECT_TYPE_PROMPT_ENTERED/promptParams');
                         this.saveString(this.state.state.promptGeneratedBy, 'EFFECT_TYPE_PROMPT_ENTERED/promptGeneratedBy');
                         this.saveString(this.state.state.promptVariable, 'EFFECT_TYPE_PROMPT_ENTERED/promptVariable');
                         this.saveString(this.state.state.promptType, 'EFFECT_TYPE_PROMPT_ENTERED/promptType');
-                        this.saveNumber(this.state.state.promptPlayer, 'EFFECT_TYPE_PROMPT_ENTERED/promptPlayer');
+                        this.saveNumber(hasPromptPlayer ? promptPlayer : 0, 'EFFECT_TYPE_PROMPT_ENTERED/promptPlayer');
+                        this.saveNumber(hasPromptPlayer ? 1 : 0, 'EFFECT_TYPE_PROMPT_ENTERED/hasPromptPlayer');
                         this.saveString(this.state.state.promptMessage, 'EFFECT_TYPE_PROMPT_ENTERED/promptMessage');
                         this.saveNumber(this.state.state.prompt ? 1 : 0, 'EFFECT_TYPE_PROMPT_ENTERED/prompt');
                         this.saveActionType(types_1.UNMAKE_EFFECT_TYPE_PROMPT_ENTERED, 'EFFECT_TYPE_PROMPT_ENTERED');
@@ -907,13 +933,11 @@ class Unmaker {
                         const target = this.state.getMetaValue(action.target, action.generatedBy);
                         const attachmentTarget = this.state.getMetaValue(action.attachmentTarget, action.generatedBy);
                         this.saveString(target.id, 'EFFECT_TYPE_ATTACH_CARD_TO_CARD/targetId');
-                        this.saveString(attachmentTarget.id, 'EFFECT_TYPE_ATTACH_CARD_TO_CARD/attachmentTargetId');
                         this.saveObject(target.data.attachedTo || null, 'EFFECT_TYPE_ATTACH_CARD_TO_CARD/previousAttachment');
                         this.saveActionType(types_1.UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD, 'EFFECT_TYPE_ATTACH_CARD_TO_CARD');
                         return {
                             type: types_1.UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD,
                             targetId: target.id,
-                            attachmentTargetId: attachmentTarget.id,
                             previousAttachment: target.data.attachedTo || null,
                         };
                     }
@@ -1018,11 +1042,14 @@ class Unmaker {
             case types_1.UNMAKE_EFFECT_TYPE_PROMPT_ENTERED: {
                 const prompt = this.readNumber('EFFECT_TYPE_PROMPT_ENTERED/prompt') == 1;
                 const promptMessage = this.readString('EFFECT_TYPE_PROMPT_ENTERED/promptMessage');
-                const promptPlayer = this.readNumber('EFFECT_TYPE_PROMPT_ENTERED/promptPlayer');
+                const hasPromptPlayer = this.readNumber('EFFECT_TYPE_PROMPT_ENTERED/hasPromptPlayer') == 1;
+                const serializedPromptPlayer = this.readNumber('EFFECT_TYPE_PROMPT_ENTERED/promptPlayer');
+                const promptPlayer = hasPromptPlayer ? serializedPromptPlayer : undefined;
                 const promptType = this.readString('EFFECT_TYPE_PROMPT_ENTERED/promptType');
                 const promptVariable = this.readString('EFFECT_TYPE_PROMPT_ENTERED/promptVariable');
                 const promptGeneratedBy = this.readString('EFFECT_TYPE_PROMPT_ENTERED/promptGeneratedBy');
                 const promptParams = this.readObject('EFFECT_TYPE_PROMPT_ENTERED/promptParams');
+                const savedActions = this.readObject('EFFECT_TYPE_PROMPT_ENTERED/savedActions');
                 state.state.prompt = prompt;
                 state.state.promptMessage = promptMessage;
                 state.state.promptPlayer = promptPlayer;
@@ -1031,6 +1058,7 @@ class Unmaker {
                 state.state.promptVariable = promptVariable;
                 state.state.promptGeneratedBy = promptGeneratedBy;
                 state.state.promptParams = promptParams;
+                state.state.savedActions = savedActions || [];
                 break;
             }
             // Log entries: 0 or target.length (one per creature)
@@ -1578,7 +1606,6 @@ class Unmaker {
             }
             case types_1.UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD: {
                 const previousAttachment = this.readObject('EFFECT_TYPE_ATTACH_CARD_TO_CARD/previousAttachment');
-                const attachmentTargetId = this.readString('EFFECT_TYPE_ATTACH_CARD_TO_CARD/attachmentTargetId');
                 const targetId = this.readString('EFFECT_TYPE_ATTACH_CARD_TO_CARD/targetId');
                 this.state.detachCard(targetId);
                 if (previousAttachment) {
@@ -1977,7 +2004,6 @@ class Unmaker {
             }
             case types_1.UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD: {
                 const previousAttachment = this.readObject('EFFECT_TYPE_ATTACH_CARD_TO_CARD/previousAttachment');
-                const attachmentTargetId = this.readString('EFFECT_TYPE_ATTACH_CARD_TO_CARD/attachmentTargetId');
                 const targetId = this.readString('EFFECT_TYPE_ATTACH_CARD_TO_CARD/targetId');
                 this.state.detachCard(targetId);
                 if (previousAttachment) {

@@ -19,7 +19,7 @@ var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
     return to.concat(ar || Array.prototype.slice.call(from));
 };
 import CardInGame from '../classes/CardInGame.js';
-import { ACTION_PLAY, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_DRAW, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, EFFECT_TYPE_ATTACH_CARD_TO_CARD, EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE } from '../const.js';
+import { ACTION_PLAY, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_DRAW, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, EFFECT_TYPE_ATTACH_CARD_TO_CARD, EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY } from '../const.js';
 import { ACTION_EFFECT, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_PROMPT_ENTERED, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_START_TURN, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_IN_PLAY, ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE, ACTION_PLAYER_WINS, ACTION_POWER, ACTION_RESOLVE_PROMPT, TYPE_MAGI, DEFAULT_PROMPT_VARIABLE } from '../index.js';
 import { UNMAKE_CALCULATION, UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI, UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE, UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, UNMAKE_EFFECT_TYPE_DIE_ROLLED, UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS, UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_ENERGY, UNMAKE_EFFECT_TYPE_PLAYER_WINS, UNMAKE_EFFECT_TYPE_PROMPT_ENTERED, UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD, UNMAKE_EFFECT_TYPE_START_OF_TURN, UNMAKE_EFFECT_TYPE_START_STEP, UNMAKE_EFFECT_TYPE_START_TURN, UNMAKE_LOG_ENTRY, UNMAKE_POWER_ACTIVATION, UNMAKE_POWER_USE, UNMAKE_PROMPT_LEAVE, UNMAKE_PROPERTY, UNMAKE_SELECT, UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD } from './types.js';
 var FLAG_WAS_ATTACKED = 1;
@@ -61,7 +61,7 @@ var actionNames = {
     36: 'UNMAKE_POWER_ACTIVATION',
     37: 'UNMAKE_EFFECT_TYPE_PLAYER_WINS',
     38: 'UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES',
-    39: 'UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD',
+    39: 'UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD'
 };
 var Unmaker = /** @class */ (function () {
     function Unmaker(state, blobSize) {
@@ -77,6 +77,7 @@ var Unmaker = /** @class */ (function () {
         this.historyStack = [];
         this.prngCheckpoints = [];
         this.actionsUsedCheckpoints = [];
+        this.promptStateCheckpoints = [];
         this.dataTags = [];
         if (blobSize) {
             this.blobSize = blobSize;
@@ -111,6 +112,20 @@ var Unmaker = /** @class */ (function () {
             }
         }
         this.actionsUsedCheckpoints.push(snapshot);
+        // Snapshot prompt internals and queued actions to avoid prompt branch leaks after rollback
+        this.promptStateCheckpoints.push({
+            prompt: this.state.state.prompt,
+            promptType: this.state.state.promptType,
+            promptMessage: this.state.state.promptMessage,
+            promptGeneratedBy: this.state.state.promptGeneratedBy,
+            promptVariable: this.state.state.promptVariable,
+            promptParams: __assign({}, this.state.state.promptParams),
+            promptPlayer: this.state.state.promptPlayer,
+            actions: __spreadArray([], (this.state.state.actions || []), true),
+            savedActions: __spreadArray([], (this.state.state.savedActions || []), true),
+            mayEffectActions: __spreadArray([], (this.state.state.mayEffectActions || []), true),
+            fallbackActions: __spreadArray([], (this.state.state.fallbackActions || []), true),
+        });
     };
     Unmaker.prototype.outputDebug = function () {
         console.log("Objects storage length: ".concat(this.objects.length));
@@ -153,6 +168,20 @@ var Unmaker = /** @class */ (function () {
                 twister.mt = __spreadArray([], prngState.mt, true);
                 twister.mti = prngState.mti;
             }
+            var promptState = this.promptStateCheckpoints.pop();
+            if (promptState) {
+                this.state.state.prompt = promptState.prompt;
+                this.state.state.promptType = promptState.promptType;
+                this.state.state.promptMessage = promptState.promptMessage;
+                this.state.state.promptGeneratedBy = promptState.promptGeneratedBy;
+                this.state.state.promptVariable = promptState.promptVariable;
+                this.state.state.promptParams = __assign({}, promptState.promptParams);
+                this.state.state.promptPlayer = promptState.promptPlayer;
+                this.state.state.actions = __spreadArray([], promptState.actions, true);
+                this.state.state.savedActions = __spreadArray([], promptState.savedActions, true);
+                this.state.state.mayEffectActions = __spreadArray([], promptState.mayEffectActions, true);
+                this.state.state.fallbackActions = __spreadArray([], promptState.fallbackActions, true);
+            }
             // Restore actionsUsed for all in-play cards and active magi
             /*const actionsUsedSnapshot = this.actionsUsedCheckpoints.pop()
             if (actionsUsedSnapshot) {
@@ -193,7 +222,6 @@ var Unmaker = /** @class */ (function () {
             throw new Error("Data blob overflow: pointer ".concat(this.pointer, " exceeds blob size ").concat(this.blobSize));
         }
         this.dataTags.push(tag);
-        var strPointer = this.strings.length;
         this.strings.push(str);
     };
     Unmaker.prototype.readString = function (expectedTag) {
@@ -204,14 +232,13 @@ var Unmaker = /** @class */ (function () {
         var str = this.strings.pop();
         return str || '';
     };
-    Unmaker.prototype.saveObject = function (obj, tag) {
+    Unmaker.prototype.saveObject = function (obj, _tag) {
         if (this.pointer > this.blobSize - 1) {
             throw new Error("Data blob overflow: pointer ".concat(this.pointer, " exceeds blob size ").concat(this.blobSize));
         }
-        var objPointer = this.objects.length;
         this.objects.push(obj);
     };
-    Unmaker.prototype.readObject = function (expectedTag) {
+    Unmaker.prototype.readObject = function (_expectedTag) {
         var obj = this.objects.pop();
         return obj;
     };
@@ -226,7 +253,7 @@ var Unmaker = /** @class */ (function () {
                 var logCount = this.state.logEngine.shouldCreateLog(action).length;
                 var generatedBy = this.state.state.promptGeneratedBy;
                 var variable = this.state.state.promptVariable || DEFAULT_PROMPT_VARIABLE[this.state.state.promptType] || 'promptResult';
-                var oldMetaData = this.state.getSpellMetadata(generatedBy)[variable];
+                var oldMetaData = this.state.getMetaValue(variable, generatedBy);
                 this.saveObject(oldMetaData, 'promptOldMetaData');
                 this.saveString(variable, 'promptVariable');
                 this.saveNumber(this.state.state.promptPlayer, 'promptPlayer');
@@ -749,33 +776,28 @@ var Unmaker = /** @class */ (function () {
                             type: UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY
                         };
                     }
+                    case EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY: {
+                        this.saveNumber(this.state.logEngine.shouldCreateLog(action).length, 'logCount');
+                        this.saveActionType(UNMAKE_LOG_ENTRY, 'EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY');
+                        break;
+                    }
                     case EFFECT_TYPE_MOVE_ENERGY: {
                         var moveMultiSource = this.state.getMetaValue(action.source, action.generatedBy);
                         var moveSource = (moveMultiSource instanceof Array) ? moveMultiSource[0] : moveMultiSource;
                         var moveMultiTarget = this.state.getMetaValue(action.target, action.generatedBy);
                         var moveTarget = (moveMultiTarget instanceof Array) ? moveMultiTarget[0] : moveMultiTarget;
-                        this.saveString(moveSource.id, 'EFFECT_TYPE_MOVE_ENERGY/sourceId');
-                        this.saveNumber(moveSource.card.type == TYPE_MAGI ? 1 : 0, 'EFFECT_TYPE_MOVE_ENERGY/sourceIsMagi');
-                        this.saveNumber(moveSource.owner, 'EFFECT_TYPE_MOVE_ENERGY/sourceOwner');
-                        this.saveString(moveTarget.id, 'EFFECT_TYPE_MOVE_ENERGY/targetId');
-                        this.saveNumber(moveTarget.card.type == TYPE_MAGI ? 1 : 0, 'EFFECT_TYPE_MOVE_ENERGY/targetIsMagi');
-                        this.saveNumber(moveTarget.owner, 'EFFECT_TYPE_MOVE_ENERGY/targetOwner');
-                        this.saveNumber(moveSource.data.energy, 'EFFECT_TYPE_MOVE_ENERGY/sourceEnergy');
-                        this.saveNumber(moveSource.data.energyLostThisTurn, 'EFFECT_TYPE_MOVE_ENERGY/sourceEnergyLost');
-                        this.saveNumber(moveTarget.data.energy, 'EFFECT_TYPE_MOVE_ENERGY/moveEnergy');
-                        this.saveActionType(UNMAKE_EFFECT_TYPE_MOVE_ENERGY, 'EFFECT_TYPE_MOVE_ENERGY');
-                        return {
-                            type: UNMAKE_EFFECT_TYPE_MOVE_ENERGY,
-                            sourceId: moveSource.id,
-                            sourceMagi: moveSource.card.type == TYPE_MAGI,
-                            sourcePlayer: moveSource.owner,
-                            targetId: moveTarget.id,
-                            targetMagi: moveTarget.card.type == TYPE_MAGI,
-                            targetPlayer: moveTarget.owner,
-                            sourceEnergy: moveSource.data.energy,
-                            sourceEnergyLost: moveSource.data.energyLostThisTurn,
-                            targetEnergy: moveTarget.data.energy,
-                        };
+                        if (moveSource == null || moveTarget == null) {
+                            this.saveString(moveSource.id, 'EFFECT_TYPE_MOVE_ENERGY/sourceId');
+                            this.saveNumber(moveSource.card.type == TYPE_MAGI ? 1 : 0, 'EFFECT_TYPE_MOVE_ENERGY/sourceIsMagi');
+                            this.saveNumber(moveSource.owner, 'EFFECT_TYPE_MOVE_ENERGY/sourceOwner');
+                            this.saveString(moveTarget.id, 'EFFECT_TYPE_MOVE_ENERGY/targetId');
+                            this.saveNumber(moveTarget.card.type == TYPE_MAGI ? 1 : 0, 'EFFECT_TYPE_MOVE_ENERGY/targetIsMagi');
+                            this.saveNumber(moveTarget.owner, 'EFFECT_TYPE_MOVE_ENERGY/targetOwner');
+                            this.saveNumber(moveSource.data.energy, 'EFFECT_TYPE_MOVE_ENERGY/sourceEnergy');
+                            this.saveNumber(moveSource.data.energyLostThisTurn, 'EFFECT_TYPE_MOVE_ENERGY/sourceEnergyLost');
+                            this.saveNumber(moveTarget.data.energy, 'EFFECT_TYPE_MOVE_ENERGY/moveEnergy');
+                            this.saveActionType(UNMAKE_EFFECT_TYPE_MOVE_ENERGY, 'EFFECT_TYPE_MOVE_ENERGY');
+                        }
                     }
                     case EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE: {
                         var creature = this.state.getMetaValue(action.target, action.generatedBy);
@@ -806,11 +828,15 @@ var Unmaker = /** @class */ (function () {
                         };
                     }
                     case EFFECT_TYPE_PROMPT_ENTERED: {
+                        var promptPlayer = this.state.state.promptPlayer;
+                        var hasPromptPlayer = typeof promptPlayer === 'number';
+                        this.saveObject(__spreadArray([], (this.state.state.savedActions || []), true), 'EFFECT_TYPE_PROMPT_ENTERED/savedActions');
                         this.saveObject(__assign({}, this.state.state.promptParams), 'EFFECT_TYPE_PROMPT_ENTERED/promptParams');
                         this.saveString(this.state.state.promptGeneratedBy, 'EFFECT_TYPE_PROMPT_ENTERED/promptGeneratedBy');
                         this.saveString(this.state.state.promptVariable, 'EFFECT_TYPE_PROMPT_ENTERED/promptVariable');
                         this.saveString(this.state.state.promptType, 'EFFECT_TYPE_PROMPT_ENTERED/promptType');
-                        this.saveNumber(this.state.state.promptPlayer, 'EFFECT_TYPE_PROMPT_ENTERED/promptPlayer');
+                        this.saveNumber(hasPromptPlayer ? promptPlayer : 0, 'EFFECT_TYPE_PROMPT_ENTERED/promptPlayer');
+                        this.saveNumber(hasPromptPlayer ? 1 : 0, 'EFFECT_TYPE_PROMPT_ENTERED/hasPromptPlayer');
                         this.saveString(this.state.state.promptMessage, 'EFFECT_TYPE_PROMPT_ENTERED/promptMessage');
                         this.saveNumber(this.state.state.prompt ? 1 : 0, 'EFFECT_TYPE_PROMPT_ENTERED/prompt');
                         this.saveActionType(UNMAKE_EFFECT_TYPE_PROMPT_ENTERED, 'EFFECT_TYPE_PROMPT_ENTERED');
@@ -935,13 +961,11 @@ var Unmaker = /** @class */ (function () {
                         var target = this.state.getMetaValue(action.target, action.generatedBy);
                         var attachmentTarget = this.state.getMetaValue(action.attachmentTarget, action.generatedBy);
                         this.saveString(target.id, 'EFFECT_TYPE_ATTACH_CARD_TO_CARD/targetId');
-                        this.saveString(attachmentTarget.id, 'EFFECT_TYPE_ATTACH_CARD_TO_CARD/attachmentTargetId');
                         this.saveObject(target.data.attachedTo || null, 'EFFECT_TYPE_ATTACH_CARD_TO_CARD/previousAttachment');
                         this.saveActionType(UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD, 'EFFECT_TYPE_ATTACH_CARD_TO_CARD');
                         return {
                             type: UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD,
                             targetId: target.id,
-                            attachmentTargetId: attachmentTarget.id,
                             previousAttachment: target.data.attachedTo || null,
                         };
                     }
@@ -1047,11 +1071,14 @@ var Unmaker = /** @class */ (function () {
             case UNMAKE_EFFECT_TYPE_PROMPT_ENTERED: {
                 var prompt = this.readNumber('EFFECT_TYPE_PROMPT_ENTERED/prompt') == 1;
                 var promptMessage = this.readString('EFFECT_TYPE_PROMPT_ENTERED/promptMessage');
-                var promptPlayer = this.readNumber('EFFECT_TYPE_PROMPT_ENTERED/promptPlayer');
+                var hasPromptPlayer = this.readNumber('EFFECT_TYPE_PROMPT_ENTERED/hasPromptPlayer') == 1;
+                var serializedPromptPlayer = this.readNumber('EFFECT_TYPE_PROMPT_ENTERED/promptPlayer');
+                var promptPlayer = hasPromptPlayer ? serializedPromptPlayer : undefined;
                 var promptType = this.readString('EFFECT_TYPE_PROMPT_ENTERED/promptType');
                 var promptVariable = this.readString('EFFECT_TYPE_PROMPT_ENTERED/promptVariable');
                 var promptGeneratedBy = this.readString('EFFECT_TYPE_PROMPT_ENTERED/promptGeneratedBy');
                 var promptParams = this.readObject('EFFECT_TYPE_PROMPT_ENTERED/promptParams');
+                var savedActions = this.readObject('EFFECT_TYPE_PROMPT_ENTERED/savedActions');
                 state.state.prompt = prompt;
                 state.state.promptMessage = promptMessage;
                 state.state.promptPlayer = promptPlayer;
@@ -1060,6 +1087,7 @@ var Unmaker = /** @class */ (function () {
                 state.state.promptVariable = promptVariable;
                 state.state.promptGeneratedBy = promptGeneratedBy;
                 state.state.promptParams = promptParams;
+                state.state.savedActions = savedActions || [];
                 break;
             }
             // Log entries: 0 or target.length (one per creature)
@@ -1618,7 +1646,6 @@ var Unmaker = /** @class */ (function () {
             }
             case UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD: {
                 var previousAttachment = this.readObject('EFFECT_TYPE_ATTACH_CARD_TO_CARD/previousAttachment');
-                var attachmentTargetId = this.readString('EFFECT_TYPE_ATTACH_CARD_TO_CARD/attachmentTargetId');
                 var targetId = this.readString('EFFECT_TYPE_ATTACH_CARD_TO_CARD/targetId');
                 this.state.detachCard(targetId);
                 if (previousAttachment) {
@@ -2027,7 +2054,6 @@ var Unmaker = /** @class */ (function () {
             }
             case UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD: {
                 var previousAttachment = this.readObject('EFFECT_TYPE_ATTACH_CARD_TO_CARD/previousAttachment');
-                var attachmentTargetId = this.readString('EFFECT_TYPE_ATTACH_CARD_TO_CARD/attachmentTargetId');
                 var targetId = this.readString('EFFECT_TYPE_ATTACH_CARD_TO_CARD/targetId');
                 this.state.detachCard(targetId);
                 if (previousAttachment) {

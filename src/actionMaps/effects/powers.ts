@@ -1,3 +1,4 @@
+import CardInGame from "../../classes/CardInGame";
 import {
   EFFECT_TYPE_EXECUTE_POWER_EFFECTS,
   PROPERTY_CONTROLLER,
@@ -10,7 +11,7 @@ export const applyExecutePowerEffects: ActionTransformer<typeof EFFECT_TYPE_EXEC
   const power = this.getMetaValue(action.power, action.generatedBy);
   const sourceRaw = this.getMetaValue(action.source, action.generatedBy);
   // Some selectors will give us arrays anyway
-  const source = sourceRaw instanceof Array ? sourceRaw[0] : sourceRaw;
+  const source: CardInGame = sourceRaw instanceof Array ? sourceRaw[0] : sourceRaw;
 
   const sourceController = this.modifyByStaticAbilities(source, PROPERTY_CONTROLLER);
   const powerCost = this.modifyByStaticAbilities(source, PROPERTY_POWER_COST, power.name || '');

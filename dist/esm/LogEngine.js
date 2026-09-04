@@ -12,8 +12,8 @@ var LogEngine = /** @class */ (function () {
         }
     };
     LogEngine.prototype.shouldCreateLog = function (action) {
-        var _a, _b, _c, _d, _e, _f;
-        var _g = this.context, getMetaValue = _g.getMetaValue, getPromptType = _g.getPromptType;
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
+        var _l = this.context, getMetaValue = _l.getMetaValue, getPromptType = _l.getPromptType;
         var entries = [];
         try {
             switch (action.type) {
@@ -91,7 +91,7 @@ var LogEngine = /** @class */ (function () {
                                     });
                                 }
                             }
-                            else {
+                            else if ((_b = target === null || target === void 0 ? void 0 : target.card) === null || _b === void 0 ? void 0 : _b.name) {
                                 entries.push({
                                     type: LOG_ENTRY_CREATURE_ENERGY_GAIN,
                                     card: target.card.name,
@@ -112,7 +112,7 @@ var LogEngine = /** @class */ (function () {
                                     });
                                 }
                             }
-                            else {
+                            else if ((_c = target === null || target === void 0 ? void 0 : target.card) === null || _c === void 0 ? void 0 : _c.name) {
                                 entries.push({
                                     type: LOG_ENTRY_MAGI_ENERGY_LOSS,
                                     card: target.card.name,
@@ -142,7 +142,7 @@ var LogEngine = /** @class */ (function () {
                                     });
                                 }
                             }
-                            else {
+                            else if ((_d = target === null || target === void 0 ? void 0 : target.card) === null || _d === void 0 ? void 0 : _d.name) {
                                 entries.push({
                                     type: LOG_ENTRY_MAGI_ENERGY_GAIN,
                                     card: target.card.name,
@@ -162,7 +162,7 @@ var LogEngine = /** @class */ (function () {
                         // Log entries: 0 or 1 (0 when target is an array)
                         case EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY: {
                             var target = getMetaValue(action.target, action.generatedBy);
-                            if (target != null && !Array.isArray(target) && ((_b = target === null || target === void 0 ? void 0 : target.card) === null || _b === void 0 ? void 0 : _b.name)) {
+                            if (target != null && !Array.isArray(target) && ((_e = target === null || target === void 0 ? void 0 : target.card) === null || _e === void 0 ? void 0 : _e.name)) {
                                 entries.push({
                                     type: LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY,
                                     card: target.card.name,
@@ -174,7 +174,7 @@ var LogEngine = /** @class */ (function () {
                         // Log entries: 0 or 1
                         case EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY: {
                             var target = getMetaValue(action.target, action.generatedBy);
-                            if (Array.isArray(target) && target.length && ((_d = (_c = target[0]) === null || _c === void 0 ? void 0 : _c.card) === null || _d === void 0 ? void 0 : _d.name)) {
+                            if (Array.isArray(target) && target.length && ((_g = (_f = target[0]) === null || _f === void 0 ? void 0 : _f.card) === null || _g === void 0 ? void 0 : _g.name)) {
                                 if (target.length) {
                                     entries.push({
                                         type: LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,
@@ -183,7 +183,7 @@ var LogEngine = /** @class */ (function () {
                                     });
                                 }
                             }
-                            else {
+                            else if ((_h = target === null || target === void 0 ? void 0 : target.card) === null || _h === void 0 ? void 0 : _h.name) {
                                 entries.push({
                                     type: LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY,
                                     card: target.card.name,
@@ -237,7 +237,7 @@ var LogEngine = /** @class */ (function () {
                         promptType === PROMPT_TYPE_SINGLE_MAGI) && 'target' in action) {
                         entries.push({
                             type: LOG_ENTRY_TARGETING,
-                            card: ((_f = (_e = action.target) === null || _e === void 0 ? void 0 : _e.card) === null || _f === void 0 ? void 0 : _f.name) || 'unknown card',
+                            card: ((_k = (_j = action.target) === null || _j === void 0 ? void 0 : _j.card) === null || _k === void 0 ? void 0 : _k.name) || 'unknown card',
                             player: action.player,
                         });
                     }
