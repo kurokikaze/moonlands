@@ -18,7 +18,7 @@
         "build-cjs": "tsc -p ./tsconfig.node.json",
         "fix-esm": "tsc-alias -p ./tsconfig.json",
         "build-types-cjs": "tsc -p ./tsconfig.node.json --declaration",
-        "test": "vitest run",
+        "test": "vitest run --allowOnly",
         "coverage": "vitest run --coverage",
         "lint": "eslint"
     },
