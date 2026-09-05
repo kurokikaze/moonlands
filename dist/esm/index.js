@@ -1,24 +1,3 @@
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
-var _a;
 import { nanoid, customRandom, urlAlphabet } from 'nanoid';
 import { MersenneTwister } from './mersenneTwister.js';
 import { TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, ACTION_PASS, ACTION_PLAY, ACTION_POWER, ACTION_EFFECT, ACTION_SELECT, ACTION_CALCULATE, ACTION_ENTER_PROMPT, ACTION_RESOLVE_PROMPT, ACTION_GET_PROPERTY_VALUE, ACTION_ATTACK, ACTION_PLAYER_WINS, ACTION_CONCEDE, ACTION_TIME_NOTIFICATION, ACTION_EXIT_PROMPTS, ACTION_PROPERTY, PROPERTY_ID, PROPERTY_TYPE, PROPERTY_CONTROLLER, PROPERTY_ENERGY_COUNT, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, PROPERTY_POWER_COST, PROPERTY_ABLE_TO_ATTACK, PROPERTY_CAN_BE_ATTACKED, PROPERTY_PROTECTION, CALCULATION_SET, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_HALVE_ROUND_DOWN, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_MAX, CALCULATION_MULTIPLY, SELECTOR_CREATURES, SELECTOR_CREATURES_AND_MAGI, SELECTOR_OWN_MAGI, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_MAGI_OF_REGION, SELECTOR_OPPONENT_ID, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, SELECTOR_CREATURES_OF_TYPE, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_OTHER_CREATURES_OF_TYPE, SELECTOR_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_ID, SELECTOR_CREATURES_OF_PLAYER, SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY, SELECTOR_NTH_CARD_OF_ZONE, SELECTOR_OWN_CARDS_IN_HAND, SELECTOR_CARDS_IN_HAND, SELECTOR_MAGI_OF_PLAYER, SELECTOR_RANDOM_CARD_IN_HAND, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_RELIC, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_OWN_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_CHOOSE_CARDS, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_MAGI_WITHOUT_CREATURES, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_PLAYER, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, PROMPT_TYPE_NUMBER_OF_CREATURES, PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_ALTERNATIVE, PROMPT_TYPE_PAYMENT_SOURCE, PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES, NO_PRIORITY, PRIORITY_PRS, PRIORITY_ATTACK, PRIORITY_CREATURES, EFFECT_TYPE_START_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_DRAW, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_PLAY_CREATURE, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_RELIC_ENTERS_PLAY, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE, EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC, EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_PAYING_ENERGY_FOR_POWER, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_CREATURE_IS_DEFEATED, // Possibly redundant
@@ -34,39 +13,39 @@ import { PromptValidator } from './PromptValidator.js';
 import { LogEngine } from './LogEngine.js';
 import convertPromptActionToEffect from './helpers/convertPromptAction.js';
 import performCalculation from './helpers/performCalculation.js';
-var convertCard = function (cardInGame) { return ({
+const convertCard = (cardInGame) => ({
     id: cardInGame.id,
     owner: cardInGame.owner,
     card: cardInGame.card.name,
     data: cardInGame.data,
-}); };
-export var DEFAULT_PROMPT_VARIABLE = (_a = {},
-    _a[PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE] = 'targetCards',
-    _a[PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE] = 'cardsOrder',
-    _a[PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE] = 'targetCards',
-    _a[PROMPT_TYPE_NUMBER] = 'number',
-    _a[PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE] = 'target',
-    _a[PROMPT_TYPE_RELIC] = 'target',
-    _a[PROMPT_TYPE_OWN_SINGLE_CREATURE] = 'target',
-    _a[PROMPT_TYPE_SINGLE_CREATURE_FILTERED] = 'target',
-    _a[PROMPT_TYPE_MAGI_WITHOUT_CREATURES] = 'target',
-    _a[PROMPT_TYPE_SINGLE_CREATURE] = 'target',
-    _a[PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI] = 'target',
-    _a[PROMPT_TYPE_SINGLE_MAGI] = 'targetMagi',
-    _a[PROMPT_TYPE_CHOOSE_CARDS] = 'selectedCards',
-    _a[PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES] = 'energyOnCreatures',
-    _a[PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES] = 'energyOnCreatures',
-    _a[PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES] = 'damageOnCreatures',
-    _a[PROMPT_TYPE_PLAYER] = 'targetPlayer',
-    _a[PROMPT_TYPE_NUMBER_OF_CREATURES] = 'targets',
-    _a[PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED] = 'targets',
-    _a[PROMPT_TYPE_POWER_ON_MAGI] = 'chosenPower',
-    _a[PROMPT_TYPE_ALTERNATIVE] = 'alternative',
-    _a[PROMPT_TYPE_PAYMENT_SOURCE] = 'paymentSource',
-    _a[PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES] = 'cardsInZones',
-    _a[PROMPT_TYPE_MAY_ABILITY] = '',
-    _a);
-var steps = [
+});
+export const DEFAULT_PROMPT_VARIABLE = {
+    [PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE]: 'targetCards',
+    [PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE]: 'cardsOrder',
+    [PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE]: 'targetCards',
+    [PROMPT_TYPE_NUMBER]: 'number',
+    [PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE]: 'target',
+    [PROMPT_TYPE_RELIC]: 'target',
+    [PROMPT_TYPE_OWN_SINGLE_CREATURE]: 'target',
+    [PROMPT_TYPE_SINGLE_CREATURE_FILTERED]: 'target',
+    [PROMPT_TYPE_MAGI_WITHOUT_CREATURES]: 'target',
+    [PROMPT_TYPE_SINGLE_CREATURE]: 'target',
+    [PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI]: 'target',
+    [PROMPT_TYPE_SINGLE_MAGI]: 'targetMagi',
+    [PROMPT_TYPE_CHOOSE_CARDS]: 'selectedCards',
+    [PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES]: 'energyOnCreatures',
+    [PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES]: 'energyOnCreatures',
+    [PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES]: 'damageOnCreatures',
+    [PROMPT_TYPE_PLAYER]: 'targetPlayer',
+    [PROMPT_TYPE_NUMBER_OF_CREATURES]: 'targets',
+    [PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED]: 'targets',
+    [PROMPT_TYPE_POWER_ON_MAGI]: 'chosenPower',
+    [PROMPT_TYPE_ALTERNATIVE]: 'alternative',
+    [PROMPT_TYPE_PAYMENT_SOURCE]: 'paymentSource',
+    [PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES]: 'cardsInZones',
+    [PROMPT_TYPE_MAY_ABILITY]: '', // Special case, doesn't use variables
+};
+const steps = [
     {
         name: 'Energize',
         priority: NO_PRIORITY,
@@ -121,7 +100,7 @@ var steps = [
         ],
     },
 ];
-var defaultState = {
+const defaultState = {
     actions: [],
     savedActions: [],
     delayedTriggers: [],
@@ -142,10 +121,8 @@ var defaultState = {
     attachedTo: {},
     cardsAttached: {},
 };
-var State = /** @class */ (function () {
-    function State(state) {
-        if (state === void 0) { state = defaultState; }
-        var _this = this;
+export class State {
+    constructor(state = defaultState) {
         this.players = [0, 1];
         this.twister = null;
         this.nanoid = nanoid;
@@ -154,7 +131,7 @@ var State = /** @class */ (function () {
         this.onFullAction = null;
         this.turnTimer = null;
         this.zoneHash = new Map();
-        this.state = __assign(__assign({}, clone(defaultState)), state);
+        this.state = Object.assign(Object.assign({}, clone(defaultState)), state);
         if (!('controllingPlayer' in state)) {
             this.state.controllingPlayer = this.state.activePlayer;
         }
@@ -168,56 +145,48 @@ var State = /** @class */ (function () {
         this.rollDebugValue = null,
             this.actionsOne = [];
         this.actionsTwo = [];
-        var self = this;
+        const self = this;
         this.selectorEngine = new SelectorEngine({
-            getZone: function (type, player) {
-                if (player === void 0) { player = null; }
-                return _this.getZone(type, player);
-            },
-            getOpponent: function (player) { return _this.getOpponent(player); },
+            getZone: (type, player = null) => this.getZone(type, player),
+            getOpponent: (player) => this.getOpponent(player),
             get players() { return self.players; },
-            getContinuousEffects: function () { return _this.state.continuousEffects; },
-            getTwister: function () { return _this.twister; },
+            getContinuousEffects: () => this.state.continuousEffects,
+            getTwister: () => this.twister,
         });
         this.promptValidator = new PromptValidator({
-            getZone: function (type, player) {
-                if (player === void 0) { player = null; }
-                return _this.getZone(type, player);
-            },
-            modifyByStaticAbilities: function (target, property, subProperty) { return _this.modifyByStaticAbilities(target, property, subProperty); },
-            getOpponent: function (player) { return _this.getOpponent(player); },
-            getMetaValue: function (value, sourceId) { return _this.getMetaValue(value, sourceId); },
-            checkAnyCardForRestrictions: function (cards, restrictions) { return _this.checkAnyCardForRestrictions(cards, restrictions); },
-            checkAnyCardForRestriction: function (cards, restriction, restrictionValue) { return _this.checkAnyCardForRestriction(cards, restriction, restrictionValue); },
+            getZone: (type, player = null) => this.getZone(type, player),
+            modifyByStaticAbilities: (target, property, subProperty) => this.modifyByStaticAbilities(target, property, subProperty),
+            getOpponent: (player) => this.getOpponent(player),
+            getMetaValue: (value, sourceId) => this.getMetaValue(value, sourceId),
+            checkAnyCardForRestrictions: (cards, restrictions) => this.checkAnyCardForRestrictions(cards, restrictions),
+            checkAnyCardForRestriction: (cards, restriction, restrictionValue) => this.checkAnyCardForRestriction(cards, restriction, restrictionValue),
         });
         this.logEngine = new LogEngine({
-            getMetaValue: function (value, spellId) { return _this.getMetaValue(value, spellId); },
-            getLog: function () { return _this.state.log; },
-            getPromptType: function () { return _this.state.promptType; },
+            getMetaValue: (value, spellId) => this.getMetaValue(value, spellId),
+            getLog: () => this.state.log,
+            getPromptType: () => this.state.promptType,
         });
     }
     // @deprecated
-    State.prototype.closeStreams = function () { };
-    State.prototype.initiatePRNG = function (seed) {
-        var _this = this;
+    closeStreams() { }
+    initiatePRNG(seed) {
         this.twisterSeed = seed;
         this.twister = new MersenneTwister(seed);
-        var seeded_nanoid = customRandom(urlAlphabet, 10, function (size) {
-            return (new Uint8Array(size)).map(function () { return 256 * _this.twister.random(); });
+        const seeded_nanoid = customRandom(urlAlphabet, 10, size => {
+            return (new Uint8Array(size)).map(() => 256 * this.twister.random());
         });
         this.nanoid = seeded_nanoid;
-    };
-    State.prototype.setOnAction = function (callback, fullStream) {
-        if (fullStream === void 0) { fullStream = false; }
+    }
+    setOnAction(callback, fullStream = false) {
         if (fullStream) {
             this.onFullAction = callback;
         }
         else {
             this.onAction = callback;
         }
-    };
-    State.prototype.addActionToStream = function (action) {
-        var actionWithValues = this.addValuesToAction(action);
+    }
+    addActionToStream(action) {
+        const actionWithValues = this.addValuesToAction(action);
         // Do not send outside CALCULATE, SELECT and so on
         if (![ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE].includes(action.type) && this.onAction) {
             this.onAction(actionWithValues);
@@ -225,9 +194,8 @@ var State = /** @class */ (function () {
         if (this.onFullAction) {
             this.onFullAction(actionWithValues);
         }
-    };
-    State.prototype.addValuesToAction = function (action) {
-        var _this = this;
+    }
+    addValuesToAction(action) {
         var _a;
         switch (action.type) {
             case ACTION_ENTER_PROMPT: {
@@ -235,18 +203,15 @@ var State = /** @class */ (function () {
                     case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
                         if ('restrictions' in action.promptParams) {
                             if (action.promptParams.restrictions) {
-                                var restrictionsWithValues = action.promptParams.restrictions.map(function (_a) {
-                                    var type = _a.type, value = _a.value;
-                                    return ({
-                                        type: type,
-                                        value: _this.getMetaValue(value, action.generatedBy),
-                                    });
-                                });
-                                return __assign(__assign({}, action), { promptParams: __assign(__assign({}, action.promptParams), { restrictions: restrictionsWithValues }) });
+                                const restrictionsWithValues = action.promptParams.restrictions.map(({ type, value }) => ({
+                                    type,
+                                    value: this.getMetaValue(value, action.generatedBy),
+                                }));
+                                return Object.assign(Object.assign({}, action), { promptParams: Object.assign(Object.assign({}, action.promptParams), { restrictions: restrictionsWithValues }) });
                             }
                         }
                         else {
-                            return __assign(__assign({}, action), { promptParams: __assign(__assign({}, action.promptParams), { restrictionValue: this.getMetaValue(action.promptParams.restrictionValue, action.generatedBy) }) });
+                            return Object.assign(Object.assign({}, action), { promptParams: Object.assign(Object.assign({}, action.promptParams), { restrictionValue: this.getMetaValue(action.promptParams.restrictionValue, action.generatedBy) }) });
                         }
                     }
                 }
@@ -255,19 +220,19 @@ var State = /** @class */ (function () {
             case ACTION_EFFECT: {
                 switch (action.effectType) {
                     case EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT: {
-                        return __assign(__assign({}, action), { staticAbilities: (_a = action.staticAbilities) === null || _a === void 0 ? void 0 : _a.map(function (ability) {
+                        return Object.assign(Object.assign({}, action), { staticAbilities: (_a = action.staticAbilities) === null || _a === void 0 ? void 0 : _a.map(ability => {
                                 var _a;
-                                var selectorParameter = ability.selectorParameter;
+                                let selectorParameter = ability.selectorParameter;
                                 if (ability.selector === SELECTOR_ID) {
-                                    selectorParameter = ability.selectorParameter ? (_a = _this.getMetaValue(ability.selectorParameter, action.generatedBy)) === null || _a === void 0 ? void 0 : _a.id : null;
+                                    selectorParameter = ability.selectorParameter ? (_a = this.getMetaValue(ability.selectorParameter, action.generatedBy)) === null || _a === void 0 ? void 0 : _a.id : null;
                                 }
                                 else {
-                                    selectorParameter = _this.getMetaValue(ability.selectorParameter, action.generatedBy);
+                                    selectorParameter = this.getMetaValue(ability.selectorParameter, action.generatedBy);
                                 }
-                                return __assign(__assign({}, ability), { modifier: {
-                                        operandOne: _this.getMetaValue(ability.modifier.operandOne, action.generatedBy),
+                                return Object.assign(Object.assign({}, ability), { modifier: {
+                                        operandOne: this.getMetaValue(ability.modifier.operandOne, action.generatedBy),
                                         operator: ability.modifier.operator,
-                                    }, selectorParameter: selectorParameter });
+                                    }, selectorParameter });
                             }) });
                     }
                 }
@@ -275,27 +240,27 @@ var State = /** @class */ (function () {
             default:
                 return action;
         }
-    };
-    State.prototype.enableDebug = function () {
+    }
+    enableDebug() {
         this.debug = true;
-    };
-    State.prototype.setRollDebugValue = function (value) {
+    }
+    setRollDebugValue(value) {
         this.rollDebugValue = value;
-    };
-    State.prototype.resetRollDebugValue = function () {
+    }
+    resetRollDebugValue() {
         this.rollDebugValue = null;
-    };
-    State.prototype.unsetWinner = function () {
+    }
+    unsetWinner() {
         this.winner = false;
-    };
-    State.prototype.setWinner = function (player) {
+    }
+    setWinner(player) {
         this.winner = player;
-    };
-    State.prototype.hasWinner = function () {
+    }
+    hasWinner() {
         return this.winner !== false;
-    };
-    State.prototype.clone = function () {
-        var newObject = new State(clone(this.state));
+    }
+    clone() {
+        const newObject = new State(clone(this.state));
         newObject.winner = this.winner;
         newObject.rollDebugValue = this.rollDebugValue;
         newObject.players = this.players;
@@ -304,70 +269,67 @@ var State = /** @class */ (function () {
             newObject.twister = new MersenneTwister(this.twisterSeed);
         }
         return newObject;
-    };
-    State.prototype.setPlayers = function (player1, player2) {
+    }
+    setPlayers(player1, player2) {
         this.players = [player1, player2];
         return this;
-    };
-    State.prototype.setDeck = function (player, cardNames) {
-        var _this = this;
+    }
+    setDeck(player, cardNames) {
         if (this.players.includes(player)) {
-            var deck = cardNames.map(function (card) {
-                var cardObject = byName(card);
+            const deck = cardNames.map(card => {
+                const cardObject = byName(card);
                 if (!cardObject) {
-                    throw new Error("Unknown card in deck: ".concat(card));
+                    throw new Error(`Unknown card in deck: ${card}`);
                 }
-                return new CardInGame(cardObject, player, _this.nanoid);
+                return new CardInGame(cardObject, player, this.nanoid);
             });
             this.decks.push({
-                player: player,
-                deck: deck,
+                player,
+                deck,
             });
         }
         else {
-            throw new Error("Non-existing player: ".concat(player));
+            throw new Error(`Non-existing player: ${player}`);
         }
-    };
-    State.prototype.enableTurnTimer = function (timer) {
-        if (timer === void 0) { timer = 75; }
+    }
+    enableTurnTimer(timer = 75) {
         this.turnTimer = timer;
         this.timerEnabled = true;
-    };
-    State.prototype.startTurnTimer = function () {
-        var _this = this;
+    }
+    startTurnTimer() {
         if (this.turnTimer && this.turnTimer > 0) {
-            this.turnTimeout = setTimeout(function () {
-                _this.endTurn();
+            this.turnTimeout = setTimeout(() => {
+                this.endTurn();
             }, this.turnTimer * 1000);
             if (this.turnTimer > 20) {
-                this.turnNotifyTimeout = setTimeout(function () {
-                    _this.update({ type: ACTION_TIME_NOTIFICATION, player: _this.state.activePlayer });
+                this.turnNotifyTimeout = setTimeout(() => {
+                    this.update({ type: ACTION_TIME_NOTIFICATION, player: this.state.activePlayer });
                 }, 20000);
             }
         }
-    };
-    State.prototype.stopTurnTimer = function () {
+    }
+    stopTurnTimer() {
         if (this.turnTimeout) {
             clearTimeout(this.turnTimeout);
         }
         if (this.turnNotifyTimeout) {
             clearTimeout(this.turnNotifyTimeout);
         }
-    };
-    State.prototype.endTurn = function () {
-        var activePlayer = this.state.activePlayer;
+    }
+    endTurn() {
+        const { activePlayer } = this.state;
         this.update({ type: ACTION_EXIT_PROMPTS });
         while (this.state.activePlayer === activePlayer) {
             this.update({ type: ACTION_PASS, player: activePlayer });
         }
-    };
-    State.prototype.addActionToLog = function (action) {
+    }
+    addActionToLog(action) {
         this.logEngine.addActionToLog(action);
-    };
-    State.prototype.createZones = function () {
-        var _a = this.players, playerOne = _a[0], playerTwo = _a[1];
-        var deck1 = new Zone('Player 1 deck', ZONE_TYPE_DECK, playerOne);
-        var deck2 = new Zone('Player 2 deck', ZONE_TYPE_DECK, playerTwo);
+    }
+    createZones() {
+        const [playerOne, playerTwo] = this.players;
+        const deck1 = new Zone('Player 1 deck', ZONE_TYPE_DECK, playerOne);
+        const deck2 = new Zone('Player 2 deck', ZONE_TYPE_DECK, playerTwo);
         if (this.twister) {
             deck1.setPRNG(this.twister);
             deck2.setPRNG(this.twister);
@@ -387,11 +349,10 @@ var State = /** @class */ (function () {
             new Zone('Player 2 magi pile', ZONE_TYPE_DEFEATED_MAGI, playerTwo),
             new Zone('In play', ZONE_TYPE_IN_PLAY, null),
         ];
-    };
-    State.prototype.serializeData = function (playerId, hideZones) {
-        if (hideZones === void 0) { hideZones = true; }
-        var gameEnded = !(this.winner === false);
-        var opponentId = this.players.find(function (player) { return player !== playerId; }) || 0;
+    }
+    serializeData(playerId, hideZones = true) {
+        const gameEnded = !(this.winner === false);
+        const opponentId = this.players.find(player => player !== playerId) || 0;
         return {
             zones: this.serializeZones(playerId, hideZones),
             continuousEffects: this.state.continuousEffects,
@@ -405,16 +366,15 @@ var State = /** @class */ (function () {
             promptPlayer: this.state.promptPlayer || null,
             promptGeneratedBy: this.state.promptGeneratedBy || null,
             promptParams: this.state.promptParams,
-            opponentId: opponentId,
+            opponentId,
             log: this.state.log,
-            gameEnded: gameEnded,
+            gameEnded,
             winner: gameEnded ? this.winner : null,
             cardsAttached: this.state.cardsAttached,
         };
-    };
-    State.prototype.serializeZones = function (playerId, hideZones) {
-        if (hideZones === void 0) { hideZones = true; }
-        var opponentId = this.getOpponent(playerId);
+    }
+    serializeZones(playerId, hideZones = true) {
+        const opponentId = this.getOpponent(playerId);
         return {
             playerHand: this.getZone(ZONE_TYPE_HAND, playerId).serialize(),
             opponentHand: this.getZone(ZONE_TYPE_HAND, opponentId).serialize(hideZones),
@@ -424,78 +384,69 @@ var State = /** @class */ (function () {
             opponentActiveMagi: this.getZone(ZONE_TYPE_ACTIVE_MAGI, opponentId).serialize(),
             playerMagiPile: this.getZone(ZONE_TYPE_MAGI_PILE, playerId).serialize(),
             opponentMagiPile: this.getZone(ZONE_TYPE_MAGI_PILE, opponentId).serialize(hideZones),
-            inPlay: this.getZone(ZONE_TYPE_IN_PLAY).cards.map(function (c) { return c.serialize(); }),
+            inPlay: this.getZone(ZONE_TYPE_IN_PLAY).cards.map(c => c.serialize()),
             playerDefeatedMagi: this.getZone(ZONE_TYPE_DEFEATED_MAGI, playerId).serialize(),
             opponentDefeatedMagi: this.getZone(ZONE_TYPE_DEFEATED_MAGI, opponentId).serialize(),
             playerDiscard: this.getZone(ZONE_TYPE_DISCARD, playerId).serialize(),
             opponentDiscard: this.getZone(ZONE_TYPE_DISCARD, opponentId).serialize(),
         };
-    };
-    State.prototype.setup = function () {
-        var _this = this;
+    }
+    setup() {
         if (this.players.length < 2) {
             throw new Error('Not enough players');
         }
         if (this.decks.length < 2) {
             throw new Error('Not enough decks for players');
         }
-        var zones = this.state.zones.length == 0 ? this.createZones() : this.state.zones;
+        const zones = this.state.zones.length == 0 ? this.createZones() : this.state.zones;
         this.state.zones = zones;
-        this.decks.forEach(function (_a) {
-            var player = _a.player, deck = _a.deck;
-            var magi = deck.filter(function (card) { return card.card.type === TYPE_MAGI; });
-            var rest = deck.filter(function (card) { return card.card.type != TYPE_MAGI; });
-            _this.getZone(ZONE_TYPE_MAGI_PILE, player).add(magi);
-            _this.getZone(ZONE_TYPE_DECK, player).add(rest).shuffle();
+        this.decks.forEach(({ player, deck }) => {
+            const magi = deck.filter(card => card.card.type === TYPE_MAGI);
+            const rest = deck.filter(card => card.card.type != TYPE_MAGI);
+            this.getZone(ZONE_TYPE_MAGI_PILE, player).add(magi);
+            this.getZone(ZONE_TYPE_DECK, player).add(rest).shuffle();
         });
         // @ts-ignore
-        var randomValue = this.twister ? this.twister.random() : Math.random();
-        var goesFirst = this.players[(randomValue > 0.5 ? 0 : 1)];
+        const randomValue = this.twister ? this.twister.random() : Math.random();
+        const goesFirst = this.players[(randomValue > 0.5 ? 0 : 1)];
         this.state.zones = zones;
         this.state.step = null;
         this.state.turn = 1;
         this.state.goesFirst = goesFirst;
         this.state.activePlayer = goesFirst;
         this.state.controllingPlayer = goesFirst;
-    };
-    State.prototype.getOpponent = function (player) {
-        var opponent = this.players.find(function (pl) { return pl != player; });
+    }
+    getOpponent(player) {
+        const opponent = this.players.find(pl => pl != player);
         return opponent || 0;
-    };
-    State.prototype.clearModifiedCardDataCache = function () {
+    }
+    clearModifiedCardDataCache() {
         this.selectorEngine.clearModifiedCardDataCache();
-    };
-    Object.defineProperty(State.prototype, "modifiedCardDataCache", {
-        get: function () {
-            return this.selectorEngine.modifiedCardDataCache;
-        },
-        enumerable: false,
-        configurable: true
-    });
-    State.prototype.getZone = function (type, player) {
-        if (player === void 0) { player = null; }
-        var key = "".concat(type).concat(player);
+    }
+    get modifiedCardDataCache() {
+        return this.selectorEngine.modifiedCardDataCache;
+    }
+    getZone(type, player = null) {
+        const key = `${type}${player}`;
         if (this.zoneHash.has(key)) {
             return this.zoneHash.get(key);
         }
-        var result = this.state.zones.find(function (zone) { return zone.type === type && (zone.player == player || player == null); }) || new Zone('Empty zone', ZONE_TYPE_DECK);
+        const result = this.state.zones.find(zone => zone.type === type && (zone.player == player || player == null)) || new Zone('Empty zone', ZONE_TYPE_DECK);
         this.zoneHash.set(key, result);
         return result;
-    };
-    State.prototype.getCurrentStep = function () {
+    }
+    getCurrentStep() {
         return this.state.step;
-    };
-    State.prototype.getActivePlayer = function () {
+    }
+    getActivePlayer() {
         return this.state.activePlayer;
-    };
-    State.prototype.getControllingPlayer = function () {
+    }
+    getControllingPlayer() {
         var _a;
-        for (var _i = 0, _b = this.state.continuousEffects; _i < _b.length; _i++) {
-            var effect = _b[_i];
-            for (var _c = 0, _d = ((_a = effect.staticAbilities) !== null && _a !== void 0 ? _a : []); _c < _d.length; _c++) {
-                var ability = _d[_c];
+        for (const effect of this.state.continuousEffects) {
+            for (const ability of ((_a = effect.staticAbilities) !== null && _a !== void 0 ? _a : [])) {
                 if (ability.property === PROPERTY_CONTROLLING_PLAYER) {
-                    var value = this.getMetaValue(ability.modifier.operandOne, effect.id);
+                    const value = this.getMetaValue(ability.modifier.operandOne, effect.id);
                     if (typeof value === 'number') {
                         return value;
                     }
@@ -503,110 +454,95 @@ var State = /** @class */ (function () {
             }
         }
         return this.state.controllingPlayer;
-    };
-    State.prototype.getCurrentPriority = function () {
+    }
+    getCurrentPriority() {
         return this.state.step === null ? 0 : steps[this.state.step].priority;
-    };
-    State.prototype.addActions = function () {
-        var _a;
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        (_a = this.state.actions).push.apply(_a, args);
-    };
-    State.prototype.transformIntoActions = function () {
-        var _a;
-        var args = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            args[_i] = arguments[_i];
-        }
-        (_a = this.state.actions).unshift.apply(_a, args);
-    };
-    State.prototype.removeDelayedTrigger = function (triggerId) {
-        this.state.delayedTriggers = this.state.delayedTriggers.filter(function (_a) {
-            var id = _a.id;
-            return id != triggerId;
-        });
-    };
-    State.prototype.getNextAction = function () {
+    }
+    addActions(...args) {
+        this.state.actions.push(...args);
+    }
+    transformIntoActions(...args) {
+        this.state.actions.unshift(...args);
+    }
+    removeDelayedTrigger(triggerId) {
+        this.state.delayedTriggers = this.state.delayedTriggers.filter(({ id }) => id != triggerId);
+    }
+    getNextAction() {
         return this.state.actions.shift();
-    };
-    State.prototype.hasActions = function () {
+    }
+    hasActions() {
         return this.state.actions.length > 0;
-    };
-    State.prototype.setSpellMetadata = function (metadata, spellId) {
+    }
+    setSpellMetadata(metadata, spellId) {
         this.state.spellMetaData[spellId] = metadata;
-    };
-    State.prototype.getSpellMetadata = function (spellId) {
+    }
+    getSpellMetadata(spellId) {
         return this.state.spellMetaData[spellId] || {};
-    };
-    State.prototype.setSpellMetaDataField = function (field, value, spellId) {
-        var _a;
+    }
+    setSpellMetaDataField(field, value, spellId) {
         if (!spellId) {
             throw new Error('Saving spell metadata field without spellId');
         }
-        var metaData = this.getSpellMetadata(spellId);
-        this.setSpellMetadata(__assign(__assign({}, metaData), (_a = {}, _a[field] = value, _a)), spellId);
-    };
-    State.prototype.clearSpellMetaDataField = function (field, spellId) {
-        var spellMetaData = this.state.spellMetaData[spellId];
+        const metaData = this.getSpellMetadata(spellId);
+        this.setSpellMetadata(Object.assign(Object.assign({}, metaData), { [field]: value }), spellId);
+    }
+    clearSpellMetaDataField(field, spellId) {
+        const spellMetaData = this.state.spellMetaData[spellId];
         if (spellMetaData && field in spellMetaData) {
             delete spellMetaData[field];
         }
         if (spellId in this.state.spellMetaData && Object.keys(spellMetaData).length === 0) {
             delete this.state.spellMetaData[spellId];
         }
-    };
-    State.prototype.getMetaValue = function (value, spellId) {
+    }
+    getMetaValue(value, spellId) {
         if (typeof value == 'string' &&
             value[0] == '$' &&
             spellId) {
-            var variableName = value.slice(1);
-            var spellMetaData = this.getSpellMetadata(spellId);
+            const variableName = value.slice(1);
+            const spellMetaData = this.getSpellMetadata(spellId);
             return (variableName in spellMetaData) ? spellMetaData[variableName] : null;
         }
         else {
             return value;
         }
-    };
+    }
     /**
          * Same as getMetaValue, but instead of $-variables it uses %-variables
          * $-variables are kept intact, we probably need them
          * %-variables include usual "self": link to trigger source
          */
-    State.prototype.prepareMetaValue = function (value, action, self, spellId) {
+    prepareMetaValue(value, action, self, spellId) {
         if (value === '%self')
             return self;
         if (typeof value == 'string' &&
             value[0] == '%') {
-            var variableName = value.slice(1);
+            const variableName = value.slice(1);
             // %-variables first refer to action's properties
             if (Object.hasOwn(action, variableName))
                 return action[variableName];
             // if not, we use spellMetaData
-            var spellMetaData = this.getSpellMetadata(spellId);
+            const spellMetaData = this.getSpellMetadata(spellId);
             return Object.hasOwn(spellMetaData, variableName) ? spellMetaData[variableName] : null;
         }
         else {
             return value;
         }
-    };
-    State.prototype.selectNthCardOfZone = function (player, zoneType, cardNumber, restrictions) {
+    }
+    selectNthCardOfZone(player, zoneType, cardNumber, restrictions) {
         return this.selectorEngine.selectNthCardOfZone(player, zoneType, cardNumber, restrictions);
-    };
-    State.prototype.selectRandomCardOfZone = function (player, zoneType) {
+    }
+    selectRandomCardOfZone(player, zoneType) {
         return this.selectorEngine.selectRandomCardOfZone(player, zoneType);
-    };
-    State.prototype.useSelector = function (selector, player, argument) {
+    }
+    useSelector(selector, player, argument) {
         return this.selectorEngine.useSelectorAny(selector, player, argument);
-    };
-    State.prototype.getByProperty = function (target, property, subProperty) {
-        if (subProperty === void 0) { subProperty = null; }
+    }
+    getByProperty(target, property, subProperty = null) {
         return this.selectorEngine.getByPropertyAny(target, property, subProperty);
-    };
-    State.prototype.isCardAffectedByEffect = function (card, effect) {
-        var protection = this.modifyByStaticAbilities(card, PROPERTY_PROTECTION);
+    }
+    isCardAffectedByEffect(card, effect) {
+        const protection = this.modifyByStaticAbilities(card, PROPERTY_PROTECTION);
         if (protection) {
             // Is the `from` right?
             if ((effect.spell && protection.from && protection.from.includes(PROTECTION_FROM_SPELLS)) ||
@@ -614,9 +550,9 @@ var State = /** @class */ (function () {
                 (effect.attack && protection.from && protection.from.includes(PROTECTION_FROM_ATTACKS))) {
                 if (effect.effectType === EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE &&
                     protection.type === PROTECTION_TYPE_ENERGY_LOSS) {
-                    var source = effect.source;
+                    const source = effect.source;
                     if (protection.restrictions) {
-                        var cardFilter = this.makeCardFilter(protection.restrictions);
+                        const cardFilter = this.makeCardFilter(protection.restrictions);
                         return !cardFilter(source);
                     }
                     else {
@@ -625,11 +561,11 @@ var State = /** @class */ (function () {
                 }
                 if ((effect.effectType === EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY && protection.type === PROTECTION_TYPE_DISCARDING_FROM_PLAY) ||
                     protection.type === PROTECTION_TYPE_GENERAL) {
-                    var source = effect.source;
+                    const source = effect.source;
                     if (!source)
                         return false;
                     if (protection.restrictions) {
-                        var cardFilter = this.makeCardFilter(protection.restrictions);
+                        const cardFilter = this.makeCardFilter(protection.restrictions);
                         return !cardFilter(source);
                     }
                     else {
@@ -638,10 +574,10 @@ var State = /** @class */ (function () {
                 }
                 if (protection.type === PROTECTION_TYPE_GENERAL) {
                     if (protection.restrictions) {
-                        var source = effect.source;
+                        const source = effect.source;
                         if (!source)
                             return false;
-                        var cardFilter = this.makeCardFilter(protection.restrictions);
+                        const cardFilter = this.makeCardFilter(protection.restrictions);
                         return !cardFilter(source);
                     }
                     else {
@@ -663,34 +599,32 @@ var State = /** @class */ (function () {
             }
         }
         return true;
-    };
-    State.prototype.isCardAffectedByStaticAbility = function (card, staticAbility) {
+    }
+    isCardAffectedByStaticAbility(card, staticAbility) {
         return this.selectorEngine.isCardAffectedByStaticAbility(card, staticAbility);
-    };
-    State.prototype.modifyByStaticAbilities = function (target, property, subProperty) {
-        if (subProperty === void 0) { subProperty = null; }
+    }
+    modifyByStaticAbilities(target, property, subProperty = null) {
         return this.selectorEngine.modifyByStaticAbilities(target, property, subProperty);
-    };
-    State.prototype.layeredDataReducer = function (currentCard, staticAbility) {
+    }
+    layeredDataReducer(currentCard, staticAbility) {
         return this.selectorEngine.layeredDataReducer(currentCard, staticAbility);
-    };
-    State.prototype.makeChecker = function (restriction, restrictionValue) {
+    }
+    makeChecker(restriction, restrictionValue) {
         return this.selectorEngine.makeChecker(restriction, restrictionValue);
-    };
-    State.prototype.checkAnyCardForRestriction = function (cards, restriction, restrictionValue) {
+    }
+    checkAnyCardForRestriction(cards, restriction, restrictionValue) {
         return this.selectorEngine.checkAnyCardForRestriction(cards, restriction, restrictionValue);
-    };
-    State.prototype.checkAnyCardForRestrictions = function (cards, restrictions) {
+    }
+    checkAnyCardForRestrictions(cards, restrictions) {
         return this.selectorEngine.checkAnyCardForRestrictions(cards, restrictions);
-    };
-    State.prototype.checkCardsForRestriction = function (cards, restriction, restrictionValue) {
+    }
+    checkCardsForRestriction(cards, restriction, restrictionValue) {
         return this.selectorEngine.checkCardsForRestriction(cards, restriction, restrictionValue);
-    };
-    State.prototype.makeCardFilter = function (restrictions) {
-        if (restrictions === void 0) { restrictions = []; }
+    }
+    makeCardFilter(restrictions = []) {
         return this.selectorEngine.makeCardFilter(restrictions);
-    };
-    State.prototype.getObjectOrSelf = function (action, self, object, property) {
+    }
+    getObjectOrSelf(action, self, object, property) {
         if (typeof object === 'boolean' || typeof object === 'number') {
             return object;
         }
@@ -698,24 +632,29 @@ var State = /** @class */ (function () {
             return self;
         }
         return property ? this.getMetaValue(action[object], action.generatedBy) : object;
-    };
-    State.prototype.replaceByReplacementEffect = function (action) {
-        var _this = this;
+    }
+    replaceByReplacementEffect(action) {
         var _a;
-        var PLAYER_ONE = this.players[0];
-        var PLAYER_TWO = this.players[1];
-        var allZonesCards = __spreadArray(__spreadArray(__spreadArray([], (this.getZone(ZONE_TYPE_IN_PLAY) || { cards: [] }).cards, true), (this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE)).cards, true), (this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO)).cards, true);
-        var zoneReplacements = allZonesCards.reduce(function (acc, cardInPlay) { return cardInPlay.card.data.replacementEffects ? __spreadArray(__spreadArray([], acc, true), cardInPlay.card.data.replacementEffects
-            .filter(function (effect) { return !effect.oncePerTurn || (effect.oncePerTurn && !cardInPlay.wasActionUsed(effect.name || 'unknown effect')); })
-            .map(function (effect) { return (__assign(__assign({}, effect), { self: cardInPlay })); }), true) : acc; }, []);
-        var replacementFound = false;
-        var appliedReplacerId = null;
-        var appliedReplacerSelf = null;
-        var replaceWith = null;
-        var foundReplacer = null;
-        for (var _i = 0, zoneReplacements_1 = zoneReplacements; _i < zoneReplacements_1.length; _i++) {
-            var replacer = zoneReplacements_1[_i];
-            var replacerId = replacer.self.id; // Not really, but will work for now
+        const PLAYER_ONE = this.players[0];
+        const PLAYER_TWO = this.players[1];
+        const allZonesCards = [
+            ...(this.getZone(ZONE_TYPE_IN_PLAY) || { cards: [] }).cards,
+            ...(this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE)).cards,
+            ...(this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO)).cards,
+        ];
+        const zoneReplacements = allZonesCards.reduce((acc, cardInPlay) => cardInPlay.card.data.replacementEffects ? [
+            ...acc,
+            ...cardInPlay.card.data.replacementEffects
+                .filter(effect => !effect.oncePerTurn || (effect.oncePerTurn && !cardInPlay.wasActionUsed(effect.name || 'unknown effect')))
+                .map(effect => (Object.assign(Object.assign({}, effect), { self: cardInPlay }))),
+        ] : acc, []);
+        let replacementFound = false;
+        let appliedReplacerId = null;
+        let appliedReplacerSelf = null;
+        let replaceWith = null;
+        let foundReplacer = null;
+        for (let replacer of zoneReplacements) {
+            const replacerId = replacer.self.id; // Not really, but will work for now
             if ('replacedBy' in action && ((_a = action.replacedBy) === null || _a === void 0 ? void 0 : _a.includes(replacerId))) {
                 break;
             }
@@ -727,50 +666,52 @@ var State = /** @class */ (function () {
                 replaceWith = (replacer.replaceWith instanceof Array) ? replacer.replaceWith : [replacer.replaceWith];
             }
         }
-        var previouslyReplacedBy = ('replacedBy' in action && action.replacedBy) ? action.replacedBy : [];
+        const previouslyReplacedBy = ('replacedBy' in action && action.replacedBy) ? action.replacedBy : [];
         if (!action) {
             throw new Error('Empty action found in the queue');
         }
         if (replacementFound && replaceWith) {
-            var resultEffects = appliedReplacerSelf ? replaceWith.map((function (appliedReplacerSelf) { return function (replacementEffect) {
+            const resultEffects = appliedReplacerSelf ? replaceWith.map(((appliedReplacerSelf) => (replacementEffect) => {
                 if ('type' in replacementEffect && replacementEffect.type == ACTION_EXIT_PROMPTS) {
                     throw new Error('Cannot replace anything with ACTION_EXIT_PROMPTS');
                 }
                 if (!('type' in replacementEffect)) {
-                    var resultEffect_1 = __assign(__assign({ type: ACTION_EFFECT }, replacementEffect), { replacedBy: appliedReplacerId ? __spreadArray(__spreadArray([], previouslyReplacedBy, true), [
+                    const resultEffect = Object.assign(Object.assign({ type: ACTION_EFFECT }, replacementEffect), { replacedBy: appliedReplacerId ? [
+                            ...previouslyReplacedBy,
                             appliedReplacerId,
-                        ], false) : previouslyReplacedBy, generatedBy: action.generatedBy || _this.nanoid(), player: appliedReplacerSelf.data.controller });
+                        ] : previouslyReplacedBy, generatedBy: action.generatedBy || this.nanoid(), player: appliedReplacerSelf.data.controller });
                     Object.keys(replacementEffect)
-                        .filter(function (key) { return !['type', 'effectType'].includes(key); })
-                        .forEach(function (key) {
-                        var value = _this.prepareMetaValue(replacementEffect[key], action, appliedReplacerSelf, action.generatedBy || 'thegame');
-                        resultEffect_1[key] = value;
+                        .filter(key => !['type', 'effectType'].includes(key))
+                        .forEach(key => {
+                        const value = this.prepareMetaValue(replacementEffect[key], action, appliedReplacerSelf, action.generatedBy || 'thegame');
+                        resultEffect[key] = value;
                     });
-                    return resultEffect_1;
+                    return resultEffect;
                 }
-                var resultEffect /*: WithReplacementValues<EffectType, EffectType>*/ = __assign(__assign({}, replacementEffect), { replacedBy: appliedReplacerId ? __spreadArray(__spreadArray([], previouslyReplacedBy, true), [
+                let resultEffect /*: WithReplacementValues<EffectType, EffectType>*/ = Object.assign(Object.assign({}, replacementEffect), { replacedBy: appliedReplacerId ? [
+                        ...previouslyReplacedBy,
                         appliedReplacerId,
-                    ], false) : previouslyReplacedBy, generatedBy: action.generatedBy || _this.nanoid(), player: appliedReplacerSelf.data.controller });
+                    ] : previouslyReplacedBy, generatedBy: action.generatedBy || this.nanoid(), player: appliedReplacerSelf.data.controller });
                 // prepare %-values on created action
                 Object.keys(replacementEffect)
-                    .filter(function (key) { return !['type', 'effectType'].includes(key); })
-                    .forEach(function (key) {
-                    var value = _this.prepareMetaValue(replacementEffect[key], action, appliedReplacerSelf, action.generatedBy || 'thegame');
+                    .filter(key => !['type', 'effectType'].includes(key))
+                    .forEach(key => {
+                    const value = this.prepareMetaValue(replacementEffect[key], action, appliedReplacerSelf, action.generatedBy || 'thegame');
                     resultEffect[key] = value;
                 });
                 return resultEffect;
-            }; })(appliedReplacerSelf)) : [];
+            })(appliedReplacerSelf)) : [];
             // If the replacer is one-time, set the action usage
             if (appliedReplacerSelf && foundReplacer && foundReplacer.oncePerTurn && foundReplacer.name) {
                 appliedReplacerSelf.setActionUsed(foundReplacer.name);
             }
             if (foundReplacer && foundReplacer.mayEffect) {
-                var replacedBy = ('replacedBy' in action && action.replacedBy) ? __spreadArray([], action.replacedBy, true) : [];
+                const replacedBy = ('replacedBy' in action && action.replacedBy) ? [...action.replacedBy] : [];
                 if (appliedReplacerId) {
                     replacedBy.push(appliedReplacerId);
                 }
                 this.state.mayEffectActions = resultEffects;
-                this.state.fallbackActions = [__assign(__assign({}, action), { replacedBy: replacedBy })];
+                this.state.fallbackActions = [Object.assign(Object.assign({}, action), { replacedBy })];
                 return [{
                         type: ACTION_ENTER_PROMPT,
                         promptType: PROMPT_TYPE_MAY_ABILITY,
@@ -789,23 +730,23 @@ var State = /** @class */ (function () {
             }
         }
         return [action];
-    };
-    State.prototype.checkCondition = function (action, self, condition) {
+    }
+    checkCondition(action, self, condition) {
         if (!('objectOne' in condition) ||
             !('objectTwo' in condition)) {
             throw new Error('Missing object field in condition');
         }
         // Sometimes, spellData stores arrays of cards. If we got array to check condition on, use only first item.
-        var multiObjectOne = this.getObjectOrSelf(action, self, condition.objectOne, 'propertyOne' in condition && Boolean(condition.propertyOne));
-        var objectOne = (multiObjectOne instanceof Array) ? multiObjectOne[0] : multiObjectOne;
-        var multiObjectTwo = this.getObjectOrSelf(action, self, condition.objectTwo, 'propertyTwo' in condition && Boolean(condition.propertyTwo));
-        var objectTwo = (multiObjectTwo instanceof Array) ? multiObjectTwo[0] : multiObjectTwo;
+        const multiObjectOne = this.getObjectOrSelf(action, self, condition.objectOne, 'propertyOne' in condition && Boolean(condition.propertyOne));
+        const objectOne = (multiObjectOne instanceof Array) ? multiObjectOne[0] : multiObjectOne;
+        const multiObjectTwo = this.getObjectOrSelf(action, self, condition.objectTwo, 'propertyTwo' in condition && Boolean(condition.propertyTwo));
+        const objectTwo = (multiObjectTwo instanceof Array) ? multiObjectTwo[0] : multiObjectTwo;
         // So here either objectOne or objectTwo might be an array. 
         if (objectOne instanceof Array || objectTwo instanceof Array) {
             throw new Error('Whoops, array in checkCondition');
         }
-        var operandOne = (condition.propertyOne && condition.propertyOne !== ACTION_PROPERTY) ? this.modifyByStaticAbilities(objectOne, condition.propertyOne) : objectOne;
-        var operandTwo = (condition.propertyTwo && condition.propertyTwo !== ACTION_PROPERTY) ? this.modifyByStaticAbilities(objectTwo, condition.propertyTwo) : objectTwo;
+        const operandOne = (condition.propertyOne && condition.propertyOne !== ACTION_PROPERTY) ? this.modifyByStaticAbilities(objectOne, condition.propertyOne) : objectOne;
+        const operandTwo = (condition.propertyTwo && condition.propertyTwo !== ACTION_PROPERTY) ? this.modifyByStaticAbilities(objectTwo, condition.propertyTwo) : objectTwo;
         switch (condition.comparator) {
             case '!=':
                 return operandOne !== operandTwo;
@@ -822,19 +763,18 @@ var State = /** @class */ (function () {
             case 'includes':
                 return operandOne.length && operandOne.includes(operandTwo);
         }
-    };
-    State.prototype.matchAction = function (action, find, self) {
-        var _this = this;
+    }
+    matchAction(action, find, self) {
         if (action.type !== ACTION_EFFECT) {
             return false;
         }
         if (action.effectType !== find.effectType) {
             return false;
         }
-        var conditions = find.conditions.map(function (condition) {
-            var result = false;
+        const conditions = find.conditions.map(condition => {
+            let result = false;
             try {
-                result = _this.checkCondition(action, self, condition);
+                result = this.checkCondition(action, self, condition);
             }
             catch (e) {
                 console.error('Failure checking condition');
@@ -842,38 +782,43 @@ var State = /** @class */ (function () {
             }
             return result;
         });
-        return conditions.every(function (result) { return result === true; });
-    };
-    State.prototype.triggerAbilities = function (action) {
-        var _this = this;
-        var PLAYER_ONE = this.players[0];
-        var PLAYER_TWO = this.players[1];
-        var allZonesCards = __spreadArray(__spreadArray(__spreadArray([], (this.getZone(ZONE_TYPE_IN_PLAY) || { cards: [] }).cards, true), (this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE) || { cards: [] }).cards, true), (this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO) || { cards: [] }).cards, true);
-        var cardTriggerEffects = allZonesCards.reduce(function (acc, cardInPlay) { return cardInPlay.card.data.triggerEffects ? __spreadArray(__spreadArray([], acc, true), cardInPlay.card.data.triggerEffects.map(function (effect) { return (__assign(__assign({}, effect), { self: cardInPlay })); }), true) : acc; }, []);
+        return conditions.every(result => result === true);
+    }
+    triggerAbilities(action) {
+        const PLAYER_ONE = this.players[0];
+        const PLAYER_TWO = this.players[1];
+        const allZonesCards = [
+            ...(this.getZone(ZONE_TYPE_IN_PLAY) || { cards: [] }).cards,
+            ...(this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE) || { cards: [] }).cards,
+            ...(this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO) || { cards: [] }).cards,
+        ];
+        const cardTriggerEffects = allZonesCards.reduce((acc, cardInPlay) => cardInPlay.card.data.triggerEffects ? [
+            ...acc,
+            ...cardInPlay.card.data.triggerEffects.map(effect => (Object.assign(Object.assign({}, effect), { self: cardInPlay }))),
+        ] : acc, []);
         // const continuousEffectTriggers = this.state.continuousEffects.map(effect => effect.triggerEffects.map(triggerEffect => ({...triggerEffect, id: effect.id})) || []).flat();
-        var triggerEffects = __spreadArray(__spreadArray([], cardTriggerEffects, true), this.state.delayedTriggers, true);
-        triggerEffects.forEach(function (replacer) {
+        const triggerEffects = [...cardTriggerEffects, ...this.state.delayedTriggers, /* ...continuousEffectTriggers*/];
+        triggerEffects.forEach(replacer => {
             // @ts-ignore
-            var triggeredId = replacer.self.id; // Not really, but will work for now
-            if (_this.matchAction(action, replacer.find, replacer.self)) {
+            const triggeredId = replacer.self.id; // Not really, but will work for now
+            if (this.matchAction(action, replacer.find, replacer.self)) {
                 // Save source to *trigger source* metadata (it's probably empty)
                 // For creatures set creatureSource field (just for convenience)
-                _this.setSpellMetaDataField('source', replacer.self, /*action.generatedBy ||*/ triggeredId);
+                this.setSpellMetaDataField('source', replacer.self, /*action.generatedBy ||*/ triggeredId);
                 if (replacer.self.card.type === TYPE_CREATURE) {
-                    _this.setSpellMetaDataField('sourceCreature', replacer.self, /*action.generatedBy ||*/ triggeredId);
+                    this.setSpellMetaDataField('sourceCreature', replacer.self, /*action.generatedBy ||*/ triggeredId);
                 }
                 // Turn all metadata entries into their corresponding values 
-                var actionWithValues_1 = Object.fromEntries(Object.entries(action).map(function (_a) {
-                    var key = _a[0], value = _a[1];
+                const actionWithValues = Object.fromEntries(Object.entries(action).map(([key, value]) => {
                     if (typeof value == 'string' && value.startsWith('$')) {
-                        return [key, _this.getMetaValue(value, action.generatedBy)];
+                        return [key, this.getMetaValue(value, action.generatedBy)];
                     }
                     return [key, value];
                 }));
                 // Turn effect-templates into actual effect actions by preparing meta-values				
-                var preparedEffects = replacer.effects.map(function (effect) {
+                const preparedEffects = replacer.effects.map(effect => {
                     // @ts-ignore
-                    var resultEffect = {
+                    let resultEffect = {
                         type: effect.type || ACTION_EFFECT,
                         generatedBy: /*action.generatedBy ||*/ triggeredId, // Some actions do not have generatedBy (game actions). We still need one though.
                         triggeredId: [triggeredId],
@@ -887,10 +832,10 @@ var State = /** @class */ (function () {
                     }
                     // prepare %-values on created action
                     Object.keys(effect)
-                        .filter(function (key) { return !['type', 'effectType'].includes(key); })
-                        .forEach(function (key) {
-                        var propertyValue = effect[key];
-                        var value = _this.prepareMetaValue(propertyValue, actionWithValues_1, replacer.self, action.generatedBy || _this.nanoid());
+                        .filter(key => !['type', 'effectType'].includes(key))
+                        .forEach(key => {
+                        const propertyValue = effect[key];
+                        const value = this.prepareMetaValue(propertyValue, actionWithValues, replacer.self, action.generatedBy || this.nanoid());
                         // if (typeof value == 'string' && value.startsWith('$')) {
                         // 	console.log(`Interpolating ${key} with generatedBy ${action.generatedBy}`)
                         // 	console.dir(this.getMetaValue(value, action.generatedBy))
@@ -906,11 +851,11 @@ var State = /** @class */ (function () {
                     effectType: EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED,
                     generatedBy: triggeredId,
                 });
-                var allPromptsAreDoable = _this.checkPrompts(replacer.self, preparedEffects, false, 0);
+                const allPromptsAreDoable = this.checkPrompts(replacer.self, preparedEffects, false, 0);
                 if (allPromptsAreDoable) {
                     if (replacer.mayEffect) {
-                        _this.state.mayEffectActions = preparedEffects;
-                        _this.transformIntoActions({
+                        this.state.mayEffectActions = preparedEffects;
+                        this.transformIntoActions({
                             type: ACTION_ENTER_PROMPT,
                             promptType: PROMPT_TYPE_MAY_ABILITY,
                             promptParams: {
@@ -924,147 +869,137 @@ var State = /** @class */ (function () {
                         });
                     }
                     else {
-                        _this.transformIntoActions.apply(_this, preparedEffects);
+                        this.transformIntoActions(...preparedEffects);
                     }
                 }
                 // @ts-ignore
                 if (replacer.id) {
                     // @ts-ignore
-                    _this.removeDelayedTrigger(replacer.id);
+                    this.removeDelayedTrigger(replacer.id);
                 }
             }
         });
-    };
-    State.prototype.attachCard = function (cardId, attachmentTargetId) {
+    }
+    attachCard(cardId, attachmentTargetId) {
         this.state.attachedTo[cardId] = attachmentTargetId;
         if (!(attachmentTargetId in this.state.cardsAttached)) {
             this.state.cardsAttached[attachmentTargetId] = [];
         }
         this.state.cardsAttached[attachmentTargetId].push(cardId);
-    };
-    State.prototype.removeAttachments = function (cardId) {
+    }
+    removeAttachments(cardId) {
         if (cardId in this.state.cardsAttached) {
-            for (var _i = 0, _a = this.state.cardsAttached[cardId]; _i < _a.length; _i++) {
-                var attachedCardId = _a[_i];
+            for (let attachedCardId of this.state.cardsAttached[cardId]) {
                 if (attachedCardId in this.state.attachedTo) {
                     delete this.state.attachedTo[attachedCardId];
                 }
             }
             delete this.state.cardsAttached[cardId];
         }
-    };
-    State.prototype.convertPromptActionToEffect = function (action) {
+    }
+    convertPromptActionToEffect(action) {
         return convertPromptActionToEffect(action, this);
-    };
-    State.prototype.detachCard = function (cardId) {
+    }
+    detachCard(cardId) {
         if (cardId in this.state.attachedTo) {
-            var attachedTargetId = this.state.attachedTo[cardId];
+            const attachedTargetId = this.state.attachedTo[cardId];
             delete this.state.attachedTo[cardId];
             this.state.cardsAttached[attachedTargetId] =
-                this.state.cardsAttached[attachedTargetId].filter(function (attachedCard) { return attachedCard !== cardId; });
+                this.state.cardsAttached[attachedTargetId].filter(attachedCard => attachedCard !== cardId);
             if (this.state.cardsAttached[attachedTargetId].length === 0) {
                 delete this.state.cardsAttached[attachedTargetId];
             }
         }
-    };
-    State.prototype.performCalculation = function (operator, operandOne, operandTwo) {
+    }
+    performCalculation(operator, operandOne, operandTwo) {
         return performCalculation(operator, operandOne, operandTwo);
-    };
-    State.prototype.calculateTotalCost = function (card) {
+    }
+    calculateTotalCost(card) {
         return this.selectorEngine.calculateTotalCost(card);
-    };
-    State.prototype.getAvailableCards = function (player, topMagi) {
+    }
+    getAvailableCards(player, topMagi) {
         var _a, _b;
-        var deckCards = this.getZone(ZONE_TYPE_DECK, player).cards.map(function (_a) {
-            var card = _a.card;
-            return card.name;
-        });
-        var discardCards = this.getZone(ZONE_TYPE_DISCARD, player).cards.map(function (_a) {
-            var card = _a.card;
-            return card.name;
-        });
-        var searchableCards = __spreadArray(__spreadArray([], deckCards, true), discardCards, true);
-        var availableCards = ((_b = (_a = topMagi.card.data) === null || _a === void 0 ? void 0 : _a.startingCards) === null || _b === void 0 ? void 0 : _b.filter(function (card) { return searchableCards.includes(card); })) || [];
+        const deckCards = this.getZone(ZONE_TYPE_DECK, player).cards.map(({ card }) => card.name);
+        const discardCards = this.getZone(ZONE_TYPE_DISCARD, player).cards.map(({ card }) => card.name);
+        const searchableCards = [...deckCards, ...discardCards];
+        const availableCards = ((_b = (_a = topMagi.card.data) === null || _a === void 0 ? void 0 : _a.startingCards) === null || _b === void 0 ? void 0 : _b.filter(card => searchableCards.includes(card))) || [];
         return availableCards;
-    };
-    State.prototype.checkPrompts = function (source, preparedActions, isPower, powerCost) {
-        if (isPower === void 0) { isPower = false; }
-        if (powerCost === void 0) { powerCost = 0; }
+    }
+    checkPrompts(source, preparedActions, isPower = false, powerCost = 0) {
         return this.promptValidator.checkPrompts(source, preparedActions, isPower, powerCost);
-    };
-    State.prototype.update = function (initialAction) {
-        var _this = this;
+    }
+    update(initialAction) {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
         if (this.hasWinner()) {
             return false;
         }
         this.addActions(initialAction);
-        var _loop_1 = function () {
-            var rawAction = this_1.getNextAction();
-            var replacedActions = this_1.replaceByReplacementEffect(rawAction);
-            var action = replacedActions[0];
+        while (this.hasActions()) {
+            const rawAction = this.getNextAction();
+            const replacedActions = this.replaceByReplacementEffect(rawAction);
+            const action = replacedActions[0];
             if (replacedActions.length > 1) {
                 // Stuff the rest of them into beginning of the action queue
-                this_1.transformIntoActions.apply(this_1, replacedActions.slice(1));
+                this.transformIntoActions(...replacedActions.slice(1));
             }
-            if (this_1.state.prompt && !(action.type === ACTION_RESOLVE_PROMPT || action.type === ACTION_CONCEDE || action.type === ACTION_EXIT_PROMPTS || (action.type == ACTION_EFFECT && action.effectType == EFFECT_TYPE_PROMPT_ENTERED))) {
+            if (this.state.prompt && !(action.type === ACTION_RESOLVE_PROMPT || action.type === ACTION_CONCEDE || action.type === ACTION_EXIT_PROMPTS || (action.type == ACTION_EFFECT && action.effectType == EFFECT_TYPE_PROMPT_ENTERED))) {
                 showAction(action);
                 throw new Error('Non-prompt action in the prompt state');
             }
-            if (this_1.debug) {
+            if (this.debug) {
                 showAction(action);
             }
-            this_1.addActionToLog(action);
-            this_1.addActionToStream(action);
-            this_1.triggerAbilities(action);
+            this.addActionToLog(action);
+            this.addActionToStream(action);
+            this.triggerAbilities(action);
             switch (action.type) {
                 case ACTION_CONCEDE: {
-                    var opponentId = this_1.getOpponent(action.player);
-                    this_1.transformIntoActions({
+                    const opponentId = this.getOpponent(action.player);
+                    this.transformIntoActions({
                         type: ACTION_PLAYER_WINS,
                         player: opponentId,
                     });
                     break;
                 }
                 case ACTION_PLAYER_WINS: {
-                    this_1.setWinner(action.player);
-                    this_1.state.actions = [];
+                    this.setWinner(action.player);
+                    this.state.actions = [];
                     break;
                 }
                 case ACTION_ATTACK: {
-                    var attackSource = action.generatedBy ? this_1.getMetaValue(action.source, action.generatedBy) : action.source;
-                    var attackTarget = action.generatedBy ? this_1.getMetaValue(action.target, action.generatedBy) : action.target;
-                    var additionalAttackers = (action.generatedBy ? this_1.getMetaValue(action.additionalAttackers, action.generatedBy) : action.additionalAttackers) || [];
-                    var sourceAttacksPerTurn = this_1.modifyByStaticAbilities(attackSource, PROPERTY_ATTACKS_PER_TURN);
-                    var attackerCanAttack = this_1.modifyByStaticAbilities(attackSource, PROPERTY_ABLE_TO_ATTACK);
+                    const attackSource = action.generatedBy ? this.getMetaValue(action.source, action.generatedBy) : action.source;
+                    const attackTarget = action.generatedBy ? this.getMetaValue(action.target, action.generatedBy) : action.target;
+                    const additionalAttackers = (action.generatedBy ? this.getMetaValue(action.additionalAttackers, action.generatedBy) : action.additionalAttackers) || [];
+                    const sourceAttacksPerTurn = this.modifyByStaticAbilities(attackSource, PROPERTY_ATTACKS_PER_TURN);
+                    const attackerCanAttack = this.modifyByStaticAbilities(attackSource, PROPERTY_ABLE_TO_ATTACK);
                     if (!attackerCanAttack) {
-                        console.error("Somehow ".concat(attackSource.card.name, " cannot attack"));
+                        console.error(`Somehow ${attackSource.card.name} cannot attack`);
                     }
                     else {
-                        var targetCanBeAttacked = this_1.modifyByStaticAbilities(attackTarget, PROPERTY_CAN_BE_ATTACKED);
+                        const targetCanBeAttacked = this.modifyByStaticAbilities(attackTarget, PROPERTY_CAN_BE_ATTACKED);
                         if (!targetCanBeAttacked) {
-                            console.error("Somehow ".concat(attackSource.card.name, " cannot be attacked"));
+                            console.error(`Somehow ${attackSource.card.name} cannot be attacked`);
                         }
                         else {
-                            var sourceHasAttacksLeft = attackSource.data.attacked < sourceAttacksPerTurn;
-                            var additionalAttackersCanAttack = additionalAttackers.every(function (card) { return card.card.data.canPackHunt && _this.modifyByStaticAbilities(card, PROPERTY_ABLE_TO_ATTACK); });
-                            var additionalAttackersHasAttacksLeft = additionalAttackers.every(function (card) { return card.data.attacked < _this.modifyByStaticAbilities(card, PROPERTY_ATTACKS_PER_TURN); });
-                            var targetIsMagi = attackTarget.card.type == TYPE_MAGI;
-                            var opponentCreatures = this_1.useSelector(SELECTOR_OWN_CREATURES, attackTarget.owner);
-                            var magiHasCreatures = opponentCreatures instanceof Array && opponentCreatures.length > 0;
-                            var attackApproved = !targetIsMagi || ( // Either we attack a creature
+                            const sourceHasAttacksLeft = attackSource.data.attacked < sourceAttacksPerTurn;
+                            const additionalAttackersCanAttack = additionalAttackers.every((card) => card.card.data.canPackHunt && this.modifyByStaticAbilities(card, PROPERTY_ABLE_TO_ATTACK));
+                            const additionalAttackersHasAttacksLeft = additionalAttackers.every((card) => card.data.attacked < this.modifyByStaticAbilities(card, PROPERTY_ATTACKS_PER_TURN));
+                            const targetIsMagi = attackTarget.card.type == TYPE_MAGI;
+                            const opponentCreatures = this.useSelector(SELECTOR_OWN_CREATURES, attackTarget.owner);
+                            const magiHasCreatures = opponentCreatures instanceof Array && opponentCreatures.length > 0;
+                            const attackApproved = !targetIsMagi || ( // Either we attack a creature
                             targetIsMagi && ( // Or we are attacking a magi, but then...
                             !magiHasCreatures || // ...he either shouldn't have creatures
-                                this_1.modifyByStaticAbilities(attackSource, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY) // ...or we can just trample through
+                                this.modifyByStaticAbilities(attackSource, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY) // ...or we can just trample through
                             ));
-                            var enoughAttacksLeft = (sourceHasAttacksLeft && ((additionalAttackersCanAttack && additionalAttackersHasAttacksLeft) || additionalAttackers.length === 0));
-                            if (enoughAttacksLeft && attackApproved && this_1.getCurrentPriority() == PRIORITY_ATTACK) {
-                                this_1.transformIntoActions({
+                            const enoughAttacksLeft = (sourceHasAttacksLeft && ((additionalAttackersCanAttack && additionalAttackersHasAttacksLeft) || additionalAttackers.length === 0));
+                            if (enoughAttacksLeft && attackApproved && this.getCurrentPriority() == PRIORITY_ATTACK) {
+                                this.transformIntoActions({
                                     type: ACTION_EFFECT,
                                     effectType: EFFECT_TYPE_ATTACK,
                                     source: attackSource,
                                     target: attackTarget,
-                                    additionalAttackers: additionalAttackers,
+                                    additionalAttackers,
                                     generatedBy: attackSource.id,
                                     player: attackSource.data.controller,
                                 });
@@ -1074,75 +1009,75 @@ var State = /** @class */ (function () {
                     break;
                 }
                 case ACTION_GET_PROPERTY_VALUE: {
-                    var multiTarget = this_1.getMetaValue(action.target, action.generatedBy);
-                    var property = this_1.getMetaValue(action.property, action.generatedBy);
+                    const multiTarget = this.getMetaValue(action.target, action.generatedBy);
+                    const property = this.getMetaValue(action.property, action.generatedBy);
                     if (property === CARD_COUNT) {
-                        var result = (multiTarget instanceof Array) ? multiTarget.length : 0;
-                        var variable = action.variable || 'result';
+                        const result = (multiTarget instanceof Array) ? multiTarget.length : 0;
+                        const variable = action.variable || 'result';
                         if (action.generatedBy) {
-                            this_1.setSpellMetaDataField(variable, result, action.generatedBy);
+                            this.setSpellMetaDataField(variable, result, action.generatedBy);
                         }
                     }
                     else {
                         // Sometimes we can only pass here results of a selector.
                         // If so, work on first element of result.
-                        var target = (multiTarget instanceof Array) ? multiTarget[0] : multiTarget;
-                        var modifiedResult = void 0;
+                        const target = (multiTarget instanceof Array) ? multiTarget[0] : multiTarget;
+                        let modifiedResult;
                         if (target && 'name' in target && 'effects' in target && property === PROPERTY_POWER_COST) {
                             modifiedResult = target.cost;
                         }
                         else {
-                            modifiedResult = this_1.modifyByStaticAbilities(target, property);
+                            modifiedResult = this.modifyByStaticAbilities(target, property);
                         }
-                        var variable = action.variable || 'result';
+                        const variable = action.variable || 'result';
                         if (action.generatedBy) {
-                            this_1.setSpellMetaDataField(variable, modifiedResult, action.generatedBy);
+                            this.setSpellMetaDataField(variable, modifiedResult, action.generatedBy);
                         }
                     }
                     break;
                 }
                 case ACTION_CALCULATE: {
-                    var operandOne = this_1.getMetaValue(action.operandOne, action.generatedBy);
-                    var operandTwo = this_1.getMetaValue(action.operandTwo, action.generatedBy);
-                    var result = this_1.performCalculation(action.operator, operandOne, operandTwo);
-                    var variable = action.variable || 'result';
+                    const operandOne = this.getMetaValue(action.operandOne, action.generatedBy);
+                    const operandTwo = this.getMetaValue(action.operandTwo, action.generatedBy);
+                    const result = this.performCalculation(action.operator, operandOne, operandTwo);
+                    const variable = action.variable || 'result';
                     if (action.generatedBy) {
-                        this_1.setSpellMetaDataField(variable, result, action.generatedBy);
+                        this.setSpellMetaDataField(variable, result, action.generatedBy);
                     }
                     break;
                 }
                 case ACTION_POWER: {
-                    var powerCost = this_1.modifyByStaticAbilities(action.source, PROPERTY_POWER_COST, action.power.name || '');
-                    var ableToUsePowers = this_1.modifyByStaticAbilities(action.source, PROPERTY_ABLE_TO_USE_POWERS);
-                    var payingCard = (action.source.card.type === TYPE_RELIC) ?
-                        this_1.getZone(ZONE_TYPE_ACTIVE_MAGI, action.source.owner).card :
+                    const powerCost = this.modifyByStaticAbilities(action.source, PROPERTY_POWER_COST, action.power.name || '');
+                    const ableToUsePowers = this.modifyByStaticAbilities(action.source, PROPERTY_ABLE_TO_USE_POWERS);
+                    const payingCard = (action.source.card.type === TYPE_RELIC) ?
+                        this.getZone(ZONE_TYPE_ACTIVE_MAGI, action.source.owner).card :
                         action.source;
                     if (payingCard &&
                         ableToUsePowers &&
                         !action.source.wasActionUsed(action.power.name) &&
                         (payingCard.data.energy >= powerCost ||
                             (payingCard.data.energy > 0 && powerCost === COST_X))) {
-                        var source_1 = action.source;
-                        var sourcePower = action.power;
-                        var effects = action.power.effects;
-                        var sourceController_1 = this_1.modifyByStaticAbilities(source_1, PROPERTY_CONTROLLER);
-                        var enrichAction = function (effect) { return (__assign(__assign({ source: source_1, player: sourceController_1 }, effect), { power: true, generatedBy: source_1.id })); };
-                        var preparedActions = effects.map(enrichAction);
-                        var allPromptsAreDoable = this_1.checkPrompts(source_1, preparedActions, true, powerCost);
+                        const source = action.source;
+                        const sourcePower = action.power;
+                        const effects = action.power.effects;
+                        const sourceController = this.modifyByStaticAbilities(source, PROPERTY_CONTROLLER);
+                        const enrichAction = (effect) => (Object.assign(Object.assign({ source, player: sourceController }, effect), { power: true, generatedBy: source.id }));
+                        const preparedActions = effects.map(enrichAction);
+                        const allPromptsAreDoable = this.checkPrompts(source, preparedActions, true, powerCost);
                         if (allPromptsAreDoable) {
-                            var currentPowerMetaData = {
-                                source: source_1,
-                                sourcePower: sourcePower,
+                            let currentPowerMetaData = {
+                                source,
+                                sourcePower,
                                 player: action.player,
-                                sourceCreature: source_1,
+                                sourceCreature: source,
                             }; // No retrieving old metadata from old activations
-                            source_1.setActionUsed(action.power.name);
+                            source.setActionUsed(action.power.name);
                             if (powerCost == COST_X) {
-                                this_1.addActions({
+                                this.addActions({
                                     type: ACTION_ENTER_PROMPT,
                                     promptType: PROMPT_TYPE_NUMBER,
-                                    player: sourceController_1,
-                                    generatedBy: source_1.id,
+                                    player: sourceController,
+                                    generatedBy: source.id,
                                     promptParams: {
                                         min: 1,
                                         max: action.source.data.energy,
@@ -1152,41 +1087,41 @@ var State = /** @class */ (function () {
                                     operator: CALCULATION_SET,
                                     operandOne: '$number',
                                     variable: 'chosen_cost',
-                                    generatedBy: source_1.id,
+                                    generatedBy: source.id,
                                 }, {
                                     type: ACTION_EFFECT,
                                     effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
                                     target: payingCard,
                                     amount: '$number',
-                                    generatedBy: source_1.id,
+                                    generatedBy: source.id,
                                 });
                             }
                             else if (powerCost > 0) {
-                                this_1.addActions({
+                                this.addActions({
                                     type: ACTION_EFFECT,
                                     effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_POWER,
                                     target: payingCard,
                                     amount: powerCost,
-                                    generatedBy: source_1.id,
+                                    generatedBy: source.id,
                                 });
                             }
                             if (sourcePower) {
-                                var powerEffects = {
+                                const powerEffects = {
                                     type: ACTION_EFFECT,
                                     effectType: EFFECT_TYPE_EXECUTE_POWER_EFFECTS,
                                     power: sourcePower,
-                                    source: source_1,
+                                    source,
                                     player: action.player,
-                                    generatedBy: source_1.id,
+                                    generatedBy: source.id,
                                 };
-                                this_1.addActions(powerEffects);
+                                this.addActions(powerEffects);
                             }
-                            this_1.addActions({
+                            this.addActions({
                                 type: ACTION_EFFECT,
                                 effectType: EFFECT_TYPE_POWER_FINISHED,
-                                generatedBy: source_1.id,
+                                generatedBy: source.id,
                             });
-                            this_1.setSpellMetadata(currentPowerMetaData, source_1.id);
+                            this.setSpellMetadata(currentPowerMetaData, source.id);
                         }
                     }
                     break;
@@ -1195,16 +1130,16 @@ var State = /** @class */ (function () {
                     if (!('player' in action)) {
                         throw new Error('Prompt without player!');
                     }
-                    var savedActions = this_1.state.actions;
-                    var promptParams = {};
-                    var skipPrompt = false;
-                    var promptPlayer = this_1.getMetaValue(action.player, action.generatedBy);
+                    const savedActions = this.state.actions;
+                    let promptParams = {};
+                    let skipPrompt = false;
+                    const promptPlayer = this.getMetaValue(action.player, action.generatedBy);
                     switch (action.promptType) {
                         case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
                             promptParams = {
                                 // @Todo fix enriched cards moving through the engine
                                 // @ts-ignore
-                                source: this_1.getMetaValue(action.source, action.generatedBy),
+                                source: this.getMetaValue(action.source, action.generatedBy),
                             };
                             break;
                         }
@@ -1230,23 +1165,23 @@ var State = /** @class */ (function () {
                             if (action.promptParams.restriction && action.promptParams.restrictions) {
                                 throw new Error('PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE error: single and multiple restrictions specified');
                             }
-                            var restrictions = action.promptParams.restrictions || (action.promptParams.restriction ? [
+                            const restrictions = action.promptParams.restrictions || (action.promptParams.restriction ? [
                                 {
-                                    type: this_1.getMetaValue(action.promptParams.restriction, action.generatedBy),
-                                    value: this_1.getMetaValue(action.promptParams.restrictionValue, action.generatedBy),
+                                    type: this.getMetaValue(action.promptParams.restriction, action.generatedBy),
+                                    value: this.getMetaValue(action.promptParams.restrictionValue, action.generatedBy),
                                 },
                             ] : null);
-                            var zone = this_1.getMetaValue(action.promptParams.zone, action.generatedBy);
-                            var zoneOwner = this_1.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
-                            var numberOfCards = this_1.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
-                            var zoneContent = (zone === ZONE_TYPE_IN_PLAY) ? this_1.getZone(zone, null).cards : this_1.getZone(zone, zoneOwner).cards;
-                            var cards = restrictions ? zoneContent.filter(this_1.makeCardFilter(restrictions)) : zoneContent;
-                            var maxNumberOfCards = Math.min(numberOfCards, cards.length);
+                            const zone = this.getMetaValue(action.promptParams.zone, action.generatedBy);
+                            const zoneOwner = this.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
+                            const numberOfCards = this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
+                            const zoneContent = (zone === ZONE_TYPE_IN_PLAY) ? this.getZone(zone, null).cards : this.getZone(zone, zoneOwner).cards;
+                            const cards = restrictions ? zoneContent.filter(this.makeCardFilter(restrictions)) : zoneContent;
+                            const maxNumberOfCards = Math.min(numberOfCards, cards.length);
                             if (maxNumberOfCards > 0) {
                                 promptParams = {
-                                    zone: zone,
-                                    zoneOwner: zoneOwner,
-                                    restrictions: restrictions,
+                                    zone,
+                                    zoneOwner,
+                                    restrictions,
                                     numberOfCards: maxNumberOfCards,
                                     cards: cards.map(convertCard),
                                 };
@@ -1260,23 +1195,23 @@ var State = /** @class */ (function () {
                             if (action.promptParams.restriction && action.promptParams.restrictions) {
                                 throw new Error('PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE error: single and multiple restrictions specified');
                             }
-                            var restrictions = action.promptParams.restrictions || (action.promptParams.restriction ? [
+                            const restrictions = action.promptParams.restrictions || (action.promptParams.restriction ? [
                                 {
-                                    type: this_1.getMetaValue(action.promptParams.restriction, action.generatedBy),
-                                    value: this_1.getMetaValue(action.promptParams.restrictionValue, action.generatedBy),
+                                    type: this.getMetaValue(action.promptParams.restriction, action.generatedBy),
+                                    value: this.getMetaValue(action.promptParams.restrictionValue, action.generatedBy),
                                 },
                             ] : null);
-                            var zone = this_1.getMetaValue(action.promptParams.zone, action.generatedBy);
-                            var zoneOwner = this_1.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
-                            var numberOfCards = this_1.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
-                            var zoneContent = (zone === ZONE_TYPE_IN_PLAY) ? this_1.getZone(zone, null).cards : this_1.getZone(zone, zoneOwner).cards;
-                            var cards = restrictions ? zoneContent.filter(this_1.makeCardFilter(restrictions)) : zoneContent;
-                            var maxNumberOfCards = Math.min(numberOfCards, cards.length);
+                            const zone = this.getMetaValue(action.promptParams.zone, action.generatedBy);
+                            const zoneOwner = this.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
+                            const numberOfCards = this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
+                            const zoneContent = (zone === ZONE_TYPE_IN_PLAY) ? this.getZone(zone, null).cards : this.getZone(zone, zoneOwner).cards;
+                            const cards = restrictions ? zoneContent.filter(this.makeCardFilter(restrictions)) : zoneContent;
+                            const maxNumberOfCards = Math.min(numberOfCards, cards.length);
                             if (maxNumberOfCards > 0) {
                                 promptParams = {
-                                    zone: zone,
-                                    zoneOwner: zoneOwner,
-                                    restrictions: restrictions,
+                                    zone,
+                                    zoneOwner,
+                                    restrictions,
                                     numberOfCards: maxNumberOfCards,
                                     cards: cards.map(convertCard),
                                 };
@@ -1287,35 +1222,32 @@ var State = /** @class */ (function () {
                             break;
                         }
                         case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {
-                            var zone = this_1.getMetaValue(action.promptParams.zone, action.generatedBy);
-                            var zoneOwner = this_1.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
-                            var numberOfCards = this_1.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
-                            var zoneContent = this_1.getZone(zone, zoneOwner).cards;
-                            var cards = zoneContent.slice(0, numberOfCards);
+                            const zone = this.getMetaValue(action.promptParams.zone, action.generatedBy);
+                            const zoneOwner = this.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
+                            const numberOfCards = this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
+                            const zoneContent = this.getZone(zone, zoneOwner).cards;
+                            const cards = zoneContent.slice(0, numberOfCards);
                             promptParams = {
-                                zone: zone,
-                                zoneOwner: zoneOwner,
-                                numberOfCards: numberOfCards,
+                                zone,
+                                zoneOwner,
+                                numberOfCards,
                                 cards: cards.map(convertCard),
                             };
                             break;
                         }
                         case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-                            var restrictions = [];
+                            let restrictions = [];
                             if ('restrictions' in action.promptParams) {
-                                restrictions = action.promptParams.restrictions.map(function (_a) {
-                                    var type = _a.type, value = _a.value;
-                                    return ({
-                                        type: type,
-                                        value: _this.getMetaValue(value, action.generatedBy),
-                                    });
-                                });
+                                restrictions = action.promptParams.restrictions.map(({ type, value }) => ({
+                                    type,
+                                    value: this.getMetaValue(value, action.generatedBy),
+                                }));
                             }
                             else if ('restriction' in action.promptParams) {
                                 restrictions = [
                                     {
                                         type: action.promptParams.restriction,
-                                        value: this_1.getMetaValue(action.promptParams.restrictionValue, action.generatedBy),
+                                        value: this.getMetaValue(action.promptParams.restrictionValue, action.generatedBy),
                                     }
                                 ];
                             }
@@ -1326,7 +1258,7 @@ var State = /** @class */ (function () {
                                     skipPrompt = true
                                 } else { */
                                 promptParams = {
-                                    restrictions: restrictions,
+                                    restrictions,
                                 };
                                 // }
                             }
@@ -1338,32 +1270,32 @@ var State = /** @class */ (function () {
                         }
                         case PROMPT_TYPE_NUMBER: {
                             promptParams = {
-                                min: this_1.getMetaValue(action.promptParams.min, action.generatedBy),
-                                max: this_1.getMetaValue(action.promptParams.max, action.generatedBy),
+                                min: this.getMetaValue(action.promptParams.min, action.generatedBy),
+                                max: this.getMetaValue(action.promptParams.max, action.generatedBy),
                             };
                             break;
                         }
                         case PROMPT_TYPE_POWER_ON_MAGI: {
                             promptParams = {
-                                magi: this_1.getMetaValue(action.promptParams.magi, action.generatedBy),
+                                magi: this.getMetaValue(action.promptParams.magi, action.generatedBy),
                             };
                             break;
                         }
                         case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
                             if (action.promptParams.restriction) {
                                 promptParams = {
-                                    amount: this_1.getMetaValue(action.promptParams.amount, action.generatedBy),
+                                    amount: this.getMetaValue(action.promptParams.amount, action.generatedBy),
                                     restrictions: [
                                         {
                                             type: action.promptParams.restriction,
-                                            value: this_1.getMetaValue(action.promptParams.amount, action.generatedBy),
+                                            value: this.getMetaValue(action.promptParams.amount, action.generatedBy),
                                         },
                                     ],
                                 };
                             }
                             else {
                                 promptParams = {
-                                    amount: this_1.getMetaValue(action.promptParams.amount, action.generatedBy),
+                                    amount: this.getMetaValue(action.promptParams.amount, action.generatedBy),
                                 };
                             }
                             break;
@@ -1371,90 +1303,87 @@ var State = /** @class */ (function () {
                         case PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES: {
                             if (action.promptParams.restriction) {
                                 promptParams = {
-                                    amount: this_1.getMetaValue(action.promptParams.amount, action.generatedBy),
+                                    amount: this.getMetaValue(action.promptParams.amount, action.generatedBy),
                                     restrictions: [
                                         {
                                             type: action.promptParams.restriction,
-                                            value: this_1.getMetaValue(action.promptParams.amount, action.generatedBy),
+                                            value: this.getMetaValue(action.promptParams.amount, action.generatedBy),
                                         },
                                     ],
                                 };
                             }
                             else {
                                 promptParams = {
-                                    amount: this_1.getMetaValue(action.promptParams.amount, action.generatedBy),
+                                    amount: this.getMetaValue(action.promptParams.amount, action.generatedBy),
                                 };
                             }
                             break;
                         }
                         case PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES: {
-                            var sourceZone = this_1.getMetaValue(action.promptParams.sourceZone, action.generatedBy);
-                            var sourceZoneOwner = this_1.getMetaValue(action.promptParams.sourceZoneOwner, action.generatedBy);
-                            var numberOfCards = this_1.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
-                            var zoneContent = this_1.getZone(sourceZone, sourceZoneOwner).cards;
-                            var cards = zoneContent.slice(0, numberOfCards);
+                            const sourceZone = this.getMetaValue(action.promptParams.sourceZone, action.generatedBy);
+                            const sourceZoneOwner = this.getMetaValue(action.promptParams.sourceZoneOwner, action.generatedBy);
+                            const numberOfCards = this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
+                            const zoneContent = this.getZone(sourceZone, sourceZoneOwner).cards;
+                            const cards = zoneContent.slice(0, numberOfCards);
                             promptParams = {
-                                sourceZone: sourceZone,
-                                sourceZoneOwner: sourceZoneOwner,
-                                numberOfCards: numberOfCards,
+                                sourceZone,
+                                sourceZoneOwner,
+                                numberOfCards,
                                 cards: cards.map(convertCard),
                                 targetZones: action.promptParams.targetZones,
                             };
                         }
                     }
                     if (!skipPrompt) {
-                        this_1.state.savedActions = savedActions;
-                        this_1.state.actions = [this_1.convertPromptActionToEffect(action)];
+                        this.state.savedActions = savedActions;
+                        this.state.actions = [this.convertPromptActionToEffect(action)];
                     }
                     break;
                 }
                 case ACTION_EXIT_PROMPTS: {
-                    this_1.state.actions = [];
-                    this_1.state.savedActions = [];
-                    this_1.state.mayEffectActions = [];
-                    this_1.state.fallbackActions = [];
-                    this_1.state.prompt = false;
-                    this_1.state.promptType = null;
-                    this_1.state.promptMessage = undefined;
-                    this_1.state.promptGeneratedBy = undefined;
-                    this_1.state.promptVariable = undefined;
-                    this_1.state.promptParams = {};
+                    this.state.actions = [];
+                    this.state.savedActions = [];
+                    this.state.mayEffectActions = [];
+                    this.state.fallbackActions = [];
+                    this.state.prompt = false;
+                    this.state.promptType = null;
+                    this.state.promptMessage = undefined;
+                    this.state.promptGeneratedBy = undefined;
+                    this.state.promptVariable = undefined;
+                    this.state.promptParams = {};
                     break;
                 }
                 case ACTION_RESOLVE_PROMPT: {
-                    if (this_1.state.promptType === PROMPT_TYPE_MAY_ABILITY) {
-                        var mayEffectActions = this_1.state.mayEffectActions || [];
-                        var fallbackActions = this_1.state.fallbackActions || [];
-                        var savedActions = this_1.state.savedActions || [];
-                        var actions = action.useEffect ? __spreadArray(__spreadArray([], mayEffectActions, true), savedActions, true) : __spreadArray(__spreadArray([], fallbackActions, true), savedActions, true);
-                        this_1.state.actions = actions;
-                        this_1.state.savedActions = [];
-                        this_1.state.mayEffectActions = [];
-                        this_1.state.fallbackActions = [];
-                        this_1.state.prompt = false;
-                        this_1.state.promptType = null;
-                        this_1.state.promptMessage = undefined;
-                        this_1.state.promptGeneratedBy = undefined;
-                        this_1.state.promptVariable = undefined;
-                        this_1.state.promptParams = {};
+                    if (this.state.promptType === PROMPT_TYPE_MAY_ABILITY) {
+                        const mayEffectActions = this.state.mayEffectActions || [];
+                        const fallbackActions = this.state.fallbackActions || [];
+                        const savedActions = this.state.savedActions || [];
+                        const actions = action.useEffect ? [...mayEffectActions, ...savedActions] : [...fallbackActions, ...savedActions];
+                        this.state.actions = actions;
+                        this.state.savedActions = [];
+                        this.state.mayEffectActions = [];
+                        this.state.fallbackActions = [];
+                        this.state.prompt = false;
+                        this.state.promptType = null;
+                        this.state.promptMessage = undefined;
+                        this.state.promptGeneratedBy = undefined;
+                        this.state.promptVariable = undefined;
+                        this.state.promptParams = {};
                     }
                     else {
-                        var generatedBy = action.generatedBy || this_1.state.promptGeneratedBy || this_1.nanoid();
-                        var variable = action.variable || this_1.state.promptVariable;
-                        var currentActionMetaData = this_1.state.spellMetaData[generatedBy] || {};
-                        switch (this_1.state.promptType) {
+                        const generatedBy = action.generatedBy || this.state.promptGeneratedBy || this.nanoid();
+                        const variable = action.variable || this.state.promptVariable;
+                        let currentActionMetaData = this.state.spellMetaData[generatedBy] || {};
+                        switch (this.state.promptType) {
                             case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
                                 if ('cards' in action && action.cards) {
-                                    if (this_1.state.promptParams.numberOfCards !== action.cards.length) {
-                                        return { value: false };
+                                    if (this.state.promptParams.numberOfCards !== action.cards.length) {
+                                        return false;
                                     }
-                                    if (this_1.state.promptParams.restrictions) {
-                                        var checkResult = this_1.state.promptParams.restrictions.every(function (_a) {
-                                            var type = _a.type, value = _a.value;
-                                            return _this.checkCardsForRestriction(action.cards, type, value);
-                                        });
+                                    if (this.state.promptParams.restrictions) {
+                                        const checkResult = this.state.promptParams.restrictions.every(({ type, value }) => this.checkCardsForRestriction(action.cards, type, value));
                                         if (!checkResult) {
-                                            return { value: false };
+                                            return false;
                                         }
                                     }
                                     currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE]] = action.cards;
@@ -1463,9 +1392,9 @@ var State = /** @class */ (function () {
                             }
                             case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {
                                 if ('cards' in action && action.cards) {
-                                    if (this_1.state.promptParams && this_1.state.promptParams.cards && this_1.state.promptParams.cards.length !== action.cards.length) {
+                                    if (this.state.promptParams && this.state.promptParams.cards && this.state.promptParams.cards.length !== action.cards.length) {
                                         console.error('Number of cards is wrong');
-                                        return { value: false };
+                                        return false;
                                     }
                                     currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE]] = action.cards;
                                 }
@@ -1473,27 +1402,24 @@ var State = /** @class */ (function () {
                             }
                             case PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES: {
                                 if ('cards' in action && action.cards) {
-                                    var totalCards = Object.values(action.cards).flat();
-                                    if (this_1.state.promptParams && this_1.state.promptParams.cards && this_1.state.promptParams.cards.length !== totalCards.length) {
+                                    const totalCards = Object.values(action.cards).flat();
+                                    if (this.state.promptParams && this.state.promptParams.cards && this.state.promptParams.cards.length !== totalCards.length) {
                                         console.error('Number of cards is wrong');
-                                        return { value: false };
+                                        return false;
                                     }
                                     currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE]] = action.cards;
                                 }
                             }
                             case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
                                 if ('cards' in action && action.cards) {
-                                    var expectedNumber = ((_b = (_a = this_1.state) === null || _a === void 0 ? void 0 : _a.promptParams) === null || _b === void 0 ? void 0 : _b.numberOfCards) || 0;
+                                    const expectedNumber = ((_b = (_a = this.state) === null || _a === void 0 ? void 0 : _a.promptParams) === null || _b === void 0 ? void 0 : _b.numberOfCards) || 0;
                                     if (action.cards.length > expectedNumber) {
-                                        return { value: false };
+                                        return false;
                                     }
-                                    if (this_1.state.promptParams.restrictions) {
-                                        var checkResult = this_1.state.promptParams.restrictions.every(function (_a) {
-                                            var type = _a.type, value = _a.value;
-                                            return _this.checkCardsForRestriction(action.cards, type, value);
-                                        });
+                                    if (this.state.promptParams.restrictions) {
+                                        const checkResult = this.state.promptParams.restrictions.every(({ type, value }) => this.checkCardsForRestriction(action.cards, type, value));
                                         if (!checkResult) {
-                                            return { value: false };
+                                            return false;
                                         }
                                     }
                                     currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE]] = action.cards;
@@ -1506,8 +1432,8 @@ var State = /** @class */ (function () {
                                 }
                                 break;
                             case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE:
-                                if ('target' in action && action.target && ((_d = (_c = this_1.state) === null || _c === void 0 ? void 0 : _c.promptParams) === null || _d === void 0 ? void 0 : _d.source)) {
-                                    if (this_1.state.promptParams.source.id === ((_e = action.target) === null || _e === void 0 ? void 0 : _e.id)) {
+                                if ('target' in action && action.target && ((_d = (_c = this.state) === null || _c === void 0 ? void 0 : _c.promptParams) === null || _d === void 0 ? void 0 : _d.source)) {
+                                    if (this.state.promptParams.source.id === ((_e = action.target) === null || _e === void 0 ? void 0 : _e.id)) {
                                         throw new Error('Got forbidden target on prompt');
                                     }
                                     currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE]] = action.target;
@@ -1524,8 +1450,8 @@ var State = /** @class */ (function () {
                             }
                             case PROMPT_TYPE_OWN_SINGLE_CREATURE: {
                                 if ('target' in action && action.target) {
-                                    var targetController = this_1.modifyByStaticAbilities(action.target, PROPERTY_CONTROLLER);
-                                    if (this_1.state.promptPlayer !== targetController) {
+                                    const targetController = this.modifyByStaticAbilities(action.target, PROPERTY_CONTROLLER);
+                                    if (this.state.promptPlayer !== targetController) {
                                         throw new Error('Not-controlled creature supplied to Own Creatures prompt');
                                     }
                                     currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_OWN_SINGLE_CREATURE]] = action.target;
@@ -1539,7 +1465,7 @@ var State = /** @class */ (function () {
                                 break;
                             }
                             case PROMPT_TYPE_MAGI_WITHOUT_CREATURES: {
-                                if ('target' in action && ((_g = action.target) === null || _g === void 0 ? void 0 : _g.card.type) === TYPE_MAGI && this_1.useSelector(SELECTOR_CREATURES_OF_PLAYER, action.target.data.controller).length == 0) {
+                                if ('target' in action && ((_g = action.target) === null || _g === void 0 ? void 0 : _g.card.type) === TYPE_MAGI && this.useSelector(SELECTOR_CREATURES_OF_PLAYER, action.target.data.controller).length == 0) {
                                     currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_MAGI_WITHOUT_CREATURES]] = action.target;
                                     break;
                                 }
@@ -1572,8 +1498,8 @@ var State = /** @class */ (function () {
                                 break;
                             case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
                                 if ('energyOnCreatures' in action && action.energyOnCreatures) {
-                                    var totalEnergy = Object.values(action.energyOnCreatures).reduce(function (a, b) { return a + b; }, 0);
-                                    if (totalEnergy === this_1.state.promptParams.amount) {
+                                    const totalEnergy = Object.values(action.energyOnCreatures).reduce((a, b) => a + b, 0);
+                                    if (totalEnergy === this.state.promptParams.amount) {
                                         currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES]] = action.energyOnCreatures || [];
                                     }
                                 }
@@ -1581,8 +1507,8 @@ var State = /** @class */ (function () {
                             }
                             case PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES: {
                                 if ('damageOnCreatures' in action) {
-                                    var totalDamage = Object.values(action.damageOnCreatures).reduce(function (a, b) { return a + b; }, 0);
-                                    if (totalDamage === this_1.state.promptParams.amount) {
+                                    const totalDamage = Object.values(action.damageOnCreatures).reduce((a, b) => a + b, 0);
+                                    if (totalDamage === this.state.promptParams.amount) {
                                         currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES]] = action.damageOnCreatures || [];
                                     }
                                 }
@@ -1590,11 +1516,11 @@ var State = /** @class */ (function () {
                             }
                             case PROMPT_TYPE_PLAYER: {
                                 if ('targetPlayer' in action) {
-                                    if (this_1.players.includes(action.targetPlayer)) {
+                                    if (this.players.includes(action.targetPlayer)) {
                                         currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_PLAYER]] = action.targetPlayer;
                                     }
                                     else {
-                                        console.error("Unknown player: ".concat(action.targetPlayer, " in PROMPT_TYPE_PLAYER prompt resolution"));
+                                        console.error(`Unknown player: ${action.targetPlayer} in PROMPT_TYPE_PLAYER prompt resolution`);
                                     }
                                 }
                                 else {
@@ -1604,13 +1530,13 @@ var State = /** @class */ (function () {
                             }
                             case PROMPT_TYPE_POWER_ON_MAGI: {
                                 if ('power' in action && 'source' in action) {
-                                    var source = this_1.getMetaValue(action.source, action.generatedBy);
-                                    var power_1 = this_1.getMetaValue(action.power, action.generatedBy);
-                                    if (source && power_1 && source.card.data.powers && source.card.data.powers.some(function (p) { return p.name === power_1.name; })) {
+                                    const source = this.getMetaValue(action.source, action.generatedBy);
+                                    const power = this.getMetaValue(action.power, action.generatedBy);
+                                    if (source && power && source.card.data.powers && source.card.data.powers.some(p => p.name === power.name)) {
                                         currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_POWER_ON_MAGI]] = action.power;
                                     }
                                     else {
-                                        console.error("Unknown power: ".concat(power_1.name || power_1, " in PROMPT_TYPE_POWER_ON_MAGI prompt resolution"));
+                                        console.error(`Unknown power: ${power.name || power} in PROMPT_TYPE_POWER_ON_MAGI prompt resolution`);
                                     }
                                 }
                                 else {
@@ -1624,128 +1550,138 @@ var State = /** @class */ (function () {
                                 }
                             }
                             case PROMPT_TYPE_PAYMENT_SOURCE: {
-                                if ('target' in action && action.target && this_1.state.promptParams.paymentType && this_1.state.promptParams.paymentAmount) {
-                                    var paymentSource = action.target;
+                                if ('target' in action && action.target && this.state.promptParams.paymentType && this.state.promptParams.paymentAmount) {
+                                    const paymentSource = action.target;
                                     if (paymentSource.card.type === TYPE_MAGI ||
-                                        (paymentSource.card.type === TYPE_CREATURE && ((_h = paymentSource.card.data.paymentSource) === null || _h === void 0 ? void 0 : _h.includes(this_1.state.promptParams.paymentType)))) {
-                                        if (paymentSource.data.energy >= this_1.state.promptParams.paymentAmount) {
+                                        (paymentSource.card.type === TYPE_CREATURE && ((_h = paymentSource.card.data.paymentSource) === null || _h === void 0 ? void 0 : _h.includes(this.state.promptParams.paymentType)))) {
+                                        if (paymentSource.data.energy >= this.state.promptParams.paymentAmount) {
                                             currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_ALTERNATIVE]] = action.target;
                                         }
                                         else {
-                                            console.error("This payment target doesn't have enough energy to pay for that");
+                                            console.error(`This payment target doesn't have enough energy to pay for that`);
                                         }
                                     }
                                     else {
-                                        console.error("You cannot pay for ".concat(this_1.state.promptParams.paymentType, " from this"));
+                                        console.error(`You cannot pay for ${this.state.promptParams.paymentType} from this`);
                                     }
                                 }
                             }
                         }
-                        var actions = this_1.state.savedActions || [];
-                        this_1.state.actions = actions;
-                        this_1.state.savedActions = [];
-                        this_1.state.prompt = false;
-                        this_1.state.promptType = null;
-                        this_1.state.promptMessage = undefined;
-                        this_1.state.promptGeneratedBy = undefined;
-                        this_1.state.promptVariable = undefined;
-                        this_1.state.promptParams = {};
-                        this_1.state.spellMetaData[generatedBy] = currentActionMetaData;
+                        const actions = this.state.savedActions || [];
+                        this.state.actions = actions;
+                        this.state.savedActions = [];
+                        this.state.prompt = false;
+                        this.state.promptType = null;
+                        this.state.promptMessage = undefined;
+                        this.state.promptGeneratedBy = undefined;
+                        this.state.promptVariable = undefined;
+                        this.state.promptParams = {};
+                        this.state.spellMetaData[generatedBy] = currentActionMetaData;
                     }
                     break;
                 }
                 case ACTION_SELECT: {
-                    var result = void 0;
+                    let result;
                     switch (action.selector) {
                         case SELECTOR_OWN_CARDS_IN_PLAY: {
-                            result = this_1.useSelector(SELECTOR_OWN_CARDS_IN_PLAY, action.player || 0);
+                            result = this.useSelector(SELECTOR_OWN_CARDS_IN_PLAY, action.player || 0);
                             break;
                         }
                         case SELECTOR_OWN_CREATURES_OF_TYPE: {
-                            result = this_1.useSelector(SELECTOR_OWN_CREATURES_OF_TYPE, action.player || 0, this_1.getMetaValue(action.creatureType, action.generatedBy));
+                            result = this.useSelector(SELECTOR_OWN_CREATURES_OF_TYPE, action.player || 0, this.getMetaValue(action.creatureType, action.generatedBy));
                             break;
                         }
                         case SELECTOR_CREATURES_OF_TYPE: {
-                            result = this_1.useSelector(SELECTOR_CREATURES_OF_TYPE, null, this_1.getMetaValue(action.creatureType, action.generatedBy));
+                            result = this.useSelector(SELECTOR_CREATURES_OF_TYPE, null, this.getMetaValue(action.creatureType, action.generatedBy));
                             break;
                         }
                         case SELECTOR_CREATURES_NOT_OF_TYPE: {
-                            result = this_1.useSelector(SELECTOR_CREATURES_NOT_OF_TYPE, null, this_1.getMetaValue(action.creatureType, action.generatedBy));
+                            result = this.useSelector(SELECTOR_CREATURES_NOT_OF_TYPE, null, this.getMetaValue(action.creatureType, action.generatedBy));
                             break;
                         }
                         case SELECTOR_CARDS_WITH_ENERGIZE_RATE: {
-                            result = this_1.useSelector(SELECTOR_CARDS_WITH_ENERGIZE_RATE, null);
+                            result = this.useSelector(SELECTOR_CARDS_WITH_ENERGIZE_RATE, null);
                             break;
                         }
                         case SELECTOR_OPPONENT_ID: {
-                            result = this_1.useSelector(SELECTOR_OPPONENT_ID, action.player || 0, this_1.getMetaValue(action.opponentOf || action.player, action.generatedBy));
+                            result = this.useSelector(SELECTOR_OPPONENT_ID, action.player || 0, this.getMetaValue(action.opponentOf || action.player, action.generatedBy));
                             break;
                         }
                         case SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE: {
-                            result = this_1.useSelector(SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, action.player || 0);
+                            result = this.useSelector(SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, action.player || 0);
                             break;
                         }
                         case SELECTOR_CREATURES_AND_MAGI: {
-                            var ownMagi = this_1.useSelector(SELECTOR_OWN_MAGI, action.player || 0);
-                            var enemyMagi = this_1.useSelector(SELECTOR_ENEMY_MAGI, action.player || 0);
-                            var creatures = this_1.useSelector(SELECTOR_CREATURES, null);
-                            result = __spreadArray(__spreadArray(__spreadArray([], (ownMagi instanceof Array ? ownMagi : []), true), (enemyMagi instanceof Array ? enemyMagi : []), true), (creatures instanceof Array ? creatures : []), true);
+                            const ownMagi = this.useSelector(SELECTOR_OWN_MAGI, action.player || 0);
+                            const enemyMagi = this.useSelector(SELECTOR_ENEMY_MAGI, action.player || 0);
+                            const creatures = this.useSelector(SELECTOR_CREATURES, null);
+                            result = [
+                                ...(ownMagi instanceof Array ? ownMagi : []),
+                                ...(enemyMagi instanceof Array ? enemyMagi : []),
+                                ...(creatures instanceof Array ? creatures : []),
+                            ];
                             break;
                         }
                         case SELECTOR_CREATURES_OF_REGION: {
-                            result = this_1.useSelector(SELECTOR_CREATURES_OF_REGION, action.player || 0, action.region);
+                            result = this.useSelector(SELECTOR_CREATURES_OF_REGION, action.player || 0, action.region);
                             break;
                         }
                         case SELECTOR_CREATURES_NOT_OF_REGION: {
-                            result = this_1.useSelector(SELECTOR_CREATURES_NOT_OF_REGION, action.player || 0, action.region);
+                            result = this.useSelector(SELECTOR_CREATURES_NOT_OF_REGION, action.player || 0, action.region);
                             break;
                         }
                         case SELECTOR_OTHER_CREATURES_OF_TYPE: {
-                            var creatures = this_1.useSelector(SELECTOR_CREATURES_OF_TYPE, null, this_1.getMetaValue(action.creatureType, action.generatedBy));
-                            result = (creatures instanceof Array) ? creatures.filter(function (card) { return card.id !== action.generatedBy; }) : [];
+                            const creatures = this.useSelector(SELECTOR_CREATURES_OF_TYPE, null, this.getMetaValue(action.creatureType, action.generatedBy));
+                            result = (creatures instanceof Array) ? creatures.filter((card) => card.id !== action.generatedBy) : [];
                             break;
                         }
                         case SELECTOR_MAGI_OF_REGION: {
-                            var ownMagi = this_1.useSelector(SELECTOR_OWN_MAGI, action.player || 0);
-                            var enemyMagi = this_1.useSelector(SELECTOR_ENEMY_MAGI, action.player || 0);
-                            result = __spreadArray(__spreadArray([], (ownMagi instanceof Array ? ownMagi : []), true), (enemyMagi instanceof Array ? enemyMagi : []), true).filter(function (magi) { return _this.modifyByStaticAbilities(magi, PROPERTY_REGION) === action.region; });
+                            const ownMagi = this.useSelector(SELECTOR_OWN_MAGI, action.player || 0);
+                            const enemyMagi = this.useSelector(SELECTOR_ENEMY_MAGI, action.player || 0);
+                            result = [
+                                ...(ownMagi instanceof Array ? ownMagi : []),
+                                ...(enemyMagi instanceof Array ? enemyMagi : []),
+                            ].filter(magi => this.modifyByStaticAbilities(magi, PROPERTY_REGION) === action.region);
                             break;
                         }
                         case SELECTOR_MAGI_NOT_OF_REGION: {
-                            var ownMagi = this_1.useSelector(SELECTOR_OWN_MAGI, action.player || 0);
-                            var enemyMagi = this_1.useSelector(SELECTOR_ENEMY_MAGI, action.player || 0);
-                            result = __spreadArray(__spreadArray([], (ownMagi instanceof Array ? ownMagi : []), true), (enemyMagi instanceof Array ? enemyMagi : []), true).filter(function (magi) { return _this.modifyByStaticAbilities(magi, PROPERTY_REGION) != action.region; });
+                            const ownMagi = this.useSelector(SELECTOR_OWN_MAGI, action.player || 0);
+                            const enemyMagi = this.useSelector(SELECTOR_ENEMY_MAGI, action.player || 0);
+                            result = [
+                                ...(ownMagi instanceof Array ? ownMagi : []),
+                                ...(enemyMagi instanceof Array ? enemyMagi : []),
+                            ].filter(magi => this.modifyByStaticAbilities(magi, PROPERTY_REGION) != action.region);
                             break;
                         }
                         case SELECTOR_STATUS: {
-                            result = this_1.useSelector(SELECTOR_STATUS, null, action.status);
+                            result = this.useSelector(SELECTOR_STATUS, null, action.status);
                             break;
                         }
                         case SELECTOR_CREATURES_WITHOUT_STATUS: {
-                            result = this_1.useSelector(SELECTOR_CREATURES_WITHOUT_STATUS, null, action.status);
+                            result = this.useSelector(SELECTOR_CREATURES_WITHOUT_STATUS, null, action.status);
                             break;
                         }
                         case SELECTOR_NTH_CARD_OF_ZONE: {
-                            var zoneOwner = this_1.getMetaValue(action.zoneOwner, action.generatedBy);
-                            var zoneType = this_1.getMetaValue(action.zone, action.generatedBy);
-                            var cardNumber = this_1.getMetaValue(action.cardNumber, action.generatedBy);
-                            result = this_1.selectNthCardOfZone(zoneOwner, zoneType, cardNumber, action.restrictions);
+                            const zoneOwner = this.getMetaValue(action.zoneOwner, action.generatedBy);
+                            const zoneType = this.getMetaValue(action.zone, action.generatedBy);
+                            const cardNumber = this.getMetaValue(action.cardNumber, action.generatedBy);
+                            result = this.selectNthCardOfZone(zoneOwner, zoneType, cardNumber, action.restrictions);
                             break;
                         }
                         case SELECTOR_RANDOM_CARD_IN_HAND: {
-                            var zoneOwner = this_1.getMetaValue(action.zoneOwner, action.generatedBy);
-                            result = this_1.selectRandomCardOfZone(zoneOwner, ZONE_TYPE_HAND);
+                            const zoneOwner = this.getMetaValue(action.zoneOwner, action.generatedBy);
+                            result = this.selectRandomCardOfZone(zoneOwner, ZONE_TYPE_HAND);
                             break;
                         }
                         case SELECTOR_MAGI_OF_PLAYER: {
-                            var owner = this_1.getMetaValue(action.owner, action.generatedBy);
-                            result = this_1.useSelector(SELECTOR_OWN_MAGI, owner);
+                            const owner = this.getMetaValue(action.owner, action.generatedBy);
+                            result = this.useSelector(SELECTOR_OWN_MAGI, owner);
                             break;
                         }
                         case SELECTOR_OWN_CARDS_IN_HAND: {
                             if ('player' in action && typeof action.player == 'number') {
-                                var zoneOwner = this_1.getMetaValue(action.player, action.generatedBy);
-                                result = this_1.getZone(ZONE_TYPE_HAND, zoneOwner).cards;
+                                const zoneOwner = this.getMetaValue(action.player, action.generatedBy);
+                                result = this.getZone(ZONE_TYPE_HAND, zoneOwner).cards;
                             }
                             else {
                                 result = [];
@@ -1754,8 +1690,8 @@ var State = /** @class */ (function () {
                         }
                         case SELECTOR_CARDS_IN_HAND: {
                             if ('zoneOwner' in action) {
-                                var zoneOwner = this_1.getMetaValue(action.zoneOwner, action.generatedBy);
-                                result = this_1.getZone(ZONE_TYPE_HAND, zoneOwner).cards;
+                                const zoneOwner = this.getMetaValue(action.zoneOwner, action.generatedBy);
+                                result = this.getZone(ZONE_TYPE_HAND, zoneOwner).cards;
                             }
                             else {
                                 result = [];
@@ -1765,16 +1701,13 @@ var State = /** @class */ (function () {
                         // This selector is special
                         // If there are more than one creature with the same (least) energy, it transforms into the corresponding prompt
                         case SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY: {
-                            var creatures = this_1.getZone(ZONE_TYPE_IN_PLAY).cards.filter(function (card) {
-                                return _this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == action.player &&
-                                    card.card.type == TYPE_CREATURE;
-                            });
+                            const creatures = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == action.player &&
+                                card.card.type == TYPE_CREATURE);
                             if (creatures.length) {
-                                var energies = {};
-                                var minEnergy = Infinity;
-                                for (var _i = 0, creatures_1 = creatures; _i < creatures_1.length; _i++) {
-                                    var creature = creatures_1[_i];
-                                    var energy = creature.data.energy;
+                                const energies = {};
+                                let minEnergy = Infinity;
+                                for (let creature of creatures) {
+                                    const energy = creature.data.energy;
                                     if (!(energy in energies)) {
                                         energies[energy] = [];
                                     }
@@ -1788,7 +1721,7 @@ var State = /** @class */ (function () {
                                 }
                                 else {
                                     result = [];
-                                    this_1.transformIntoActions({
+                                    this.transformIntoActions({
                                         type: ACTION_ENTER_PROMPT,
                                         promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
                                         promptParams: {
@@ -1813,47 +1746,48 @@ var State = /** @class */ (function () {
                         }
                         default: {
                             // @ts-ignore
-                            result = this_1.useSelector(action.selector, action.player);
+                            result = this.useSelector(action.selector, action.player);
                         }
                     }
-                    var variable = action.variable || 'selected';
-                    this_1.setSpellMetaDataField(variable, result, action.generatedBy || this_1.nanoid());
+                    const variable = action.variable || 'selected';
+                    this.setSpellMetaDataField(variable, result, action.generatedBy || this.nanoid());
                     break;
                 }
                 case ACTION_PASS: {
-                    if (this_1.state.step === null) {
+                    var newStep;
+                    if (this.state.step === null) {
                         // Null-start
-                        this_1.transformIntoActions({
+                        this.transformIntoActions({
                             type: ACTION_EFFECT,
                             effectType: EFFECT_TYPE_START_TURN,
-                            player: this_1.state.activePlayer,
-                            generatedBy: this_1.nanoid(),
+                            player: this.state.activePlayer,
+                            generatedBy: this.nanoid(),
                         });
                     }
                     else {
-                        if (action.player === this_1.state.activePlayer) {
-                            newStep = (this_1.state.step + 1) % steps.length;
+                        if (action.player === this.state.activePlayer) {
+                            newStep = (this.state.step + 1) % steps.length;
                             if (newStep === 0) {
-                                this_1.stopTurnTimer();
-                                this_1.transformIntoActions({
+                                this.stopTurnTimer();
+                                this.transformIntoActions({
                                     type: ACTION_EFFECT,
                                     effectType: EFFECT_TYPE_END_OF_TURN,
-                                    player: this_1.state.activePlayer,
-                                    generatedBy: this_1.nanoid(),
+                                    player: this.state.activePlayer,
+                                    generatedBy: this.nanoid(),
                                 }, {
                                     type: ACTION_EFFECT,
                                     effectType: EFFECT_TYPE_START_TURN,
-                                    player: this_1.getOpponent(this_1.state.activePlayer),
-                                    generatedBy: this_1.nanoid(),
+                                    player: this.getOpponent(this.state.activePlayer),
+                                    generatedBy: this.nanoid(),
                                 });
                             }
                             else {
-                                this_1.transformIntoActions({
+                                this.transformIntoActions({
                                     type: ACTION_EFFECT,
                                     effectType: EFFECT_TYPE_START_STEP,
-                                    player: this_1.state.activePlayer,
+                                    player: this.state.activePlayer,
                                     step: newStep,
-                                    generatedBy: this_1.nanoid(),
+                                    generatedBy: this.nanoid(),
                                 });
                             }
                         }
@@ -1861,158 +1795,151 @@ var State = /** @class */ (function () {
                     break;
                 }
                 case ACTION_PLAY: {
-                    var castCards = ('card' in action) ? this_1.getMetaValue(action.card, action.generatedBy) : null;
-                    var castCard = castCards ? (castCards.length ? castCards[0] : castCards) : null;
-                    var player_1 = ('payload' in action) ? action.payload.player : action.player || 0;
-                    var cardItself_1 = ('payload' in action) ? action.payload.card : castCard;
-                    if (!cardItself_1) {
+                    const castCards = ('card' in action) ? this.getMetaValue(action.card, action.generatedBy) : null;
+                    const castCard = castCards ? (castCards.length ? castCards[0] : castCards) : null;
+                    const player = ('payload' in action) ? action.payload.player : action.player || 0;
+                    const cardItself = ('payload' in action) ? action.payload.card : castCard;
+                    if (!cardItself) {
                         throw new Error('No card itself found');
                     }
-                    var playerHand = this_1.getZone(ZONE_TYPE_HAND, player_1);
-                    var cardInHand = playerHand.containsId((cardItself_1 === null || cardItself_1 === void 0 ? void 0 : cardItself_1.id) || '');
+                    const playerHand = this.getZone(ZONE_TYPE_HAND, player);
+                    const cardInHand = playerHand.containsId((cardItself === null || cardItself === void 0 ? void 0 : cardItself.id) || '');
                     // baseCard is "abstract" card, CardInPlay is concrete instance
-                    var baseCard_1 = ('payload' in action) ? action.payload.card.card : castCard === null || castCard === void 0 ? void 0 : castCard.card;
-                    if (cardInHand && baseCard_1) {
-                        var currentPriority = this_1.getCurrentPriority();
-                        var cardType = baseCard_1.type;
+                    const baseCard = ('payload' in action) ? action.payload.card.card : castCard === null || castCard === void 0 ? void 0 : castCard.card;
+                    if (cardInHand && baseCard) {
+                        const currentPriority = this.getCurrentPriority();
+                        const cardType = baseCard.type;
                         if ((cardType == TYPE_CREATURE && currentPriority == PRIORITY_CREATURES) ||
                             (cardType == TYPE_RELIC && currentPriority == PRIORITY_PRS) ||
                             (cardType == TYPE_SPELL && currentPriority == PRIORITY_PRS) ||
                             action.forcePriority) {
-                            var activeMagi = this_1.getZone(ZONE_TYPE_ACTIVE_MAGI, player_1).card;
+                            const activeMagi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card;
                             if (!activeMagi) {
                                 throw new Error('Trying to play a card without Magi');
                             }
-                            var totalCost_1 = this_1.calculateTotalCost(cardItself_1);
+                            const totalCost = this.calculateTotalCost(cardItself);
                             switch (cardType) {
                                 case TYPE_CREATURE: {
-                                    var alternativePaymentSources = this_1.getZone(ZONE_TYPE_IN_PLAY).cards.filter(function (card) { return card.card.data.paymentSource && card.card.data.paymentSource.includes(TYPE_CREATURE) && _this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player_1; });
-                                    var alternativePaymentSourcesAbleToPay = alternativePaymentSources.filter(function (card) { return card.data.energy >= totalCost_1; });
-                                    if (activeMagi.data.energy >= totalCost_1 || alternativePaymentSourcesAbleToPay.length > 0) {
-                                        var availablePaymentSources = __spreadArray(__spreadArray([], alternativePaymentSourcesAbleToPay, true), [
-                                            activeMagi.data.energy >= totalCost_1 ? activeMagi : undefined
-                                        ], false).filter(function (card) { return card instanceof CardInGame; });
-                                        var paymentActions = availablePaymentSources.length == 1 ? [{
+                                    const alternativePaymentSources = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.data.paymentSource && card.card.data.paymentSource.includes(TYPE_CREATURE) && this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player);
+                                    const alternativePaymentSourcesAbleToPay = alternativePaymentSources.filter(card => card.data.energy >= totalCost);
+                                    if (activeMagi.data.energy >= totalCost || alternativePaymentSourcesAbleToPay.length > 0) {
+                                        const availablePaymentSources = [
+                                            ...alternativePaymentSourcesAbleToPay,
+                                            activeMagi.data.energy >= totalCost ? activeMagi : undefined
+                                        ].filter((card) => card instanceof CardInGame);
+                                        const paymentActions = availablePaymentSources.length == 1 ? [{
                                                 type: ACTION_EFFECT,
                                                 effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
                                                 from: availablePaymentSources[0],
-                                                amount: totalCost_1,
-                                                player: player_1,
-                                                generatedBy: cardItself_1.id,
+                                                amount: totalCost,
+                                                player: player,
+                                                generatedBy: cardItself.id,
                                             }] : [{
                                                 type: ACTION_ENTER_PROMPT,
                                                 promptType: PROMPT_TYPE_PAYMENT_SOURCE,
                                                 promptParams: {
-                                                    amount: totalCost_1,
+                                                    amount: totalCost,
                                                     paymentType: TYPE_CREATURE,
                                                     cards: availablePaymentSources,
                                                 },
                                                 variable: 'paymentSource',
-                                                player: player_1,
-                                                generatedBy: cardItself_1.id,
+                                                player: player,
+                                                generatedBy: cardItself.id,
                                             }, {
                                                 type: ACTION_EFFECT,
                                                 effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
                                                 from: '$paymentSource',
-                                                amount: totalCost_1,
-                                                player: player_1,
-                                                generatedBy: cardItself_1.id,
+                                                amount: totalCost,
+                                                player: player,
+                                                generatedBy: cardItself.id,
                                             }];
-                                        this_1.transformIntoActions.apply(this_1, __spreadArray(__spreadArray([], paymentActions, false), [{
-                                                type: ACTION_EFFECT,
-                                                effectType: EFFECT_TYPE_PLAY_CREATURE,
-                                                card: cardItself_1,
-                                                player: player_1,
-                                                generatedBy: cardItself_1.id,
-                                            },
-                                            {
-                                                type: ACTION_EFFECT,
-                                                effectType: EFFECT_TYPE_CREATURE_ENTERS_PLAY,
-                                                target: '$creature_created',
-                                                player: player_1,
-                                                generatedBy: cardItself_1.id,
-                                            },
-                                            {
-                                                type: ACTION_EFFECT,
-                                                effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
-                                                target: '$creature_created',
-                                                player: player_1,
-                                                amount: (baseCard_1.cost === COST_X || baseCard_1.cost === COST_X_PLUS_ONE || baseCard_1.cost === null) ? 0 : baseCard_1.cost,
-                                                generatedBy: cardItself_1.id,
-                                            },
-                                            {
-                                                type: ACTION_EFFECT,
-                                                effectType: EFFECT_TYPE_PLAY_FINISHED,
-                                                generatedBy: cardItself_1.id,
-                                            }], false));
+                                        this.transformIntoActions(...paymentActions, {
+                                            type: ACTION_EFFECT,
+                                            effectType: EFFECT_TYPE_PLAY_CREATURE,
+                                            card: cardItself,
+                                            player: player,
+                                            generatedBy: cardItself.id,
+                                        }, {
+                                            type: ACTION_EFFECT,
+                                            effectType: EFFECT_TYPE_CREATURE_ENTERS_PLAY,
+                                            target: '$creature_created',
+                                            player: player,
+                                            generatedBy: cardItself.id,
+                                        }, {
+                                            type: ACTION_EFFECT,
+                                            effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
+                                            target: '$creature_created',
+                                            player: player,
+                                            amount: (baseCard.cost === COST_X || baseCard.cost === COST_X_PLUS_ONE || baseCard.cost === null) ? 0 : baseCard.cost,
+                                            generatedBy: cardItself.id,
+                                        }, {
+                                            type: ACTION_EFFECT,
+                                            effectType: EFFECT_TYPE_PLAY_FINISHED,
+                                            generatedBy: cardItself.id,
+                                        });
                                     }
                                     break;
                                 }
                                 case TYPE_RELIC: {
-                                    var alreadyHasOne = this_1.getZone(ZONE_TYPE_IN_PLAY).cards
-                                        .some(function (card) { return card.data.controller === player_1 && card.card.name === baseCard_1.name; });
-                                    var relicRegion = baseCard_1.region;
-                                    var magiRegion = activeMagi.card.region;
-                                    var regionAllows = relicRegion === magiRegion || relicRegion === REGION_UNIVERSAL;
-                                    if (!alreadyHasOne && regionAllows && typeof baseCard_1.cost == 'number' && activeMagi.data.energy >= baseCard_1.cost) {
-                                        this_1.transformIntoActions({
+                                    const alreadyHasOne = this.getZone(ZONE_TYPE_IN_PLAY).cards
+                                        .some(card => card.data.controller === player && card.card.name === baseCard.name);
+                                    const relicRegion = baseCard.region;
+                                    const magiRegion = activeMagi.card.region;
+                                    const regionAllows = relicRegion === magiRegion || relicRegion === REGION_UNIVERSAL;
+                                    if (!alreadyHasOne && regionAllows && typeof baseCard.cost == 'number' && activeMagi.data.energy >= baseCard.cost) {
+                                        this.transformIntoActions({
                                             type: ACTION_EFFECT,
                                             effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC,
                                             from: activeMagi,
-                                            amount: totalCost_1,
-                                            player: player_1,
-                                            generatedBy: cardItself_1.id,
+                                            amount: totalCost,
+                                            player,
+                                            generatedBy: cardItself.id,
                                         }, {
                                             type: ACTION_EFFECT,
                                             effectType: EFFECT_TYPE_PLAY_RELIC,
-                                            card: cardItself_1,
-                                            player: player_1,
-                                            generatedBy: cardItself_1.id,
+                                            card: cardItself,
+                                            player,
+                                            generatedBy: cardItself.id,
                                         }, {
                                             type: ACTION_EFFECT,
                                             effectType: EFFECT_TYPE_RELIC_ENTERS_PLAY,
                                             card: '$relic_created',
-                                            player: player_1,
-                                            generatedBy: cardItself_1.id,
+                                            player,
+                                            generatedBy: cardItself.id,
                                         }, {
                                             type: ACTION_EFFECT,
                                             effectType: EFFECT_TYPE_PLAY_FINISHED,
-                                            generatedBy: cardItself_1.id,
+                                            generatedBy: cardItself.id,
                                         });
                                     }
                                     break;
                                 }
                                 case TYPE_SPELL: {
-                                    if (activeMagi.data.energy >= totalCost_1 || baseCard_1.cost === COST_X || baseCard_1.cost === COST_X_PLUS_ONE) {
-                                        var enrichAction = function (effect) { return (__assign(__assign({ source: cardItself_1, player: player_1 }, effect), { spell: true, generatedBy: cardItself_1.id })); };
-                                        var preparedEffects = ((_k = (_j = baseCard_1.data) === null || _j === void 0 ? void 0 : _j.effects) === null || _k === void 0 ? void 0 : _k.map(enrichAction)) || [];
-                                        var testablePrompts_1 = [
+                                    if (activeMagi.data.energy >= totalCost || baseCard.cost === COST_X || baseCard.cost === COST_X_PLUS_ONE) {
+                                        const enrichAction = (effect) => (Object.assign(Object.assign({ source: cardItself, player }, effect), { spell: true, generatedBy: cardItself.id }));
+                                        const preparedEffects = ((_k = (_j = baseCard.data) === null || _j === void 0 ? void 0 : _j.effects) === null || _k === void 0 ? void 0 : _k.map(enrichAction)) || [];
+                                        const testablePrompts = [
                                             PROMPT_TYPE_SINGLE_CREATURE,
                                             PROMPT_TYPE_RELIC,
                                             PROMPT_TYPE_OWN_SINGLE_CREATURE,
                                             PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
                                         ];
-                                        var testablePromptFilter = function (action) {
-                                            return action.type === ACTION_ENTER_PROMPT && testablePrompts_1.includes(action.promptType);
-                                        };
-                                        var allPrompts = preparedEffects.filter(testablePromptFilter);
-                                        var allPromptsAreDoable = allPrompts.every(function (promptAction) {
+                                        const testablePromptFilter = (action) => action.type === ACTION_ENTER_PROMPT && testablePrompts.includes(action.promptType);
+                                        const allPrompts = preparedEffects.filter(testablePromptFilter);
+                                        const allPromptsAreDoable = allPrompts.every(promptAction => {
                                             switch (promptAction.promptType) {
                                                 case PROMPT_TYPE_SINGLE_CREATURE:
-                                                    return _this.getZone(ZONE_TYPE_IN_PLAY).cards.some(function (card) { return card.card.type === TYPE_CREATURE; });
+                                                    return this.getZone(ZONE_TYPE_IN_PLAY).cards.some(card => card.card.type === TYPE_CREATURE);
                                                 case PROMPT_TYPE_RELIC:
-                                                    return _this.getZone(ZONE_TYPE_IN_PLAY).cards.some(function (card) { return card.card.type === TYPE_RELIC; });
+                                                    return this.getZone(ZONE_TYPE_IN_PLAY).cards.some(card => card.card.type === TYPE_RELIC);
                                                 case PROMPT_TYPE_OWN_SINGLE_CREATURE:
-                                                    return _this.getZone(ZONE_TYPE_IN_PLAY).cards.some(function (card) { return _this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === promptAction.player; });
+                                                    return this.getZone(ZONE_TYPE_IN_PLAY).cards.some(card => this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === promptAction.player);
                                                 case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
                                                     if ('restrictions' in promptAction.promptParams) {
-                                                        return promptAction.promptParams.restrictions.every(function (_a) {
-                                                            var type = _a.type, value = _a.value;
-                                                            return _this.checkAnyCardForRestriction(_this.getZone(ZONE_TYPE_IN_PLAY).cards, type, value);
-                                                        });
+                                                        return promptAction.promptParams.restrictions.every(({ type, value }) => this.checkAnyCardForRestriction(this.getZone(ZONE_TYPE_IN_PLAY).cards, type, value));
                                                     }
                                                     else if ('restriction' in promptAction.promptParams) {
-                                                        return _this.checkAnyCardForRestriction(_this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(function (card) { return card.card.type === TYPE_CREATURE; }), promptAction.promptParams.restriction, promptAction.promptParams.restrictionValue);
+                                                        return this.checkAnyCardForRestriction(this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.type === TYPE_CREATURE), promptAction.promptParams.restriction, promptAction.promptParams.restrictionValue);
                                                     }
                                                     return true;
                                                 }
@@ -2021,76 +1948,75 @@ var State = /** @class */ (function () {
                                             }
                                         });
                                         if (allPromptsAreDoable) {
-                                            var regionPenalty = (activeMagi.card.region == baseCard_1.region || baseCard_1.region == REGION_UNIVERSAL) ? 0 : 1;
-                                            var maxCost = baseCard_1.data.maxCostX || Infinity;
-                                            var payEffects = (baseCard_1.cost === COST_X || baseCard_1.cost === COST_X_PLUS_ONE) ? [
+                                            const regionPenalty = (activeMagi.card.region == baseCard.region || baseCard.region == REGION_UNIVERSAL) ? 0 : 1;
+                                            const maxCost = baseCard.data.maxCostX || Infinity;
+                                            const payEffects = (baseCard.cost === COST_X || baseCard.cost === COST_X_PLUS_ONE) ? [
                                                 {
                                                     type: ACTION_ENTER_PROMPT,
                                                     promptType: PROMPT_TYPE_NUMBER,
-                                                    player: player_1,
+                                                    player,
                                                     promptParams: {
                                                         min: 1,
-                                                        max: Math.min(activeMagi.data.energy, maxCost) - regionPenalty - (baseCard_1.cost === COST_X_PLUS_ONE ? 1 : 0),
+                                                        max: Math.min(activeMagi.data.energy, maxCost) - regionPenalty - (baseCard.cost === COST_X_PLUS_ONE ? 1 : 0),
                                                     },
                                                     variable: 'chosen_cost',
-                                                    generatedBy: cardItself_1.id,
+                                                    generatedBy: cardItself.id,
                                                 },
                                                 {
                                                     type: ACTION_CALCULATE,
                                                     operandOne: 'chosen_cost',
-                                                    operandTwo: regionPenalty + (baseCard_1.cost === COST_X_PLUS_ONE ? 1 : 0),
+                                                    operandTwo: regionPenalty + (baseCard.cost === COST_X_PLUS_ONE ? 1 : 0),
                                                     operator: CALCULATION_ADD,
                                                     variable: 'totalCost',
-                                                    generatedBy: cardItself_1.id,
+                                                    generatedBy: cardItself.id,
                                                 },
                                                 {
                                                     type: ACTION_EFFECT,
                                                     effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
                                                     from: activeMagi,
                                                     amount: '$totalCost',
-                                                    player: player_1,
-                                                    generatedBy: cardItself_1.id,
+                                                    player: player,
+                                                    generatedBy: cardItself.id,
                                                 }
                                             ] : [{
                                                     type: ACTION_EFFECT,
                                                     effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
                                                     from: activeMagi,
-                                                    amount: totalCost_1,
-                                                    player: player_1,
-                                                    generatedBy: cardItself_1.id,
+                                                    amount: totalCost,
+                                                    player: player,
+                                                    generatedBy: cardItself.id,
                                                 }
                                             ];
-                                            this_1.transformIntoActions.apply(this_1, __spreadArray(__spreadArray(__spreadArray(__spreadArray([{
-                                                    type: ACTION_EFFECT,
-                                                    effectType: EFFECT_TYPE_PLAY_SPELL,
-                                                    card: cardItself_1,
-                                                    player: player_1,
-                                                    generatedBy: cardItself_1.id,
-                                                },
-                                                {
-                                                    type: ACTION_CALCULATE,
-                                                    operator: CALCULATION_SET,
-                                                    operandOne: player_1,
-                                                    variable: 'player',
-                                                    generatedBy: cardItself_1.id,
-                                                }], payEffects, false), [{
-                                                    type: ACTION_EFFECT,
-                                                    effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-                                                    target: cardItself_1,
-                                                    bottom: false,
-                                                    sourceZone: ZONE_TYPE_HAND,
-                                                    destinationZone: ZONE_TYPE_DISCARD,
-                                                    player: player_1,
-                                                    generatedBy: cardItself_1.id,
-                                                }], false), preparedEffects, false), [{
-                                                    type: ACTION_EFFECT,
-                                                    effectType: EFFECT_TYPE_PLAY_FINISHED,
-                                                    generatedBy: cardItself_1.id,
-                                                }], false));
-                                            var currentMetaData = {
-                                                source: cardItself_1,
+                                            this.transformIntoActions({
+                                                type: ACTION_EFFECT,
+                                                effectType: EFFECT_TYPE_PLAY_SPELL,
+                                                card: cardItself,
+                                                player: player,
+                                                generatedBy: cardItself.id,
+                                            }, {
+                                                type: ACTION_CALCULATE,
+                                                operator: CALCULATION_SET,
+                                                operandOne: player,
+                                                variable: 'player',
+                                                generatedBy: cardItself.id,
+                                            }, ...payEffects, {
+                                                type: ACTION_EFFECT,
+                                                effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+                                                target: cardItself,
+                                                bottom: false,
+                                                sourceZone: ZONE_TYPE_HAND,
+                                                destinationZone: ZONE_TYPE_DISCARD,
+                                                player: player,
+                                                generatedBy: cardItself.id,
+                                            }, ...preparedEffects, {
+                                                type: ACTION_EFFECT,
+                                                effectType: EFFECT_TYPE_PLAY_FINISHED,
+                                                generatedBy: cardItself.id,
+                                            });
+                                            let currentMetaData = {
+                                                source: cardItself,
                                             };
-                                            this_1.setSpellMetadata(currentMetaData, cardItself_1.id);
+                                            this.setSpellMetadata(currentMetaData, cardItself.id);
                                         }
                                     }
                                     break;
@@ -2098,7 +2024,7 @@ var State = /** @class */ (function () {
                             }
                         }
                         else {
-                            console.error("Wrong Priority: current is ".concat(currentPriority, " (step ").concat(this_1.getCurrentStep(), ", type is ").concat(cardType, ")"));
+                            console.error(`Wrong Priority: current is ${currentPriority} (step ${this.getCurrentStep()}, type is ${cardType})`);
                         }
                     }
                     else {
@@ -2108,54 +2034,46 @@ var State = /** @class */ (function () {
                 }
                 case ACTION_EFFECT: {
                     if (action.effectType in actionMap) {
-                        var transform = this_1.transformIntoActions.bind(this_1);
-                        var actionTransformer = actionMap[action.effectType];
-                        actionTransformer.call(this_1, action, transform, this_1.state, this_1.nanoid);
+                        const transform = this.transformIntoActions.bind(this);
+                        const actionTransformer = actionMap[action.effectType];
+                        actionTransformer.call(this, action, transform, this.state, this.nanoid);
                     }
                     break;
                 }
             } // switch (action.type)
-        };
-        var this_1 = this, newStep;
-        while (this.hasActions()) {
-            var state_1 = _loop_1();
-            if (typeof state_1 === "object")
-                return state_1.value;
         } // while(this.hasActions())
         // SBA for Magi losing
         if (!this.state.prompt) {
-            var sbActions_1 = [];
-            this.players.forEach(function (player) {
-                if (_this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).length === 1) {
-                    var magi = _this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card;
+            const sbActions = [];
+            this.players.forEach(player => {
+                if (this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).length === 1) {
+                    const magi = this.getZone(ZONE_TYPE_ACTIVE_MAGI, player).card;
                     if (!magi) {
                         throw new Error('Trying to defeat missing Magi');
                     }
-                    var creatures = _this.useSelector(SELECTOR_OWN_CREATURES, player);
+                    const creatures = this.useSelector(SELECTOR_OWN_CREATURES, player);
                     if (magi.data.energy === 0 && creatures instanceof Array && creatures.length === 0) {
-                        sbActions_1.push({
+                        sbActions.push({
                             type: ACTION_EFFECT,
                             effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
                             source: null,
                             target: magi,
                             generatedBy: 'thegame', //nanoid(),
-                            player: player,
+                            player,
                         });
                     }
                 }
             });
-            if (sbActions_1.length > 0) {
-                this.addActions.apply(this, sbActions_1);
+            if (sbActions.length > 0) {
+                this.addActions(...sbActions);
                 this.update({
                     type: ACTION_NONE,
                 });
             }
         }
         return true;
-    };
-    return State;
-}());
-export { State };
+    }
+}
 export { TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, ACTION_PASS, ACTION_PLAY, ACTION_POWER, ACTION_EFFECT, ACTION_SELECT, ACTION_CALCULATE, ACTION_ENTER_PROMPT, ACTION_RESOLVE_PROMPT, ACTION_GET_PROPERTY_VALUE, ACTION_ATTACK, ACTION_PLAYER_WINS, PROPERTY_ID, PROPERTY_TYPE, PROPERTY_CONTROLLER, PROPERTY_ENERGY_COUNT, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, CALCULATION_SET, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_HALVE_ROUND_DOWN, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_MAX, CALCULATION_MULTIPLY, SELECTOR_CREATURES, SELECTOR_CREATURES_AND_MAGI, SELECTOR_OWN_MAGI, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_MAGI_OF_REGION, SELECTOR_OPPONENT_ID, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, NO_PRIORITY, PRIORITY_PRS, PRIORITY_ATTACK, PRIORITY_CREATURES, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_CHOOSE_CARDS, EFFECT_TYPE_DRAW, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_PLAY_CREATURE, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_RELIC_ENTERS_PLAY, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE, EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC, EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_PAYING_ENERGY_FOR_POWER, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_CREATURE_IS_DEFEATED, // Possibly redundant
 EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_IS_ATTACKED, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_DRAW_REST_OF_CARDS, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_PROMPT_ENTERED, REGION_UNIVERSAL, COST_X, COST_X_PLUS_ONE, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, };
 //# sourceMappingURL=index.js.map

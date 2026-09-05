@@ -1,17 +1,16 @@
 import { PROMPT_TYPE_ALTERNATIVE, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_CHOOSE_CARDS, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_NUMBER, PROMPT_TYPE_PAYMENT_SOURCE, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, ZONE_TYPE_IN_PLAY, } from "../../const.js";
-var convertCard = function (cardInGame) { return ({
+const convertCard = (cardInGame) => ({
     id: cardInGame.id,
     owner: cardInGame.owner,
     card: cardInGame.card.name,
     data: cardInGame.data,
-}); };
-export var applyPromptEnteredEffect = function (action) {
-    var _this = this;
+});
+export const applyPromptEnteredEffect = function (action) {
     if (!('player' in action)) {
         throw new Error('Prompt without player!');
     }
-    var promptParams = {};
-    var promptPlayer = this.getMetaValue(action.player, action.generatedBy);
+    let promptParams = {};
+    const promptPlayer = this.getMetaValue(action.player, action.generatedBy);
     switch (action.promptType) {
         case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
             promptParams = {
@@ -41,23 +40,23 @@ export var applyPromptEnteredEffect = function (action) {
             if (action.promptParams.restriction && action.promptParams.restrictions) {
                 throw new Error('PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE error: single and multiple restrictions specified');
             }
-            var restrictions = action.promptParams.restrictions || (action.promptParams.restriction ? [
+            const restrictions = action.promptParams.restrictions || (action.promptParams.restriction ? [
                 {
                     type: this.getMetaValue(action.promptParams.restriction, action.generatedBy),
                     value: this.getMetaValue(action.promptParams.restrictionValue, action.generatedBy),
                 },
             ] : null);
-            var zone = this.getMetaValue(action.promptParams.zone, action.generatedBy);
-            var zoneOwner = this.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
-            var numberOfCards = this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
-            var zoneContent = (zone === ZONE_TYPE_IN_PLAY) ? this.getZone(zone, null).cards : this.getZone(zone, zoneOwner).cards;
-            var cards = restrictions ? zoneContent.filter(this.makeCardFilter(restrictions)) : zoneContent;
-            var maxNumberOfCards = Math.min(numberOfCards, cards.length);
+            const zone = this.getMetaValue(action.promptParams.zone, action.generatedBy);
+            const zoneOwner = this.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
+            const numberOfCards = this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
+            const zoneContent = (zone === ZONE_TYPE_IN_PLAY) ? this.getZone(zone, null).cards : this.getZone(zone, zoneOwner).cards;
+            const cards = restrictions ? zoneContent.filter(this.makeCardFilter(restrictions)) : zoneContent;
+            const maxNumberOfCards = Math.min(numberOfCards, cards.length);
             if (maxNumberOfCards > 0) {
                 promptParams = {
-                    zone: zone,
-                    zoneOwner: zoneOwner,
-                    restrictions: restrictions,
+                    zone,
+                    zoneOwner,
+                    restrictions,
                     numberOfCards: maxNumberOfCards,
                     cards: cards.map(convertCard),
                 };
@@ -68,23 +67,23 @@ export var applyPromptEnteredEffect = function (action) {
             if (action.promptParams.restriction && action.promptParams.restrictions) {
                 throw new Error('PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE error: single and multiple restrictions specified');
             }
-            var restrictions = action.promptParams.restrictions || (action.promptParams.restriction ? [
+            const restrictions = action.promptParams.restrictions || (action.promptParams.restriction ? [
                 {
                     type: this.getMetaValue(action.promptParams.restriction, action.generatedBy),
                     value: this.getMetaValue(action.promptParams.restrictionValue, action.generatedBy),
                 },
             ] : null);
-            var zone = this.getMetaValue(action.promptParams.zone, action.generatedBy);
-            var zoneOwner = this.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
-            var numberOfCards = this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
-            var zoneContent = (zone === ZONE_TYPE_IN_PLAY) ? this.getZone(zone, null).cards : this.getZone(zone, zoneOwner).cards;
-            var cards = restrictions ? zoneContent.filter(this.makeCardFilter(restrictions)) : zoneContent;
-            var maxNumberOfCards = Math.min(numberOfCards, cards.length);
+            const zone = this.getMetaValue(action.promptParams.zone, action.generatedBy);
+            const zoneOwner = this.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
+            const numberOfCards = this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
+            const zoneContent = (zone === ZONE_TYPE_IN_PLAY) ? this.getZone(zone, null).cards : this.getZone(zone, zoneOwner).cards;
+            const cards = restrictions ? zoneContent.filter(this.makeCardFilter(restrictions)) : zoneContent;
+            const maxNumberOfCards = Math.min(numberOfCards, cards.length);
             if (maxNumberOfCards > 0) {
                 promptParams = {
-                    zone: zone,
-                    zoneOwner: zoneOwner,
-                    restrictions: restrictions,
+                    zone,
+                    zoneOwner,
+                    restrictions,
                     numberOfCards: maxNumberOfCards,
                     cards: cards.map(convertCard),
                 };
@@ -92,28 +91,25 @@ export var applyPromptEnteredEffect = function (action) {
             break;
         }
         case PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE: {
-            var zone = this.getMetaValue(action.promptParams.zone, action.generatedBy);
-            var zoneOwner = this.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
-            var numberOfCards = this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
-            var zoneContent = this.getZone(zone, zoneOwner).cards;
-            var cards = zoneContent.slice(0, numberOfCards);
+            const zone = this.getMetaValue(action.promptParams.zone, action.generatedBy);
+            const zoneOwner = this.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
+            const numberOfCards = this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
+            const zoneContent = this.getZone(zone, zoneOwner).cards;
+            const cards = zoneContent.slice(0, numberOfCards);
             promptParams = {
-                zone: zone,
-                zoneOwner: zoneOwner,
-                numberOfCards: numberOfCards,
+                zone,
+                zoneOwner,
+                numberOfCards,
                 cards: cards.map(convertCard),
             };
             break;
         }
         case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
             if ('restrictions' in action.promptParams && action.promptParams.restrictions) {
-                var restrictionsWithValues = action.promptParams.restrictions.map(function (_a) {
-                    var type = _a.type, value = _a.value;
-                    return ({
-                        type: type,
-                        value: _this.getMetaValue(value, action.generatedBy),
-                    });
-                });
+                const restrictionsWithValues = action.promptParams.restrictions.map(({ type, value }) => ({
+                    type,
+                    value: this.getMetaValue(value, action.generatedBy),
+                }));
                 promptParams = {
                     restrictions: restrictionsWithValues,
                 };
@@ -187,15 +183,15 @@ export var applyPromptEnteredEffect = function (action) {
         }
         case PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES: {
             // console.dir(this.getSpellMetadata(action.generatedBy))
-            var sourceZone = this.getMetaValue(action.promptParams.sourceZone, action.generatedBy);
-            var sourceZoneOwner = this.getMetaValue(action.promptParams.sourceZoneOwner, action.generatedBy);
-            var numberOfCards = this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
-            var zoneContent = this.getZone(sourceZone, sourceZoneOwner).cards;
-            var cards = zoneContent.slice(0, numberOfCards);
+            const sourceZone = this.getMetaValue(action.promptParams.sourceZone, action.generatedBy);
+            const sourceZoneOwner = this.getMetaValue(action.promptParams.sourceZoneOwner, action.generatedBy);
+            const numberOfCards = this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
+            const zoneContent = this.getZone(sourceZone, sourceZoneOwner).cards;
+            const cards = zoneContent.slice(0, numberOfCards);
             promptParams = {
-                sourceZone: sourceZone,
-                sourceZoneOwner: sourceZoneOwner,
-                numberOfCards: numberOfCards,
+                sourceZone,
+                sourceZoneOwner,
+                numberOfCards,
                 cards: cards.map(convertCard),
                 targetZones: action.promptParams.targetZones,
             };

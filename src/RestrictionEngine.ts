@@ -16,10 +16,10 @@ import {
 	RESTRICTION_STATUS,
 	RESTRICTION_ENERGY_EQUALS,
 	PROPERTY_STATUS,
-} from './const';
+} from './const.js';
 
-import CardInGame from './classes/CardInGame';
-import { RestrictionObjectType, RestrictionType } from './types';
+import CardInGame from './classes/CardInGame.js';
+import { RestrictionObjectType, RestrictionType } from './types/index.js';
 
 export interface RestrictionEngineContext {
 	getOwnMagi(player: number): CardInGame[];

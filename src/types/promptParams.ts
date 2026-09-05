@@ -1,4 +1,4 @@
-import CardInGame, { ConvertedCard } from '../classes/CardInGame';
+import CardInGame, { ConvertedCard } from '../classes/CardInGame.js';
 import {
     ACTION_ENTER_PROMPT,
     PROMPT_TYPE_ALTERNATIVE,
@@ -34,8 +34,8 @@ import {
     TYPE_CREATURE,
     TYPE_RELIC,
     TYPE_SPELL
-} from '../const';
-import { GenericPromptType, RestrictionType, RestrictionObjectType, ZoneType } from './common'
+} from '../const.js';
+import { GenericPromptType, RestrictionType, RestrictionObjectType, ZoneType } from './common.js'
 
 export type AnyCreatureExceptSourcePromptParams = {
     promptType: typeof PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE;

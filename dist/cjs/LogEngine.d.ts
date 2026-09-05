@@ -1,4 +1,4 @@
-import { AnyEffectType, LogEntryType, PromptTypeType } from './types';
+import { AnyEffectType, LogEntryType, PromptTypeType } from './types/index.js';
 export interface LogEngineContext {
     getMetaValue(value: any, spellId: string | undefined): any;
     getLog(): LogEntryType[];

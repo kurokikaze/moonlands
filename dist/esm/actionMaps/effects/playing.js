@@ -1,5 +1,5 @@
 import { ACTION_CALCULATE, ACTION_EFFECT, ACTION_GET_PROPERTY_VALUE, CALCULATION_SET, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ATTACH_CARD_TO_CARD, EFFECT_TYPE_CARD_ATTACHED_TO_CARD, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, PROPERTY_ID, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, } from "../../const.js";
-export var applyPlayRelicEffect = function (action, transform) {
+export const applyPlayRelicEffect = function (action, transform) {
     transform({
         type: ACTION_EFFECT,
         effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
@@ -17,7 +17,7 @@ export var applyPlayRelicEffect = function (action, transform) {
         generatedBy: action.generatedBy,
     });
 };
-export var applyPlayCreatureEffect = function (action, transform) {
+export const applyPlayCreatureEffect = function (action, transform) {
     transform({
         type: ACTION_EFFECT,
         effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
@@ -35,20 +35,20 @@ export var applyPlayCreatureEffect = function (action, transform) {
         generatedBy: action.generatedBy,
     });
 };
-export var applyStartingEnergyOnCreatureEffect = function (action, transform) {
-    var target = this.getMetaValue(action.target, action.generatedBy);
+export const applyStartingEnergyOnCreatureEffect = function (action, transform) {
+    const target = this.getMetaValue(action.target, action.generatedBy);
     transform({
         type: ACTION_EFFECT,
         effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
-        target: target,
+        target,
         source: undefined,
         amount: this.getMetaValue(action.amount, action.generatedBy),
         generatedBy: action.generatedBy,
     });
 };
-export var applyPlayAttachedToCreatureEffect = function (action, transform) {
-    var card = this.getMetaValue(action.target, action.generatedBy);
-    var attachmentTarget = this.getMetaValue(action.attachmentTarget, action.generatedBy);
+export const applyPlayAttachedToCreatureEffect = function (action, transform) {
+    const card = this.getMetaValue(action.target, action.generatedBy);
+    const attachmentTarget = this.getMetaValue(action.attachmentTarget, action.generatedBy);
     if (!card || !attachmentTarget) {
         return; // no valid card or target – skip the play entirely
     }
@@ -64,13 +64,13 @@ export var applyPlayAttachedToCreatureEffect = function (action, transform) {
         type: ACTION_EFFECT,
         effectType: EFFECT_TYPE_ATTACH_CARD_TO_CARD,
         target: '$new_card', // We need to attach the new card in play, not the one in hand
-        attachmentTarget: attachmentTarget,
+        attachmentTarget,
         generatedBy: action.generatedBy,
     });
 };
-export var applyAttachCardToCardEffect = function (action, transform) {
-    var card = this.getMetaValue(action.target, action.generatedBy);
-    var attachmentTarget = this.getMetaValue(action.attachmentTarget, action.generatedBy);
+export const applyAttachCardToCardEffect = function (action, transform) {
+    const card = this.getMetaValue(action.target, action.generatedBy);
+    const attachmentTarget = this.getMetaValue(action.attachmentTarget, action.generatedBy);
     if (!card || !attachmentTarget) {
         return;
     }

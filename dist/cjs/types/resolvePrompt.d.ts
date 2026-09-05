@@ -1,6 +1,6 @@
-import { ACTION_RESOLVE_PROMPT } from "../const";
-import CardInGame from "../classes/CardInGame";
-import { ZoneType } from "./common";
+import { ACTION_RESOLVE_PROMPT } from "../const.js";
+import CardInGame from "../classes/CardInGame.js";
+import { ZoneType } from "./common.js";
 interface ResolvePromptInterface {
     type: typeof ACTION_RESOLVE_PROMPT;
     generatedBy?: string;
@@ -40,9 +40,9 @@ export type ResolveDistributeCardsPrompt = ResolvePromptInterface & {
 export type ResolveMagiWithoutCreaturesPrompt = ResolvePromptInterface & {
     target: CardInGame;
 };
-export type ResolvePromptType = ResolvePromptInterface & {
+export type ResolvePromptType = (ResolvePromptInterface & {
     number?: number | string;
     cards?: CardInGame[];
     target?: CardInGame;
-} | ResolveRearrangeEnergyPrompt | ResolveDistributeEnergyPrompt | ResolveDistributeDamagePrompt | ResolvePlayerPrompt | ResolveRearrangeCardsPrompt | ResolveAlternativePrompt | ResolvePaymentSourcePrompt | ResolvePowerOnMagiPrompt | ResolveMagiWithoutCreaturesPrompt;
+}) | ResolveRearrangeEnergyPrompt | ResolveDistributeEnergyPrompt | ResolveDistributeDamagePrompt | ResolvePlayerPrompt | ResolveRearrangeCardsPrompt | ResolveAlternativePrompt | ResolvePaymentSourcePrompt | ResolvePowerOnMagiPrompt | ResolveMagiWithoutCreaturesPrompt;
 export {};

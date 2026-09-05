@@ -1,14 +1,14 @@
-import CardInGame from "../../classes/CardInGame";
+import CardInGame from "../../classes/CardInGame.js";
 import {
   EFFECT_TYPE_CONDITIONAL,
   EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
   EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
   SELECTOR_CREATURES_OF_PLAYER,
   SELECTOR_ID,
-} from "../../const";
-import { ContinuousEffectType, EnrichedAction } from "../../types";
-import { oneOrSeveral } from "../actionMapUtils";
-import { ActionTransformer } from "../actionMapTypes";
+} from "../../const.js";
+import { ContinuousEffectType, EnrichedAction } from "../../types/index.js";
+import { oneOrSeveral } from "../actionMapUtils.js";
+import { ActionTransformer } from "../actionMapTypes.js";
 
 // Should rework into continuous effect with duration
 export const applyForbidAttackToCreatureEffect: ActionTransformer<typeof EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE> = function (action, _transform) {

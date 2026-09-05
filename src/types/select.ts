@@ -1,4 +1,4 @@
-import { Region, RestrictionObjectType, StatusType, ZoneType } from "./common";
+import { Region, RestrictionObjectType, StatusType, ZoneType } from "./common.js";
 import {
     ACTION_SELECT,
 
@@ -37,7 +37,7 @@ import {
     SELECTOR_CARDS_IN_HAND,
     SELECTOR_MAGI_OF_PLAYER,
     SELECTOR_RANDOM_CARD_IN_HAND,
-} from "../const";
+} from "../const.js";
 
 export type SelectorParams = {
     selector: SelectorTypeType,

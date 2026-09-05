@@ -1,5 +1,5 @@
-import { EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_ATTACK, EFFECT_TYPE_ATTACKER_DEALS_DAMAGE, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DAMAGE_STEP, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE } from "../../const";
-import { ActionTransformer } from "../actionMapTypes";
+import { EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_ATTACK, EFFECT_TYPE_ATTACKER_DEALS_DAMAGE, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DAMAGE_STEP, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE } from "../../const.js";
+import { ActionTransformer } from "../actionMapTypes.js";
 export declare const applyAttackEffect: ActionTransformer<typeof EFFECT_TYPE_ATTACK>;
 export declare const applyBeforeDamageEffect: ActionTransformer<typeof EFFECT_TYPE_BEFORE_DAMAGE>;
 export declare const applyDamageStepEffect: ActionTransformer<typeof EFFECT_TYPE_DAMAGE_STEP>;

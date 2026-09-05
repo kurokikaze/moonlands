@@ -1,4 +1,4 @@
-import CardInGame from "../../classes/CardInGame";
+import CardInGame from "../../classes/CardInGame.js";
 import {
   ACTION_EFFECT,
   EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
@@ -9,9 +9,9 @@ import {
   ZONE_TYPE_DECK,
   ZONE_TYPE_DISCARD,
   ZONE_TYPE_HAND,
-} from "../../const";
-import { oneOrSeveral } from "../actionMapUtils";
-import { ActionTransformer } from "../actionMapTypes";
+} from "../../const.js";
+import { oneOrSeveral } from "../actionMapUtils.js";
+import { ActionTransformer } from "../actionMapTypes.js";
 
 export const applyDiscardCardsEffect: ActionTransformer<typeof EFFECT_TYPE_DISCARD_CARDS_FROM_HAND> = function (action, transform) {
   const targets = this.getMetaValue(action.target, action.generatedBy);

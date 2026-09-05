@@ -1,5 +1,5 @@
-import { COST_X, COST_X_PLUS_ONE } from '../const';
-import { Region, CardType, CardData } from '../types';
+import { COST_X, COST_X_PLUS_ONE } from '../const.js';
+import { Region, CardType, CardData } from '../types/index.js';
 export type CostType = number | typeof COST_X | typeof COST_X_PLUS_ONE | null;
 export type ModifiedCardType = {
     name: string;

@@ -1,9 +1,9 @@
 import { ACTION_EFFECT, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_ATTACKER_DAMAGE_DEALT, EFFECT_TYPE_ATTACKER_DEALS_DAMAGE, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_CREATURE_IS_DEFEATED, EFFECT_TYPE_DAMAGE_STEP, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_DEFENDER_DAMAGE_DEALT, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, TYPE_CREATURE, } from "../../const.js";
-export var applyAttackEffect = function (action, transform) {
-    var source = this.getMetaValue(action.source, action.generatedBy);
-    var target = this.getMetaValue(action.target, action.generatedBy);
-    var additionalAttackers = this.getMetaValue(action.additionalAttackers, action.generatedBy);
-    var attackSequence = [
+export const applyAttackEffect = function (action, transform) {
+    const source = this.getMetaValue(action.source, action.generatedBy);
+    const target = this.getMetaValue(action.target, action.generatedBy);
+    const additionalAttackers = this.getMetaValue(action.additionalAttackers, action.generatedBy);
+    const attackSequence = [
         {
             type: ACTION_EFFECT,
             effectType: EFFECT_TYPE_CREATURE_ATTACKS,
@@ -41,7 +41,7 @@ export var applyAttackEffect = function (action, transform) {
         },
     ];
     if (additionalAttackers) {
-        var preparedEffects = additionalAttackers.map(function (card) { return [
+        const preparedEffects = additionalAttackers.map((card) => [
             {
                 type: ACTION_EFFECT,
                 effectType: EFFECT_TYPE_CREATURE_ATTACKS,
@@ -80,27 +80,26 @@ export var applyAttackEffect = function (action, transform) {
                 target: target,
                 generatedBy: source.id,
             },
-        ]; }).flat();
-        for (var _i = 0, preparedEffects_1 = preparedEffects; _i < preparedEffects_1.length; _i++) {
-            var effect = preparedEffects_1[_i];
+        ]).flat();
+        for (let effect of preparedEffects) {
             attackSequence.push(effect);
         }
     }
-    transform.apply(void 0, attackSequence);
+    transform(...attackSequence);
 };
-export var applyBeforeDamageEffect = function (action, transform, _state) {
+export const applyBeforeDamageEffect = function (action, transform, _state) {
     action.source.markAttackDone();
     action.target.markAttackReceived();
 };
-export var applyDamageStepEffect = function (action, transform) {
+export const applyDamageStepEffect = function (action, transform) {
     // Here we finalize damage amount from both creatures' energy
-    var attackSource = action.source;
-    var attackTarget = action.target;
-    var damageByAttacker = attackSource.data.energy;
-    var damageByDefender = (attackTarget.card.type === TYPE_CREATURE) ?
+    const attackSource = action.source;
+    const attackTarget = action.target;
+    const damageByAttacker = attackSource.data.energy;
+    const damageByDefender = (attackTarget.card.type === TYPE_CREATURE) ?
         attackTarget.data.energy :
         0;
-    var attackerDamageActions = [{
+    const attackerDamageActions = [{
             type: ACTION_EFFECT,
             effectType: EFFECT_TYPE_ATTACKER_DEALS_DAMAGE,
             source: attackSource,
@@ -150,9 +149,9 @@ export var applyDamageStepEffect = function (action, transform) {
             generatedBy: attackSource.id,
         });
     }
-    transform.apply(void 0, attackerDamageActions);
+    transform(...attackerDamageActions);
 };
-export var applyAttackerDealsDamageEffect = function (action, transform) {
+export const applyAttackerDealsDamageEffect = function (action, transform) {
     transform({
         type: ACTION_EFFECT,
         effectType: EFFECT_TYPE_DEAL_DAMAGE,
@@ -165,7 +164,7 @@ export var applyAttackerDealsDamageEffect = function (action, transform) {
         generatedBy: action.generatedBy,
     });
 };
-export var applyDefenderDealsDamageEffect = function (action, transform) {
+export const applyDefenderDealsDamageEffect = function (action, transform) {
     transform({
         type: ACTION_EFFECT,
         effectType: EFFECT_TYPE_DEAL_DAMAGE,
@@ -178,7 +177,7 @@ export var applyDefenderDealsDamageEffect = function (action, transform) {
         generatedBy: action.generatedBy,
     });
 };
-export var applyDealDamageEffect = function (action, transform) {
+export const applyDealDamageEffect = function (action, transform) {
     transform({
         type: ACTION_EFFECT,
         effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
@@ -190,7 +189,7 @@ export var applyDealDamageEffect = function (action, transform) {
         generatedBy: action.generatedBy,
     });
 };
-export var applyAfterDamageEffect = function (action, transform) {
+export const applyAfterDamageEffect = function (action, transform) {
     if (action.source.data.energy === 0) {
         transform({
             type: ACTION_EFFECT,
@@ -226,7 +225,7 @@ export var applyAfterDamageEffect = function (action, transform) {
         });
     }
 };
-export var applyCreatureDefeatsCreatureEffect = function (action, transform) {
+export const applyCreatureDefeatsCreatureEffect = function (action, transform) {
     if (action.target.data.energy === 0) {
         action.source.markDefeatedCreature();
         transform({
