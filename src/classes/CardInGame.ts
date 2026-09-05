@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
-import clone from '../clone';
-import Card from './Card';
+import clone from '../clone.js';
+import Card from './Card.js';
 
 export type InGameData = {
     energy: number;

@@ -1,6 +1,6 @@
-import CardInGame from './classes/CardInGame';
-import Zone from './classes/Zone';
-import { AnyEffectType, PropertyType, RestrictionObjectType, ZoneType } from './types';
+import CardInGame from './classes/CardInGame.js';
+import Zone from './classes/Zone.js';
+import { AnyEffectType, PropertyType, RestrictionObjectType, ZoneType } from './types/index.js';
 /**
  * Context interface containing methods needed by PromptValidator
  * Kept as an interface to avoid circular imports

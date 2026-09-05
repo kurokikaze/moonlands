@@ -1,4 +1,4 @@
-import CardInGame from "../../classes/CardInGame";
+import CardInGame from "../../classes/CardInGame.js";
 import {
   ACTION_EFFECT,
   ACTION_PLAYER_WINS,
@@ -21,11 +21,11 @@ import {
   ZONE_TYPE_DISCARD,
   ZONE_TYPE_IN_PLAY,
   ZONE_TYPE_MAGI_PILE,
-} from "../../const";
-import { ZoneType } from "../../types";
-import { oneOrSeveral } from "../actionMapUtils";
-import { ActionTransformer } from "../actionMapTypes";
-import { DiscardCreatureFromPlayEffect, MoveCardBetwenZonesEffect } from "../../types/effect";
+} from "../../const.js";
+import { ZoneType } from "../../types/index.js";
+import { oneOrSeveral } from "../actionMapUtils.js";
+import { ActionTransformer } from "../actionMapTypes.js";
+import { DiscardCreatureFromPlayEffect, MoveCardBetwenZonesEffect } from "../../types/effect.js";
 
 export const applyMoveCardsBetweenZonesEffect: ActionTransformer<typeof EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES> = function (action, transform, _state, seeded_nanoid) {
   if (!action.sourceZone || !action.destinationZone) {

@@ -63,8 +63,8 @@ import {
   EFFECT_TYPE_START_OF_TURN,
   EFFECT_TYPE_START_STEP,
   EFFECT_TYPE_START_TURN,
-} from "../../const";
-import { ActionHandlerMap } from "../actionMapTypes";
+} from "../../const.js";
+import { ActionHandlerMap } from "../actionMapTypes.js";
 
 // Turn and step effects
 import {
@@ -77,20 +77,20 @@ import {
   applyMagiFlippedEffect,
   applyAddStartingEnergyToMagiEffect,
   applyAddDelayedTriggerEffect,
-} from "./turnAndStep";
+} from "./turnAndStep.js";
 
 // Discard effects
 import {
   applyDiscardCardsEffect,
   applyDiscardCardEffect,
   applyReshuffleDiscardEffect,
-} from "./discard";
+} from "./discard.js";
 
 // Draw effects
 import {
   applyDrawNCardsEffect,
   applyDrawEffect,
-} from "./draw";
+} from "./draw.js";
 
 // Attack effects
 import {
@@ -102,7 +102,7 @@ import {
   applyDealDamageEffect,
   applyAfterDamageEffect,
   applyCreatureDefeatsCreatureEffect,
-} from "./attack";
+} from "./attack.js";
 
 // Energy effects
 import {
@@ -123,7 +123,7 @@ import {
   applyRearrangeEnergyOnCreaturesEffect,
   applyDistributeEnergyOnCreaturesEffect,
   applyDistributeDamageEffect,
-} from "./energy";
+} from "./energy.js";
 
 // Playing effects
 import {
@@ -132,7 +132,7 @@ import {
   applyStartingEnergyOnCreatureEffect,
   applyPlayAttachedToCreatureEffect,
   applyAttachCardToCardEffect,
-} from "./playing";
+} from "./playing.js";
 
 // Payment effects
 import {
@@ -140,14 +140,14 @@ import {
   applyPayingEnergyForSpellEffect,
   applyPayingEnergyForCreatureEffect,
   applyPayingEnergyForPowerEffect,
-} from "./payment";
+} from "./payment.js";
 
 // Trigger effects
 import {
   applyForbidAttackToCreatureEffect,
   applyConditionalEffect,
   applyCreateContinuousEffect,
-} from "./triggers";
+} from "./triggers.js";
 
 // Zone effects
 import {
@@ -160,26 +160,26 @@ import {
   applyDiscardCreatureFromPlayEffect,
   applyRearrangeCardsOfZoneEffect,
   applyDistributeCardsInZonesEffect,
-} from "./zones";
+} from "./zones.js";
 
 // Randomization effects
 import {
   applyRollDieEffect,
   applyDieRolledEffect,
-} from "./randomization";
+} from "./randomization.js";
 
 // Power effects
 import {
   applyExecutePowerEffects,
-} from "./powers";
+} from "./powers.js";
 
 // Prompt effects
 import {
   applyPromptEnteredEffect,
-} from "./prompt";
+} from "./prompt.js";
 
 // Re-export for backwards compatibility
-export { applyDiscardEnergyFromCreatureOrMagiEffect } from "./energy";
+export { applyDiscardEnergyFromCreatureOrMagiEffect } from "./energy.js";
 
 export const actionMap: Partial<ActionHandlerMap> = {
   // Beginning of turn and step

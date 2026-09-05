@@ -1,11 +1,11 @@
-import CardInGame from "../../classes/CardInGame";
+import CardInGame from "../../classes/CardInGame.js";
 import {
   EFFECT_TYPE_EXECUTE_POWER_EFFECTS,
   PROPERTY_CONTROLLER,
   PROPERTY_POWER_COST,
-} from "../../const";
-import { AnyEffectType, EnrichedAction } from "../../types";
-import { ActionTransformer } from "../actionMapTypes";
+} from "../../const.js";
+import { AnyEffectType, EnrichedAction } from "../../types/index.js";
+import { ActionTransformer } from "../actionMapTypes.js";
 
 export const applyExecutePowerEffects: ActionTransformer<typeof EFFECT_TYPE_EXECUTE_POWER_EFFECTS> = function (action) {
   const power = this.getMetaValue(action.power, action.generatedBy);

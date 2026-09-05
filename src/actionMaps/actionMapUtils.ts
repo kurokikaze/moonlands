@@ -1,5 +1,5 @@
-import { EXPIRATION_ANY_TURNS, EXPIRATION_OPPONENT_TURNS, EXPIRATION_NEVER } from "../const";
-import { ContinuousEffectType } from "../types";
+import { EXPIRATION_ANY_TURNS, EXPIRATION_OPPONENT_TURNS, EXPIRATION_NEVER } from "../const.js";
+import { ContinuousEffectType } from "../types/index.js";
 
 export const updateContinuousEffects = (player: number) => (effect: ContinuousEffectType) => {
 	switch (effect.expiration.type) {

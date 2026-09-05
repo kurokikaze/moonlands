@@ -1,4 +1,4 @@
-import CardInGame, { ConvertedCard, HiddenConvertedCard } from '../classes/CardInGame';
+import CardInGame, { ConvertedCard, HiddenConvertedCard } from '../classes/CardInGame.js';
 import {
     ACTION_CALCULATE,
     ACTION_PLAY,
@@ -37,23 +37,23 @@ import {
     TYPE_CREATURE,
     TYPE_RELIC,
     TYPE_SPELL,
-} from '../const';
+} from '../const.js';
 
-import { ResolvePromptType } from './resolvePrompt';
-import { SelectorTypeType, SelectType } from './select';
-import { EffectTypeType, EffectType, ConditionalEffect, DiscardCreatureFromPlayEffect } from './effect';
-import { PromptType } from './prompt';
-import { PropertyType, ConditionType, ExpirationObjectType, RestrictionObjectType, PromptTypeType, Region } from './common';
-import { AttackEffect } from './attack';
-import { LogEntryType } from './log';
-import { PromptParamsType } from '..';
+import { ResolvePromptType } from './resolvePrompt.js';
+import { SelectorTypeType, SelectType } from './select.js';
+import { EffectTypeType, EffectType, ConditionalEffect, DiscardCreatureFromPlayEffect } from './effect.js';
+import { PromptType } from './prompt.js';
+import { PropertyType, ConditionType, ExpirationObjectType, RestrictionObjectType, PromptTypeType, Region } from './common.js';
+import { AttackEffect } from './attack.js';
+import { LogEntryType } from './log.js';
+import { PromptParamsType } from '../index.js';
 
-export { type AttackerDealsDamageEffect, type DefenderDealsDamageEffect } from './attack';
-export { type Region, type CardType, type PromptTypeType, type PropertyType, type ConditionType, type ZoneType, type RestrictionType, type RestrictionObjectType } from './common';
-export { type SelectType, type SelectorTypeType, type SelectorParams, type RefinedSelectParams } from './select';
-export { type EffectType, type MoveCardBetwenZonesEffect } from './effect';
-export { type PromptType, type PromptParams } from './prompt';
-export { type LogEntryType } from './log';
+export { type AttackerDealsDamageEffect, type DefenderDealsDamageEffect } from './attack.js';
+export { type Region, type CardType, type PromptTypeType, type PropertyType, type ConditionType, type ZoneType, type RestrictionType, type RestrictionObjectType } from './common.js';
+export { type SelectType, type SelectorTypeType, type SelectorParams, type RefinedSelectParams } from './select.js';
+export { type EffectType, type MoveCardBetwenZonesEffect } from './effect.js';
+export { type PromptType, type PromptParams } from './prompt.js';
+export { type LogEntryType } from './log.js';
 
 type ProtectionFromType = typeof PROTECTION_FROM_SPELLS | typeof PROTECTION_FROM_EFFECTS | typeof PROTECTION_FROM_POWERS;
 type ProtectionTypeType = typeof PROTECTION_TYPE_ENERGY_LOSS | typeof PROTECTION_TYPE_ENERGY_GAIN | typeof PROTECTION_TYPE_DISCARDING_FROM_PLAY | typeof PROTECTION_TYPE_GENERAL;

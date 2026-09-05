@@ -12,8 +12,8 @@ import {
     EFFECT_TYPE_DEAL_DAMAGE,
     EFFECT_TYPE_DEFENDER_DAMAGE_DEALT,
     EFFECT_TYPE_DEFENDER_DEALS_DAMAGE
-} from "../const";
-import CardInGame from "../classes/CardInGame";
+} from "../const.js";
+import CardInGame from "../classes/CardInGame.js";
 
 interface AttackEffectAction {
     type: typeof ACTION_EFFECT;

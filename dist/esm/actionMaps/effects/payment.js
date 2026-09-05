@@ -1,8 +1,8 @@
 import CardInGame from "../../classes/CardInGame.js";
 import { ACTION_EFFECT, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, PROPERTY_CONTROLLER, TYPE_CREATURE, TYPE_MAGI, } from "../../const.js";
-export var applyPayingEnergyForRelicEffect = function (action, transform) {
-    var payingTarget = this.getMetaValue(action.from, action.generatedBy);
-    var payingAmount = Number(this.getMetaValue(action.amount, action.generatedBy));
+export const applyPayingEnergyForRelicEffect = function (action, transform) {
+    const payingTarget = this.getMetaValue(action.from, action.generatedBy);
+    const payingAmount = Number(this.getMetaValue(action.amount, action.generatedBy));
     if (payingAmount > 0) {
         transform({
             type: ACTION_EFFECT,
@@ -14,9 +14,9 @@ export var applyPayingEnergyForRelicEffect = function (action, transform) {
         });
     }
 };
-export var applyPayingEnergyForSpellEffect = function (action, transform) {
-    var payingTarget = this.getMetaValue(action.from, action.generatedBy);
-    var payingAmount = Number(this.getMetaValue(action.amount, action.generatedBy));
+export const applyPayingEnergyForSpellEffect = function (action, transform) {
+    const payingTarget = this.getMetaValue(action.from, action.generatedBy);
+    const payingAmount = Number(this.getMetaValue(action.amount, action.generatedBy));
     if (payingAmount > 0) {
         transform({
             type: ACTION_EFFECT,
@@ -28,13 +28,13 @@ export var applyPayingEnergyForSpellEffect = function (action, transform) {
         });
     }
 };
-export var applyPayingEnergyForCreatureEffect = function (action, transform) {
-    var payingTarget = this.getMetaValue(action.from, action.generatedBy);
-    var payingAmount = Number(this.getMetaValue(action.amount, action.generatedBy));
+export const applyPayingEnergyForCreatureEffect = function (action, transform) {
+    const payingTarget = this.getMetaValue(action.from, action.generatedBy);
+    const payingAmount = Number(this.getMetaValue(action.amount, action.generatedBy));
     if (payingAmount > 0) {
         if (payingTarget instanceof CardInGame) {
             if (this.modifyByStaticAbilities(payingTarget, PROPERTY_CONTROLLER) == action.player) {
-                var correctEffectType = payingTarget.card.type === TYPE_MAGI ? EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI : EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE;
+                const correctEffectType = payingTarget.card.type === TYPE_MAGI ? EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI : EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE;
                 transform({
                     type: ACTION_EFFECT,
                     effectType: correctEffectType,
@@ -50,9 +50,9 @@ export var applyPayingEnergyForCreatureEffect = function (action, transform) {
         }
     }
 };
-export var applyPayingEnergyForPowerEffect = function (action, transform) {
-    var payingTarget = this.getMetaValue(action.target, action.generatedBy);
-    var payingAmount = Number(this.getMetaValue(action.amount, action.generatedBy));
+export const applyPayingEnergyForPowerEffect = function (action, transform) {
+    const payingTarget = this.getMetaValue(action.target, action.generatedBy);
+    const payingAmount = Number(this.getMetaValue(action.amount, action.generatedBy));
     if (payingAmount > 0) {
         switch (payingTarget.card.type) {
             case TYPE_CREATURE: {

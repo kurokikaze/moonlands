@@ -18,8 +18,9 @@
         "build-cjs": "tsc -p ./tsconfig.node.json",
         "fix-esm": "tsc-alias -p ./tsconfig.json",
         "build-types-cjs": "tsc -p ./tsconfig.node.json --declaration",
-        "test": "jest",
-        "coverage": "jest --coverage"
+        "test": "vitest run --allowOnly",
+        "coverage": "vitest run --coverage --allowOnly",
+        "lint": "eslint"
     },
     "keywords": [
         "ccg"
@@ -27,17 +28,16 @@
     "author": "kurokikaze@yandex.ru",
     "license": "MIT",
     "devDependencies": {
-        "@babel/preset-env": "^7.11.5",
-        "@babel/preset-typescript": "^7.12.7",
-        "@types/jest": "^29.5.3",
-        "@types/node": ">=4.2.0 < 13",
-        "babel-jest": "^29.0.0",
-        "eslint": "^6.8.0",
-        "eslint-plugin-import": "^2.22.0",
-        "jest": "^29.0.0",
-        "ts-jest": "^29.1.2",
+        "@eslint/eslintrc": "^3.3.7",
+        "@eslint/js": "^10.0.1",
+        "@types/node": "^24.13.3",
+        "@vitest/coverage-v8": "^3.2.7",
+        "eslint": "^10.10.0",
+        "globals": "^17.12.0",
         "tsc-alias": "^1.8.10",
-        "typescript": "^5.4.3"
+        "typescript": "^7.0.2",
+        "vite": "^7.1.4",
+        "vitest": "^3.2.4"
     },
     "dependencies": {
         "nanoid": "^3.0.0"

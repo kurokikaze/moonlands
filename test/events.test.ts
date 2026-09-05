@@ -1,6 +1,6 @@
 /* global expect, describe, it */
 import {nanoid} from 'nanoid';
-import * as moonlands from '../src/index';
+import * as moonlands from '../src/index.js';
 
 import {
 	ACTION_PASS,
@@ -16,11 +16,11 @@ import {
 
 	ZONE_TYPE_MAGI_PILE,
 	ZONE_TYPE_DECK,
-} from '../src/const';
+} from '../src/const.js';
 
-import {caldDeck, naroomDeck} from './testData';
-import { AnyEffectType } from '../src/types';
-import Zone from '../src/classes/Zone';
+import {caldDeck, naroomDeck} from './testData.js';
+import { AnyEffectType } from '../src/types/index.js';
+import Zone from '../src/classes/Zone.js';
 
 describe('Stream of actions', () => {
 	it('Streams actions', () => {

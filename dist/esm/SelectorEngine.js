@@ -1,167 +1,135 @@
-var __extends = (this && this.__extends) || (function () {
-    var extendStatics = function (d, b) {
-        extendStatics = Object.setPrototypeOf ||
-            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
-            function (d, b) { for (var p in b) if (Object.prototype.hasOwnProperty.call(b, p)) d[p] = b[p]; };
-        return extendStatics(d, b);
-    };
-    return function (d, b) {
-        if (typeof b !== "function" && b !== null)
-            throw new TypeError("Class extends value " + String(b) + " is not a constructor or null");
-        extendStatics(d, b);
-        function __() { this.constructor = d; }
-        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-    };
-})();
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
-var __spreadArray = (this && this.__spreadArray) || function (to, from, pack) {
-    if (pack || arguments.length === 2) for (var i = 0, l = from.length, ar; i < l; i++) {
-        if (ar || !(i in from)) {
-            if (!ar) ar = Array.prototype.slice.call(from, 0, i);
-            ar[i] = from[i];
-        }
-    }
-    return to.concat(ar || Array.prototype.slice.call(from));
-};
 import { TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, SELECTOR_CREATURES, SELECTOR_MAGI, SELECTOR_RELICS, SELECTOR_OWN_MAGI, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_OWN_SPELLS_IN_HAND, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, SELECTOR_CREATURES_OF_TYPE, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_ID, SELECTOR_CREATURES_OF_PLAYER, SELECTOR_SELF_AND_STATUS, SELECTOR_OWN_CREATURES_WITH_STATUS, SELECTOR_OPPONENT_ID, STATUS_BURROWED, PROPERTY_CONTROLLER, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, PROPERTY_POWER_COST, PROPERTY_ENERGY_LOSS_THRESHOLD, PROPERTY_STATUS, PROPERTY_ABLE_TO_ATTACK, PROPERTY_ABLE_TO_USE_POWERS, PROPERTY_PROTECTION, CALCULATION_SET, ZONE_TYPE_IN_PLAY, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_HAND, } from './const.js';
 import { CostEngine } from './CostEngine.js';
 import { RestrictionEngine } from './RestrictionEngine.js';
 import { LayeredModificationEngine } from './LayeredModificationEngine.js';
 // ─── SelectorEngine ───────────────────────────────────────────────────────────
-var SelectorEngine = /** @class */ (function (_super) {
-    __extends(SelectorEngine, _super);
-    function SelectorEngine(context) {
-        var _this = _super.call(this) || this;
-        _this.modifiedCardDataCache = new Map();
-        _this.context = context;
-        _this.costEngine = new CostEngine({
-            getOwnMagi: _this.getOwnMagi.bind(_this),
-            modifyByStaticAbilities: _this.modifyByStaticAbilities.bind(_this),
+export class SelectorEngine extends LayeredModificationEngine {
+    constructor(context) {
+        super();
+        this.modifiedCardDataCache = new Map();
+        this.context = context;
+        this.costEngine = new CostEngine({
+            getOwnMagi: this.getOwnMagi.bind(this),
+            modifyByStaticAbilities: this.modifyByStaticAbilities.bind(this),
         });
-        _this.restrictionEngine = new RestrictionEngine({
-            getOwnMagi: _this.getOwnMagi.bind(_this),
-            getOwnCreatures: _this.getOwnCreatures.bind(_this),
-            calculateTotalCost: _this.costEngine.calculateTotalCost.bind(_this.costEngine),
-            modifyByStaticAbilities: _this.modifyByStaticAbilities.bind(_this),
+        this.restrictionEngine = new RestrictionEngine({
+            getOwnMagi: this.getOwnMagi.bind(this),
+            getOwnCreatures: this.getOwnCreatures.bind(this),
+            calculateTotalCost: this.costEngine.calculateTotalCost.bind(this.costEngine),
+            modifyByStaticAbilities: this.modifyByStaticAbilities.bind(this),
         });
-        return _this;
     }
-    SelectorEngine.prototype.getOwnMagi = function (player) {
+    getOwnMagi(player) {
         return this.useSelector(SELECTOR_OWN_MAGI, player);
-    };
-    SelectorEngine.prototype.getOwnCreatures = function (player) {
+    }
+    getOwnCreatures(player) {
         return this.useSelector(SELECTOR_OWN_CREATURES, player);
-    };
-    SelectorEngine.prototype.clearModifiedCardDataCache = function () {
+    }
+    clearModifiedCardDataCache() {
         this.modifiedCardDataCache.clear();
-    };
+    }
     // ── Nth / random card helpers ────────────────────────────────────────────
-    SelectorEngine.prototype.selectNthCardOfZone = function (player, zoneType, cardNumber, restrictions) {
-        var zoneCards = this.context.getZone(zoneType, player).cards;
-        var filteredCards = (restrictions && restrictions.length) ? zoneCards.filter(this.makeCardFilter(restrictions)) : zoneCards;
-        var index = cardNumber - 1; // 1-based indexing, for better card data readability
+    selectNthCardOfZone(player, zoneType, cardNumber, restrictions) {
+        const zoneCards = this.context.getZone(zoneType, player).cards;
+        const filteredCards = (restrictions && restrictions.length) ? zoneCards.filter(this.makeCardFilter(restrictions)) : zoneCards;
+        const index = cardNumber - 1; // 1-based indexing, for better card data readability
         if (filteredCards.length < index + 1) {
             return [];
         }
         else {
             return [filteredCards[index]];
         }
-    };
-    SelectorEngine.prototype.selectRandomCardOfZone = function (player, zoneType) {
-        var zoneCards = this.context.getZone(zoneType, player).cards;
-        var twister = this.context.getTwister();
+    }
+    selectRandomCardOfZone(player, zoneType) {
+        const zoneCards = this.context.getZone(zoneType, player).cards;
+        const twister = this.context.getTwister();
         // @ts-ignore
-        var randomValue = twister ? twister.random() : Math.random();
-        var index = Math.floor(randomValue * zoneCards.length);
+        const randomValue = twister ? twister.random() : Math.random();
+        const index = Math.floor(randomValue * zoneCards.length);
         if (zoneCards.length === 0) {
             return [];
         }
         else {
             return [zoneCards[index]];
         }
-    };
-    SelectorEngine.prototype.useSelector = function (selector, player, argument) {
-        var _this = this;
-        var _a = this.context, getZone = _a.getZone, getOpponent = _a.getOpponent, players = _a.players;
+    }
+    useSelector(selector, player, argument) {
+        const { getZone, getOpponent, players } = this.context;
         switch (selector) {
             case SELECTOR_OWN_CARDS_IN_PLAY: {
                 return getZone(ZONE_TYPE_IN_PLAY).cards
-                    .filter(function (card) { return _this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player; });
+                    .filter(card => this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player);
             }
             case SELECTOR_RELICS: {
-                return getZone(ZONE_TYPE_IN_PLAY).cards.filter(function (card) { return card.card.type == TYPE_RELIC; });
+                return getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.type == TYPE_RELIC);
             }
             case SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE: {
-                return __spreadArray(__spreadArray([], getZone(ZONE_TYPE_IN_PLAY).cards
-                    .filter(function (card) { return _this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player && _this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0; }), true), getZone(ZONE_TYPE_ACTIVE_MAGI, player).cards
-                    .filter(function (card) { return _this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0; }), true);
+                return [
+                    ...getZone(ZONE_TYPE_IN_PLAY).cards
+                        .filter(card => this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player && this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0),
+                    ...getZone(ZONE_TYPE_ACTIVE_MAGI, player).cards
+                        .filter(card => this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0),
+                ];
             }
             case SELECTOR_CARDS_WITH_ENERGIZE_RATE: {
-                return __spreadArray(__spreadArray(__spreadArray([], getZone(ZONE_TYPE_IN_PLAY).cards.filter(function (card) { return _this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0; }), true), getZone(ZONE_TYPE_ACTIVE_MAGI, players[0]).cards.filter(function (card) { return _this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0; }), true), getZone(ZONE_TYPE_ACTIVE_MAGI, players[1]).cards.filter(function (card) { return _this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0; }), true);
+                return [
+                    ...getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0),
+                    ...getZone(ZONE_TYPE_ACTIVE_MAGI, players[0]).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0),
+                    ...getZone(ZONE_TYPE_ACTIVE_MAGI, players[1]).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_ENERGIZE) > 0),
+                ];
             }
             case SELECTOR_OPPONENT_ID:
-                return players.find(function (id) { return id != argument; }) || 999;
+                return players.find(id => id != argument) || 999;
             case SELECTOR_CREATURES:
-                return getZone(ZONE_TYPE_IN_PLAY).cards.filter(function (card) { return card.card.type == TYPE_CREATURE; });
+                return getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.type == TYPE_CREATURE);
             case SELECTOR_MAGI:
-                return __spreadArray(__spreadArray([], getZone(ZONE_TYPE_ACTIVE_MAGI, players[0]).cards, true), getZone(ZONE_TYPE_ACTIVE_MAGI, players[1]).cards, true).filter(Boolean);
+                return [
+                    ...getZone(ZONE_TYPE_ACTIVE_MAGI, players[0]).cards,
+                    ...getZone(ZONE_TYPE_ACTIVE_MAGI, players[1]).cards,
+                ].filter(Boolean);
             case SELECTOR_TOP_MAGI_OF_PILE: {
-                var topMagi = getZone(ZONE_TYPE_MAGI_PILE, player).cards[0];
+                const topMagi = getZone(ZONE_TYPE_MAGI_PILE, player).cards[0];
                 return [topMagi]; // Selectors always have to return array
             }
             case SELECTOR_OWN_MAGI:
                 return getZone(ZONE_TYPE_ACTIVE_MAGI, player).cards;
             case SELECTOR_OWN_SPELLS_IN_HAND:
-                return getZone(ZONE_TYPE_HAND, player).cards.filter(function (card) { return card.card.type == TYPE_SPELL; });
+                return getZone(ZONE_TYPE_HAND, player).cards.filter(card => card.card.type == TYPE_SPELL);
             case SELECTOR_ENEMY_MAGI:
                 return getZone(ZONE_TYPE_ACTIVE_MAGI, getOpponent(player || 0)).cards;
             case SELECTOR_OWN_CREATURES:
-                return getZone(ZONE_TYPE_IN_PLAY).cards.filter(function (card) { return _this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player && card.card.type == TYPE_CREATURE; });
+                return getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player && card.card.type == TYPE_CREATURE);
             case SELECTOR_ENEMY_CREATURES:
-                return getZone(ZONE_TYPE_IN_PLAY).cards.filter(function (card) { return _this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) != player && card.card.type == TYPE_CREATURE; });
+                return getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) != player && card.card.type == TYPE_CREATURE);
             case SELECTOR_CREATURES_OF_REGION:
-                return getZone(ZONE_TYPE_IN_PLAY).cards.filter(function (card) { return _this.modifyByStaticAbilities(card, PROPERTY_REGION) == argument && card.card.type == TYPE_CREATURE; });
+                return getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_REGION) == argument && card.card.type == TYPE_CREATURE);
             case SELECTOR_CREATURES_NOT_OF_REGION:
-                return getZone(ZONE_TYPE_IN_PLAY).cards.filter(function (card) { return _this.modifyByStaticAbilities(card, PROPERTY_REGION) != argument && card.card.type == TYPE_CREATURE; });
+                return getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_REGION) != argument && card.card.type == TYPE_CREATURE);
             case SELECTOR_CREATURES_OF_TYPE:
-                return getZone(ZONE_TYPE_IN_PLAY).cards.filter(function (card) { return card.card.name.split(' ').includes(argument) && card.card.type == TYPE_CREATURE; });
+                return getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.name.split(' ').includes(argument) && card.card.type == TYPE_CREATURE);
             case SELECTOR_CREATURES_NOT_OF_TYPE:
-                return getZone(ZONE_TYPE_IN_PLAY).cards.filter(function (card) { return !card.card.name.split(' ').includes(argument) && card.card.type == TYPE_CREATURE; });
+                return getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => !card.card.name.split(' ').includes(argument) && card.card.type == TYPE_CREATURE);
             case SELECTOR_OWN_CREATURES_OF_TYPE:
-                return getZone(ZONE_TYPE_IN_PLAY).cards.filter(function (card) {
-                    return _this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player &&
-                        card.card.type == TYPE_CREATURE &&
-                        card.card.name.split(' ').includes(argument);
-                });
+                return getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player &&
+                    card.card.type == TYPE_CREATURE &&
+                    card.card.name.split(' ').includes(argument));
             case SELECTOR_STATUS:
-                return getZone(ZONE_TYPE_IN_PLAY).cards.filter(function (card) {
-                    return _this.modifyByStaticAbilities(card, PROPERTY_STATUS, argument);
-                });
+                return getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => this.modifyByStaticAbilities(card, PROPERTY_STATUS, argument));
             case SELECTOR_CREATURES_WITHOUT_STATUS:
                 return getZone(ZONE_TYPE_IN_PLAY).cards
-                    .filter(function (card) { return card.card.type == TYPE_CREATURE; })
-                    .filter(function (card) { return !_this.modifyByStaticAbilities(card, PROPERTY_STATUS, argument); });
+                    .filter(card => card.card.type == TYPE_CREATURE)
+                    .filter(card => !this.modifyByStaticAbilities(card, PROPERTY_STATUS, argument));
             default:
                 return [];
         }
-    };
-    SelectorEngine.prototype.useSelectorAny = function (selector, player, argument) {
+    }
+    useSelectorAny(selector, player, argument) {
         return this.useSelector(selector, player, argument);
-    };
+    }
     // ── isCardAffectedByStaticAbility ────────────────────────────────────────
-    SelectorEngine.prototype.isCardAffectedByStaticAbility = function (card, staticAbility) {
-        var _a, _b, _c, _d;
-        var getZone = this.context.getZone;
+    isCardAffectedByStaticAbility(card, staticAbility) {
+        var _a, _b, _c;
+        const { getZone } = this.context;
         switch (staticAbility.selector) {
             case SELECTOR_ID: {
                 return card.id === staticAbility.selectorParameter;
@@ -174,40 +142,28 @@ var SelectorEngine = /** @class */ (function (_super) {
             }
             case SELECTOR_CREATURES: {
                 return card.card.type === TYPE_CREATURE &&
-                    getZone(ZONE_TYPE_IN_PLAY).cards.some(function (_a) {
-                        var id = _a.id;
-                        return id === card.id;
-                    });
+                    getZone(ZONE_TYPE_IN_PLAY).cards.some(({ id }) => id === card.id);
             }
             case SELECTOR_OWN_CREATURES: {
                 return card.card.type === TYPE_CREATURE &&
-                    getZone(ZONE_TYPE_IN_PLAY).cards.some(function (_a) {
-                        var id = _a.id;
-                        return id === card.id;
-                    }) &&
+                    getZone(ZONE_TYPE_IN_PLAY).cards.some(({ id }) => id === card.id) &&
                     card.data.controller === staticAbility.player;
             }
             case SELECTOR_OWN_CREATURES_OF_TYPE: {
                 return card.card.type === TYPE_CREATURE &&
-                    getZone(ZONE_TYPE_IN_PLAY).cards.some(function (_a) {
-                        var id = _a.id;
-                        return id === card.id;
-                    }) &&
+                    getZone(ZONE_TYPE_IN_PLAY).cards.some(({ id }) => id === card.id) &&
                     card.data.controller === staticAbility.player &&
                     card.card.name.split(' ').includes(((_a = staticAbility === null || staticAbility === void 0 ? void 0 : staticAbility.selectorParameter) === null || _a === void 0 ? void 0 : _a.toString()) || 'no matches');
             }
             case SELECTOR_CREATURES_OF_PLAYER: {
                 return card.card.type === TYPE_CREATURE &&
-                    getZone(ZONE_TYPE_IN_PLAY).cards.some(function (_a) {
-                        var id = _a.id;
-                        return id === card.id;
-                    }) &&
+                    getZone(ZONE_TYPE_IN_PLAY).cards.some(({ id }) => id === card.id) &&
                     card.data.controller == staticAbility.selectorParameter;
             }
             case SELECTOR_OWN_MAGI: {
                 return card.card.type === TYPE_MAGI &&
                     getZone(ZONE_TYPE_ACTIVE_MAGI, staticAbility.player).cards.length === 1 &&
-                    ((_d = ((_c = (_b = getZone(ZONE_TYPE_ACTIVE_MAGI, staticAbility.player)) === null || _b === void 0 ? void 0 : _b.card) === null || _c === void 0 ? void 0 : _c.id) === card.id) !== null && _d !== void 0 ? _d : false);
+                    (((_c = (_b = getZone(ZONE_TYPE_ACTIVE_MAGI, staticAbility.player)) === null || _b === void 0 ? void 0 : _b.card) === null || _c === void 0 ? void 0 : _c.id) === card.id);
             }
             case SELECTOR_STATUS: {
                 return !!this.getByProperty(card, PROPERTY_STATUS, staticAbility.selectorParameter);
@@ -217,34 +173,29 @@ var SelectorEngine = /** @class */ (function (_super) {
                     card.data.controller === staticAbility.player;
             }
             case SELECTOR_OWN_SPELLS_IN_HAND: {
-                return getZone(ZONE_TYPE_HAND, staticAbility.player).cards.some(function (_a) {
-                    var id = _a.id;
-                    return id === card.id && card.card.type == TYPE_SPELL;
-                });
+                return getZone(ZONE_TYPE_HAND, staticAbility.player).cards.some(({ id }) => id === card.id && card.card.type == TYPE_SPELL);
             }
             default: {
-                console.error("Unknown static ability selector: ".concat(staticAbility.selector));
+                console.error(`Unknown static ability selector: ${staticAbility.selector}`);
                 return false;
             }
         }
-    };
+    }
     // ── modifyByStaticAbilities ──────────────────────────────────────────────
-    SelectorEngine.prototype.modifyByStaticAbilities = function (target, property, subProperty) {
-        var _a;
-        if (subProperty === void 0) { subProperty = null; }
+    modifyByStaticAbilities(target, property, subProperty = null) {
         if (!target) {
             return null;
         }
-        var cached = this.modifiedCardDataCache.get(target.id);
+        const cached = this.modifiedCardDataCache.get(target.id);
         if (cached) {
-            var freshData = __assign(__assign({}, cached.data), { energy: target.data.energy, attacked: target.data.attacked, actionsUsed: target.data.actionsUsed, energyLostThisTurn: target.data.energyLostThisTurn, defeatedCreature: target.data.defeatedCreature, hasAttacked: target.data.hasAttacked, wasAttacked: target.data.wasAttacked, attachedTo: target.data.attachedTo });
+            const freshData = Object.assign(Object.assign({}, cached.data), { energy: target.data.energy, attacked: target.data.attacked, actionsUsed: target.data.actionsUsed, energyLostThisTurn: target.data.energyLostThisTurn, defeatedCreature: target.data.defeatedCreature, hasAttacked: target.data.hasAttacked, wasAttacked: target.data.wasAttacked, attachedTo: target.data.attachedTo });
             // @ts-ignore
-            return this.getByProperty(__assign(__assign({}, cached), { data: freshData }), property, subProperty);
+            return this.getByProperty(Object.assign(Object.assign({}, cached), { data: freshData }), property, subProperty);
         }
-        var _b = this.context, getZone = _b.getZone, players = _b.players, getContinuousEffects = _b.getContinuousEffects;
-        var PLAYER_ONE = players[0];
-        var PLAYER_TWO = players[1];
-        var gameStaticAbilities = [
+        const { getZone, players, getContinuousEffects } = this.context;
+        const PLAYER_ONE = players[0];
+        const PLAYER_TWO = players[1];
+        const gameStaticAbilities = [
             {
                 name: 'Burrowed - Energy loss',
                 text: 'Your burrowed creatures may not lose more than 2 energy each turn',
@@ -268,57 +219,61 @@ var SelectorEngine = /** @class */ (function (_super) {
                 },
             },
         ];
-        var allZonesCards = __spreadArray(__spreadArray(__spreadArray([], getZone(ZONE_TYPE_IN_PLAY).cards, true), getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE).cards, true), getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO).cards, true);
-        var continuousStaticAbilities = getContinuousEffects().map(function (effect) { var _a; return ((_a = effect.staticAbilities) === null || _a === void 0 ? void 0 : _a.map(function (a) { return (__assign(__assign({}, a), { player: effect.player })); })) || []; }).flat();
-        var propertyLayers = (_a = {},
-            _a[PROPERTY_CONTROLLER] = 0,
-            _a[PROPERTY_POWER_COST] = 1,
-            _a[PROPERTY_COST] = 1,
-            _a[PROPERTY_ENERGIZE] = 2,
-            _a[PROPERTY_STATUS] = 3,
-            _a[PROPERTY_ATTACKS_PER_TURN] = 4,
-            _a[PROPERTY_CAN_ATTACK_MAGI_DIRECTLY] = 5,
-            _a[PROPERTY_ENERGY_LOSS_THRESHOLD] = 6,
-            _a[PROPERTY_ABLE_TO_ATTACK] = 7,
-            _a[PROPERTY_ABLE_TO_USE_POWERS] = 8,
-            _a[PROPERTY_PROTECTION] = 9,
-            _a);
-        var zoneAbilities = allZonesCards.reduce(function (acc, cardInPlay) { return cardInPlay.card.data.staticAbilities ? __spreadArray(__spreadArray([], acc, true), (cardInPlay.card.data.staticAbilities.map(function (a) { return (__assign(__assign({}, a), { player: cardInPlay.data.controller, card: cardInPlay })); })), true) : acc; }, []);
-        var staticAbilities = __spreadArray(__spreadArray(__spreadArray([], gameStaticAbilities, true), zoneAbilities, true), continuousStaticAbilities, true).sort(function (a, b) { return propertyLayers[a.property] - propertyLayers[b.property]; });
-        var initialCardData = {
+        const allZonesCards = [
+            ...getZone(ZONE_TYPE_IN_PLAY).cards,
+            ...getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE).cards,
+            ...getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO).cards,
+        ];
+        const continuousStaticAbilities = getContinuousEffects().map(effect => { var _a; return ((_a = effect.staticAbilities) === null || _a === void 0 ? void 0 : _a.map(a => (Object.assign(Object.assign({}, a), { player: effect.player })))) || []; }).flat();
+        const propertyLayers = {
+            [PROPERTY_CONTROLLER]: 0,
+            [PROPERTY_POWER_COST]: 1,
+            [PROPERTY_COST]: 1,
+            [PROPERTY_ENERGIZE]: 2,
+            [PROPERTY_STATUS]: 3,
+            [PROPERTY_ATTACKS_PER_TURN]: 4,
+            [PROPERTY_CAN_ATTACK_MAGI_DIRECTLY]: 5,
+            [PROPERTY_ENERGY_LOSS_THRESHOLD]: 6,
+            [PROPERTY_ABLE_TO_ATTACK]: 7,
+            [PROPERTY_ABLE_TO_USE_POWERS]: 8,
+            [PROPERTY_PROTECTION]: 9,
+        };
+        const zoneAbilities = allZonesCards.reduce((acc, cardInPlay) => cardInPlay.card.data.staticAbilities ? [
+            ...acc,
+            ...(cardInPlay.card.data.staticAbilities.map(a => (Object.assign(Object.assign({}, a), { player: cardInPlay.data.controller, card: cardInPlay }))))
+        ] : acc, []);
+        const staticAbilities = [...gameStaticAbilities, ...zoneAbilities, ...continuousStaticAbilities].sort((a, b) => propertyLayers[a.property] - propertyLayers[b.property]);
+        let initialCardData = {
             card: target.card,
-            modifiedCard: __assign(__assign({}, target.card), { data: __assign(__assign({ protection: undefined }, target.card.data), { energyLossThreshold: 0, ableToAttack: 'ableToAttack' in target.card.data ? target.card.data.ableToAttack : true }) }),
-            data: __assign({}, target.data),
+            modifiedCard: Object.assign(Object.assign({}, target.card), { data: Object.assign(Object.assign({ protection: undefined }, target.card.data), { energyLossThreshold: 0, ableToAttack: 'ableToAttack' in target.card.data ? target.card.data.ableToAttack : true }) }),
+            data: Object.assign({}, target.data),
             id: target.id,
             owner: target.owner,
         };
-        var modifiedCardData = staticAbilities.reduce(this.layeredDataReducer.bind(this), initialCardData);
+        const modifiedCardData = staticAbilities.reduce(this.layeredDataReducer.bind(this), initialCardData);
         this.modifiedCardDataCache.set(target.id, modifiedCardData);
         // @ts-ignore
         return this.getByProperty(modifiedCardData, property, subProperty);
-    };
+    }
     // ── Restriction checkers ─────────────────────────────────────────────────
-    SelectorEngine.prototype.makeChecker = function (restriction, restrictionValue) {
+    makeChecker(restriction, restrictionValue) {
         return this.restrictionEngine.makeChecker(restriction, restrictionValue);
-    };
-    SelectorEngine.prototype.checkAnyCardForRestriction = function (cards, restriction, restrictionValue) {
+    }
+    checkAnyCardForRestriction(cards, restriction, restrictionValue) {
         return this.restrictionEngine.checkAnyCardForRestriction(cards, restriction, restrictionValue);
-    };
-    SelectorEngine.prototype.checkAnyCardForRestrictions = function (cards, restrictions) {
+    }
+    checkAnyCardForRestrictions(cards, restrictions) {
         return this.restrictionEngine.checkAnyCardForRestrictions(cards, restrictions);
-    };
-    SelectorEngine.prototype.checkCardsForRestriction = function (cards, restriction, restrictionValue) {
+    }
+    checkCardsForRestriction(cards, restriction, restrictionValue) {
         return this.restrictionEngine.checkCardsForRestriction(cards, restriction, restrictionValue);
-    };
-    SelectorEngine.prototype.makeCardFilter = function (restrictions) {
-        if (restrictions === void 0) { restrictions = []; }
+    }
+    makeCardFilter(restrictions = []) {
         return this.restrictionEngine.makeCardFilter(restrictions);
-    };
+    }
     // ── calculateTotalCost ───────────────────────────────────────────────────
-    SelectorEngine.prototype.calculateTotalCost = function (card) {
+    calculateTotalCost(card) {
         return this.costEngine.calculateTotalCost(card);
-    };
-    return SelectorEngine;
-}(LayeredModificationEngine));
-export { SelectorEngine };
+    }
+}
 //# sourceMappingURL=SelectorEngine.js.map

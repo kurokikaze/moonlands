@@ -15,7 +15,7 @@ import {
     LOG_ENTRY_TARGETING,
     LOG_ENTRY_DIE_ROLLED,
     LOG_ENTRY_CARD_DISCARDED_FROM_HAND,
-} from '../const';
+} from '../const.js';
 
 type CreatureEnergyLossEntry = {
     type: typeof LOG_ENTRY_CREATURE_ENERGY_LOSS;

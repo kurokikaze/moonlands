@@ -1,6 +1,6 @@
-import { PROPERTY_STATUS } from './const';
-import CardInGame from './classes/CardInGame';
-import { RestrictionObjectType, RestrictionType } from './types';
+import { PROPERTY_STATUS } from './const.js';
+import CardInGame from './classes/CardInGame.js';
+import { RestrictionObjectType, RestrictionType } from './types/index.js';
 export interface RestrictionEngineContext {
     getOwnMagi(player: number): CardInGame[];
     getOwnCreatures(player: number): CardInGame[];

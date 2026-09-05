@@ -1,10 +1,10 @@
 import {
 	PROPERTY_COST,
 	REGION_UNIVERSAL,
-} from './const';
+} from './const.js';
 
-import CardInGame from './classes/CardInGame';
-import { PropertyType } from './types';
+import CardInGame from './classes/CardInGame.js';
+import { PropertyType } from './types/index.js';
 
 export interface CostEngineContext {
 	getOwnMagi(player: number): CardInGame[];

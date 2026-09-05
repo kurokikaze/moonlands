@@ -1,5 +1,5 @@
 import { nanoid, customRandom, urlAlphabet } from 'nanoid';
-import { MersenneTwister } from './mersenneTwister';
+import { MersenneTwister } from './mersenneTwister.js';
 import {
 	TYPE_CREATURE,
 	TYPE_MAGI,
@@ -204,21 +204,21 @@ import {
 	CARD_COUNT,
 	PROPERTY_CONTROLLING_PLAYER,
 	PROPERTY_ABLE_TO_USE_POWERS,
-} from './const';
+} from './const.js';
 
-import { actionMap } from './actionMaps/effects';
-import { showAction } from './logAction';
+import { actionMap } from './actionMaps/effects.js';
+import { showAction } from './logAction.js';
 
-import clone from './clone';
+import clone from './clone.js';
 
-import { byName } from './cards';
-import CardInGame, { ConvertedCard } from './classes/CardInGame';
-import { CostType } from './classes/Card';
-import Zone from './classes/Zone';
-import { SelectorEngine } from './SelectorEngine';
-import { PromptValidator } from './PromptValidator';
-import { LogEngine } from './LogEngine';
-import { CardWithModification, EnrichedStaticAbilityType, GameStaticAbility } from './LayeredModificationEngine';
+import { byName } from './cards.js';
+import CardInGame, { ConvertedCard } from './classes/CardInGame.js';
+import { CostType } from './classes/Card.js';
+import Zone from './classes/Zone.js';
+import { SelectorEngine } from './SelectorEngine.js';
+import { PromptValidator } from './PromptValidator.js';
+import { LogEngine } from './LogEngine.js';
+import { CardWithModification, EnrichedStaticAbilityType, GameStaticAbility } from './LayeredModificationEngine.js';
 import {
 	AnyEffectType,
 	PromptTypeType,
@@ -245,19 +245,19 @@ import {
 	SerializedZones,
 	MercenneFixed,
 	MetaDataRecord,
-} from './types';
+} from './types/index.js';
 import {
 	AnyPromptEnteredEffect,
 	EnhancedDelayedTriggerType,
 	ExecutePowerEffect,
 	StartingEnergyOnCreatureEffect
-} from './types/effect';
-import { CardType, StatusType } from './types/common';
-import { PromptTypeMayAbility } from './types/prompt';
-import { AlternativeType } from './types/promptParams';
-import { ActionTransformer } from './actionMaps/actionMapTypes';
-import convertPromptActionToEffect from './helpers/convertPromptAction';
-import performCalculation from './helpers/performCalculation';
+} from './types/effect.js';
+import { CardType, StatusType } from './types/common.js';
+import { PromptTypeMayAbility } from './types/prompt.js';
+import { AlternativeType } from './types/promptParams.js';
+import { ActionTransformer } from './actionMaps/actionMapTypes.js';
+import convertPromptActionToEffect from './helpers/convertPromptAction.js';
+import performCalculation from './helpers/performCalculation.js';
 
 const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
 	id: cardInGame.id,

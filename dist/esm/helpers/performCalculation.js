@@ -1,6 +1,6 @@
 import { CALCULATION_SET, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, CALCULATION_HALVE_ROUND_DOWN, CALCULATION_HALVE_ROUND_UP, CALCULATION_MULTIPLY, CALCULATION_MIN, CALCULATION_MAX } from "../const.js";
 export default function performCalculation(operator, operandOne, operandTwo) {
-    var result;
+    let result;
     switch (operator) {
         case CALCULATION_SET: {
             result = operandOne;

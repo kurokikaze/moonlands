@@ -1,82 +1,67 @@
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 import CardInGame from "../../classes/CardInGame.js";
 import { SELECTOR_CREATURES_OF_PLAYER, SELECTOR_ID, } from "../../const.js";
 import { oneOrSeveral } from "../actionMapUtils.js";
 // Should rework into continuous effect with duration
-export var applyForbidAttackToCreatureEffect = function (action, _transform) {
-    var targets = this.getMetaValue(action.target, action.generatedBy);
-    oneOrSeveral(targets, function (target) { return target.forbidAttacks(); });
+export const applyForbidAttackToCreatureEffect = function (action, _transform) {
+    const targets = this.getMetaValue(action.target, action.generatedBy);
+    oneOrSeveral(targets, target => target.forbidAttacks());
 };
-export var applyConditionalEffect = function (action, transform) {
-    var _this = this;
-    var metaData = this.getSpellMetadata(action.generatedBy);
+export const applyConditionalEffect = function (action, transform) {
+    const metaData = this.getSpellMetadata(action.generatedBy);
     // "new_card" fallback is for "defeated" triggers
-    var self = action.triggerSource || metaData.source || metaData.new_card;
+    const self = action.triggerSource || metaData.source || metaData.new_card;
     if (!self) {
         return;
     }
     //   checkCondition(action, self, condition)
-    var results = action.conditions.map(function (condition) {
-        return _this.checkCondition(action, self, condition);
-    });
-    var enrichAction = function (effect) { return (__assign(__assign({ source: self, player: self.data.controller }, effect), { generatedBy: action.generatedBy })); };
-    if (results.every(function (result) { return result === true; })) {
+    const results = action.conditions.map(condition => this.checkCondition(action, self, condition));
+    const enrichAction = (effect) => (Object.assign(Object.assign({ source: self, player: self.data.controller }, effect), { generatedBy: action.generatedBy }));
+    if (results.every(result => result === true)) {
         if (action.thenEffects) {
-            var preparedEffects = action.thenEffects
+            const preparedEffects = action.thenEffects
                 .map(enrichAction);
-            transform.apply(void 0, preparedEffects);
+            transform(...preparedEffects);
         }
     }
     else {
         if (action.elseEffects) {
-            var preparedEffects = action.elseEffects
+            const preparedEffects = action.elseEffects
                 .map(enrichAction);
-            transform.apply(void 0, preparedEffects);
+            transform(...preparedEffects);
         }
     }
 };
-export var applyCreateContinuousEffect = function (action, _transform, _state, seeded_nanoid) {
-    var _this = this;
-    var id = seeded_nanoid();
-    var staticAbilities = (action.staticAbilities || []).map(function (ability) {
+export const applyCreateContinuousEffect = function (action, _transform, _state, seeded_nanoid) {
+    const id = seeded_nanoid();
+    const staticAbilities = (action.staticAbilities || []).map(ability => {
         switch (ability.selector) {
             case SELECTOR_ID: {
-                var selectorParameterMetaValue = _this.getMetaValue(ability.selectorParameter, action.generatedBy);
-                var selectorParameter = (selectorParameterMetaValue instanceof CardInGame) ? selectorParameterMetaValue.id : selectorParameterMetaValue;
-                return __assign(__assign({}, ability), { selectorParameter: selectorParameter });
+                const selectorParameterMetaValue = this.getMetaValue(ability.selectorParameter, action.generatedBy);
+                const selectorParameter = (selectorParameterMetaValue instanceof CardInGame) ? selectorParameterMetaValue.id : selectorParameterMetaValue;
+                return Object.assign(Object.assign({}, ability), { selectorParameter });
             }
             case SELECTOR_CREATURES_OF_PLAYER: {
-                var selectorParameter = _this.getMetaValue(ability.selectorParameter, action.generatedBy);
-                return __assign(__assign({}, ability), { selectorParameter: selectorParameter });
+                const selectorParameter = this.getMetaValue(ability.selectorParameter, action.generatedBy);
+                return Object.assign(Object.assign({}, ability), { selectorParameter });
             }
             default: {
                 return ability;
             }
         }
-    }).map(function (ability) {
+    }).map(ability => {
         var _a;
-        var operandOne = _this.getMetaValue((_a = ability.modifier) === null || _a === void 0 ? void 0 : _a.operandOne, action.generatedBy);
-        return __assign(__assign({}, ability), { modifier: {
+        const operandOne = this.getMetaValue((_a = ability.modifier) === null || _a === void 0 ? void 0 : _a.operandOne, action.generatedBy);
+        return Object.assign(Object.assign({}, ability), { modifier: {
                 operator: ability.modifier.operator,
-                operandOne: operandOne,
+                operandOne,
             } });
     });
-    var continuousEffect = {
+    const continuousEffect = {
         triggerEffects: action.triggerEffects || [],
-        staticAbilities: staticAbilities,
+        staticAbilities,
         expiration: action.expiration,
         player: action.player || 0,
-        id: id,
+        id,
     };
     this.state.continuousEffects.push(continuousEffect);
     this.clearModifiedCardDataCache();
