@@ -2125,7 +2125,7 @@ describe('Arderial\'s Crown', () => {
 
 		const jaela = new CardInGame(byName('Jaela'), ACTIVE_PLAYER).addEnergy(10);
 		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(5);
-		const arderialsCrown = new CardInGame(byName("Arderial's Crown"), ACTIVE_PLAYER);
+		const arderialsCrown = new CardInGame(byName('Arderial\'s Crown'), ACTIVE_PLAYER);
 		const pharan = new CardInGame(byName('Pharan'), ACTIVE_PLAYER).addEnergy(3);
 		const vellup = new CardInGame(byName('Vellup'), NON_ACTIVE_PLAYER).addEnergy(2);
 
@@ -2170,7 +2170,7 @@ describe('Arderial\'s Crown', () => {
 
 		const jaela = new CardInGame(byName('Jaela'), ACTIVE_PLAYER).addEnergy(10);
 		const grega = new CardInGame(byName('Grega'), NON_ACTIVE_PLAYER).addEnergy(5);
-		const arderialsCrown = new CardInGame(byName("Arderial's Crown"), ACTIVE_PLAYER);
+		const arderialsCrown = new CardInGame(byName('Arderial\'s Crown'), ACTIVE_PLAYER);
 		const pharan = new CardInGame(byName('Pharan'), ACTIVE_PLAYER).addEnergy(3);
 
 		const zones = createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [arderialsCrown, pharan], [jaela]);
