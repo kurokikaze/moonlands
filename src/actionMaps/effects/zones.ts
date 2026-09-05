@@ -54,26 +54,30 @@ export const applyMoveCardsBetweenZonesEffect: ActionTransformer<typeof EFFECT_T
     const newCards: CardInGame[] = [];
 
     oneOrSeveral(zoneChangingTargets, zoneChangingCard => {
-      const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner, seeded_nanoid);
-      if (action.bottom) {
-        destinationZone.add([newObject]);
-      } else {
-        destinationZone.addToTop([newObject]);
-      }
-      sourceZone.removeById(zoneChangingCard.id);
+      if (sourceZone.containsId(zoneChangingCard.id)) {
+        const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner, seeded_nanoid);
+        if (action.bottom) {
+          destinationZone.add([newObject]);
+        } else {
+          destinationZone.addToTop([newObject]);
+        }
+        sourceZone.removeById(zoneChangingCard.id);
 
-      newCards.push(newObject);
-      // Let the old cards keep track of the movement too
-      this.setSpellMetaDataField('new_card', newObject, zoneChangingCard.id);
-      transform({
-        type: ACTION_EFFECT,
-        effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
-        sourceCard: zoneChangingCard,
-        sourceZone: sourceZoneType,
-        destinationCard: newObject,
-        destinationZone: destinationZoneType,
-        generatedBy: action.generatedBy,
-      });
+        newCards.push(newObject);
+        // Let the old cards keep track of the movement too
+        this.setSpellMetaDataField('new_card', newObject, zoneChangingCard.id);
+        transform({
+          type: ACTION_EFFECT,
+          effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
+          sourceCard: zoneChangingCard,
+          sourceZone: sourceZoneType,
+          destinationCard: newObject,
+          destinationZone: destinationZoneType,
+          generatedBy: action.generatedBy,
+        });
+      } else {
+        console.log(`Card ${zoneChangingCard.id} is not in the indicated source zone`);
+      }
     });
     this.setSpellMetaDataField('new_cards', newCards, action.generatedBy);
   }
@@ -96,53 +100,53 @@ export const applyMoveCardBetweenZonesEffect: ActionTransformer<typeof EFFECT_TY
       this.clearModifiedCardDataCache();
     }
 
-    const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner, seeded_nanoid);
-    if (action.bottom) {
-      destinationZone.add([newObject]);
-    } else {
-      destinationZone.addToTop([newObject]);
-    }
-
-    sourceZone.removeById(zoneChangingCard.id);
-
-    if (sourceZoneType == ZONE_TYPE_IN_PLAY && destinationZoneType !== ZONE_TYPE_IN_PLAY) {
-      if (zoneChangingCard.id in this.state.cardsAttached) {
-        // Queue the removal of the attached cards
-        for (const attachmentId of this.state.cardsAttached[zoneChangingCard.id]) {
-          const attachedCard = this.getZone(ZONE_TYPE_IN_PLAY).byId(attachmentId)
-
-          if (attachedCard) {
-            transform({
-              type: ACTION_EFFECT,
-              effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-              target: attachedCard,
-              sourceZone: ZONE_TYPE_IN_PLAY,
-              destinationZone: ZONE_TYPE_DISCARD,
-              generatedBy: action.generatedBy,
-              bottom: false,
-            })
-          } else {
-            console.log(`Cannot find the card ${attachmentId} in play`)
-          }
-        }
-        // This cleans up the attachments
-        this.removeAttachments(zoneChangingCard.id)
+    if (sourceZone.containsId(zoneChangingCard.id)) {
+      const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner, seeded_nanoid);
+      if (action.bottom) {
+        destinationZone.add([newObject]);
+      } else {
+        destinationZone.addToTop([newObject]);
       }
+
+      sourceZone.removeById(zoneChangingCard.id);
+
+      if (sourceZoneType == ZONE_TYPE_IN_PLAY && destinationZoneType !== ZONE_TYPE_IN_PLAY) {
+        if (zoneChangingCard.id in this.state.cardsAttached) {
+          // Queue the removal of the attached cards
+          for (const attachmentId of this.state.cardsAttached[zoneChangingCard.id]) {
+            const attachedCard = this.getZone(ZONE_TYPE_IN_PLAY).byId(attachmentId)
+
+            if (attachedCard) {
+              transform({
+                type: ACTION_EFFECT,
+                effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+                target: attachedCard,
+                sourceZone: ZONE_TYPE_IN_PLAY,
+                destinationZone: ZONE_TYPE_DISCARD,
+                generatedBy: action.generatedBy,
+                bottom: false,
+              })
+            }
+          }
+          // This cleans up the attachments
+          this.removeAttachments(zoneChangingCard.id)
+        }
+      }
+
+      this.setSpellMetaDataField('new_card', newObject, action.generatedBy);
+      this.setSpellMetaDataField('new_card', newObject, zoneChangingCard.id);
+
+      transform({
+        type: ACTION_EFFECT,
+        effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
+        sourceCard: zoneChangingCard,
+        sourceZone: sourceZoneType,
+        destinationCard: newObject,
+        attack: action.attack,
+        destinationZone: destinationZoneType,
+        generatedBy: action.generatedBy,
+      });
     }
-
-    this.setSpellMetaDataField('new_card', newObject, action.generatedBy);
-    this.setSpellMetaDataField('new_card', newObject, zoneChangingCard.id);
-
-    transform({
-      type: ACTION_EFFECT,
-      effectType: EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
-      sourceCard: zoneChangingCard,
-      sourceZone: sourceZoneType,
-      destinationCard: newObject,
-      attack: action.attack,
-      destinationZone: destinationZoneType,
-      generatedBy: action.generatedBy,
-    });
   }
 }
 
