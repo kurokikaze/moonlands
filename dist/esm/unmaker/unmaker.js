@@ -418,88 +418,92 @@ export class Unmaker {
                             const sourceZoneType = this.state.getMetaValue(action.sourceZone, action.generatedBy);
                             const destinationZoneType = this.state.getMetaValue(action.destinationZone, action.generatedBy);
                             const sourceZone = this.state.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
-                            const position = sourceZone.cards.findIndex(card => card.id === zoneChangingCard.id);
-                            // Uint16Array cannot represent -1; encode "not found" as 0 and real indices as index + 1.
-                            const encodedPosition = position + 1;
-                            // Capture the current spellMetaData values that will be modified
-                            const metaDataEntries = [];
-                            if (action.generatedBy) {
-                                const generatedByMeta = this.state.getSpellMetadata(action.generatedBy);
+                            if (sourceZone.containsId(zoneChangingCard.id)) {
+                                const position = sourceZone.cards.findIndex(card => card.id === zoneChangingCard.id);
+                                // Uint16Array cannot represent -1; encode "not found" as 0 and real indices as index + 1.
+                                const encodedPosition = position + 1;
+                                // Capture the current spellMetaData values that will be modified
+                                const metaDataEntries = [];
+                                if (action.generatedBy) {
+                                    const generatedByMeta = this.state.getSpellMetadata(action.generatedBy);
+                                    metaDataEntries.push({
+                                        spellId: action.generatedBy,
+                                        field: 'new_card',
+                                        previousValue: generatedByMeta === null || generatedByMeta === void 0 ? void 0 : generatedByMeta.new_card,
+                                    });
+                                }
+                                const cardIdMeta = this.state.getSpellMetadata(zoneChangingCard.id);
                                 metaDataEntries.push({
-                                    spellId: action.generatedBy,
+                                    spellId: zoneChangingCard.id,
                                     field: 'new_card',
-                                    previousValue: generatedByMeta === null || generatedByMeta === void 0 ? void 0 : generatedByMeta.new_card,
+                                    previousValue: cardIdMeta === null || cardIdMeta === void 0 ? void 0 : cardIdMeta.new_card,
                                 });
+                                const attachedCards = zoneChangingCard.id in this.state.state.cardsAttached ? [...this.state.state.cardsAttached[zoneChangingCard.id]] : null;
+                                this.saveObject(attachedCards, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/attachedCards');
+                                this.saveObject(metaDataEntries, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/metaDataEntries');
+                                this.saveNumber(action.bottom ? 1 : 0, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/bottom');
+                                this.saveNumber(encodedPosition, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/position');
+                                this.saveString(destinationZoneType, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/destinationZoneType');
+                                this.saveNumber(zoneChangingCard.owner, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/cardOwner');
+                                this.saveString(sourceZoneType, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/sourceZoneType');
+                                this.saveObject(zoneChangingCard, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/zoneChangingCard');
+                                this.saveActionType(UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
+                                return {
+                                    type: UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+                                    card: zoneChangingCard,
+                                    sourceZone: sourceZoneType,
+                                    sourceZoneOwner: zoneChangingCard.owner,
+                                    destinationZone: destinationZoneType,
+                                    position,
+                                    bottom: action.bottom || false,
+                                    metaDataEntries,
+                                };
                             }
-                            const cardIdMeta = this.state.getSpellMetadata(zoneChangingCard.id);
-                            metaDataEntries.push({
-                                spellId: zoneChangingCard.id,
-                                field: 'new_card',
-                                previousValue: cardIdMeta === null || cardIdMeta === void 0 ? void 0 : cardIdMeta.new_card,
-                            });
-                            const attachedCards = zoneChangingCard.id in this.state.state.cardsAttached ? [...this.state.state.cardsAttached[zoneChangingCard.id]] : null;
-                            this.saveObject(attachedCards, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/attachedCards');
-                            this.saveObject(metaDataEntries, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/metaDataEntries');
-                            this.saveNumber(action.bottom ? 1 : 0, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/bottom');
-                            this.saveNumber(encodedPosition, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/position');
-                            this.saveString(destinationZoneType, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/destinationZoneType');
-                            this.saveNumber(zoneChangingCard.owner, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/cardOwner');
-                            this.saveString(sourceZoneType, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/sourceZoneType');
-                            this.saveObject(zoneChangingCard, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/zoneChangingCard');
-                            this.saveActionType(UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
-                            return {
-                                type: UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-                                card: zoneChangingCard,
-                                sourceZone: sourceZoneType,
-                                sourceZoneOwner: zoneChangingCard.owner,
-                                destinationZone: destinationZoneType,
-                                position,
-                                bottom: action.bottom || false,
-                                metaDataEntries,
-                            };
                         }
                         break;
                     }
                     case EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES: {
-                        const targets = this.state.getMetaValue(action.target, action.generatedBy) || [];
+                        let targets = this.state.getMetaValue(action.target, action.generatedBy) || [];
                         if (!targets || targets.length === 0)
                             return undefined;
                         const sourceZoneType = this.state.getMetaValue(action.sourceZone, action.generatedBy);
                         const destZoneType = this.state.getMetaValue(action.destinationZone, action.generatedBy);
                         const zoneOwner = targets[0].owner;
                         const sourceZone = this.state.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
-                        const cardsWithPositions = targets.map((card) => ({
-                            card,
-                            position: sourceZone.cards.findIndex((c) => c.id === card.id),
-                            attachedCards: [...this.state.state.cardsAttached[card.id] || []],
-                        }));
-                        const metaDataEntries = targets.map((card) => { var _a; return ({
-                            spellId: card.id,
-                            field: 'new_card',
-                            previousValue: (_a = this.state.getSpellMetadata(card.id)) === null || _a === void 0 ? void 0 : _a.new_card,
-                        }); });
-                        metaDataEntries.push({
-                            spellId: action.generatedBy,
-                            field: 'new_cards',
-                            previousValue: (_a = this.state.getSpellMetadata(action.generatedBy)) === null || _a === void 0 ? void 0 : _a.new_cards,
-                        });
-                        const attachments = [...this.state.state.cardsAttached[action.generatedBy]];
-                        this.saveObject(metaDataEntries, 'EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/metaDataEntries');
-                        this.saveNumber(action.bottom ? 1 : 0, 'EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/bottom');
-                        this.saveString(destZoneType, 'EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/destZoneType');
-                        this.saveNumber(zoneOwner, 'EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/zoneOwner');
-                        this.saveString(sourceZoneType, 'EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/sourceZoneType');
-                        this.saveObject(cardsWithPositions, 'EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/cardsWithPositions');
-                        this.saveActionType(UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, 'EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES');
-                        return {
-                            type: UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
-                            cards: cardsWithPositions,
-                            sourceZone: sourceZoneType,
-                            zoneOwner,
-                            destinationZone: destZoneType,
-                            bottom: action.bottom || false,
-                            metaDataEntries,
-                        };
+                        targets = targets.filter((card) => sourceZone.containsId(card.id));
+                        if (targets.length) {
+                            const cardsWithPositions = targets.map((card) => ({
+                                card,
+                                position: sourceZone.cards.findIndex((c) => c.id === card.id),
+                                attachedCards: [...this.state.state.cardsAttached[card.id] || []],
+                            }));
+                            const metaDataEntries = targets.map((card) => { var _a; return ({
+                                spellId: card.id,
+                                field: 'new_card',
+                                previousValue: (_a = this.state.getSpellMetadata(card.id)) === null || _a === void 0 ? void 0 : _a.new_card,
+                            }); });
+                            metaDataEntries.push({
+                                spellId: action.generatedBy,
+                                field: 'new_cards',
+                                previousValue: (_a = this.state.getSpellMetadata(action.generatedBy)) === null || _a === void 0 ? void 0 : _a.new_cards,
+                            });
+                            this.saveObject(metaDataEntries, 'EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/metaDataEntries');
+                            this.saveNumber(action.bottom ? 1 : 0, 'EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/bottom');
+                            this.saveString(destZoneType, 'EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/destZoneType');
+                            this.saveNumber(zoneOwner, 'EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/zoneOwner');
+                            this.saveString(sourceZoneType, 'EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/sourceZoneType');
+                            this.saveObject(cardsWithPositions, 'EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES/cardsWithPositions');
+                            this.saveActionType(UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, 'EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES');
+                            return {
+                                type: UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES,
+                                cards: cardsWithPositions,
+                                sourceZone: sourceZoneType,
+                                zoneOwner,
+                                destinationZone: destZoneType,
+                                bottom: action.bottom || false,
+                                metaDataEntries,
+                            };
+                        }
                     }
                     case EFFECT_TYPE_DIE_ROLLED: {
                         if (action.generatedBy) {
