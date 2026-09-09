@@ -532,6 +532,16 @@ class State {
             cardsAttached: this.state.cardsAttached,
         };
     }
+    serializeFullState(playerId) {
+        const serializedState = this.serializeData(playerId, false);
+        const opponentId = this.getOpponent(playerId);
+        serializedState.zones.playerDeck = this.getZone(const_1.ZONE_TYPE_DECK, playerId).serialize(true);
+        serializedState.zones.opponentDeck = this.getZone(const_1.ZONE_TYPE_DECK, opponentId).serialize(true);
+        return {
+            ...serializedState,
+            spellMetaData: this.state.spellMetaData,
+        };
+    }
     serializeZones(playerId, hideZones = true) {
         const opponentId = this.getOpponent(playerId);
         return {

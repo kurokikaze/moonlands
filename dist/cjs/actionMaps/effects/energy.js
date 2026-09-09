@@ -68,7 +68,6 @@ const applyMoveEnergyEffect = function (action, transform, _state) {
     const moveMultiTarget = this.getMetaValue(action.target, action.generatedBy);
     const moveTarget = (moveMultiTarget instanceof Array) ? moveMultiTarget[0] : moveMultiTarget;
     const amountToMove = this.getMetaValue(action.amount, action.generatedBy);
-    console.dir(_state.spellMetaData[action.generatedBy], { depth: null });
     if (moveSource.data.energy >= amountToMove) {
         moveSource.removeEnergy(amountToMove);
         moveTarget.addEnergy(amountToMove);

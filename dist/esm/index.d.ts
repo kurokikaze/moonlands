@@ -8,7 +8,7 @@ import { SelectorEngine } from './SelectorEngine.js';
 import { PromptValidator } from './PromptValidator.js';
 import { LogEngine } from './LogEngine.js';
 import { CardWithModification, EnrichedStaticAbilityType, GameStaticAbility } from './LayeredModificationEngine.js';
-import { AnyEffectType, PromptTypeType, RestrictionObjectType, RestrictionType, LogEntryType, PropertyType, PromptType, EnrichedAction, OperatorType, ConditionType, FindType, ContinuousEffectType, EffectType, ZoneType, Region, ProtectionType, SerializedState, SerializedZones, MercenneFixed, MetaDataRecord } from './types/index.js';
+import { AnyEffectType, PromptTypeType, RestrictionObjectType, RestrictionType, LogEntryType, PropertyType, PromptType, EnrichedAction, OperatorType, ConditionType, FindType, ContinuousEffectType, EffectType, ZoneType, Region, ProtectionType, SerializedState, FullSerializedState, SerializedZones, MercenneFixed, MetaDataRecord } from './types/index.js';
 import { AnyPromptEnteredEffect, EnhancedDelayedTriggerType } from './types/effect.js';
 import { CardType, StatusType } from './types/common.js';
 import { AlternativeType } from './types/promptParams.js';
@@ -113,6 +113,7 @@ export declare class State {
     addActionToLog(action: AnyEffectType): void;
     createZones(): Zone[];
     serializeData(playerId: number, hideZones?: boolean): SerializedState;
+    serializeFullState(playerId: number): FullSerializedState;
     serializeZones(playerId: number, hideZones?: boolean): SerializedZones;
     setup(): void;
     getOpponent(player: number): number;

@@ -8,7 +8,7 @@ import { SelectorEngine } from './SelectorEngine';
 import { PromptValidator } from './PromptValidator';
 import { LogEngine } from './LogEngine';
 import { CardWithModification, EnrichedStaticAbilityType, GameStaticAbility } from './LayeredModificationEngine';
-import { AnyEffectType, PromptTypeType, RestrictionObjectType, RestrictionType, LogEntryType, PropertyType, PromptType, EnrichedAction, OperatorType, ConditionType, FindType, ContinuousEffectType, EffectType, ZoneType, Region, ProtectionType, SerializedState, SerializedZones, MercenneFixed, MetaDataRecord } from './types';
+import { AnyEffectType, PromptTypeType, RestrictionObjectType, RestrictionType, LogEntryType, PropertyType, PromptType, EnrichedAction, OperatorType, ConditionType, FindType, ContinuousEffectType, EffectType, ZoneType, Region, ProtectionType, SerializedState, FullSerializedState, SerializedZones, MercenneFixed, MetaDataRecord } from './types';
 import { AnyPromptEnteredEffect, EnhancedDelayedTriggerType } from './types/effect';
 import { CardType, StatusType } from './types/common';
 import { AlternativeType } from './types/promptParams';
@@ -113,6 +113,7 @@ export declare class State {
     addActionToLog(action: AnyEffectType): void;
     createZones(): Zone[];
     serializeData(playerId: number, hideZones?: boolean): SerializedState;
+    serializeFullState(playerId: number): FullSerializedState;
     serializeZones(playerId: number, hideZones?: boolean): SerializedZones;
     setup(): void;
     getOpponent(player: number): number;

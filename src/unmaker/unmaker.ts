@@ -1,8 +1,8 @@
 import CardInGame from '../classes/CardInGame';
 import { ACTION_PLAY, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_DRAW, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, EFFECT_TYPE_ATTACH_CARD_TO_CARD, EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY } from '../const';
-import { ACTION_EFFECT, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_PROMPT_ENTERED, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_START_TURN, State, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_IN_PLAY, ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE, ACTION_PLAYER_WINS, ACTION_POWER, ACTION_RESOLVE_PROMPT, TYPE_MAGI, DEFAULT_PROMPT_VARIABLE } from '../index'
+import { ACTION_EFFECT, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_PROMPT_ENTERED, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_START_TURN, State, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_IN_PLAY, ACTION_CALCULATE, ACTION_ENTER_PROMPT, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE, ACTION_PLAYER_WINS, ACTION_POWER, ACTION_RESOLVE_PROMPT, TYPE_MAGI, DEFAULT_PROMPT_VARIABLE } from '../index'
 import { AnyEffectType, PromptTypeType, ZoneType } from '../types'
-import { CardFlagsSnapshot, UNMAKE_CALCULATION, UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI, UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE, UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, UNMAKE_EFFECT_TYPE_DIE_ROLLED, UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS, UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_ENERGY, UNMAKE_EFFECT_TYPE_PLAYER_WINS, UNMAKE_EFFECT_TYPE_PROMPT_ENTERED, UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD, UNMAKE_EFFECT_TYPE_START_OF_TURN, UNMAKE_EFFECT_TYPE_START_STEP, UNMAKE_EFFECT_TYPE_START_TURN, UNMAKE_LOG_ENTRY, UNMAKE_POWER_ACTIVATION, UNMAKE_POWER_USE, UNMAKE_PROMPT_LEAVE, UNMAKE_PROPERTY, UNMAKE_SELECT, UnAction, UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD } from './types';
+import { CardFlagsSnapshot, UNMAKE_CALCULATION, UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI, UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE, UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, UNMAKE_EFFECT_TYPE_DIE_ROLLED, UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS, UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_ENERGY, UNMAKE_EFFECT_TYPE_PLAYER_WINS, UNMAKE_EFFECT_TYPE_PROMPT_ENTERED, UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD, UNMAKE_EFFECT_TYPE_START_OF_TURN, UNMAKE_EFFECT_TYPE_START_STEP, UNMAKE_EFFECT_TYPE_START_TURN, UNMAKE_LOG_ENTRY, UNMAKE_POWER_ACTIVATION, UNMAKE_POWER_USE, UNMAKE_PROMPT_ENTER, UNMAKE_PROMPT_LEAVE, UNMAKE_PROPERTY, UNMAKE_SELECT, UnAction, UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD } from './types';
 
 const FLAG_WAS_ATTACKED = 1
 const FLAG_HAS_ATTACKED = 2
@@ -39,6 +39,7 @@ const actionNames = {
     30: 'UNMAKE_PROPERTY',
     31: 'UNMAKE_LOG_ENTRY',
     32: 'UNMAKE_PROMPT_LEAVE',
+	41: 'UNMAKE_PROMPT_ENTER',
     33: 'UNMAKE_POWER_USE',
     34: 'UNMAKE_POWER_PAY',
     36: 'UNMAKE_POWER_ACTIVATION',
@@ -265,11 +266,22 @@ export class Unmaker {
 
     public generateUnAction(action: AnyEffectType): UnAction | undefined {
         switch (action.type) {
+            case ACTION_ENTER_PROMPT: {
+                this.saveObject([...this.state.state.actions], 'ACTION_ENTER_PROMPT/actions')
+                this.saveObject([...this.state.state.savedActions], 'ACTION_ENTER_PROMPT/savedActions')
+                this.saveActionType(UNMAKE_PROMPT_ENTER, 'ACTION_ENTER_PROMPT')
+                return {
+                    type: UNMAKE_PROMPT_ENTER,
+                    actions: [...this.state.state.actions],
+                    savedActions: [...this.state.state.savedActions],
+                }
+            }
             case ACTION_RESOLVE_PROMPT: {
                 const logCount = this.state.logEngine.shouldCreateLog(action).length
                 const generatedBy = this.state.state.promptGeneratedBy as string;
                 const variable = this.state.state.promptVariable as string || DEFAULT_PROMPT_VARIABLE[this.state.state.promptType as PromptTypeType] || 'promptResult';
-                const oldMetaData = this.state.getMetaValue(variable, generatedBy)
+                const metadata = this.state.getSpellMetadata(generatedBy)
+                const oldMetaData = Object.hasOwn(metadata, variable) ? metadata[variable] : undefined
                 this.saveObject(oldMetaData, 'promptOldMetaData')
                 this.saveString(variable, 'promptVariable')
                 this.saveNumber(this.state.state.promptPlayer as number, 'promptPlayer')
@@ -544,7 +556,9 @@ export class Unmaker {
                     case EFFECT_TYPE_DIE_ROLLED: {
                         if (action.generatedBy) {
                             const currentMeta = this.state.getSpellMetadata(action.generatedBy)
+                            const hasPreviousRollResult = typeof currentMeta?.roll_result === 'number'
                             this.saveNumber(currentMeta?.roll_result as number, 'EFFECT_TYPE_DIE_ROLLED/rollResult')
+							this.saveNumber(hasPreviousRollResult ? 1 : 0, 'EFFECT_TYPE_DIE_ROLLED/hasRollResult')
                             this.saveString(action.generatedBy, 'EFFECT_TYPE_DIE_ROLLED/spellId')
                             this.saveNumber(this.state.logEngine.shouldCreateLog(action).length, 'EFFECT_TYPE_DIE_ROLLED/logCount')
                             this.saveActionType(UNMAKE_EFFECT_TYPE_DIE_ROLLED, 'EFFECT_TYPE_DIE_ROLLED')
@@ -804,7 +818,7 @@ export class Unmaker {
                         const moveMultiTarget = this.state.getMetaValue(action.target, action.generatedBy);
                         const moveTarget = (moveMultiTarget instanceof Array) ? moveMultiTarget[0] : moveMultiTarget;
 
-                        if (moveSource == null || moveTarget == null) {
+                        if (moveSource != null && moveTarget != null) {
                             this.saveString(moveSource.id, 'EFFECT_TYPE_MOVE_ENERGY/sourceId')
                             this.saveNumber(moveSource.card.type == TYPE_MAGI ? 1 : 0, 'EFFECT_TYPE_MOVE_ENERGY/sourceIsMagi')
                             this.saveNumber(moveSource.owner, 'EFFECT_TYPE_MOVE_ENERGY/sourceOwner')
@@ -1084,6 +1098,13 @@ export class Unmaker {
                 state.state.log.length -= logCount
                 break;
             }
+            case UNMAKE_PROMPT_ENTER: {
+                const savedActions = this.readObject<any[]>('ACTION_ENTER_PROMPT/savedActions')
+                const actions = this.readObject<any[]>('ACTION_ENTER_PROMPT/actions')
+                state.state.actions = actions
+                state.state.savedActions = savedActions
+                break;
+            }
             case UNMAKE_EFFECT_TYPE_PROMPT_ENTERED: {
                 const prompt = this.readNumber('EFFECT_TYPE_PROMPT_ENTERED/prompt') == 1;
                 const promptMessage = this.readString('EFFECT_TYPE_PROMPT_ENTERED/promptMessage')
@@ -1327,8 +1348,9 @@ export class Unmaker {
             case UNMAKE_EFFECT_TYPE_DIE_ROLLED: {
                 const logCount = this.readNumber('EFFECT_TYPE_DIE_ROLLED/logCount')
                 const generatedBy = this.readString('EFFECT_TYPE_DIE_ROLLED/spellId')
+				const hasPreviousRollResult = this.readNumber('EFFECT_TYPE_DIE_ROLLED/hasRollResult') === 1
                 const previousRollResult = this.readNumber('EFFECT_TYPE_DIE_ROLLED/rollResult')
-                if (previousRollResult === undefined) {
+				if (!hasPreviousRollResult) {
                     state.clearSpellMetaDataField('roll_result', generatedBy)
                 } else {
                     state.setSpellMetaDataField('roll_result', previousRollResult, generatedBy)

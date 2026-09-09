@@ -42,6 +42,7 @@ const actionNames = {
     30: 'UNMAKE_PROPERTY',
     31: 'UNMAKE_LOG_ENTRY',
     32: 'UNMAKE_PROMPT_LEAVE',
+    41: 'UNMAKE_PROMPT_ENTER',
     33: 'UNMAKE_POWER_USE',
     34: 'UNMAKE_POWER_PAY',
     36: 'UNMAKE_POWER_ACTIVATION',
@@ -231,11 +232,22 @@ class Unmaker {
     }
     generateUnAction(action) {
         switch (action.type) {
+            case index_1.ACTION_ENTER_PROMPT: {
+                this.saveObject([...this.state.state.actions], 'ACTION_ENTER_PROMPT/actions');
+                this.saveObject([...this.state.state.savedActions], 'ACTION_ENTER_PROMPT/savedActions');
+                this.saveActionType(types_1.UNMAKE_PROMPT_ENTER, 'ACTION_ENTER_PROMPT');
+                return {
+                    type: types_1.UNMAKE_PROMPT_ENTER,
+                    actions: [...this.state.state.actions],
+                    savedActions: [...this.state.state.savedActions],
+                };
+            }
             case index_1.ACTION_RESOLVE_PROMPT: {
                 const logCount = this.state.logEngine.shouldCreateLog(action).length;
                 const generatedBy = this.state.state.promptGeneratedBy;
                 const variable = this.state.state.promptVariable || index_1.DEFAULT_PROMPT_VARIABLE[this.state.state.promptType] || 'promptResult';
-                const oldMetaData = this.state.getMetaValue(variable, generatedBy);
+                const metadata = this.state.getSpellMetadata(generatedBy);
+                const oldMetaData = Object.hasOwn(metadata, variable) ? metadata[variable] : undefined;
                 this.saveObject(oldMetaData, 'promptOldMetaData');
                 this.saveString(variable, 'promptVariable');
                 this.saveNumber(this.state.state.promptPlayer, 'promptPlayer');
@@ -510,7 +522,9 @@ class Unmaker {
                     case index_1.EFFECT_TYPE_DIE_ROLLED: {
                         if (action.generatedBy) {
                             const currentMeta = this.state.getSpellMetadata(action.generatedBy);
+                            const hasPreviousRollResult = typeof currentMeta?.roll_result === 'number';
                             this.saveNumber(currentMeta?.roll_result, 'EFFECT_TYPE_DIE_ROLLED/rollResult');
+                            this.saveNumber(hasPreviousRollResult ? 1 : 0, 'EFFECT_TYPE_DIE_ROLLED/hasRollResult');
                             this.saveString(action.generatedBy, 'EFFECT_TYPE_DIE_ROLLED/spellId');
                             this.saveNumber(this.state.logEngine.shouldCreateLog(action).length, 'EFFECT_TYPE_DIE_ROLLED/logCount');
                             this.saveActionType(types_1.UNMAKE_EFFECT_TYPE_DIE_ROLLED, 'EFFECT_TYPE_DIE_ROLLED');
@@ -761,7 +775,7 @@ class Unmaker {
                         const moveSource = (moveMultiSource instanceof Array) ? moveMultiSource[0] : moveMultiSource;
                         const moveMultiTarget = this.state.getMetaValue(action.target, action.generatedBy);
                         const moveTarget = (moveMultiTarget instanceof Array) ? moveMultiTarget[0] : moveMultiTarget;
-                        if (moveSource == null || moveTarget == null) {
+                        if (moveSource != null && moveTarget != null) {
                             this.saveString(moveSource.id, 'EFFECT_TYPE_MOVE_ENERGY/sourceId');
                             this.saveNumber(moveSource.card.type == index_1.TYPE_MAGI ? 1 : 0, 'EFFECT_TYPE_MOVE_ENERGY/sourceIsMagi');
                             this.saveNumber(moveSource.owner, 'EFFECT_TYPE_MOVE_ENERGY/sourceOwner');
@@ -1039,6 +1053,13 @@ class Unmaker {
                 state.state.log.length -= logCount;
                 break;
             }
+            case types_1.UNMAKE_PROMPT_ENTER: {
+                const savedActions = this.readObject('ACTION_ENTER_PROMPT/savedActions');
+                const actions = this.readObject('ACTION_ENTER_PROMPT/actions');
+                state.state.actions = actions;
+                state.state.savedActions = savedActions;
+                break;
+            }
             case types_1.UNMAKE_EFFECT_TYPE_PROMPT_ENTERED: {
                 const prompt = this.readNumber('EFFECT_TYPE_PROMPT_ENTERED/prompt') == 1;
                 const promptMessage = this.readString('EFFECT_TYPE_PROMPT_ENTERED/promptMessage');
@@ -1282,8 +1303,9 @@ class Unmaker {
             case types_1.UNMAKE_EFFECT_TYPE_DIE_ROLLED: {
                 const logCount = this.readNumber('EFFECT_TYPE_DIE_ROLLED/logCount');
                 const generatedBy = this.readString('EFFECT_TYPE_DIE_ROLLED/spellId');
+                const hasPreviousRollResult = this.readNumber('EFFECT_TYPE_DIE_ROLLED/hasRollResult') === 1;
                 const previousRollResult = this.readNumber('EFFECT_TYPE_DIE_ROLLED/rollResult');
-                if (previousRollResult === undefined) {
+                if (!hasPreviousRollResult) {
                     state.clearSpellMetaDataField('roll_result', generatedBy);
                 }
                 else {

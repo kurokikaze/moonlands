@@ -308,6 +308,10 @@ export type SerializedState = {
     cardsAttached: Record<string, string[]>
 }
 
+export type FullSerializedState = SerializedState & {
+    spellMetaData: Record<string, MetaDataRecord>
+}
+
 export type MercenneFixed = {
     random: () => number
 }

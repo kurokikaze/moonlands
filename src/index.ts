@@ -242,6 +242,7 @@ import {
 	ReplacingEffectType,
 	NoneType,
 	SerializedState,
+	FullSerializedState,
 	SerializedZones,
 	MercenneFixed,
 	MetaDataRecord,
@@ -828,6 +829,21 @@ export class State {
 			cardsAttached: this.state.cardsAttached,
 		};
 	}
+
+	serializeFullState(playerId: number): FullSerializedState {
+		const serializedState = this.serializeData(playerId, false);
+		const opponentId = this.getOpponent(playerId);
+
+		serializedState.zones.playerDeck = this.getZone(ZONE_TYPE_DECK, playerId).serialize(true);
+		serializedState.zones.opponentDeck = this.getZone(ZONE_TYPE_DECK, opponentId).serialize(true);
+
+		return {
+			...serializedState,
+			spellMetaData: this.state.spellMetaData,
+		};
+	}
+
+	
 
 	serializeZones(playerId: number, hideZones = true): SerializedZones {
 		const opponentId = this.getOpponent(playerId);

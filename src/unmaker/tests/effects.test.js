@@ -1,8 +1,8 @@
 /* global expect, describe, it */
-import * as moonlands from '../index.ts';
-import { byName, cards } from '../cards.ts';
-import CardInGame from '../classes/CardInGame.ts';
-import { Unmaker } from './unmaker.ts';
+import * as moonlands from '../../index.ts';
+import { byName, cards } from '../../cards.ts';
+import CardInGame from '../../classes/CardInGame.ts';
+import { Unmaker } from '../unmaker.ts';
 
 import {
 	TYPE_CREATURE,
@@ -114,7 +114,7 @@ import {
 	EXPIRATION_NEVER,
 
 	STATUS_BURROWED,
-} from '../const.ts';
+} from '../../const.ts';
 
 import {
 	STEP_ENERGIZE,
@@ -124,10 +124,10 @@ import {
 	STEP_PRS_SECOND,
 	STEP_DRAW,
 	createZones,
-} from '../../test/utils.js';
+} from '../../../test/utils.js';
 
-import Zone from '../classes/Zone.ts';
-import { UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_DIE_ROLLED, UNMAKE_EFFECT_TYPE_START_TURN, UNMAKE_EFFECT_TYPE_START_OF_TURN, UNMAKE_EFFECT_TYPE_START_STEP, UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI, UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE, UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, UNMAKE_EFFECT_TYPE_MOVE_ENERGY, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_PROMPT_ENTERED, UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS, UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD, UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER, UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, UNMAKE_EFFECT_TYPE_PLAYER_WINS } from './types.ts';
+import Zone from '../../classes/Zone.ts';
+import { UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_DIE_ROLLED, UNMAKE_EFFECT_TYPE_START_TURN, UNMAKE_EFFECT_TYPE_START_OF_TURN, UNMAKE_EFFECT_TYPE_START_STEP, UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI, UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE, UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, UNMAKE_EFFECT_TYPE_MOVE_ENERGY, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_PROMPT_ENTERED, UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS, UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD, UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER, UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, UNMAKE_EFFECT_TYPE_PLAYER_WINS } from '../types.ts';
 
 
 expect.extend({
@@ -168,10 +168,10 @@ describe('Unmake state action (TypedArray)', () => {
             generatedBy: arbolit.id,
         };
 
-        const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
-		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData)
+        const serializedState = gameState.serializeFullState(ACTIVE_PLAYER)
 
         const unmaker = new Unmaker(gameState);
+        unmaker.setCheckpoint()
         unmaker.setCheckpoint()
         gameState.update(powerAction);
 
@@ -190,8 +190,7 @@ describe('Unmake state action (TypedArray)', () => {
         unmaker.revertToCheckpoint(gameState)
 
         expect(gameState.winner).toBe(false)
-		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
-		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData))
+		expect(serializedState).toEqual(gameState.serializeFullState(ACTIVE_PLAYER))
     });
 
     it('Creature defeats creature action', () => {
@@ -244,8 +243,8 @@ describe('Unmake state action (TypedArray)', () => {
 
 		const unmaker = new Unmaker(gameState)
 		unmaker.setCheckpoint()
-		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
-		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData)
+		unmaker.setCheckpoint()
+		const serializedState = gameState.serializeFullState(ACTIVE_PLAYER)
 
 		// Apply CREATURE_DEFEATS_CREATURE effect directly
 		const effect = {
@@ -271,8 +270,7 @@ describe('Unmake state action (TypedArray)', () => {
 		// Verify flag was restored
 		const fireChogoRestored = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)
 		expect(fireChogoRestored.data.defeatedCreature).toBe(false)
-		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
-		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData))
+		expect(serializedState).toEqual(gameState.serializeFullState(ACTIVE_PLAYER))
 	})
 
     it('Damage action', () => {
@@ -324,8 +322,8 @@ describe('Unmake state action (TypedArray)', () => {
         }
 
         const unmaker = new Unmaker(gameState)
-		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
-		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData)
+        unmaker.setCheckpoint()
+		const serializedState = gameState.serializeFullState(ACTIVE_PLAYER)
 
         unmaker.setCheckpoint()
         gameState.update(effect);
@@ -335,8 +333,7 @@ describe('Unmake state action (TypedArray)', () => {
 		unmaker.revertToCheckpoint(gameState)
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(14)
-		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
-		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData))
+		expect(serializedState).toEqual(gameState.serializeFullState(ACTIVE_PLAYER))
 	})
 
     it('Start turn action', () => {
@@ -403,7 +400,7 @@ describe('Unmake state action (TypedArray)', () => {
 
 		const unmaker = new Unmaker(gameState)
 		unmaker.setCheckpoint()
-		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData)
+		unmaker.setCheckpoint()
 
 		const effect = {
 			type: moonlands.ACTION_EFFECT,
@@ -432,7 +429,6 @@ describe('Unmake state action (TypedArray)', () => {
 
 		// Apply un-action
 		unmaker.revertToCheckpoint(gameState)
-		// unmaker.applyUnAction(gameState, startTurnUnActions[0]);
 
 		// Verify state was restored
 		expect(gameState.turn).toBe(initialTurn)
@@ -448,7 +444,6 @@ describe('Unmake state action (TypedArray)', () => {
 
 		const gregaRestored = gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card
 		expect(gregaRestored.data.actionsUsed).toEqual(['Flame Geyser'])
-		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData))
 	})
 
 	it('Start of turn action', () => {
@@ -517,6 +512,7 @@ describe('Unmake state action (TypedArray)', () => {
 		expect(grega.data.actionsUsed).toEqual(['Flame Geyser'])
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
 
 		// Apply START_OF_TURN directly (not through START_TURN)
 		const effect = {
@@ -529,22 +525,8 @@ describe('Unmake state action (TypedArray)', () => {
 		gameState.update(effect);
 
 		// Find the START_OF_TURN un-action
-		const startOfTurnUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_START_OF_TURN)
-		expect(startOfTurnUnActions).toHaveLength(1)
-		expect(startOfTurnUnActions[0].player).toBe(ACTIVE_PLAYER)
 
 		// Verify card flags were captured
-		expect(startOfTurnUnActions[0].cardFlags[arbolit.id]).toBeDefined()
-		expect(startOfTurnUnActions[0].cardFlags[arbolit.id].hasAttacked).toBe(true)
-		expect(startOfTurnUnActions[0].cardFlags[arbolit.id].attacked).toBe(1)
-		expect(startOfTurnUnActions[0].cardFlags[arbolit.id].actionsUsed).toEqual(['SomePower'])
-		expect(startOfTurnUnActions[0].cardFlags[arbolit.id].energyLostThisTurn).toBe(2)
-		expect(startOfTurnUnActions[0].cardFlags[arbolit.id].wasAttacked).toBe(true)
-		expect(startOfTurnUnActions[0].cardFlags[arbolit.id].defeatedCreature).toBe(true)
-		expect(startOfTurnUnActions[0].cardFlags[staffOfHyren.id]).toBeDefined()
-		expect(startOfTurnUnActions[0].cardFlags[staffOfHyren.id].actionsUsed).toEqual(['HealingLight'])
-		expect(startOfTurnUnActions[0].cardFlags[grega.id]).toBeDefined()
-		expect(startOfTurnUnActions[0].cardFlags[grega.id].actionsUsed).toEqual(['Flame Geyser'])
 
 		// Verify card flags were cleared by START_OF_TURN
 		const arbolitInPlay = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)
@@ -562,7 +544,7 @@ describe('Unmake state action (TypedArray)', () => {
 		expect(gregaActive.data.actionsUsed).toEqual([])
 
 		// Apply un-action
-		unmaker.applyUnAction(gameState, startOfTurnUnActions[0]);
+		unmaker.revertToCheckpoint()
 
 		// Verify card flags were restored
 		const arbolitRestored = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)
@@ -621,7 +603,7 @@ describe('Unmake state action (TypedArray)', () => {
 		const initialStep = gameState.state.step;
 
 		const unmaker = new Unmaker(gameState)
-		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData)
+		unmaker.setCheckpoint()
 
 		// Apply START_STEP to advance to step 2 (Attack)
 		const effect = {
@@ -635,19 +617,15 @@ describe('Unmake state action (TypedArray)', () => {
 		gameState.update(effect);
 
 		// Find the START_STEP un-action
-		const startStepUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_START_STEP)
-		expect(startStepUnActions).toHaveLength(1)
-		expect(startStepUnActions[0].previousStep).toBe(initialStep)
 
 		// Verify step was changed
 		expect(gameState.state.step).toBe(STEP_ATTACK)
 
 		// Apply un-action
-		unmaker.applyUnAction(gameState, startStepUnActions[0]);
+		unmaker.revertToCheckpoint()
 
 		// Verify step was restored
 		expect(gameState.state.step).toBe(initialStep)
-		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData))
 	})
 })
 
@@ -700,22 +678,19 @@ describe('Unmaking state action', () => {
         }
 
         const unmaker = new Unmaker(gameState)
-		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
-		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData)
+        unmaker.setCheckpoint()
+		unmaker.setCheckpoint()
+		const serializedState = gameState.serializeFullState(ACTIVE_PLAYER)
 
         expect(gameState.winner).toBe(false)
 
         gameState.update(effect);
 
         expect(gameState.winner).toEqual(ACTIVE_PLAYER)
-		expect(unmaker.unActions).toHaveLength(1)
-		expect(unmaker.unActions[0].type).toBe(UNMAKE_EFFECT_TYPE_PLAYER_WINS)
-
-		unmaker.applyUnAction(gameState, unmaker.unActions[0]);
+		unmaker.revertToCheckpoint();
 
         expect(gameState.winner).toBe(false)
-		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
-		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData))
+		expect(serializedState).toEqual(gameState.serializeFullState(ACTIVE_PLAYER))
 	})
 
     it('Damage action', () => {
@@ -766,25 +741,19 @@ describe('Unmaking state action', () => {
             generatedBy: quorOne.id,
         }
 
-        const unmaker = new Unmaker(gameState)
-		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
-		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData)
+		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
+		unmaker.setCheckpoint()
+		const serializedState = gameState.serializeFullState(ACTIVE_PLAYER)
 
         gameState.update(effect);
 
-		expect(unmaker.unActions).toHaveLength(1)
-		expect(unmaker.unActions[0].type).toBe(UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE)
-		expect(unmaker.unActions[0].creatures).toHaveLength(1)
-		expect(unmaker.unActions[0].creatures[0].id).toBe(arbolit.id)
-		expect(unmaker.unActions[0].creatures[0].energy).toBe(14)
-
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(9)
 
-		unmaker.applyUnAction(gameState, unmaker.unActions[0]);
+		unmaker.revertToCheckpoint()
 
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(14)
-		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
-		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData))
+		expect(serializedState).toEqual(gameState.serializeFullState(ACTIVE_PLAYER))
 	})
 
 	it('Discard energy from magi action', () => {
@@ -830,25 +799,20 @@ describe('Unmaking state action', () => {
 			generatedBy: quorOne.id,
 		}
 
-		const unmaker = new Unmaker(gameState)
-
-		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
+				const unmaker = new Unmaker(gameState)
+				unmaker.setCheckpoint()
+				unmaker.setCheckpoint()
+				const serializedState = gameState.serializeFullState(ACTIVE_PLAYER)
 
 		gameState.update(effect);
 
-		expect(unmaker.unActions).toHaveLength(1)
-		expect(unmaker.unActions[0].type).toBe(UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI)
-		expect(unmaker.unActions[0].magi).toHaveLength(1)
-		expect(unmaker.unActions[0].magi[0].id).toBe(grega.id)
-		expect(unmaker.unActions[0].magi[0].energy).toBe(10)
-
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).byId(grega.id)).toHaveEnergy(7)
 
-		unmaker.applyUnAction(gameState, unmaker.unActions[0]);
+				unmaker.revertToCheckpoint()
 
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).byId(grega.id)).toHaveEnergy(10)
 
-		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+		expect(serializedState).toEqual(gameState.serializeFullState(ACTIVE_PLAYER))
 	})
 
 	it('Move card between zones action (in play to discard)', () => {
@@ -910,18 +874,13 @@ describe('Unmaking state action', () => {
 
 		const unmaker = new Unmaker(gameState)
 		unmaker.setCheckpoint()
+		unmaker.setCheckpoint()
 
-		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
+		const serializedState = gameState.serializeFullState(ACTIVE_PLAYER)
 
 		gameState.update(effect);
 
 		// Verify action was captured
-		expect(unmaker.unActions).toHaveLength(1)
-		expect(unmaker.unActions[0].type).toBe(UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES)
-		expect(unmaker.unActions[0].card.id).toBe(arbolit.id)
-		expect(unmaker.unActions[0].sourceZone).toBe(ZONE_TYPE_IN_PLAY)
-		expect(unmaker.unActions[0].destinationZone).toBe(ZONE_TYPE_DISCARD)
-		expect(unmaker.unActions[0].position).toBe(0)
 
 		// Verify card was moved
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toBe(2)
@@ -934,7 +893,6 @@ describe('Unmaking state action', () => {
 
 		// Apply un-action
 		unmaker.revertToCheckpoint(gameState)
-		// unmaker.applyUnAction(gameState, unmaker.unActions[0]);
 
 		// Verify card was moved back
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toBe(3)
@@ -947,7 +905,7 @@ describe('Unmaking state action', () => {
 		expect(gameState.getSpellMetadata(grega.id).new_card).toBeUndefined()
 		expect(gameState.getSpellMetadata(arbolit.id).new_card).toBeUndefined()
 
-		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+		expect(serializedState).toEqual(gameState.serializeFullState(ACTIVE_PLAYER))
 	})
 
 	it('Move card between zones action (hand to deck, bottom)', () => {
@@ -1004,14 +962,10 @@ describe('Unmaking state action', () => {
 		}
 
 		const unmaker = new Unmaker(gameState)
-		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData)
+		unmaker.setCheckpoint()
 		gameState.update(effect);
 
 		// Verify action was captured
-		expect(unmaker.unActions).toHaveLength(3)
-		expect(unmaker.unActions[0].type).toBe(UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES)
-		expect(unmaker.unActions[0].card.id).toBe(quorOne.id)
-		expect(unmaker.unActions[0].bottom).toBe(true)
 
 		// Verify card was moved
 		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toBe(1)
@@ -1019,7 +973,7 @@ describe('Unmaking state action', () => {
 		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).length).toBe(2)
 
 		// Apply un-action
-		unmaker.applyUnAction(gameState, unmaker.unActions[0]);
+		unmaker.revertToCheckpoint()
 
 		// Verify card was moved back
 		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).length).toBe(2)
@@ -1027,7 +981,6 @@ describe('Unmaking state action', () => {
 		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).length).toBe(1)
 		// Verify the card is back at its original position (first in hand)
 		expect(gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).cards[0].id).toBe(quorOne.id)
-		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData))
 	})
 
 	it('Die rolled action', () => {
@@ -1070,6 +1023,7 @@ describe('Unmaking state action', () => {
 		expect(gameState.getSpellMetadata(spellId).roll_result).toBeUndefined()
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
 
 		// Use ROLL_DIE which transforms into DIE_ROLLED
 		const effect = {
@@ -1083,16 +1037,12 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Verify DIE_ROLLED action was captured (ROLL_DIE transforms into DIE_ROLLED)
-		const dieRolledUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_DIE_ROLLED)
-		expect(dieRolledUnActions).toHaveLength(1)
-		expect(dieRolledUnActions[0].spellId).toBe(spellId)
-		expect(dieRolledUnActions[0].previousRollResult).toBeUndefined()
 
 		// Verify roll_result was set
 		expect(gameState.getSpellMetadata(spellId).roll_result).toBe(4)
 
 		// Apply un-action
-		unmaker.applyUnAction(gameState, dieRolledUnActions[0]);
+		unmaker.revertToCheckpoint()
 
 		// Verify roll_result was reverted
 		expect(gameState.getSpellMetadata(spellId).roll_result).toBeUndefined()
@@ -1139,6 +1089,7 @@ describe('Unmaking state action', () => {
 		expect(gameState.getSpellMetadata(spellId).roll_result).toBe(2)
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
 
 		// Use ROLL_DIE which transforms into DIE_ROLLED
 		const effect = {
@@ -1152,16 +1103,12 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Verify DIE_ROLLED action was captured with previous value
-		const dieRolledUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_DIE_ROLLED)
-		expect(dieRolledUnActions).toHaveLength(1)
-		expect(dieRolledUnActions[0].spellId).toBe(spellId)
-		expect(dieRolledUnActions[0].previousRollResult).toBe(2)
 
 		// Verify roll_result was updated
 		expect(gameState.getSpellMetadata(spellId).roll_result).toBe(5)
 
 		// Apply un-action
-		unmaker.applyUnAction(gameState, dieRolledUnActions[0]);
+		unmaker.revertToCheckpoint()
 
 		// Verify roll_result was restored to previous value
 		expect(gameState.getSpellMetadata(spellId).roll_result).toBe(2)
@@ -1231,7 +1178,7 @@ describe('Unmaking state action', () => {
 
 		const unmaker = new Unmaker(gameState)
 		unmaker.setCheckpoint()
-		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData)
+		unmaker.setCheckpoint()
 
 		const effect = {
 			type: moonlands.ACTION_EFFECT,
@@ -1243,19 +1190,8 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Find the START_TURN un-action
-		const startTurnUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_START_TURN)
-		expect(startTurnUnActions).toHaveLength(1)
-		expect(startTurnUnActions[0].previousTurn).toBe(initialTurn)
-		expect(startTurnUnActions[0].previousStep).toBe(initialStep)
-		expect(startTurnUnActions[0].previousActivePlayer).toBe(initialActivePlayer)
 
 		// Verify card flags were captured
-		expect(startTurnUnActions[0].cardFlags[arbolit.id]).toBeDefined()
-		expect(startTurnUnActions[0].cardFlags[arbolit.id].hasAttacked).toBe(true)
-		expect(startTurnUnActions[0].cardFlags[arbolit.id].attacked).toBe(1)
-		expect(startTurnUnActions[0].cardFlags[arbolit.id].actionsUsed).toEqual(['SomePower'])
-		expect(startTurnUnActions[0].cardFlags[grega.id]).toBeDefined()
-		expect(startTurnUnActions[0].cardFlags[grega.id].actionsUsed).toEqual(['Flame Geyser'])
 
 		// Verify state was changed
 		expect(gameState.turn).toBe(6) // Incremented from 5
@@ -1275,7 +1211,6 @@ describe('Unmaking state action', () => {
 
 		// Apply un-action
 		unmaker.revertToCheckpoint(gameState)
-		// unmaker.applyUnAction(gameState, startTurnUnActions[0]);
 
 		// Verify state was restored
 		expect(gameState.turn).toBe(initialTurn)
@@ -1291,7 +1226,6 @@ describe('Unmaking state action', () => {
 
 		const gregaRestored = gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card
 		expect(gregaRestored.data.actionsUsed).toEqual(['Flame Geyser'])
-		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData))
 	})
 
 	it('Start of turn action', () => {
@@ -1360,6 +1294,7 @@ describe('Unmaking state action', () => {
 		expect(grega.data.actionsUsed).toEqual(['Flame Geyser'])
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
 
 		// Apply START_OF_TURN directly (not through START_TURN)
 		const effect = {
@@ -1372,22 +1307,8 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Find the START_OF_TURN un-action
-		const startOfTurnUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_START_OF_TURN)
-		expect(startOfTurnUnActions).toHaveLength(1)
-		expect(startOfTurnUnActions[0].player).toBe(ACTIVE_PLAYER)
 
 		// Verify card flags were captured
-		expect(startOfTurnUnActions[0].cardFlags[arbolit.id]).toBeDefined()
-		expect(startOfTurnUnActions[0].cardFlags[arbolit.id].hasAttacked).toBe(true)
-		expect(startOfTurnUnActions[0].cardFlags[arbolit.id].attacked).toBe(1)
-		expect(startOfTurnUnActions[0].cardFlags[arbolit.id].actionsUsed).toEqual(['SomePower'])
-		expect(startOfTurnUnActions[0].cardFlags[arbolit.id].energyLostThisTurn).toBe(2)
-		expect(startOfTurnUnActions[0].cardFlags[arbolit.id].wasAttacked).toBe(true)
-		expect(startOfTurnUnActions[0].cardFlags[arbolit.id].defeatedCreature).toBe(true)
-		expect(startOfTurnUnActions[0].cardFlags[staffOfHyren.id]).toBeDefined()
-		expect(startOfTurnUnActions[0].cardFlags[staffOfHyren.id].actionsUsed).toEqual(['HealingLight'])
-		expect(startOfTurnUnActions[0].cardFlags[grega.id]).toBeDefined()
-		expect(startOfTurnUnActions[0].cardFlags[grega.id].actionsUsed).toEqual(['Flame Geyser'])
 
 		// Verify card flags were cleared by START_OF_TURN
 		const arbolitInPlay = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)
@@ -1405,7 +1326,7 @@ describe('Unmaking state action', () => {
 		expect(gregaActive.data.actionsUsed).toEqual([])
 
 		// Apply un-action
-		unmaker.applyUnAction(gameState, startOfTurnUnActions[0]);
+		unmaker.revertToCheckpoint()
 
 		// Verify card flags were restored
 		const arbolitRestored = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)
@@ -1464,7 +1385,7 @@ describe('Unmaking state action', () => {
 		const initialStep = gameState.state.step;
 
 		const unmaker = new Unmaker(gameState)
-		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData)
+		unmaker.setCheckpoint()
 
 		// Apply START_STEP to advance to step 2 (Attack)
 		const effect = {
@@ -1478,19 +1399,15 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Find the START_STEP un-action
-		const startStepUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_START_STEP)
-		expect(startStepUnActions).toHaveLength(1)
-		expect(startStepUnActions[0].previousStep).toBe(initialStep)
 
 		// Verify step was changed
 		expect(gameState.state.step).toBe(STEP_ATTACK)
 
 		// Apply un-action
-		unmaker.applyUnAction(gameState, startStepUnActions[0]);
+		unmaker.revertToCheckpoint()
 
 		// Verify step was restored
 		expect(gameState.state.step).toBe(initialStep)
-		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData))
 	})
 
 	it('Rearrange cards of zone action', () => {
@@ -1542,6 +1459,7 @@ describe('Unmaking state action', () => {
 		expect(initialDeck.cards[3].id).toBe(fireChogoTwo.id)
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
 
 		// Rearrange the first 3 cards: fireChogoOne, quorOne, quorTwo
 		const newOrder = [fireChogoOne.id, quorOne.id, quorTwo.id]
@@ -1558,11 +1476,6 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Verify un-action was captured
-		const rearrangeUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE)
-		expect(rearrangeUnActions).toHaveLength(1)
-		expect(rearrangeUnActions[0].zone).toBe(ZONE_TYPE_DECK)
-		expect(rearrangeUnActions[0].zoneOwner).toBe(ACTIVE_PLAYER)
-		expect(rearrangeUnActions[0].previousOrder).toEqual([quorOne.id, quorTwo.id, fireChogoOne.id])
 
 		// Verify deck was rearranged
 		const rearrangedDeck = gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER);
@@ -1572,7 +1485,7 @@ describe('Unmaking state action', () => {
 		expect(rearrangedDeck.cards[3].id).toBe(fireChogoTwo.id) // Last card unchanged
 
 		// Apply un-action
-		unmaker.applyUnAction(gameState, rearrangeUnActions[0]);
+		unmaker.revertToCheckpoint()
 
 		// Verify deck was restored to original order
 		const restoredDeck = gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER);
@@ -1623,6 +1536,7 @@ describe('Unmaking state action', () => {
 		expect(gameState.state.continuousEffects).toHaveLength(0)
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
 
 		// Create a continuous effect that modifies creature energy
 		const effect = {
@@ -1647,16 +1561,13 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Verify un-action was captured
-		const createEffectUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT)
-		expect(createEffectUnActions).toHaveLength(1)
-		expect(createEffectUnActions[0].previousLength).toBe(0)
 
 		// Verify continuous effect was created
 		expect(gameState.state.continuousEffects).toHaveLength(1)
 		expect(gameState.state.continuousEffects[0].player).toBe(ACTIVE_PLAYER)
 
 		// Apply un-action
-		unmaker.applyUnAction(gameState, createEffectUnActions[0]);
+		unmaker.revertToCheckpoint()
 
 		// Verify continuous effect was removed
 		expect(gameState.state.continuousEffects).toHaveLength(0)
@@ -1697,6 +1608,7 @@ describe('Unmaking state action', () => {
 		gameState.turn = 1;
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
 
 		// Create first continuous effect
 		const effect1 = {
@@ -1719,6 +1631,7 @@ describe('Unmaking state action', () => {
 
 		gameState.update(effect1);
 		expect(gameState.state.continuousEffects).toHaveLength(1)
+		unmaker.setCheckpoint()
 
 		// Create second continuous effect
 		const effect2 = {
@@ -1744,13 +1657,9 @@ describe('Unmaking state action', () => {
 		expect(gameState.state.continuousEffects).toHaveLength(2)
 
 		// Verify un-actions were captured
-		const createEffectUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT)
-		expect(createEffectUnActions).toHaveLength(2)
-		expect(createEffectUnActions[0].previousLength).toBe(0)
-		expect(createEffectUnActions[1].previousLength).toBe(1)
 
 		// Undo only the second effect
-		unmaker.applyUnAction(gameState, createEffectUnActions[1]);
+		unmaker.revertToCheckpoint()
 
 		// Verify only the first continuous effect remains
 		expect(gameState.state.continuousEffects).toHaveLength(1)
@@ -1798,6 +1707,7 @@ describe('Unmaking state action', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(5)
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
 
 		const effect = {
 			type: moonlands.ACTION_EFFECT,
@@ -1810,17 +1720,12 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Verify un-action was captured
-		const addEnergyUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE)
-		expect(addEnergyUnActions).toHaveLength(1)
-		expect(addEnergyUnActions[0].creatures).toHaveLength(1)
-		expect(addEnergyUnActions[0].creatures[0].id).toBe(arbolit.id)
-		expect(addEnergyUnActions[0].creatures[0].energy).toBe(5) // Previous energy before add
 
 		// Verify energy was added
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(8)
 
 		// Apply un-action
-		unmaker.applyUnAction(gameState, addEnergyUnActions[0]);
+		unmaker.revertToCheckpoint()
 
 		// Verify energy was restored
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(5)
@@ -1871,8 +1776,9 @@ describe('Unmaking state action', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(quorPup.id)).toHaveEnergy(2)
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
 
-		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
+		const serializedState = gameState.serializeFullState(ACTIVE_PLAYER)
 
 		const effect = {
 			type: moonlands.ACTION_EFFECT,
@@ -1885,24 +1791,19 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Verify un-action was captured with both creatures
-		const addEnergyUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE)
-		expect(addEnergyUnActions).toHaveLength(1)
-		expect(addEnergyUnActions[0].creatures).toHaveLength(2)
-		expect(addEnergyUnActions[0].creatures[0].energy).toBe(5)
-		expect(addEnergyUnActions[0].creatures[1].energy).toBe(2)
 
 		// Verify energy was added to both
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(9)
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(quorPup.id)).toHaveEnergy(6)
 
 		// Apply un-action
-		unmaker.applyUnAction(gameState, addEnergyUnActions[0]);
+		unmaker.revertToCheckpoint()
 
 		// Verify energy was restored for both
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(5)
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(quorPup.id)).toHaveEnergy(2)
 
-		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+		expect(serializedState).toEqual(gameState.serializeFullState(ACTIVE_PLAYER))
 	})
 
 	it('Add energy to magi action', () => {
@@ -1944,8 +1845,9 @@ describe('Unmaking state action', () => {
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card).toHaveEnergy(10)
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
 
-		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
+		const serializedState = gameState.serializeFullState(ACTIVE_PLAYER)
 
 		const effect = {
 			type: moonlands.ACTION_EFFECT,
@@ -1958,22 +1860,17 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Verify un-action was captured
-		const addEnergyUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI)
-		expect(addEnergyUnActions).toHaveLength(1)
-		expect(addEnergyUnActions[0].magi).toHaveLength(1)
-		expect(addEnergyUnActions[0].magi[0].id).toBe(grega.id)
-		expect(addEnergyUnActions[0].magi[0].energy).toBe(10) // Previous energy before add
 
 		// Verify energy was added
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card).toHaveEnergy(15)
 
 		// Apply un-action
-		unmaker.applyUnAction(gameState, addEnergyUnActions[0]);
+		unmaker.revertToCheckpoint()
 
 		// Verify energy was restored
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card).toHaveEnergy(10)
 
-		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+		expect(serializedState).toEqual(gameState.serializeFullState(ACTIVE_PLAYER))
 	})
 
 	it('Before damage action', () => {
@@ -2030,8 +1927,10 @@ describe('Unmaking state action', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id).data.wasAttacked).toBe(false)
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
+				unmaker.setCheckpoint()
 
-		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
+		const serializedState = gameState.serializeFullState(ACTIVE_PLAYER)
 
 		// Apply BEFORE_DAMAGE effect directly
 		const effect = {
@@ -2046,15 +1945,6 @@ describe('Unmaking state action', () => {
 
 		gameState.update(effect);
 
-		// Find the BEFORE_DAMAGE un-action
-		const beforeDamageUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE)
-		expect(beforeDamageUnActions).toHaveLength(1)
-		expect(beforeDamageUnActions[0].sourceId).toBe(fireChogo.id)
-		expect(beforeDamageUnActions[0].sourceHasAttacked).toBe(false)
-		expect(beforeDamageUnActions[0].sourceAttacked).toBe(0)
-		expect(beforeDamageUnActions[0].targetId).toBe(arbolit.id)
-		expect(beforeDamageUnActions[0].targetWasAttacked).toBe(false)
-
 		// Verify flags were changed by BEFORE_DAMAGE
 		const fireChogoAfter = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)
 		expect(fireChogoAfter.data.hasAttacked).toBe(true)
@@ -2063,8 +1953,7 @@ describe('Unmaking state action', () => {
 		const arbolitAfter = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)
 		expect(arbolitAfter.data.wasAttacked).toBe(true)
 
-		// Apply un-action
-		unmaker.applyUnAction(gameState, beforeDamageUnActions[0]);
+				unmaker.revertToCheckpoint();
 
 		// Verify flags were restored
 		const fireChogoRestored = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)
@@ -2073,7 +1962,7 @@ describe('Unmaking state action', () => {
 
 		const arbolitRestored = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)
 		expect(arbolitRestored.data.wasAttacked).toBe(false)
-		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+		expect(serializedState).toEqual(gameState.serializeFullState(ACTIVE_PLAYER))
 	})
 
 	it('Before damage action (with existing attack state)', () => {
@@ -2127,8 +2016,10 @@ describe('Unmaking state action', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id).data.attacked).toBe(1)
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id).data.wasAttacked).toBe(true)
 
-		const unmaker = new Unmaker(gameState)
-		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
+				const unmaker = new Unmaker(gameState)
+				unmaker.setCheckpoint()
+				unmaker.setCheckpoint()
+		const serializedState = gameState.serializeFullState(ACTIVE_PLAYER)
 
 		// Apply BEFORE_DAMAGE effect for a second attack
 		const effect = {
@@ -2143,27 +2034,18 @@ describe('Unmaking state action', () => {
 
 		gameState.update(effect);
 
-		// Find the BEFORE_DAMAGE un-action
-		const beforeDamageUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE)
-		expect(beforeDamageUnActions).toHaveLength(1)
-		// Should capture state before the second attack
-		expect(beforeDamageUnActions[0].sourceHasAttacked).toBe(true)
-		expect(beforeDamageUnActions[0].sourceAttacked).toBe(1)
-		expect(beforeDamageUnActions[0].targetWasAttacked).toBe(true)
-
 		// Verify flags were updated (attacked incremented to 2)
 		const fireChogoAfter = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)
 		expect(fireChogoAfter.data.hasAttacked).toBe(true)
 		expect(fireChogoAfter.data.attacked).toBe(2)
 
-		// Apply un-action
-		unmaker.applyUnAction(gameState, beforeDamageUnActions[0]);
+				unmaker.revertToCheckpoint();
 
 		// Verify flags were restored to state before second attack
 		const fireChogoRestored = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)
 		expect(fireChogoRestored.data.hasAttacked).toBe(true)
 		expect(fireChogoRestored.data.attacked).toBe(1)
-		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+		expect(serializedState).toEqual(gameState.serializeFullState(ACTIVE_PLAYER))
 	})
 
 	it('Creature defeats creature action', () => {
@@ -2216,8 +2098,8 @@ describe('Unmaking state action', () => {
 
 		const unmaker = new Unmaker(gameState)
 		unmaker.setCheckpoint()
-		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
-		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData)
+		unmaker.setCheckpoint()
+		const serializedState = gameState.serializeFullState(ACTIVE_PLAYER)
 
 		// Apply CREATURE_DEFEATS_CREATURE effect directly
 		const effect = {
@@ -2234,10 +2116,6 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Find the CREATURE_DEFEATS_CREATURE un-action
-		const creatureDefeatsUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE)
-		expect(creatureDefeatsUnActions).toHaveLength(1)
-		expect(creatureDefeatsUnActions[0].sourceId).toBe(fireChogo.id)
-		expect(creatureDefeatsUnActions[0].sourceDefeatedCreature).toBe(false)
 
 		// Verify flag was changed by CREATURE_DEFEATS_CREATURE
 		const fireChogoAfter = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)
@@ -2249,8 +2127,7 @@ describe('Unmaking state action', () => {
 		// Verify flag was restored
 		const fireChogoRestored = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)
 		expect(fireChogoRestored.data.defeatedCreature).toBe(false)
-		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
-		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData))
+		expect(serializedState).toEqual(gameState.serializeFullState(ACTIVE_PLAYER))
 	})
 
 	it('Creature defeats creature action (creature already defeated another)', () => {
@@ -2301,6 +2178,7 @@ describe('Unmaking state action', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id).data.defeatedCreature).toBe(true)
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
 
 		// Apply CREATURE_DEFEATS_CREATURE effect
 		const effect = {
@@ -2317,17 +2195,13 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Find the CREATURE_DEFEATS_CREATURE un-action
-		const creatureDefeatsUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE)
-		expect(creatureDefeatsUnActions).toHaveLength(1)
-		// Should capture state as true (already defeated a creature before)
-		expect(creatureDefeatsUnActions[0].sourceDefeatedCreature).toBe(true)
 
 		// Flag should still be true
 		const fireChogoAfter = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)
 		expect(fireChogoAfter.data.defeatedCreature).toBe(true)
 
 		// Apply un-action
-		unmaker.applyUnAction(gameState, creatureDefeatsUnActions[0]);
+		unmaker.revertToCheckpoint()
 
 		// Verify flag was restored (still true)
 		const fireChogoRestored = gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)
@@ -2381,6 +2255,7 @@ describe('Unmaking state action', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(quorPup.id)).toHaveEnergy(3)
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
 
 		// Move 5 energy from fireChogo to quorPup
 		const effect = {
@@ -2395,19 +2270,13 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Verify un-action was captured
-		const moveEnergyUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_MOVE_ENERGY)
-		expect(moveEnergyUnActions).toHaveLength(1)
-		expect(moveEnergyUnActions[0].sourceId).toBe(fireChogo.id)
-		expect(moveEnergyUnActions[0].targetId).toBe(quorPup.id)
-		expect(moveEnergyUnActions[0].sourceEnergy).toBe(8) // Previous energy before move
-		expect(moveEnergyUnActions[0].targetEnergy).toBe(3) // Previous energy before move
 
 		// Verify energy was moved
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)).toHaveEnergy(3)
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(quorPup.id)).toHaveEnergy(8)
 
 		// Apply un-action
-		unmaker.applyUnAction(gameState, moveEnergyUnActions[0]);
+		unmaker.revertToCheckpoint()
 
 		// Verify energy was restored
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)).toHaveEnergy(8)
@@ -2458,9 +2327,9 @@ describe('Unmaking state action', () => {
 
 		const unmaker = new Unmaker(gameState)
 		unmaker.setCheckpoint()
+		unmaker.setCheckpoint()
 
-		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
-		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData)
+		const serializedState = gameState.serializeFullState(ACTIVE_PLAYER)
 
 		// Move 4 energy from arbolit to fireChogo
 		const effect = {
@@ -2484,8 +2353,7 @@ describe('Unmaking state action', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(10)
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)).toHaveEnergy(2)
 
-		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
-		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData))
+		expect(serializedState).toEqual(gameState.serializeFullState(ACTIVE_PLAYER))
 	})
 
 	it('Remove energy from creature action', () => {
@@ -2530,6 +2398,7 @@ describe('Unmaking state action', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id).data.energy).toBe(8)
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
 
 		// Remove 3 energy from arbolit
 		const effect = {
@@ -2543,16 +2412,12 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Verify un-action was captured
-		const removeEnergyUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE)
-		expect(removeEnergyUnActions).toHaveLength(1)
-		expect(removeEnergyUnActions[0].creatureId).toBe(arbolit.id)
-		expect(removeEnergyUnActions[0].energy).toBe(8) // Previous energy before removal
 
 		// Verify energy was removed
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id).data.energy).toBe(5)
 
 		// Apply un-action
-		unmaker.applyUnAction(gameState, removeEnergyUnActions[0]);
+		unmaker.revertToCheckpoint()
 
 		// Verify energy was restored
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id).data.energy).toBe(8)
@@ -2598,8 +2463,9 @@ describe('Unmaking state action', () => {
 
 		const unmaker = new Unmaker(gameState)
 		unmaker.setCheckpoint()
+		unmaker.setCheckpoint()
 
-		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
+		const serializedState = gameState.serializeFullState(ACTIVE_PLAYER)
 
 		// Remove 5 energy from fireChogo
 		const effect = {
@@ -2621,7 +2487,7 @@ describe('Unmaking state action', () => {
 		// Verify energy was restored
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id).data.energy).toBe(12)
 
-		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+		expect(serializedState).toEqual(gameState.serializeFullState(ACTIVE_PLAYER))
 	})
 
 	it('Remove energy from magi action', () => {
@@ -2663,6 +2529,7 @@ describe('Unmaking state action', () => {
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toBe(15)
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
 
 		// Remove 4 energy from grega
 		const effect = {
@@ -2676,17 +2543,12 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Verify un-action was captured
-		const removeEnergyUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI)
-		expect(removeEnergyUnActions).toHaveLength(1)
-		expect(removeEnergyUnActions[0].magiId).toBe(grega.id)
-		expect(removeEnergyUnActions[0].owner).toBe(ACTIVE_PLAYER)
-		expect(removeEnergyUnActions[0].energy).toBe(15) // Previous energy before removal
 
 		// Verify energy was removed
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toBe(11)
 
 		// Apply un-action
-		unmaker.applyUnAction(gameState, removeEnergyUnActions[0]);
+		unmaker.revertToCheckpoint()
 
 		// Verify energy was restored
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).card.data.energy).toBe(15)
@@ -2729,8 +2591,9 @@ describe('Unmaking state action', () => {
 
 		const unmaker = new Unmaker(gameState)
 		unmaker.setCheckpoint()
+		unmaker.setCheckpoint()
 
-		const serializedState = gameState.serializeData(NON_ACTIVE_PLAYER, false)
+		const serializedState = gameState.serializeFullState(NON_ACTIVE_PLAYER)
 
 		// Remove 5 energy from yaki (the active player's magi)
 		const effect = {
@@ -2752,7 +2615,7 @@ describe('Unmaking state action', () => {
 		// Verify energy was restored
 		expect(gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER).card.data.energy).toBe(12)
 
-		expect(serializedState).toEqual(gameState.serializeData(NON_ACTIVE_PLAYER, false))
+		expect(serializedState).toEqual(gameState.serializeFullState(NON_ACTIVE_PLAYER))
 	})
 
 	it('Prompt entered action', () => {
@@ -2797,6 +2660,7 @@ describe('Unmaking state action', () => {
 		expect(gameState.state.prompt).toBe(false)
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
 
 		// Enter a number prompt
 		const effect = {
@@ -2816,9 +2680,6 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Verify un-action was captured
-		const promptEnteredUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_PROMPT_ENTERED)
-		expect(promptEnteredUnActions).toHaveLength(1)
-		expect(promptEnteredUnActions[0].previousPrompt).toBe(false)
 
 		// Verify prompt state was set
 		expect(gameState.state.prompt).toBe(true)
@@ -2828,7 +2689,7 @@ describe('Unmaking state action', () => {
 		expect(gameState.state.promptVariable).toBe('chosen_number')
 
 		// Apply un-action
-		unmaker.applyUnAction(gameState, promptEnteredUnActions[0]);
+		unmaker.revertToCheckpoint()
 
 		// Verify prompt state was restored
 		expect(gameState.state.prompt).toBe(false)
@@ -2874,8 +2735,9 @@ describe('Unmaking state action', () => {
 
 		const unmaker = new Unmaker(gameState)
 		unmaker.setCheckpoint()
+		unmaker.setCheckpoint()
 
-		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
+		const serializedState = gameState.serializeFullState(ACTIVE_PLAYER)
 
 		// Enter a creature selection prompt
 		const effect = {
@@ -2901,7 +2763,7 @@ describe('Unmaking state action', () => {
 		// Verify prompt state was restored
 		expect(gameState.state.prompt).toBe(false)
 
-		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+		expect(serializedState).toEqual(gameState.serializeFullState(ACTIVE_PLAYER))
 	})
 
 	it('Find starting cards action', () => {
@@ -2949,8 +2811,8 @@ describe('Unmaking state action', () => {
 
 		const unmaker = new Unmaker(gameState)
 		unmaker.setCheckpoint()
-		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
-		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData)
+		unmaker.setCheckpoint()
+		const serializedState = gameState.serializeFullState(ACTIVE_PLAYER)
 
 		// Find starting cards
 		const effect = {
@@ -2964,10 +2826,6 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Verify un-action was captured
-		const findStartingCardsUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS)
-		expect(findStartingCardsUnActions).toHaveLength(1)
-		expect(findStartingCardsUnActions[0].spellId).toBe(grega.id)
-		expect(findStartingCardsUnActions[0].previousFoundCards).toBeUndefined()
 
 		// Verify foundCards metadata was set
 		expect(gameState.getSpellMetadata(grega.id)?.foundCards).toEqual(['Fire Chogo', 'Flame Geyser'])
@@ -2978,8 +2836,7 @@ describe('Unmaking state action', () => {
 		// Verify foundCards metadata was restored (removed)
 		expect(gameState.getSpellMetadata(grega.id)?.foundCards).toBeUndefined()
 
-		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
-		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData))
+		expect(serializedState).toEqual(gameState.serializeFullState(ACTIVE_PLAYER))
 	})
 
 	it('Find starting cards action with checkpoint', () => {
@@ -3022,6 +2879,7 @@ describe('Unmaking state action', () => {
 		gameState.turn = 1;
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
 		unmaker.setCheckpoint()
 
 		// Find starting cards
@@ -3095,6 +2953,7 @@ describe('Unmaking state action', () => {
 		const originalDiscardCardIds = gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).cards.map(c => c.id)
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
 
 		// Reshuffle discard into deck
 		const effect = {
@@ -3107,18 +2966,13 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Verify un-action was captured
-		const reshuffleUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD)
-		expect(reshuffleUnActions).toHaveLength(1)
-		expect(reshuffleUnActions[0].player).toBe(ACTIVE_PLAYER)
-		expect(reshuffleUnActions[0].previousDeckCards.map(c => c.id)).toEqual(originalDeckCardIds)
-		expect(reshuffleUnActions[0].previousDiscardCards.map(c => c.id)).toEqual(originalDiscardCardIds)
 
 		// Verify discard was emptied and deck now has 4 cards
 		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).cards.length).toBe(0)
 		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).cards.length).toBe(4)
 
 		// Apply un-action
-		unmaker.applyUnAction(gameState, reshuffleUnActions[0]);
+		unmaker.revertToCheckpoint()
 
 		// Verify deck and discard were restored
 		expect(gameState.getZone(ZONE_TYPE_DECK, ACTIVE_PLAYER).cards.length).toBe(2)
@@ -3175,6 +3029,7 @@ describe('Unmaking state action', () => {
 		const originalDiscardCardIds = gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).cards.map(c => c.id)
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
 		unmaker.setCheckpoint()
 
 		// Reshuffle discard into deck
@@ -3246,6 +3101,7 @@ describe('Unmaking state action', () => {
 		gameState.setSpellMetaDataField('source', fireChogo, fireChogo.id)
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
 
 		// Add a delayed trigger
 		const effect = {
@@ -3264,9 +3120,6 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Verify un-action was captured
-		const addDelayedTriggerUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER)
-		expect(addDelayedTriggerUnActions).toHaveLength(1)
-		expect(addDelayedTriggerUnActions[0].previousLength).toBe(0)
 
 		// Verify delayed trigger was added
 		expect(gameState.state.delayedTriggers).toHaveLength(1)
@@ -3274,7 +3127,7 @@ describe('Unmaking state action', () => {
 		expect(gameState.state.delayedTriggers[0].self).toBe(fireChogo)
 
 		// Apply un-action
-		unmaker.applyUnAction(gameState, addDelayedTriggerUnActions[0]);
+		unmaker.revertToCheckpoint()
 
 		// Verify delayed trigger was removed
 		expect(gameState.state.delayedTriggers).toHaveLength(0)
@@ -3326,9 +3179,9 @@ describe('Unmaking state action', () => {
 
 		const unmaker = new Unmaker(gameState)
 		unmaker.setCheckpoint()
+		unmaker.setCheckpoint()
 
-		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
-		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData, null, 2)
+		const serializedState = gameState.serializeFullState(ACTIVE_PLAYER)
 
 		// Add first delayed trigger
 		const effect1 = {
@@ -3372,9 +3225,8 @@ describe('Unmaking state action', () => {
 		// Verify all delayed triggers were removed
 		expect(gameState.state.delayedTriggers).toHaveLength(0)
 
-		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+		expect(serializedState).toEqual(gameState.serializeFullState(ACTIVE_PLAYER))
 		gameState.clearSpellMetaDataField('source', arbolit.id)
-		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData, null, 2))
 	})
 
 	it('Rearrange energy on creatures action', () => {
@@ -3428,6 +3280,8 @@ describe('Unmaking state action', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(quorPup.id)).toHaveEnergy(2)
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
+		const serializedState = gameState.serializeFullState(ACTIVE_PLAYER)
 
 		// Rearrange energy: move energy around (keep total at 10)
 		const newArrangement = {
@@ -3447,17 +3301,6 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Verify un-action was captured
-		const rearrangeUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES)
-		expect(rearrangeUnActions).toHaveLength(1)
-		expect(rearrangeUnActions[0].creatures).toHaveLength(3)
-
-		// Check that previous energy values were captured
-		const fireChogoCapture = rearrangeUnActions[0].creatures.find(c => c.id === fireChogo.id)
-		expect(fireChogoCapture.energy).toBe(5)
-		const arbolitCapture = rearrangeUnActions[0].creatures.find(c => c.id === arbolit.id)
-		expect(arbolitCapture.energy).toBe(3)
-		const quorPupCapture = rearrangeUnActions[0].creatures.find(c => c.id === quorPup.id)
-		expect(quorPupCapture.energy).toBe(2)
 
 		// Verify energy was rearranged
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)).toHaveEnergy(2)
@@ -3465,12 +3308,13 @@ describe('Unmaking state action', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(quorPup.id)).toHaveEnergy(2)
 
 		// Apply un-action
-		unmaker.applyUnAction(gameState, rearrangeUnActions[0]);
+		unmaker.revertToCheckpoint()
 
 		// Verify energy was restored
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)).toHaveEnergy(5)
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(3)
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(quorPup.id)).toHaveEnergy(2)
+		expect(serializedState).toEqual(gameState.serializeFullState(ACTIVE_PLAYER))
 	})
 
 	it('Rearrange energy on creatures action with checkpoint', () => {
@@ -3517,9 +3361,9 @@ describe('Unmaking state action', () => {
 
 		const unmaker = new Unmaker(gameState)
 		unmaker.setCheckpoint()
+		unmaker.setCheckpoint()
 
-		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
-		const serializedSpellMetadata = JSON.stringify(gameState.state.spellMetaData)
+		const serializedState = gameState.serializeFullState(ACTIVE_PLAYER)
 
 		// Rearrange energy (swap values)
 		const effect = {
@@ -3546,8 +3390,7 @@ describe('Unmaking state action', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)).toHaveEnergy(4)
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(6)
 
-		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
-		expect(serializedSpellMetadata).toEqual(JSON.stringify(gameState.state.spellMetaData))
+		expect(serializedState).toEqual(gameState.serializeFullState(ACTIVE_PLAYER))
 	})
 
 	it('Distribute energy on creatures action', () => {
@@ -3597,6 +3440,8 @@ describe('Unmaking state action', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(2)
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
+		const serializedState = gameState.serializeFullState(ACTIVE_PLAYER)
 
 		// Distribute energy: add 2 to fireChogo, add 3 to arbolit
 		const energyDistribution = {
@@ -3615,26 +3460,18 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Verify un-action was captured
-		const distributeUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES)
-		expect(distributeUnActions).toHaveLength(1)
-		expect(distributeUnActions[0].creatures).toHaveLength(2)
-
-		// Check that previous energy values were captured
-		const fireChogoCapture = distributeUnActions[0].creatures.find(c => c.id === fireChogo.id)
-		expect(fireChogoCapture.energy).toBe(3)
-		const arbolitCapture = distributeUnActions[0].creatures.find(c => c.id === arbolit.id)
-		expect(arbolitCapture.energy).toBe(2)
 
 		// Verify energy was distributed (added)
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)).toHaveEnergy(5) // 3 + 2
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(5) // 2 + 3
 
 		// Apply un-action
-		unmaker.applyUnAction(gameState, distributeUnActions[0]);
+		unmaker.revertToCheckpoint()
 
 		// Verify energy was restored
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id)).toHaveEnergy(3)
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(2)
+		expect(serializedState).toEqual(gameState.serializeFullState(ACTIVE_PLAYER))
 	})
 
 	it('Distribute energy on creatures action with checkpoint', () => {
@@ -3684,8 +3521,9 @@ describe('Unmaking state action', () => {
 
 		const unmaker = new Unmaker(gameState)
 		unmaker.setCheckpoint()
+		unmaker.setCheckpoint()
 
-		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
+		const serializedState = gameState.serializeFullState(ACTIVE_PLAYER)
 
 		// Distribute 5 energy total across creatures
 		const effect = {
@@ -3715,7 +3553,7 @@ describe('Unmaking state action', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id)).toHaveEnergy(1)
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(quorPup.id)).toHaveEnergy(1)
 
-		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+		expect(serializedState).toEqual(gameState.serializeFullState(ACTIVE_PLAYER))
 	})
 
 	it('Forbid attack to creature action', () => {
@@ -3762,6 +3600,7 @@ describe('Unmaking state action', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id).data.attacked).toBe(0)
 
 		const unmaker = new Unmaker(gameState)
+		unmaker.setCheckpoint()
 
 		// Forbid attack to the creature
 		const effect = {
@@ -3774,17 +3613,12 @@ describe('Unmaking state action', () => {
 		gameState.update(effect);
 
 		// Verify un-action was captured
-		const forbidAttackUnActions = unmaker.unActions.filter(ua => ua.type === UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE)
-		expect(forbidAttackUnActions).toHaveLength(1)
-		expect(forbidAttackUnActions[0].creatures).toHaveLength(1)
-		expect(forbidAttackUnActions[0].creatures[0].id).toBe(fireChogo.id)
-		expect(forbidAttackUnActions[0].creatures[0].attacked).toBe(0)
 
 		// Verify attacked was set to 100 (forbid attacks hack)
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id).data.attacked).toBe(100)
 
 		// Apply un-action
-		unmaker.applyUnAction(gameState, forbidAttackUnActions[0]);
+		unmaker.revertToCheckpoint()
 
 		// Verify attacked was restored
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id).data.attacked).toBe(0)
@@ -3836,8 +3670,9 @@ describe('Unmaking state action', () => {
 
 		const unmaker = new Unmaker(gameState)
 		unmaker.setCheckpoint()
+		unmaker.setCheckpoint()
 
-		const serializedState = gameState.serializeData(ACTIVE_PLAYER, false)
+		const serializedState = gameState.serializeFullState(ACTIVE_PLAYER)
 
 		// Forbid attack to both creatures
 		const effect = {
@@ -3860,7 +3695,7 @@ describe('Unmaking state action', () => {
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(fireChogo.id).data.attacked).toBe(0)
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(arbolit.id).data.attacked).toBe(1)
 
-		expect(serializedState).toEqual(gameState.serializeData(ACTIVE_PLAYER, false))
+		expect(serializedState).toEqual(gameState.serializeFullState(ACTIVE_PLAYER))
 	})
 
 	it('Grow spell - PRNG state is restored after revert', () => {
@@ -3884,6 +3719,7 @@ describe('Unmaking state action', () => {
 		gameState.getZone(ZONE_TYPE_HAND, ACTIVE_PLAYER).add([grow]);
 
 		const unmaker = new Unmaker(gameState);
+		unmaker.setCheckpoint()
 
 		// Capture PRNG state before the checkpoint
 		const prngMtBefore = [...gameState.twister.mt];
@@ -3938,9 +3774,10 @@ describe('Unmaking state action', () => {
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
 		gameState.turn = 1;
 
-		const serializedStateBefore = gameState.serializeData(ACTIVE_PLAYER, false);
+		const serializedStateBefore = gameState.serializeFullState(ACTIVE_PLAYER);
 
 		const unmaker = new Unmaker(gameState);
+		unmaker.setCheckpoint()
 		unmaker.setCheckpoint();
 
 		// Activate Life Channel - prompts for a magi target and marks the power as used
@@ -3963,6 +3800,7 @@ describe('Unmaking state action', () => {
 		expect(gameState.state.prompt).toBe(false);
 		expect(gameState.state.promptType).toBeNull();
 		// Full serialized state must match the pre-power snapshot
-		expect(serializedStateBefore).toEqual(gameState.serializeData(ACTIVE_PLAYER, false));
+		expect(serializedStateBefore).toEqual(gameState.serializeFullState(ACTIVE_PLAYER));
 	});
 })
+

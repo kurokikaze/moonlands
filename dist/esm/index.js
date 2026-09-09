@@ -412,6 +412,13 @@ var State = /** @class */ (function () {
             cardsAttached: this.state.cardsAttached,
         };
     };
+    State.prototype.serializeFullState = function (playerId) {
+        var serializedState = this.serializeData(playerId, false);
+        var opponentId = this.getOpponent(playerId);
+        serializedState.zones.playerDeck = this.getZone(ZONE_TYPE_DECK, playerId).serialize(true);
+        serializedState.zones.opponentDeck = this.getZone(ZONE_TYPE_DECK, opponentId).serialize(true);
+        return __assign(__assign({}, serializedState), { spellMetaData: this.state.spellMetaData });
+    };
     State.prototype.serializeZones = function (playerId, hideZones) {
         if (hideZones === void 0) { hideZones = true; }
         var opponentId = this.getOpponent(playerId);

@@ -224,6 +224,9 @@ export type SerializedState = {
     winner: number | boolean | null;
     cardsAttached: Record<string, string[]>;
 };
+export type FullSerializedState = SerializedState & {
+    spellMetaData: Record<string, MetaDataRecord>;
+};
 export type MercenneFixed = {
     random: () => number;
 };

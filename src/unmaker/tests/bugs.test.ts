@@ -1,12 +1,12 @@
 // Tests that isolate the known Unmaker revert bugs.
 // Each test: save state → setCheckpoint → sim.update(…) → revertToCheckpoint
 // → assert serialized state equals the saved snapshot.
-import { State } from '../index';
-import { byName } from '../cards';
-import Card from '../classes/Card';
-import CardInGame from '../classes/CardInGame';
-import Zone from '../classes/Zone';
-import { Unmaker } from '../unmaker/unmaker';
+import { State } from '../../index';
+import { byName } from '../../cards';
+import Card from '../../classes/Card';
+import CardInGame from '../../classes/CardInGame';
+import Zone from '../../classes/Zone';
+import { Unmaker } from '../unmaker';
 import {
     ACTION_PASS,
     ACTION_PLAY,
@@ -22,7 +22,7 @@ import {
     ACTION_EFFECT,
     EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
     ACTION_ATTACK,
-} from '../const';
+} from '../../const';
 
 const PLAYER = 1;
 const OPPONENT = 2;
@@ -70,7 +70,7 @@ function makeState(
 }
 
 function snapshot(state: State): string {
-    return JSON.stringify(state.serializeData(PLAYER, false), null, 2);
+    return JSON.stringify(state.serializeFullState(PLAYER), null, 2);
 }
 
 // ---------------------------------------------------------------------------
@@ -155,7 +155,7 @@ describe('Unmaker bug - PLAY with roll_die (Grow)', () => {
         const furok = new CardInGame(byName('Furok') as Card, PLAYER).addEnergy(3);
 
         const state = makeState(STEP_PRS1, [furok], [grow], [], poad, sinder);
-        const logBefore = (state.serializeData(PLAYER, false) as any).log?.length ?? 0;
+        const logBefore = (state.serializeFullState(PLAYER) as any).log?.length ?? 0;
 
         const unmaker = new Unmaker(state);
         unmaker.setCheckpoint();
@@ -165,7 +165,7 @@ describe('Unmaker bug - PLAY with roll_die (Grow)', () => {
 
         unmaker.revertToCheckpoint();
 
-        const logAfter = (state.serializeData(PLAYER, false) as any).log?.length ?? 0;
+        const logAfter = (state.serializeFullState(PLAYER) as any).log?.length ?? 0;
         expect(logAfter).toBe(logBefore);
     });
 
@@ -179,7 +179,7 @@ describe('Unmaker bug - PLAY with roll_die (Grow)', () => {
         const state = makeState(STEP_PRS1, [furok], [grow1, grow2], [], poad, sinder);
         state.initiatePRNG(42);
         const getDieRoll = () => {
-            const log: any[] = (state.serializeData(PLAYER, false) as any).log ?? [];
+            const log: any[] = (state.serializeFullState(PLAYER) as any).log ?? [];
             const entry = log.find((e: any) => e.type === 'log_entry/die_rolled');
             return entry?.result ?? null;
         };
@@ -444,7 +444,7 @@ describe('Unmaker bug – Firestorm repeated branch does not leak unmake state',
             }
             return data;
         };
-        const before = normalizePromptType(state.serializeData(PLAYER, false) as any);
+        const before = normalizePromptType(state.serializeFullState(PLAYER) as any);
 
         const firestorm = (lavaAq.card.data.powers as any[]).find(p => p.name === 'Firestorm');
         expect(firestorm).toBeTruthy();
@@ -475,7 +475,7 @@ describe('Unmaker bug – Firestorm repeated branch does not leak unmake state',
 
             expect(unmaker.getPointer()).toBe(checkpointPointer);
             expect(unmaker.numberOfUnActions).toBe(checkpointUnActions);
-            const after = normalizePromptType(state.serializeData(PLAYER, false) as any);
+            const after = normalizePromptType(state.serializeFullState(PLAYER) as any);
             expect(after).toEqual(before);
         }
     });

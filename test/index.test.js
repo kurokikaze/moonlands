@@ -1417,6 +1417,9 @@ describe('Effects', () => {
 		};
 
 		const gameState = new moonlands.State({
+			zones: [
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
+			],
 			activePlayer,
 		});
 
@@ -1448,6 +1451,9 @@ describe('Effects', () => {
 		};
 
 		const gameState = new moonlands.State({
+			zones: [
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([quorPup, fireGrag]),
+			],
 			activePlayer,
 		});
 
@@ -1476,6 +1482,9 @@ describe('Effects', () => {
 		};
 
 		const gameState = new moonlands.State({
+			zones: [
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
+			],
 			activePlayer,
 		});
 
@@ -5587,6 +5596,42 @@ describe('serializeData', () => {
 		});
 
 		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+	});
+
+	it('serializeFullState exposes non-library cards and metadata', () => {
+		const ACTIVE_PLAYER = 64;
+		const NON_ACTIVE_PLAYER = 30;
+		const activeHandCard = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
+		const opponentHandCard = new CardInGame(byName('Kelthet'), NON_ACTIVE_PLAYER);
+		const activeDeckCard = new CardInGame(byName('Flame Geyser'), ACTIVE_PLAYER);
+		const opponentDeckCard = new CardInGame(byName('Water of Life'), NON_ACTIVE_PLAYER);
+		const opponentMagi = new CardInGame(byName('Yaki'), NON_ACTIVE_PLAYER);
+
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('AP Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([activeHandCard]),
+				new Zone('NAP Hand', ZONE_TYPE_HAND, NON_ACTIVE_PLAYER).add([opponentHandCard]),
+				new Zone('AP Deck', ZONE_TYPE_DECK, ACTIVE_PLAYER).add([activeDeckCard]),
+				new Zone('NAP Deck', ZONE_TYPE_DECK, NON_ACTIVE_PLAYER).add([opponentDeckCard]),
+				new Zone('AP Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER),
+				new Zone('NAP Active Magi', ZONE_TYPE_ACTIVE_MAGI, NON_ACTIVE_PLAYER),
+				new Zone('AP Magi Pile', ZONE_TYPE_MAGI_PILE, ACTIVE_PLAYER),
+				new Zone('NAP Magi Pile', ZONE_TYPE_MAGI_PILE, NON_ACTIVE_PLAYER).add([opponentMagi]),
+				new Zone('In play', ZONE_TYPE_IN_PLAY, null),
+			],
+			step: STEP_PRS_FIRST,
+			activePlayer: ACTIVE_PLAYER,
+			spellMetaData: { testEffect: { result: 4 } },
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		const serialized = gameState.serializeFullState(ACTIVE_PLAYER);
+
+		expect(serialized.zones.opponentHand[0].card).toEqual('Kelthet');
+		expect(serialized.zones.opponentMagiPile[0].card).toEqual('Yaki');
+		expect(serialized.zones.playerDeck[0].card).toBeNull();
+		expect(serialized.zones.opponentDeck[0].card).toBeNull();
+		expect(serialized.spellMetaData).toEqual({ testEffect: { result: 4 } });
 	});
 });
 
