@@ -64,13 +64,13 @@ import {
 	ZONE_TYPE_MAGI_PILE,
 	ZONE_TYPE_HAND,
 	ZONE_TYPE_DECK,
-} from './const';
+} from './const.js';
 
-import CardInGame from './classes/CardInGame';
-import Zone from './classes/Zone';
-import { CostEngine } from './CostEngine';
-import { RestrictionEngine } from './RestrictionEngine';
-import { LayeredModificationEngine, CardWithModification, EnrichedStaticAbilityType, GameStaticAbility } from './LayeredModificationEngine';
+import CardInGame from './classes/CardInGame.js';
+import Zone from './classes/Zone.js';
+import { CostEngine } from './CostEngine.js';
+import { RestrictionEngine } from './RestrictionEngine.js';
+import { LayeredModificationEngine, CardWithModification, EnrichedStaticAbilityType, GameStaticAbility } from './LayeredModificationEngine.js';
 
 import {
 	SelectorTypeType,
@@ -81,13 +81,13 @@ import {
 	ZoneType,
 	Region,
 	MercenneFixed,
-} from './types';
-import { StatusType } from './types/common';
+} from './types/index.js';
+import { StatusType } from './types/common.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 // Re-export types from LayeredModificationEngine
-export type { CardWithModification, EnrichedStaticAbilityType, GameStaticAbility } from './LayeredModificationEngine';
+export type { CardWithModification, EnrichedStaticAbilityType, GameStaticAbility } from './LayeredModificationEngine.js';
 
 // ─── Context interface ────────────────────────────────────────────────────────
 
@@ -302,7 +302,7 @@ export class SelectorEngine extends LayeredModificationEngine {
 			case SELECTOR_OWN_MAGI: {
 				return card.card.type === TYPE_MAGI &&
 					getZone(ZONE_TYPE_ACTIVE_MAGI, staticAbility.player).cards.length === 1 &&
-					(getZone(ZONE_TYPE_ACTIVE_MAGI, staticAbility.player)?.card?.id === card.id ?? false);
+					(getZone(ZONE_TYPE_ACTIVE_MAGI, staticAbility.player)?.card?.id === card.id);
 			}
 			case SELECTOR_STATUS: {
 				return !!this.getByProperty(card, PROPERTY_STATUS, staticAbility.selectorParameter as StatusType);

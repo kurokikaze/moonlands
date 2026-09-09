@@ -1,4 +1,4 @@
-import Card from './classes/Card';
+import Card from './classes/Card.js';
 
 import {
 	/* eslint-disable no-unused-vars */
@@ -196,7 +196,7 @@ import {
 	PROTECTION_FROM_EFFECTS,
 	PROTECTION_FROM_POWERS,
 	/* eslint-enable no-unused-vars */
-} from './const';
+} from './const.js';
 
 import {
 	ConditionType,
@@ -210,13 +210,13 @@ import {
 	SelectType,
 	RefinedSelectParams,
 	ZoneType,
-} from './types';
+} from './types/index.js';
 
 import {
 	PromptTypeChooseNCardsFromZone,
 	PromptTypeDistributeCardsInZones,
 	PromptTypeSingleCreatureFiltered
-} from './types/prompt';
+} from './types/prompt.js';
 import {
 	AlternativePromptParams,
 	ChooseNCardsFromZonePromptParams,
@@ -231,7 +231,7 @@ import {
 	DistributeCardsInZonesPromptParams,
 	MagiWithoutCreaturesPromptParams,
 	AnyCreatureExceptSourcePromptParams
-} from './types/promptParams';
+} from './types/promptParams.js';
 
 const effect = (data: any): EffectType => ({
 	type: ACTION_EFFECT,

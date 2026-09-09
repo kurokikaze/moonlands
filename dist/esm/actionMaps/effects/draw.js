@@ -1,7 +1,7 @@
 import { ACTION_EFFECT, EFFECT_TYPE_DRAW, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_RESHUFFLE_DISCARD, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_HAND, } from "../../const.js";
-export var applyDrawNCardsEffect = function (action, transform) {
-    var numberOfCards = this.getMetaValue(action.numberOfCards, action.generatedBy) || 0;
-    for (var i = 0; i < numberOfCards; i++) {
+export const applyDrawNCardsEffect = function (action, transform) {
+    const numberOfCards = this.getMetaValue(action.numberOfCards, action.generatedBy) || 0;
+    for (let i = 0; i < numberOfCards; i++) {
         transform({
             type: ACTION_EFFECT,
             effectType: EFFECT_TYPE_DRAW,
@@ -10,12 +10,12 @@ export var applyDrawNCardsEffect = function (action, transform) {
         });
     }
 };
-export var applyDrawEffect = function (action, transform) {
-    var player = this.getMetaValue(action.player, action.generatedBy);
-    var deck = this.getZone(ZONE_TYPE_DECK, player);
-    var discard = this.getZone(ZONE_TYPE_DISCARD, player);
+export const applyDrawEffect = function (action, transform) {
+    const player = this.getMetaValue(action.player, action.generatedBy);
+    const deck = this.getZone(ZONE_TYPE_DECK, player);
+    const discard = this.getZone(ZONE_TYPE_DISCARD, player);
     if (deck.length > 0) {
-        var card = deck.cards[0];
+        const card = deck.cards[0];
         transform({
             type: ACTION_EFFECT,
             effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,

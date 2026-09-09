@@ -1416,11 +1416,17 @@ describe('Effects', () => {
 			amount: 2,
 		};
 
+		const zones = [
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
+			new Zone('Discard', ZONE_TYPE_DISCARD, activePlayer),
+		];
+
 		const gameState = new moonlands.State({
 			zones: [
 				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
 			],
 			activePlayer,
+			zones,
 		});
 
 		expect(arbolit.data.energy).toEqual(0, 'Arbolit has 0 energy');
@@ -1450,11 +1456,17 @@ describe('Effects', () => {
 			generatedBy: fireGrag.id,
 		};
 
+		const zones = [
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([quorPup, fireGrag]),
+			new Zone('Discard', ZONE_TYPE_DISCARD, activePlayer),
+		];
+
 		const gameState = new moonlands.State({
 			zones: [
 				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([quorPup, fireGrag]),
 			],
 			activePlayer,
+			zones,
 		});
 
 		expect(quorPup.data.energy).toEqual(1, 'Quor Pup has 1 energy');
@@ -1481,11 +1493,17 @@ describe('Effects', () => {
 			amount: 2,
 		};
 
+		const zones = [
+			new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
+			new Zone('Discard', ZONE_TYPE_DISCARD, activePlayer),
+		];
+
 		const gameState = new moonlands.State({
 			zones: [
 				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arbolit]),
 			],
 			activePlayer,
+			zones,
 		});
 
 		expect(arbolit.data.energy).toEqual(5, 'Arbolit has 5 energy');

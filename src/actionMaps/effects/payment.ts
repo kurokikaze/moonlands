@@ -1,4 +1,4 @@
-import CardInGame from "../../classes/CardInGame";
+import CardInGame from "../../classes/CardInGame.js";
 import {
   ACTION_EFFECT,
   EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE,
@@ -10,8 +10,8 @@ import {
   PROPERTY_CONTROLLER,
   TYPE_CREATURE,
   TYPE_MAGI,
-} from "../../const";
-import { ActionTransformer } from "../actionMapTypes";
+} from "../../const.js";
+import { ActionTransformer } from "../actionMapTypes.js";
 
 export const applyPayingEnergyForRelicEffect: ActionTransformer<typeof EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC> = function (action, transform) {
   const payingTarget: CardInGame = this.getMetaValue(action.from, action.generatedBy);

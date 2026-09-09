@@ -1,6 +1,6 @@
-import { ACTION_ENTER_PROMPT } from '../const';
-import { GenericPromptType, RestrictionType, RestrictionObjectType } from './common';
-import { AlternativePromptParams, AnyCreatureExceptSourcePromptParams, ChooseCardsPromptParams, ChooseNCardsFromZonePromptParams, ChooseUpToNCardsFromZonePromptParams, DistributeCardsInZonesPromptParams, DistributeDamagePromptParams, DistributeEnergyPromptParams, GenericPromptParams, MagiPowerPromptParams, MagiWithoutCreaturesPromptParams, MayAbilityPromptParams, NumberPromptParams, PaymentSourcePromptParams, PlayerPromptParams, RearrangeCardsOfZonePromptParams, RearrangeEnergyPromptParams, SingleCreatureFilteredPromptParams } from './promptParams';
+import { ACTION_ENTER_PROMPT } from '../const.js';
+import { GenericPromptType, RestrictionType, RestrictionObjectType } from './common.js';
+import { AlternativePromptParams, AnyCreatureExceptSourcePromptParams, ChooseCardsPromptParams, ChooseNCardsFromZonePromptParams, ChooseUpToNCardsFromZonePromptParams, DistributeCardsInZonesPromptParams, DistributeDamagePromptParams, DistributeEnergyPromptParams, GenericPromptParams, MagiPowerPromptParams, MagiWithoutCreaturesPromptParams, MayAbilityPromptParams, NumberPromptParams, PaymentSourcePromptParams, PlayerPromptParams, RearrangeCardsOfZonePromptParams, RearrangeEnergyPromptParams, SingleCreatureFilteredPromptParams } from './promptParams.js';
 export type PromptParams = {
     promptType: GenericPromptType;
     promptParams?: {

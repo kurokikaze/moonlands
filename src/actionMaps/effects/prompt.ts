@@ -1,4 +1,4 @@
-import CardInGame, { ConvertedCard } from "../../classes/CardInGame";
+import CardInGame, { ConvertedCard } from "../../classes/CardInGame.js";
 import {
   EFFECT_TYPE_PROMPT_ENTERED,
   PROMPT_TYPE_ALTERNATIVE,
@@ -16,10 +16,10 @@ import {
   PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
   PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
   ZONE_TYPE_IN_PLAY,
-} from "../../const";
-import { RestrictionObjectType, ZoneType } from "../../types";
-import { ActionTransformer } from "../actionMapTypes";
-import { PromptParamsType } from "../..";
+} from "../../const.js";
+import { RestrictionObjectType, ZoneType } from "../../types/index.js";
+import { ActionTransformer } from "../actionMapTypes.js";
+import { PromptParamsType } from "../../index.js";
 
 const convertCard = (cardInGame: CardInGame): ConvertedCard => ({
   id: cardInGame.id,

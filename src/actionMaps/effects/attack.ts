@@ -1,4 +1,4 @@
-import CardInGame from "../../classes/CardInGame";
+import CardInGame from "../../classes/CardInGame.js";
 import {
     ACTION_EFFECT,
     EFFECT_TYPE_AFTER_DAMAGE,
@@ -16,10 +16,10 @@ import {
     EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
     TYPE_CREATURE,
-} from "../../const";
-import { AnyEffectType } from "../../types";
-import { ActionTransformer } from "../actionMapTypes";
-import { AttackerDamageDealtEffect, AttackerDealsDamageEffect, BeforeDamageEffect, DefenderDamageDealt, DefenderDealsDamageEffect } from "../../types/attack";
+} from "../../const.js";
+import { AnyEffectType } from "../../types/index.js";
+import { ActionTransformer } from "../actionMapTypes.js";
+import { AttackerDamageDealtEffect, AttackerDealsDamageEffect, BeforeDamageEffect, DefenderDamageDealt, DefenderDealsDamageEffect } from "../../types/attack.js";
 
 export const applyAttackEffect: ActionTransformer<typeof EFFECT_TYPE_ATTACK> = function (action, transform) {
     const source = this.getMetaValue(action.source, action.generatedBy);

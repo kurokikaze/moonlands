@@ -1,16 +1,18 @@
 {
     "compilerOptions": {
-        "target": "es5",
+        "target": "es6",
         "lib": [
             "es6",
             "es2022"
         ],
-        "module": "ESNext",
+        "module": "NodeNext",
         "esModuleInterop": true,
-        "moduleResolution": "node",
+        "moduleResolution": "nodenext",
+        "types": ["node"],
         "strict": true,
         "forceConsistentCasingInFileNames": true,
         "sourceMap": true,
+        "rootDir": "src",
         "outDir": "dist/esm",
     },
     "include": [
@@ -22,10 +24,11 @@
         "resolveFullExtension": ".js",
     },
     "exclude": [
-        "test/*",
-        "dist/*"
-    ],
-    "lib": [
-        "es2015"
+        "test/**",
+        "src/**/tests/**",
+        "src/**/*.test.ts",
+        "src/**/*.test.js",
+        "dist/**",
+        "node_modules/**"
     ]
 }

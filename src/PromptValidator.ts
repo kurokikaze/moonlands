@@ -24,10 +24,10 @@ import {
 
 	ACTION_GET_PROPERTY_VALUE,
 	ACTION_ENTER_PROMPT,
-} from './const';
+} from './const.js';
 
-import CardInGame from './classes/CardInGame';
-import Zone from './classes/Zone';
+import CardInGame from './classes/CardInGame.js';
+import Zone from './classes/Zone.js';
 
 import {
 	AnyEffectType,
@@ -38,7 +38,7 @@ import {
 	RestrictionObjectType,
 	MetaDataRecord,
 	ZoneType,
-} from './types';
+} from './types/index.js';
 
 /**
  * Context interface containing methods needed by PromptValidator

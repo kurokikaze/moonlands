@@ -13,9 +13,9 @@ import {
 	REGION_BOGRATH,
 	COST_X,
 	COST_X_PLUS_ONE,
-} from '../const';
+} from '../const.js';
 
-import {Region, CardType, CardData} from '../types';
+import {Region, CardType, CardData} from '../types/index.js';
 
 export type CostType = number | typeof COST_X | typeof COST_X_PLUS_ONE | null
 

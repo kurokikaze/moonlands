@@ -1,4 +1,4 @@
-import CardInGame from "../../classes/CardInGame";
+import CardInGame from "../../classes/CardInGame.js";
 import {
   ACTION_EFFECT,
   ACTION_ENTER_PROMPT,
@@ -35,10 +35,10 @@ import {
   ZONE_TYPE_HAND,
   ZONE_TYPE_IN_PLAY,
   ZONE_TYPE_MAGI_PILE,
-} from "../../const";
-import { AnyEffectType, ContinuousEffectType } from "../../types";
-import { oneOrSeveral, updateContinuousEffects } from "../actionMapUtils";
-import { ActionTransformer, ProtoEffectType, ProtoChooseCardsPrompt, StepType } from "../actionMapTypes";
+} from "../../const.js";
+import { AnyEffectType, ContinuousEffectType } from "../../types/index.js";
+import { oneOrSeveral, updateContinuousEffects } from "../actionMapUtils.js";
+import { ActionTransformer, ProtoEffectType, ProtoChooseCardsPrompt, StepType } from "../actionMapTypes.js";
 
 const steps: StepType[] = [
   {

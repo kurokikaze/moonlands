@@ -5,7 +5,7 @@ export declare class Unmaker {
     private state;
     unActions: UnAction[];
     private blobSize;
-    dataBlob: Uint16Array;
+    dataBlob: Uint16Array<ArrayBuffer>;
     pointer: number;
     numberOfUnActions: number;
     private strings;

@@ -1,3 +1,3 @@
-import { ActionHandlerMap } from "../actionMapTypes";
-export { applyDiscardEnergyFromCreatureOrMagiEffect } from "./energy";
+import { ActionHandlerMap } from "../actionMapTypes.js";
+export { applyDiscardEnergyFromCreatureOrMagiEffect } from "./energy.js";
 export declare const actionMap: Partial<ActionHandlerMap>;

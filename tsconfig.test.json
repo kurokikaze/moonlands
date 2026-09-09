@@ -1,0 +1,25 @@
+{
+    "compilerOptions": {
+        "target": "es2022",
+        "lib": ["es2022"],
+        "module": "ESNext",
+        "moduleResolution": "bundler",
+        "types": ["node", "vitest/globals"],
+        "allowJs": true,
+        "checkJs": false,
+        "noEmit": true,
+        "skipLibCheck": true,
+        "strict": true,
+        "forceConsistentCasingInFileNames": true
+    },
+    "include": [
+        "test/**/*.js",
+        "test/**/*.ts",
+        "src/**/*.test.js",
+        "src/**/*.test.ts"
+    ],
+    "exclude": [
+        "dist/**",
+        "node_modules/**"
+    ]
+}

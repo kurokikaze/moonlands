@@ -29,18 +29,18 @@ import {
 
 	STATUS_BURROWED,
 	SELECTOR_STATUS,
-} from './const';
+} from './const.js';
 
-import CardInGame, { InGameData } from './classes/CardInGame';
-import Card, { CostType, ModifiedCardType } from './classes/Card';
-import performCalculation from './helpers/performCalculation';
+import CardInGame, { InGameData } from './classes/CardInGame.js';
+import Card, { CostType, ModifiedCardType } from './classes/Card.js';
+import performCalculation from './helpers/performCalculation.js';
 
 import {
 	PropertyType,
 	ProtectionType,
 	StaticAbilityType,
-} from './types';
-import { CardType, StatusType } from './types/common';
+} from './types/index.js';
+import { CardType, StatusType } from './types/common.js';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 

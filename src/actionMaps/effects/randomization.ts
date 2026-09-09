@@ -2,8 +2,8 @@ import {
   ACTION_EFFECT,
   EFFECT_TYPE_DIE_ROLLED,
   EFFECT_TYPE_ROLL_DIE,
-} from "../../const";
-import { ActionTransformer } from "../actionMapTypes";
+} from "../../const.js";
+import { ActionTransformer } from "../actionMapTypes.js";
 
 export const applyRollDieEffect: ActionTransformer<typeof EFFECT_TYPE_ROLL_DIE> = function (action, transform) {
   // @ts-ignore

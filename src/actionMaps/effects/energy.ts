@@ -1,4 +1,4 @@
-import CardInGame from "../../classes/CardInGame";
+import CardInGame from "../../classes/CardInGame.js";
 import {
   ACTION_EFFECT,
   ACTION_GET_PROPERTY_VALUE,
@@ -33,10 +33,10 @@ import {
   ZONE_TYPE_DISCARD,
   ZONE_TYPE_HAND,
   ZONE_TYPE_IN_PLAY,
-} from "../../const";
-import { oneOrSeveral } from "../actionMapUtils";
-import { ActionTransformer } from "../actionMapTypes";
-import { DiscardCreatureFromPlayEffect, DiscardEnergyFromCreatureEffect } from "../../types/effect";
+} from "../../const.js";
+import { oneOrSeveral } from "../actionMapUtils.js";
+import { ActionTransformer } from "../actionMapTypes.js";
+import { DiscardCreatureFromPlayEffect, DiscardEnergyFromCreatureEffect } from "../../types/effect.js";
 
 export const applyReturnCreatureDiscardingEnergyEffect: ActionTransformer<typeof EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY> =
   function (action, transform) {

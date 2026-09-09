@@ -93,7 +93,7 @@ import {
     PROMPT_TYPE_ALTERNATIVE,
     PROMPT_TYPE_PAYMENT_SOURCE,
     PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES,
-} from "../const";
+} from "../const.js";
 
 export type ZoneType =
     typeof ZONE_TYPE_MAGI_PILE |

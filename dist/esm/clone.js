@@ -1,8 +1,7 @@
 import { byName } from "./cards.js";
 import CardInGame from "./classes/CardInGame.js";
 import Zone from "./classes/Zone.js";
-export default function clone(item, cardsGenerated) {
-    if (cardsGenerated === void 0) { cardsGenerated = {}; }
+export default function clone(item, cardsGenerated = {}) {
     if (!item) {
         return item;
     } // null, undefined values check
@@ -15,11 +14,11 @@ export default function clone(item, cardsGenerated) {
     });
     if (typeof result == 'undefined') {
         if (Object.prototype.toString.call(item) === '[object Array]') {
-            var result_1 = [];
+            const result = [];
             item.forEach(function (child, index) {
-                result_1[index] = clone(child, cardsGenerated);
+                result[index] = clone(child, cardsGenerated);
             });
-            return result_1;
+            return result;
         }
         else if (typeof item == 'object') {
             // testing that this is DOM
@@ -29,11 +28,11 @@ export default function clone(item, cardsGenerated) {
                 }
                 else if (item instanceof Zone) {
                     result = new Zone(item.name, item.type, item.player, item.ordered);
-                    result.add(item.cards.map(function (card) { return clone(card, cardsGenerated); }));
+                    result.add(item.cards.map(card => clone(card, cardsGenerated)));
                     return result;
                 }
                 else if (item instanceof CardInGame) {
-                    var card = byName(item.card.name);
+                    const card = byName(item.card.name);
                     if (card) {
                         if (item.id in cardsGenerated) {
                             return cardsGenerated[item.id];

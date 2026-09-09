@@ -1,11 +1,11 @@
-import { State } from '../index';
-import { AnyEffectType } from '../types';
-import { UnAction } from './types';
+import { State } from '../index.js';
+import { AnyEffectType } from '../types/index.js';
+import { UnAction } from './types.js';
 export declare class Unmaker {
     private state;
     unActions: UnAction[];
     private blobSize;
-    dataBlob: Uint16Array;
+    dataBlob: Uint16Array<ArrayBuffer>;
     pointer: number;
     numberOfUnActions: number;
     private strings;

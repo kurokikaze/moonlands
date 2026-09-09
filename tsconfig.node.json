@@ -4,23 +4,30 @@
         "lib": [
             "es2022"
         ],
-        "module": "commonjs",
+        "module": "nodenext",
         "esModuleInterop": true,
-        "moduleResolution": "node",
+        "moduleResolution": "nodenext",
+        "types": ["node"],
         "strict": true,
         "forceConsistentCasingInFileNames": true,
         "sourceMap": true,
+        "rootDir": "src",
         "outDir": "dist/cjs",
     },
     "tsc-alias": {
         "resolveFullPaths": true,
         "resolveFullExtension": ".js",
     },
-    "exclude": [
-        "test/*",
-        "dist/*"
+    "include": [
+        "src/index.ts",
+        "src/unmaker/unmaker.ts"
     ],
-    "lib": [
-        "es2022"
+    "exclude": [
+        "test/**",
+        "src/**/tests/**",
+        "src/**/*.test.ts",
+        "src/**/*.test.js",
+        "dist/**",
+        "node_modules/**"
     ]
 }

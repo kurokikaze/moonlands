@@ -41,9 +41,9 @@ import {
 	PROMPT_TYPE_OWN_SINGLE_CREATURE,
 	PROMPT_TYPE_SINGLE_MAGI,
 	PROMPT_TYPE_NUMBER,
-} from './const';
+} from './const.js';
 
-import { AnyEffectType, LogEntryType, PromptTypeType } from './types';
+import { AnyEffectType, LogEntryType, PromptTypeType } from './types/index.js';
 
 export interface LogEngineContext {
 	getMetaValue(value: any, spellId: string | undefined): any;

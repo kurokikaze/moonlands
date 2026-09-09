@@ -7,8 +7,8 @@ import {
   ZONE_TYPE_DECK,
   ZONE_TYPE_DISCARD,
   ZONE_TYPE_HAND,
-} from "../../const";
-import { ActionTransformer } from "../actionMapTypes";
+} from "../../const.js";
+import { ActionTransformer } from "../actionMapTypes.js";
 
 export const applyDrawNCardsEffect: ActionTransformer<typeof EFFECT_TYPE_DRAW_N_CARDS> = function (action, transform) {
   const numberOfCards = this.getMetaValue(action.numberOfCards, action.generatedBy) || 0;

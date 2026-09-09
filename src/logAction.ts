@@ -1,6 +1,6 @@
-import CardInGame from './classes/CardInGame';
-import { ACTION_ENTER_PROMPT, ACTION_RESOLVE_PROMPT } from './const';
-import { AnyEffectType } from './types';
+import CardInGame from './classes/CardInGame.js';
+import { ACTION_ENTER_PROMPT, ACTION_RESOLVE_PROMPT } from './const.js';
+import { AnyEffectType } from './types/index.js';
 
 const FgRed = '\x1b[31m';
 const FgGreen = '\x1b[32m';

@@ -1,8 +1,8 @@
-import { State, StateShape } from "..";
-import CardInGame from "../classes/CardInGame";
-import { ACTION_SELECT, ACTION_EFFECT, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI, ACTION_ENTER_PROMPT, PROMPT_TYPE_CHOOSE_CARDS, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_DRAW_REST_OF_CARDS, NO_PRIORITY, PRIORITY_ATTACK, PRIORITY_CREATURES, PRIORITY_PRS } from "../const";
-import { EffectType, AnyEffectType, SelectorTypeType } from "../types";
-import { AttackOnlyEffect } from "../types/attack";
+import { State, StateShape } from "../index.js";
+import CardInGame from "../classes/CardInGame.js";
+import { ACTION_SELECT, ACTION_EFFECT, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI, ACTION_ENTER_PROMPT, PROMPT_TYPE_CHOOSE_CARDS, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_DRAW_REST_OF_CARDS, NO_PRIORITY, PRIORITY_ATTACK, PRIORITY_CREATURES, PRIORITY_PRS } from "../const.js";
+import { EffectType, AnyEffectType, SelectorTypeType } from "../types/index.js";
+import { AttackOnlyEffect } from "../types/attack.js";
 type FilterFromUnion<T, U> = T extends U ? T : never;
 export type EffectsUnited = EffectType | AttackOnlyEffect;
 export type ActionTransformer<T> = (this: State, action: FilterFromUnion<EffectsUnited, {

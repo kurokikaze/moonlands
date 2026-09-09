@@ -1,24 +1,12 @@
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 import { nanoid } from 'nanoid';
 import clone from '../clone.js';
-var FLAG_DEFEATED_CREATURE = 1;
-var FLAG_WAS_ATTACKED = 2;
-var FLAG_HAS_ATTACKED = 4;
-var FLAG_BURROWED = 8;
-var FLAG_ABLE_TO_ATTACK = 16;
-var CardInGame = /** @class */ (function () {
-    function CardInGame(card, owner, seeded_nanoid) {
-        if (seeded_nanoid === void 0) { seeded_nanoid = nanoid; }
+const FLAG_DEFEATED_CREATURE = 1;
+const FLAG_WAS_ATTACKED = 2;
+const FLAG_HAS_ATTACKED = 4;
+const FLAG_BURROWED = 8;
+const FLAG_ABLE_TO_ATTACK = 16;
+export default class CardInGame {
+    constructor(card, owner, seeded_nanoid = nanoid) {
         this.flags = 0;
         this._card = card;
         this.modifiedCard = clone(card);
@@ -35,81 +23,73 @@ var CardInGame = /** @class */ (function () {
         };
         this.owner = owner;
     }
-    Object.defineProperty(CardInGame.prototype, "card", {
-        get: function () {
-            return this._card;
-        },
-        enumerable: false,
-        configurable: true
-    });
-    CardInGame.prototype.addEnergy = function (amount) {
-        if (amount === void 0) { amount = 0; }
+    get card() {
+        return this._card;
+    }
+    addEnergy(amount = 0) {
         this.data.energy += amount;
         return this;
-    };
-    CardInGame.prototype.removeEnergy = function (amount) {
-        if (amount === void 0) { amount = 0; }
-        var amountToRemove = Math.min(this.data.energy, amount);
+    }
+    removeEnergy(amount = 0) {
+        const amountToRemove = Math.min(this.data.energy, amount);
         this.data.energy -= amountToRemove;
         this.data.energyLostThisTurn += amountToRemove;
-    };
-    CardInGame.prototype.setEnergy = function (amount) {
-        var amountToRemove = Math.max(this.data.energy - amount, 0);
+    }
+    setEnergy(amount) {
+        const amountToRemove = Math.max(this.data.energy - amount, 0);
         this.data.energyLostThisTurn += amountToRemove;
         this.data.energy = amount;
-    };
-    CardInGame.prototype.markAttackDone = function () {
+    }
+    markAttackDone() {
         this.flags = this.flags | FLAG_HAS_ATTACKED;
         this.data.hasAttacked = true;
         this.data.attacked += 1;
-    };
-    CardInGame.prototype.forbidAttacks = function () {
+    }
+    forbidAttacks() {
         this.data.attacked = 100; // Hack, but will work for now
-    };
-    CardInGame.prototype.markAttackReceived = function () {
+    }
+    markAttackReceived() {
         this.flags = this.flags | FLAG_WAS_ATTACKED;
         this.data.wasAttacked = true;
-    };
-    CardInGame.prototype.unmarkAttackReceived = function () {
+    }
+    unmarkAttackReceived() {
         this.flags = this.flags & ~FLAG_HAS_ATTACKED;
         this.data.wasAttacked = false;
-    };
-    CardInGame.prototype.markDefeatedCreature = function () {
+    }
+    markDefeatedCreature() {
         this.flags = this.flags | FLAG_DEFEATED_CREATURE;
         this.data.defeatedCreature = true;
-    };
-    CardInGame.prototype.unmarkDefeatedCreature = function () {
+    }
+    unmarkDefeatedCreature() {
         this.flags = this.flags & ~FLAG_DEFEATED_CREATURE;
         this.data.defeatedCreature = false;
-    };
+    }
     // In future, refer to actions by ID, not name
-    CardInGame.prototype.wasActionUsed = function (actionName) {
+    wasActionUsed(actionName) {
         return this.data.actionsUsed.includes(actionName);
-    };
-    CardInGame.prototype.setActionUsed = function (actionName) {
+    }
+    setActionUsed(actionName) {
         if (!this.data.actionsUsed.includes(actionName)) {
             this.data.actionsUsed.push(actionName);
         }
-    };
-    CardInGame.prototype.clearActionsUsed = function () {
+    }
+    clearActionsUsed() {
         this.data.actionsUsed = [];
-    };
-    CardInGame.prototype.clearAttackMarkers = function () {
+    }
+    clearAttackMarkers() {
         this.data.wasAttacked = false;
         this.data.hasAttacked = false;
         this.data.attacked = 0;
         this.data.defeatedCreature = false;
         this.data.energyLostThisTurn = 0;
-    };
-    CardInGame.prototype.copy = function () {
-        var _this = this;
-        var newCard = new CardInGame(this._card, this.owner, function () { return _this.id; });
-        newCard.data = __assign({}, this.data);
+    }
+    copy() {
+        const newCard = new CardInGame(this._card, this.owner, () => this.id);
+        newCard.data = Object.assign({}, this.data);
         newCard.id = this.id;
         return newCard;
-    };
-    CardInGame.prototype.serialize = function (hidden) {
-        if (hidden === void 0) { hidden = false; }
+    }
+    serialize(hidden = false) {
         return hidden ? {
             card: null,
             data: {},
@@ -121,8 +101,6 @@ var CardInGame = /** @class */ (function () {
             owner: this.owner,
             id: this.id,
         };
-    };
-    return CardInGame;
-}());
-export default CardInGame;
+    }
+}
 //# sourceMappingURL=CardInGame.js.map

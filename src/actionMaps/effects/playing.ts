@@ -1,4 +1,4 @@
-import CardInGame from "../../classes/CardInGame";
+import CardInGame from "../../classes/CardInGame.js";
 import {
   ACTION_CALCULATE,
   ACTION_EFFECT,
@@ -15,8 +15,8 @@ import {
   PROPERTY_ID,
   ZONE_TYPE_HAND,
   ZONE_TYPE_IN_PLAY,
-} from "../../const";
-import { ActionTransformer } from "../actionMapTypes";
+} from "../../const.js";
+import { ActionTransformer } from "../actionMapTypes.js";
 
 export const applyPlayRelicEffect: ActionTransformer<typeof EFFECT_TYPE_PLAY_RELIC> = function (action, transform) {
   transform({

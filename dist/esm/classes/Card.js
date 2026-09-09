@@ -1,20 +1,8 @@
-var __assign = (this && this.__assign) || function () {
-    __assign = Object.assign || function(t) {
-        for (var s, i = 1, n = arguments.length; i < n; i++) {
-            s = arguments[i];
-            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
-                t[p] = s[p];
-        }
-        return t;
-    };
-    return __assign.apply(this, arguments);
-};
 import { TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, REGION_CALD, REGION_NAROOM, REGION_OROTHE, REGION_ARDERIAL, REGION_UNDERNEATH, REGION_UNIVERSAL, REGION_BOGRATH, } from '../const.js';
-var Card = /** @class */ (function () {
-    function Card(name, type, region, cost, data) {
-        if (data === void 0) { data = {}; }
+export default class Card {
+    constructor(name, type, region, cost, data = {}) {
         if (![TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL].includes(type)) {
-            throw new Error("Unknown card type: \"".concat(type, "\" for card ").concat(name));
+            throw new Error(`Unknown card type: "${type}" for card ${name}`);
         }
         if (![
             REGION_CALD,
@@ -25,24 +13,22 @@ var Card = /** @class */ (function () {
             REGION_UNIVERSAL,
             REGION_BOGRATH,
         ].includes(region)) {
-            throw new Error("Unknown card region: \"".concat(region, "\" for card ").concat(name));
+            throw new Error(`Unknown card region: "${region}" for card ${name}`);
         }
         this.name = name;
         this.type = type;
         this.region = region;
         this.cost = cost;
-        this.data = __assign({ attacksPerTurn: 1, canAttackMagiDirectly: false, ableToAttack: true, canBeAttacked: true }, data);
+        this.data = Object.assign({ attacksPerTurn: 1, canAttackMagiDirectly: false, ableToAttack: true, canBeAttacked: true }, data);
     }
-    Card.prototype.getName = function () {
+    getName() {
         return this.name;
-    };
-    Card.prototype.getCost = function () {
+    }
+    getCost() {
         return this.cost;
-    };
-    Card.prototype.toJSON = function () {
+    }
+    toJSON() {
         return this.name;
-    };
-    return Card;
-}());
-export default Card;
+    }
+}
 //# sourceMappingURL=Card.js.map

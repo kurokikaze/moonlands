@@ -1,1 +1,1 @@
-export { actionMap, applyDiscardEnergyFromCreatureOrMagiEffect } from "./effects/index";
+export { actionMap, applyDiscardEnergyFromCreatureOrMagiEffect } from "./effects/index.js";

@@ -1,5 +1,5 @@
-import CardInGame from './classes/CardInGame';
-import { PropertyType } from './types';
+import CardInGame from './classes/CardInGame.js';
+import { PropertyType } from './types/index.js';
 export interface CostEngineContext {
     getOwnMagi(player: number): CardInGame[];
     modifyByStaticAbilities(target: CardInGame, property: PropertyType, subProperty?: string | null): any;

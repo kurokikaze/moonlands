@@ -1,6 +1,6 @@
-import CardInGame from '../classes/CardInGame';
-import { PromptParamsType } from '../index';
-import { ContinuousEffectType, PromptTypeType, ZoneType } from '../types';
+import CardInGame from '../classes/CardInGame.js';
+import { PromptParamsType } from '../index.js';
+import { ContinuousEffectType, PromptTypeType, ZoneType } from '../types/index.js';
 export declare const UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE = 1;
 export declare const UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI = 2;
 export declare const UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES = 3;

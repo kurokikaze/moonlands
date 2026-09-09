@@ -1,6 +1,6 @@
-import CardInGame, { ConvertedCard, HiddenConvertedCard } from "./CardInGame";
-import { MercenneFixed, RestrictionObjectType, ZoneType } from "../types";
-import { State } from "..";
+import CardInGame, { ConvertedCard, HiddenConvertedCard } from "./CardInGame.js";
+import { MercenneFixed, RestrictionObjectType, ZoneType } from "../types/index.js";
+import { State } from "../index.js";
 
 export default class Zone {
 	_name: string;

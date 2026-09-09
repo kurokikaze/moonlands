@@ -1,20 +1,19 @@
 import { ACTION_PLAY, ACTION_POWER, ACTION_EFFECT, ACTION_RESOLVE_PROMPT, LOG_ENTRY_PLAY, LOG_ENTRY_DRAW, LOG_ENTRY_CHOOSES_STARTING_CARDS, LOG_ENTRY_POWER_ACTIVATION, LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY, LOG_ENTRY_RELIC_DISCARDED_FROM_PLAY, LOG_ENTRY_TARGETING, LOG_ENTRY_NUMBER_CHOICE, LOG_ENTRY_ATTACK, LOG_ENTRY_CREATURE_ENERGY_LOSS, LOG_ENTRY_MAGI_ENERGY_LOSS, LOG_ENTRY_CREATURE_ENERGY_GAIN, LOG_ENTRY_MAGI_ENERGY_GAIN, LOG_ENTRY_MAGI_DEFEATED, LOG_ENTRY_DIE_ROLLED, LOG_ENTRY_CARD_DISCARDED_FROM_HAND, EFFECT_TYPE_DRAW, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_DISCARD_CARD_FROM_HAND, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_OWN_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_NUMBER, } from './const.js';
-var LogEngine = /** @class */ (function () {
-    function LogEngine(context) {
+export class LogEngine {
+    constructor(context) {
         this.context = context;
     }
-    LogEngine.prototype.addActionToLog = function (action) {
-        var entries = this.shouldCreateLog(action);
-        var log = this.context.getLog();
-        for (var _i = 0, entries_1 = entries; _i < entries_1.length; _i++) {
-            var entry = entries_1[_i];
+    addActionToLog(action) {
+        const entries = this.shouldCreateLog(action);
+        const log = this.context.getLog();
+        for (const entry of entries) {
             log.push(entry);
         }
-    };
-    LogEngine.prototype.shouldCreateLog = function (action) {
+    }
+    shouldCreateLog(action) {
         var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
-        var _l = this.context, getMetaValue = _l.getMetaValue, getPromptType = _l.getPromptType;
-        var entries = [];
+        const { getMetaValue, getPromptType } = this.context;
+        const entries = [];
         try {
             switch (action.type) {
                 // Log entries: 1
@@ -27,8 +26,8 @@ var LogEngine = /** @class */ (function () {
                         });
                     }
                     else {
-                        var metaValue = getMetaValue(action.card, action.generatedBy);
-                        var metaCard = Array.isArray(metaValue) ? metaValue[0] : metaValue;
+                        const metaValue = getMetaValue(action.card, action.generatedBy);
+                        const metaCard = Array.isArray(metaValue) ? metaValue[0] : metaValue;
                         entries.push({
                             type: LOG_ENTRY_PLAY,
                             card: metaCard.card.name,
@@ -59,7 +58,7 @@ var LogEngine = /** @class */ (function () {
                         }
                         // Log entries: 0 or 1
                         case EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE: {
-                            var target = getMetaValue(action.target, action.generatedBy);
+                            const target = getMetaValue(action.target, action.generatedBy);
                             if (Array.isArray(target)) {
                                 if (target.length) {
                                     entries.push({
@@ -80,10 +79,9 @@ var LogEngine = /** @class */ (function () {
                         }
                         // Log entries: 0 or target.length (one per creature)
                         case EFFECT_TYPE_ADD_ENERGY_TO_CREATURE: {
-                            var target = getMetaValue(action.target, action.generatedBy);
+                            const target = getMetaValue(action.target, action.generatedBy);
                             if (Array.isArray(target)) {
-                                for (var _i = 0, target_1 = target; _i < target_1.length; _i++) {
-                                    var tgt = target_1[_i];
+                                for (const tgt of target) {
                                     entries.push({
                                         type: LOG_ENTRY_CREATURE_ENERGY_GAIN,
                                         card: tgt.card.name,
@@ -102,7 +100,7 @@ var LogEngine = /** @class */ (function () {
                         }
                         // Log entries: 0 or 1
                         case EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI: {
-                            var target = getMetaValue(action.target, action.generatedBy);
+                            const target = getMetaValue(action.target, action.generatedBy);
                             if (Array.isArray(target)) {
                                 if (target.length) {
                                     entries.push({
@@ -132,7 +130,7 @@ var LogEngine = /** @class */ (function () {
                         }
                         // Log entries: 0 or 1
                         case EFFECT_TYPE_ADD_ENERGY_TO_MAGI: {
-                            var target = getMetaValue(action.target, action.generatedBy);
+                            const target = getMetaValue(action.target, action.generatedBy);
                             if (Array.isArray(target)) {
                                 if (target.length) {
                                     entries.push({
@@ -161,7 +159,7 @@ var LogEngine = /** @class */ (function () {
                         }
                         // Log entries: 0 or 1 (0 when target is an array)
                         case EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY: {
-                            var target = getMetaValue(action.target, action.generatedBy);
+                            const target = getMetaValue(action.target, action.generatedBy);
                             if (target != null && !Array.isArray(target) && ((_e = target === null || target === void 0 ? void 0 : target.card) === null || _e === void 0 ? void 0 : _e.name)) {
                                 entries.push({
                                     type: LOG_ENTRY_CREATURE_DISCARDED_FROM_PLAY,
@@ -173,7 +171,7 @@ var LogEngine = /** @class */ (function () {
                         }
                         // Log entries: 0 or 1
                         case EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY: {
-                            var target = getMetaValue(action.target, action.generatedBy);
+                            const target = getMetaValue(action.target, action.generatedBy);
                             if (Array.isArray(target) && target.length && ((_g = (_f = target[0]) === null || _f === void 0 ? void 0 : _f.card) === null || _g === void 0 ? void 0 : _g.name)) {
                                 if (target.length) {
                                     entries.push({
@@ -229,7 +227,7 @@ var LogEngine = /** @class */ (function () {
                 }
                 // Log entries: 0 or 1 (1 for single-target and number prompts only)
                 case ACTION_RESOLVE_PROMPT: {
-                    var promptType = getPromptType();
+                    const promptType = getPromptType();
                     if ((promptType === PROMPT_TYPE_SINGLE_CREATURE ||
                         promptType === PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE ||
                         promptType === PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI ||
@@ -257,8 +255,6 @@ var LogEngine = /** @class */ (function () {
             console.dir(action);
         }
         return entries;
-    };
-    return LogEngine;
-}());
-export { LogEngine };
+    }
+}
 //# sourceMappingURL=LogEngine.js.map

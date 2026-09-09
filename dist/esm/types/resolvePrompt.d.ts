@@ -40,9 +40,9 @@ export type ResolveDistributeCardsPrompt = ResolvePromptInterface & {
 export type ResolveMagiWithoutCreaturesPrompt = ResolvePromptInterface & {
     target: CardInGame;
 };
-export type ResolvePromptType = ResolvePromptInterface & {
+export type ResolvePromptType = (ResolvePromptInterface & {
     number?: number | string;
     cards?: CardInGame[];
     target?: CardInGame;
-} | ResolveRearrangeEnergyPrompt | ResolveDistributeEnergyPrompt | ResolveDistributeDamagePrompt | ResolvePlayerPrompt | ResolveRearrangeCardsPrompt | ResolveAlternativePrompt | ResolvePaymentSourcePrompt | ResolvePowerOnMagiPrompt | ResolveMagiWithoutCreaturesPrompt;
+}) | ResolveRearrangeEnergyPrompt | ResolveDistributeEnergyPrompt | ResolveDistributeDamagePrompt | ResolvePlayerPrompt | ResolveRearrangeCardsPrompt | ResolveAlternativePrompt | ResolvePaymentSourcePrompt | ResolvePowerOnMagiPrompt | ResolveMagiWithoutCreaturesPrompt;
 export {};

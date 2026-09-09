@@ -1,10 +1,10 @@
-import { SELECTOR_CREATURES, SELECTOR_RELICS, SELECTOR_OWN_MAGI, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, SELECTOR_CREATURES_OF_TYPE, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_CREATURES_OF_PLAYER, SELECTOR_RANDOM_CARD_IN_HAND, SELECTOR_OPPONENT_ID } from './const';
-import CardInGame from './classes/CardInGame';
-import Zone from './classes/Zone';
-import { LayeredModificationEngine, CardWithModification, EnrichedStaticAbilityType, GameStaticAbility } from './LayeredModificationEngine';
-import { SelectorTypeType, PropertyType, RestrictionType, RestrictionObjectType, ContinuousEffectType, ZoneType, Region, MercenneFixed } from './types';
-import { StatusType } from './types/common';
-export type { CardWithModification, EnrichedStaticAbilityType, GameStaticAbility } from './LayeredModificationEngine';
+import { SELECTOR_CREATURES, SELECTOR_RELICS, SELECTOR_OWN_MAGI, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, SELECTOR_CREATURES_OF_TYPE, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_CREATURES_OF_PLAYER, SELECTOR_RANDOM_CARD_IN_HAND, SELECTOR_OPPONENT_ID } from './const.js';
+import CardInGame from './classes/CardInGame.js';
+import Zone from './classes/Zone.js';
+import { LayeredModificationEngine, CardWithModification, EnrichedStaticAbilityType, GameStaticAbility } from './LayeredModificationEngine.js';
+import { SelectorTypeType, PropertyType, RestrictionType, RestrictionObjectType, ContinuousEffectType, ZoneType, Region, MercenneFixed } from './types/index.js';
+import { StatusType } from './types/common.js';
+export type { CardWithModification, EnrichedStaticAbilityType, GameStaticAbility } from './LayeredModificationEngine.js';
 /** Subset of State that SelectorEngine needs. Kept as an interface to avoid a circular import. */
 export interface SelectorEngineContext {
     getZone(type: ZoneType, player?: number | null): Zone;

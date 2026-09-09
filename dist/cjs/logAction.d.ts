@@ -1,4 +1,4 @@
-import { AnyEffectType } from './types';
+import { AnyEffectType } from './types/index.js';
 export declare const color: {
     red: (word: string) => string;
     green: (word: string) => string;

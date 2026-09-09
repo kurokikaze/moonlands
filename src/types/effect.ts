@@ -1,6 +1,6 @@
-import { AnyEffectType, FindType, StaticAbilityType, TriggerEffectType } from '.';
-import { ConditionType, ExpirationObjectType, GenericPromptType, PromptTypeType, ZoneType } from './common';
-import CardInGame from '../classes/CardInGame'
+import { AnyEffectType, FindType, StaticAbilityType, TriggerEffectType } from './index.js';
+import { ConditionType, ExpirationObjectType, GenericPromptType, PromptTypeType, ZoneType } from './common.js';
+import CardInGame from '../classes/CardInGame.js'
 
 import {
 	ACTION_EFFECT,
@@ -86,7 +86,7 @@ import {
 	PROMPT_TYPE_NUMBER_OF_CREATURES,
 	PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE,
 	PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
-} from '../const';
+} from '../const.js';
 import {
 	AlternativePromptParams,
 	AnyCreatureExceptSourcePromptParams,
@@ -104,8 +104,8 @@ import {
 	RearrangeCardsOfZonePromptParams,
 	RearrangeEnergyPromptParams,
 	SingleCreatureFilteredPromptParams
-} from './promptParams';
-import { PromptParamsType } from '..';
+} from './promptParams.js';
+import { PromptParamsType } from '../index.js';
 
 export type EffectTypeType =
 	typeof EFFECT_TYPE_END_OF_TURN |
