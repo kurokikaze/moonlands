@@ -87,6 +87,7 @@ import {
 	EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
 	EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
 	EFFECT_TYPE_DISCARD_CARDS_FROM_HAND,
+	EFFECT_TYPE_DISCARD_CARD_FROM_HAND,
 	EFFECT_TYPE_ATTACK,
 	EFFECT_TYPE_BEFORE_DAMAGE,
 	EFFECT_TYPE_CREATURE_DEFEATS_CREATURE,
@@ -630,6 +631,33 @@ describe('Unmake state action (TypedArray)', () => {
 })
 
 describe('Unmaking state action', () => {
+	it('Discard card from hand restores its log entry', () => {
+		const ACTIVE_PLAYER = 0;
+		const arbolit = new CardInGame(byName('Arbolit'), ACTIVE_PLAYER);
+		const gameState = new moonlands.State({
+			zones: [
+				new Zone('Hand', ZONE_TYPE_HAND, ACTIVE_PLAYER).add([arbolit]),
+				new Zone('Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+			],
+			activePlayer: ACTIVE_PLAYER,
+		});
+		const unmaker = new Unmaker(gameState);
+		const before = gameState.serializeFullState(ACTIVE_PLAYER);
+
+		unmaker.setCheckpoint();
+		gameState.update({
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_DISCARD_CARD_FROM_HAND,
+			target: arbolit,
+			player: ACTIVE_PLAYER,
+			generatedBy: arbolit.id,
+		});
+
+		expect(gameState.state.log.some(entry => entry.type === 'log_entry/card_discarded_from_hand')).toBe(true);
+		unmaker.revertToCheckpoint();
+		expect(gameState.serializeFullState(ACTIVE_PLAYER)).toEqual(before);
+	});
+
     it('Winning action', () => {
         const ACTIVE_PLAYER = 0;
         const NON_ACTIVE_PLAYER = 2;
