@@ -800,7 +800,7 @@ describe('Engine invariant - MOVE_CARD_BETWEEN_ZONES with stale source id', () =
         expect(snapshot(state)).toBe(before);
     });
 
-    it.only('Attack with the card attached', () => {
+    it('Attack with the card attached', () => {
         const ora = new CardInGame(byName('Ora') as Card, PLAYER).addEnergy(12);
         const sinder = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(8);
 
@@ -860,7 +860,7 @@ describe('Engine invariant - MOVE_CARD_BETWEEN_ZONES with stale source id', () =
 //   which can later surface as "Non-prompt action in the prompt state" in
 //   deep simulation branches.
 // ---------------------------------------------------------------------------
-describe.only('Moonlands regression – prompt internals must be restored after Shatterfire revert', () => {
+describe('Moonlands regression – prompt internals must be restored after Shatterfire revert', () => {
     it('restores savedActions and promptPlayer after reverting a relic prompt branch', () => {
         const adis = new CardInGame(byName('Adis') as Card, OPPONENT).addEnergy(12);
         const sinder = new CardInGame(byName('Sinder') as Card, PLAYER).addEnergy(12);
@@ -933,3 +933,96 @@ describe.only('Moonlands regression – prompt internals must be restored after 
     });
 });
 
+// ---------------------------------------------------------------------------
+// Arderial bug F – POWER: Epik's Dream Feast
+//   Power enters a PROMPT_TYPE_PLAYER prompt before the cost/actionsUsed
+//   effects of ACTION_POWER are unmade. Reverting after the PLAYER choice is
+//   resolved should restore energy/actionsUsed/energyLostThisTurn to their
+//   pre-activation values.
+// ---------------------------------------------------------------------------
+describe.only('Unmaker bug – POWER with PLAYER prompt (Epik Dream Feast)', () => {
+    it('reverts state correctly after Dream Feast PLAYER prompt is resolved (opponent hand empty, power fully resolves)', () => {
+        const epik = new CardInGame(byName('Epik') as Card, PLAYER).addEnergy(2);
+        const adis = new CardInGame(byName('Adis') as Card, PLAYER).addEnergy(10);
+        const sinder = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(6);
+
+        const state = makeState(STEP_PRS1, [epik], [], [], adis, sinder);
+        const before = snapshot(state);
+
+        const power = (epik.card.data.powers as any[]).find(p => p.name === 'Dream Feast');
+        const unmaker = new Unmaker(state);
+        unmaker.setCheckpoint();
+
+        state.update({ type: ACTION_POWER, source: epik, power, player: PLAYER, generatedBy: epik.id } as any);
+        state.update({
+            type: ACTION_RESOLVE_PROMPT,
+            targetPlayer: OPPONENT,
+            generatedBy: epik.id,
+        } as any);
+
+        unmaker.revertToCheckpoint();
+        expect(snapshot(state)).toBe(before);
+    });
+
+    it('reverts state correctly when opponent hand has creatures (stops at CHOOSE_CARDS prompt after self-discard)', () => {
+        const epik = new CardInGame(byName('Epik') as Card, PLAYER).addEnergy(2);
+        const adis = new CardInGame(byName('Adis') as Card, PLAYER).addEnergy(10);
+        const sinder = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(6);
+        const oppHandCards = ['Leaf Hyren', 'Furok'].map(name => new CardInGame(byName(name) as Card, OPPONENT));
+
+        const state = makeState(STEP_PRS1, [epik], [], [], adis, sinder);
+        state.getZone(ZONE_TYPE_HAND, OPPONENT).add(oppHandCards);
+        const before = snapshot(state);
+
+        const power = (epik.card.data.powers as any[]).find(p => p.name === 'Dream Feast');
+        const unmaker = new Unmaker(state);
+        unmaker.setCheckpoint();
+
+        state.update({ type: ACTION_POWER, source: epik, power, player: PLAYER, generatedBy: epik.id } as any);
+        state.update({
+            type: ACTION_RESOLVE_PROMPT,
+            targetPlayer: OPPONENT,
+            generatedBy: epik.id,
+        } as any);
+
+        // Engine should now be paused at the CHOOSE_CARDS prompt (Epik already discarded itself).
+        expect((state.state as any).prompt).toBe(true);
+
+        unmaker.revertToCheckpoint();
+        expect(snapshot(state)).toBe(before);
+    });
+
+    // Mirrors the real search-tree flow: ACTION_POWER is applied/committed in a
+    // separate (already-closed) checkpoint, then a NEW checkpoint is opened just
+    // for the PLAYER prompt resolution alone, matching ReconSimulationStrategy's
+    // per-depth checkpoint/revert boundaries.
+    it('reverts only the PLAYER resolution when POWER activation was committed under a prior, separate checkpoint', () => {
+        const epik = new CardInGame(byName('Epik') as Card, PLAYER).addEnergy(2);
+        const adis = new CardInGame(byName('Adis') as Card, PLAYER).addEnergy(10);
+        const sinder = new CardInGame(byName('Sinder') as Card, OPPONENT).addEnergy(6);
+        const oppHandCards = ['Leaf Hyren', 'Furok'].map(name => new CardInGame(byName(name) as Card, OPPONENT));
+
+        const state = makeState(STEP_PRS1, [epik], [], [], adis, sinder);
+        state.getZone(ZONE_TYPE_HAND, OPPONENT).add(oppHandCards);
+
+        const power = (epik.card.data.powers as any[]).find(p => p.name === 'Dream Feast');
+        const unmaker = new Unmaker(state);
+
+        // Depth 0: activate the power for real (committed, checkpoint closed by not reverting).
+        unmaker.setCheckpoint();
+        state.update({ type: ACTION_POWER, source: epik, power, player: PLAYER, generatedBy: epik.id } as any);
+
+        const afterActivation = snapshot(state);
+
+        // Depth 1: resolve the PLAYER prompt under its own checkpoint.
+        unmaker.setCheckpoint();
+        state.update({
+            type: ACTION_RESOLVE_PROMPT,
+            targetPlayer: OPPONENT,
+            generatedBy: epik.id,
+        } as any);
+
+        unmaker.revertToCheckpoint();
+        expect(snapshot(state)).toBe(afterActivation);
+    });
+});

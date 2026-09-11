@@ -786,6 +786,7 @@ export class Unmaker {
                             this.saveNumber(moveTarget.data.energy, 'EFFECT_TYPE_MOVE_ENERGY/moveEnergy');
                             this.saveActionType(UNMAKE_EFFECT_TYPE_MOVE_ENERGY, 'EFFECT_TYPE_MOVE_ENERGY');
                         }
+                        break;
                     }
                     case EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE: {
                         const creature = this.state.getMetaValue(action.target, action.generatedBy);
