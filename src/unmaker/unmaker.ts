@@ -265,6 +265,22 @@ export class Unmaker {
     }
 
     public generateUnAction(action: AnyEffectType): UnAction | undefined {
+        const pointerBefore = this.pointer;
+        const tagsLengthBefore = this.dataTags.length;
+        const stringsLengthBefore = this.strings.length;
+        const objectsLengthBefore = this.objects.length;
+        try {
+            return this.generateUnActionInner(action)
+        } catch (error) {
+            this.pointer = pointerBefore;
+            this.dataTags.length = tagsLengthBefore;
+            this.strings.length = stringsLengthBefore;
+            this.objects.length = objectsLengthBefore;
+            throw error;
+        }
+    }
+
+    private generateUnActionInner(action: AnyEffectType): UnAction | undefined {
         switch (action.type) {
             case ACTION_ENTER_PROMPT: {
                 this.saveObject([...this.state.state.actions], 'ACTION_ENTER_PROMPT/actions')
@@ -823,7 +839,7 @@ export class Unmaker {
                         const moveMultiTarget = this.state.getMetaValue(action.target, action.generatedBy);
                         const moveTarget = (moveMultiTarget instanceof Array) ? moveMultiTarget[0] : moveMultiTarget;
 
-                        if (moveSource != null && moveTarget != null) {
+                        if (moveSource != null && moveTarget != null && moveSource.card != null && moveTarget.card != null) {
                             this.saveString(moveSource.id, 'EFFECT_TYPE_MOVE_ENERGY/sourceId')
                             this.saveNumber(moveSource.card.type == TYPE_MAGI ? 1 : 0, 'EFFECT_TYPE_MOVE_ENERGY/sourceIsMagi')
                             this.saveNumber(moveSource.owner, 'EFFECT_TYPE_MOVE_ENERGY/sourceOwner')
