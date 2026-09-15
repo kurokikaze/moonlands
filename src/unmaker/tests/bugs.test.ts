@@ -1,3 +1,4 @@
+/* global expect, describe, it */
 // Tests that isolate the known Unmaker revert bugs.
 // Each test: save state → setCheckpoint → sim.update(…) → revertToCheckpoint
 // → assert serialized state equals the saved snapshot.

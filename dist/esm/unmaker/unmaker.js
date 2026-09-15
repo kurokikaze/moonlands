@@ -447,8 +447,9 @@ export class Unmaker {
                             const sourceZoneType = this.state.getMetaValue(action.sourceZone, action.generatedBy);
                             const destinationZoneType = this.state.getMetaValue(action.destinationZone, action.generatedBy);
                             const sourceZone = this.state.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
-                            if (sourceZone.containsId(zoneChangingCard.id)) {
-                                const position = sourceZone.cards.findIndex(card => card.id === zoneChangingCard.id);
+                            const sourceZoneCard = sourceZone.byId(zoneChangingCard.id);
+                            if (sourceZoneCard) {
+                                const position = sourceZone.cards.findIndex(card => card.id === sourceZoneCard.id);
                                 // Uint16Array cannot represent -1; encode "not found" as 0 and real indices as index + 1.
                                 const encodedPosition = position + 1;
                                 // Capture the current spellMetaData values that will be modified
@@ -461,27 +462,27 @@ export class Unmaker {
                                         previousValue: generatedByMeta === null || generatedByMeta === void 0 ? void 0 : generatedByMeta.new_card,
                                     });
                                 }
-                                const cardIdMeta = this.state.getSpellMetadata(zoneChangingCard.id);
+                                const cardIdMeta = this.state.getSpellMetadata(sourceZoneCard.id);
                                 metaDataEntries.push({
-                                    spellId: zoneChangingCard.id,
+                                    spellId: sourceZoneCard.id,
                                     field: 'new_card',
                                     previousValue: cardIdMeta === null || cardIdMeta === void 0 ? void 0 : cardIdMeta.new_card,
                                 });
-                                const attachedCards = zoneChangingCard.id in this.state.state.cardsAttached ? [...this.state.state.cardsAttached[zoneChangingCard.id]] : null;
+                                const attachedCards = sourceZoneCard.id in this.state.state.cardsAttached ? [...this.state.state.cardsAttached[sourceZoneCard.id]] : null;
                                 this.saveObject(attachedCards, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/attachedCards');
                                 this.saveObject(metaDataEntries, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/metaDataEntries');
                                 this.saveNumber(action.bottom ? 1 : 0, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/bottom');
                                 this.saveNumber(encodedPosition, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/position');
                                 this.saveString(destinationZoneType, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/destinationZoneType');
-                                this.saveNumber(zoneChangingCard.owner, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/cardOwner');
+                                this.saveNumber(sourceZoneCard.owner, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/cardOwner');
                                 this.saveString(sourceZoneType, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/sourceZoneType');
-                                this.saveObject(zoneChangingCard, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/zoneChangingCard');
+                                this.saveObject(sourceZoneCard, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/zoneChangingCard');
                                 this.saveActionType(UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
                                 return {
                                     type: UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-                                    card: zoneChangingCard,
+                                    card: sourceZoneCard,
                                     sourceZone: sourceZoneType,
-                                    sourceZoneOwner: zoneChangingCard.owner,
+                                    sourceZoneOwner: sourceZoneCard.owner,
                                     destinationZone: destinationZoneType,
                                     position,
                                     bottom: action.bottom || false,
