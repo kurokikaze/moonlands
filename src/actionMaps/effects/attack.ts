@@ -115,8 +115,8 @@ export const applyAttackEffect: ActionTransformer<typeof EFFECT_TYPE_ATTACK> = f
 }
 
 export const applyBeforeDamageEffect: ActionTransformer<typeof EFFECT_TYPE_BEFORE_DAMAGE> = function (action: BeforeDamageEffect, transform, _state) {
-    action.source.markAttackDone();
-    action.target.markAttackReceived();
+    this.markAttackDone(action.source);
+    this.markAttackReceived(action.target);
 }
 
 export const applyDamageStepEffect: ActionTransformer<typeof EFFECT_TYPE_DAMAGE_STEP> = function (action, transform) {
@@ -268,7 +268,7 @@ export const applyAfterDamageEffect: ActionTransformer<typeof EFFECT_TYPE_AFTER_
 
 export const applyCreatureDefeatsCreatureEffect: ActionTransformer<typeof EFFECT_TYPE_CREATURE_DEFEATS_CREATURE> = function (action, transform) {
     if (action.target.data.energy === 0) {
-        action.source.markDefeatedCreature();
+        this.markDefeatedCreature(action.source);
         transform({
             type: ACTION_EFFECT,
             effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,

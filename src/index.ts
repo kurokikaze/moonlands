@@ -971,6 +971,44 @@ export class State {
 		card.setEnergy(amount);
 	}
 
+	// Card flags
+
+	markAttackDone(card: CardInGame): void {
+		card.markAttackDone();
+	}
+
+	markAttackReceived(card: CardInGame): void {
+		card.markAttackReceived();
+	}
+
+	unmarkAttackReceived(card: CardInGame): void {
+		card.unmarkAttackReceived();
+	}
+
+	markDefeatedCreature(card: CardInGame): void {
+		card.markDefeatedCreature();
+	}
+
+	unmarkDefeatedCreature(card: CardInGame): void {
+		card.unmarkDefeatedCreature();
+	}
+
+	forbidAttacks(card: CardInGame): void {
+		card.forbidAttacks();
+	}
+
+	clearAttackMarkers(card: CardInGame): void {
+		card.clearAttackMarkers();
+	}
+
+	setActionUsed(card: CardInGame, actionName: string): void {
+		card.setActionUsed(actionName);
+	}
+
+	clearActionsUsed(card: CardInGame): void {
+		card.clearActionsUsed();
+	}
+
 	// Zones
 
 	/**
@@ -1491,7 +1529,7 @@ export class State {
 
 			// If the replacer is one-time, set the action usage
 			if (appliedReplacerSelf && foundReplacer && foundReplacer.oncePerTurn && foundReplacer.name) {
-				appliedReplacerSelf.setActionUsed(foundReplacer.name);
+				this.setActionUsed(appliedReplacerSelf, foundReplacer.name);
 			}
 
 			if (foundReplacer && foundReplacer.mayEffect) {
@@ -1911,7 +1949,7 @@ export class State {
 								sourceCreature: source,
 							}; // No retrieving old metadata from old activations
 
-							source.setActionUsed(action.power.name);
+							this.setActionUsed(source, action.power.name);
 
 							if (powerCost == COST_X) {
 								this.addActions(
