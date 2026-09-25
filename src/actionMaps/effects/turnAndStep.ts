@@ -97,11 +97,7 @@ const steps: StepType[] = [
 ];
 
 export const applyStartTurnEffect: ActionTransformer<typeof EFFECT_TYPE_START_TURN> = function (action, transform) {
-  if (this.turn === null) {
-    this.turn = 0;
-  } else {
-    this.turn += 1;
-  }
+  this.setTurn(this.turn === null ? 0 : this.turn + 1);
   transform(
     {
       type: ACTION_EFFECT,

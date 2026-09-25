@@ -215,6 +215,9 @@ import { byName } from './cards.js';
 import CardInGame, { ConvertedCard } from './classes/CardInGame.js';
 import { CostType } from './classes/Card.js';
 import Zone from './classes/Zone.js';
+import { Journal, JournalFrame, snapshotCardData } from './Journal.js';
+export { Journal } from './Journal.js';
+export type { JournalFrame, JournalEntry } from './Journal.js';
 import { SelectorEngine } from './SelectorEngine.js';
 import { PromptValidator } from './PromptValidator.js';
 import { LogEngine } from './LogEngine.js';
@@ -532,6 +535,7 @@ export class State {
 	selectorEngine: SelectorEngine;
 	promptValidator: PromptValidator;
 	logEngine: LogEngine;
+	journal: Journal | null = null;
 
 	constructor(state: StateShape = defaultState) {
 		this.state = {
@@ -689,16 +693,41 @@ export class State {
 		this.rollDebugValue = null;
 	}
 
-    unsetWinner() {
-        this.winner = false;
-    }
-
-	setWinner(player: number) {
-		this.winner = player;
-	}
-
 	hasWinner() {
 		return this.winner !== false;
+	}
+
+	/**
+	 * Starts recording un-actions for every Mutation API call.
+	 * Frames can be nested; `rollback(frame)` restores the state to the moment
+	 * the frame was started, `endSearchFrame(frame)` keeps the changes.
+	 */
+	beginSearchFrame(): JournalFrame {
+		if (!this.journal) {
+			this.journal = new Journal();
+		}
+		return this.journal.beginFrame(this.twister);
+	}
+
+	rollback(frame: JournalFrame): void {
+		if (!this.journal) {
+			throw new Error('No search frame to roll back');
+		}
+		this.journal.rollback(frame, this);
+		this.clearModifiedCardDataCache();
+		if (!this.journal.hasFrames) {
+			this.journal = null;
+		}
+	}
+
+	endSearchFrame(frame: JournalFrame): void {
+		if (!this.journal) {
+			throw new Error('No search frame to end');
+		}
+		this.journal.endFrame(frame);
+		if (!this.journal.hasFrames) {
+			this.journal = null;
+		}
 	}
 
 	clone(): State {
@@ -954,12 +983,69 @@ export class State {
 	 * The reducer (`update`) and the action maps call them instead of
 	 * writing into `this.state`, zones or cards directly, so there is a single
 	 * place to hook into for logging, undo, validation or cache invalidation.
+	 *
+	 * While a search frame is open (see `beginSearchFrame`), every method
+	 * records an un-action into the journal before changing anything.
 	 */
+
+	private recordStateFields(...keys: (keyof StateShape)[]): void {
+		if (!this.journal) return;
+		const previous: Partial<StateShape> = {};
+		for (const key of keys) {
+			(previous as any)[key] = this.state[key];
+		}
+		this.journal.record({ kind: 'stateFields', previous });
+	}
+
+	private recordKey(target: Record<string, any>, key: string): void {
+		this.journal?.record({
+			kind: 'key',
+			target,
+			key,
+			had: key in target,
+			previous: target[key],
+		});
+	}
+
+	private recordCardData(card: CardInGame): void {
+		this.journal?.record({
+			kind: 'cardData',
+			card,
+			previous: snapshotCardData(card),
+		});
+	}
+
+	private recordEnergy(card: CardInGame): void {
+		this.journal?.record({
+			kind: 'energy',
+			card,
+			previousEnergy: card.data.energy,
+			previousEnergyLostThisTurn: card.data.energyLostThisTurn,
+		});
+	}
+
+	// Game result and turn
+
+	unsetWinner() {
+		this.journal?.record({ kind: 'winner', previous: this.winner });
+		this.winner = false;
+	}
+
+	setWinner(player: number) {
+		this.journal?.record({ kind: 'winner', previous: this.winner });
+		this.winner = player;
+	}
+
+	setTurn(turn: number | null): void {
+		this.journal?.record({ kind: 'turn', previous: this.turn });
+		this.turn = turn;
+	}
 
 	// Energy
 
 	/** Adds (positive amount) or removes (negative amount) energy from the card */
 	changeEnergy(card: CardInGame, amount: number): void {
+		this.recordEnergy(card);
 		if (amount < 0) {
 			card.removeEnergy(-amount);
 		} else {
@@ -968,44 +1054,54 @@ export class State {
 	}
 
 	setEnergy(card: CardInGame, amount: number): void {
+		this.recordEnergy(card);
 		card.setEnergy(amount);
 	}
 
 	// Card flags
 
 	markAttackDone(card: CardInGame): void {
+		this.recordCardData(card);
 		card.markAttackDone();
 	}
 
 	markAttackReceived(card: CardInGame): void {
+		this.recordCardData(card);
 		card.markAttackReceived();
 	}
 
 	unmarkAttackReceived(card: CardInGame): void {
+		this.recordCardData(card);
 		card.unmarkAttackReceived();
 	}
 
 	markDefeatedCreature(card: CardInGame): void {
+		this.recordCardData(card);
 		card.markDefeatedCreature();
 	}
 
 	unmarkDefeatedCreature(card: CardInGame): void {
+		this.recordCardData(card);
 		card.unmarkDefeatedCreature();
 	}
 
 	forbidAttacks(card: CardInGame): void {
+		this.recordCardData(card);
 		card.forbidAttacks();
 	}
 
 	clearAttackMarkers(card: CardInGame): void {
+		this.recordCardData(card);
 		card.clearAttackMarkers();
 	}
 
 	setActionUsed(card: CardInGame, actionName: string): void {
+		this.recordCardData(card);
 		card.setActionUsed(actionName);
 	}
 
 	clearActionsUsed(card: CardInGame): void {
+		this.recordCardData(card);
 		card.clearActionsUsed();
 	}
 
@@ -1016,7 +1112,8 @@ export class State {
 	 * Returns the new card object, or null if the card is not in the source zone.
 	 */
 	moveCard(card: CardInGame, from: Zone, to: Zone, bottom = false): CardInGame | null {
-		if (!from.containsId(card.id)) {
+		const fromIndex = from.cards.findIndex(({ id }) => id === card.id);
+		if (fromIndex === -1) {
 			return null;
 		}
 
@@ -1025,6 +1122,8 @@ export class State {
 		}
 
 		const newCard = new CardInGame(card.card, card.owner, this.nanoid);
+		this.journal?.record({ kind: 'moveCard', card, newCard, from, to, fromIndex });
+
 		if (bottom) {
 			to.add([newCard]);
 		} else {
@@ -1036,16 +1135,20 @@ export class State {
 	}
 
 	setZoneCards(zone: Zone, cards: CardInGame[]): void {
+		this.journal?.record({ kind: 'zoneCards', zone, previousCards: zone.cards });
 		zone.cards = cards;
 	}
 
 	shuffleZone(zone: Zone): void {
+		// Shuffle works in place, so we keep a copy
+		this.journal?.record({ kind: 'zoneCards', zone, previousCards: [...zone.cards] });
 		zone.shuffle();
 	}
 
 	// Spell metadata
 
 	setSpellMetadata(metadata: any, spellId: string): void {
+		this.recordKey(this.state.spellMetaData, spellId);
 		this.state.spellMetaData[spellId] = metadata;
 	}
 
@@ -1063,10 +1166,12 @@ export class State {
 	clearSpellMetaDataField(field: string, spellId: string): void {
 		const spellMetaData = this.state.spellMetaData[spellId]
 		if (spellMetaData && field in spellMetaData) {
+			this.recordKey(spellMetaData, field);
 			delete spellMetaData[field]
 		}
 
 		if (spellId in this.state.spellMetaData && Object.keys(spellMetaData).length === 0) {
+			this.recordKey(this.state.spellMetaData, spellId);
 			delete this.state.spellMetaData[spellId]
 		}
 	}
@@ -1074,21 +1179,26 @@ export class State {
 	// Attachments
 
 	attachCard(cardId: string, attachmentTargetId: string) {
+		this.recordKey(this.state.attachedTo, cardId);
+		this.recordKey(this.state.cardsAttached, attachmentTargetId);
+
 		this.state.attachedTo[cardId] = attachmentTargetId;
-		if (!(attachmentTargetId in this.state.cardsAttached)) {
-			this.state.cardsAttached[attachmentTargetId] = []
-		}
-		this.state.cardsAttached[attachmentTargetId].push(cardId)
+		this.state.cardsAttached[attachmentTargetId] = [
+			...(this.state.cardsAttached[attachmentTargetId] || []),
+			cardId,
+		];
 	}
 
 	removeAttachments(cardId: string) {
 		if (cardId in this.state.cardsAttached) {
 			for (let attachedCardId of this.state.cardsAttached[cardId]) {
 				if (attachedCardId in this.state.attachedTo) {
+					this.recordKey(this.state.attachedTo, attachedCardId);
 					delete this.state.attachedTo[attachedCardId];
 				}
 			}
 
+			this.recordKey(this.state.cardsAttached, cardId);
 			delete this.state.cardsAttached[cardId];
 		}
 	}
@@ -1096,6 +1206,8 @@ export class State {
 	detachCard(cardId: string) {
 		if (cardId in this.state.attachedTo) {
 			const attachedTargetId = this.state.attachedTo[cardId]
+			this.recordKey(this.state.attachedTo, cardId);
+			this.recordKey(this.state.cardsAttached, attachedTargetId);
 			delete this.state.attachedTo[cardId];
 
 			this.state.cardsAttached[attachedTargetId] =
@@ -1111,20 +1223,24 @@ export class State {
 	// Continuous effects and triggers
 
 	addContinuousEffect(effect: ContinuousEffectType): void {
+		this.journal?.record({ kind: 'arrayPush', array: this.state.continuousEffects, count: 1 });
 		this.state.continuousEffects.push(effect);
 		this.clearModifiedCardDataCache();
 	}
 
 	setContinuousEffects(effects: ContinuousEffectType[]): void {
+		this.recordStateFields('continuousEffects');
 		this.state.continuousEffects = effects;
 		this.clearModifiedCardDataCache();
 	}
 
 	addDelayedTrigger(trigger: EnhancedDelayedTriggerType): void {
+		this.journal?.record({ kind: 'arrayPush', array: this.state.delayedTriggers, count: 1 });
 		this.state.delayedTriggers.push(trigger);
 	}
 
 	removeDelayedTrigger(triggerId: string) {
+		this.recordStateFields('delayedTriggers');
 		this.state.delayedTriggers = this.state.delayedTriggers.filter(({ id }) => id != triggerId);
 	}
 
@@ -1138,6 +1254,7 @@ export class State {
 		promptVariable?: string,
 		promptGeneratedBy?: string,
 	}): void {
+		this.recordStateFields('prompt', 'promptType', 'promptParams', 'promptMessage', 'promptPlayer', 'promptVariable', 'promptGeneratedBy');
 		this.state.prompt = true;
 		this.state.promptType = prompt.promptType;
 		this.state.promptParams = prompt.promptParams;
@@ -1148,6 +1265,7 @@ export class State {
 	}
 
 	clearPrompt(): void {
+		this.recordStateFields('prompt', 'promptType', 'promptParams', 'promptMessage', 'promptVariable', 'promptGeneratedBy');
 		this.state.prompt = false;
 		this.state.promptType = null;
 		this.state.promptMessage = undefined;
@@ -1158,6 +1276,7 @@ export class State {
 
 	/** Sets actions to apply if the may effect is accepted (and, optionally, if it is declined) */
 	setMayEffectActions(mayEffectActions: AnyEffectType[], fallbackActions?: AnyEffectType[]): void {
+		this.recordStateFields('mayEffectActions', 'fallbackActions');
 		this.state.mayEffectActions = mayEffectActions;
 		if (fallbackActions) {
 			this.state.fallbackActions = fallbackActions;
@@ -1165,6 +1284,7 @@ export class State {
 	}
 
 	clearMayEffectActions(): void {
+		this.recordStateFields('mayEffectActions', 'fallbackActions');
 		this.state.mayEffectActions = [];
 		this.state.fallbackActions = [];
 	}
@@ -1172,29 +1292,35 @@ export class State {
 	// Action queue
 
 	addActions(...args: AnyEffectType[]) {
+		this.journal?.record({ kind: 'arrayPush', array: this.state.actions, count: args.length });
 		this.state.actions.push(...args);
 	}
 
 	transformIntoActions(...args: AnyEffectType[]) {
+		this.journal?.record({ kind: 'arrayUnshift', array: this.state.actions, count: args.length });
 		this.state.actions.unshift(...args);
 	}
 
 	setActions(actions: AnyEffectType[]): void {
+		this.recordStateFields('actions');
 		this.state.actions = actions;
 	}
 
 	setSavedActions(actions: AnyEffectType[]): void {
+		this.recordStateFields('savedActions');
 		this.state.savedActions = actions;
 	}
 
 	// Turn and step
 
 	setStep(step: number | null): void {
+		this.recordStateFields('step');
 		this.state.step = step;
 	}
 
 	/** Sets both the active and the controlling player */
 	setActivePlayer(player: number): void {
+		this.recordStateFields('activePlayer', 'controllingPlayer');
 		this.state.activePlayer = player;
 		this.state.controllingPlayer = player;
 	}
@@ -1202,10 +1328,14 @@ export class State {
 	// Log
 
 	addLogEntry(entry: LogEntryType): void {
+		this.journal?.record({ kind: 'arrayPush', array: this.state.log, count: 1 });
 		this.state.log.push(entry);
 	}
 
 	private getNextAction() {
+		if (this.journal && this.state.actions.length > 0) {
+			this.journal.record({ kind: 'arrayShift', array: this.state.actions, item: this.state.actions[0] });
+		}
 		return this.state.actions.shift();
 	}
 
