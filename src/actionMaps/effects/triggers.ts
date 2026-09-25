@@ -96,6 +96,5 @@ export const applyCreateContinuousEffect: ActionTransformer<typeof EFFECT_TYPE_C
     id,
   };
 
-  this.state.continuousEffects.push(continuousEffect);
-  this.clearModifiedCardDataCache();
+  this.addContinuousEffect(continuousEffect);
 }

@@ -230,11 +230,12 @@ export const applyPromptEnteredEffect: ActionTransformer<typeof EFFECT_TYPE_PROM
     }
   }
 
-  this.state.prompt = true
-  this.state.promptMessage = ('message' in action) ? action.message : '';
-  this.state.promptPlayer = promptPlayer
-  this.state.promptType = action.promptType
-  this.state.promptVariable = action.variable
-  this.state.promptGeneratedBy = action.generatedBy
-  this.state.promptParams = promptParams
+  this.setPrompt({
+    promptType: action.promptType,
+    promptParams,
+    promptMessage: ('message' in action) ? action.message : '',
+    promptPlayer,
+    promptVariable: action.variable,
+    promptGeneratedBy: action.generatedBy,
+  });
 }

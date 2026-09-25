@@ -576,7 +576,7 @@ export class State {
 
 		this.logEngine = new LogEngine({
 			getMetaValue: (value, spellId) => this.getMetaValue(value, spellId),
-			getLog: () => this.state.log,
+			addLogEntry: (entry) => this.addLogEntry(entry),
 			getPromptType: () => this.state.promptType,
 		});
 	}
@@ -947,32 +947,68 @@ export class State {
 		return this.state.step === null ? 0 : steps[this.state.step].priority;
 	}
 
-	addActions(...args: AnyEffectType[]) {
-		this.state.actions.push(...args);
+	/*
+	 * Mutation API
+	 *
+	 * Every change to the game state should go through one of these methods.
+	 * The reducer (`update`) and the action maps call them instead of
+	 * writing into `this.state`, zones or cards directly, so there is a single
+	 * place to hook into for logging, undo, validation or cache invalidation.
+	 */
+
+	// Energy
+
+	/** Adds (positive amount) or removes (negative amount) energy from the card */
+	changeEnergy(card: CardInGame, amount: number): void {
+		if (amount < 0) {
+			card.removeEnergy(-amount);
+		} else {
+			card.addEnergy(amount);
+		}
 	}
 
-	transformIntoActions(...args: AnyEffectType[]) {
-		this.state.actions.unshift(...args);
+	setEnergy(card: CardInGame, amount: number): void {
+		card.setEnergy(amount);
 	}
 
-	removeDelayedTrigger(triggerId: string) {
-		this.state.delayedTriggers = this.state.delayedTriggers.filter(({ id }) => id != triggerId);
+	// Zones
+
+	/**
+	 * Moves the card between zones. Moved card becomes a new object with a new id.
+	 * Returns the new card object, or null if the card is not in the source zone.
+	 */
+	moveCard(card: CardInGame, from: Zone, to: Zone, bottom = false): CardInGame | null {
+		if (!from.containsId(card.id)) {
+			return null;
+		}
+
+		if (from.type === ZONE_TYPE_IN_PLAY || to.type === ZONE_TYPE_IN_PLAY) {
+			this.clearModifiedCardDataCache();
+		}
+
+		const newCard = new CardInGame(card.card, card.owner, this.nanoid);
+		if (bottom) {
+			to.add([newCard]);
+		} else {
+			to.addToTop([newCard]);
+		}
+		from.removeById(card.id);
+
+		return newCard;
 	}
 
-	private getNextAction() {
-		return this.state.actions.shift();
+	setZoneCards(zone: Zone, cards: CardInGame[]): void {
+		zone.cards = cards;
 	}
 
-	hasActions() {
-		return this.state.actions.length > 0;
+	shuffleZone(zone: Zone): void {
+		zone.shuffle();
 	}
+
+	// Spell metadata
 
 	setSpellMetadata(metadata: any, spellId: string): void {
-        this.state.spellMetaData[spellId] = metadata;
-	}
-
-	getSpellMetadata(spellId: string): MetaDataRecord {
-		return this.state.spellMetaData[spellId] || {};
+		this.state.spellMetaData[spellId] = metadata;
 	}
 
 	setSpellMetaDataField(field: string, value: any, spellId: string): void {
@@ -995,6 +1031,152 @@ export class State {
 		if (spellId in this.state.spellMetaData && Object.keys(spellMetaData).length === 0) {
 			delete this.state.spellMetaData[spellId]
 		}
+	}
+
+	// Attachments
+
+	attachCard(cardId: string, attachmentTargetId: string) {
+		this.state.attachedTo[cardId] = attachmentTargetId;
+		if (!(attachmentTargetId in this.state.cardsAttached)) {
+			this.state.cardsAttached[attachmentTargetId] = []
+		}
+		this.state.cardsAttached[attachmentTargetId].push(cardId)
+	}
+
+	removeAttachments(cardId: string) {
+		if (cardId in this.state.cardsAttached) {
+			for (let attachedCardId of this.state.cardsAttached[cardId]) {
+				if (attachedCardId in this.state.attachedTo) {
+					delete this.state.attachedTo[attachedCardId];
+				}
+			}
+
+			delete this.state.cardsAttached[cardId];
+		}
+	}
+
+	detachCard(cardId: string) {
+		if (cardId in this.state.attachedTo) {
+			const attachedTargetId = this.state.attachedTo[cardId]
+			delete this.state.attachedTo[cardId];
+
+			this.state.cardsAttached[attachedTargetId] =
+				this.state.cardsAttached[attachedTargetId].filter(attachedCard => attachedCard !== cardId);
+
+			if (this.state.cardsAttached[attachedTargetId].length === 0) {
+				delete this.state.cardsAttached[attachedTargetId];
+			}
+		}
+
+	}
+
+	// Continuous effects and triggers
+
+	addContinuousEffect(effect: ContinuousEffectType): void {
+		this.state.continuousEffects.push(effect);
+		this.clearModifiedCardDataCache();
+	}
+
+	setContinuousEffects(effects: ContinuousEffectType[]): void {
+		this.state.continuousEffects = effects;
+		this.clearModifiedCardDataCache();
+	}
+
+	addDelayedTrigger(trigger: EnhancedDelayedTriggerType): void {
+		this.state.delayedTriggers.push(trigger);
+	}
+
+	removeDelayedTrigger(triggerId: string) {
+		this.state.delayedTriggers = this.state.delayedTriggers.filter(({ id }) => id != triggerId);
+	}
+
+	// Prompts
+
+	setPrompt(prompt: {
+		promptType: PromptTypeType,
+		promptParams: PromptParamsType,
+		promptMessage?: string,
+		promptPlayer?: number,
+		promptVariable?: string,
+		promptGeneratedBy?: string,
+	}): void {
+		this.state.prompt = true;
+		this.state.promptType = prompt.promptType;
+		this.state.promptParams = prompt.promptParams;
+		this.state.promptMessage = prompt.promptMessage;
+		this.state.promptPlayer = prompt.promptPlayer;
+		this.state.promptVariable = prompt.promptVariable;
+		this.state.promptGeneratedBy = prompt.promptGeneratedBy;
+	}
+
+	clearPrompt(): void {
+		this.state.prompt = false;
+		this.state.promptType = null;
+		this.state.promptMessage = undefined;
+		this.state.promptGeneratedBy = undefined;
+		this.state.promptVariable = undefined;
+		this.state.promptParams = {};
+	}
+
+	/** Sets actions to apply if the may effect is accepted (and, optionally, if it is declined) */
+	setMayEffectActions(mayEffectActions: AnyEffectType[], fallbackActions?: AnyEffectType[]): void {
+		this.state.mayEffectActions = mayEffectActions;
+		if (fallbackActions) {
+			this.state.fallbackActions = fallbackActions;
+		}
+	}
+
+	clearMayEffectActions(): void {
+		this.state.mayEffectActions = [];
+		this.state.fallbackActions = [];
+	}
+
+	// Action queue
+
+	addActions(...args: AnyEffectType[]) {
+		this.state.actions.push(...args);
+	}
+
+	transformIntoActions(...args: AnyEffectType[]) {
+		this.state.actions.unshift(...args);
+	}
+
+	setActions(actions: AnyEffectType[]): void {
+		this.state.actions = actions;
+	}
+
+	setSavedActions(actions: AnyEffectType[]): void {
+		this.state.savedActions = actions;
+	}
+
+	// Turn and step
+
+	setStep(step: number | null): void {
+		this.state.step = step;
+	}
+
+	/** Sets both the active and the controlling player */
+	setActivePlayer(player: number): void {
+		this.state.activePlayer = player;
+		this.state.controllingPlayer = player;
+	}
+
+	// Log
+
+	addLogEntry(entry: LogEntryType): void {
+		this.state.log.push(entry);
+	}
+
+	private getNextAction() {
+		return this.state.actions.shift();
+	}
+
+	hasActions() {
+		return this.state.actions.length > 0;
+	}
+
+	getSpellMetadata(spellId: string): MetaDataRecord {
+		return this.state.spellMetaData[spellId] || {};
 	}
 
 	getMetaValue<T>(value: string | T, spellId: string | undefined): T | any {
@@ -1317,11 +1499,10 @@ export class State {
 				if (appliedReplacerId) {
 					replacedBy.push(appliedReplacerId);
 				}
-				this.state.mayEffectActions = resultEffects;
-				this.state.fallbackActions = [{
+				this.setMayEffectActions(resultEffects, [{
 					...action,
 					replacedBy, // :	('replacedBy' in action && action.replacedBy) ? [...action.replacedBy, appliedReplacerId] : [appliedReplacerId],
-				}];
+				}]);
 
 				return [{
 					type: ACTION_ENTER_PROMPT,
@@ -1497,7 +1678,7 @@ export class State {
 				const allPromptsAreDoable = this.checkPrompts(replacer.self, preparedEffects, false, 0);
 				if (allPromptsAreDoable) {
 					if (replacer.mayEffect) {
-						this.state.mayEffectActions = preparedEffects;
+						this.setMayEffectActions(preparedEffects);
 
 						this.transformIntoActions({
 							type: ACTION_ENTER_PROMPT,
@@ -1525,43 +1706,8 @@ export class State {
 		});
 	}
 
-	attachCard(cardId: string, attachmentTargetId: string) {
-		this.state.attachedTo[cardId] = attachmentTargetId;
-		if (!(attachmentTargetId in this.state.cardsAttached)) {
-			this.state.cardsAttached[attachmentTargetId] = []
-		}
-		this.state.cardsAttached[attachmentTargetId].push(cardId)
-	}
-
-	removeAttachments(cardId: string) {
-		if (cardId in this.state.cardsAttached) {
-			for (let attachedCardId of this.state.cardsAttached[cardId]) {
-				if (attachedCardId in this.state.attachedTo) {
-					delete this.state.attachedTo[attachedCardId];
-				}
-			}
-
-			delete this.state.cardsAttached[cardId];
-		}
-	}
-
 	convertPromptActionToEffect(action: PromptType & { source: CardInGame }): AnyPromptEnteredEffect {
 		return convertPromptActionToEffect(action, this);
-	}
-
-	detachCard(cardId: string) {
-		if (cardId in this.state.attachedTo) {
-			const attachedTargetId = this.state.attachedTo[cardId]
-			delete this.state.attachedTo[cardId];
-
-			this.state.cardsAttached[attachedTargetId] =
-				this.state.cardsAttached[attachedTargetId].filter(attachedCard => attachedCard !== cardId);
-
-			if (this.state.cardsAttached[attachedTargetId].length === 0) {
-				delete this.state.cardsAttached[attachedTargetId];
-			}
-		}
-
 	}
 
 	performCalculation(operator: OperatorType, operandOne: number, operandTwo: number): number {
@@ -1627,7 +1773,7 @@ export class State {
 
 				case ACTION_PLAYER_WINS: {
 					this.setWinner(action.player);
-					this.state.actions = [];
+					this.setActions([]);
 					break;
 				}
 
@@ -2042,23 +2188,17 @@ export class State {
 					}
 
 					if (!skipPrompt) {
-                        this.state.savedActions = savedActions;
-                        this.state.actions = [this.convertPromptActionToEffect(action as PromptType & { source: CardInGame })]
+						this.setSavedActions(savedActions);
+						this.setActions([this.convertPromptActionToEffect(action as PromptType & { source: CardInGame })]);
 					}
 					break;
 				}
 				case ACTION_EXIT_PROMPTS: {
-                    this.state.actions = []
-                    this.state.savedActions = []
-                    this.state.mayEffectActions = []
-                    this.state.fallbackActions = []
-                    this.state.prompt = false
-                    this.state.promptType = null
-					this.state.promptMessage = undefined
-					this.state.promptGeneratedBy = undefined
-					this.state.promptVariable = undefined
-					this.state.promptParams = {}
-					
+					this.setActions([]);
+					this.setSavedActions([]);
+					this.clearMayEffectActions();
+					this.clearPrompt();
+
 					break;
 				}
 				case ACTION_RESOLVE_PROMPT: {
@@ -2069,20 +2209,14 @@ export class State {
 
 						const actions = action.useEffect ? [...mayEffectActions, ...savedActions] : [...fallbackActions, ...savedActions];
 
-                        this.state.actions = actions;
-                        this.state.savedActions = [];
-                        this.state.mayEffectActions = [];
-                        this.state.fallbackActions = [];
-                        this.state.prompt = false
-                        this.state.promptType = null
-                        this.state.promptMessage = undefined
-                        this.state.promptGeneratedBy = undefined
-                        this.state.promptVariable = undefined
-                        this.state.promptParams = {}
+						this.setActions(actions);
+						this.setSavedActions([]);
+						this.clearMayEffectActions();
+						this.clearPrompt();
                     } else {
 						const generatedBy = action.generatedBy || this.state.promptGeneratedBy || this.nanoid();
 						const variable = action.variable || this.state.promptVariable;
-						let currentActionMetaData = this.state.spellMetaData[generatedBy] || {};
+						const currentActionMetaData = { ...this.getSpellMetadata(generatedBy) };
 
 						switch (this.state.promptType) {
 							case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
@@ -2278,15 +2412,10 @@ export class State {
 							}
 						}
 						const actions = this.state.savedActions || [];
-                        this.state.actions = actions;
-                        this.state.savedActions = [];
-                        this.state.prompt = false;
-                        this.state.promptType = null;
-                        this.state.promptMessage =  undefined;
-						this.state.promptGeneratedBy = undefined;
-						this.state.promptVariable = undefined;
-						this.state.promptParams = {};
-                        this.state.spellMetaData[generatedBy] = currentActionMetaData;
+						this.setActions(actions);
+						this.setSavedActions([]);
+						this.clearPrompt();
+						this.setSpellMetadata(currentActionMetaData, generatedBy);
 					}
 					break;
 				}
