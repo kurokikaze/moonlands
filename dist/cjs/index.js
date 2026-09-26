@@ -557,6 +557,14 @@ export class State {
             previous: target[key],
         });
     }
+    /** Call before deleting keys from the record, so rollback can restore their order */
+    recordRecord(target) {
+        this.journal?.record({
+            kind: 'record',
+            target,
+            previous: { ...target },
+        });
+    }
     recordCardData(card) {
         this.journal?.record({
             kind: 'cardData',
@@ -688,11 +696,11 @@ export class State {
     clearSpellMetaDataField(field, spellId) {
         const spellMetaData = this.state.spellMetaData[spellId];
         if (spellMetaData && field in spellMetaData) {
-            this.recordKey(spellMetaData, field);
+            this.recordRecord(spellMetaData);
             delete spellMetaData[field];
         }
         if (spellId in this.state.spellMetaData && Object.keys(spellMetaData).length === 0) {
-            this.recordKey(this.state.spellMetaData, spellId);
+            this.recordRecord(this.state.spellMetaData);
             delete this.state.spellMetaData[spellId];
         }
     }
@@ -708,21 +716,21 @@ export class State {
     }
     removeAttachments(cardId) {
         if (cardId in this.state.cardsAttached) {
+            this.recordRecord(this.state.attachedTo);
             for (let attachedCardId of this.state.cardsAttached[cardId]) {
                 if (attachedCardId in this.state.attachedTo) {
-                    this.recordKey(this.state.attachedTo, attachedCardId);
                     delete this.state.attachedTo[attachedCardId];
                 }
             }
-            this.recordKey(this.state.cardsAttached, cardId);
+            this.recordRecord(this.state.cardsAttached);
             delete this.state.cardsAttached[cardId];
         }
     }
     detachCard(cardId) {
         if (cardId in this.state.attachedTo) {
             const attachedTargetId = this.state.attachedTo[cardId];
-            this.recordKey(this.state.attachedTo, cardId);
-            this.recordKey(this.state.cardsAttached, attachedTargetId);
+            this.recordRecord(this.state.attachedTo);
+            this.recordRecord(this.state.cardsAttached);
             delete this.state.attachedTo[cardId];
             this.state.cardsAttached[attachedTargetId] =
                 this.state.cardsAttached[attachedTargetId].filter(attachedCard => attachedCard !== cardId);

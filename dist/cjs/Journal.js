@@ -84,6 +84,13 @@ export class Journal {
                 }
                 break;
             }
+            case 'record': {
+                for (const key of Object.keys(entry.target)) {
+                    delete entry.target[key];
+                }
+                Object.assign(entry.target, entry.previous);
+                break;
+            }
             case 'stateFields': {
                 Object.assign(state.state, entry.previous);
                 break;

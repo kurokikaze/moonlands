@@ -41,6 +41,10 @@ export type JournalEntry = {
     had: boolean;
     previous: any;
 } | {
+    kind: 'record';
+    target: Record<string, any>;
+    previous: Record<string, any>;
+} | {
     kind: 'stateFields';
     previous: Partial<StateShape>;
 } | {

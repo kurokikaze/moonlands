@@ -136,6 +136,8 @@ export declare class State {
     getCurrentPriority(): PriorityType;
     private recordStateFields;
     private recordKey;
+    /** Call before deleting keys from the record, so rollback can restore their order */
+    private recordRecord;
     private recordCardData;
     private recordEnergy;
     unsetWinner(): void;
