@@ -47,7 +47,7 @@ import { AnyEffectType, LogEntryType, PromptTypeType } from './types/index.js';
 
 export interface LogEngineContext {
 	getMetaValue(value: any, spellId: string | undefined): any;
-	getLog(): LogEntryType[];
+	addLogEntry(entry: LogEntryType): void;
 	getPromptType(): PromptTypeType | null;
 }
 
@@ -60,9 +60,8 @@ export class LogEngine {
 
 	addActionToLog(action: AnyEffectType) {
 		const entries = this.shouldCreateLog(action);
-		const log = this.context.getLog();
 		for (const entry of entries) {
-			log.push(entry);
+			this.context.addLogEntry(entry);
 		}
 	}
 

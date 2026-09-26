@@ -13,7 +13,7 @@ import { ActionTransformer } from "../actionMapTypes.js";
 // Should rework into continuous effect with duration
 export const applyForbidAttackToCreatureEffect: ActionTransformer<typeof EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE> = function (action, _transform) {
   const targets = this.getMetaValue(action.target, action.generatedBy);
-  oneOrSeveral(targets, target => target.forbidAttacks());
+  oneOrSeveral(targets, target => this.forbidAttacks(target));
 }
 
 export const applyConditionalEffect: ActionTransformer<typeof EFFECT_TYPE_CONDITIONAL> = function (action, transform) {
@@ -96,6 +96,5 @@ export const applyCreateContinuousEffect: ActionTransformer<typeof EFFECT_TYPE_C
     id,
   };
 
-  this.state.continuousEffects.push(continuousEffect);
-  this.clearModifiedCardDataCache();
+  this.addContinuousEffect(continuousEffect);
 }

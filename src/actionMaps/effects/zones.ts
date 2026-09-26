@@ -27,7 +27,7 @@ import { oneOrSeveral } from "../actionMapUtils.js";
 import { ActionTransformer } from "../actionMapTypes.js";
 import { DiscardCreatureFromPlayEffect, MoveCardBetwenZonesEffect } from "../../types/effect.js";
 
-export const applyMoveCardsBetweenZonesEffect: ActionTransformer<typeof EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES> = function (action, transform, _state, seeded_nanoid) {
+export const applyMoveCardsBetweenZonesEffect: ActionTransformer<typeof EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES> = function (action, transform) {
   if (!action.sourceZone || !action.destinationZone) {
     console.error('Source zone or destination zone invalid');
     throw new Error('Invalid params for EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
@@ -47,22 +47,11 @@ export const applyMoveCardsBetweenZonesEffect: ActionTransformer<typeof EFFECT_T
     const destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
     const destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
 
-    if (sourceZoneType === ZONE_TYPE_IN_PLAY || destinationZoneType === ZONE_TYPE_IN_PLAY) {
-      this.clearModifiedCardDataCache();
-    }
-
     const newCards: CardInGame[] = [];
 
     oneOrSeveral(zoneChangingTargets, zoneChangingCard => {
-      if (sourceZone.containsId(zoneChangingCard.id)) {
-        const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner, seeded_nanoid);
-        if (action.bottom) {
-          destinationZone.add([newObject]);
-        } else {
-          destinationZone.addToTop([newObject]);
-        }
-        sourceZone.removeById(zoneChangingCard.id);
-
+      const newObject = this.moveCard(zoneChangingCard, sourceZone, destinationZone, action.bottom);
+      if (newObject) {
         newCards.push(newObject);
         // Let the old cards keep track of the movement too
         this.setSpellMetaDataField('new_card', newObject, zoneChangingCard.id);
@@ -83,7 +72,7 @@ export const applyMoveCardsBetweenZonesEffect: ActionTransformer<typeof EFFECT_T
   }
 }
 
-export const applyMoveCardBetweenZonesEffect: ActionTransformer<typeof EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES> = function (action, transform, _state, seeded_nanoid) {
+export const applyMoveCardBetweenZonesEffect: ActionTransformer<typeof EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES> = function (action, transform) {
   if (!action.sourceZone || !action.destinationZone) {
     console.error('Source zone or destination zone invalid');
     throw new Error('Invalid params for EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
@@ -96,20 +85,8 @@ export const applyMoveCardBetweenZonesEffect: ActionTransformer<typeof EFFECT_TY
     const destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
     const sourceZone = this.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
 
-    if (sourceZoneType === ZONE_TYPE_IN_PLAY || destinationZoneType === ZONE_TYPE_IN_PLAY) {
-      this.clearModifiedCardDataCache();
-    }
-
-    if (sourceZone.containsId(zoneChangingCard.id)) {
-      const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner, seeded_nanoid);
-      if (action.bottom) {
-        destinationZone.add([newObject]);
-      } else {
-        destinationZone.addToTop([newObject]);
-      }
-
-      sourceZone.removeById(zoneChangingCard.id);
-
+    const newObject = this.moveCard(zoneChangingCard, sourceZone, destinationZone, action.bottom);
+    if (newObject) {
       if (sourceZoneType == ZONE_TYPE_IN_PLAY && destinationZoneType !== ZONE_TYPE_IN_PLAY) {
         if (zoneChangingCard.id in this.state.cardsAttached) {
           // Queue the removal of the attached cards
@@ -282,7 +259,7 @@ export const applyRearrangeCardsOfZoneEffect: ActionTransformer<typeof EFFECT_TY
     ...zoneContent.slice(cardsOrder.length),
   ]
 
-  this.getZone(zone, zoneOwner).cards = newZoneContent;
+  this.setZoneCards(this.getZone(zone, zoneOwner), newZoneContent);
 }
 
 export const applyDistributeCardsInZonesEffect: ActionTransformer<typeof EFFECT_TYPE_DISTRIBUTE_CARDS_IN_ZONES> = function (action, transform) {

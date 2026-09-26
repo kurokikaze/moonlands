@@ -215,6 +215,9 @@ import { byName } from './cards.js';
 import CardInGame, { ConvertedCard } from './classes/CardInGame.js';
 import { CostType } from './classes/Card.js';
 import Zone from './classes/Zone.js';
+import { Journal, JournalFrame, snapshotCardData } from './Journal.js';
+export { Journal } from './Journal.js';
+export type { JournalFrame, JournalEntry } from './Journal.js';
 import { SelectorEngine } from './SelectorEngine.js';
 import { PromptValidator } from './PromptValidator.js';
 import { LogEngine } from './LogEngine.js';
@@ -532,6 +535,7 @@ export class State {
 	selectorEngine: SelectorEngine;
 	promptValidator: PromptValidator;
 	logEngine: LogEngine;
+	journal: Journal | null = null;
 
 	constructor(state: StateShape = defaultState) {
 		this.state = {
@@ -576,7 +580,7 @@ export class State {
 
 		this.logEngine = new LogEngine({
 			getMetaValue: (value, spellId) => this.getMetaValue(value, spellId),
-			getLog: () => this.state.log,
+			addLogEntry: (entry) => this.addLogEntry(entry),
 			getPromptType: () => this.state.promptType,
 		});
 	}
@@ -689,16 +693,41 @@ export class State {
 		this.rollDebugValue = null;
 	}
 
-    unsetWinner() {
-        this.winner = false;
-    }
-
-	setWinner(player: number) {
-		this.winner = player;
-	}
-
 	hasWinner() {
 		return this.winner !== false;
+	}
+
+	/**
+	 * Starts recording un-actions for every Mutation API call.
+	 * Frames can be nested; `rollback(frame)` restores the state to the moment
+	 * the frame was started, `endSearchFrame(frame)` keeps the changes.
+	 */
+	beginSearchFrame(): JournalFrame {
+		if (!this.journal) {
+			this.journal = new Journal();
+		}
+		return this.journal.beginFrame(this.twister);
+	}
+
+	rollback(frame: JournalFrame): void {
+		if (!this.journal) {
+			throw new Error('No search frame to roll back');
+		}
+		this.journal.rollback(frame, this);
+		this.clearModifiedCardDataCache();
+		if (!this.journal.hasFrames) {
+			this.journal = null;
+		}
+	}
+
+	endSearchFrame(frame: JournalFrame): void {
+		if (!this.journal) {
+			throw new Error('No search frame to end');
+		}
+		this.journal.endFrame(frame);
+		if (!this.journal.hasFrames) {
+			this.journal = null;
+		}
 	}
 
 	clone(): State {
@@ -947,32 +976,180 @@ export class State {
 		return this.state.step === null ? 0 : steps[this.state.step].priority;
 	}
 
-	addActions(...args: AnyEffectType[]) {
-		this.state.actions.push(...args);
+	/*
+	 * Mutation API
+	 *
+	 * Every change to the game state should go through one of these methods.
+	 * The reducer (`update`) and the action maps call them instead of
+	 * writing into `this.state`, zones or cards directly, so there is a single
+	 * place to hook into for logging, undo, validation or cache invalidation.
+	 *
+	 * While a search frame is open (see `beginSearchFrame`), every method
+	 * records an un-action into the journal before changing anything.
+	 */
+
+	private recordStateFields(...keys: (keyof StateShape)[]): void {
+		if (!this.journal) return;
+		const previous: Partial<StateShape> = {};
+		for (const key of keys) {
+			(previous as any)[key] = this.state[key];
+		}
+		this.journal.record({ kind: 'stateFields', previous });
 	}
 
-	transformIntoActions(...args: AnyEffectType[]) {
-		this.state.actions.unshift(...args);
+	private recordKey(target: Record<string, any>, key: string): void {
+		this.journal?.record({
+			kind: 'key',
+			target,
+			key,
+			had: key in target,
+			previous: target[key],
+		});
 	}
 
-	removeDelayedTrigger(triggerId: string) {
-		this.state.delayedTriggers = this.state.delayedTriggers.filter(({ id }) => id != triggerId);
+	private recordCardData(card: CardInGame): void {
+		this.journal?.record({
+			kind: 'cardData',
+			card,
+			previous: snapshotCardData(card),
+		});
 	}
 
-	private getNextAction() {
-		return this.state.actions.shift();
+	private recordEnergy(card: CardInGame): void {
+		this.journal?.record({
+			kind: 'energy',
+			card,
+			previousEnergy: card.data.energy,
+			previousEnergyLostThisTurn: card.data.energyLostThisTurn,
+		});
 	}
 
-	hasActions() {
-		return this.state.actions.length > 0;
+	// Game result and turn
+
+	unsetWinner() {
+		this.journal?.record({ kind: 'winner', previous: this.winner });
+		this.winner = false;
 	}
+
+	setWinner(player: number) {
+		this.journal?.record({ kind: 'winner', previous: this.winner });
+		this.winner = player;
+	}
+
+	setTurn(turn: number | null): void {
+		this.journal?.record({ kind: 'turn', previous: this.turn });
+		this.turn = turn;
+	}
+
+	// Energy
+
+	/** Adds (positive amount) or removes (negative amount) energy from the card */
+	changeEnergy(card: CardInGame, amount: number): void {
+		this.recordEnergy(card);
+		if (amount < 0) {
+			card.removeEnergy(-amount);
+		} else {
+			card.addEnergy(amount);
+		}
+	}
+
+	setEnergy(card: CardInGame, amount: number): void {
+		this.recordEnergy(card);
+		card.setEnergy(amount);
+	}
+
+	// Card flags
+
+	markAttackDone(card: CardInGame): void {
+		this.recordCardData(card);
+		card.markAttackDone();
+	}
+
+	markAttackReceived(card: CardInGame): void {
+		this.recordCardData(card);
+		card.markAttackReceived();
+	}
+
+	unmarkAttackReceived(card: CardInGame): void {
+		this.recordCardData(card);
+		card.unmarkAttackReceived();
+	}
+
+	markDefeatedCreature(card: CardInGame): void {
+		this.recordCardData(card);
+		card.markDefeatedCreature();
+	}
+
+	unmarkDefeatedCreature(card: CardInGame): void {
+		this.recordCardData(card);
+		card.unmarkDefeatedCreature();
+	}
+
+	forbidAttacks(card: CardInGame): void {
+		this.recordCardData(card);
+		card.forbidAttacks();
+	}
+
+	clearAttackMarkers(card: CardInGame): void {
+		this.recordCardData(card);
+		card.clearAttackMarkers();
+	}
+
+	setActionUsed(card: CardInGame, actionName: string): void {
+		this.recordCardData(card);
+		card.setActionUsed(actionName);
+	}
+
+	clearActionsUsed(card: CardInGame): void {
+		this.recordCardData(card);
+		card.clearActionsUsed();
+	}
+
+	// Zones
+
+	/**
+	 * Moves the card between zones. Moved card becomes a new object with a new id.
+	 * Returns the new card object, or null if the card is not in the source zone.
+	 */
+	moveCard(card: CardInGame, from: Zone, to: Zone, bottom = false): CardInGame | null {
+		const fromIndex = from.cards.findIndex(({ id }) => id === card.id);
+		if (fromIndex === -1) {
+			return null;
+		}
+
+		if (from.type === ZONE_TYPE_IN_PLAY || to.type === ZONE_TYPE_IN_PLAY) {
+			this.clearModifiedCardDataCache();
+		}
+
+		const newCard = new CardInGame(card.card, card.owner, this.nanoid);
+		this.journal?.record({ kind: 'moveCard', card, newCard, from, to, fromIndex });
+
+		if (bottom) {
+			to.add([newCard]);
+		} else {
+			to.addToTop([newCard]);
+		}
+		from.removeById(card.id);
+
+		return newCard;
+	}
+
+	setZoneCards(zone: Zone, cards: CardInGame[]): void {
+		this.journal?.record({ kind: 'zoneCards', zone, previousCards: zone.cards });
+		zone.cards = cards;
+	}
+
+	shuffleZone(zone: Zone): void {
+		// Shuffle works in place, so we keep a copy
+		this.journal?.record({ kind: 'zoneCards', zone, previousCards: [...zone.cards] });
+		zone.shuffle();
+	}
+
+	// Spell metadata
 
 	setSpellMetadata(metadata: any, spellId: string): void {
-        this.state.spellMetaData[spellId] = metadata;
-	}
-
-	getSpellMetadata(spellId: string): MetaDataRecord {
-		return this.state.spellMetaData[spellId] || {};
+		this.recordKey(this.state.spellMetaData, spellId);
+		this.state.spellMetaData[spellId] = metadata;
 	}
 
 	setSpellMetaDataField(field: string, value: any, spellId: string): void {
@@ -989,12 +1166,185 @@ export class State {
 	clearSpellMetaDataField(field: string, spellId: string): void {
 		const spellMetaData = this.state.spellMetaData[spellId]
 		if (spellMetaData && field in spellMetaData) {
+			this.recordKey(spellMetaData, field);
 			delete spellMetaData[field]
 		}
 
 		if (spellId in this.state.spellMetaData && Object.keys(spellMetaData).length === 0) {
+			this.recordKey(this.state.spellMetaData, spellId);
 			delete this.state.spellMetaData[spellId]
 		}
+	}
+
+	// Attachments
+
+	attachCard(cardId: string, attachmentTargetId: string) {
+		this.recordKey(this.state.attachedTo, cardId);
+		this.recordKey(this.state.cardsAttached, attachmentTargetId);
+
+		this.state.attachedTo[cardId] = attachmentTargetId;
+		this.state.cardsAttached[attachmentTargetId] = [
+			...(this.state.cardsAttached[attachmentTargetId] || []),
+			cardId,
+		];
+	}
+
+	removeAttachments(cardId: string) {
+		if (cardId in this.state.cardsAttached) {
+			for (let attachedCardId of this.state.cardsAttached[cardId]) {
+				if (attachedCardId in this.state.attachedTo) {
+					this.recordKey(this.state.attachedTo, attachedCardId);
+					delete this.state.attachedTo[attachedCardId];
+				}
+			}
+
+			this.recordKey(this.state.cardsAttached, cardId);
+			delete this.state.cardsAttached[cardId];
+		}
+	}
+
+	detachCard(cardId: string) {
+		if (cardId in this.state.attachedTo) {
+			const attachedTargetId = this.state.attachedTo[cardId]
+			this.recordKey(this.state.attachedTo, cardId);
+			this.recordKey(this.state.cardsAttached, attachedTargetId);
+			delete this.state.attachedTo[cardId];
+
+			this.state.cardsAttached[attachedTargetId] =
+				this.state.cardsAttached[attachedTargetId].filter(attachedCard => attachedCard !== cardId);
+
+			if (this.state.cardsAttached[attachedTargetId].length === 0) {
+				delete this.state.cardsAttached[attachedTargetId];
+			}
+		}
+
+	}
+
+	// Continuous effects and triggers
+
+	addContinuousEffect(effect: ContinuousEffectType): void {
+		this.journal?.record({ kind: 'arrayPush', array: this.state.continuousEffects, count: 1 });
+		this.state.continuousEffects.push(effect);
+		this.clearModifiedCardDataCache();
+	}
+
+	setContinuousEffects(effects: ContinuousEffectType[]): void {
+		this.recordStateFields('continuousEffects');
+		this.state.continuousEffects = effects;
+		this.clearModifiedCardDataCache();
+	}
+
+	addDelayedTrigger(trigger: EnhancedDelayedTriggerType): void {
+		this.journal?.record({ kind: 'arrayPush', array: this.state.delayedTriggers, count: 1 });
+		this.state.delayedTriggers.push(trigger);
+	}
+
+	removeDelayedTrigger(triggerId: string) {
+		this.recordStateFields('delayedTriggers');
+		this.state.delayedTriggers = this.state.delayedTriggers.filter(({ id }) => id != triggerId);
+	}
+
+	// Prompts
+
+	setPrompt(prompt: {
+		promptType: PromptTypeType,
+		promptParams: PromptParamsType,
+		promptMessage?: string,
+		promptPlayer?: number,
+		promptVariable?: string,
+		promptGeneratedBy?: string,
+	}): void {
+		this.recordStateFields('prompt', 'promptType', 'promptParams', 'promptMessage', 'promptPlayer', 'promptVariable', 'promptGeneratedBy');
+		this.state.prompt = true;
+		this.state.promptType = prompt.promptType;
+		this.state.promptParams = prompt.promptParams;
+		this.state.promptMessage = prompt.promptMessage;
+		this.state.promptPlayer = prompt.promptPlayer;
+		this.state.promptVariable = prompt.promptVariable;
+		this.state.promptGeneratedBy = prompt.promptGeneratedBy;
+	}
+
+	clearPrompt(): void {
+		this.recordStateFields('prompt', 'promptType', 'promptParams', 'promptMessage', 'promptVariable', 'promptGeneratedBy');
+		this.state.prompt = false;
+		this.state.promptType = null;
+		this.state.promptMessage = undefined;
+		this.state.promptGeneratedBy = undefined;
+		this.state.promptVariable = undefined;
+		this.state.promptParams = {};
+	}
+
+	/** Sets actions to apply if the may effect is accepted (and, optionally, if it is declined) */
+	setMayEffectActions(mayEffectActions: AnyEffectType[], fallbackActions?: AnyEffectType[]): void {
+		this.recordStateFields('mayEffectActions', 'fallbackActions');
+		this.state.mayEffectActions = mayEffectActions;
+		if (fallbackActions) {
+			this.state.fallbackActions = fallbackActions;
+		}
+	}
+
+	clearMayEffectActions(): void {
+		this.recordStateFields('mayEffectActions', 'fallbackActions');
+		this.state.mayEffectActions = [];
+		this.state.fallbackActions = [];
+	}
+
+	// Action queue
+
+	addActions(...args: AnyEffectType[]) {
+		this.journal?.record({ kind: 'arrayPush', array: this.state.actions, count: args.length });
+		this.state.actions.push(...args);
+	}
+
+	transformIntoActions(...args: AnyEffectType[]) {
+		this.journal?.record({ kind: 'arrayUnshift', array: this.state.actions, count: args.length });
+		this.state.actions.unshift(...args);
+	}
+
+	setActions(actions: AnyEffectType[]): void {
+		this.recordStateFields('actions');
+		this.state.actions = actions;
+	}
+
+	setSavedActions(actions: AnyEffectType[]): void {
+		this.recordStateFields('savedActions');
+		this.state.savedActions = actions;
+	}
+
+	// Turn and step
+
+	setStep(step: number | null): void {
+		this.recordStateFields('step');
+		this.state.step = step;
+	}
+
+	/** Sets both the active and the controlling player */
+	setActivePlayer(player: number): void {
+		this.recordStateFields('activePlayer', 'controllingPlayer');
+		this.state.activePlayer = player;
+		this.state.controllingPlayer = player;
+	}
+
+	// Log
+
+	addLogEntry(entry: LogEntryType): void {
+		this.journal?.record({ kind: 'arrayPush', array: this.state.log, count: 1 });
+		this.state.log.push(entry);
+	}
+
+	private getNextAction() {
+		if (this.journal && this.state.actions.length > 0) {
+			this.journal.record({ kind: 'arrayShift', array: this.state.actions, item: this.state.actions[0] });
+		}
+		return this.state.actions.shift();
+	}
+
+	hasActions() {
+		return this.state.actions.length > 0;
+	}
+
+	getSpellMetadata(spellId: string): MetaDataRecord {
+		return this.state.spellMetaData[spellId] || {};
 	}
 
 	getMetaValue<T>(value: string | T, spellId: string | undefined): T | any {
@@ -1309,7 +1659,7 @@ export class State {
 
 			// If the replacer is one-time, set the action usage
 			if (appliedReplacerSelf && foundReplacer && foundReplacer.oncePerTurn && foundReplacer.name) {
-				appliedReplacerSelf.setActionUsed(foundReplacer.name);
+				this.setActionUsed(appliedReplacerSelf, foundReplacer.name);
 			}
 
 			if (foundReplacer && foundReplacer.mayEffect) {
@@ -1317,11 +1667,10 @@ export class State {
 				if (appliedReplacerId) {
 					replacedBy.push(appliedReplacerId);
 				}
-				this.state.mayEffectActions = resultEffects;
-				this.state.fallbackActions = [{
+				this.setMayEffectActions(resultEffects, [{
 					...action,
 					replacedBy, // :	('replacedBy' in action && action.replacedBy) ? [...action.replacedBy, appliedReplacerId] : [appliedReplacerId],
-				}];
+				}]);
 
 				return [{
 					type: ACTION_ENTER_PROMPT,
@@ -1497,7 +1846,7 @@ export class State {
 				const allPromptsAreDoable = this.checkPrompts(replacer.self, preparedEffects, false, 0);
 				if (allPromptsAreDoable) {
 					if (replacer.mayEffect) {
-						this.state.mayEffectActions = preparedEffects;
+						this.setMayEffectActions(preparedEffects);
 
 						this.transformIntoActions({
 							type: ACTION_ENTER_PROMPT,
@@ -1525,43 +1874,8 @@ export class State {
 		});
 	}
 
-	attachCard(cardId: string, attachmentTargetId: string) {
-		this.state.attachedTo[cardId] = attachmentTargetId;
-		if (!(attachmentTargetId in this.state.cardsAttached)) {
-			this.state.cardsAttached[attachmentTargetId] = []
-		}
-		this.state.cardsAttached[attachmentTargetId].push(cardId)
-	}
-
-	removeAttachments(cardId: string) {
-		if (cardId in this.state.cardsAttached) {
-			for (let attachedCardId of this.state.cardsAttached[cardId]) {
-				if (attachedCardId in this.state.attachedTo) {
-					delete this.state.attachedTo[attachedCardId];
-				}
-			}
-
-			delete this.state.cardsAttached[cardId];
-		}
-	}
-
 	convertPromptActionToEffect(action: PromptType & { source: CardInGame }): AnyPromptEnteredEffect {
 		return convertPromptActionToEffect(action, this);
-	}
-
-	detachCard(cardId: string) {
-		if (cardId in this.state.attachedTo) {
-			const attachedTargetId = this.state.attachedTo[cardId]
-			delete this.state.attachedTo[cardId];
-
-			this.state.cardsAttached[attachedTargetId] =
-				this.state.cardsAttached[attachedTargetId].filter(attachedCard => attachedCard !== cardId);
-
-			if (this.state.cardsAttached[attachedTargetId].length === 0) {
-				delete this.state.cardsAttached[attachedTargetId];
-			}
-		}
-
 	}
 
 	performCalculation(operator: OperatorType, operandOne: number, operandTwo: number): number {
@@ -1627,7 +1941,7 @@ export class State {
 
 				case ACTION_PLAYER_WINS: {
 					this.setWinner(action.player);
-					this.state.actions = [];
+					this.setActions([]);
 					break;
 				}
 
@@ -1765,7 +2079,7 @@ export class State {
 								sourceCreature: source,
 							}; // No retrieving old metadata from old activations
 
-							source.setActionUsed(action.power.name);
+							this.setActionUsed(source, action.power.name);
 
 							if (powerCost == COST_X) {
 								this.addActions(
@@ -2042,23 +2356,17 @@ export class State {
 					}
 
 					if (!skipPrompt) {
-                        this.state.savedActions = savedActions;
-                        this.state.actions = [this.convertPromptActionToEffect(action as PromptType & { source: CardInGame })]
+						this.setSavedActions(savedActions);
+						this.setActions([this.convertPromptActionToEffect(action as PromptType & { source: CardInGame })]);
 					}
 					break;
 				}
 				case ACTION_EXIT_PROMPTS: {
-                    this.state.actions = []
-                    this.state.savedActions = []
-                    this.state.mayEffectActions = []
-                    this.state.fallbackActions = []
-                    this.state.prompt = false
-                    this.state.promptType = null
-					this.state.promptMessage = undefined
-					this.state.promptGeneratedBy = undefined
-					this.state.promptVariable = undefined
-					this.state.promptParams = {}
-					
+					this.setActions([]);
+					this.setSavedActions([]);
+					this.clearMayEffectActions();
+					this.clearPrompt();
+
 					break;
 				}
 				case ACTION_RESOLVE_PROMPT: {
@@ -2069,20 +2377,14 @@ export class State {
 
 						const actions = action.useEffect ? [...mayEffectActions, ...savedActions] : [...fallbackActions, ...savedActions];
 
-                        this.state.actions = actions;
-                        this.state.savedActions = [];
-                        this.state.mayEffectActions = [];
-                        this.state.fallbackActions = [];
-                        this.state.prompt = false
-                        this.state.promptType = null
-                        this.state.promptMessage = undefined
-                        this.state.promptGeneratedBy = undefined
-                        this.state.promptVariable = undefined
-                        this.state.promptParams = {}
+						this.setActions(actions);
+						this.setSavedActions([]);
+						this.clearMayEffectActions();
+						this.clearPrompt();
                     } else {
 						const generatedBy = action.generatedBy || this.state.promptGeneratedBy || this.nanoid();
 						const variable = action.variable || this.state.promptVariable;
-						let currentActionMetaData = this.state.spellMetaData[generatedBy] || {};
+						const currentActionMetaData = { ...this.getSpellMetadata(generatedBy) };
 
 						switch (this.state.promptType) {
 							case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
@@ -2278,15 +2580,10 @@ export class State {
 							}
 						}
 						const actions = this.state.savedActions || [];
-                        this.state.actions = actions;
-                        this.state.savedActions = [];
-                        this.state.prompt = false;
-                        this.state.promptType = null;
-                        this.state.promptMessage =  undefined;
-						this.state.promptGeneratedBy = undefined;
-						this.state.promptVariable = undefined;
-						this.state.promptParams = {};
-                        this.state.spellMetaData[generatedBy] = currentActionMetaData;
+						this.setActions(actions);
+						this.setSavedActions([]);
+						this.clearPrompt();
+						this.setSpellMetadata(currentActionMetaData, generatedBy);
 					}
 					break;
 				}
