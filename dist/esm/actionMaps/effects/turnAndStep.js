@@ -56,12 +56,7 @@ const steps = [
     },
 ];
 export const applyStartTurnEffect = function (action, transform) {
-    if (this.turn === null) {
-        this.turn = 0;
-    }
-    else {
-        this.turn += 1;
-    }
+    this.setTurn(this.turn === null ? 0 : this.turn + 1);
     transform({
         type: ACTION_EFFECT,
         effectType: EFFECT_TYPE_START_STEP,
@@ -74,11 +69,9 @@ export const applyStartTurnEffect = function (action, transform) {
         player: action.player,
         generatedBy: action.generatedBy,
     });
-    this.state.continuousEffects = this.state.continuousEffects.map(updateContinuousEffects(action.player)).filter(Boolean);
-    this.clearModifiedCardDataCache();
-    this.state.activePlayer = action.player;
-    this.state.controllingPlayer = action.player;
-    this.state.step = 0;
+    this.setContinuousEffects(this.state.continuousEffects.map(updateContinuousEffects(action.player)).filter(Boolean));
+    this.setActivePlayer(action.player);
+    this.setStep(0);
 };
 export const applyDrawCardsInDrawStep = function (action, transform) {
     const numberOfCards = action.numberOfCards;
@@ -92,7 +85,7 @@ export const applyDrawCardsInDrawStep = function (action, transform) {
     transform(...draws);
 };
 export const applyStartOfTurnEffect = function (action, transform) {
-    var _a, _b;
+    var _a;
     if (this.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).length == 0 &&
         this.getZone(ZONE_TYPE_MAGI_PILE, action.player).length > 0) {
         const topMagi = this.getZone(ZONE_TYPE_MAGI_PILE, action.player).cards[0];
@@ -144,19 +137,22 @@ export const applyStartOfTurnEffect = function (action, transform) {
         .filter(card => card.card.type === TYPE_CREATURE && card.data.controller === action.player);
     if (creatures.length > 0) {
         creatures.forEach(creature => {
-            creature.clearAttackMarkers();
-            creature.clearActionsUsed();
+            this.clearAttackMarkers(creature);
+            this.clearActionsUsed(creature);
         });
     }
     // Reset relics' actions
     const relics = this.getZone(ZONE_TYPE_IN_PLAY).cards
         .filter(card => card.card.type === TYPE_RELIC && card.data.controller === action.player);
     if (relics.length > 0) {
-        relics.forEach(relic => relic.clearActionsUsed());
+        relics.forEach(relic => this.clearActionsUsed(relic));
     }
     // if magi is active, reset its actions used too
     if (this.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player).length == 1) {
-        (_b = (_a = this.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player)) === null || _a === void 0 ? void 0 : _a.card) === null || _b === void 0 ? void 0 : _b.clearActionsUsed();
+        const activeMagi = (_a = this.getZone(ZONE_TYPE_ACTIVE_MAGI, action.player)) === null || _a === void 0 ? void 0 : _a.card;
+        if (activeMagi) {
+            this.clearActionsUsed(activeMagi);
+        }
     }
 };
 export const applyStartStepEffect = function (action) {
@@ -178,14 +174,14 @@ export const applyStartStepEffect = function (action) {
     if (action.step === 1 && this.timerEnabled) {
         this.startTurnTimer();
     }
-    this.state.step = action.step;
+    this.setStep(action.step);
 };
 export const applyAddDelayedTriggerEffect = function (action, _transform, _state, seeded_nanoid) {
     const metaData = this.getSpellMetadata(action.generatedBy);
     // "new_card" fallback is for "defeated" triggers
     if ('source' in metaData || 'new_card' in metaData) {
         const self = metaData.source || metaData.new_card;
-        this.state.delayedTriggers.push(Object.assign({ id: seeded_nanoid(), self }, action.delayedTrigger));
+        this.addDelayedTrigger(Object.assign({ id: seeded_nanoid(), self }, action.delayedTrigger));
     }
 };
 export const applyFindStartingCardsEffect = function (action, transform) {

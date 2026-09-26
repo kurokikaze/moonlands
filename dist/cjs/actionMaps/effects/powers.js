@@ -20,7 +20,7 @@ export const applyExecutePowerEffects = function (action) {
         if (allPromptsAreDoable) {
             const mustSetUsage = !('setUsage' in action) || action.setUsage == true;
             if (mustSetUsage && !source.wasActionUsed(power.name)) {
-                source.setActionUsed(power.name);
+                this.setActionUsed(source, power.name);
             }
             this.transformIntoActions(...preparedActions);
         }

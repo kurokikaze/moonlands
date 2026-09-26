@@ -5,9 +5,8 @@ export class LogEngine {
     }
     addActionToLog(action) {
         const entries = this.shouldCreateLog(action);
-        const log = this.context.getLog();
         for (const entry of entries) {
-            log.push(entry);
+            this.context.addLogEntry(entry);
         }
     }
     shouldCreateLog(action) {

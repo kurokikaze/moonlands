@@ -3,6 +3,9 @@ EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_AFTER_DAMAGE, EF
 import CardInGame, { ConvertedCard } from './classes/CardInGame.js';
 import { CostType } from './classes/Card.js';
 import Zone from './classes/Zone.js';
+import { Journal, JournalFrame } from './Journal.js';
+export { Journal } from './Journal.js';
+export type { JournalFrame, JournalEntry } from './Journal.js';
 import { SelectorEngine } from './SelectorEngine.js';
 import { PromptValidator } from './PromptValidator.js';
 import { LogEngine } from './LogEngine.js';
@@ -90,6 +93,7 @@ export declare class State {
     selectorEngine: SelectorEngine;
     promptValidator: PromptValidator;
     logEngine: LogEngine;
+    journal: Journal | null;
     constructor(state?: StateShape);
     closeStreams(): void;
     initiatePRNG(seed: number): void;
@@ -99,9 +103,15 @@ export declare class State {
     enableDebug(): void;
     setRollDebugValue(value: number): void;
     resetRollDebugValue(): void;
-    unsetWinner(): void;
-    setWinner(player: number): void;
     hasWinner(): boolean;
+    /**
+     * Starts recording un-actions for every Mutation API call.
+     * Frames can be nested; `rollback(frame)` restores the state to the moment
+     * the frame was started, `endSearchFrame(frame)` keeps the changes.
+     */
+    beginSearchFrame(): JournalFrame;
+    rollback(frame: JournalFrame): void;
+    endSearchFrame(frame: JournalFrame): void;
     clone(): State;
     setPlayers(player1: number, player2: number): this;
     setDeck(player: number, cardNames: string[]): void;
@@ -124,15 +134,65 @@ export declare class State {
     getActivePlayer(): number;
     getControllingPlayer(): number;
     getCurrentPriority(): PriorityType;
-    addActions(...args: AnyEffectType[]): void;
-    transformIntoActions(...args: AnyEffectType[]): void;
-    removeDelayedTrigger(triggerId: string): void;
-    private getNextAction;
-    hasActions(): boolean;
+    private recordStateFields;
+    private recordKey;
+    private recordCardData;
+    private recordEnergy;
+    unsetWinner(): void;
+    setWinner(player: number): void;
+    setTurn(turn: number | null): void;
+    /** Adds (positive amount) or removes (negative amount) energy from the card */
+    changeEnergy(card: CardInGame, amount: number): void;
+    setEnergy(card: CardInGame, amount: number): void;
+    markAttackDone(card: CardInGame): void;
+    markAttackReceived(card: CardInGame): void;
+    unmarkAttackReceived(card: CardInGame): void;
+    markDefeatedCreature(card: CardInGame): void;
+    unmarkDefeatedCreature(card: CardInGame): void;
+    forbidAttacks(card: CardInGame): void;
+    clearAttackMarkers(card: CardInGame): void;
+    setActionUsed(card: CardInGame, actionName: string): void;
+    clearActionsUsed(card: CardInGame): void;
+    /**
+     * Moves the card between zones. Moved card becomes a new object with a new id.
+     * Returns the new card object, or null if the card is not in the source zone.
+     */
+    moveCard(card: CardInGame, from: Zone, to: Zone, bottom?: boolean): CardInGame | null;
+    setZoneCards(zone: Zone, cards: CardInGame[]): void;
+    shuffleZone(zone: Zone): void;
     setSpellMetadata(metadata: any, spellId: string): void;
-    getSpellMetadata(spellId: string): MetaDataRecord;
     setSpellMetaDataField(field: string, value: any, spellId: string): void;
     clearSpellMetaDataField(field: string, spellId: string): void;
+    attachCard(cardId: string, attachmentTargetId: string): void;
+    removeAttachments(cardId: string): void;
+    detachCard(cardId: string): void;
+    addContinuousEffect(effect: ContinuousEffectType): void;
+    setContinuousEffects(effects: ContinuousEffectType[]): void;
+    addDelayedTrigger(trigger: EnhancedDelayedTriggerType): void;
+    removeDelayedTrigger(triggerId: string): void;
+    setPrompt(prompt: {
+        promptType: PromptTypeType;
+        promptParams: PromptParamsType;
+        promptMessage?: string;
+        promptPlayer?: number;
+        promptVariable?: string;
+        promptGeneratedBy?: string;
+    }): void;
+    clearPrompt(): void;
+    /** Sets actions to apply if the may effect is accepted (and, optionally, if it is declined) */
+    setMayEffectActions(mayEffectActions: AnyEffectType[], fallbackActions?: AnyEffectType[]): void;
+    clearMayEffectActions(): void;
+    addActions(...args: AnyEffectType[]): void;
+    transformIntoActions(...args: AnyEffectType[]): void;
+    setActions(actions: AnyEffectType[]): void;
+    setSavedActions(actions: AnyEffectType[]): void;
+    setStep(step: number | null): void;
+    /** Sets both the active and the controlling player */
+    setActivePlayer(player: number): void;
+    addLogEntry(entry: LogEntryType): void;
+    private getNextAction;
+    hasActions(): boolean;
+    getSpellMetadata(spellId: string): MetaDataRecord;
     getMetaValue<T>(value: string | T, spellId: string | undefined): T | any;
     /**
          * Same as getMetaValue, but instead of $-variables it uses %-variables
@@ -190,12 +250,9 @@ export declare class State {
     checkCondition(action: AnyEffectType, self: CardInGame, condition: ConditionType): any;
     matchAction(action: AnyEffectType, find: FindType, self: CardInGame): boolean;
     triggerAbilities(action: AnyEffectType): void;
-    attachCard(cardId: string, attachmentTargetId: string): void;
-    removeAttachments(cardId: string): void;
     convertPromptActionToEffect(action: PromptType & {
         source: CardInGame;
     }): AnyPromptEnteredEffect;
-    detachCard(cardId: string): void;
     performCalculation(operator: OperatorType, operandOne: number, operandTwo: number): number;
     calculateTotalCost(card: CardInGame): number;
     getAvailableCards(player: number, topMagi: CardInGame): string[];

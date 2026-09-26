@@ -4,7 +4,7 @@ import { oneOrSeveral } from "../actionMapUtils.js";
 // Should rework into continuous effect with duration
 export const applyForbidAttackToCreatureEffect = function (action, _transform) {
     const targets = this.getMetaValue(action.target, action.generatedBy);
-    oneOrSeveral(targets, target => target.forbidAttacks());
+    oneOrSeveral(targets, target => this.forbidAttacks(target));
 };
 export const applyConditionalEffect = function (action, transform) {
     const metaData = this.getSpellMetadata(action.generatedBy);
@@ -76,7 +76,6 @@ export const applyCreateContinuousEffect = function (action, _transform, _state,
         player: action.player || 0,
         id,
     };
-    this.state.continuousEffects.push(continuousEffect);
-    this.clearModifiedCardDataCache();
+    this.addContinuousEffect(continuousEffect);
 };
 //# sourceMappingURL=triggers.js.map

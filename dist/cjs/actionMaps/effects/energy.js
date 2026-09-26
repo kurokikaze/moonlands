@@ -63,8 +63,8 @@ export const applyMoveEnergyEffect = function (action, transform, _state) {
     const moveTarget = (moveMultiTarget instanceof Array) ? moveMultiTarget[0] : moveMultiTarget;
     const amountToMove = this.getMetaValue(action.amount, action.generatedBy);
     if (moveSource.data.energy >= amountToMove) {
-        moveSource.removeEnergy(amountToMove);
-        moveTarget.addEnergy(amountToMove);
+        this.changeEnergy(moveSource, -amountToMove);
+        this.changeEnergy(moveTarget, amountToMove);
         if (moveSource.data.energy === 0) {
             switch (moveSource.card.type) {
                 case TYPE_CREATURE: {
@@ -156,7 +156,7 @@ export const applyDiscardEnergyFromMagiEffect = function (action, transform) {
     oneOrSeveral(this.getMetaValue(action.target, action.generatedBy), target => {
         if (target) {
             const energyToRemove = Math.min(this.getMetaValue(action.amount, action.generatedBy), target.data.energy);
-            target.removeEnergy(energyToRemove);
+            this.changeEnergy(target, -energyToRemove);
             if (energyToRemove > 0) {
                 transform({
                     ...action,
@@ -202,7 +202,7 @@ export const applyDiscardEnergyFromCreatureEffect = function (action, transform)
                 energyToLose = Math.min(energyToLose, energyCanLoseThisTurn);
             }
             const energyLost = Math.min(energyToLose, target.data.energy);
-            target.removeEnergy(energyLost);
+            this.changeEnergy(target, -energyLost);
             totalEnergyLost += energyLost;
             if (target.data.energy == 0 && !action.attack) {
                 transform({
@@ -235,7 +235,7 @@ export const applyRemoveEnergyFromCreatureEffect = function (action, transform) 
     const target = this.getMetaValue(action.target, action.generatedBy);
     const energyToLose = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
     if (target && target.card.type === TYPE_CREATURE) {
-        target.removeEnergy(energyToLose);
+        this.changeEnergy(target, -energyToLose);
         if (target.data.energy === 0) {
             transform({
                 type: ACTION_EFFECT,
@@ -257,7 +257,7 @@ export const applyRemoveEnergyFromMagiEffect = function (action) {
     const target = this.getMetaValue(action.target, action.generatedBy);
     const energyToLose = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
     if (target && target.card.type === TYPE_MAGI) {
-        target.removeEnergy(energyToLose);
+        this.changeEnergy(target, -energyToLose);
     }
 };
 export const applyRestoreCreatureToStartingEnergyEffect = function (action, transform) {
@@ -284,7 +284,7 @@ export const applyAddEnergyToCreatureEffect = function (action) {
     const inPlay = this.getZone(ZONE_TYPE_IN_PLAY);
     oneOrSeveral(addTargets, addTarget => {
         if (addTarget && inPlay.containsId(addTarget.id) && this.isCardAffectedByEffect(addTarget, action)) {
-            addTarget.addEnergy(parseInt(this.getMetaValue(action.amount, action.generatedBy), 10));
+            this.changeEnergy(addTarget, parseInt(this.getMetaValue(action.amount, action.generatedBy), 10));
         }
     });
 };
@@ -292,7 +292,7 @@ export const applyAddEnergyToMagiEffect = function (action) {
     const magiTarget = this.getMetaValue(action.target, action.generatedBy);
     oneOrSeveral(magiTarget, target => {
         if (target) {
-            target.addEnergy(parseInt(this.getMetaValue(action.amount, action.generatedBy), 10));
+            this.changeEnergy(target, parseInt(this.getMetaValue(action.amount, action.generatedBy), 10));
         }
     });
 };
@@ -316,7 +316,7 @@ export const applyRearrangeEnergyOnCreaturesEffect = function (action, transform
             this.getZone(ZONE_TYPE_IN_PLAY).cards.forEach(card => {
                 if (card.card.type === TYPE_CREATURE && card.id in energyArrangement) {
                     const newEnergy = energyArrangement[card.id];
-                    card.setEnergy(newEnergy);
+                    this.setEnergy(card, newEnergy);
                     if (card.data.energy === 0) {
                         transform({
                             type: ACTION_EFFECT,
@@ -345,7 +345,7 @@ export const applyDistributeEnergyOnCreaturesEffect = function (action) {
     this.getZone(ZONE_TYPE_IN_PLAY).cards.forEach(card => {
         if (card.card.type === TYPE_CREATURE && card.id in energyArrangement) {
             const energyAmount = energyArrangement[card.id];
-            card.addEnergy(energyAmount);
+            this.changeEnergy(card, energyAmount);
         }
     });
 };

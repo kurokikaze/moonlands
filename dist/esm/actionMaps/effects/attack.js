@@ -88,8 +88,8 @@ export const applyAttackEffect = function (action, transform) {
     transform(...attackSequence);
 };
 export const applyBeforeDamageEffect = function (action, transform, _state) {
-    action.source.markAttackDone();
-    action.target.markAttackReceived();
+    this.markAttackDone(action.source);
+    this.markAttackReceived(action.target);
 };
 export const applyDamageStepEffect = function (action, transform) {
     // Here we finalize damage amount from both creatures' energy
@@ -227,7 +227,7 @@ export const applyAfterDamageEffect = function (action, transform) {
 };
 export const applyCreatureDefeatsCreatureEffect = function (action, transform) {
     if (action.target.data.energy === 0) {
-        action.source.markDefeatedCreature();
+        this.markDefeatedCreature(action.source);
         transform({
             type: ACTION_EFFECT,
             effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,

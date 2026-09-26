@@ -30,9 +30,9 @@ export const applyReshuffleDiscardEffect = function (action, transform, _state, 
     const deck = this.getZone(ZONE_TYPE_DECK, player);
     const discard = this.getZone(ZONE_TYPE_DISCARD, player);
     const newCards = discard.cards.map(card => new CardInGame(card.card, card.owner, seeded_nanoid));
-    deck.add(newCards);
-    deck.shuffle();
-    discard.empty();
+    this.setZoneCards(deck, [...deck.cards, ...newCards]);
+    this.shuffleZone(deck);
+    this.setZoneCards(discard, []);
     transform({
         type: ACTION_EFFECT,
         effectType: EFFECT_TYPE_DISCARD_RESHUFFLED,

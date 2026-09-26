@@ -1,7 +1,6 @@
-import CardInGame from "../../classes/CardInGame.js";
 import { ACTION_EFFECT, ACTION_PLAYER_WINS, ACTION_SELECT, EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, SELECTOR_OWN_CARDS_IN_PLAY, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DEFEATED_MAGI, ZONE_TYPE_DISCARD, ZONE_TYPE_IN_PLAY, ZONE_TYPE_MAGI_PILE, } from "../../const.js";
 import { oneOrSeveral } from "../actionMapUtils.js";
-export const applyMoveCardsBetweenZonesEffect = function (action, transform, _state, seeded_nanoid) {
+export const applyMoveCardsBetweenZonesEffect = function (action, transform) {
     if (!action.sourceZone || !action.destinationZone) {
         console.error('Source zone or destination zone invalid');
         throw new Error('Invalid params for EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
@@ -18,20 +17,10 @@ export const applyMoveCardsBetweenZonesEffect = function (action, transform, _st
         const sourceZone = this.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
         const destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
         const destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneOwner);
-        if (sourceZoneType === ZONE_TYPE_IN_PLAY || destinationZoneType === ZONE_TYPE_IN_PLAY) {
-            this.clearModifiedCardDataCache();
-        }
         const newCards = [];
         oneOrSeveral(zoneChangingTargets, zoneChangingCard => {
-            if (sourceZone.containsId(zoneChangingCard.id)) {
-                const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner, seeded_nanoid);
-                if (action.bottom) {
-                    destinationZone.add([newObject]);
-                }
-                else {
-                    destinationZone.addToTop([newObject]);
-                }
-                sourceZone.removeById(zoneChangingCard.id);
+            const newObject = this.moveCard(zoneChangingCard, sourceZone, destinationZone, action.bottom);
+            if (newObject) {
                 newCards.push(newObject);
                 // Let the old cards keep track of the movement too
                 this.setSpellMetaDataField('new_card', newObject, zoneChangingCard.id);
@@ -52,7 +41,7 @@ export const applyMoveCardsBetweenZonesEffect = function (action, transform, _st
         this.setSpellMetaDataField('new_cards', newCards, action.generatedBy);
     }
 };
-export const applyMoveCardBetweenZonesEffect = function (action, transform, _state, seeded_nanoid) {
+export const applyMoveCardBetweenZonesEffect = function (action, transform) {
     if (!action.sourceZone || !action.destinationZone) {
         console.error('Source zone or destination zone invalid');
         throw new Error('Invalid params for EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES');
@@ -64,18 +53,8 @@ export const applyMoveCardBetweenZonesEffect = function (action, transform, _sta
         const destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
         const destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
         const sourceZone = this.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
-        if (sourceZoneType === ZONE_TYPE_IN_PLAY || destinationZoneType === ZONE_TYPE_IN_PLAY) {
-            this.clearModifiedCardDataCache();
-        }
-        if (sourceZone.containsId(zoneChangingCard.id)) {
-            const newObject = new CardInGame(zoneChangingCard.card, zoneChangingCard.owner, seeded_nanoid);
-            if (action.bottom) {
-                destinationZone.add([newObject]);
-            }
-            else {
-                destinationZone.addToTop([newObject]);
-            }
-            sourceZone.removeById(zoneChangingCard.id);
+        const newObject = this.moveCard(zoneChangingCard, sourceZone, destinationZone, action.bottom);
+        if (newObject) {
             if (sourceZoneType == ZONE_TYPE_IN_PLAY && destinationZoneType !== ZONE_TYPE_IN_PLAY) {
                 if (zoneChangingCard.id in this.state.cardsAttached) {
                     // Queue the removal of the attached cards
@@ -235,7 +214,7 @@ export const applyRearrangeCardsOfZoneEffect = function (action) {
         ...cardsOrder.map(id => cardsToRearrange[id]),
         ...zoneContent.slice(cardsOrder.length),
     ];
-    this.getZone(zone, zoneOwner).cards = newZoneContent;
+    this.setZoneCards(this.getZone(zone, zoneOwner), newZoneContent);
 };
 export const applyDistributeCardsInZonesEffect = function (action, transform) {
     const sourceZone = this.getMetaValue(action.sourceZone, action.generatedBy);
