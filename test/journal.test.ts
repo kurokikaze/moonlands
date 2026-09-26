@@ -189,3 +189,73 @@ describe('Journal search frames', () => {
 		expect(() => state.rollback(outer)).toThrow();
 	});
 });
+
+describe('Journal preserves key order of restored records', () => {
+	const setup = () => {
+		const first = card('Vellup', PLAYER, 3);
+		const second = card('Vellup', PLAYER, 3);
+		const firstBank = card('Fog Bank', PLAYER);
+		const secondBank = card('Fog Bank', PLAYER);
+		const state = makeState({
+			inPlay: [first, firstBank, second, secondBank, card('Flame Hyren', OPPONENT, 15)],
+			magi: card('Ora', PLAYER, 12),
+			opponentMagi: card('Sinder', OPPONENT, 8),
+		});
+		state.attachCard(firstBank.id, first.id);
+		state.attachCard(secondBank.id, second.id);
+		return { state, first, second, firstBank, secondBank };
+	};
+
+	it('restores attachments in their original order after removeAttachments', () => {
+		const { state, first } = setup();
+		const before = snapshot(state);
+
+		const frame = state.beginSearchFrame();
+		state.removeAttachments(first.id);
+		state.rollback(frame);
+
+		expect(Object.keys(state.state.cardsAttached)).toEqual(Object.keys(JSON.parse(before.json).full.cardsAttached));
+		expectSameState(state, before);
+		expect(JSON.stringify(state.state.attachedTo)).toBe(JSON.stringify(JSON.parse(before.json).attachedTo));
+	});
+
+	it('restores attachments in their original order after detachCard', () => {
+		const { state, firstBank } = setup();
+		const before = snapshot(state);
+
+		const frame = state.beginSearchFrame();
+		state.detachCard(firstBank.id);
+		state.rollback(frame);
+
+		expectSameState(state, before);
+	});
+
+	it('restores attachments in their original order after the attached creature is discarded in an attack', () => {
+		const { state, first } = setup();
+		const flameHyren = state.getZone(ZONE_TYPE_IN_PLAY).cards.find(c => c.card.name === 'Flame Hyren')!;
+		state.update({ type: ACTION_PASS, player: PLAYER } as any);
+		const before = snapshot(state);
+
+		const frame = state.beginSearchFrame();
+		state.update({ type: ACTION_ATTACK, source: first, target: flameHyren, player: PLAYER } as any);
+		expect(state.getZone(ZONE_TYPE_IN_PLAY).containsId(first.id)).toBe(false);
+		state.rollback(frame);
+
+		expectSameState(state, before);
+	});
+
+	it('restores spell metadata in its original order after clearSpellMetaDataField', () => {
+		const { state } = setup();
+		state.setSpellMetaDataField('a', 1, 'spellOne');
+		state.setSpellMetaDataField('b', 2, 'spellOne');
+		state.setSpellMetaDataField('c', 3, 'spellTwo');
+		const before = JSON.stringify(state.state.spellMetaData);
+
+		const frame = state.beginSearchFrame();
+		state.clearSpellMetaDataField('a', 'spellOne');
+		state.clearSpellMetaDataField('c', 'spellTwo');
+		state.rollback(frame);
+
+		expect(JSON.stringify(state.state.spellMetaData)).toBe(before);
+	});
+});
