@@ -51,6 +51,13 @@ export type JournalEntry =
 		previous: any,
 	}
 	| {
+		// Restores the whole record in place, keeping its original key order.
+		// Used before deleting keys: re-adding a deleted key would move it to the end.
+		kind: 'record',
+		target: Record<string, any>,
+		previous: Record<string, any>,
+	}
+	| {
 		kind: 'stateFields',
 		previous: Partial<StateShape>,
 	}
@@ -180,6 +187,13 @@ export class Journal {
 				} else {
 					delete entry.target[entry.key];
 				}
+				break;
+			}
+			case 'record': {
+				for (const key of Object.keys(entry.target)) {
+					delete entry.target[key];
+				}
+				Object.assign(entry.target, entry.previous);
 				break;
 			}
 			case 'stateFields': {
