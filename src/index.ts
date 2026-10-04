@@ -1129,6 +1129,11 @@ export class State {
 		if (from.type === ZONE_TYPE_IN_PLAY || to.type === ZONE_TYPE_IN_PLAY) {
 			this.clearModifiedCardDataCache();
 		}
+		if (card.card.data.staticAbilities?.length &&
+			(from.type === ZONE_TYPE_IN_PLAY || to.type === ZONE_TYPE_IN_PLAY ||
+				from.type === ZONE_TYPE_ACTIVE_MAGI || to.type === ZONE_TYPE_ACTIVE_MAGI)) {
+			this.selectorEngine.clearStaticAbilitiesCache();
+		}
 
 		const newCard = new CardInGame(card.card, card.owner, this.nanoid);
 		this.journal?.record({ kind: 'moveCard', card, newCard, from, to, fromIndex });
@@ -1144,14 +1149,17 @@ export class State {
 	}
 
 	setZoneCards(zone: Zone, cards: CardInGame[]): void {
+		this.selectorEngine.invalidateStaticAbilitiesForZoneChange(zone, zone.cards, cards);
 		this.journal?.record({ kind: 'zoneCards', zone, previousCards: zone.cards });
 		zone.cards = cards;
 	}
 
 	shuffleZone(zone: Zone): void {
+		const previousCards = [...zone.cards];
 		// Shuffle works in place, so we keep a copy
-		this.journal?.record({ kind: 'zoneCards', zone, previousCards: [...zone.cards] });
+		this.journal?.record({ kind: 'zoneCards', zone, previousCards });
 		zone.shuffle();
+		this.selectorEngine.invalidateStaticAbilitiesForZoneChange(zone, previousCards, zone.cards);
 	}
 
 	// Spell metadata

@@ -1,3 +1,4 @@
+import { ZONE_TYPE_IN_PLAY, ZONE_TYPE_ACTIVE_MAGI } from './const.js';
 export const snapshotCardData = (card) => ({
     flags: card.flags,
     data: {
@@ -66,12 +67,18 @@ export class Journal {
                 break;
             }
             case 'moveCard': {
+                if (entry.card.card.data.staticAbilities?.length &&
+                    (entry.from.type === ZONE_TYPE_IN_PLAY || entry.to.type === ZONE_TYPE_IN_PLAY ||
+                        entry.from.type === ZONE_TYPE_ACTIVE_MAGI || entry.to.type === ZONE_TYPE_ACTIVE_MAGI)) {
+                    state.selectorEngine.clearStaticAbilitiesCache();
+                }
                 entry.to.removeById(entry.newCard.id);
                 const cards = entry.from.cards;
                 entry.from.cards = [...cards.slice(0, entry.fromIndex), entry.card, ...cards.slice(entry.fromIndex)];
                 break;
             }
             case 'zoneCards': {
+                state.selectorEngine.invalidateStaticAbilitiesForZoneChange(entry.zone, entry.zone.cards, entry.previousCards);
                 entry.zone.cards = entry.previousCards;
                 break;
             }

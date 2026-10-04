@@ -622,7 +622,7 @@ export class State {
      * Returns the new card object, or null if the card is not in the source zone.
      */
     moveCard(card, from, to, bottom = false) {
-        var _a;
+        var _a, _b;
         const fromIndex = from.cards.findIndex(({ id }) => id === card.id);
         if (fromIndex === -1) {
             return null;
@@ -630,8 +630,13 @@ export class State {
         if (from.type === ZONE_TYPE_IN_PLAY || to.type === ZONE_TYPE_IN_PLAY) {
             this.clearModifiedCardDataCache();
         }
+        if (((_a = card.card.data.staticAbilities) === null || _a === void 0 ? void 0 : _a.length) &&
+            (from.type === ZONE_TYPE_IN_PLAY || to.type === ZONE_TYPE_IN_PLAY ||
+                from.type === ZONE_TYPE_ACTIVE_MAGI || to.type === ZONE_TYPE_ACTIVE_MAGI)) {
+            this.selectorEngine.clearStaticAbilitiesCache();
+        }
         const newCard = new CardInGame(card.card, card.owner, this.nanoid);
-        (_a = this.journal) === null || _a === void 0 ? void 0 : _a.record({ kind: 'moveCard', card, newCard, from, to, fromIndex });
+        (_b = this.journal) === null || _b === void 0 ? void 0 : _b.record({ kind: 'moveCard', card, newCard, from, to, fromIndex });
         if (bottom) {
             to.add([newCard]);
         }
@@ -643,14 +648,17 @@ export class State {
     }
     setZoneCards(zone, cards) {
         var _a;
+        this.selectorEngine.invalidateStaticAbilitiesForZoneChange(zone, zone.cards, cards);
         (_a = this.journal) === null || _a === void 0 ? void 0 : _a.record({ kind: 'zoneCards', zone, previousCards: zone.cards });
         zone.cards = cards;
     }
     shuffleZone(zone) {
         var _a;
+        const previousCards = [...zone.cards];
         // Shuffle works in place, so we keep a copy
-        (_a = this.journal) === null || _a === void 0 ? void 0 : _a.record({ kind: 'zoneCards', zone, previousCards: [...zone.cards] });
+        (_a = this.journal) === null || _a === void 0 ? void 0 : _a.record({ kind: 'zoneCards', zone, previousCards });
         zone.shuffle();
+        this.selectorEngine.invalidateStaticAbilitiesForZoneChange(zone, previousCards, zone.cards);
     }
     // Spell metadata
     setSpellMetadata(metadata, spellId) {

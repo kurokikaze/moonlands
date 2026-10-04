@@ -7,6 +7,7 @@ export class SelectorEngine extends LayeredModificationEngine {
     constructor(context) {
         super();
         this.modifiedCardDataCache = new Map();
+        this.zoneStaticAbilitiesCache = null;
         this.context = context;
         this.costEngine = new CostEngine({
             getOwnMagi: this.getOwnMagi.bind(this),
@@ -27,6 +28,36 @@ export class SelectorEngine extends LayeredModificationEngine {
     }
     clearModifiedCardDataCache() {
         this.modifiedCardDataCache.clear();
+    }
+    clearStaticAbilitiesCache() {
+        this.zoneStaticAbilitiesCache = null;
+        this.clearModifiedCardDataCache();
+    }
+    /** Only active zones contribute card static abilities. */
+    invalidateStaticAbilitiesForZoneChange(zone, previousCards, cards) {
+        if (zone.type !== ZONE_TYPE_IN_PLAY && zone.type !== ZONE_TYPE_ACTIVE_MAGI) {
+            return;
+        }
+        const previousSources = previousCards.filter(card => { var _a; return (_a = card.card.data.staticAbilities) === null || _a === void 0 ? void 0 : _a.length; });
+        const sources = cards.filter(card => { var _a; return (_a = card.card.data.staticAbilities) === null || _a === void 0 ? void 0 : _a.length; });
+        if (previousSources.length !== sources.length || previousSources.some((card, index) => card !== sources[index])) {
+            this.clearStaticAbilitiesCache();
+        }
+    }
+    getZoneStaticAbilities() {
+        if (this.zoneStaticAbilitiesCache === null) {
+            const { getZone, players } = this.context;
+            const cards = [
+                ...getZone(ZONE_TYPE_IN_PLAY).cards,
+                ...getZone(ZONE_TYPE_ACTIVE_MAGI, players[0]).cards,
+                ...getZone(ZONE_TYPE_ACTIVE_MAGI, players[1]).cards,
+            ];
+            this.zoneStaticAbilitiesCache = cards.flatMap(card => { var _a; return ((_a = card.card.data.staticAbilities) !== null && _a !== void 0 ? _a : []).map(ability => (Object.assign(Object.assign({}, ability), { 
+                // Control can change without the source leaving its zone.
+                get player() { return card.data.controller; },
+                card }))); });
+        }
+        return this.zoneStaticAbilitiesCache;
     }
     // ── Nth / random card helpers ────────────────────────────────────────────
     selectNthCardOfZone(player, zoneType, cardNumber, restrictions) {
@@ -192,9 +223,7 @@ export class SelectorEngine extends LayeredModificationEngine {
             // @ts-ignore
             return this.getByProperty(Object.assign(Object.assign({}, cached), { data: freshData }), property, subProperty);
         }
-        const { getZone, players, getContinuousEffects } = this.context;
-        const PLAYER_ONE = players[0];
-        const PLAYER_TWO = players[1];
+        const { getContinuousEffects } = this.context;
         const gameStaticAbilities = [
             {
                 name: 'Burrowed - Energy loss',
@@ -219,11 +248,6 @@ export class SelectorEngine extends LayeredModificationEngine {
                 },
             },
         ];
-        const allZonesCards = [
-            ...getZone(ZONE_TYPE_IN_PLAY).cards,
-            ...getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE).cards,
-            ...getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO).cards,
-        ];
         const continuousStaticAbilities = getContinuousEffects().map(effect => { var _a; return ((_a = effect.staticAbilities) === null || _a === void 0 ? void 0 : _a.map(a => (Object.assign(Object.assign({}, a), { player: effect.player })))) || []; }).flat();
         const propertyLayers = {
             [PROPERTY_CONTROLLER]: 0,
@@ -238,10 +262,7 @@ export class SelectorEngine extends LayeredModificationEngine {
             [PROPERTY_ABLE_TO_USE_POWERS]: 8,
             [PROPERTY_PROTECTION]: 9,
         };
-        const zoneAbilities = allZonesCards.reduce((acc, cardInPlay) => cardInPlay.card.data.staticAbilities ? [
-            ...acc,
-            ...(cardInPlay.card.data.staticAbilities.map(a => (Object.assign(Object.assign({}, a), { player: cardInPlay.data.controller, card: cardInPlay }))))
-        ] : acc, []);
+        const zoneAbilities = this.getZoneStaticAbilities();
         const staticAbilities = [...gameStaticAbilities, ...zoneAbilities, ...continuousStaticAbilities].sort((a, b) => propertyLayers[a.property] - propertyLayers[b.property]);
         let initialCardData = {
             card: target.card,

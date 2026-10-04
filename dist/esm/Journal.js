@@ -1,3 +1,4 @@
+import { ZONE_TYPE_IN_PLAY, ZONE_TYPE_ACTIVE_MAGI } from './const.js';
 export const snapshotCardData = (card) => ({
     flags: card.flags,
     data: Object.assign(Object.assign({}, card.data), { actionsUsed: [...card.data.actionsUsed] }),
@@ -53,6 +54,7 @@ export class Journal {
         }
     }
     undo(entry, state) {
+        var _a;
         switch (entry.kind) {
             case 'energy': {
                 entry.card.data.energy = entry.previousEnergy;
@@ -65,12 +67,18 @@ export class Journal {
                 break;
             }
             case 'moveCard': {
+                if (((_a = entry.card.card.data.staticAbilities) === null || _a === void 0 ? void 0 : _a.length) &&
+                    (entry.from.type === ZONE_TYPE_IN_PLAY || entry.to.type === ZONE_TYPE_IN_PLAY ||
+                        entry.from.type === ZONE_TYPE_ACTIVE_MAGI || entry.to.type === ZONE_TYPE_ACTIVE_MAGI)) {
+                    state.selectorEngine.clearStaticAbilitiesCache();
+                }
                 entry.to.removeById(entry.newCard.id);
                 const cards = entry.from.cards;
                 entry.from.cards = [...cards.slice(0, entry.fromIndex), entry.card, ...cards.slice(entry.fromIndex)];
                 break;
             }
             case 'zoneCards': {
+                state.selectorEngine.invalidateStaticAbilitiesForZoneChange(entry.zone, entry.zone.cards, entry.previousCards);
                 entry.zone.cards = entry.previousCards;
                 break;
             }
