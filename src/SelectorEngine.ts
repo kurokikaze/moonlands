@@ -108,6 +108,7 @@ export class SelectorEngine extends LayeredModificationEngine {
 	private restrictionEngine: RestrictionEngine;
 	public modifiedCardDataCache: Map<string, CardWithModification> = new Map();
 	private zoneStaticAbilitiesCache: EnrichedStaticAbilityType[] | null = null;
+	private continuousStaticAbilitiesCache: EnrichedStaticAbilityType[] | null = null;
 
 	constructor(context: SelectorEngineContext) {
 		super();
@@ -139,6 +140,29 @@ export class SelectorEngine extends LayeredModificationEngine {
 	clearStaticAbilitiesCache(): void {
 		this.zoneStaticAbilitiesCache = null;
 		this.clearModifiedCardDataCache();
+	}
+
+	clearContinuousStaticAbilitiesCache(): void {
+		this.continuousStaticAbilitiesCache = null;
+		this.clearModifiedCardDataCache();
+	}
+
+	invalidateStaticAbilitiesForContinuousEffectsChange(previous: ContinuousEffectType[], effects: ContinuousEffectType[]): void {
+		const previousSources = previous.filter(effect => effect.staticAbilities?.length);
+		const sources = effects.filter(effect => effect.staticAbilities?.length);
+		if (previousSources.length !== sources.length || previousSources.some((effect, index) =>
+			effect.staticAbilities !== sources[index].staticAbilities || effect.player !== sources[index].player)) {
+			this.clearContinuousStaticAbilitiesCache();
+		}
+	}
+
+	private getContinuousStaticAbilities(): EnrichedStaticAbilityType[] {
+		if (this.continuousStaticAbilitiesCache === null) {
+			this.continuousStaticAbilitiesCache = this.context.getContinuousEffects().flatMap(effect =>
+				(effect.staticAbilities ?? []).map(ability => ({ ...ability, player: effect.player })),
+			);
+		}
+		return this.continuousStaticAbilitiesCache;
 	}
 
 	/** Only active zones contribute card static abilities. */
@@ -384,8 +408,6 @@ export class SelectorEngine extends LayeredModificationEngine {
 			return this.getByProperty({ ...cached, data: freshData }, property, subProperty);
 		}
 
-		const { getContinuousEffects } = this.context;
-
 		const gameStaticAbilities: GameStaticAbility[] = [
 			{
 				name: 'Burrowed - Energy loss',
@@ -411,9 +433,7 @@ export class SelectorEngine extends LayeredModificationEngine {
 			},
 		];
 
-		const continuousStaticAbilities: EnrichedStaticAbilityType[] = getContinuousEffects().map(
-			effect => effect.staticAbilities?.map(a => ({ ...a, player: effect.player })) || []
-		).flat();
+		const continuousStaticAbilities = this.getContinuousStaticAbilities();
 
 		const propertyLayers = {
 			[PROPERTY_CONTROLLER]: 0,

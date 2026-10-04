@@ -178,6 +178,11 @@ export class Journal {
 						entry.from.type === ZONE_TYPE_ACTIVE_MAGI || entry.to.type === ZONE_TYPE_ACTIVE_MAGI)) {
 					state.selectorEngine.clearStaticAbilitiesCache();
 				}
+				if (entry.card.card.data.replacementEffects?.length &&
+					(entry.from.type === ZONE_TYPE_IN_PLAY || entry.to.type === ZONE_TYPE_IN_PLAY ||
+						entry.from.type === ZONE_TYPE_ACTIVE_MAGI || entry.to.type === ZONE_TYPE_ACTIVE_MAGI)) {
+					state.clearReplacementEffectsCache();
+				}
 				entry.to.removeById(entry.newCard.id);
 				const cards = entry.from.cards;
 				entry.from.cards = [...cards.slice(0, entry.fromIndex), entry.card, ...cards.slice(entry.fromIndex)];
@@ -185,6 +190,7 @@ export class Journal {
 			}
 			case 'zoneCards': {
 				state.selectorEngine.invalidateStaticAbilitiesForZoneChange(entry.zone, entry.zone.cards, entry.previousCards);
+				state.invalidateReplacementEffectsForZoneChange(entry.zone, entry.zone.cards, entry.previousCards);
 				entry.zone.cards = entry.previousCards;
 				break;
 			}
@@ -204,10 +210,17 @@ export class Journal {
 				break;
 			}
 			case 'stateFields': {
+				if (entry.previous.continuousEffects) {
+					state.selectorEngine.invalidateStaticAbilitiesForContinuousEffectsChange(state.state.continuousEffects, entry.previous.continuousEffects);
+				}
 				Object.assign(state.state, entry.previous);
 				break;
 			}
 			case 'arrayPush': {
+				if (entry.array === state.state.continuousEffects &&
+					entry.array.slice(entry.array.length - entry.count).some(effect => effect.staticAbilities?.length)) {
+					state.selectorEngine.clearContinuousStaticAbilitiesCache();
+				}
 				entry.array.splice(entry.array.length - entry.count, entry.count);
 				break;
 			}

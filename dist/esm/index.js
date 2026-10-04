@@ -133,6 +133,7 @@ export class State {
         this.onFullAction = null;
         this.turnTimer = null;
         this.journal = null;
+        this.replacementEffectsCache = null;
         this.zoneHash = new Map();
         this.state = Object.assign(Object.assign({}, clone(defaultState)), state);
         if (!('controllingPlayer' in state)) {
@@ -622,7 +623,7 @@ export class State {
      * Returns the new card object, or null if the card is not in the source zone.
      */
     moveCard(card, from, to, bottom = false) {
-        var _a, _b;
+        var _a, _b, _c;
         const fromIndex = from.cards.findIndex(({ id }) => id === card.id);
         if (fromIndex === -1) {
             return null;
@@ -635,8 +636,13 @@ export class State {
                 from.type === ZONE_TYPE_ACTIVE_MAGI || to.type === ZONE_TYPE_ACTIVE_MAGI)) {
             this.selectorEngine.clearStaticAbilitiesCache();
         }
+        if (((_b = card.card.data.replacementEffects) === null || _b === void 0 ? void 0 : _b.length) &&
+            (from.type === ZONE_TYPE_IN_PLAY || to.type === ZONE_TYPE_IN_PLAY ||
+                from.type === ZONE_TYPE_ACTIVE_MAGI || to.type === ZONE_TYPE_ACTIVE_MAGI)) {
+            this.clearReplacementEffectsCache();
+        }
         const newCard = new CardInGame(card.card, card.owner, this.nanoid);
-        (_b = this.journal) === null || _b === void 0 ? void 0 : _b.record({ kind: 'moveCard', card, newCard, from, to, fromIndex });
+        (_c = this.journal) === null || _c === void 0 ? void 0 : _c.record({ kind: 'moveCard', card, newCard, from, to, fromIndex });
         if (bottom) {
             to.add([newCard]);
         }
@@ -649,6 +655,7 @@ export class State {
     setZoneCards(zone, cards) {
         var _a;
         this.selectorEngine.invalidateStaticAbilitiesForZoneChange(zone, zone.cards, cards);
+        this.invalidateReplacementEffectsForZoneChange(zone, zone.cards, cards);
         (_a = this.journal) === null || _a === void 0 ? void 0 : _a.record({ kind: 'zoneCards', zone, previousCards: zone.cards });
         zone.cards = cards;
     }
@@ -659,6 +666,7 @@ export class State {
         (_a = this.journal) === null || _a === void 0 ? void 0 : _a.record({ kind: 'zoneCards', zone, previousCards });
         zone.shuffle();
         this.selectorEngine.invalidateStaticAbilitiesForZoneChange(zone, previousCards, zone.cards);
+        this.invalidateReplacementEffectsForZoneChange(zone, previousCards, zone.cards);
     }
     // Spell metadata
     setSpellMetadata(metadata, spellId) {
@@ -720,12 +728,16 @@ export class State {
     }
     // Continuous effects and triggers
     addContinuousEffect(effect) {
-        var _a;
+        var _a, _b;
         (_a = this.journal) === null || _a === void 0 ? void 0 : _a.record({ kind: 'arrayPush', array: this.state.continuousEffects, count: 1 });
         this.state.continuousEffects.push(effect);
+        if ((_b = effect.staticAbilities) === null || _b === void 0 ? void 0 : _b.length) {
+            this.selectorEngine.clearContinuousStaticAbilitiesCache();
+        }
         this.clearModifiedCardDataCache();
     }
     setContinuousEffects(effects) {
+        this.selectorEngine.invalidateStaticAbilitiesForContinuousEffectsChange(this.state.continuousEffects, effects);
         this.recordStateFields('continuousEffects');
         this.state.continuousEffects = effects;
         this.clearModifiedCardDataCache();
@@ -958,27 +970,40 @@ export class State {
         }
         return property ? this.getMetaValue(action[object], action.generatedBy) : object;
     }
+    clearReplacementEffectsCache() {
+        this.replacementEffectsCache = null;
+    }
+    invalidateReplacementEffectsForZoneChange(zone, previousCards, cards) {
+        if (zone.type !== ZONE_TYPE_IN_PLAY && zone.type !== ZONE_TYPE_ACTIVE_MAGI) {
+            return;
+        }
+        const previousSources = previousCards.filter(card => { var _a; return (_a = card.card.data.replacementEffects) === null || _a === void 0 ? void 0 : _a.length; });
+        const sources = cards.filter(card => { var _a; return (_a = card.card.data.replacementEffects) === null || _a === void 0 ? void 0 : _a.length; });
+        if (previousSources.length !== sources.length || previousSources.some((card, index) => card !== sources[index])) {
+            this.clearReplacementEffectsCache();
+        }
+    }
     replaceByReplacementEffect(action) {
         var _a;
-        const PLAYER_ONE = this.players[0];
-        const PLAYER_TWO = this.players[1];
-        const allZonesCards = [
-            ...(this.getZone(ZONE_TYPE_IN_PLAY) || { cards: [] }).cards,
-            ...(this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE)).cards,
-            ...(this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO)).cards,
-        ];
-        const zoneReplacements = allZonesCards.reduce((acc, cardInPlay) => cardInPlay.card.data.replacementEffects ? [
-            ...acc,
-            ...cardInPlay.card.data.replacementEffects
-                .filter(effect => !effect.oncePerTurn || (effect.oncePerTurn && !cardInPlay.wasActionUsed(effect.name || 'unknown effect')))
-                .map(effect => (Object.assign(Object.assign({}, effect), { self: cardInPlay }))),
-        ] : acc, []);
+        if (this.replacementEffectsCache === null) {
+            const cards = [
+                ...this.getZone(ZONE_TYPE_IN_PLAY).cards,
+                ...this.getZone(ZONE_TYPE_ACTIVE_MAGI, this.players[0]).cards,
+                ...this.getZone(ZONE_TYPE_ACTIVE_MAGI, this.players[1]).cards,
+            ];
+            this.replacementEffectsCache = cards.flatMap(card => { var _a; return ((_a = card.card.data.replacementEffects) !== null && _a !== void 0 ? _a : []).map(effect => (Object.assign(Object.assign({}, effect), { self: card }))); });
+        }
+        const zoneReplacements = this.replacementEffectsCache;
         let replacementFound = false;
         let appliedReplacerId = null;
         let appliedReplacerSelf = null;
         let replaceWith = null;
         let foundReplacer = null;
         for (let replacer of zoneReplacements) {
+            // Eligibility changes during a turn and when card data is rolled back.
+            if (replacer.oncePerTurn && replacer.self.wasActionUsed(replacer.name || 'unknown effect')) {
+                continue;
+            }
             const replacerId = replacer.self.id; // Not really, but will work for now
             if ('replacedBy' in action && ((_a = action.replacedBy) === null || _a === void 0 ? void 0 : _a.includes(replacerId))) {
                 break;

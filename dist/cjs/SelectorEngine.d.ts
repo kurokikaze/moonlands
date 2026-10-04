@@ -19,11 +19,15 @@ export declare class SelectorEngine extends LayeredModificationEngine {
     private restrictionEngine;
     modifiedCardDataCache: Map<string, CardWithModification>;
     private zoneStaticAbilitiesCache;
+    private continuousStaticAbilitiesCache;
     constructor(context: SelectorEngineContext);
     private getOwnMagi;
     private getOwnCreatures;
     clearModifiedCardDataCache(): void;
     clearStaticAbilitiesCache(): void;
+    clearContinuousStaticAbilitiesCache(): void;
+    invalidateStaticAbilitiesForContinuousEffectsChange(previous: ContinuousEffectType[], effects: ContinuousEffectType[]): void;
+    private getContinuousStaticAbilities;
     /** Only active zones contribute card static abilities. */
     invalidateStaticAbilitiesForZoneChange(zone: Zone, previousCards: CardInGame[], cards: CardInGame[]): void;
     private getZoneStaticAbilities;

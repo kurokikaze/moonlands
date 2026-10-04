@@ -1,13 +1,67 @@
 import { describe, expect, it, vi } from 'vitest';
 import Card from '../src/classes/Card';
 import CardInGame from '../src/classes/CardInGame';
+import { applyStartTurnEffect } from '../src/actionMaps/effects/turnAndStep';
 import {
+	ACTION_EFFECT, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_START_TURN, EXPIRATION_ANY_TURNS,
 	PROPERTY_ENERGIZE, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DISCARD,
 	ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_MAGI_PILE,
 } from '../src/const';
 import { PLAYER, OPPONENT, card, makeState } from './journalUtils';
 
 describe('Card static ability cache', () => {
+	it('invalidates continuous effect creation, expiration and both nested rollbacks', () => {
+		const magi = card('Grega', PLAYER);
+		const state = makeState({ magi });
+		const read = () => state.modifyByStaticAbilities(magi, PROPERTY_ENERGIZE);
+		const baseline = read(); // Populate the empty continuous ability cache.
+		const outer = state.beginSearchFrame();
+		state.update({
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+			staticAbilities: card('Water of Life', PLAYER).card.data.staticAbilities,
+			expiration: { type: EXPIRATION_ANY_TURNS, turns: 2 },
+			player: PLAYER,
+			generatedBy: magi.id,
+		});
+		expect(read()).toBe(baseline + 1);
+		state.clearModifiedCardDataCache();
+		expect(read()).toBe(baseline + 1);
+		const invalidate = vi.spyOn(state.selectorEngine, 'clearContinuousStaticAbilitiesCache');
+		const startTurn = () => applyStartTurnEffect.call(state, {
+			type: ACTION_EFFECT,
+			effectType: EFFECT_TYPE_START_TURN,
+			player: PLAYER,
+			generatedBy: magi.id,
+		}, () => {}, state.state, () => 'test-id');
+		const inner = state.beginSearchFrame();
+		startTurn(); // Decrementing the countdown does not change the abilities.
+		expect(read()).toBe(baseline + 1);
+		expect(invalidate).not.toHaveBeenCalled();
+		startTurn(); // Expire the effect and populate the now-empty cache.
+		expect(read()).toBe(baseline);
+		expect(invalidate).toHaveBeenCalledTimes(1);
+		state.rollback(inner);
+		expect(read()).toBe(baseline + 1);
+		expect(state.state.continuousEffects[0].expiration.turns).toBe(2);
+		state.rollback(outer);
+		expect(read()).toBe(baseline);
+		expect(state.state.continuousEffects).toEqual([]);
+	});
+
+	it('does not invalidate gathered abilities for effects without static abilities', () => {
+		const state = makeState({ magi: card('Grega', PLAYER) });
+		const invalidate = vi.spyOn(state.selectorEngine, 'clearContinuousStaticAbilitiesCache');
+		const frame = state.beginSearchFrame();
+		state.addContinuousEffect({
+			id: 'trigger-only', player: PLAYER, triggerEffects: [],
+			expiration: { type: EXPIRATION_ANY_TURNS, turns: 1 },
+		});
+		state.setContinuousEffects([]);
+		state.rollback(frame);
+		expect(invalidate).not.toHaveBeenCalled();
+	});
+
 	it('reuses gathered abilities across modified data cache clears and reads current control', () => {
 		const template = card('Water of Life', PLAYER).card;
 		const definition = new Card(template.name, template.type, template.region, template.cost, template.data);

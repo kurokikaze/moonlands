@@ -536,6 +536,7 @@ export class State {
 	promptValidator: PromptValidator;
 	logEngine: LogEngine;
 	journal: Journal | null = null;
+	private replacementEffectsCache: (ReplacementEffectType<FindType> & { self: CardInGame })[] | null = null;
 
 	constructor(state: StateShape = defaultState) {
 		this.state = {
@@ -1134,6 +1135,11 @@ export class State {
 				from.type === ZONE_TYPE_ACTIVE_MAGI || to.type === ZONE_TYPE_ACTIVE_MAGI)) {
 			this.selectorEngine.clearStaticAbilitiesCache();
 		}
+		if (card.card.data.replacementEffects?.length &&
+			(from.type === ZONE_TYPE_IN_PLAY || to.type === ZONE_TYPE_IN_PLAY ||
+				from.type === ZONE_TYPE_ACTIVE_MAGI || to.type === ZONE_TYPE_ACTIVE_MAGI)) {
+			this.clearReplacementEffectsCache();
+		}
 
 		const newCard = new CardInGame(card.card, card.owner, this.nanoid);
 		this.journal?.record({ kind: 'moveCard', card, newCard, from, to, fromIndex });
@@ -1150,6 +1156,7 @@ export class State {
 
 	setZoneCards(zone: Zone, cards: CardInGame[]): void {
 		this.selectorEngine.invalidateStaticAbilitiesForZoneChange(zone, zone.cards, cards);
+		this.invalidateReplacementEffectsForZoneChange(zone, zone.cards, cards);
 		this.journal?.record({ kind: 'zoneCards', zone, previousCards: zone.cards });
 		zone.cards = cards;
 	}
@@ -1160,6 +1167,7 @@ export class State {
 		this.journal?.record({ kind: 'zoneCards', zone, previousCards });
 		zone.shuffle();
 		this.selectorEngine.invalidateStaticAbilitiesForZoneChange(zone, previousCards, zone.cards);
+		this.invalidateReplacementEffectsForZoneChange(zone, previousCards, zone.cards);
 	}
 
 	// Spell metadata
@@ -1242,10 +1250,14 @@ export class State {
 	addContinuousEffect(effect: ContinuousEffectType): void {
 		this.journal?.record({ kind: 'arrayPush', array: this.state.continuousEffects, count: 1 });
 		this.state.continuousEffects.push(effect);
+		if (effect.staticAbilities?.length) {
+			this.selectorEngine.clearContinuousStaticAbilitiesCache();
+		}
 		this.clearModifiedCardDataCache();
 	}
 
 	setContinuousEffects(effects: ContinuousEffectType[]): void {
+		this.selectorEngine.invalidateStaticAbilitiesForContinuousEffectsChange(this.state.continuousEffects, effects);
 		this.recordStateFields('continuousEffects');
 		this.state.continuousEffects = effects;
 		this.clearModifiedCardDataCache();
@@ -1573,30 +1585,34 @@ export class State {
 		return property ? this.getMetaValue(action[object as keyof typeof action], action.generatedBy) : object;
 	}
 
-	replaceByReplacementEffect(action: AnyEffectType): AnyEffectType[] {
-		const PLAYER_ONE = this.players[0];
-		const PLAYER_TWO = this.players[1];
+	clearReplacementEffectsCache(): void {
+		this.replacementEffectsCache = null;
+	}
 
-		const allZonesCards = [
-			...(this.getZone(ZONE_TYPE_IN_PLAY) || { cards: [] }).cards,
-			...(this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE)).cards,
-			...(this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO)).cards,
-		];
-
-		interface WithSelf {
-			self: CardInGame;
+	invalidateReplacementEffectsForZoneChange(zone: Zone, previousCards: CardInGame[], cards: CardInGame[]): void {
+		if (zone.type !== ZONE_TYPE_IN_PLAY && zone.type !== ZONE_TYPE_ACTIVE_MAGI) {
+			return;
 		}
+		const previousSources = previousCards.filter(card => card.card.data.replacementEffects?.length);
+		const sources = cards.filter(card => card.card.data.replacementEffects?.length);
+		if (previousSources.length !== sources.length || previousSources.some((card, index) => card !== sources[index])) {
+			this.clearReplacementEffectsCache();
+		}
+	}
 
-		type ReplacementEffectEnhanced = ReplacementEffectType<FindType> & WithSelf;
-		const zoneReplacements: ReplacementEffectEnhanced[] = allZonesCards.reduce<ReplacementEffectEnhanced[]>(
-			(acc, cardInPlay) => cardInPlay.card.data.replacementEffects ? [
-				...acc,
-				...cardInPlay.card.data.replacementEffects
-					.filter(effect => !effect.oncePerTurn || (effect.oncePerTurn && !cardInPlay.wasActionUsed(effect.name || 'unknown effect')))
-					.map(effect => ({ ...effect, self: cardInPlay })),
-			] : acc,
-			[],
-		);
+	replaceByReplacementEffect(action: AnyEffectType): AnyEffectType[] {
+		type ReplacementEffectEnhanced = ReplacementEffectType<FindType> & { self: CardInGame };
+		if (this.replacementEffectsCache === null) {
+			const cards = [
+				...this.getZone(ZONE_TYPE_IN_PLAY).cards,
+				...this.getZone(ZONE_TYPE_ACTIVE_MAGI, this.players[0]).cards,
+				...this.getZone(ZONE_TYPE_ACTIVE_MAGI, this.players[1]).cards,
+			];
+			this.replacementEffectsCache = cards.flatMap(card =>
+				(card.card.data.replacementEffects ?? []).map(effect => ({ ...effect, self: card })),
+			);
+		}
+		const zoneReplacements = this.replacementEffectsCache;
 
 		let replacementFound: boolean = false;
 		let appliedReplacerId: string | null = null;
@@ -1605,6 +1621,10 @@ export class State {
 		let foundReplacer: ReplacementEffectEnhanced | null = null;
 
 		for (let replacer of zoneReplacements) {
+			// Eligibility changes during a turn and when card data is rolled back.
+			if (replacer.oncePerTurn && replacer.self.wasActionUsed(replacer.name || 'unknown effect')) {
+				continue;
+			}
 			const replacerId = replacer.self.id; // Not really, but will work for now
 
 			if ('replacedBy' in action && action.replacedBy?.includes(replacerId)) {

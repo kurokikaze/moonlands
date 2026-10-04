@@ -94,6 +94,7 @@ export declare class State {
     promptValidator: PromptValidator;
     logEngine: LogEngine;
     journal: Journal | null;
+    private replacementEffectsCache;
     constructor(state?: StateShape);
     closeStreams(): void;
     initiatePRNG(seed: number): void;
@@ -248,6 +249,8 @@ export declare class State {
     checkCardsForRestriction(cards: CardInGame[], restriction: RestrictionType, restrictionValue: any): boolean;
     makeCardFilter(restrictions?: RestrictionObjectType[]): (c: CardInGame) => boolean;
     getObjectOrSelf(action: AnyEffectType, self: CardInGame, object: string | number | boolean, property: boolean): any;
+    clearReplacementEffectsCache(): void;
+    invalidateReplacementEffectsForZoneChange(zone: Zone, previousCards: CardInGame[], cards: CardInGame[]): void;
     replaceByReplacementEffect(action: AnyEffectType): AnyEffectType[];
     checkCondition(action: AnyEffectType, self: CardInGame, condition: ConditionType): any;
     matchAction(action: AnyEffectType, find: FindType, self: CardInGame): boolean;
