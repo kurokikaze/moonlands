@@ -146,7 +146,7 @@ export class LayeredModificationEngine {
                 };
             }
             case PROPERTY_ENERGY_LOSS_THRESHOLD: {
-                const initialValue = this.getByProperty(currentCard, PROPERTY_ENERGIZE);
+                const initialValue = this.getByProperty(currentCard, PROPERTY_ENERGY_LOSS_THRESHOLD);
                 const { operator, operandOne } = staticAbility.modifier;
                 const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?
                     performCalculation(operator, initialValue, (typeof operandOne === 'number') ? operandOne : 0) :

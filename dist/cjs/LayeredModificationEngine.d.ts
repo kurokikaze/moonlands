@@ -1,4 +1,4 @@
-import { PROPERTY_TYPE, PROPERTY_CONTROLLER, PROPERTY_ENERGY_COUNT, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, PROPERTY_POWER_COST, PROPERTY_CREATURE_TYPES, PROPERTY_STATUS, PROPERTY_ABLE_TO_ATTACK, PROPERTY_MAGI_NAME, PROPERTY_CAN_BE_ATTACKED, PROPERTY_PROTECTION, PROPERTY_CREATURE_NAME, PROPERTY_CONTROLLING_PLAYER, PROPERTY_ABLE_TO_USE_POWERS, STATUS_BURROWED, SELECTOR_STATUS } from './const.js';
+import { PROPERTY_TYPE, PROPERTY_CONTROLLER, PROPERTY_ENERGY_COUNT, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, PROPERTY_POWER_COST, PROPERTY_CREATURE_TYPES, PROPERTY_ENERGY_LOSS_THRESHOLD, PROPERTY_STATUS, PROPERTY_ABLE_TO_ATTACK, PROPERTY_MAGI_NAME, PROPERTY_CAN_BE_ATTACKED, PROPERTY_PROTECTION, PROPERTY_CREATURE_NAME, PROPERTY_CONTROLLING_PLAYER, PROPERTY_ABLE_TO_USE_POWERS, STATUS_BURROWED, SELECTOR_STATUS } from './const.js';
 import CardInGame, { InGameData } from './classes/CardInGame.js';
 import Card, { CostType, ModifiedCardType } from './classes/Card.js';
 import { PropertyType, ProtectionType, StaticAbilityType } from './types/index.js';
@@ -34,6 +34,7 @@ export declare class LayeredModificationEngine {
     getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CREATURE_TYPES): string[];
     getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CREATURE_NAME): string;
     getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_COST): CostType;
+    getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_ENERGY_LOSS_THRESHOLD): number;
     getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_STATUS, subProperty: typeof STATUS_BURROWED): boolean;
     getByPropertyAny(target: CardInGame | CardWithModification, property: PropertyType, subProperty?: null | typeof STATUS_BURROWED | string): any;
     layeredDataReducer(currentCard: CardWithModification, staticAbility: EnrichedStaticAbilityType | GameStaticAbility): CardWithModification;

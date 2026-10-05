@@ -11,10 +11,10 @@ const sourceCard = (oncePerTurn = false) => new CardInGame(new Card('Test replac
 	replacementEffects: [{
 		name: 'Replacement', text: 'Replace energizing', oncePerTurn,
 		find: { effectType: EFFECT_TYPE_ENERGIZE, conditions: [] },
-		replaceWith: { effectType: EFFECT_TYPE_NONE },
+		replaceWith: { type: ACTION_EFFECT, effectType: EFFECT_TYPE_NONE },
 	}],
 }), PLAYER);
-const action = { type: ACTION_EFFECT, effectType: EFFECT_TYPE_ENERGIZE, player: PLAYER, generatedBy: 'test' } as const;
+const action = { type: ACTION_EFFECT, effectType: EFFECT_TYPE_ENERGIZE, target: '$energize', player: PLAYER, generatedBy: 'test' } as const;
 
 describe('Replacement effect cache', () => {
 	it('gathers once while checking once-per-turn usage, rollback and current control on each lookup', () => {
@@ -35,7 +35,7 @@ describe('Replacement effect cache', () => {
 		expect(readEffects).toHaveBeenCalledTimes(1);
 	});
 
-	it.each([ZONE_TYPE_IN_PLAY, ZONE_TYPE_ACTIVE_MAGI])('invalidates moves and nested rollbacks in %s', zoneType => {
+	it.each([ZONE_TYPE_IN_PLAY, ZONE_TYPE_ACTIVE_MAGI] as const)('invalidates moves and nested rollbacks in %s', zoneType => {
 		const source = sourceCard();
 		const state = makeState({ hand: [source] });
 		const zone = state.getZone(zoneType, zoneType === ZONE_TYPE_IN_PLAY ? null : PLAYER);

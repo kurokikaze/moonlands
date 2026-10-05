@@ -1,4 +1,5 @@
 /// <reference types="vitest/globals" />
+/* global expect, describe, it */
 
 import { State } from '../../index.js';
 import { Unmaker } from '../unmaker.js';

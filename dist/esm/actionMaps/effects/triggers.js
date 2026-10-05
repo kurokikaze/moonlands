@@ -10,12 +10,9 @@ export const applyConditionalEffect = function (action, transform) {
     const metaData = this.getSpellMetadata(action.generatedBy);
     // "new_card" fallback is for "defeated" triggers
     const self = action.triggerSource || metaData.source || metaData.new_card;
-    if (!self) {
-        return;
-    }
     //   checkCondition(action, self, condition)
     const results = action.conditions.map(condition => this.checkCondition(action, self, condition));
-    const enrichAction = (effect) => (Object.assign(Object.assign({ source: self, player: self.data.controller }, effect), { generatedBy: action.generatedBy }));
+    const enrichAction = (effect) => { var _a; return (Object.assign(Object.assign({ source: self, player: (_a = action.player) !== null && _a !== void 0 ? _a : self === null || self === void 0 ? void 0 : self.data.controller }, effect), { generatedBy: action.generatedBy })); };
     if (results.every(result => result === true)) {
         if (action.thenEffects) {
             const preparedEffects = action.thenEffects
@@ -63,6 +60,10 @@ export const applyCreateContinuousEffect = function (action, _transform, _state,
         player: action.player || 0,
         id,
     };
+    const source = this.getMetaValue(action.source, action.generatedBy) ||
+        action.triggerSource || this.getSpellMetadata(action.generatedBy || '').source;
+    if (source instanceof CardInGame)
+        continuousEffect.self = source;
     this.addContinuousEffect(continuousEffect);
 };
 //# sourceMappingURL=triggers.js.map

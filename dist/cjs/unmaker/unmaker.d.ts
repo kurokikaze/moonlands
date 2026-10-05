@@ -13,6 +13,8 @@ export declare class Unmaker {
     private historyStack;
     private prngCheckpoints;
     private actionsUsedCheckpoints;
+    private continuousTriggerSourceCheckpoints;
+    private delayedTriggerCheckpoints;
     private promptStateCheckpoints;
     constructor(state: State, blobSize?: number);
     setCheckpoint(): void;
@@ -30,6 +32,7 @@ export declare class Unmaker {
     hasSpace(): boolean;
     generateUnAction(action: AnyEffectType): UnAction | undefined;
     private generateUnActionInner;
+    private invalidateDerivedCaches;
     readAndApplyUnAction(state: State): void;
     applyUnAction(state: State, unaction: UnAction): void;
 }

@@ -221,6 +221,7 @@ export type { JournalFrame, JournalEntry } from './Journal.js';
 import { SelectorEngine } from './SelectorEngine.js';
 import { PromptValidator } from './PromptValidator.js';
 import { LogEngine } from './LogEngine.js';
+import { TriggerEffectRegistry } from './TriggerEffectRegistry.js';
 import { CardWithModification, EnrichedStaticAbilityType, GameStaticAbility } from './LayeredModificationEngine.js';
 import {
 	AnyEffectType,
@@ -235,7 +236,6 @@ import {
 	OperatorType,
 	ConditionType,
 	FindType,
-	TriggerEffectType,
 	ReplacementEffectType,
 	ContinuousEffectType,
 	EffectType,
@@ -537,6 +537,7 @@ export class State {
 	logEngine: LogEngine;
 	journal: Journal | null = null;
 	private replacementEffectsCache: (ReplacementEffectType<FindType> & { self: CardInGame })[] | null = null;
+	triggerEffectRegistry: TriggerEffectRegistry;
 
 	constructor(state: StateShape = defaultState) {
 		this.state = {
@@ -583,6 +584,14 @@ export class State {
 			getMetaValue: (value, spellId) => this.getMetaValue(value, spellId),
 			addLogEntry: (entry) => this.addLogEntry(entry),
 			getPromptType: () => this.state.promptType,
+		});
+
+		this.triggerEffectRegistry = new TriggerEffectRegistry({
+			getZones: () => this.state.zones,
+			getPlayers: () => this.players,
+			getDelayedTriggers: () => this.state.delayedTriggers,
+			getContinuousEffects: () => this.state.continuousEffects,
+			matchAction: (action, find, source) => this.matchAction(action, find, source),
 		});
 	}
 
@@ -1395,7 +1404,7 @@ export class State {
 		 * $-variables are kept intact, we probably need them
 		 * %-variables include usual "self": link to trigger source
 		 */
-	prepareMetaValue<T>(value: string | T, action: AnyEffectType, self: CardInGame, spellId: string): T | any {
+	prepareMetaValue<T>(value: string | T, action: AnyEffectType, self: CardInGame | undefined, spellId: string): T | any {
 		if (value === '%self') return self;
 
 		if (
@@ -1575,7 +1584,7 @@ export class State {
 		return this.selectorEngine.makeCardFilter(restrictions);
 	}
 
-	getObjectOrSelf(action: AnyEffectType, self: CardInGame, object: string | number | boolean, property: boolean) {
+	getObjectOrSelf(action: AnyEffectType, self: CardInGame | undefined, object: string | number | boolean, property: boolean) {
 		if (typeof object === 'boolean' || typeof object === 'number') {
 			return object;
 		}
@@ -1729,7 +1738,7 @@ export class State {
 		return [action];
 	}
 
-	checkCondition(action: AnyEffectType, self: CardInGame, condition: ConditionType) {
+	checkCondition(action: AnyEffectType, self: CardInGame | undefined, condition: ConditionType) {
 		if (
 			!('objectOne' in condition) ||
 			!('objectTwo' in condition)
@@ -1770,7 +1779,7 @@ export class State {
 		}
 	}
 
-	matchAction(action: AnyEffectType, find: FindType, self: CardInGame) {
+	matchAction(action: AnyEffectType, find: FindType, self?: CardInGame) {
 		if (action.type !== ACTION_EFFECT) {
 			return false;
 		}
@@ -1795,120 +1804,78 @@ export class State {
 	}
 
 	triggerAbilities(action: AnyEffectType) {
-		const PLAYER_ONE = this.players[0];
-		const PLAYER_TWO = this.players[1];
-		const allZonesCards = [
-			...(this.getZone(ZONE_TYPE_IN_PLAY) || { cards: [] }).cards,
-			...(this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_ONE) || { cards: [] }).cards,
-			...(this.getZone(ZONE_TYPE_ACTIVE_MAGI, PLAYER_TWO) || { cards: [] }).cards,
-		];
+		for (const registration of this.triggerEffectRegistry.getMatchingTriggers(action)) {
+			const replacer = { ...registration.trigger, self: registration.self };
+			const triggeredId = registration.kind === 'continuous' ? registration.id! : replacer.self!.id;
+			const player = registration.kind === 'continuous' ? registration.player : replacer.self!.data.controller;
+			if (replacer.self) this.setSpellMetaDataField('source', replacer.self, triggeredId);
+			if (replacer.self?.card.type === TYPE_CREATURE) {
+				this.setSpellMetaDataField('sourceCreature', replacer.self, triggeredId);
+			}
 
-		type TriggerTypeEnhanced = WithSelf & TriggerEffectType;
-
-		const cardTriggerEffects = allZonesCards.reduce<TriggerTypeEnhanced[]>(
-			(acc, cardInPlay) => cardInPlay.card.data.triggerEffects ? [
-				...acc,
-				...cardInPlay.card.data.triggerEffects.map(effect => ({ ...effect, self: cardInPlay })),
-			] : acc,
-			[],
-		);
-
-		interface WithSelf {
-			self: CardInGame;
-		}
-
-		// const continuousEffectTriggers = this.state.continuousEffects.map(effect => effect.triggerEffects.map(triggerEffect => ({...triggerEffect, id: effect.id})) || []).flat();
-		const triggerEffects: TriggerTypeEnhanced[] = [...cardTriggerEffects, ...this.state.delayedTriggers, /* ...continuousEffectTriggers*/];
-
-		triggerEffects.forEach(replacer => {
-			// @ts-ignore
-			const triggeredId = replacer.self.id; // Not really, but will work for now
-			if (this.matchAction(action, replacer.find, replacer.self)) {
-				// Save source to *trigger source* metadata (it's probably empty)
-				// For creatures set creatureSource field (just for convenience)
-				this.setSpellMetaDataField('source', replacer.self, /*action.generatedBy ||*/ triggeredId);
-				if (replacer.self.card.type === TYPE_CREATURE) {
-					this.setSpellMetaDataField('sourceCreature', replacer.self, /*action.generatedBy ||*/ triggeredId);
+			const actionWithValues = Object.fromEntries(Object.entries(action).map(([key, value]) => {
+				if (typeof value === 'string' && value.startsWith('$')) {
+					return [key, this.getMetaValue(value, action.generatedBy)];
 				}
+				return [key, value];
+			})) as AnyEffectType;
 
-				// Turn all metadata entries into their corresponding values 
-				const actionWithValues = Object.fromEntries(Object.entries(action).map(([key, value]) => {
-					if (typeof value == 'string' && value.startsWith('$')) {
-						return [key, this.getMetaValue(value, action.generatedBy)]
-					}
-					return [key, value]
-				})) as AnyEffectType;
-
-				// Turn effect-templates into actual effect actions by preparing meta-values				
-				const preparedEffects = replacer.effects.map(effect => {
-					// @ts-ignore
-					let resultEffect: AnyEffectType = {
-						type: effect.type || ACTION_EFFECT,
-						generatedBy: /*action.generatedBy ||*/ triggeredId, // Some actions do not have generatedBy (game actions). We still need one though.
-						triggeredId: [triggeredId],
-						triggerSource: replacer.self,
-						player: replacer.self.data.controller,
-					};
-
-					// Do we need to replace this? Maybe later
-					if (effect.type === ACTION_EFFECT) {
-						// @ts-ignore
-						resultEffect.effectType = effect.effectType;
-					}
-
-					// prepare %-values on created action
-					Object.keys(effect)
-						.filter(key => !['type', 'effectType'].includes(key))
-						.forEach(key => {
-							const propertyValue = effect[key as keyof typeof effect]
-							const value = this.prepareMetaValue(propertyValue, actionWithValues, replacer.self, action.generatedBy || this.nanoid());
-							// if (typeof value == 'string' && value.startsWith('$')) {
-							// 	console.log(`Interpolating ${key} with generatedBy ${action.generatedBy}`)
-							// 	console.dir(this.getMetaValue(value, action.generatedBy))
-							// 	resultEffect[key as keyof typeof effect] = this.getMetaValue(value, action.generatedBy)
-							// } else {
-							resultEffect[key as keyof typeof effect] = value;
-							// }
-						});
-
-					return resultEffect;
-				});
-
-				preparedEffects.push({
-					type: ACTION_EFFECT,
-					effectType: EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED,
+			const preparedEffects = replacer.effects.map(effect => {
+				const resultEffect = {
+					type: effect.type || ACTION_EFFECT,
 					generatedBy: triggeredId,
-				})
+					triggeredId: [triggeredId],
+					triggerSource: replacer.self,
+					player,
+				} as AnyEffectType;
 
-				const allPromptsAreDoable = this.checkPrompts(replacer.self, preparedEffects, false, 0);
-				if (allPromptsAreDoable) {
-					if (replacer.mayEffect) {
-						this.setMayEffectActions(preparedEffects);
-
-						this.transformIntoActions({
-							type: ACTION_ENTER_PROMPT,
-							promptType: PROMPT_TYPE_MAY_ABILITY,
-							promptParams: {
-								effect: {
-									name: replacer.name || 'Generic replacer',
-									text: replacer.text || 'There was an error determining the replacer for the effect',
-								},
-							},
-							generatedBy: replacer.self.id,
-							player: replacer.self.data.controller,
-						});
-					} else {
-						this.transformIntoActions(...preparedEffects);
-					}
+				if (effect.type === ACTION_EFFECT && resultEffect.type === ACTION_EFFECT) {
+					resultEffect.effectType = effect.effectType;
 				}
 
-				// @ts-ignore
-				if (replacer.id) {
-					// @ts-ignore
-					this.removeDelayedTrigger(replacer.id);
+				Object.keys(effect)
+					.filter(key => !['type', 'effectType'].includes(key))
+					.forEach(key => {
+						const propertyValue = effect[key as keyof typeof effect];
+						const value = this.prepareMetaValue(propertyValue, actionWithValues, replacer.self, action.generatedBy || this.nanoid());
+						resultEffect[key as keyof typeof effect] = value;
+					});
+				return resultEffect;
+			});
+
+			preparedEffects.push({
+				type: ACTION_EFFECT,
+				effectType: EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED,
+				generatedBy: triggeredId,
+			});
+
+			const allPromptsAreDoable = registration.kind === 'continuous'
+				? this.promptValidator.checkPrompts(replacer.self, preparedEffects, false, 0, player, triggeredId)
+				: this.checkPrompts(replacer.self!, preparedEffects, false, 0);
+			if (allPromptsAreDoable) {
+				if (replacer.mayEffect) {
+					this.setMayEffectActions(preparedEffects);
+					this.transformIntoActions({
+						type: ACTION_ENTER_PROMPT,
+						promptType: PROMPT_TYPE_MAY_ABILITY,
+						promptParams: {
+							effect: {
+								name: replacer.name || 'Generic replacer',
+								text: replacer.text || 'There was an error determining the replacer for the effect',
+							},
+						},
+						generatedBy: triggeredId,
+						player,
+					});
+				} else {
+					this.transformIntoActions(...preparedEffects);
 				}
 			}
-		});
+
+			if (registration.kind === 'delayed' && registration.id) {
+				this.removeDelayedTrigger(registration.id);
+			}
+		}
 	}
 
 	convertPromptActionToEffect(action: PromptType & { source: CardInGame }): AnyPromptEnteredEffect {
@@ -2184,7 +2151,6 @@ export class State {
 					const savedActions = this.state.actions;
 					let promptParams: PromptParamsType = {};
 					let skipPrompt = false;
-					const promptPlayer = this.getMetaValue(action.player, action.generatedBy);
 
 					switch (action.promptType) {
 						case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {

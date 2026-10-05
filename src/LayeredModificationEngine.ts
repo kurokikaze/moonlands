@@ -82,6 +82,7 @@ export class LayeredModificationEngine {
 	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CREATURE_TYPES): string[]
 	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_CREATURE_NAME): string
 	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_COST): CostType
+	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_ENERGY_LOSS_THRESHOLD): number
 	getByProperty(target: CardInGame | CardWithModification, property: typeof PROPERTY_STATUS, subProperty: typeof STATUS_BURROWED): boolean
 	getByProperty(target: CardInGame | CardWithModification, property: PropertyType, subProperty: null | typeof STATUS_BURROWED | string = null): any {
 		switch (property) {
@@ -237,7 +238,7 @@ export class LayeredModificationEngine {
 				};
 			}
 			case PROPERTY_ENERGY_LOSS_THRESHOLD: {
-				const initialValue = this.getByProperty(currentCard, PROPERTY_ENERGIZE);
+				const initialValue = this.getByProperty(currentCard, PROPERTY_ENERGY_LOSS_THRESHOLD);
 				const { operator, operandOne } = staticAbility.modifier;
 
 				const resultValue = (operator === CALCULATION_SUBTRACT || operator === CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE) ?

@@ -21,10 +21,6 @@ export const applyConditionalEffect: ActionTransformer<typeof EFFECT_TYPE_CONDIT
   // "new_card" fallback is for "defeated" triggers
   const self = action.triggerSource || metaData.source || metaData.new_card;
 
-  if (!self) {
-    return
-  }
-
   //   checkCondition(action, self, condition)
   const results = action.conditions.map(condition =>
     this.checkCondition(action, self, condition),
@@ -32,7 +28,7 @@ export const applyConditionalEffect: ActionTransformer<typeof EFFECT_TYPE_CONDIT
 
   const enrichAction = <T>(effect: T): T & EnrichedAction => ({
     source: self,
-    player: self.data.controller,
+    player: action.player ?? self?.data.controller,
     ...effect,
     generatedBy: action.generatedBy,
   });
@@ -95,6 +91,10 @@ export const applyCreateContinuousEffect: ActionTransformer<typeof EFFECT_TYPE_C
     player: action.player || 0,
     id,
   };
+
+  const source = this.getMetaValue(action.source, action.generatedBy) ||
+    action.triggerSource || this.getSpellMetadata(action.generatedBy || '').source;
+  if (source instanceof CardInGame) continuousEffect.self = source;
 
   this.addContinuousEffect(continuousEffect);
 }

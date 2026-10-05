@@ -60,21 +60,21 @@ export class PromptValidator {
 		this.context = context;
 	}
 
-	checkPrompts(source: CardInGame, preparedActions: AnyEffectType[], isPower: boolean = false, powerCost: number = 0): boolean {
+	checkPrompts(source: CardInGame | undefined, preparedActions: AnyEffectType[], isPower: boolean = false, powerCost: number = 0, player: number = source?.data.controller ?? 0, generatedBy: string = source?.id ?? ''): boolean {
 		const { getZone, modifyByStaticAbilities, getOpponent, getMetaValue, checkAnyCardForRestrictions, checkAnyCardForRestriction } = this.context;
 
 		const testedActions = [...preparedActions];
 		// Calculate if prompts are resolvable
 		// If source is Magi, it will not be filtered out, being in another zone
-		const creatureWillSurvive = !isPower || source.data.energy > powerCost;
+		const creatureWillSurvive = !isPower || (source?.data.energy ?? 0) > powerCost;
 
-		const ourCardsInPlay = getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => (creatureWillSurvive ? true : card.id !== source.id) && modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === source.data.controller);
-		const allCardsInPlay = getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => creatureWillSurvive ? true : card.id !== source.id);
+		const ourCardsInPlay = getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => (creatureWillSurvive ? true : card.id !== source?.id) && modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === player);
+		const allCardsInPlay = getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => creatureWillSurvive ? true : card.id !== source?.id);
 
-		const metaValues: MetaDataRecord = {
+		const metaValues: MetaDataRecord = source ? {
 			'$source': source,
 			'$sourceCreature': source,
-		}
+		} : {};
 
 		while (testedActions.length && testedActions[0].type === ACTION_GET_PROPERTY_VALUE) {
 			const valueGetter: PropertyGetterType = testedActions[0];
@@ -112,18 +112,18 @@ export class PromptValidator {
 				case PROMPT_TYPE_SINGLE_CREATURE:
 					return allCardsInPlay.some(card => card.card.type === TYPE_CREATURE);
 				case PROMPT_TYPE_MAGI_WITHOUT_CREATURES:
-					const opponent = getOpponent(source.data.controller);
-					const magi = [...getZone(ZONE_TYPE_ACTIVE_MAGI, source.data.controller).cards, ...getZone(ZONE_TYPE_ACTIVE_MAGI, opponent).cards];
+					const opponent = getOpponent(player);
+					const magi = [...getZone(ZONE_TYPE_ACTIVE_MAGI, player).cards, ...getZone(ZONE_TYPE_ACTIVE_MAGI, opponent).cards];
 					return magi.some(magi => !allCardsInPlay.some(card => card.card.type === TYPE_CREATURE && modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === magi.data.controller));
 				case PROMPT_TYPE_RELIC:
 					return allCardsInPlay.some(card => card.card.type === TYPE_RELIC);
 				case PROMPT_TYPE_OWN_SINGLE_CREATURE:
 					return ourCardsInPlay.some(card => card.card.type === TYPE_CREATURE);
 				case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE: {
-					return getZone(ZONE_TYPE_IN_PLAY).cards.some(card => card.id !== source.id);
+					return getZone(ZONE_TYPE_IN_PLAY).cards.some(card => card.id !== source?.id);
 				}
 				case PROMPT_TYPE_POWER_ON_MAGI: {
-					const magi = getZone(ZONE_TYPE_ACTIVE_MAGI, source.data.controller).cards;
+					const magi = getZone(ZONE_TYPE_ACTIVE_MAGI, player).cards;
 					return magi.some(magi => magi.card.data.powers && magi.card.data.powers.some(power => power.cost === COST_X || (power.cost <= magi.data.energy + 2)));
 				}
 				case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
@@ -146,14 +146,14 @@ export class PromptValidator {
 								return checkAnyCardForRestriction(
 									allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE),
 									promptAction.promptParams.restriction,
-									source.data.controller,
+									player,
 								);
 							}
 							case RESTRICTION_OPPONENT_CREATURE: {
 								return checkAnyCardForRestriction(
 									allCardsInPlay.filter(card => card.card.type === TYPE_CREATURE),
 									promptAction.promptParams.restriction,
-									source.data.controller,
+									player,
 								);
 							}
 							default: {
@@ -173,9 +173,9 @@ export class PromptValidator {
 					return true;
 				}
 				case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
-					const zoneOwner = getMetaValue(promptAction.promptParams.zoneOwner, source.id);
+					const zoneOwner = getMetaValue(promptAction.promptParams.zoneOwner, generatedBy);
 					const cardsInZone = getZone(promptAction.promptParams.zone as ZoneType, zoneOwner).cards;
-					const numberOfCards = getMetaValue(promptAction.promptParams.numberOfCards, source.id);
+					const numberOfCards = getMetaValue(promptAction.promptParams.numberOfCards, generatedBy);
 					// if (cardsInZone.length < numberOfCards) {
 					//	 return false;
 					// }
@@ -187,14 +187,14 @@ export class PromptValidator {
 								return checkAnyCardForRestriction(
 									cardsInZone.filter(card => card.card.type === TYPE_CREATURE),
 									promptAction.promptParams.restriction,
-									source.data.controller,
+									player,
 								);
 							}
 							case RESTRICTION_OPPONENT_CREATURE: {
 								return checkAnyCardForRestriction(
 									cardsInZone.filter(card => card.card.type === TYPE_CREATURE),
 									promptAction.promptParams.restriction,
-									source.data.controller,
+									player,
 								);
 							}
 							default: {
@@ -209,7 +209,7 @@ export class PromptValidator {
 					return true;
 				}
 				case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
-					const zoneOwner = getMetaValue(promptAction.promptParams.zoneOwner, source.id);
+					const zoneOwner = getMetaValue(promptAction.promptParams.zoneOwner, generatedBy);
 					const cardsInZone = getZone(promptAction.promptParams.zone, zoneOwner).cards;
 					if (promptAction.promptParams.restrictions) {
 						return checkAnyCardForRestrictions(cardsInZone, promptAction.promptParams.restrictions);
@@ -219,14 +219,14 @@ export class PromptValidator {
 								return checkAnyCardForRestriction(
 									cardsInZone.filter(card => card.card.type === TYPE_CREATURE),
 									promptAction.promptParams.restriction,
-									source.data.controller,
+									player,
 								);
 							}
 							case RESTRICTION_OPPONENT_CREATURE: {
 								return checkAnyCardForRestriction(
 									cardsInZone.filter(card => card.card.type === TYPE_CREATURE),
 									promptAction.promptParams.restriction,
-									source.data.controller,
+									player,
 								);
 							}
 							default: {

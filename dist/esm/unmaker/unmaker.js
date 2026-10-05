@@ -57,6 +57,8 @@ export class Unmaker {
         this.historyStack = [];
         this.prngCheckpoints = [];
         this.actionsUsedCheckpoints = [];
+        this.continuousTriggerSourceCheckpoints = [];
+        this.delayedTriggerCheckpoints = [];
         this.promptStateCheckpoints = [];
         this.dataTags = [];
         if (blobSize) {
@@ -75,6 +77,13 @@ export class Unmaker {
     }*/
     setCheckpoint() {
         this.historyStack.push(this.numberOfUnActions);
+        this.delayedTriggerCheckpoints.push([...this.state.state.delayedTriggers]);
+        const triggerSources = {};
+        for (const effect of this.state.state.continuousEffects) {
+            const metadata = this.state.getSpellMetadata(effect.id);
+            triggerSources[effect.id] = Object.fromEntries(Object.entries(metadata).filter(([key]) => key === 'source' || key === 'sourceCreature'));
+        }
+        this.continuousTriggerSourceCheckpoints.push(triggerSources);
         // Snapshot PRNG state so die rolls can be fully reversed
         const twister = this.state.twister;
         this.prngCheckpoints.push(twister ? { mt: [...twister.mt], mti: twister.mti } : null);
@@ -136,8 +145,23 @@ export class Unmaker {
                 throw new Error('Invalid checkpoint target');
             }
             const numberOfSteps = this.numberOfUnActions - target;
+            const continuousEffectIds = this.state.state.continuousEffects.map(effect => effect.id);
             for (let i = 0; i < numberOfSteps; i++) {
                 this.readAndApplyUnAction(this.state);
+            }
+            this.state.state.delayedTriggers = this.delayedTriggerCheckpoints.pop() || [];
+            this.invalidateDerivedCaches(this.state);
+            const triggerSources = this.continuousTriggerSourceCheckpoints.pop() || {};
+            for (const id of new Set([...continuousEffectIds, ...Object.keys(triggerSources)])) {
+                for (const field of ['source', 'sourceCreature']) {
+                    const previous = triggerSources[id];
+                    if (previous && Object.hasOwn(previous, field)) {
+                        this.state.setSpellMetaDataField(field, previous[field], id);
+                    }
+                    else {
+                        this.state.clearSpellMetaDataField(field, id);
+                    }
+                }
             }
             // Restore PRNG state to the checkpoint position
             const prngState = this.prngCheckpoints.pop();
@@ -1028,8 +1052,16 @@ export class Unmaker {
             }
         }
     }
+    invalidateDerivedCaches(state) {
+        // Legacy undo writes canonical arrays directly, unlike Journal's selective undo.
+        state.selectorEngine.clearStaticAbilitiesCache();
+        state.selectorEngine.clearContinuousStaticAbilitiesCache();
+        state.clearReplacementEffectsCache();
+        state.triggerEffectRegistry.invalidate();
+    }
     readAndApplyUnAction(state) {
         var _a, _b, _c, _d;
+        this.invalidateDerivedCaches(state);
         const unAction = this.readNumber('UnActionType');
         switch (unAction) {
             // Log entries: 1
@@ -1411,6 +1443,10 @@ export class Unmaker {
             }
             case UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT: {
                 const effectsLength = this.readNumber('EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT/effectsLength');
+                for (const effect of state.state.continuousEffects.slice(effectsLength)) {
+                    state.clearSpellMetaDataField('source', effect.id);
+                    state.clearSpellMetaDataField('sourceCreature', effect.id);
+                }
                 state.state.continuousEffects = state.state.continuousEffects.slice(0, effectsLength);
                 state.clearModifiedCardDataCache();
                 break;
@@ -1658,6 +1694,7 @@ export class Unmaker {
     }
     applyUnAction(state, unaction) {
         var _a, _b;
+        this.invalidateDerivedCaches(state);
         switch (unaction.type) {
             case UNMAKE_EFFECT_TYPE_PLAYER_WINS: {
                 state.unsetWinner();
@@ -1853,6 +1890,10 @@ export class Unmaker {
             }
             case UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT: {
                 // Remove all continuous effects added after the captured length
+                for (const effect of state.state.continuousEffects.slice(unaction.previousLength)) {
+                    state.clearSpellMetaDataField('source', effect.id);
+                    state.clearSpellMetaDataField('sourceCreature', effect.id);
+                }
                 state.state.continuousEffects = state.state.continuousEffects.slice(0, unaction.previousLength);
                 state.clearModifiedCardDataCache();
                 break;

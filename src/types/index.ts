@@ -263,6 +263,8 @@ export type ExitPromptsAction = EnrichedAction & {
 export type ContinuousEffectType = {
     staticAbilities?: StaticAbilityType[];
     triggerEffects?: TriggerEffectType[];
+    /** Captured source incarnation; continuous triggers may outlive it. */
+    self?: CardInGame;
     expiration: ExpirationObjectType;
     player: number;
     id: string;

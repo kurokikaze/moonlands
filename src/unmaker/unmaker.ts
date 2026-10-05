@@ -1,7 +1,7 @@
 import CardInGame from '../classes/CardInGame.js';
 import { ACTION_PLAY, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_DRAW, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, EFFECT_TYPE_ATTACH_CARD_TO_CARD, EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE, EFFECT_TYPE_DISCARD_CARD_FROM_HAND, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, ACTION_ENTER_PROMPT } from '../const.js';
 import { ACTION_EFFECT, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_PROMPT_ENTERED, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_START_TURN, State, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_IN_PLAY, ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE, ACTION_PLAYER_WINS, ACTION_POWER, ACTION_RESOLVE_PROMPT, TYPE_MAGI, DEFAULT_PROMPT_VARIABLE } from '../index.js'
-import { AnyEffectType, PromptTypeType, ZoneType } from '../types/index.js'
+import { AnyEffectType, MetaDataRecord, PromptTypeType, ZoneType } from '../types/index.js'
 import { CardFlagsSnapshot, UNMAKE_CALCULATION, UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI, UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE, UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, UNMAKE_EFFECT_TYPE_DIE_ROLLED, UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS, UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_ENERGY, UNMAKE_EFFECT_TYPE_PLAYER_WINS, UNMAKE_EFFECT_TYPE_PROMPT_ENTERED, UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD, UNMAKE_EFFECT_TYPE_START_OF_TURN, UNMAKE_EFFECT_TYPE_START_STEP, UNMAKE_EFFECT_TYPE_START_TURN, UNMAKE_LOG_ENTRY, UNMAKE_POWER_ACTIVATION, UNMAKE_POWER_USE, UNMAKE_PROMPT_LEAVE, UNMAKE_PROPERTY, UNMAKE_SELECT, UnAction, UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD, UNMAKE_PROMPT_ENTER } from './types.js';
 
 const FLAG_WAS_ATTACKED = 1
@@ -61,6 +61,8 @@ export class Unmaker {
     private historyStack: number[] = [];
     private prngCheckpoints: Array<{ mt: number[], mti: number } | null> = [];
     private actionsUsedCheckpoints: Array<Record<string, string[]>> = [];
+    private continuousTriggerSourceCheckpoints: Array<Record<string, MetaDataRecord>> = [];
+    private delayedTriggerCheckpoints: Array<State['state']['delayedTriggers']> = [];
     private promptStateCheckpoints: Array<{
         prompt: boolean,
         promptType: PromptTypeType | null,
@@ -94,6 +96,14 @@ export class Unmaker {
 
     public setCheckpoint() {
         this.historyStack.push(this.numberOfUnActions)
+        this.delayedTriggerCheckpoints.push([...this.state.state.delayedTriggers])
+
+        const triggerSources: Record<string, MetaDataRecord> = {}
+        for (const effect of this.state.state.continuousEffects) {
+            const metadata = this.state.getSpellMetadata(effect.id)
+            triggerSources[effect.id] = Object.fromEntries(Object.entries(metadata).filter(([key]) => key === 'source' || key === 'sourceCreature'))
+        }
+        this.continuousTriggerSourceCheckpoints.push(triggerSources)
 
         // Snapshot PRNG state so die rolls can be fully reversed
         const twister = this.state.twister as any
@@ -162,8 +172,23 @@ export class Unmaker {
             }
 
             const numberOfSteps = this.numberOfUnActions - target;
+            const continuousEffectIds = this.state.state.continuousEffects.map(effect => effect.id)
             for (let i = 0; i < numberOfSteps; i++) {
                 this.readAndApplyUnAction(this.state)
+            }
+            this.state.state.delayedTriggers = this.delayedTriggerCheckpoints.pop() || []
+            this.invalidateDerivedCaches(this.state)
+
+            const triggerSources = this.continuousTriggerSourceCheckpoints.pop() || {}
+            for (const id of new Set([...continuousEffectIds, ...Object.keys(triggerSources)])) {
+                for (const field of ['source', 'sourceCreature']) {
+                    const previous = triggerSources[id]
+                    if (previous && Object.hasOwn(previous, field)) {
+                        this.state.setSpellMetaDataField(field, previous[field], id)
+                    } else {
+                        this.state.clearSpellMetaDataField(field, id)
+                    }
+                }
             }
 
             // Restore PRNG state to the checkpoint position
@@ -1078,7 +1103,16 @@ export class Unmaker {
         }
     }
 
+    private invalidateDerivedCaches(state: State): void {
+        // Legacy undo writes canonical arrays directly, unlike Journal's selective undo.
+        state.selectorEngine.clearStaticAbilitiesCache()
+        state.selectorEngine.clearContinuousStaticAbilitiesCache()
+        state.clearReplacementEffectsCache()
+        state.triggerEffectRegistry.invalidate()
+    }
+
     public readAndApplyUnAction(state: State) {
+        this.invalidateDerivedCaches(state)
         const unAction = this.readNumber('UnActionType') as UnAction['type']
         switch (unAction) {
             // Log entries: 1
@@ -1465,6 +1499,10 @@ export class Unmaker {
             }
             case UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT: {
                 const effectsLength = this.readNumber('EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT/effectsLength')
+                for (const effect of state.state.continuousEffects.slice(effectsLength)) {
+                    state.clearSpellMetaDataField('source', effect.id)
+                    state.clearSpellMetaDataField('sourceCreature', effect.id)
+                }
                 state.state.continuousEffects = state.state.continuousEffects.slice(0, effectsLength)
                 state.clearModifiedCardDataCache()
                 break;
@@ -1706,6 +1744,7 @@ export class Unmaker {
     }
 
     public applyUnAction(state: State, unaction: UnAction) {
+        this.invalidateDerivedCaches(state)
         switch (unaction.type) {
             case UNMAKE_EFFECT_TYPE_PLAYER_WINS: {
                 state.unsetWinner()
@@ -1900,6 +1939,10 @@ export class Unmaker {
             }
             case UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT: {
                 // Remove all continuous effects added after the captured length
+                for (const effect of state.state.continuousEffects.slice(unaction.previousLength)) {
+                    state.clearSpellMetaDataField('source', effect.id)
+                    state.clearSpellMetaDataField('sourceCreature', effect.id)
+                }
                 state.state.continuousEffects = state.state.continuousEffects.slice(0, unaction.previousLength)
                 state.clearModifiedCardDataCache()
                 break

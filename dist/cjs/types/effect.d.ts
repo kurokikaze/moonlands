@@ -323,6 +323,7 @@ export type MagiIsDefeatedEffect = ActionEffect & {
 };
 export type CreateContinuousEffect = ActionEffect & {
     effectType: typeof EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT;
+    source?: CardInGame | string;
     staticAbilities?: StaticAbilityType[];
     triggerEffects?: TriggerEffectType[];
     expiration: ExpirationObjectType;

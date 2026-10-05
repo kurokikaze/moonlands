@@ -16,5 +16,5 @@ export interface PromptValidatorContext {
 export declare class PromptValidator {
     private context;
     constructor(context: PromptValidatorContext);
-    checkPrompts(source: CardInGame, preparedActions: AnyEffectType[], isPower?: boolean, powerCost?: number): boolean;
+    checkPrompts(source: CardInGame | undefined, preparedActions: AnyEffectType[], isPower?: boolean, powerCost?: number, player?: number, generatedBy?: string): boolean;
 }

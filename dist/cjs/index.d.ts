@@ -9,6 +9,7 @@ export type { JournalFrame, JournalEntry } from './Journal.js';
 import { SelectorEngine } from './SelectorEngine.js';
 import { PromptValidator } from './PromptValidator.js';
 import { LogEngine } from './LogEngine.js';
+import { TriggerEffectRegistry } from './TriggerEffectRegistry.js';
 import { CardWithModification, EnrichedStaticAbilityType, GameStaticAbility } from './LayeredModificationEngine.js';
 import { AnyEffectType, PromptTypeType, RestrictionObjectType, RestrictionType, LogEntryType, PropertyType, PromptType, EnrichedAction, OperatorType, ConditionType, FindType, ContinuousEffectType, EffectType, ZoneType, Region, ProtectionType, SerializedState, FullSerializedState, SerializedZones, MercenneFixed, MetaDataRecord } from './types/index.js';
 import { AnyPromptEnteredEffect, EnhancedDelayedTriggerType } from './types/effect.js';
@@ -95,6 +96,7 @@ export declare class State {
     logEngine: LogEngine;
     journal: Journal | null;
     private replacementEffectsCache;
+    triggerEffectRegistry: TriggerEffectRegistry;
     constructor(state?: StateShape);
     closeStreams(): void;
     initiatePRNG(seed: number): void;
@@ -202,7 +204,7 @@ export declare class State {
          * $-variables are kept intact, we probably need them
          * %-variables include usual "self": link to trigger source
          */
-    prepareMetaValue<T>(value: string | T, action: AnyEffectType, self: CardInGame, spellId: string): T | any;
+    prepareMetaValue<T>(value: string | T, action: AnyEffectType, self: CardInGame | undefined, spellId: string): T | any;
     selectNthCardOfZone(player: number, zoneType: ZoneType, cardNumber: number, restrictions?: RestrictionObjectType[]): CardInGame[];
     selectRandomCardOfZone(player: number, zoneType: ZoneType): CardInGame[];
     useSelector(selector: typeof SELECTOR_STATUS, player: null, argument: StatusType): CardInGame[];
@@ -248,12 +250,12 @@ export declare class State {
     checkAnyCardForRestrictions(cards: CardInGame[], restrictions: RestrictionObjectType[]): boolean;
     checkCardsForRestriction(cards: CardInGame[], restriction: RestrictionType, restrictionValue: any): boolean;
     makeCardFilter(restrictions?: RestrictionObjectType[]): (c: CardInGame) => boolean;
-    getObjectOrSelf(action: AnyEffectType, self: CardInGame, object: string | number | boolean, property: boolean): any;
+    getObjectOrSelf(action: AnyEffectType, self: CardInGame | undefined, object: string | number | boolean, property: boolean): any;
     clearReplacementEffectsCache(): void;
     invalidateReplacementEffectsForZoneChange(zone: Zone, previousCards: CardInGame[], cards: CardInGame[]): void;
     replaceByReplacementEffect(action: AnyEffectType): AnyEffectType[];
-    checkCondition(action: AnyEffectType, self: CardInGame, condition: ConditionType): any;
-    matchAction(action: AnyEffectType, find: FindType, self: CardInGame): boolean;
+    checkCondition(action: AnyEffectType, self: CardInGame | undefined, condition: ConditionType): any;
+    matchAction(action: AnyEffectType, find: FindType, self?: CardInGame): boolean;
     triggerAbilities(action: AnyEffectType): void;
     convertPromptActionToEffect(action: PromptType & {
         source: CardInGame;

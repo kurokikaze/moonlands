@@ -110,7 +110,7 @@ export const applyMoveEnergyEffect: ActionTransformer<typeof EFFECT_TYPE_MOVE_EN
   const moveTarget = (moveMultiTarget instanceof Array) ? moveMultiTarget[0] : moveMultiTarget;
   const amountToMove: number = this.getMetaValue(action.amount, action.generatedBy);
 
-  if (moveSource.data.energy >= amountToMove) {
+  if (moveSource && moveTarget && moveSource.data.energy >= amountToMove) {
     this.changeEnergy(moveSource, -amountToMove);
     this.changeEnergy(moveTarget, amountToMove);
     if (moveSource.data.energy === 0) {

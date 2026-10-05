@@ -84,7 +84,7 @@ describe('Card static ability cache', () => {
 		expect(readAbilities).toHaveBeenCalledTimes(1);
 	});
 
-	it.each([ZONE_TYPE_IN_PLAY, ZONE_TYPE_ACTIVE_MAGI])('invalidates entry, exit and nested rollbacks for %s', zoneType => {
+	it.each([ZONE_TYPE_IN_PLAY, ZONE_TYPE_ACTIVE_MAGI] as const)('invalidates entry, exit and nested rollbacks for %s', zoneType => {
 		const source = card('Water of Life', PLAYER);
 		const magi = card('Grega', OPPONENT);
 		const state = makeState({ hand: [source], opponentMagi: magi });
