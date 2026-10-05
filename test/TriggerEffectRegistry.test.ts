@@ -112,7 +112,7 @@ describe('TriggerEffectRegistry', () => {
 		expect(registry.getCandidates(none)[0]).toBe(registry.getCandidates(none)[0]);
 	});
 
-	it('reconciles direct zone edits, reorder, same-length replacements and player changes', () => {
+	it('refreshes direct zone edits and observes player changes', () => {
 		const state = game();
 		const zone = state.getZone(ZONE_TYPE_IN_PLAY);
 		const first = card('First', [trigger('first')]);
@@ -120,10 +120,13 @@ describe('TriggerEffectRegistry', () => {
 		const registry = state.triggerEffectRegistry;
 		expect(registry.getCandidates(none)).toEqual([]);
 		zone.add([first, second]);
+		state.refreshEffectRegistries();
 		expect(registry.getCandidates(none).map(entry => entry.self)).toEqual([first, second]);
 		zone.cards.reverse();
+		state.refreshEffectRegistries();
 		expect(registry.getCandidates(none).map(entry => entry.self)).toEqual([second, first]);
 		zone.cards[0] = card('Replacement', [trigger('replacement')]);
+		state.refreshEffectRegistries();
 		expect(registry.getCandidates(none).map(entry => entry.trigger.name)).toEqual(['replacement', 'first']);
 		zone.empty();
 		state.state.zones = [new Zone('Other Magi', ZONE_TYPE_ACTIVE_MAGI, 20).add([card('Other', [trigger('other')], 20, true)])];
@@ -131,16 +134,18 @@ describe('TriggerEffectRegistry', () => {
 		expect(registry.getCandidates(none).map(entry => entry.trigger.name)).toEqual(['other']);
 	});
 
-	it('detects trigger array changes and in-place effectType edits', () => {
+	it('refreshes externally edited trigger arrays and effect types explicitly', () => {
 		const state = game();
 		const definition = trigger('first');
 		const source = card('Source', [definition]);
 		state.getZone(ZONE_TYPE_IN_PLAY).add([source]);
 		expect(state.triggerEffectRegistry.getCandidates(none)).toHaveLength(1);
 		definition.find.effectType = EFFECT_TYPE_END_OF_TURN;
+		state.refreshEffectRegistries();
 		expect(state.triggerEffectRegistry.getCandidates(none)).toHaveLength(0);
 		expect(state.triggerEffectRegistry.getCandidates(end)).toHaveLength(1);
 		source.card.data.triggerEffects!.push(trigger('second'));
+		state.refreshEffectRegistries();
 		expect(state.triggerEffectRegistry.getCandidates(none)).toHaveLength(1);
 	});
 
@@ -251,7 +256,7 @@ describe('TriggerEffectRegistry', () => {
 		expect(entries[0].self).not.toBe(source);
 		expect(entries[0].self).toBe(cloned.getZone(ZONE_TYPE_IN_PLAY).cards[0]);
 		expect(entries[1].self).toBe(entries[0].self);
-		cloned.getZone(ZONE_TYPE_IN_PLAY).empty();
+		cloned.setZoneCards(cloned.getZone(ZONE_TYPE_IN_PLAY), []);
 		expect(state.triggerEffectRegistry.getCandidates(action)).toHaveLength(2);
 		expect(cloned.triggerEffectRegistry.getCandidates(action)).toHaveLength(1);
 	});

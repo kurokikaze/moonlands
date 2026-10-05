@@ -1,7 +1,6 @@
 import type CardInGame from './classes/CardInGame.js';
 import type Zone from './classes/Zone.js';
 import type { State, StateShape } from './index.js';
-import { ZONE_TYPE_IN_PLAY, ZONE_TYPE_ACTIVE_MAGI } from './const.js';
 
 type CardDataSnapshot = {
 	flags: number;
@@ -173,25 +172,19 @@ export class Journal {
 				break;
 			}
 			case 'moveCard': {
-				if (entry.card.card.data.staticAbilities?.length &&
-					(entry.from.type === ZONE_TYPE_IN_PLAY || entry.to.type === ZONE_TYPE_IN_PLAY ||
-						entry.from.type === ZONE_TYPE_ACTIVE_MAGI || entry.to.type === ZONE_TYPE_ACTIVE_MAGI)) {
-					state.selectorEngine.clearStaticAbilitiesCache();
-				}
-				if (entry.card.card.data.replacementEffects?.length &&
-					(entry.from.type === ZONE_TYPE_IN_PLAY || entry.to.type === ZONE_TYPE_IN_PLAY ||
-						entry.from.type === ZONE_TYPE_ACTIVE_MAGI || entry.to.type === ZONE_TYPE_ACTIVE_MAGI)) {
-					state.clearReplacementEffectsCache();
-				}
+				const previousTo = [...entry.to.cards];
+				const previousFrom = entry.from === entry.to ? previousTo : [...entry.from.cards];
 				entry.to.removeById(entry.newCard.id);
 				const cards = entry.from.cards;
 				entry.from.cards = [...cards.slice(0, entry.fromIndex), entry.card, ...cards.slice(entry.fromIndex)];
+				state.notifyZoneChange(entry.to, previousTo);
+				if (entry.from !== entry.to) state.notifyZoneChange(entry.from, previousFrom);
 				break;
 			}
 			case 'zoneCards': {
-				state.selectorEngine.invalidateStaticAbilitiesForZoneChange(entry.zone, entry.zone.cards, entry.previousCards);
-				state.invalidateReplacementEffectsForZoneChange(entry.zone, entry.zone.cards, entry.previousCards);
+				const previous = entry.zone.cards;
 				entry.zone.cards = entry.previousCards;
+				state.notifyZoneChange(entry.zone, previous);
 				break;
 			}
 			case 'key': {
@@ -210,18 +203,20 @@ export class Journal {
 				break;
 			}
 			case 'stateFields': {
-				if (entry.previous.continuousEffects) {
-					state.selectorEngine.invalidateStaticAbilitiesForContinuousEffectsChange(state.state.continuousEffects, entry.previous.continuousEffects);
-				}
+				const continuous = state.state.continuousEffects;
+				const delayed = state.state.delayedTriggers;
 				Object.assign(state.state, entry.previous);
+				if ('continuousEffects' in entry.previous) state.notifySourceChange({ kind: 'continuous', previous: continuous, current: state.state.continuousEffects });
+				if ('delayedTriggers' in entry.previous) state.notifySourceChange({ kind: 'delayed', previous: delayed, current: state.state.delayedTriggers });
 				break;
 			}
 			case 'arrayPush': {
-				if (entry.array === state.state.continuousEffects &&
-					entry.array.slice(entry.array.length - entry.count).some(effect => effect.staticAbilities?.length)) {
-					state.selectorEngine.clearContinuousStaticAbilitiesCache();
-				}
+				const continuous = entry.array === state.state.continuousEffects;
+				const delayed = entry.array === state.state.delayedTriggers;
+				const previous = continuous || delayed ? [...entry.array] : [];
 				entry.array.splice(entry.array.length - entry.count, entry.count);
+				if (continuous) state.notifySourceChange({ kind: 'continuous', previous, current: state.state.continuousEffects });
+				if (delayed) state.notifySourceChange({ kind: 'delayed', previous, current: state.state.delayedTriggers });
 				break;
 			}
 			case 'arrayUnshift': {

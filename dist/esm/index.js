@@ -14,6 +14,8 @@ import { SelectorEngine } from './SelectorEngine.js';
 import { PromptValidator } from './PromptValidator.js';
 import { LogEngine } from './LogEngine.js';
 import { TriggerEffectRegistry } from './TriggerEffectRegistry.js';
+import { SourceChangeService } from './SourceChangeService.js';
+import { ReplacementEffectRegistry } from './ReplacementEffectRegistry.js';
 import convertPromptActionToEffect from './helpers/convertPromptAction.js';
 import performCalculation from './helpers/performCalculation.js';
 const convertCard = (cardInGame) => ({
@@ -134,7 +136,6 @@ export class State {
         this.onFullAction = null;
         this.turnTimer = null;
         this.journal = null;
-        this.replacementEffectsCache = null;
         this.zoneHash = new Map();
         this.state = Object.assign(Object.assign({}, clone(defaultState)), state);
         if (!('controllingPlayer' in state)) {
@@ -171,13 +172,72 @@ export class State {
             addLogEntry: (entry) => this.addLogEntry(entry),
             getPromptType: () => this.state.promptType,
         });
+        this.sourceChangeService = new SourceChangeService(() => this.players);
+        const updateStaticCaches = (change) => {
+            if (change.kind === 'batch') {
+                change.changes.forEach(updateStaticCaches);
+                return;
+            }
+            if (change.kind === 'reset') {
+                this.zoneHash.clear();
+                this.selectorEngine.clearStaticAbilitiesCache();
+                this.selectorEngine.clearContinuousStaticAbilitiesCache();
+            }
+            else if (change.kind === 'zone') {
+                this.selectorEngine.invalidateStaticAbilitiesForZoneChange(change.zone, change.previous, change.current);
+                if (change.zone.type === ZONE_TYPE_IN_PLAY || change.zone.type === ZONE_TYPE_ACTIVE_MAGI)
+                    this.clearModifiedCardDataCache();
+            }
+            else if (change.kind === 'continuous') {
+                this.selectorEngine.invalidateStaticAbilitiesForContinuousEffectsChange(change.previous, change.current);
+                this.clearModifiedCardDataCache();
+            }
+        };
+        this.sourceChangeService.subscribe(updateStaticCaches);
+        this.replacementEffectRegistry = new ReplacementEffectRegistry({
+            getZones: () => this.state.zones,
+            getPlayers: () => this.players,
+            ensureSourcesCurrent: () => this.sourceChangeService.ensureCurrent(),
+            subscribeSourceChanges: listener => this.subscribeSourceChanges(listener),
+        });
         this.triggerEffectRegistry = new TriggerEffectRegistry({
             getZones: () => this.state.zones,
             getPlayers: () => this.players,
             getDelayedTriggers: () => this.state.delayedTriggers,
             getContinuousEffects: () => this.state.continuousEffects,
             matchAction: (action, find, source) => this.matchAction(action, find, source),
+            ensureSourcesCurrent: () => this.sourceChangeService.ensureCurrent(),
+            subscribeSourceChanges: listener => this.subscribeSourceChanges(listener),
         });
+    }
+    /** Subscribe to successful structural changes, including inverse changes during rollback. */
+    subscribeSourceChanges(listener) {
+        return this.sourceChangeService.subscribe(listener);
+    }
+    batchSourceChanges(operation) {
+        return this.sourceChangeService.batch(operation);
+    }
+    /** Call after direct setup edits to zones, effects, or ability definitions. */
+    refreshEffectRegistries() {
+        this.sourceChangeService.emit({ kind: 'reset' });
+    }
+    /** Non-recording notification boundary, also used after Journal inverses. */
+    notifySourceChange(change) {
+        this.sourceChangeService.emit(change);
+    }
+    /** Hidden-zone writes and deck shuffles do not affect active source indexes. */
+    notifyZoneChange(zone, previous) {
+        if (zone.type !== ZONE_TYPE_IN_PLAY && zone.type !== ZONE_TYPE_ACTIVE_MAGI)
+            return;
+        if (previous.length === zone.cards.length && previous.every((card, index) => card === zone.cards[index]))
+            return;
+        this.notifySourceChange({ kind: 'zone', zone, previous, current: zone.cards });
+    }
+    /** Release source-change listeners when discarding a State. */
+    dispose() {
+        this.triggerEffectRegistry.dispose();
+        this.replacementEffectRegistry.dispose();
+        this.sourceChangeService.dispose();
     }
     // @deprecated
     closeStreams() { }
@@ -280,7 +340,7 @@ export class State {
         if (!this.journal) {
             throw new Error('No search frame to roll back');
         }
-        this.journal.rollback(frame, this);
+        this.batchSourceChanges(() => this.journal.rollback(frame, this));
         this.clearModifiedCardDataCache();
         if (!this.journal.hasFrames) {
             this.journal = null;
@@ -308,6 +368,7 @@ export class State {
     }
     setPlayers(player1, player2) {
         this.players = [player1, player2];
+        this.sourceChangeService.ensureCurrent();
         return this;
     }
     setDeck(player, cardNames) {
@@ -443,6 +504,7 @@ export class State {
         }
         const zones = this.state.zones.length == 0 ? this.createZones() : this.state.zones;
         this.state.zones = zones;
+        this.refreshEffectRegistries();
         this.decks.forEach(({ player, deck }) => {
             const magi = deck.filter(card => card.card.type === TYPE_MAGI);
             const rest = deck.filter(card => card.card.type != TYPE_MAGI);
@@ -631,50 +693,45 @@ export class State {
      * Returns the new card object, or null if the card is not in the source zone.
      */
     moveCard(card, from, to, bottom = false) {
-        var _a, _b, _c;
+        var _a;
         const fromIndex = from.cards.findIndex(({ id }) => id === card.id);
         if (fromIndex === -1) {
             return null;
         }
-        if (from.type === ZONE_TYPE_IN_PLAY || to.type === ZONE_TYPE_IN_PLAY) {
-            this.clearModifiedCardDataCache();
-        }
-        if (((_a = card.card.data.staticAbilities) === null || _a === void 0 ? void 0 : _a.length) &&
-            (from.type === ZONE_TYPE_IN_PLAY || to.type === ZONE_TYPE_IN_PLAY ||
-                from.type === ZONE_TYPE_ACTIVE_MAGI || to.type === ZONE_TYPE_ACTIVE_MAGI)) {
-            this.selectorEngine.clearStaticAbilitiesCache();
-        }
-        if (((_b = card.card.data.replacementEffects) === null || _b === void 0 ? void 0 : _b.length) &&
-            (from.type === ZONE_TYPE_IN_PLAY || to.type === ZONE_TYPE_IN_PLAY ||
-                from.type === ZONE_TYPE_ACTIVE_MAGI || to.type === ZONE_TYPE_ACTIVE_MAGI)) {
-            this.clearReplacementEffectsCache();
-        }
         const newCard = new CardInGame(card.card, card.owner, this.nanoid);
-        (_c = this.journal) === null || _c === void 0 ? void 0 : _c.record({ kind: 'moveCard', card, newCard, from, to, fromIndex });
-        if (bottom) {
-            to.add([newCard]);
-        }
-        else {
-            to.addToTop([newCard]);
-        }
-        from.removeById(card.id);
+        (_a = this.journal) === null || _a === void 0 ? void 0 : _a.record({ kind: 'moveCard', card, newCard, from, to, fromIndex });
+        const previousFrom = [...from.cards];
+        const previousTo = from === to ? previousFrom : [...to.cards];
+        this.batchSourceChanges(() => {
+            if (bottom) {
+                to.add([newCard]);
+            }
+            else {
+                to.addToTop([newCard]);
+            }
+            from.removeById(card.id);
+            this.notifyZoneChange(to, previousTo);
+            if (from !== to)
+                this.notifyZoneChange(from, previousFrom);
+        });
         return newCard;
     }
     setZoneCards(zone, cards) {
         var _a;
-        this.selectorEngine.invalidateStaticAbilitiesForZoneChange(zone, zone.cards, cards);
-        this.invalidateReplacementEffectsForZoneChange(zone, zone.cards, cards);
-        (_a = this.journal) === null || _a === void 0 ? void 0 : _a.record({ kind: 'zoneCards', zone, previousCards: zone.cards });
+        const previous = zone.cards;
+        (_a = this.journal) === null || _a === void 0 ? void 0 : _a.record({ kind: 'zoneCards', zone, previousCards: [...previous] });
         zone.cards = cards;
+        this.notifyZoneChange(zone, previous);
     }
     shuffleZone(zone) {
         var _a;
+        if (zone.type === ZONE_TYPE_IN_PLAY || zone.type === ZONE_TYPE_ACTIVE_MAGI) {
+            throw new Error('Active source zones cannot be shuffled');
+        }
         const previousCards = [...zone.cards];
         // Shuffle works in place, so we keep a copy
         (_a = this.journal) === null || _a === void 0 ? void 0 : _a.record({ kind: 'zoneCards', zone, previousCards });
         zone.shuffle();
-        this.selectorEngine.invalidateStaticAbilitiesForZoneChange(zone, previousCards, zone.cards);
-        this.invalidateReplacementEffectsForZoneChange(zone, previousCards, zone.cards);
     }
     // Spell metadata
     setSpellMetadata(metadata, spellId) {
@@ -736,28 +793,30 @@ export class State {
     }
     // Continuous effects and triggers
     addContinuousEffect(effect) {
-        var _a, _b;
+        var _a;
+        const previous = [...this.state.continuousEffects];
         (_a = this.journal) === null || _a === void 0 ? void 0 : _a.record({ kind: 'arrayPush', array: this.state.continuousEffects, count: 1 });
         this.state.continuousEffects.push(effect);
-        if ((_b = effect.staticAbilities) === null || _b === void 0 ? void 0 : _b.length) {
-            this.selectorEngine.clearContinuousStaticAbilitiesCache();
-        }
-        this.clearModifiedCardDataCache();
+        this.notifySourceChange({ kind: 'continuous', previous, current: this.state.continuousEffects });
     }
     setContinuousEffects(effects) {
-        this.selectorEngine.invalidateStaticAbilitiesForContinuousEffectsChange(this.state.continuousEffects, effects);
+        const previous = this.state.continuousEffects;
         this.recordStateFields('continuousEffects');
         this.state.continuousEffects = effects;
-        this.clearModifiedCardDataCache();
+        this.notifySourceChange({ kind: 'continuous', previous, current: effects });
     }
     addDelayedTrigger(trigger) {
         var _a;
+        const previous = [...this.state.delayedTriggers];
         (_a = this.journal) === null || _a === void 0 ? void 0 : _a.record({ kind: 'arrayPush', array: this.state.delayedTriggers, count: 1 });
         this.state.delayedTriggers.push(trigger);
+        this.notifySourceChange({ kind: 'delayed', previous, current: this.state.delayedTriggers });
     }
     removeDelayedTrigger(triggerId) {
+        const previous = this.state.delayedTriggers;
         this.recordStateFields('delayedTriggers');
         this.state.delayedTriggers = this.state.delayedTriggers.filter(({ id }) => id != triggerId);
+        this.notifySourceChange({ kind: 'delayed', previous, current: this.state.delayedTriggers });
     }
     // Prompts
     setPrompt(prompt) {
@@ -979,29 +1038,11 @@ export class State {
         return property ? this.getMetaValue(action[object], action.generatedBy) : object;
     }
     clearReplacementEffectsCache() {
-        this.replacementEffectsCache = null;
-    }
-    invalidateReplacementEffectsForZoneChange(zone, previousCards, cards) {
-        if (zone.type !== ZONE_TYPE_IN_PLAY && zone.type !== ZONE_TYPE_ACTIVE_MAGI) {
-            return;
-        }
-        const previousSources = previousCards.filter(card => { var _a; return (_a = card.card.data.replacementEffects) === null || _a === void 0 ? void 0 : _a.length; });
-        const sources = cards.filter(card => { var _a; return (_a = card.card.data.replacementEffects) === null || _a === void 0 ? void 0 : _a.length; });
-        if (previousSources.length !== sources.length || previousSources.some((card, index) => card !== sources[index])) {
-            this.clearReplacementEffectsCache();
-        }
+        this.replacementEffectRegistry.invalidate();
     }
     replaceByReplacementEffect(action) {
         var _a;
-        if (this.replacementEffectsCache === null) {
-            const cards = [
-                ...this.getZone(ZONE_TYPE_IN_PLAY).cards,
-                ...this.getZone(ZONE_TYPE_ACTIVE_MAGI, this.players[0]).cards,
-                ...this.getZone(ZONE_TYPE_ACTIVE_MAGI, this.players[1]).cards,
-            ];
-            this.replacementEffectsCache = cards.flatMap(card => { var _a; return ((_a = card.card.data.replacementEffects) !== null && _a !== void 0 ? _a : []).map(effect => (Object.assign(Object.assign({}, effect), { self: card }))); });
-        }
-        const zoneReplacements = this.replacementEffectsCache;
+        const zoneReplacements = this.replacementEffectRegistry.getCandidates();
         let replacementFound = false;
         let appliedReplacerId = null;
         let appliedReplacerSelf = null;

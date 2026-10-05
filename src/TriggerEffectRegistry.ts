@@ -3,6 +3,8 @@ import Zone from './classes/Zone.js';
 import { ACTION_EFFECT, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_IN_PLAY } from './const.js';
 import type { AnyEffectType, ContinuousEffectType, FindType, TriggerEffectType } from './types/index.js';
 import type { EnhancedDelayedTriggerType } from './types/effect.js';
+import type { SourceChange } from './SourceChangeService.js';
+import { SourceEffectIndex } from './SourceEffectIndex.js';
 
 export interface TriggerEffectRegistryContext {
 	getZones(): Zone[];
@@ -10,6 +12,8 @@ export interface TriggerEffectRegistryContext {
 	getDelayedTriggers(): EnhancedDelayedTriggerType[];
 	getContinuousEffects(): ContinuousEffectType[];
 	matchAction(action: AnyEffectType, find: FindType, self?: CardInGame): boolean;
+	subscribeSourceChanges?(listener: (change: SourceChange) => void): () => void;
+	ensureSourcesCurrent?(): void;
 }
 
 export type RegisteredTriggerEffect = {
@@ -32,23 +36,57 @@ type TriggerSource = {
 
 /**
  * Derived state: never serialized or shared between State clones.
- * Reconcile source identities and definitions before lookup, because public zone
- * arrays and unmaker can mutate canonical state without going through handlers.
- * Unchanged sources reuse the index; only candidates of this effectType are matched.
+ * State contexts subscribe to structural edits, maintaining per-source chunks.
+ * Only initialization or an explicit definition refresh scans all sources.
+ * Standalone contexts without subscriptions retain the legacy reconciliation path.
  */
 export class TriggerEffectRegistry {
+	private initialized = false;
+	private watchedZones: (Zone | undefined)[] = [];
+	private unsubscribe?: () => void;
+	private index = new SourceEffectIndex<CardInGame | EnhancedDelayedTriggerType | ContinuousEffectType, RegisteredTriggerEffect>(source => {
+		if (source instanceof CardInGame) {
+			return (source.card.data.triggerEffects || []).map(trigger => ({ kind: 'card', trigger, self: source, get player() { return source.data.controller; } }));
+		}
+		if ('find' in source) {
+			return [{ kind: 'delayed', trigger: source, self: source.self, id: source.id, get player() { return source.self.data.controller; } }];
+		}
+		return (source.triggerEffects || []).map(trigger => ({ kind: 'continuous', trigger,
+			get self() { return source.self; }, get id() { return source.id; }, get player() { return source.player; },
+		}));
+	}, entry => entry.trigger.find.effectType);
 	private sources: TriggerSource[] = [];
 	private byEffectType = new Map<string, RegisteredTriggerEffect[]>();
 	private indexedEffectTypes = new WeakMap<TriggerEffectType, FindType['effectType']>();
 
-	constructor(private context: TriggerEffectRegistryContext) {}
+	constructor(private context: TriggerEffectRegistryContext) {
+		this.unsubscribe = context.subscribeSourceChanges?.(change => this.onSourceChange(change));
+	}
+
+	dispose(): void { this.unsubscribe?.(); this.invalidate(); }
 
 	invalidate(): void {
+		this.initialized = false;
+		this.index.clear();
 		this.sources = [];
 		this.byEffectType.clear();
 	}
 
 	synchronize(): void {
+		if (this.context.subscribeSourceChanges) {
+			this.context.ensureSourcesCurrent?.();
+			this.index.clear();
+			const zones = this.context.getZones();
+			this.watchedZones = [
+				zones.find(zone => zone.type === ZONE_TYPE_IN_PLAY && zone.player === null),
+				...this.context.getPlayers().slice(0, 2).map(player => zones.find(zone => zone.type === ZONE_TYPE_ACTIVE_MAGI && zone.player === player)),
+			];
+			this.watchedZones.forEach((zone, index) => this.index.setGroup(`zone:${index}`, zone?.cards || []));
+			this.index.setGroup('delayed', this.context.getDelayedTriggers());
+			this.index.setGroup('continuous', this.context.getContinuousEffects());
+			this.initialized = true;
+			return;
+		}
 		const zones = this.context.getZones();
 		const watchedZones = [
 			zones.find(zone => zone.type === ZONE_TYPE_IN_PLAY && zone.player === null),
@@ -94,8 +132,23 @@ export class TriggerEffectRegistry {
 		this.sources = sources.map(source => ({ ...source, triggers: [...source.triggers] }));
 	}
 
+	private onSourceChange(change: SourceChange): void {
+		if (change.kind === 'batch') { change.changes.forEach(item => this.onSourceChange(item)); return; }
+		if (change.kind === 'reset') { this.invalidate(); return; }
+		if (!this.initialized) return;
+		if (change.kind === 'zone') {
+			const position = this.watchedZones.indexOf(change.zone);
+			if (position !== -1) this.index.setGroup(`zone:${position}`, change.current);
+		} else this.index.setGroup(change.kind, change.current);
+	}
+
 	getCandidates(action: AnyEffectType): RegisteredTriggerEffect[] {
 		if (action.type !== ACTION_EFFECT) return [];
+		if (this.context.subscribeSourceChanges) {
+			this.context.ensureSourcesCurrent?.();
+			if (!this.initialized) this.synchronize();
+			return [...this.index.getByEffectType(action.effectType)];
+		}
 		this.synchronize();
 		return [...(this.byEffectType.get(action.effectType) || [])];
 	}

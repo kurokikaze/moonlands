@@ -44,9 +44,7 @@ export default class Zone {
 	}
 
 	add(cards: CardInGame[]) {
-		for (let card of cards) {
-			this.cards.push(card);
-		}
+		this.cards.push(...cards);
 		return this;
 	}
 

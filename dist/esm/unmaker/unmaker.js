@@ -44,6 +44,11 @@ const actionNames = {
     38: 'UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES',
     39: 'UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD'
 };
+/**
+ * @deprecated Obsolete legacy rollback API, retained temporarily for compatibility.
+ * Use State.beginSearchFrame(), State.rollback(), and State.endSearchFrame() instead.
+ * New features and optimizations do not support Unmaker; scheduled for eventual removal.
+ */
 export class Unmaker {
     constructor(state, blobSize) {
         this.state = state;

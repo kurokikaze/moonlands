@@ -10,6 +10,9 @@ import { SelectorEngine } from './SelectorEngine.js';
 import { PromptValidator } from './PromptValidator.js';
 import { LogEngine } from './LogEngine.js';
 import { TriggerEffectRegistry } from './TriggerEffectRegistry.js';
+import { type SourceChange } from './SourceChangeService.js';
+import { ReplacementEffectRegistry } from './ReplacementEffectRegistry.js';
+export type { SourceChange } from './SourceChangeService.js';
 import { CardWithModification, EnrichedStaticAbilityType, GameStaticAbility } from './LayeredModificationEngine.js';
 import { AnyEffectType, PromptTypeType, RestrictionObjectType, RestrictionType, LogEntryType, PropertyType, PromptType, EnrichedAction, OperatorType, ConditionType, FindType, ContinuousEffectType, EffectType, ZoneType, Region, ProtectionType, SerializedState, FullSerializedState, SerializedZones, MercenneFixed, MetaDataRecord } from './types/index.js';
 import { AnyPromptEnteredEffect, EnhancedDelayedTriggerType } from './types/effect.js';
@@ -95,9 +98,21 @@ export declare class State {
     promptValidator: PromptValidator;
     logEngine: LogEngine;
     journal: Journal | null;
-    private replacementEffectsCache;
+    private sourceChangeService;
+    replacementEffectRegistry: ReplacementEffectRegistry;
     triggerEffectRegistry: TriggerEffectRegistry;
     constructor(state?: StateShape);
+    /** Subscribe to successful structural changes, including inverse changes during rollback. */
+    subscribeSourceChanges(listener: (change: SourceChange) => void): () => void;
+    batchSourceChanges<T>(operation: () => T): T;
+    /** Call after direct setup edits to zones, effects, or ability definitions. */
+    refreshEffectRegistries(): void;
+    /** Non-recording notification boundary, also used after Journal inverses. */
+    notifySourceChange(change: SourceChange): void;
+    /** Hidden-zone writes and deck shuffles do not affect active source indexes. */
+    notifyZoneChange(zone: Zone, previous: CardInGame[]): void;
+    /** Release source-change listeners when discarding a State. */
+    dispose(): void;
     closeStreams(): void;
     initiatePRNG(seed: number): void;
     setOnAction(callback: (e: AnyEffectType) => void, fullStream?: boolean): void;
@@ -252,7 +267,6 @@ export declare class State {
     makeCardFilter(restrictions?: RestrictionObjectType[]): (c: CardInGame) => boolean;
     getObjectOrSelf(action: AnyEffectType, self: CardInGame | undefined, object: string | number | boolean, property: boolean): any;
     clearReplacementEffectsCache(): void;
-    invalidateReplacementEffectsForZoneChange(zone: Zone, previousCards: CardInGame[], cards: CardInGame[]): void;
     replaceByReplacementEffect(action: AnyEffectType): AnyEffectType[];
     checkCondition(action: AnyEffectType, self: CardInGame | undefined, condition: ConditionType): any;
     matchAction(action: AnyEffectType, find: FindType, self?: CardInGame): boolean;

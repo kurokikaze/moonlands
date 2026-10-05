@@ -28,9 +28,7 @@ export default class Zone {
         return this.cards.length;
     }
     add(cards) {
-        for (let card of cards) {
-            this.cards.push(card);
-        }
+        this.cards.push(...cards);
         return this;
     }
     addToTop(cards) {

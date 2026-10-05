@@ -1,6 +1,11 @@
 import { State } from '../index.js';
 import { AnyEffectType } from '../types/index.js';
 import { UnAction } from './types.js';
+/**
+ * @deprecated Obsolete legacy rollback API, retained temporarily for compatibility.
+ * Use State.beginSearchFrame(), State.rollback(), and State.endSearchFrame() instead.
+ * New features and optimizations do not support Unmaker; scheduled for eventual removal.
+ */
 export declare class Unmaker {
     private state;
     unActions: UnAction[];
