@@ -1,10 +1,7 @@
 import CardInGame from './classes/CardInGame.js';
 import Zone from './classes/Zone.js';
 import { AnyEffectType, PropertyType, RestrictionObjectType, ZoneType } from './types/index.js';
-/**
- * Context interface containing methods needed by PromptValidator
- * Kept as an interface to avoid circular imports
- */
+/** Context kept separate from State to avoid circular imports. */
 export interface PromptValidatorContext {
     getZone(type: ZoneType, player?: number | null): Zone;
     modifyByStaticAbilities(target: CardInGame, property: PropertyType, subProperty?: string | null): any;

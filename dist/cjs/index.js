@@ -1,3 +1,4 @@
+import { resolvePromptRestrictions } from './helpers/resolvePromptRestrictions.js';
 import { nanoid, customRandom, urlAlphabet } from 'nanoid';
 import { MersenneTwister } from './mersenneTwister.js';
 import { TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, ACTION_PASS, ACTION_PLAY, ACTION_POWER, ACTION_EFFECT, ACTION_SELECT, ACTION_CALCULATE, ACTION_ENTER_PROMPT, ACTION_RESOLVE_PROMPT, ACTION_GET_PROPERTY_VALUE, ACTION_ATTACK, ACTION_PLAYER_WINS, ACTION_CONCEDE, ACTION_TIME_NOTIFICATION, ACTION_EXIT_PROMPTS, ACTION_PROPERTY, PROPERTY_ID, PROPERTY_TYPE, PROPERTY_CONTROLLER, PROPERTY_ENERGY_COUNT, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, PROPERTY_POWER_COST, PROPERTY_ABLE_TO_ATTACK, PROPERTY_CAN_BE_ATTACKED, PROPERTY_PROTECTION, CALCULATION_SET, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_HALVE_ROUND_DOWN, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_MAX, CALCULATION_MULTIPLY, SELECTOR_CREATURES, SELECTOR_CREATURES_AND_MAGI, SELECTOR_OWN_MAGI, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_MAGI_OF_REGION, SELECTOR_OPPONENT_ID, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, SELECTOR_CREATURES_OF_TYPE, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_OTHER_CREATURES_OF_TYPE, SELECTOR_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_ID, SELECTOR_CREATURES_OF_PLAYER, SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY, SELECTOR_NTH_CARD_OF_ZONE, SELECTOR_OWN_CARDS_IN_HAND, SELECTOR_CARDS_IN_HAND, SELECTOR_MAGI_OF_PLAYER, SELECTOR_RANDOM_CARD_IN_HAND, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_RELIC, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_OWN_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_CHOOSE_CARDS, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_MAGI_WITHOUT_CREATURES, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_PLAYER, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, PROMPT_TYPE_NUMBER_OF_CREATURES, PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_ALTERNATIVE, PROMPT_TYPE_PAYMENT_SOURCE, PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES, NO_PRIORITY, PRIORITY_PRS, PRIORITY_ATTACK, PRIORITY_CREATURES, EFFECT_TYPE_START_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_DRAW, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_PLAY_CREATURE, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_RELIC_ENTERS_PLAY, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE, EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC, EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_PAYING_ENERGY_FOR_POWER, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_CREATURE_IS_DEFEATED, // Possibly redundant
@@ -18,6 +19,7 @@ import { SourceChangeService } from './SourceChangeService.js';
 import { ReplacementEffectRegistry } from './ReplacementEffectRegistry.js';
 import convertPromptActionToEffect from './helpers/convertPromptAction.js';
 import performCalculation from './helpers/performCalculation.js';
+import { validatePromptResolution } from './helpers/validatePromptResolution.js';
 const convertCard = (cardInGame) => ({
     id: cardInGame.id,
     owner: cardInGame.owner,
@@ -1551,12 +1553,7 @@ export class State {
                             if (action.promptParams.restriction && action.promptParams.restrictions) {
                                 throw new Error('PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE error: single and multiple restrictions specified');
                             }
-                            const restrictions = action.promptParams.restrictions || (action.promptParams.restriction ? [
-                                {
-                                    type: this.getMetaValue(action.promptParams.restriction, action.generatedBy),
-                                    value: this.getMetaValue(action.promptParams.restrictionValue, action.generatedBy),
-                                },
-                            ] : null);
+                            const restrictions = resolvePromptRestrictions(action.promptParams, value => this.getMetaValue(value, action.generatedBy), this.getMetaValue(action.player, action.generatedBy));
                             const zone = this.getMetaValue(action.promptParams.zone, action.generatedBy);
                             const zoneOwner = this.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
                             const numberOfCards = this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
@@ -1581,12 +1578,7 @@ export class State {
                             if (action.promptParams.restriction && action.promptParams.restrictions) {
                                 throw new Error('PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE error: single and multiple restrictions specified');
                             }
-                            const restrictions = action.promptParams.restrictions || (action.promptParams.restriction ? [
-                                {
-                                    type: this.getMetaValue(action.promptParams.restriction, action.generatedBy),
-                                    value: this.getMetaValue(action.promptParams.restrictionValue, action.generatedBy),
-                                },
-                            ] : null);
+                            const restrictions = resolvePromptRestrictions(action.promptParams, value => this.getMetaValue(value, action.generatedBy), this.getMetaValue(action.player, action.generatedBy));
                             const zone = this.getMetaValue(action.promptParams.zone, action.generatedBy);
                             const zoneOwner = this.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
                             const numberOfCards = this.getMetaValue(action.promptParams.numberOfCards, action.generatedBy);
@@ -1667,42 +1659,13 @@ export class State {
                             };
                             break;
                         }
-                        case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
-                            if (action.promptParams.restriction) {
-                                promptParams = {
-                                    amount: this.getMetaValue(action.promptParams.amount, action.generatedBy),
-                                    restrictions: [
-                                        {
-                                            type: action.promptParams.restriction,
-                                            value: this.getMetaValue(action.promptParams.amount, action.generatedBy),
-                                        },
-                                    ],
-                                };
-                            }
-                            else {
-                                promptParams = {
-                                    amount: this.getMetaValue(action.promptParams.amount, action.generatedBy),
-                                };
-                            }
-                            break;
-                        }
+                        case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES:
                         case PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES: {
-                            if (action.promptParams.restriction) {
-                                promptParams = {
-                                    amount: this.getMetaValue(action.promptParams.amount, action.generatedBy),
-                                    restrictions: [
-                                        {
-                                            type: action.promptParams.restriction,
-                                            value: this.getMetaValue(action.promptParams.amount, action.generatedBy),
-                                        },
-                                    ],
-                                };
-                            }
-                            else {
-                                promptParams = {
-                                    amount: this.getMetaValue(action.promptParams.amount, action.generatedBy),
-                                };
-                            }
+                            const restrictions = resolvePromptRestrictions(action.promptParams, value => this.getMetaValue(value, action.generatedBy), this.getMetaValue(action.player, action.generatedBy));
+                            promptParams = {
+                                amount: this.getMetaValue(action.promptParams.amount, action.generatedBy),
+                                ...(restrictions ? { restrictions } : {}),
+                            };
                             break;
                         }
                         case PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES: {
@@ -1734,6 +1697,8 @@ export class State {
                     break;
                 }
                 case ACTION_RESOLVE_PROMPT: {
+                    if (!validatePromptResolution(this, action))
+                        return false;
                     if (this.state.promptType === PROMPT_TYPE_MAY_ABILITY) {
                         const mayEffectActions = this.state.mayEffectActions || [];
                         const fallbackActions = this.state.fallbackActions || [];
@@ -1781,8 +1746,9 @@ export class State {
                                         console.error('Number of cards is wrong');
                                         return false;
                                     }
-                                    currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE]] = action.cards;
+                                    currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES]] = action.cards;
                                 }
+                                break;
                             }
                             case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
                                 if ('cards' in action && action.cards) {
@@ -1802,12 +1768,12 @@ export class State {
                             }
                             case PROMPT_TYPE_NUMBER:
                                 if ('number' in action) {
-                                    currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_NUMBER]] = (typeof action.number === 'number') ? action.number : parseInt(action.number || '0', 10);
+                                    currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_NUMBER]] = Number(action.number);
                                 }
                                 break;
                             case PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE:
-                                if ('target' in action && action.target && this.state?.promptParams?.source) {
-                                    if (this.state.promptParams.source.id === action.target?.id) {
+                                if ('target' in action && action.target) {
+                                    if (this.state.promptParams.source?.id === action.target?.id) {
                                         throw new Error('Got forbidden target on prompt');
                                     }
                                     currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE]] = action.target;
@@ -1907,7 +1873,7 @@ export class State {
                                     const source = this.getMetaValue(action.source, action.generatedBy);
                                     const power = this.getMetaValue(action.power, action.generatedBy);
                                     if (source && power && source.card.data.powers && source.card.data.powers.some(p => p.name === power.name)) {
-                                        currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_POWER_ON_MAGI]] = action.power;
+                                        currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_POWER_ON_MAGI]] = source.card.data.powers.find(p => p.name === power.name);
                                     }
                                     else {
                                         console.error(`Unknown power: ${power.name || power} in PROMPT_TYPE_POWER_ON_MAGI prompt resolution`);
@@ -1922,14 +1888,15 @@ export class State {
                                 if ('alternative' in action) {
                                     currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_ALTERNATIVE]] = action.alternative;
                                 }
+                                break;
                             }
                             case PROMPT_TYPE_PAYMENT_SOURCE: {
-                                if ('target' in action && action.target && this.state.promptParams.paymentType && this.state.promptParams.paymentAmount) {
+                                if ('target' in action && action.target && this.state.promptParams.paymentType && this.state.promptParams.paymentAmount !== undefined) {
                                     const paymentSource = action.target;
                                     if (paymentSource.card.type === TYPE_MAGI ||
                                         (paymentSource.card.type === TYPE_CREATURE && paymentSource.card.data.paymentSource?.includes(this.state.promptParams.paymentType))) {
                                         if (paymentSource.data.energy >= this.state.promptParams.paymentAmount) {
-                                            currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_ALTERNATIVE]] = action.target;
+                                            currentActionMetaData[variable || DEFAULT_PROMPT_VARIABLE[PROMPT_TYPE_PAYMENT_SOURCE]] = action.target;
                                         }
                                         else {
                                             console.error(`This payment target doesn't have enough energy to pay for that`);

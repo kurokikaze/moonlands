@@ -1,3 +1,4 @@
+import { resolvePromptRestrictions } from './resolvePromptRestrictions.js';
 import { State } from "../index.js";
 import CardInGame, { ConvertedCard } from "../classes/CardInGame.js";
 import { PROMPT_TYPE_NUMBER, ACTION_EFFECT, EFFECT_TYPE_PROMPT_ENTERED, PROMPT_TYPE_ALTERNATIVE, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_CHOOSE_CARDS, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES, PROMPT_TYPE_MAGI_WITHOUT_CREATURES, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_NUMBER_OF_CREATURES, PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED, PROMPT_TYPE_OWN_SINGLE_CREATURE, PROMPT_TYPE_PAYMENT_SOURCE, PROMPT_TYPE_PLAYER, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_RELIC, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_SINGLE_MAGI, ZONE_TYPE_IN_PLAY } from "../const.js";
@@ -62,12 +63,7 @@ export default function convertPromptActionToEffect(action: PromptType & { sourc
             return effect
         }
         case PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE: {
-            const restrictions = action.promptParams.restrictions || (action.promptParams.restriction ? [
-                {
-                    type: state.getMetaValue(action.promptParams.restriction, action.generatedBy),
-                    value: state.getMetaValue(action.promptParams.restrictionValue, action.generatedBy),
-                },
-            ] : undefined);
+            const restrictions = resolvePromptRestrictions(action.promptParams, value => state.getMetaValue(value, action.generatedBy), player);
 
             const zone = state.getMetaValue(action.promptParams.zone, action.generatedBy) as ZoneType;
             const zoneOwner = state.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
@@ -96,12 +92,7 @@ export default function convertPromptActionToEffect(action: PromptType & { sourc
             return effect
         }
         case PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
-            const restrictions = action.promptParams.restrictions || (action.promptParams.restriction ? [
-                {
-                    type: state.getMetaValue(action.promptParams.restriction, action.generatedBy),
-                    value: state.getMetaValue(action.promptParams.restrictionValue, action.generatedBy),
-                },
-            ] : undefined);
+            const restrictions = resolvePromptRestrictions(action.promptParams, value => state.getMetaValue(value, action.generatedBy), player);
 
             const zone = state.getMetaValue(action.promptParams.zone, action.generatedBy);
             const zoneOwner = state.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
@@ -133,6 +124,7 @@ export default function convertPromptActionToEffect(action: PromptType & { sourc
                 type: ACTION_EFFECT,
                 effectType: EFFECT_TYPE_PROMPT_ENTERED,
                 promptParams: {
+                    ...action.promptParams,
                     amount: state.getMetaValue(action.promptParams.amount, action.generatedBy),
                 },
                 generatedBy: action.generatedBy || 'the-game',

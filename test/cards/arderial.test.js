@@ -2076,8 +2076,8 @@ describe('Orathan Flyer', () => {
 			generatedBy: gameState.state.prompt.generatedBy,
 		};
 
-		expect(() => gameState.update(resolvePaymentPrompt)).toThrow('Trying to pay for the creature from non-controlled Orathan')
-		;
+		expect(gameState.update(resolvePaymentPrompt)).toEqual(false);
+		expect(gameState.state.prompt).toEqual(true);
 	});
 
 

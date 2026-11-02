@@ -89,6 +89,7 @@ export type DistributeDamagePromptParams = {
     promptParams: {
         amount: string | number;
         restriction?: RestrictionType;
+        restrictionValue?: any;
     }
 }
 

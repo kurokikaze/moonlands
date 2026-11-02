@@ -2159,7 +2159,7 @@ describe('Abaquist', () => {
 
 		const chooseCardAction = {
 			type: ACTION_RESOLVE_PROMPT,
-			target: giantParathin,
+			cards: [giantParathin],
 			player: ACTIVE_PLAYER,
 			generatedBy: whall.id,
 		};

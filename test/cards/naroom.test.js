@@ -915,6 +915,33 @@ describe('Giant Carillion', () => {
 });
 
 describe('Balamant Pup', () => {
+	it.each([2, 4])('Support cannot activate with only a relic as another card (energy: %i)', (energy) => {
+		const ACTIVE_PLAYER = 421;
+		const NON_ACTIVE_PLAYER = 160;
+		const yaki = new CardInGame(byName('Yaki'), ACTIVE_PLAYER).addEnergy(7);
+		const balamantPup = new CardInGame(byName('Balamant Pup'), ACTIVE_PLAYER).addEnergy(energy);
+		const relic = new CardInGame(byName('Water of Life'), ACTIVE_PLAYER);
+		const gameState = new State({
+			zones: createZones(ACTIVE_PLAYER, NON_ACTIVE_PLAYER, [balamantPup, relic], [yaki]),
+			step: STEP_PRS_SECOND,
+			activePlayer: ACTIVE_PLAYER,
+		});
+		gameState.setPlayers(ACTIVE_PLAYER, NON_ACTIVE_PLAYER);
+
+		gameState.update({
+			type: ACTION_POWER,
+			source: balamantPup,
+			power: balamantPup.card.data.powers[0],
+			player: ACTIVE_PLAYER,
+		});
+
+		expect(gameState.state.prompt).toEqual(false);
+		expect(balamantPup.data.energy).toEqual(energy);
+		expect(balamantPup.wasActionUsed('Support')).toEqual(false);
+		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).byId(balamantPup.id)).toBe(balamantPup);
+		expect(gameState.getZone(ZONE_TYPE_DISCARD, ACTIVE_PLAYER).length).toEqual(0);
+	});
+
 	it('Support (target is not Balamant)', () => {
 		const ACTIVE_PLAYER = 421;
 		const NON_ACTIVE_PLAYER = 160;

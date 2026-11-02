@@ -22,7 +22,7 @@ export type ExpirationObjectType = {
 export type RestrictionType = typeof RESTRICTION_CREATURE_WAS_ATTACKED | typeof RESTRICTION_OWN_CREATURE | typeof RESTRICTION_OPPONENT_CREATURE | typeof RESTRICTION_ENERGY_LESS_THAN_STARTING | typeof RESTRICTION_REGION | typeof RESTRICTION_REGION_IS_NOT | typeof RESTRICTION_TYPE | typeof RESTRICTION_CREATURE_TYPE | typeof RESTRICTION_CREATURE_NAME | typeof RESTRICTION_PLAYABLE | typeof RESTRICTION_ENERGY_LESS_THAN | typeof RESTRICTION_STATUS | typeof RESTRICTION_MAGI_WITHOUT_CREATURES | typeof RESTRICTION_EXCEPT_SOURCE | typeof RESTRICTION_ENERGY_EQUALS;
 export type RestrictionObjectType = {
     type: RestrictionType;
-    value: string;
+    value: string | number | boolean;
 } | {
     type: typeof RESTRICTION_CREATURE_TYPE;
     value: string | string[];

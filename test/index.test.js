@@ -2635,7 +2635,7 @@ describe('Selector actions', () => {
 			restrictions: [
 				{
 					type: RESTRICTION_OWN_CREATURE,
-					value: '',
+					value: ACTIVE_PLAYER,
 				},
 				{
 					type: RESTRICTION_ENERGY_EQUALS,
@@ -2700,7 +2700,7 @@ describe('Selector actions', () => {
 			restrictions: [
 				{
 					type: RESTRICTION_OWN_CREATURE,
-					value: '',
+					value: ACTIVE_PLAYER,
 				},
 				{
 					type: RESTRICTION_ENERGY_EQUALS,
@@ -3260,6 +3260,7 @@ describe('Activating power', () => {
 			zones: [
 				new Zone('In play', ZONE_TYPE_IN_PLAY, null).add([arboll]),
 				new Zone('Discard', ZONE_TYPE_DISCARD, ACTIVE_PLAYER),
+				new Zone('Active Magi', ZONE_TYPE_ACTIVE_MAGI, ACTIVE_PLAYER).add([grega]),
 			],
 			step: STEP_PRS_SECOND,
 			activePlayer: ACTIVE_PLAYER,

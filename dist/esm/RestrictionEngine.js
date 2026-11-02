@@ -1,4 +1,4 @@
-import { TYPE_CREATURE, TYPE_MAGI, RESTRICTION_CREATURE_NAME, RESTRICTION_CREATURE_TYPE, RESTRICTION_TYPE, RESTRICTION_PLAYABLE, RESTRICTION_MAGI_WITHOUT_CREATURES, RESTRICTION_REGION, RESTRICTION_REGION_IS_NOT, RESTRICTION_ENERGY_LESS_THAN_STARTING, RESTRICTION_ENERGY_LESS_THAN, RESTRICTION_CREATURE_WAS_ATTACKED, RESTRICTION_OWN_CREATURE, RESTRICTION_OPPONENT_CREATURE, RESTRICTION_STATUS, RESTRICTION_ENERGY_EQUALS, PROPERTY_STATUS, } from './const.js';
+import { TYPE_CREATURE, TYPE_MAGI, RESTRICTION_CREATURE_NAME, RESTRICTION_CREATURE_TYPE, RESTRICTION_TYPE, RESTRICTION_PLAYABLE, RESTRICTION_MAGI_WITHOUT_CREATURES, RESTRICTION_REGION, RESTRICTION_REGION_IS_NOT, RESTRICTION_ENERGY_LESS_THAN_STARTING, RESTRICTION_ENERGY_LESS_THAN, RESTRICTION_CREATURE_WAS_ATTACKED, RESTRICTION_OWN_CREATURE, RESTRICTION_OPPONENT_CREATURE, RESTRICTION_STATUS, RESTRICTION_ENERGY_EQUALS, PROPERTY_STATUS, PROPERTY_CONTROLLER, } from './const.js';
 export class RestrictionEngine {
     constructor(context) {
         this.context = context;
@@ -38,9 +38,9 @@ export class RestrictionEngine {
             case RESTRICTION_CREATURE_WAS_ATTACKED:
                 return (card) => card.card.type === TYPE_CREATURE && card.data.wasAttacked === true;
             case RESTRICTION_OWN_CREATURE:
-                return (card) => card.data.controller === restrictionValue;
+                return (card) => this.context.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === restrictionValue;
             case RESTRICTION_OPPONENT_CREATURE:
-                return (card) => card.data.controller !== restrictionValue;
+                return (card) => this.context.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) !== restrictionValue;
             case RESTRICTION_STATUS:
                 return (card) => this.context.modifyByStaticAbilities(card, PROPERTY_STATUS, restrictionValue);
             case RESTRICTION_ENERGY_EQUALS:

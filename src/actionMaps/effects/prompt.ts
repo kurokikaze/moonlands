@@ -1,3 +1,4 @@
+import { resolvePromptRestrictions } from '../../helpers/resolvePromptRestrictions.js';
 import CardInGame, { ConvertedCard } from "../../classes/CardInGame.js";
 import {
   EFFECT_TYPE_PROMPT_ENTERED,
@@ -17,7 +18,7 @@ import {
   PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
   ZONE_TYPE_IN_PLAY,
 } from "../../const.js";
-import { RestrictionObjectType, ZoneType } from "../../types/index.js";
+import { ZoneType } from "../../types/index.js";
 import { ActionTransformer } from "../actionMapTypes.js";
 import { PromptParamsType } from "../../index.js";
 
@@ -64,12 +65,7 @@ export const applyPromptEnteredEffect: ActionTransformer<typeof EFFECT_TYPE_PROM
       if (action.promptParams.restriction && action.promptParams.restrictions) {
         throw new Error('PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE error: single and multiple restrictions specified');
       }
-      const restrictions = action.promptParams.restrictions || (action.promptParams.restriction ? [
-        {
-          type: this.getMetaValue(action.promptParams.restriction, action.generatedBy),
-          value: this.getMetaValue(action.promptParams.restrictionValue, action.generatedBy),
-        },
-      ] : null);
+      const restrictions = resolvePromptRestrictions(action.promptParams, value => this.getMetaValue(value, action.generatedBy), promptPlayer);
 
       const zone = this.getMetaValue(action.promptParams.zone, action.generatedBy) as ZoneType;
       const zoneOwner = this.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
@@ -83,7 +79,7 @@ export const applyPromptEnteredEffect: ActionTransformer<typeof EFFECT_TYPE_PROM
         promptParams = {
           zone,
           zoneOwner,
-          restrictions,
+          restrictions: restrictions || null,
           numberOfCards: maxNumberOfCards,
           cards: cards.map(convertCard),
         };
@@ -94,12 +90,7 @@ export const applyPromptEnteredEffect: ActionTransformer<typeof EFFECT_TYPE_PROM
       if (action.promptParams.restriction && action.promptParams.restrictions) {
         throw new Error('PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE error: single and multiple restrictions specified');
       }
-      const restrictions = action.promptParams.restrictions || (action.promptParams.restriction ? [
-        {
-          type: this.getMetaValue(action.promptParams.restriction, action.generatedBy),
-          value: this.getMetaValue(action.promptParams.restrictionValue, action.generatedBy),
-        },
-      ] : null);
+      const restrictions = resolvePromptRestrictions(action.promptParams, value => this.getMetaValue(value, action.generatedBy), promptPlayer);
 
       const zone = this.getMetaValue(action.promptParams.zone, action.generatedBy);
       const zoneOwner = this.getMetaValue(action.promptParams.zoneOwner, action.generatedBy);
@@ -114,7 +105,7 @@ export const applyPromptEnteredEffect: ActionTransformer<typeof EFFECT_TYPE_PROM
         promptParams = {
           zone,
           zoneOwner,
-          restrictions,
+          restrictions: restrictions || null,
           numberOfCards: maxNumberOfCards,
           cards: cards.map(convertCard),
         };
@@ -136,26 +127,8 @@ export const applyPromptEnteredEffect: ActionTransformer<typeof EFFECT_TYPE_PROM
       break;
     }
     case PROMPT_TYPE_SINGLE_CREATURE_FILTERED: {
-      if ('restrictions' in action.promptParams && action.promptParams.restrictions) {
-        const restrictionsWithValues = action.promptParams.restrictions.map(({ type, value }: RestrictionObjectType) => ({
-          type,
-          value: this.getMetaValue(value, action.generatedBy as string),
-        }));
-
-        promptParams = {
-          restrictions: restrictionsWithValues,
-        };
-      } else if ('restriction' in action.promptParams && action.promptParams.restriction && 'restrictionValue' in action.promptParams) {
-        promptParams = {
-          restrictions: [
-            {
-              type: action.promptParams.restriction,
-              value: this.getMetaValue(action.promptParams.restrictionValue, action.generatedBy),
-            }
-          ],
-        };
-      }
-
+      const restrictions = resolvePromptRestrictions(action.promptParams, value => this.getMetaValue(value, action.generatedBy), promptPlayer);
+      if (restrictions?.length) promptParams = { restrictions };
       break;
     }
     case PROMPT_TYPE_CHOOSE_CARDS: {
@@ -175,40 +148,13 @@ export const applyPromptEnteredEffect: ActionTransformer<typeof EFFECT_TYPE_PROM
       }
       break;
     }
-    case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES: {
-      if (action.promptParams.restriction) {
-        promptParams = {
-          amount: this.getMetaValue(action.promptParams.amount, action.generatedBy),
-          restrictions: [
-            {
-              type: action.promptParams.restriction,
-              value: this.getMetaValue(action.promptParams.amount, action.generatedBy),
-            },
-          ],
-        };
-      } else {
-        promptParams = {
-          amount: this.getMetaValue(action.promptParams.amount, action.generatedBy),
-        };
-      }
-      break;
-    }
+    case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES:
     case PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES: {
-      if (action.promptParams.restriction) {
-        promptParams = {
-          amount: this.getMetaValue(action.promptParams.amount, action.generatedBy),
-          restrictions: [
-            {
-              type: action.promptParams.restriction,
-              value: this.getMetaValue(action.promptParams.amount, action.generatedBy),
-            },
-          ],
-        };
-      } else {
-        promptParams = {
-          amount: this.getMetaValue(action.promptParams.amount, action.generatedBy),
-        }
-      }
+      const restrictions = resolvePromptRestrictions(action.promptParams, value => this.getMetaValue(value, action.generatedBy), promptPlayer);
+      promptParams = {
+        amount: this.getMetaValue(action.promptParams.amount, action.generatedBy),
+        ...(restrictions ? { restrictions } : {}),
+      };
       break;
     }
     case PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES: {

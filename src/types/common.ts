@@ -214,7 +214,7 @@ export type RestrictionType = typeof RESTRICTION_CREATURE_WAS_ATTACKED |
 
 export type RestrictionObjectType = {
 	type: RestrictionType;
-	value: string;
+	value: string | number | boolean;
 } | {
   type: typeof RESTRICTION_CREATURE_TYPE;
   value: string | string[]

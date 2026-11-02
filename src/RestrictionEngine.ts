@@ -16,6 +16,7 @@ import {
 	RESTRICTION_STATUS,
 	RESTRICTION_ENERGY_EQUALS,
 	PROPERTY_STATUS,
+	PROPERTY_CONTROLLER,
 } from './const.js';
 
 import CardInGame from './classes/CardInGame.js';
@@ -25,7 +26,7 @@ export interface RestrictionEngineContext {
 	getOwnMagi(player: number): CardInGame[];
 	getOwnCreatures(player: number): CardInGame[];
 	calculateTotalCost(card: CardInGame): number;
-	modifyByStaticAbilities(target: CardInGame, property: typeof PROPERTY_STATUS, subProperty?: string | null): boolean;
+	modifyByStaticAbilities(target: CardInGame, property: typeof PROPERTY_STATUS | typeof PROPERTY_CONTROLLER, subProperty?: string | null): any;
 }
 
 export class RestrictionEngine {
@@ -71,9 +72,9 @@ export class RestrictionEngine {
 			case RESTRICTION_CREATURE_WAS_ATTACKED:
 				return (card: CardInGame) => card.card.type === TYPE_CREATURE && card.data.wasAttacked === true;
 			case RESTRICTION_OWN_CREATURE:
-				return (card: CardInGame) => card.data.controller === restrictionValue;
+				return (card: CardInGame) => this.context.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === restrictionValue;
 			case RESTRICTION_OPPONENT_CREATURE:
-				return (card: CardInGame) => card.data.controller !== restrictionValue;
+				return (card: CardInGame) => this.context.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) !== restrictionValue;
 			case RESTRICTION_STATUS:
 				return (card: CardInGame) => this.context.modifyByStaticAbilities(card, PROPERTY_STATUS, restrictionValue);
 			case RESTRICTION_ENERGY_EQUALS:
