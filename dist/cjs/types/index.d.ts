@@ -232,5 +232,5 @@ export type FullSerializedState = SerializedState & {
 export type MercenneFixed = {
     random: () => number;
 };
-export type MetaDataValue = CardInGame | CardInGame[] | PowerType | Region | number | Record<string, number> | string;
+export type MetaDataValue = CardInGame | CardInGame[] | string[] | PowerType | Region | number | Record<string, number> | string;
 export type MetaDataRecord = Record<string, MetaDataValue>;

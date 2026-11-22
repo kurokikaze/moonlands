@@ -22,7 +22,7 @@ export type ResolvePlayerPrompt = ResolvePromptInterface & {
     targetPlayer: number;
 };
 export type ResolveRearrangeCardsPrompt = ResolvePromptInterface & {
-    cardsOrder: string[];
+    cards: string[];
 };
 export type ResolvePowerOnMagiPrompt = ResolvePromptInterface & {
     power: any;

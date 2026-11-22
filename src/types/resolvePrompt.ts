@@ -28,7 +28,7 @@ export type ResolvePlayerPrompt = ResolvePromptInterface & {
 };
 
 export type ResolveRearrangeCardsPrompt = ResolvePromptInterface & {
-  cardsOrder: string[];
+  cards: string[];
 };
 
 export type ResolvePowerOnMagiPrompt = ResolvePromptInterface & {

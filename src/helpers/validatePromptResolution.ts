@@ -1,6 +1,7 @@
 import type { State } from '../index.js';
 import type { ResolvePromptType } from '../types/resolvePrompt.js';
 import type { ZoneType } from '../types/index.js';
+import type CardInGame from '../classes/CardInGame.js';
 import * as C from '../const.js';
 
 /** Validate before clearing a prompt or resuming its saved effects. */
@@ -50,6 +51,7 @@ export function validatePromptResolution(state: State, action: ResolvePromptType
 		case C.PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE:
 		case C.PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
 			if (!('cards' in action) || !Array.isArray(action.cards)) return false;
+			if (!action.cards.every((card): card is CardInGame => typeof card === 'object' && card !== null)) return false;
 			const count = params.numberOfCards ?? 0;
 			return (promptType === C.PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE ? action.cards.length === count : action.cards.length <= count)
 				&& validCards(action.cards) && action.cards.every(matches);
@@ -64,7 +66,7 @@ export function validatePromptResolution(state: State, action: ResolvePromptType
 		}
 		case C.PROMPT_TYPE_CHOOSE_CARDS:
 			return 'cards' in action && Array.isArray(action.cards)
-				&& new Set(action.cards).size === action.cards.length
+				&& new Set<string | CardInGame>(action.cards).size === action.cards.length
 				&& action.cards.every(card => params.availableCards?.includes(card as unknown as string));
 		case C.PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES:
 			return 'energyOnCreatures' in action && !!action.energyOnCreatures && validDistribution(action.energyOnCreatures);

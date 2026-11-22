@@ -52,6 +52,8 @@ export function validatePromptResolution(state, action) {
         case C.PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE: {
             if (!('cards' in action) || !Array.isArray(action.cards))
                 return false;
+            if (!action.cards.every((card) => typeof card === 'object' && card !== null))
+                return false;
             const count = (_k = params.numberOfCards) !== null && _k !== void 0 ? _k : 0;
             return (promptType === C.PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE ? action.cards.length === count : action.cards.length <= count)
                 && validCards(action.cards) && action.cards.every(matches);
