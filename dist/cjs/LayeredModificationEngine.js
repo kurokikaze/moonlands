@@ -1,4 +1,4 @@
-import { PROPERTY_ID, PROPERTY_TYPE, PROPERTY_CONTROLLER, PROPERTY_ENERGY_COUNT, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, PROPERTY_POWER_COST, PROPERTY_CREATURE_TYPES, PROPERTY_STATUS_WAS_ATTACKED, PROPERTY_STATUS_DEFEATED_CREATURE, PROPERTY_ENERGY_LOSS_THRESHOLD, PROPERTY_STATUS, PROPERTY_ABLE_TO_ATTACK, PROPERTY_MAGI_NAME, PROPERTY_CAN_BE_ATTACKED, PROPERTY_PROTECTION, PROPERTY_CARD_MEMORY, PROPERTY_CREATURE_NAME, PROPERTY_CONTROLLING_PLAYER, PROPERTY_ABLE_TO_USE_POWERS, CALCULATION_SET, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, STATUS_BURROWED, } from './const.js';
+import { PROPERTY_ID, PROPERTY_TYPE, PROPERTY_CONTROLLER, PROPERTY_ENERGY_COUNT, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, PROPERTY_POWER_COST, PROPERTY_CREATURE_TYPES, PROPERTY_STATUS_WAS_ATTACKED, PROPERTY_STATUS_DEFEATED_CREATURE, PROPERTY_ENERGY_LOSS_THRESHOLD, PROPERTY_STATUS, PROPERTY_ABLE_TO_ATTACK, PROPERTY_MAGI_NAME, PROPERTY_CAN_BE_ATTACKED, PROPERTY_PROTECTION, PROPERTY_CARD_MEMORY, PROPERTY_CREATURE_NAME, PROPERTY_CONTROLLING_PLAYER, PROPERTY_ABLE_TO_USE_POWERS, PROPERTY_ABLE_TO_PLAY_SPELLS, PROPERTY_MUST_ATTACK, CALCULATION_SET, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, STATUS_BURROWED, } from './const.js';
 import performCalculation from './helpers/performCalculation.js';
 // ─── LayeredModificationEngine ───────────────────────────────────────────────
 export class LayeredModificationEngine {
@@ -79,6 +79,10 @@ export class LayeredModificationEngine {
                 return target.modifiedCard?.data.controllingPlayer ?? 0;
             case PROPERTY_ABLE_TO_USE_POWERS:
                 return target.modifiedCard?.data.ableToUsePowers ?? true;
+            case PROPERTY_ABLE_TO_PLAY_SPELLS:
+                return target.modifiedCard?.data.ableToPlaySpells ?? true;
+            case PROPERTY_MUST_ATTACK:
+                return target.modifiedCard.data.mustAttack ?? false;
         }
     }
     getByPropertyAny(target, property, subProperty = null) {
@@ -286,7 +290,11 @@ export class LayeredModificationEngine {
                 }
                 return currentCard;
             }
-            case PROPERTY_ABLE_TO_USE_POWERS: {
+            case PROPERTY_ABLE_TO_USE_POWERS:
+            case PROPERTY_ABLE_TO_PLAY_SPELLS:
+            case PROPERTY_MUST_ATTACK: {
+                const key = staticAbility.property === PROPERTY_MUST_ATTACK ? 'mustAttack'
+                    : staticAbility.property === PROPERTY_ABLE_TO_PLAY_SPELLS ? 'ableToPlaySpells' : 'ableToUsePowers';
                 const { operator, operandOne } = staticAbility.modifier;
                 const resultValue = (operator === CALCULATION_SET) ? operandOne : true;
                 if (typeof resultValue === 'boolean') {
@@ -296,7 +304,7 @@ export class LayeredModificationEngine {
                             ...currentCard.modifiedCard,
                             data: {
                                 ...currentCard.modifiedCard.data,
-                                ableToUsePowers: resultValue,
+                                [key]: resultValue,
                             },
                         },
                     };

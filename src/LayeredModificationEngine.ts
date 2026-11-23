@@ -23,6 +23,8 @@ import {
 	PROPERTY_CREATURE_NAME,
 	PROPERTY_CONTROLLING_PLAYER,
 	PROPERTY_ABLE_TO_USE_POWERS,
+	PROPERTY_ABLE_TO_PLAY_SPELLS,
+	PROPERTY_MUST_ATTACK,
 
 	CALCULATION_SET,
 	CALCULATION_SUBTRACT,
@@ -162,6 +164,10 @@ export class LayeredModificationEngine {
 				return target.modifiedCard?.data.controllingPlayer ?? 0;
 			case PROPERTY_ABLE_TO_USE_POWERS:
 				return target.modifiedCard?.data.ableToUsePowers ?? true;
+			case PROPERTY_ABLE_TO_PLAY_SPELLS:
+				return target.modifiedCard?.data.ableToPlaySpells ?? true;
+			case PROPERTY_MUST_ATTACK:
+				return target.modifiedCard.data.mustAttack ?? false;
 		}
 	}
 
@@ -386,7 +392,11 @@ export class LayeredModificationEngine {
 				}
 				return currentCard;
 			}
-			case PROPERTY_ABLE_TO_USE_POWERS: {
+			case PROPERTY_ABLE_TO_USE_POWERS:
+			case PROPERTY_ABLE_TO_PLAY_SPELLS:
+			case PROPERTY_MUST_ATTACK: {
+				const key = staticAbility.property === PROPERTY_MUST_ATTACK ? 'mustAttack'
+					: staticAbility.property === PROPERTY_ABLE_TO_PLAY_SPELLS ? 'ableToPlaySpells' : 'ableToUsePowers';
 				const { operator, operandOne } = staticAbility.modifier;
 				const resultValue = (operator === CALCULATION_SET) ? operandOne : true;
 
@@ -397,7 +407,7 @@ export class LayeredModificationEngine {
 							...currentCard.modifiedCard,
 							data: {
 								...currentCard.modifiedCard.data,
-								ableToUsePowers: resultValue,
+								[key]: resultValue,
 							},
 						},
 					};

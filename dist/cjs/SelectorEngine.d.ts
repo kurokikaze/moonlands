@@ -2,7 +2,7 @@ import { SELECTOR_CREATURES, SELECTOR_RELICS, SELECTOR_OWN_MAGI, SELECTOR_ENEMY_
 import CardInGame from './classes/CardInGame.js';
 import Zone from './classes/Zone.js';
 import { LayeredModificationEngine, CardWithModification, EnrichedStaticAbilityType, GameStaticAbility } from './LayeredModificationEngine.js';
-import { SelectorTypeType, PropertyType, RestrictionType, RestrictionObjectType, ContinuousEffectType, ZoneType, Region, MercenneFixed } from './types/index.js';
+import { SelectorTypeType, PropertyType, RestrictionType, RestrictionObjectType, ContinuousEffectType, ZoneType, Region, MercenneFixed, StepId } from './types/index.js';
 import { StatusType } from './types/common.js';
 export type { CardWithModification, EnrichedStaticAbilityType, GameStaticAbility } from './LayeredModificationEngine.js';
 /** Subset of State that SelectorEngine needs. Kept as an interface to avoid a circular import. */
@@ -12,6 +12,7 @@ export interface SelectorEngineContext {
     players: number[];
     getContinuousEffects(): ContinuousEffectType[];
     getTwister(): MercenneFixed | null;
+    getStepId(): StepId | null;
 }
 export declare class SelectorEngine extends LayeredModificationEngine {
     private context;
@@ -20,6 +21,8 @@ export declare class SelectorEngine extends LayeredModificationEngine {
     modifiedCardDataCache: Map<string, CardWithModification>;
     private zoneStaticAbilitiesCache;
     private continuousStaticAbilitiesCache;
+    private cachedStepId;
+    private isAbilityActive;
     constructor(context: SelectorEngineContext);
     private getOwnMagi;
     private getOwnCreatures;
@@ -28,6 +31,7 @@ export declare class SelectorEngine extends LayeredModificationEngine {
     clearContinuousStaticAbilitiesCache(): void;
     invalidateStaticAbilitiesForContinuousEffectsChange(previous: ContinuousEffectType[], effects: ContinuousEffectType[]): void;
     private hasActiveStaticAbilities;
+    getActiveContinuousStaticAbilities(): EnrichedStaticAbilityType[];
     private getContinuousStaticAbilities;
     /** Only active zones contribute card static abilities. */
     invalidateStaticAbilitiesForZoneChange(zone: Zone, previousCards: CardInGame[], cards: CardInGame[]): void;

@@ -3,6 +3,7 @@ import {
   EFFECT_TYPE_CONDITIONAL,
   EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
   EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE,
+  EXPIRATION_DURING_PLAYER_TURNS,
   SELECTOR_CREATURES_OF_PLAYER,
   SELECTOR_ID,
 } from "../../const.js";
@@ -100,7 +101,9 @@ export const applyCreateContinuousEffect: ActionTransformer<typeof EFFECT_TYPE_C
       })),
     }),
     staticAbilities,
-    expiration: action.expiration,
+    expiration: action.expiration.type === EXPIRATION_DURING_PLAYER_TURNS && action.turnPlayer !== undefined
+      ? { ...action.expiration, turnPlayer: this.getMetaValue<number>(action.turnPlayer, action.generatedBy) }
+      : action.expiration,
     player: action.player || 0,
     id,
   };

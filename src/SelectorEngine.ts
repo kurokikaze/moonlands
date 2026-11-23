@@ -1,5 +1,6 @@
 import {
 	EXPIRATION_DURING_OPPONENT_TURNS,
+	EXPIRATION_DURING_PLAYER_TURNS,
 	TYPE_CREATURE,
 	TYPE_MAGI,
 	TYPE_RELIC,
@@ -51,6 +52,8 @@ import {
 	PROPERTY_STATUS,
 	PROPERTY_ABLE_TO_ATTACK,
 	PROPERTY_ABLE_TO_USE_POWERS,
+	PROPERTY_ABLE_TO_PLAY_SPELLS,
+	PROPERTY_MUST_ATTACK,
 	PROPERTY_MAGI_NAME,
 	PROPERTY_CAN_BE_ATTACKED,
 	PROPERTY_PROTECTION,
@@ -83,6 +86,7 @@ import {
 	ZoneType,
 	Region,
 	MercenneFixed,
+	StepId,
 } from './types/index.js';
 import { StatusType } from './types/common.js';
 
@@ -100,6 +104,7 @@ export interface SelectorEngineContext {
 	players: number[];
 	getContinuousEffects(): ContinuousEffectType[];
 	getTwister(): MercenneFixed | null;
+	getStepId(): StepId | null;
 }
 
 // ─── SelectorEngine ───────────────────────────────────────────────────────────
@@ -111,6 +116,12 @@ export class SelectorEngine extends LayeredModificationEngine {
 	public modifiedCardDataCache: Map<string, CardWithModification> = new Map();
 	private zoneStaticAbilitiesCache: EnrichedStaticAbilityType[] | null = null;
 	private continuousStaticAbilitiesCache: EnrichedStaticAbilityType[] | null = null;
+	private cachedStepId: StepId | null = null;
+
+	private isAbilityActive(ability: EnrichedStaticAbilityType | GameStaticAbility): boolean {
+		const step = this.context.getStepId();
+		return !ability.activeDuringSteps || (step !== null && ability.activeDuringSteps.includes(step));
+	}
 
 	constructor(context: SelectorEngineContext) {
 		super();
@@ -160,7 +171,12 @@ export class SelectorEngine extends LayeredModificationEngine {
 
 	private hasActiveStaticAbilities(effect: ContinuousEffectType): boolean {
 		return !!effect.staticAbilities?.length &&
-			(effect.expiration.type !== EXPIRATION_DURING_OPPONENT_TURNS || effect.expiration.active === true);
+			(effect.expiration.type !== EXPIRATION_DURING_OPPONENT_TURNS &&
+				effect.expiration.type !== EXPIRATION_DURING_PLAYER_TURNS || effect.expiration.active === true);
+	}
+
+	getActiveContinuousStaticAbilities(): EnrichedStaticAbilityType[] {
+		return this.getContinuousStaticAbilities().filter(ability => this.isAbilityActive(ability));
 	}
 
 	private getContinuousStaticAbilities(): EnrichedStaticAbilityType[] {
@@ -407,6 +423,11 @@ export class SelectorEngine extends LayeredModificationEngine {
 			return this.getByPropertyAny(target, property, subProperty);
 		}
 
+		const stepId = this.context.getStepId();
+		if (this.cachedStepId !== stepId) {
+			this.clearModifiedCardDataCache();
+			this.cachedStepId = stepId;
+		}
 		const cached = this.modifiedCardDataCache.get(target.id);
 
 		if (cached) {
@@ -463,12 +484,16 @@ export class SelectorEngine extends LayeredModificationEngine {
 			[PROPERTY_ENERGY_LOSS_THRESHOLD]: 6,
 			[PROPERTY_ABLE_TO_ATTACK]: 7,
 			[PROPERTY_ABLE_TO_USE_POWERS]: 8,
+			[PROPERTY_ABLE_TO_PLAY_SPELLS]: 8,
+			[PROPERTY_MUST_ATTACK]: 8,
 			[PROPERTY_PROTECTION]: 9,
 		};
 
 		const zoneAbilities = this.getZoneStaticAbilities();
 
-		const staticAbilities = [...gameStaticAbilities, ...zoneAbilities, ...continuousStaticAbilities].sort((a, b) => propertyLayers[a.property as keyof typeof propertyLayers] - propertyLayers[b.property as keyof typeof propertyLayers]);
+		const staticAbilities = [...gameStaticAbilities, ...zoneAbilities, ...continuousStaticAbilities]
+			.filter(ability => this.isAbilityActive(ability))
+			.sort((a, b) => propertyLayers[a.property as keyof typeof propertyLayers] - propertyLayers[b.property as keyof typeof propertyLayers]);
 
 		let initialCardData: CardWithModification = {
 			card: target.card,

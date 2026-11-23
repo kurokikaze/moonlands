@@ -1,5 +1,20 @@
-import { ACTION_EFFECT, ACTION_PLAYER_WINS, ACTION_SELECT, EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES, EFFECT_TYPE_SHUFFLE_DECK, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, SELECTOR_OWN_CARDS_IN_PLAY, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, ZONE_TYPE_DISCARD, ZONE_TYPE_IN_PLAY, ZONE_TYPE_MAGI_PILE, } from "../../const.js";
+import { ACTION_EFFECT, ACTION_PLAYER_WINS, ACTION_SELECT, EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES, EFFECT_TYPE_SHUFFLE_DECK, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, SELECTOR_OWN_CARDS_IN_PLAY, PROPERTY_CONTROLLER, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, ZONE_TYPE_DISCARD, ZONE_TYPE_IN_PLAY, ZONE_TYPE_HAND, ZONE_TYPE_SET_ASIDE, ZONE_TYPE_MAGI_PILE, } from "../../const.js";
 import { oneOrSeveral } from "../actionMapUtils.js";
+function relicReturns(state, card, sourceZone, destinationZone, generatedBy) {
+    if (sourceZone !== ZONE_TYPE_IN_PLAY || destinationZone === ZONE_TYPE_IN_PLAY)
+        return [];
+    return state.getZone(ZONE_TYPE_SET_ASIDE).cards
+        .filter(relic => relic.data.setAsideUnder?.cardId === card.id)
+        .map(relic => ({
+        type: ACTION_EFFECT,
+        effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+        target: relic,
+        sourceZone: ZONE_TYPE_SET_ASIDE,
+        destinationZone: ZONE_TYPE_HAND,
+        bottom: false,
+        generatedBy,
+    }));
+}
 export const applyMoveCardsBetweenZonesEffect = function (action, transform) {
     if (!action.sourceZone || !action.destinationZone) {
         console.error('Source zone or destination zone invalid');
@@ -32,7 +47,7 @@ export const applyMoveCardsBetweenZonesEffect = function (action, transform) {
                     destinationCard: newObject,
                     destinationZone: destinationZoneType,
                     generatedBy: action.generatedBy,
-                });
+                }, ...relicReturns(this, zoneChangingCard, sourceZoneType, destinationZoneType, action.generatedBy));
             }
             else {
                 console.log(`Card ${zoneChangingCard.id} is not in the indicated source zone`);
@@ -53,8 +68,16 @@ export const applyMoveCardBetweenZonesEffect = function (action, transform) {
         const destinationZoneType = this.getMetaValue(action.destinationZone, action.generatedBy);
         const destinationZone = this.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
         const sourceZone = this.getZone(sourceZoneType, sourceZoneType === ZONE_TYPE_IN_PLAY ? null : zoneChangingCard.owner);
+        const holder = action.setAsideUnder === undefined
+            ? undefined : this.getMetaValue(action.setAsideUnder, action.generatedBy);
+        if (action.setAsideUnder !== undefined && (!holder || !sourceZone.containsId(zoneChangingCard.id) ||
+            !this.getZone(ZONE_TYPE_IN_PLAY).containsId(holder.id) || zoneChangingCard.card.type !== TYPE_RELIC))
+            return;
+        const blockedPlayer = holder ? this.modifyByStaticAbilities(zoneChangingCard, PROPERTY_CONTROLLER) : undefined;
         const newObject = this.moveCard(zoneChangingCard, sourceZone, destinationZone, action.bottom);
         if (newObject) {
+            if (holder && blockedPlayer !== undefined)
+                newObject.data.setAsideUnder = { cardId: holder.id, blockedPlayer };
             if (sourceZoneType == ZONE_TYPE_IN_PLAY && destinationZoneType !== ZONE_TYPE_IN_PLAY) {
                 this.detachCard(zoneChangingCard.id);
                 if (zoneChangingCard.id in this.state.cardsAttached) {
@@ -88,7 +111,7 @@ export const applyMoveCardBetweenZonesEffect = function (action, transform) {
                 attack: action.attack,
                 destinationZone: destinationZoneType,
                 generatedBy: action.generatedBy,
-            });
+            }, ...relicReturns(this, zoneChangingCard, sourceZoneType, destinationZoneType, action.generatedBy));
             if (action.shuffleDestination && destinationZoneType === ZONE_TYPE_DECK) {
                 transform({ type: ACTION_EFFECT, effectType: EFFECT_TYPE_SHUFFLE_DECK, player: zoneChangingCard.owner, generatedBy: action.generatedBy });
             }

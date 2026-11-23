@@ -16,6 +16,7 @@ export type PromptParams = {
     };
     variable?: string;
     message?: string;
+    minimumCreaturesInPlay?: number;
     player?: number | string;
 };
 interface PromptInterface {

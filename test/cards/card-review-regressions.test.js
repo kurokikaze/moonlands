@@ -3,7 +3,7 @@ import { byName } from '../../src/cards.ts';
 import CardInGame from '../../src/classes/CardInGame.ts';
 import * as C from '../../src/const.ts';
 import { Unmaker } from '../../src/unmaker/unmaker.ts';
-import { createZones, STEP_CREATURES, STEP_PRS_FIRST, STEP_PRS_SECOND } from '../utils.js';
+import { createZones, STEP_ATTACK, STEP_CREATURES, STEP_PRS_FIRST, STEP_PRS_SECOND } from '../utils.js';
 
 const card = (name, owner, energy = 0) => new CardInGame(byName(name), owner).addEnergy(energy);
 
@@ -17,6 +17,290 @@ function setup(magi, opposingMagi, inPlay) {
 function resolve(state, selection) {
 	return state.update({ type: C.ACTION_RESOLVE_PROMPT, player: state.state.promptPlayer, generatedBy: state.state.promptGeneratedBy, ...selection });
 }
+
+it.each([true, false])('Energy Band requires a charged creature to attack only if able (%s)', canAttack => {
+	const band = card('Energy Band', 0);
+	const attacker = card(canAttack ? 'Furok' : 'Orathan Flyer', 0, 5);
+	const opponent = card('Grega', 1, 10);
+	const magi = card('Pruitt', 0, 10);
+	const state = setup(magi, opponent, [band, attacker]);
+	const power = { type: C.ACTION_POWER, source: band, power: band.card.data.powers[0], player: 0 };
+	const pass = { type: C.ACTION_PASS, player: 0 };
+	const passes = [];
+	state.setOnAction(action => { if (action.type === C.ACTION_PASS) passes.push(action); });
+
+	state.setStep(STEP_PRS_SECOND);
+	state.update(power);
+	expect(magi.data.energy).toBe(10);
+	expect(state.state.prompt).toBe(false);
+	state.setStep(STEP_PRS_FIRST);
+	state.update(power);
+	resolve(state, { target: attacker });
+	expect(magi.data.energy).toBe(9);
+	expect(attacker.data.energy).toBe(7);
+	state.update(pass);
+	expect(state.state.step).toBe(STEP_ATTACK);
+
+	state.update(pass);
+	if (canAttack) {
+		expect(state.state.step).toBe(STEP_ATTACK);
+		expect(passes).toHaveLength(1);
+		state.update({ type: C.ACTION_ATTACK, source: attacker, target: opponent, player: 0 });
+		expect(opponent.data.energy).toBe(3);
+		state.update(pass);
+	}
+	expect(state.state.step).toBe(STEP_CREATURES);
+});
+
+it('Karak sets aside a relic, bans copies for its previous controller, and restores it to its owner', () => {
+	const karak = card('Karak', 0, 5);
+	const relic = card('Dream Balm', 0);
+	relic.data.controller = 1;
+	const otherRelic = card('Dream Balm', 0);
+	const blockedRelic = card('Dream Balm', 1);
+	const state = setup(card('Whall', 0, 10), card('Grega', 1, 10), [karak, relic]);
+	const setAside = state.getZone(C.ZONE_TYPE_SET_ASIDE);
+	const hands = [0, 1].map(player => state.getZone(C.ZONE_TYPE_HAND, player));
+	const play = (relic, player) => state.update({ type: C.ACTION_PLAY, payload: { card: relic, player } });
+	hands[0].add([otherRelic]);
+	hands[1].add([blockedRelic]);
+	const steal = { type: C.ACTION_POWER, source: karak, power: karak.card.data.powers[0], player: 0 };
+
+	const frame = state.beginSearchFrame();
+	state.update(steal);
+	resolve(state, { target: relic });
+	expect(karak.data.energy).toBe(3);
+	expect(setAside.card?.data.setAsideUnder).toEqual({ cardId: karak.id, blockedPlayer: 1 });
+	expect(state.getZone(C.ZONE_TYPE_IN_PLAY).containsId(relic.id)).toBe(false);
+	state.rollback(frame);
+	expect(setAside.length).toBe(0);
+	expect(state.getZone(C.ZONE_TYPE_IN_PLAY).containsId(relic.id)).toBe(true);
+
+	state.update(steal);
+	resolve(state, { target: relic });
+	play(otherRelic, 0);
+	expect(hands[0].containsId(otherRelic.id)).toBe(false);
+	state.setStep(STEP_PRS_SECOND);
+	state.update({ type: C.ACTION_PASS, player: 0 });
+	play(blockedRelic, 1);
+	expect(hands[1].containsId(blockedRelic.id)).toBe(true);
+
+	const departure = state.beginSearchFrame();
+	state.update({
+		type: C.ACTION_EFFECT, effectType: C.EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+		sourceZone: C.ZONE_TYPE_IN_PLAY, destinationZone: C.ZONE_TYPE_DISCARD,
+		target: karak, bottom: false, generatedBy: karak.id,
+	});
+	expect(setAside.length).toBe(0);
+	expect(hands[0].card?.card.name).toBe('Dream Balm');
+	expect(hands[0].card?.data.setAsideUnder).toBeUndefined();
+	play(blockedRelic, 1);
+	expect(hands[1].containsId(blockedRelic.id)).toBe(false);
+	state.rollback(departure);
+	expect(setAside.card?.data.setAsideUnder?.cardId).toBe(karak.id);
+	expect(hands[1].containsId(blockedRelic.id)).toBe(true);
+});
+
+it.each([0, 1])('Entangle prevents player %i from playing spells only during the chosen Magi’s next turn', player => {
+	const magi = [card('Whall', 0, 10), card('O\'Qua', 1, 10)];
+	const target = magi[player];
+	const state = setup(...magi, []);
+	const entangle = card('Entangle', 0);
+	const blockedSpell = card('Fire Ball', player);
+	const hand = state.getZone(C.ZONE_TYPE_HAND, player);
+	const play = (spell, owner) => state.update({ type: C.ACTION_PLAY, payload: { card: spell, player: owner } });
+	const canPlay = magi => state.modifyByStaticAbilities(magi, C.PROPERTY_ABLE_TO_PLAY_SPELLS);
+	const passTurn = () => {
+		state.setStep(STEP_PRS_SECOND);
+		state.update({ type: C.ACTION_PASS, player: state.state.activePlayer });
+	};
+
+	state.getZone(C.ZONE_TYPE_HAND, 0).add([entangle]);
+	hand.add([blockedSpell]);
+	play(entangle, 0);
+	resolve(state, { target });
+	expect(canPlay(target)).toBe(true);
+	passTurn();
+	if (player === 0) {
+		expect(canPlay(target)).toBe(true);
+		passTurn();
+	}
+	expect(state.state.activePlayer).toBe(player);
+	expect(canPlay(target)).toBe(false);
+	expect(canPlay(magi[1 - player])).toBe(true);
+
+	const energy = target.data.energy;
+	play(blockedSpell, player);
+	expect(state.state.prompt).toBe(false);
+	expect(hand.containsId(blockedSpell.id)).toBe(true);
+	expect(target.data.energy).toBe(energy);
+
+	passTurn();
+	expect(canPlay(target)).toBe(true);
+	passTurn();
+	play(blockedSpell, player);
+	expect(state.state.promptType).toBe(C.PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI);
+});
+
+it('Windsight reveals the opponent hand only to the Mask controller', () => {
+	const mask = card('Mask of Abwyn', 0);
+	const state = setup(card('Ora', 0, 10), card('Pruitt', 1, 10), [mask]);
+	const hand = state.getZone(C.ZONE_TYPE_HAND, 1);
+	const cards = [card('Arboll', 1), card('Grow', 1)];
+	hand.add(cards);
+	const reveals = [];
+	state.setOnAction(action => {
+		if (action.effectType === C.EFFECT_TYPE_REVEAL_CARDS) {
+			reveals.push([state.getMetaValue(action.viewer, action.generatedBy), state.getMetaValue(action.cards, action.generatedBy)]);
+		}
+	});
+
+	state.update({ type: C.ACTION_POWER, source: mask, power: mask.card.data.powers[0], player: 0 });
+
+	expect(reveals).toEqual([[0, cards]]);
+	expect(hand.cards).toEqual(cards);
+});
+
+it.each([
+	['Arboll', 'reveal', 4],
+	['Arboll', 'hide', 3],
+	['Grow', null, 3],
+])('Wayfarer’s Lore draws %s with choice %s', (drawnName, choice, expectedHandSize) => {
+	const wence = card('Wence', 0, 10);
+	const state = setup(wence, card('Grega', 1, 10), []);
+	const hand = state.getZone(C.ZONE_TYPE_HAND, 0);
+	state.getZone(C.ZONE_TYPE_DECK, 0).add([drawnName, 'Weebo', 'Rudwot', 'Grow'].map(name => card(name, 0)));
+	const reveals = [];
+	state.setOnAction(action => {
+		if (action.effectType === C.EFFECT_TYPE_REVEAL_CARDS) {
+			reveals.push([state.getMetaValue(action.viewer, action.generatedBy), state.getMetaValue(action.cards, action.generatedBy).card.name]);
+		}
+	});
+
+	state.update({ type: C.ACTION_POWER, source: wence, power: wence.card.data.powers[0], player: 0 });
+	expect(wence.data.energy).toBe(8);
+	expect(hand.cards.map(entry => entry.card.name)).toEqual([drawnName]);
+	expect(state.state.prompt).toBe(Boolean(choice));
+	if (choice) resolve(state, { alternative: choice });
+	expect(reveals).toEqual(choice === 'reveal' ? [[1, drawnName]] : []);
+	expect(hand.length).toBe(1);
+
+	state.setStep(STEP_PRS_SECOND);
+	state.update({ type: C.ACTION_PASS, player: 0 });
+	expect(hand.length).toBe(expectedHandSize);
+	expect(state.state.continuousEffects).toHaveLength(0);
+});
+
+it.each([
+	['Grega', 4, 0],
+	['Pruitt', 5, 1],
+	['Grega', 5, 0],
+	['Pruitt', 9, 1],
+])('Syphon Vortex pays X + 4 with %s at %i energy', (magiName, energy, tax) => {
+	const magi = card(magiName, 0, energy);
+	const target = card('Furok', 1, 2);
+	const spell = card('Syphon Vortex', 0);
+	const state = setup(magi, card('Whall', 1, 10), [target]);
+	const hand = state.getZone(C.ZONE_TYPE_HAND, 0);
+	hand.add([spell]);
+	state.update({ type: C.ACTION_PLAY, payload: { card: spell, player: 0 } });
+
+	const max = energy - 4 - tax;
+	if (max < 1) {
+		expect(hand.containsId(spell.id)).toBe(true);
+		expect(state.state.prompt).toBe(false);
+		expect(magi.data.energy).toBe(energy);
+		return;
+	}
+	expect(state.state.promptParams).toMatchObject({ min: 1, max });
+	resolve(state, { number: max });
+	expect(magi.data.energy).toBe(0);
+	resolve(state, { target });
+	expect(target.data.energy).toBe(Math.max(0, 2 - max));
+	expect(magi.data.energy).toBe(max);
+});
+
+it('Conceal protects only your Magi and prevents reusing the Hood through your next turn', () => {
+	const hood = card('Hood of Hiding', 0);
+	const ownMagi = card('Tryn', 0, 12);
+	const opposingMagi = card('Grega', 1, 10);
+	const state = setup(ownMagi, opposingMagi, [hood]);
+	const conceal = { type: C.ACTION_POWER, player: 0, source: hood, power: hood.card.data.powers[0] };
+	const attackable = target => state.modifyByStaticAbilities(target, C.PROPERTY_CAN_BE_ATTACKED);
+	const passTurn = () => {
+		state.setStep(STEP_PRS_SECOND);
+		state.update({ type: C.ACTION_PASS, player: state.state.activePlayer });
+	};
+
+	state.update(conceal);
+	expect(ownMagi.data.energy).toBe(8);
+	expect(attackable(ownMagi)).toBe(false);
+	expect(attackable(opposingMagi)).toBe(true);
+
+	passTurn();
+	expect(attackable(ownMagi)).toBe(false);
+	passTurn();
+	expect(attackable(ownMagi)).toBe(false);
+	const energyBeforeRetry = ownMagi.data.energy;
+	state.update(conceal);
+	expect(ownMagi.data.energy).toBe(energyBeforeRetry);
+
+	passTurn();
+	expect(attackable(ownMagi)).toBe(true);
+	passTurn();
+	const energyBeforeReuse = ownMagi.data.energy;
+	state.update(conceal);
+	expect(ownMagi.data.energy).toBe(energyBeforeReuse - 4);
+	expect(attackable(ownMagi)).toBe(false);
+});
+
+it('Vaal pays for Shield, keeps energy in combat and loses protection at the end of the turn', () => {
+	const vaal = card('Vaal', 0, 3);
+	const defender = card('Arbolit', 1, 2);
+	const state = setup(card('Grega', 0, 10), card('Pruitt', 1, 10), [vaal, defender]);
+	state.update({ type: C.ACTION_POWER, player: 0, source: vaal, power: vaal.card.data.powers[0] });
+	expect(vaal.data.energy).toBe(2);
+	state.update({ type: C.ACTION_PASS, player: 0 });
+	expect(state.state.step).toBe(STEP_ATTACK);
+	state.update({ type: C.ACTION_ATTACK, player: 0, source: vaal, target: defender });
+	expect(vaal.data.energy).toBe(2);
+	expect(state.getZone(C.ZONE_TYPE_DISCARD, 1).card?.card.name).toBe('Arbolit');
+	while (state.state.activePlayer === 0 && state.state.step !== STEP_PRS_SECOND) {
+		state.update({ type: C.ACTION_PASS, player: 0 });
+	}
+	state.update({ type: C.ACTION_PASS, player: 0 });
+	expect(state.state.activePlayer).toBe(1);
+	expect(state.modifyByStaticAbilities(vaal, C.PROPERTY_PROTECTION)).toBeUndefined();
+});
+
+it.each([[0, 2], [2, 0], [1, 2]])('Tap Roots independently removes %i and adds %i energy', (removed, added) => {
+	const first = card('Furok', 1, 4);
+	const second = card('Rudwot', 0, 4);
+	const caster = card('Pruitt', 0, 10);
+	const spell = card('Tap Roots', 0);
+	const state = setup(caster, card('Grega', 1, 10), [first, second]);
+	state.getZone(C.ZONE_TYPE_HAND, 0).add([spell]);
+	state.update({ type: C.ACTION_PLAY, payload: { card: spell, player: 0 } });
+	resolve(state, { target: first });
+	expect(resolve(state, { target: first })).toBe(false);
+	resolve(state, { target: second });
+	resolve(state, { number: removed });
+	resolve(state, { number: added });
+	expect(caster.data.energy).toBe(7);
+	expect(first.data.energy).toBe(4 - removed);
+	expect(second.data.energy).toBe(4 + added);
+});
+
+it('Tap Roots cannot be played with one creature in play', () => {
+	const caster = card('Pruitt', 0, 10);
+	const spell = card('Tap Roots', 0);
+	const state = setup(caster, card('Grega', 1, 10), [card('Furok', 1, 4)]);
+	state.getZone(C.ZONE_TYPE_HAND, 0).add([spell]);
+	state.update({ type: C.ACTION_PLAY, payload: { card: spell, player: 0 } });
+	expect(caster.data.energy).toBe(10);
+	expect(state.getZone(C.ZONE_TYPE_HAND, 0).containsId(spell.id)).toBe(true);
+	expect(state.state.prompt).toBe(false);
+});
 
 it.each([0, 1])('Fog Bank protects a creature of player %i only on the next two opposing turns', owner => {
 	const target = card('Furok', owner, 4);

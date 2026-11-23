@@ -1,4 +1,4 @@
-Done: **182** cards out of **191**
+Done: **191** cards out of **191**
 
 # Done, tested
 
@@ -36,6 +36,8 @@ Done: **182** cards out of **191**
 - Drakan
 - Eclipse
 - Eebit
+- Entangle
+- Energy Band
 - Epik
 - Evu
 - Eye of the Storm
@@ -52,8 +54,10 @@ Done: **182** cards out of **191**
 - Giant Vulbor
 - Grega
 - Gum-Gum
+- Hood of Hiding
 - Hubdra's Spear
 - Hyren's Call
+- Karak
 - Korrit
 - Lava Aq
 - Lava Balamant
@@ -62,6 +66,7 @@ Done: **182** cards out of **191**
 - Magam
 - Magma Armor
 - Magma Hyren
+- Mask of Abwyn
 - Megathan
 - Mirror Pendant
 - Mobis
@@ -95,6 +100,8 @@ Done: **182** cards out of **191**
 - Sinder
 - Staff of Korrits
 - Stagadan
+- Syphon Vortex
+- Tap Roots
 - Storm Ring
 - Stradus
 - Strag
@@ -104,6 +111,7 @@ Done: **182** cards out of **191**
 - Ulk
 - Undertow
 - Updraft
+- Vaal
 - Valkan
 - Vellup
 - Vinoc
@@ -113,6 +121,7 @@ Done: **182** cards out of **191**
 - Weebo
 - Wellisk
 - Wellisk Pup
+- Wence
 - Whall
 - Will of Orothe
 - Xyx
@@ -188,18 +197,6 @@ Done: **182** cards out of **191**
 - Water of Life
 - Xyx Minor
 
-# Not done yet
-
-- Energy Band (using only before attack, must attack if able)
-- Entangle ([in]ability to play spells)
-- Hood of Hiding (ability to use power)
-- Karak (exiling under creature, ability to play named relics)
-- Mask of Abwyn (looking at hand)
-- Syphon Vortex (Cost X plus 4)
-- Tap Roots (selecting two creatures)
-- Vaal (not losing energy from attack)
-- Wence (showing cards to opponent)
-
 # Replacement effect
 
 - Orathan Flyer (also custom prompts)
@@ -208,34 +205,14 @@ Done: **182** cards out of **191**
 
 - Raxis (also custom prompts, prompting opponent)
 
-## Continuous effects
-
-- Vaal
-
 ## Statuses
 
 - Burrow (X + 1 cost)
-
-## Ability to play certain cards
-
-- Karak
-
-## Ability to attack
-
-- Energy Band
-
-## Ability to play spells
-
-- Entangle (also continuous effects)
 
 ## Additional selectors
 
 - Bisiwog (selector of card itself)
 - Twee (next card in the zone)
-
-# Ability to use certain power
-
-- Hood of Hiding (also continuous effects)
 
 # Controlling another player
 

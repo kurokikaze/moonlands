@@ -186,8 +186,10 @@ import {
 
 	COST_X,
 	COST_X_PLUS_ONE,
+	COST_X_PLUS_FOUR,
 
 	ZONE_TYPE_HAND,
+	ZONE_TYPE_SET_ASIDE,
 	ZONE_TYPE_IN_PLAY,
 	ZONE_TYPE_DISCARD,
 	ZONE_TYPE_ACTIVE_MAGI,
@@ -207,7 +209,10 @@ import {
 	CARD_COUNT,
 	PROPERTY_CONTROLLING_PLAYER,
 	PROPERTY_ABLE_TO_USE_POWERS,
+	PROPERTY_ABLE_TO_PLAY_SPELLS,
+	PROPERTY_MUST_ATTACK,
 } from './const.js';
+import { variableCostOffsets } from './CostEngine.js';
 
 import { actionMap } from './actionMaps/effects.js';
 import { showAction } from './logAction.js';
@@ -347,6 +352,7 @@ type ProtoEffectType = ProtoSelectEffect |
 	ProtoDrawRestOfCardsEffect
 
 type StepType = {
+	id: import('./types/index.js').StepId;
 	name: string,
 	priority: PriorityType;
 	automatic: boolean;
@@ -386,6 +392,7 @@ export const DEFAULT_PROMPT_VARIABLE: Record<PromptTypeType, string> = {
 
 const steps: StepType[] = [
 	{
+		id: 'energize',
 		name: 'Energize',
 		priority: NO_PRIORITY,
 		automatic: true,
@@ -403,26 +410,31 @@ const steps: StepType[] = [
 		],
 	},
 	{
+		id: 'prs-first',
 		name: 'Powers/Relics/Spells',
 		priority: PRIORITY_PRS,
 		automatic: false,
 	},
 	{
+		id: 'attack',
 		name: 'Attack',
 		priority: PRIORITY_ATTACK,
 		automatic: false,
 	},
 	{
+		id: 'creatures',
 		name: 'Play Dream Creatures',
 		priority: PRIORITY_CREATURES,
 		automatic: false,
 	},
 	{
+		id: 'prs-second',
 		name: 'Powers/Relics/Spells',
 		priority: PRIORITY_PRS,
 		automatic: false,
 	},
 	{
+		id: 'draw',
 		name: 'Draw',
 		priority: NO_PRIORITY,
 		automatic: true,
@@ -552,6 +564,9 @@ export class State {
 			...clone(defaultState),
 			...state,
 		};
+		if (this.state.zones.length && !this.state.zones.some(zone => zone.type === ZONE_TYPE_SET_ASIDE)) {
+			this.state.zones = [...this.state.zones, new Zone('Set aside', ZONE_TYPE_SET_ASIDE, null)];
+		}
 
 		if (!('controllingPlayer' in state)) {
 			this.state.controllingPlayer = this.state.activePlayer;
@@ -576,6 +591,7 @@ export class State {
 			getOpponent: (player) => this.getOpponent(player),
 			get players() { return self.players; },
 			getContinuousEffects: () => this.state.continuousEffects,
+			getStepId: () => this.getStepId(),
 			getTwister: () => this.twister,
 		});
 
@@ -910,6 +926,7 @@ export class State {
 			new Zone('Player 1 magi pile', ZONE_TYPE_DEFEATED_MAGI, playerOne),
 			new Zone('Player 2 magi pile', ZONE_TYPE_DEFEATED_MAGI, playerTwo),
 			new Zone('In play', ZONE_TYPE_IN_PLAY, null),
+			new Zone('Set aside', ZONE_TYPE_SET_ASIDE, null),
 		];
 	}
 
@@ -955,7 +972,9 @@ export class State {
 
 	serializeZones(playerId: number, hideZones = true): SerializedZones {
 		const opponentId = this.getOpponent(playerId);
+		const setAside = this.getZone(ZONE_TYPE_SET_ASIDE);
 		return {
+			...(setAside.length ? { setAside: setAside.serialize() } : {}),
 			playerHand: this.getZone(ZONE_TYPE_HAND, playerId).serialize(),
 			opponentHand: this.getZone(ZONE_TYPE_HAND, opponentId).serialize(hideZones),
 			playerDeck: this.getZone(ZONE_TYPE_DECK, playerId).serialize(hideZones),
@@ -1025,7 +1044,7 @@ export class State {
         if (this.zoneHash.has(key)) {
             return this.zoneHash.get(key)!
         }
-		const result = this.state.zones.find(zone => zone.type === type && (zone.player == player || player == null)) || new Zone('Empty zone', ZONE_TYPE_DECK);
+		const result = this.state.zones.find(zone => zone.type === type && (type === ZONE_TYPE_SET_ASIDE || zone.player == player || player == null)) || new Zone('Empty zone', ZONE_TYPE_DECK);
         this.zoneHash.set(key, result)
         return result
 	}
@@ -1039,17 +1058,18 @@ export class State {
 	}
 
 	getControllingPlayer() {
-		for (const effect of this.state.continuousEffects) {
-			for (const ability of (effect.staticAbilities ?? [])) {
-				if (ability.property === PROPERTY_CONTROLLING_PLAYER) {
-					const value = this.getMetaValue(ability.modifier.operandOne, effect.id);
-					if (typeof value === 'number') {
-						return value;
-					}
-				}
+		for (const ability of this.selectorEngine.getActiveContinuousStaticAbilities()) {
+			if (ability.property === PROPERTY_CONTROLLING_PLAYER &&
+				(ability.selector !== SELECTOR_CREATURES_OF_PLAYER || ability.selectorParameter === this.state.activePlayer) &&
+				typeof ability.modifier.operandOne === 'number') {
+				return ability.modifier.operandOne;
 			}
 		}
 		return this.state.controllingPlayer;
+	}
+
+	getStepId() {
+		return this.state.step === null ? null : steps[this.state.step]?.id ?? null;
 	}
 
 	getCurrentPriority(): PriorityType {
@@ -1934,6 +1954,29 @@ export class State {
 		return this.promptValidator.checkPrompts(source, preparedActions, isPower, powerCost);
 	}
 
+	private canDeclareAttack(source: CardInGame, target: CardInGame): boolean {
+		const player = this.modifyByStaticAbilities(source, PROPERTY_CONTROLLER);
+		const defender = this.modifyByStaticAbilities(target, PROPERTY_CONTROLLER);
+		return player === this.state.activePlayer && defender !== player &&
+			source.card.type === TYPE_CREATURE && this.getZone(ZONE_TYPE_IN_PLAY).containsId(source.id) &&
+			this.modifyByStaticAbilities(source, PROPERTY_ABLE_TO_ATTACK) &&
+			source.data.attacked < this.modifyByStaticAbilities(source, PROPERTY_ATTACKS_PER_TURN) &&
+			this.modifyByStaticAbilities(target, PROPERTY_CAN_BE_ATTACKED) &&
+			(target.card.type === TYPE_CREATURE ? this.getZone(ZONE_TYPE_IN_PLAY).containsId(target.id) :
+				target.card.type === TYPE_MAGI && this.getZone(ZONE_TYPE_ACTIVE_MAGI, defender).containsId(target.id) &&
+				(!this.useSelector(SELECTOR_OWN_CREATURES, defender).length ||
+					this.modifyByStaticAbilities(source, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY)));
+	}
+
+	hasRequiredAttack(player: number): boolean {
+		const required = this.useSelector(SELECTOR_OWN_CREATURES, player).filter(card =>
+			!card.data.hasAttacked && this.modifyByStaticAbilities(card, PROPERTY_MUST_ATTACK));
+		if (!required.length) return false;
+		const opponent = this.getOpponent(player);
+		const targets = [...this.useSelector(SELECTOR_OWN_CREATURES, opponent), ...this.getZone(ZONE_TYPE_ACTIVE_MAGI, opponent).cards];
+		return required.some(card => targets.some(target => this.canDeclareAttack(card, target)));
+	}
+
 	update(initialAction: AnyEffectType) {
 		if (this.hasWinner()) {
 			return false;
@@ -1955,6 +1998,21 @@ export class State {
 
 			if (this.debug) {
 				showAction(action);
+			}
+
+			if (this.getCurrentPriority() === PRIORITY_ATTACK &&
+				(action.type === ACTION_PASS || action.type === ACTION_ATTACK)) {
+				const controllingPlayer = this.getControllingPlayer();
+				const activePlayer = this.state.activePlayer;
+				if (controllingPlayer !== activePlayer && (!('player' in action) || action.player !== controllingPlayer)) return false;
+				if (action.type === ACTION_PASS && action.player === controllingPlayer && this.hasRequiredAttack(activePlayer)) return false;
+				if (action.type === ACTION_ATTACK && controllingPlayer !== activePlayer) {
+					const source = this.getMetaValue(action.source, action.generatedBy);
+					const target = this.getMetaValue(action.target, action.generatedBy);
+					const pack = this.getMetaValue(action.additionalAttackers, action.generatedBy) ?? [];
+					if (!source || !target || !this.canDeclareAttack(source, target) ||
+						pack.some((card: CardInGame) => this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) !== activePlayer)) return false;
+				}
 			}
 
 			this.addActionToLog(action);
@@ -2070,6 +2128,10 @@ export class State {
 					break;
 				}
 				case ACTION_POWER: {
+					if (action.power.beforeAttackOnly && (this.state.step === null ||
+						this.state.step >= steps.findIndex(step => step.priority === PRIORITY_ATTACK) ||
+						this.getCurrentPriority() !== PRIORITY_PRS ||
+						this.getControllingPlayer() !== this.modifyByStaticAbilities(action.source, PROPERTY_CONTROLLER))) break;
 					const powerCost = this.modifyByStaticAbilities(action.source, PROPERTY_POWER_COST, action.power.name || '');
 					const ableToUsePowers = this.modifyByStaticAbilities(action.source, PROPERTY_ABLE_TO_USE_POWERS);
 
@@ -2773,7 +2835,7 @@ export class State {
 							generatedBy: this.nanoid(),
 						});
 					} else {
-						if (action.player === this.state.activePlayer) {
+						if (action.player === (this.getCurrentPriority() === PRIORITY_ATTACK ? this.getControllingPlayer() : this.state.activePlayer)) {
 							newStep = (this.state.step + 1) % steps.length;
 
 							if (newStep === 0) {
@@ -2833,6 +2895,7 @@ export class State {
 								throw new Error('Trying to play a card without Magi')
 							}
 							const totalCost = this.calculateTotalCost(cardItself);
+							const variableCostOffset = variableCostOffsets[baseCard.cost as keyof typeof variableCostOffsets];
 							switch (cardType) {
 								case TYPE_CREATURE: {
 									const alternativePaymentSources = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.data.paymentSource && card.card.data.paymentSource.includes(TYPE_CREATURE) && this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player);
@@ -2891,7 +2954,7 @@ export class State {
 												effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
 												target: '$creature_created',
 												player: player,
-												amount: (baseCard.cost === COST_X || baseCard.cost === COST_X_PLUS_ONE || baseCard.cost === null) ? 0 : baseCard.cost,
+												amount: typeof baseCard.cost === 'number' ? baseCard.cost : 0,
 												generatedBy: cardItself.id,
 											} as StartingEnergyOnCreatureEffect,
 											{
@@ -2904,13 +2967,16 @@ export class State {
 									break;
 								}
 								case TYPE_RELIC: {
+									const lockedByKarak = this.getZone(ZONE_TYPE_SET_ASIDE).cards.some(relic =>
+										relic.card.name === baseCard.name && relic.data.setAsideUnder?.blockedPlayer === player &&
+										this.getZone(ZONE_TYPE_IN_PLAY).containsId(relic.data.setAsideUnder.cardId));
 									const alreadyHasOne = this.getZone(ZONE_TYPE_IN_PLAY).cards
 										.some(card => card.data.controller === player && card.card.name === baseCard.name);
 									const relicRegion = baseCard.region;
 									const magiRegion = activeMagi.card.region;
 									const regionAllows = relicRegion === magiRegion || relicRegion === REGION_UNIVERSAL;
 
-									if (!alreadyHasOne && regionAllows && typeof baseCard.cost == 'number' && activeMagi.data.energy >= baseCard.cost) {
+									if (!lockedByKarak && !alreadyHasOne && regionAllows && typeof baseCard.cost == 'number' && activeMagi.data.energy >= baseCard.cost) {
 										this.transformIntoActions(
 											{
 												type: ACTION_EFFECT,
@@ -2944,7 +3010,8 @@ export class State {
 									break;
 								}
 								case TYPE_SPELL: {
-									if (activeMagi.data.energy >= totalCost || baseCard.cost === COST_X || baseCard.cost === COST_X_PLUS_ONE) {
+									if (!this.modifyByStaticAbilities(activeMagi, PROPERTY_ABLE_TO_PLAY_SPELLS)) break;
+									if (activeMagi.data.energy >= totalCost) {
 										const enrichAction = <T>(effect: T): T & EnrichedAction => ({
 											source: cardItself,
 											player, // Spell can rewrite this to make opponent do something - draw a card, for example
@@ -2971,7 +3038,8 @@ export class State {
 										const allPromptsAreDoable = allPrompts.every(promptAction => {
 											switch (promptAction.promptType) {
 												case PROMPT_TYPE_SINGLE_CREATURE:
-													return this.getZone(ZONE_TYPE_IN_PLAY).cards.some(card => card.card.type === TYPE_CREATURE);
+													return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.type === TYPE_CREATURE).length >=
+														(promptAction.minimumCreaturesInPlay ?? 1);
 												case PROMPT_TYPE_RELIC:
 													return this.getZone(ZONE_TYPE_IN_PLAY).cards.some(card => card.card.type === TYPE_RELIC);
 												case PROMPT_TYPE_OWN_SINGLE_CREATURE:
@@ -2997,23 +3065,23 @@ export class State {
 
 										if (allPromptsAreDoable) {
 											const regionPenalty = (activeMagi.card.region == baseCard.region || baseCard.region == REGION_UNIVERSAL) ? 0 : 1;
-											const maxCost = baseCard.data.maxCostX || Infinity;
-											const payEffects: AnyEffectType[] = (baseCard.cost === COST_X || baseCard.cost === COST_X_PLUS_ONE) ? [
+											const maxCost = baseCard.data.maxCostX ?? Infinity;
+											const payEffects: AnyEffectType[] = variableCostOffset !== undefined ? [
 												{
 													type: ACTION_ENTER_PROMPT,
 													promptType: PROMPT_TYPE_NUMBER,
 													player,
 													promptParams: {
 														min: 1,
-														max: Math.min(activeMagi.data.energy, maxCost) - regionPenalty - (baseCard.cost === COST_X_PLUS_ONE ? 1 : 0),
+														max: Math.min(activeMagi.data.energy, maxCost) - regionPenalty - variableCostOffset,
 													},
 													variable: 'chosen_cost',
 													generatedBy: cardItself.id,
 												},
 												{
 													type: ACTION_CALCULATE,
-													operandOne: 'chosen_cost',
-													operandTwo: regionPenalty + (baseCard.cost === COST_X_PLUS_ONE ? 1 : 0),
+													operandOne: '$chosen_cost',
+													operandTwo: regionPenalty + variableCostOffset,
 													operator: CALCULATION_ADD,
 													variable: 'totalCost',
 													generatedBy: cardItself.id,
@@ -3254,6 +3322,7 @@ export {
 
 	COST_X,
 	COST_X_PLUS_ONE,
+	COST_X_PLUS_FOUR,
 
 	ZONE_TYPE_HAND,
 	ZONE_TYPE_IN_PLAY,

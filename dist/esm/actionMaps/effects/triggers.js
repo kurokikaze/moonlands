@@ -1,5 +1,5 @@
 import CardInGame from "../../classes/CardInGame.js";
-import { SELECTOR_CREATURES_OF_PLAYER, SELECTOR_ID, } from "../../const.js";
+import { EXPIRATION_DURING_PLAYER_TURNS, SELECTOR_CREATURES_OF_PLAYER, SELECTOR_ID, } from "../../const.js";
 import { oneOrSeveral } from "../actionMapUtils.js";
 // Should rework into continuous effect with duration
 export const applyForbidAttackToCreatureEffect = function (action, _transform) {
@@ -55,7 +55,8 @@ export const applyCreateContinuousEffect = function (action, _transform, _state,
     });
     const continuousEffect = Object.assign(Object.assign({ triggerEffects: action.triggerEffects || [] }, (action.replacementEffects && {
         replacementEffects: action.replacementEffects.map(replacement => (Object.assign(Object.assign({}, replacement), { find: Object.assign(Object.assign({}, replacement.find), { conditions: replacement.find.conditions.map(condition => (Object.assign(Object.assign({}, condition), { objectOne: this.getMetaValue(condition.objectOne, action.generatedBy), objectTwo: this.getMetaValue(condition.objectTwo, action.generatedBy) }))) }) }))),
-    })), { staticAbilities, expiration: action.expiration, player: action.player || 0, id });
+    })), { staticAbilities, expiration: action.expiration.type === EXPIRATION_DURING_PLAYER_TURNS && action.turnPlayer !== undefined
+            ? Object.assign(Object.assign({}, action.expiration), { turnPlayer: this.getMetaValue(action.turnPlayer, action.generatedBy) }) : action.expiration, player: action.player || 0, id });
     const source = this.getMetaValue(action.source, action.generatedBy) ||
         action.triggerSource || this.getSpellMetadata(action.generatedBy || '').source;
     if (source instanceof CardInGame) {

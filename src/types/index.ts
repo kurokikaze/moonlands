@@ -86,6 +86,8 @@ export type CardData = {
     canBeAttacked?: boolean;
     burrowed?: boolean;
     ableToUsePowers?: boolean;
+    ableToPlaySpells?: boolean;
+    mustAttack?: boolean;
     controllingPlayer?: number;
     maxCostX?: number;
 }
@@ -101,12 +103,16 @@ export interface EnrichedAction {
 
 type PowerType = {
     name: string;
+    beforeAttackOnly?: boolean;
     text: string;
     cost: number | typeof COST_X;
     effects: AnyEffectType[];
 }
 
+export type StepId = 'energize' | 'prs-first' | 'attack' | 'creatures' | 'prs-second' | 'draw';
+
 export type StaticAbilityType = {
+    activeDuringSteps?: readonly StepId[];
     name: string,
     text: string,
     selector: SelectorTypeType,
@@ -279,6 +285,7 @@ export type AnyEffectType = EffectType | PromptType | SelectType | CalculateType
 type SerializedZone = ConvertedCard[] | HiddenConvertedCard[]
 
 export type SerializedZones = {
+    setAside?: ConvertedCard[];
     playerHand: SerializedZone
     opponentHand: SerializedZone
     playerDeck: SerializedZone

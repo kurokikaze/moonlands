@@ -12,6 +12,7 @@ import {
 	EFFECT_TYPE_ROLL_DIE,
 	EFFECT_TYPE_PLAY_CREATURE,
 	EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP,
+	EFFECT_TYPE_REVEAL_CARDS,
 	EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP,
 	EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI,
 	EFFECT_TYPE_REMEMBER_CARD_VALUE,
@@ -115,6 +116,7 @@ export type EffectTypeType =
 	typeof EFFECT_TYPE_ATTACK |
 	typeof EFFECT_TYPE_NONE |
 	typeof EFFECT_TYPE_DRAW |
+	typeof EFFECT_TYPE_REVEAL_CARDS |
 	typeof EFFECT_TYPE_ROLL_DIE |
 	typeof EFFECT_TYPE_PLAY_CREATURE |
 	typeof EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP |
@@ -192,6 +194,12 @@ type NoneEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_NONE;
 }
 
+type RevealCardsEffect = ActionEffect & {
+	effectType: typeof EFFECT_TYPE_REVEAL_CARDS;
+	cards: CardInGame | CardInGame[] | string;
+	viewer: number | string;
+};
+
 type DrawEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_DRAW;
 	stepEffect?: boolean;
@@ -227,6 +235,7 @@ type DrawRestOfCardsEffect = ActionEffect & {
 }
 
 export type MoveCardBetwenZonesEffect = ActionEffect & {
+	setAsideUnder?: string;
 	shuffleDestination?: boolean;
 	effectType: typeof EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES;
 	target: string | CardInGame;
@@ -572,6 +581,7 @@ export type CreateContinuousEffect = ActionEffect & {
 	triggerEffects?: TriggerEffectType[];
 	replacementEffects?: ReplacementEffectType[];
 	discardSourceOnExpiration?: boolean;
+	turnPlayer?: number | string;
 	expiration: ExpirationObjectType;
 }
 
@@ -740,6 +750,7 @@ export type EffectType = MoveCardBetwenZonesEffect |
 	StartStepEffect |
 	EndOfTurnEffect |
 	DrawEffect |
+	RevealCardsEffect |
 	DrawRestOfCardsEffect |
 	MagiFlippedEffect |
 	AddStartingEnergyToMagi |

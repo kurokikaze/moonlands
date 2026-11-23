@@ -1,10 +1,10 @@
-import { PROPERTY_ID, PROPERTY_TYPE, PROPERTY_CONTROLLER, PROPERTY_ENERGY_COUNT, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, PROPERTY_POWER_COST, PROPERTY_CREATURE_TYPES, PROPERTY_STATUS_WAS_ATTACKED, PROPERTY_STATUS_DEFEATED_CREATURE, PROPERTY_ENERGY_LOSS_THRESHOLD, PROPERTY_STATUS, PROPERTY_ABLE_TO_ATTACK, PROPERTY_MAGI_NAME, PROPERTY_CAN_BE_ATTACKED, PROPERTY_PROTECTION, PROPERTY_CARD_MEMORY, PROPERTY_CREATURE_NAME, PROPERTY_CONTROLLING_PLAYER, PROPERTY_ABLE_TO_USE_POWERS, CALCULATION_SET, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, STATUS_BURROWED, } from './const.js';
+import { PROPERTY_ID, PROPERTY_TYPE, PROPERTY_CONTROLLER, PROPERTY_ENERGY_COUNT, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, PROPERTY_POWER_COST, PROPERTY_CREATURE_TYPES, PROPERTY_STATUS_WAS_ATTACKED, PROPERTY_STATUS_DEFEATED_CREATURE, PROPERTY_ENERGY_LOSS_THRESHOLD, PROPERTY_STATUS, PROPERTY_ABLE_TO_ATTACK, PROPERTY_MAGI_NAME, PROPERTY_CAN_BE_ATTACKED, PROPERTY_PROTECTION, PROPERTY_CARD_MEMORY, PROPERTY_CREATURE_NAME, PROPERTY_CONTROLLING_PLAYER, PROPERTY_ABLE_TO_USE_POWERS, PROPERTY_ABLE_TO_PLAY_SPELLS, PROPERTY_MUST_ATTACK, CALCULATION_SET, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, STATUS_BURROWED, } from './const.js';
 import performCalculation from './helpers/performCalculation.js';
 // ─── LayeredModificationEngine ───────────────────────────────────────────────
 export class LayeredModificationEngine {
     getByProperty(target, property, subProperty = null) {
-        var _a, _b, _c, _d, _e;
-        var _f, _g, _h, _j;
+        var _a, _b, _c, _d, _e, _f;
+        var _g, _h, _j, _k, _l, _m;
         switch (property) {
             case PROPERTY_ID:
                 return target.id;
@@ -13,7 +13,7 @@ export class LayeredModificationEngine {
             case PROPERTY_CREATURE_TYPES:
                 return target.card.name.split(' ');
             case PROPERTY_CARD_MEMORY:
-                return subProperty && Object.hasOwn((_f = target.data.memory) !== null && _f !== void 0 ? _f : {}, subProperty) ? (_g = (_a = target.data.memory) === null || _a === void 0 ? void 0 : _a[subProperty]) !== null && _g !== void 0 ? _g : [] : [];
+                return subProperty && Object.hasOwn((_g = target.data.memory) !== null && _g !== void 0 ? _g : {}, subProperty) ? (_h = (_a = target.data.memory) === null || _a === void 0 ? void 0 : _a[subProperty]) !== null && _h !== void 0 ? _h : [] : [];
             case PROPERTY_CREATURE_NAME:
                 return target.card.name;
             case PROPERTY_MAGI_NAME:
@@ -78,9 +78,13 @@ export class LayeredModificationEngine {
                     target.modifiedCard.data.ableToAttack : defaultValue;
             }
             case PROPERTY_CONTROLLING_PLAYER:
-                return (_h = (_d = target.modifiedCard) === null || _d === void 0 ? void 0 : _d.data.controllingPlayer) !== null && _h !== void 0 ? _h : 0;
+                return (_j = (_d = target.modifiedCard) === null || _d === void 0 ? void 0 : _d.data.controllingPlayer) !== null && _j !== void 0 ? _j : 0;
             case PROPERTY_ABLE_TO_USE_POWERS:
-                return (_j = (_e = target.modifiedCard) === null || _e === void 0 ? void 0 : _e.data.ableToUsePowers) !== null && _j !== void 0 ? _j : true;
+                return (_k = (_e = target.modifiedCard) === null || _e === void 0 ? void 0 : _e.data.ableToUsePowers) !== null && _k !== void 0 ? _k : true;
+            case PROPERTY_ABLE_TO_PLAY_SPELLS:
+                return (_l = (_f = target.modifiedCard) === null || _f === void 0 ? void 0 : _f.data.ableToPlaySpells) !== null && _l !== void 0 ? _l : true;
+            case PROPERTY_MUST_ATTACK:
+                return (_m = target.modifiedCard.data.mustAttack) !== null && _m !== void 0 ? _m : false;
         }
     }
     getByPropertyAny(target, property, subProperty = null) {
@@ -197,11 +201,15 @@ export class LayeredModificationEngine {
                 }
                 return currentCard;
             }
-            case PROPERTY_ABLE_TO_USE_POWERS: {
+            case PROPERTY_ABLE_TO_USE_POWERS:
+            case PROPERTY_ABLE_TO_PLAY_SPELLS:
+            case PROPERTY_MUST_ATTACK: {
+                const key = staticAbility.property === PROPERTY_MUST_ATTACK ? 'mustAttack'
+                    : staticAbility.property === PROPERTY_ABLE_TO_PLAY_SPELLS ? 'ableToPlaySpells' : 'ableToUsePowers';
                 const { operator, operandOne } = staticAbility.modifier;
                 const resultValue = (operator === CALCULATION_SET) ? operandOne : true;
                 if (typeof resultValue === 'boolean') {
-                    return Object.assign(Object.assign({}, currentCard), { modifiedCard: Object.assign(Object.assign({}, currentCard.modifiedCard), { data: Object.assign(Object.assign({}, currentCard.modifiedCard.data), { ableToUsePowers: resultValue }) }) });
+                    return Object.assign(Object.assign({}, currentCard), { modifiedCard: Object.assign(Object.assign({}, currentCard.modifiedCard), { data: Object.assign(Object.assign({}, currentCard.modifiedCard.data), { [key]: resultValue }) }) });
                 }
                 return currentCard;
             }

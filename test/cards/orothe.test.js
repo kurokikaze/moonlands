@@ -2495,7 +2495,7 @@ describe('Will of Orothe', () => {
 		gameState.update({ type: ACTION_PASS, player: ACTIVE_PLAYER });
 
 		expect(gameState.state.activePlayer).toEqual(NON_ACTIVE_PLAYER, 'It is now the opponent\'s turn');
-		expect(gameState.getControllingPlayer()).toEqual(ACTIVE_PLAYER, 'Caster controls the opponent\'s decisions');
+		expect(gameState.getControllingPlayer()).toEqual(NON_ACTIVE_PLAYER);
 
 		// Opponent's creature should be blocked from using powers
 		expect(gameState.modifyByStaticAbilities(arbolit, PROPERTY_ABLE_TO_USE_POWERS)).toEqual(false, 'Arbolit cannot use powers');
@@ -2512,6 +2512,18 @@ describe('Will of Orothe', () => {
 		expect(gameState.state.prompt).toEqual(false, 'Power was blocked — no prompt appeared');
 		expect(gameState.getZone(ZONE_TYPE_IN_PLAY).length).toEqual(2, 'Arbolit is still in play (power not used)');
 		expect(arbolit.data.energy).toEqual(1, 'Arbolit energy is unchanged');
+		gameState.update({ type: ACTION_PASS, player: NON_ACTIVE_PLAYER });
+		expect(gameState.state.step).toBe(STEP_ATTACK);
+		expect(gameState.getControllingPlayer()).toBe(ACTIVE_PLAYER);
+		expect(gameState.update({ type: ACTION_PASS, player: NON_ACTIVE_PLAYER })).toBe(false);
+		const attack = { type: ACTION_ATTACK, source: arbolit, target: ebylon };
+		expect(gameState.update({ ...attack, player: NON_ACTIVE_PLAYER })).toBe(false);
+		const energyBeforeAttack = ebylon.data.energy;
+		gameState.update({ ...attack, player: ACTIVE_PLAYER });
+		expect(ebylon.data.energy).toBe(energyBeforeAttack - arbolit.data.energy);
+		gameState.update({ type: ACTION_PASS, player: ACTIVE_PLAYER });
+		expect(gameState.state.step).toBe(STEP_CREATURES);
+		expect(gameState.getControllingPlayer()).toBe(NON_ACTIVE_PLAYER);
 	});
 
 	it('Effects expire after the target\'s turn ends, restoring power use', () => {
@@ -2557,7 +2569,7 @@ describe('Will of Orothe', () => {
 
 		// Pass opponent's full turn: PRS1 → ATTACK → CREATURES → PRS2 → (back to caster)
 		gameState.update(passNAP); // → ATTACK
-		gameState.update(passNAP); // → CREATURES
+		gameState.update(passAP); // → CREATURES
 		gameState.update(passNAP); // → PRS2
 		gameState.update(passNAP); // → ACTIVE_PLAYER PRS1
 

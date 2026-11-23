@@ -1,14 +1,19 @@
-import { EXPIRATION_DURING_OPPONENT_TURNS, TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, SELECTOR_CREATURES, SELECTOR_MAGI, SELECTOR_RELICS, SELECTOR_OWN_MAGI, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_OWN_SPELLS_IN_HAND, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, SELECTOR_CREATURES_OF_TYPE, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_ID, SELECTOR_CREATURES_OF_PLAYER, SELECTOR_SELF_AND_STATUS, SELECTOR_OWN_CREATURES_WITH_STATUS, SELECTOR_OPPONENT_ID, STATUS_BURROWED, PROPERTY_CONTROLLER, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, PROPERTY_POWER_COST, PROPERTY_ENERGY_LOSS_THRESHOLD, PROPERTY_STATUS, PROPERTY_ABLE_TO_ATTACK, PROPERTY_ABLE_TO_USE_POWERS, PROPERTY_PROTECTION, PROPERTY_CARD_MEMORY, CALCULATION_SET, ZONE_TYPE_IN_PLAY, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_HAND, } from './const.js';
+import { EXPIRATION_DURING_OPPONENT_TURNS, EXPIRATION_DURING_PLAYER_TURNS, TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, SELECTOR_CREATURES, SELECTOR_MAGI, SELECTOR_RELICS, SELECTOR_OWN_MAGI, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_OWN_SPELLS_IN_HAND, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, SELECTOR_CREATURES_OF_TYPE, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_ID, SELECTOR_CREATURES_OF_PLAYER, SELECTOR_SELF_AND_STATUS, SELECTOR_OWN_CREATURES_WITH_STATUS, SELECTOR_OPPONENT_ID, STATUS_BURROWED, PROPERTY_CONTROLLER, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, PROPERTY_POWER_COST, PROPERTY_ENERGY_LOSS_THRESHOLD, PROPERTY_STATUS, PROPERTY_ABLE_TO_ATTACK, PROPERTY_ABLE_TO_USE_POWERS, PROPERTY_ABLE_TO_PLAY_SPELLS, PROPERTY_MUST_ATTACK, PROPERTY_PROTECTION, PROPERTY_CARD_MEMORY, CALCULATION_SET, ZONE_TYPE_IN_PLAY, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_HAND, } from './const.js';
 import { CostEngine } from './CostEngine.js';
 import { RestrictionEngine } from './RestrictionEngine.js';
 import { LayeredModificationEngine } from './LayeredModificationEngine.js';
 // ─── SelectorEngine ───────────────────────────────────────────────────────────
 export class SelectorEngine extends LayeredModificationEngine {
+    isAbilityActive(ability) {
+        const step = this.context.getStepId();
+        return !ability.activeDuringSteps || (step !== null && ability.activeDuringSteps.includes(step));
+    }
     constructor(context) {
         super();
         this.modifiedCardDataCache = new Map();
         this.zoneStaticAbilitiesCache = null;
         this.continuousStaticAbilitiesCache = null;
+        this.cachedStepId = null;
         this.context = context;
         this.costEngine = new CostEngine({
             getOwnMagi: this.getOwnMagi.bind(this),
@@ -48,7 +53,11 @@ export class SelectorEngine extends LayeredModificationEngine {
     hasActiveStaticAbilities(effect) {
         var _a;
         return !!((_a = effect.staticAbilities) === null || _a === void 0 ? void 0 : _a.length) &&
-            (effect.expiration.type !== EXPIRATION_DURING_OPPONENT_TURNS || effect.expiration.active === true);
+            (effect.expiration.type !== EXPIRATION_DURING_OPPONENT_TURNS &&
+                effect.expiration.type !== EXPIRATION_DURING_PLAYER_TURNS || effect.expiration.active === true);
+    }
+    getActiveContinuousStaticAbilities() {
+        return this.getContinuousStaticAbilities().filter(ability => this.isAbilityActive(ability));
     }
     getContinuousStaticAbilities() {
         if (this.continuousStaticAbilitiesCache === null) {
@@ -250,6 +259,11 @@ export class SelectorEngine extends LayeredModificationEngine {
         if (property === PROPERTY_CARD_MEMORY) {
             return this.getByPropertyAny(target, property, subProperty);
         }
+        const stepId = this.context.getStepId();
+        if (this.cachedStepId !== stepId) {
+            this.clearModifiedCardDataCache();
+            this.cachedStepId = stepId;
+        }
         const cached = this.modifiedCardDataCache.get(target.id);
         if (cached) {
             const freshData = Object.assign(Object.assign({}, cached.data), { energy: target.data.energy, attacked: target.data.attacked, actionsUsed: target.data.actionsUsed, energyLostThisTurn: target.data.energyLostThisTurn, defeatedCreature: target.data.defeatedCreature, hasAttacked: target.data.hasAttacked, wasAttacked: target.data.wasAttacked, attachedTo: target.data.attachedTo });
@@ -292,10 +306,14 @@ export class SelectorEngine extends LayeredModificationEngine {
             [PROPERTY_ENERGY_LOSS_THRESHOLD]: 6,
             [PROPERTY_ABLE_TO_ATTACK]: 7,
             [PROPERTY_ABLE_TO_USE_POWERS]: 8,
+            [PROPERTY_ABLE_TO_PLAY_SPELLS]: 8,
+            [PROPERTY_MUST_ATTACK]: 8,
             [PROPERTY_PROTECTION]: 9,
         };
         const zoneAbilities = this.getZoneStaticAbilities();
-        const staticAbilities = [...gameStaticAbilities, ...zoneAbilities, ...continuousStaticAbilities].sort((a, b) => propertyLayers[a.property] - propertyLayers[b.property]);
+        const staticAbilities = [...gameStaticAbilities, ...zoneAbilities, ...continuousStaticAbilities]
+            .filter(ability => this.isAbilityActive(ability))
+            .sort((a, b) => propertyLayers[a.property] - propertyLayers[b.property]);
         let initialCardData = {
             card: target.card,
             modifiedCard: Object.assign(Object.assign({}, target.card), { data: Object.assign(Object.assign({ protection: undefined }, target.card.data), { energyLossThreshold: 0, ableToAttack: 'ableToAttack' in target.card.data ? target.card.data.ableToAttack : true }) }),

@@ -44,9 +44,9 @@
 - [x] Ebylon
 - [x] Eclipse
 - [x] Eebit
-- [ ] Energy Band
+- [x] Energy Band
 - [x] Enrich
-- [ ] Entangle
+- [x] Entangle
 - [x] Epik
 - [x] Evu
 - [x] Eye of the Storm
@@ -77,12 +77,12 @@
 - [x] Gruk
 - [x] Gum-Gum
 - [x] Heat Lens
-- [ ] Hood of Hiding
+- [x] Hood of Hiding
 - [x] Hubdra's Spear
 - [x] Hyren's Call
 - [x] Implosion
 - [x] Jaela
-- [ ] Karak
+- [x] Karak
 - [x] Kelthet
 - [x] Korrit
 - [x] Lasada
@@ -96,7 +96,7 @@
 - [x] Magam
 - [x] Magma Armor
 - [x] Magma Hyren
-- [ ] Mask of Abwyn
+- [x] Mask of Abwyn
 - [x] Megathan
 - [x] Mirror Pendant
 - [x] Mobis
@@ -156,7 +156,7 @@
 - [x] Submerge
 - [x] Syphon Stone
 - [x] Syphon Vortex
-- [ ] Tap Roots
+- [x] Tap Roots
 - [x] Thermal Blast
 - [x] Thunder Hyren
 - [x] Thunder Vashp
@@ -170,7 +170,7 @@
 - [x] Ulk
 - [x] Undertow
 - [x] Updraft
-- [ ] Vaal
+- [x] Vaal
 - [x] Valkan
 - [x] Vellup
 - [x] Vinoc
@@ -181,7 +181,7 @@
 - [x] Weebo
 - [x] Wellisk
 - [x] Wellisk Pup
-- [ ] Wence
+- [x] Wence
 - [x] Whall
 - [ ] Will of Orothe
 - [x] Xyx

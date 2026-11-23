@@ -19,6 +19,7 @@ import {
     ZONE_TYPE_DEFEATED_MAGI,
     ZONE_TYPE_DISCARD,
     ZONE_TYPE_HAND,
+    ZONE_TYPE_SET_ASIDE,
     ZONE_TYPE_IN_PLAY,
     ZONE_TYPE_MAGI_PILE,
 
@@ -43,6 +44,7 @@ import {
     PROPERTY_MAGI_NAME,
     PROPERTY_COST,
     PROPERTY_ABLE_TO_ATTACK,
+    PROPERTY_MUST_ATTACK,
     PROPERTY_ATTACKS_PER_TURN,
     PROPERTY_CAN_ATTACK_MAGI_DIRECTLY,
     PROPERTY_CONTROLLER,
@@ -60,6 +62,7 @@ import {
     ACTION_PROPERTY,
     EXPIRATION_ANY_TURNS,
     EXPIRATION_DURING_OPPONENT_TURNS,
+    EXPIRATION_DURING_PLAYER_TURNS,
     EXPIRATION_THIS_TURN,
     EXPIRATION_NEVER,
     EXPIRATION_OPPONENT_TURNS,
@@ -87,6 +90,7 @@ import {
     PROPERTY_PROTECTION,
     PROPERTY_CONTROLLING_PLAYER,
     PROPERTY_ABLE_TO_USE_POWERS,
+    PROPERTY_ABLE_TO_PLAY_SPELLS,
     PROMPT_TYPE_PLAYER,
     PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
     PROPERTY_CARD_MEMORY,
@@ -106,6 +110,7 @@ export type ZoneType =
     typeof ZONE_TYPE_DEFEATED_MAGI |
     typeof ZONE_TYPE_DISCARD |
     typeof ZONE_TYPE_HAND |
+    typeof ZONE_TYPE_SET_ASIDE |
     typeof ZONE_TYPE_IN_PLAY;
 
 export type Region =
@@ -120,6 +125,7 @@ export type Region =
 export type PropertyType = typeof PROPERTY_MAGI_STARTING_ENERGY |
     typeof PROPERTY_COST |
     typeof PROPERTY_ABLE_TO_ATTACK |
+    typeof PROPERTY_MUST_ATTACK |
     typeof PROPERTY_ATTACKS_PER_TURN |
     typeof PROPERTY_CAN_ATTACK_MAGI_DIRECTLY |
     typeof PROPERTY_CONTROLLER |
@@ -141,6 +147,7 @@ export type PropertyType = typeof PROPERTY_MAGI_STARTING_ENERGY |
     typeof PROPERTY_PROTECTION |
     typeof PROPERTY_CONTROLLING_PLAYER |
     typeof PROPERTY_ABLE_TO_USE_POWERS |
+    typeof PROPERTY_ABLE_TO_PLAY_SPELLS |
     typeof CARD_COUNT | // Special case of property getter
     typeof ACTION_PROPERTY; // Special case of property getter
 
@@ -191,6 +198,7 @@ export type ConditionType = {
 }
 
 export type ExpirationType = typeof EXPIRATION_DURING_OPPONENT_TURNS |
+    typeof EXPIRATION_DURING_PLAYER_TURNS |
     typeof EXPIRATION_THIS_TURN |
     typeof EXPIRATION_OPPONENT_TURNS |
     typeof EXPIRATION_PLAYER_TURNS |
@@ -198,10 +206,11 @@ export type ExpirationType = typeof EXPIRATION_DURING_OPPONENT_TURNS |
     typeof EXPIRATION_NEVER;
 
 export type ExpirationObjectType = {
-    type: Exclude<ExpirationType, typeof EXPIRATION_THIS_TURN | typeof EXPIRATION_DURING_OPPONENT_TURNS>;
+    type: Exclude<ExpirationType, typeof EXPIRATION_THIS_TURN | typeof EXPIRATION_DURING_OPPONENT_TURNS | typeof EXPIRATION_DURING_PLAYER_TURNS>;
     turns: number;
 } | { type: typeof EXPIRATION_THIS_TURN; turns?: never }
-  | { type: typeof EXPIRATION_DURING_OPPONENT_TURNS; turns: number; active?: boolean };
+  | { type: typeof EXPIRATION_DURING_OPPONENT_TURNS; turns: number; active?: boolean }
+  | { type: typeof EXPIRATION_DURING_PLAYER_TURNS; turns: number; active?: boolean; turnPlayer?: number };
 
 export type RestrictionType = typeof RESTRICTION_CREATURE_WAS_ATTACKED | 
     typeof RESTRICTION_OWN_CREATURE |

@@ -2,7 +2,8 @@ import { resolvePromptRestrictions } from './helpers/resolvePromptRestrictions.j
 import { nanoid, customRandom, urlAlphabet } from 'nanoid';
 import { MersenneTwister } from './mersenneTwister.js';
 import { TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, ACTION_PASS, ACTION_PLAY, ACTION_POWER, ACTION_EFFECT, ACTION_SELECT, ACTION_CALCULATE, ACTION_ENTER_PROMPT, ACTION_RESOLVE_PROMPT, ACTION_GET_PROPERTY_VALUE, ACTION_ATTACK, ACTION_PLAYER_WINS, ACTION_CONCEDE, ACTION_TIME_NOTIFICATION, ACTION_EXIT_PROMPTS, ACTION_PROPERTY, PROPERTY_ID, PROPERTY_TYPE, PROPERTY_CONTROLLER, PROPERTY_ENERGY_COUNT, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, PROPERTY_POWER_COST, PROPERTY_ABLE_TO_ATTACK, PROPERTY_CAN_BE_ATTACKED, PROPERTY_PROTECTION, CALCULATION_SET, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_HALVE_ROUND_DOWN, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_MAX, CALCULATION_MULTIPLY, SELECTOR_CREATURES, SELECTOR_CREATURES_AND_MAGI, SELECTOR_OWN_MAGI, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_MAGI_OF_REGION, SELECTOR_OPPONENT_ID, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, SELECTOR_CREATURES_OF_TYPE, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_OTHER_CREATURES_OF_TYPE, SELECTOR_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_ID, SELECTOR_CREATURES_OF_PLAYER, SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY, SELECTOR_NTH_CARD_OF_ZONE, SELECTOR_OWN_CARDS_IN_HAND, SELECTOR_CARDS_IN_HAND, SELECTOR_MAGI_OF_PLAYER, SELECTOR_RANDOM_CARD_IN_HAND, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_RELIC, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_OWN_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_CHOOSE_CARDS, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_MAGI_WITHOUT_CREATURES, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_MAY_ABILITY, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_PLAYER, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, PROMPT_TYPE_NUMBER_OF_CREATURES, PROMPT_TYPE_NUMBER_OF_CREATURES_FILTERED, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_ALTERNATIVE, PROMPT_TYPE_PAYMENT_SOURCE, PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES, NO_PRIORITY, PRIORITY_PRS, PRIORITY_ATTACK, PRIORITY_CREATURES, EFFECT_TYPE_START_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_DRAW, EFFECT_TYPE_SHUFFLE_DECK, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_PLAY_CREATURE, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_RELIC_ENTERS_PLAY, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE, EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC, EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_PAYING_ENERGY_FOR_POWER, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_CREATURE_IS_DEFEATED, // Possibly redundant
-EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_IS_ATTACKED, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_DRAW_REST_OF_CARDS, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_ATTACK, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, EFFECT_TYPE_PLAY_FINISHED, EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED, EFFECT_TYPE_POWER_FINISHED, EFFECT_TYPE_PROMPT_ENTERED, REGION_UNIVERSAL, RESTRICTION_OWN_CREATURE, RESTRICTION_ENERGY_EQUALS, COST_X, COST_X_PLUS_ONE, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, ACTION_NONE, PROTECTION_FROM_POWERS, PROTECTION_FROM_SPELLS, PROTECTION_TYPE_DISCARDING_FROM_PLAY, PROTECTION_TYPE_GENERAL, PROTECTION_FROM_ATTACKS, PROTECTION_TYPE_ENERGY_LOSS, CARD_COUNT, PROPERTY_CONTROLLING_PLAYER, PROPERTY_ABLE_TO_USE_POWERS, } from './const.js';
+EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_IS_ATTACKED, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_DRAW_REST_OF_CARDS, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_ATTACK, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, EFFECT_TYPE_PLAY_FINISHED, EFFECT_TYPE_TRIGGERED_ABILITY_FINISHED, EFFECT_TYPE_POWER_FINISHED, EFFECT_TYPE_PROMPT_ENTERED, REGION_UNIVERSAL, RESTRICTION_OWN_CREATURE, RESTRICTION_ENERGY_EQUALS, COST_X, COST_X_PLUS_ONE, COST_X_PLUS_FOUR, ZONE_TYPE_HAND, ZONE_TYPE_SET_ASIDE, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, ACTION_NONE, PROTECTION_FROM_POWERS, PROTECTION_FROM_SPELLS, PROTECTION_TYPE_DISCARDING_FROM_PLAY, PROTECTION_TYPE_GENERAL, PROTECTION_FROM_ATTACKS, PROTECTION_TYPE_ENERGY_LOSS, CARD_COUNT, PROPERTY_CONTROLLING_PLAYER, PROPERTY_ABLE_TO_USE_POWERS, PROPERTY_ABLE_TO_PLAY_SPELLS, PROPERTY_MUST_ATTACK, } from './const.js';
+import { variableCostOffsets } from './CostEngine.js';
 import { actionMap } from './actionMaps/effects.js';
 import { showAction } from './logAction.js';
 import clone from './clone.js';
@@ -54,6 +55,7 @@ export const DEFAULT_PROMPT_VARIABLE = {
 };
 const steps = [
     {
+        id: 'energize',
         name: 'Energize',
         priority: NO_PRIORITY,
         automatic: true,
@@ -71,26 +73,31 @@ const steps = [
         ],
     },
     {
+        id: 'prs-first',
         name: 'Powers/Relics/Spells',
         priority: PRIORITY_PRS,
         automatic: false,
     },
     {
+        id: 'attack',
         name: 'Attack',
         priority: PRIORITY_ATTACK,
         automatic: false,
     },
     {
+        id: 'creatures',
         name: 'Play Dream Creatures',
         priority: PRIORITY_CREATURES,
         automatic: false,
     },
     {
+        id: 'prs-second',
         name: 'Powers/Relics/Spells',
         priority: PRIORITY_PRS,
         automatic: false,
     },
     {
+        id: 'draw',
         name: 'Draw',
         priority: NO_PRIORITY,
         automatic: true,
@@ -159,6 +166,9 @@ export class State {
             ...clone(defaultState),
             ...state,
         };
+        if (this.state.zones.length && !this.state.zones.some(zone => zone.type === ZONE_TYPE_SET_ASIDE)) {
+            this.state.zones = [...this.state.zones, new Zone('Set aside', ZONE_TYPE_SET_ASIDE, null)];
+        }
         if (!('controllingPlayer' in state)) {
             this.state.controllingPlayer = this.state.activePlayer;
         }
@@ -178,6 +188,7 @@ export class State {
             getOpponent: (player) => this.getOpponent(player),
             get players() { return self.players; },
             getContinuousEffects: () => this.state.continuousEffects,
+            getStepId: () => this.getStepId(),
             getTwister: () => this.twister,
         });
         this.promptValidator = new PromptValidator({
@@ -483,6 +494,7 @@ export class State {
             new Zone('Player 1 magi pile', ZONE_TYPE_DEFEATED_MAGI, playerOne),
             new Zone('Player 2 magi pile', ZONE_TYPE_DEFEATED_MAGI, playerTwo),
             new Zone('In play', ZONE_TYPE_IN_PLAY, null),
+            new Zone('Set aside', ZONE_TYPE_SET_ASIDE, null),
         ];
     }
     serializeData(playerId, hideZones = true) {
@@ -520,7 +532,9 @@ export class State {
     }
     serializeZones(playerId, hideZones = true) {
         const opponentId = this.getOpponent(playerId);
+        const setAside = this.getZone(ZONE_TYPE_SET_ASIDE);
         return {
+            ...(setAside.length ? { setAside: setAside.serialize() } : {}),
             playerHand: this.getZone(ZONE_TYPE_HAND, playerId).serialize(),
             opponentHand: this.getZone(ZONE_TYPE_HAND, opponentId).serialize(hideZones),
             playerDeck: this.getZone(ZONE_TYPE_DECK, playerId).serialize(hideZones),
@@ -578,7 +592,7 @@ export class State {
         if (this.zoneHash.has(key)) {
             return this.zoneHash.get(key);
         }
-        const result = this.state.zones.find(zone => zone.type === type && (zone.player == player || player == null)) || new Zone('Empty zone', ZONE_TYPE_DECK);
+        const result = this.state.zones.find(zone => zone.type === type && (type === ZONE_TYPE_SET_ASIDE || zone.player == player || player == null)) || new Zone('Empty zone', ZONE_TYPE_DECK);
         this.zoneHash.set(key, result);
         return result;
     }
@@ -589,17 +603,17 @@ export class State {
         return this.state.activePlayer;
     }
     getControllingPlayer() {
-        for (const effect of this.state.continuousEffects) {
-            for (const ability of (effect.staticAbilities ?? [])) {
-                if (ability.property === PROPERTY_CONTROLLING_PLAYER) {
-                    const value = this.getMetaValue(ability.modifier.operandOne, effect.id);
-                    if (typeof value === 'number') {
-                        return value;
-                    }
-                }
+        for (const ability of this.selectorEngine.getActiveContinuousStaticAbilities()) {
+            if (ability.property === PROPERTY_CONTROLLING_PLAYER &&
+                (ability.selector !== SELECTOR_CREATURES_OF_PLAYER || ability.selectorParameter === this.state.activePlayer) &&
+                typeof ability.modifier.operandOne === 'number') {
+                return ability.modifier.operandOne;
             }
         }
         return this.state.controllingPlayer;
+    }
+    getStepId() {
+        return this.state.step === null ? null : steps[this.state.step]?.id ?? null;
     }
     getCurrentPriority() {
         return this.state.step === null ? 0 : steps[this.state.step].priority;
@@ -1303,6 +1317,27 @@ export class State {
     checkPrompts(source, preparedActions, isPower = false, powerCost = 0) {
         return this.promptValidator.checkPrompts(source, preparedActions, isPower, powerCost);
     }
+    canDeclareAttack(source, target) {
+        const player = this.modifyByStaticAbilities(source, PROPERTY_CONTROLLER);
+        const defender = this.modifyByStaticAbilities(target, PROPERTY_CONTROLLER);
+        return player === this.state.activePlayer && defender !== player &&
+            source.card.type === TYPE_CREATURE && this.getZone(ZONE_TYPE_IN_PLAY).containsId(source.id) &&
+            this.modifyByStaticAbilities(source, PROPERTY_ABLE_TO_ATTACK) &&
+            source.data.attacked < this.modifyByStaticAbilities(source, PROPERTY_ATTACKS_PER_TURN) &&
+            this.modifyByStaticAbilities(target, PROPERTY_CAN_BE_ATTACKED) &&
+            (target.card.type === TYPE_CREATURE ? this.getZone(ZONE_TYPE_IN_PLAY).containsId(target.id) :
+                target.card.type === TYPE_MAGI && this.getZone(ZONE_TYPE_ACTIVE_MAGI, defender).containsId(target.id) &&
+                    (!this.useSelector(SELECTOR_OWN_CREATURES, defender).length ||
+                        this.modifyByStaticAbilities(source, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY)));
+    }
+    hasRequiredAttack(player) {
+        const required = this.useSelector(SELECTOR_OWN_CREATURES, player).filter(card => !card.data.hasAttacked && this.modifyByStaticAbilities(card, PROPERTY_MUST_ATTACK));
+        if (!required.length)
+            return false;
+        const opponent = this.getOpponent(player);
+        const targets = [...this.useSelector(SELECTOR_OWN_CREATURES, opponent), ...this.getZone(ZONE_TYPE_ACTIVE_MAGI, opponent).cards];
+        return required.some(card => targets.some(target => this.canDeclareAttack(card, target)));
+    }
     update(initialAction) {
         if (this.hasWinner()) {
             return false;
@@ -1322,6 +1357,23 @@ export class State {
             }
             if (this.debug) {
                 showAction(action);
+            }
+            if (this.getCurrentPriority() === PRIORITY_ATTACK &&
+                (action.type === ACTION_PASS || action.type === ACTION_ATTACK)) {
+                const controllingPlayer = this.getControllingPlayer();
+                const activePlayer = this.state.activePlayer;
+                if (controllingPlayer !== activePlayer && (!('player' in action) || action.player !== controllingPlayer))
+                    return false;
+                if (action.type === ACTION_PASS && action.player === controllingPlayer && this.hasRequiredAttack(activePlayer))
+                    return false;
+                if (action.type === ACTION_ATTACK && controllingPlayer !== activePlayer) {
+                    const source = this.getMetaValue(action.source, action.generatedBy);
+                    const target = this.getMetaValue(action.target, action.generatedBy);
+                    const pack = this.getMetaValue(action.additionalAttackers, action.generatedBy) ?? [];
+                    if (!source || !target || !this.canDeclareAttack(source, target) ||
+                        pack.some((card) => this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) !== activePlayer))
+                        return false;
+                }
             }
             this.addActionToLog(action);
             this.addActionToStream(action);
@@ -1421,6 +1473,11 @@ export class State {
                     break;
                 }
                 case ACTION_POWER: {
+                    if (action.power.beforeAttackOnly && (this.state.step === null ||
+                        this.state.step >= steps.findIndex(step => step.priority === PRIORITY_ATTACK) ||
+                        this.getCurrentPriority() !== PRIORITY_PRS ||
+                        this.getControllingPlayer() !== this.modifyByStaticAbilities(action.source, PROPERTY_CONTROLLER)))
+                        break;
                     const powerCost = this.modifyByStaticAbilities(action.source, PROPERTY_POWER_COST, action.power.name || '');
                     const ableToUsePowers = this.modifyByStaticAbilities(action.source, PROPERTY_ABLE_TO_USE_POWERS);
                     const payingCard = (action.source.card.type === TYPE_RELIC) ?
@@ -2092,7 +2149,7 @@ export class State {
                         });
                     }
                     else {
-                        if (action.player === this.state.activePlayer) {
+                        if (action.player === (this.getCurrentPriority() === PRIORITY_ATTACK ? this.getControllingPlayer() : this.state.activePlayer)) {
                             newStep = (this.state.step + 1) % steps.length;
                             if (newStep === 0) {
                                 this.stopTurnTimer();
@@ -2145,6 +2202,7 @@ export class State {
                                 throw new Error('Trying to play a card without Magi');
                             }
                             const totalCost = this.calculateTotalCost(cardItself);
+                            const variableCostOffset = variableCostOffsets[baseCard.cost];
                             switch (cardType) {
                                 case TYPE_CREATURE: {
                                     const alternativePaymentSources = this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.data.paymentSource && card.card.data.paymentSource.includes(TYPE_CREATURE) && this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) == player);
@@ -2197,7 +2255,7 @@ export class State {
                                             effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
                                             target: '$creature_created',
                                             player: player,
-                                            amount: (baseCard.cost === COST_X || baseCard.cost === COST_X_PLUS_ONE || baseCard.cost === null) ? 0 : baseCard.cost,
+                                            amount: typeof baseCard.cost === 'number' ? baseCard.cost : 0,
                                             generatedBy: cardItself.id,
                                         }, {
                                             type: ACTION_EFFECT,
@@ -2208,12 +2266,14 @@ export class State {
                                     break;
                                 }
                                 case TYPE_RELIC: {
+                                    const lockedByKarak = this.getZone(ZONE_TYPE_SET_ASIDE).cards.some(relic => relic.card.name === baseCard.name && relic.data.setAsideUnder?.blockedPlayer === player &&
+                                        this.getZone(ZONE_TYPE_IN_PLAY).containsId(relic.data.setAsideUnder.cardId));
                                     const alreadyHasOne = this.getZone(ZONE_TYPE_IN_PLAY).cards
                                         .some(card => card.data.controller === player && card.card.name === baseCard.name);
                                     const relicRegion = baseCard.region;
                                     const magiRegion = activeMagi.card.region;
                                     const regionAllows = relicRegion === magiRegion || relicRegion === REGION_UNIVERSAL;
-                                    if (!alreadyHasOne && regionAllows && typeof baseCard.cost == 'number' && activeMagi.data.energy >= baseCard.cost) {
+                                    if (!lockedByKarak && !alreadyHasOne && regionAllows && typeof baseCard.cost == 'number' && activeMagi.data.energy >= baseCard.cost) {
                                         this.transformIntoActions({
                                             type: ACTION_EFFECT,
                                             effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC,
@@ -2242,7 +2302,9 @@ export class State {
                                     break;
                                 }
                                 case TYPE_SPELL: {
-                                    if (activeMagi.data.energy >= totalCost || baseCard.cost === COST_X || baseCard.cost === COST_X_PLUS_ONE) {
+                                    if (!this.modifyByStaticAbilities(activeMagi, PROPERTY_ABLE_TO_PLAY_SPELLS))
+                                        break;
+                                    if (activeMagi.data.energy >= totalCost) {
                                         const enrichAction = (effect) => ({
                                             source: cardItself,
                                             player, // Spell can rewrite this to make opponent do something - draw a card, for example
@@ -2264,7 +2326,8 @@ export class State {
                                         const allPromptsAreDoable = allPrompts.every(promptAction => {
                                             switch (promptAction.promptType) {
                                                 case PROMPT_TYPE_SINGLE_CREATURE:
-                                                    return this.getZone(ZONE_TYPE_IN_PLAY).cards.some(card => card.card.type === TYPE_CREATURE);
+                                                    return this.getZone(ZONE_TYPE_IN_PLAY).cards.filter(card => card.card.type === TYPE_CREATURE).length >=
+                                                        (promptAction.minimumCreaturesInPlay ?? 1);
                                                 case PROMPT_TYPE_RELIC:
                                                     return this.getZone(ZONE_TYPE_IN_PLAY).cards.some(card => card.card.type === TYPE_RELIC);
                                                 case PROMPT_TYPE_OWN_SINGLE_CREATURE:
@@ -2284,23 +2347,23 @@ export class State {
                                         });
                                         if (allPromptsAreDoable) {
                                             const regionPenalty = (activeMagi.card.region == baseCard.region || baseCard.region == REGION_UNIVERSAL) ? 0 : 1;
-                                            const maxCost = baseCard.data.maxCostX || Infinity;
-                                            const payEffects = (baseCard.cost === COST_X || baseCard.cost === COST_X_PLUS_ONE) ? [
+                                            const maxCost = baseCard.data.maxCostX ?? Infinity;
+                                            const payEffects = variableCostOffset !== undefined ? [
                                                 {
                                                     type: ACTION_ENTER_PROMPT,
                                                     promptType: PROMPT_TYPE_NUMBER,
                                                     player,
                                                     promptParams: {
                                                         min: 1,
-                                                        max: Math.min(activeMagi.data.energy, maxCost) - regionPenalty - (baseCard.cost === COST_X_PLUS_ONE ? 1 : 0),
+                                                        max: Math.min(activeMagi.data.energy, maxCost) - regionPenalty - variableCostOffset,
                                                     },
                                                     variable: 'chosen_cost',
                                                     generatedBy: cardItself.id,
                                                 },
                                                 {
                                                     type: ACTION_CALCULATE,
-                                                    operandOne: 'chosen_cost',
-                                                    operandTwo: regionPenalty + (baseCard.cost === COST_X_PLUS_ONE ? 1 : 0),
+                                                    operandOne: '$chosen_cost',
+                                                    operandTwo: regionPenalty + variableCostOffset,
                                                     operator: CALCULATION_ADD,
                                                     variable: 'totalCost',
                                                     generatedBy: cardItself.id,
@@ -2410,5 +2473,5 @@ export class State {
     }
 }
 export { TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, ACTION_PASS, ACTION_PLAY, ACTION_POWER, ACTION_EFFECT, ACTION_SELECT, ACTION_CALCULATE, ACTION_ENTER_PROMPT, ACTION_RESOLVE_PROMPT, ACTION_GET_PROPERTY_VALUE, ACTION_ATTACK, ACTION_PLAYER_WINS, PROPERTY_ID, PROPERTY_TYPE, PROPERTY_CONTROLLER, PROPERTY_ENERGY_COUNT, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, CALCULATION_SET, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_HALVE_ROUND_DOWN, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_MAX, CALCULATION_MULTIPLY, SELECTOR_CREATURES, SELECTOR_CREATURES_AND_MAGI, SELECTOR_OWN_MAGI, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_MAGI_OF_REGION, SELECTOR_OPPONENT_ID, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, NO_PRIORITY, PRIORITY_PRS, PRIORITY_ATTACK, PRIORITY_CREATURES, PROMPT_TYPE_NUMBER, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_CHOOSE_CARDS, EFFECT_TYPE_DRAW, EFFECT_TYPE_SHUFFLE_DECK, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_PLAY_CREATURE, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_RELIC_ENTERS_PLAY, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_PAYING_ENERGY_FOR_CREATURE, EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC, EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_PAYING_ENERGY_FOR_POWER, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_CREATURE_IS_DEFEATED, // Possibly redundant
-EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_IS_ATTACKED, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_DRAW_REST_OF_CARDS, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_PROMPT_ENTERED, REGION_UNIVERSAL, COST_X, COST_X_PLUS_ONE, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, };
+EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_IS_ATTACKED, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_MAGI_FLIPPED, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_DRAW_REST_OF_CARDS, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_PROMPT_ENTERED, REGION_UNIVERSAL, COST_X, COST_X_PLUS_ONE, COST_X_PLUS_FOUR, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_DECK, ZONE_TYPE_DEFEATED_MAGI, };
 //# sourceMappingURL=index.js.map

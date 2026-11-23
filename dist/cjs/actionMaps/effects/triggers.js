@@ -1,5 +1,5 @@
 import CardInGame from "../../classes/CardInGame.js";
-import { SELECTOR_CREATURES_OF_PLAYER, SELECTOR_ID, } from "../../const.js";
+import { EXPIRATION_DURING_PLAYER_TURNS, SELECTOR_CREATURES_OF_PLAYER, SELECTOR_ID, } from "../../const.js";
 import { oneOrSeveral } from "../actionMapUtils.js";
 // Should rework into continuous effect with duration
 export const applyForbidAttackToCreatureEffect = function (action, _transform) {
@@ -82,7 +82,9 @@ export const applyCreateContinuousEffect = function (action, _transform, _state,
             })),
         }),
         staticAbilities,
-        expiration: action.expiration,
+        expiration: action.expiration.type === EXPIRATION_DURING_PLAYER_TURNS && action.turnPlayer !== undefined
+            ? { ...action.expiration, turnPlayer: this.getMetaValue(action.turnPlayer, action.generatedBy) }
+            : action.expiration,
         player: action.player || 0,
         id,
     };

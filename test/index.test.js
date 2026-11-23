@@ -5853,7 +5853,7 @@ describe('Card logic', () => {
 				'$source': 1,
 				'$player': 1,
 			};
-			if (spell.cost == moonlands.COST_X || spell.cost == moonlands.COST_X_PLUS_ONE) {
+			if ([moonlands.COST_X, moonlands.COST_X_PLUS_ONE, moonlands.COST_X_PLUS_FOUR].includes(spell.cost)) {
 				variables['$chosen_cost'] = 1;
 			}
 

@@ -1,5 +1,9 @@
 import Card from './Card.js';
 export type InGameData = {
+    setAsideUnder?: {
+        cardId: string;
+        blockedPlayer: number;
+    };
     memory?: Record<string, readonly string[]>;
     energy: number;
     controller: number;

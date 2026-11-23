@@ -43,6 +43,8 @@ import {
 	CARD_COUNT,
 	PROPERTY_CONTROLLING_PLAYER,
 	PROPERTY_ABLE_TO_USE_POWERS,
+	PROPERTY_ABLE_TO_PLAY_SPELLS,
+	PROPERTY_MUST_ATTACK,
 
 	REGION_ARDERIAL,
 	REGION_CALD,
@@ -93,6 +95,7 @@ import {
 	EFFECT_TYPE_DRAW,
 	EFFECT_TYPE_ROLL_DIE,
 	EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP,
+	EFFECT_TYPE_REVEAL_CARDS,
 	EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI,
 	EFFECT_TYPE_ADD_DELAYED_TRIGGER,
 	EFFECT_TYPE_PLAY_RELIC,
@@ -180,10 +183,12 @@ import {
 
 	COST_X,
 	COST_X_PLUS_ONE,
+	COST_X_PLUS_FOUR,
 
 	ZONE_TYPE_ACTIVE_MAGI,
 	ZONE_TYPE_MAGI_PILE,
 	ZONE_TYPE_HAND,
+	ZONE_TYPE_SET_ASIDE,
 	ZONE_TYPE_IN_PLAY,
 	ZONE_TYPE_DISCARD,
 	ZONE_TYPE_DECK,
@@ -192,6 +197,7 @@ import {
 
 	EXPIRATION_ANY_TURNS,
 	EXPIRATION_DURING_OPPONENT_TURNS,
+	EXPIRATION_DURING_PLAYER_TURNS,
 	EXPIRATION_THIS_TURN,
 	EXPIRATION_NEVER,
 	EXPIRATION_OPPONENT_TURNS,
@@ -283,7 +289,7 @@ type PromptParamsType = PromptParams |
 	MagiWithoutCreaturesPromptParams |
 	MagiPowerPromptParams;
 
-const prompt = (data: PromptParamsType & { message?: string }): PromptType => {
+const prompt = (data: PromptParamsType & { message?: string; minimumCreaturesInPlay?: number }): PromptType => {
 	switch (data.promptType) {
 		case PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES:
 			return {
@@ -647,6 +653,24 @@ export const cards = [
 			},
 		],
 	}),
+	new Card('Entangle', TYPE_SPELL, REGION_OROTHE, 3, {
+		text: 'Choose any one Magi in play. The chosen Magi cannot play any spells during his or her next turn.',
+		effects: [
+			prompt({ promptType: PROMPT_TYPE_SINGLE_MAGI }),
+			getPropertyValue({ target: '$targetMagi', property: PROPERTY_CONTROLLER, variable: 'entangledPlayer' }),
+			effect({
+				effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+				expiration: { type: EXPIRATION_DURING_PLAYER_TURNS, turns: 1 },
+				turnPlayer: '$entangledPlayer',
+				staticAbilities: [{
+					selector: SELECTOR_ID,
+					selectorParameter: '$targetMagi',
+					property: PROPERTY_ABLE_TO_PLAY_SPELLS,
+					modifier: { operator: CALCULATION_SET, operandOne: false },
+				}],
+			}),
+		],
+	}),
 	new Card('Implosion', TYPE_SPELL, REGION_OROTHE, 1, {
 		text: 'Choose any one Creature or Magi in play. Discard X Orothe cards from your hand. Discard X energy from the chosen Creature or Magi.',
 		effects: [
@@ -729,6 +753,18 @@ export const cards = [
 				amount: '$energyToAdd',
 			}),
 		],
+	}),
+	new Card('Mask of Abwyn', TYPE_RELIC, REGION_ARDERIAL, 0, {
+		powers: [{
+			name: 'Windsight',
+			cost: 0,
+			text: 'Choose an opponent and look at their hand.',
+			effects: [
+				select({ selector: SELECTOR_OPPONENT_ID, opponentOf: '$player', variable: 'opponent' }),
+				select({ selector: SELECTOR_CARDS_IN_HAND, zoneOwner: '$opponent' }),
+				effect({ effectType: EFFECT_TYPE_REVEAL_CARDS, cards: '$selected', viewer: '$player' }),
+			],
+		}],
 	}),
 	new Card('Cloud Sceptre', TYPE_RELIC, REGION_ARDERIAL, 0, {
 		powers: [{
@@ -873,6 +909,15 @@ export const cards = [
 					}),
 				],
 			},
+		],
+	}),
+	new Card('Syphon Vortex', TYPE_SPELL, REGION_CALD, COST_X_PLUS_FOUR, {
+		text: 'Choose any one Creature in play. Discard X energy from the chosen Creature. Add X energy to your Magi.',
+		effects: [
+			prompt({ promptType: PROMPT_TYPE_SINGLE_CREATURE }),
+			effect({ effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, target: '$target', amount: '$chosen_cost' }),
+			select({ selector: SELECTOR_OWN_MAGI }),
+			effect({ effectType: EFFECT_TYPE_ADD_ENERGY_TO_MAGI, target: '$selected', amount: '$chosen_cost' }),
 		],
 	}),
 	new Card('Thermal Blast', TYPE_SPELL, REGION_CALD, 3, {
@@ -2760,6 +2805,52 @@ export const cards = [
 			}
 		],
 	}),
+	new Card('Energy Band', TYPE_RELIC, REGION_NAROOM, 0, {
+		powers: [{
+			name: 'Charge',
+			cost: 1,
+			beforeAttackOnly: true,
+			text: 'Use this Power only before your Attack Step. Choose any one Creature in play. Add two energy to the chosen Creature. That Creature must attack this turn, if able.',
+			effects: [
+				prompt({ promptType: PROMPT_TYPE_SINGLE_CREATURE }),
+				effect({ effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, target: '$target', amount: 2 }),
+				effect({
+					effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+					expiration: { type: EXPIRATION_THIS_TURN },
+					staticAbilities: [{
+						selector: SELECTOR_ID,
+						selectorParameter: '$target',
+						property: PROPERTY_MUST_ATTACK,
+						modifier: { operator: CALCULATION_SET, operandOne: true },
+					}],
+				}),
+			],
+		}],
+	}),
+	new Card('Hood of Hiding', TYPE_RELIC, REGION_NAROOM, 0, {
+		powers: [{
+			name: 'Conceal',
+			cost: 4,
+			text: 'Your Magi cannot be attacked until after your next turn. You may not use this Power on your next turn.',
+			effects: [effect({
+				effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+				expiration: { type: EXPIRATION_ANY_TURNS, turns: 3 },
+				staticAbilities: [
+					{
+						selector: SELECTOR_OWN_MAGI,
+						property: PROPERTY_CAN_BE_ATTACKED,
+						modifier: { operator: CALCULATION_SET, operandOne: false },
+					},
+					{
+						selector: SELECTOR_ID,
+						selectorParameter: '$source',
+						property: PROPERTY_ABLE_TO_USE_POWERS,
+						modifier: { operator: CALCULATION_SET, operandOne: false },
+					},
+				],
+			})],
+		}],
+	}),
 	new Card('Robe of Vines', TYPE_RELIC, REGION_NAROOM, 0, {
 		triggerEffects: [
 			{
@@ -3410,6 +3501,26 @@ export const cards = [
 				target: '$target',
 			}),
 		],
+	}),
+	new Card('Vaal', TYPE_CREATURE, REGION_CALD, 3, {
+		powers: [{
+			name: 'Shield',
+			cost: 1,
+			text: 'Vaal is prevented from losing any energy from attacks until the end of your turn.',
+			effects: [effect({
+				effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+				expiration: { type: EXPIRATION_THIS_TURN },
+				staticAbilities: [{
+					selector: SELECTOR_ID,
+					selectorParameter: '$sourceCreature',
+					property: PROPERTY_PROTECTION,
+					modifier: {
+						operator: CALCULATION_SET,
+						operandOne: { type: PROTECTION_TYPE_ENERGY_LOSS, from: [PROTECTION_FROM_ATTACKS] },
+					},
+				}],
+			})],
+		}],
 	}),
 	new Card('Greater Vaal', TYPE_CREATURE, REGION_CALD, 5, {
 		powers: [
@@ -4360,6 +4471,24 @@ export const cards = [
 			],
 		}],
 	}),
+	new Card('Karak', TYPE_CREATURE, REGION_OROTHE, 5, {
+		powers: [{
+			name: 'Steal',
+			cost: 2,
+			text: 'Choose a player and a Relic they control. Set that Relic aside under Karak. While Karak is in play, that player cannot play Relics with that name. When Karak leaves play, return the Relics under it to their owners’ hands.',
+			effects: [
+				prompt({ promptType: PROMPT_TYPE_RELIC, message: 'Choose a Relic to set aside under Karak.' }),
+				effect({
+					effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+					target: '$target',
+					sourceZone: ZONE_TYPE_IN_PLAY,
+					destinationZone: ZONE_TYPE_SET_ASIDE,
+					setAsideUnder: '$source',
+					bottom: false,
+				}),
+			],
+		}],
+	}),
 	new Card('Megathan', TYPE_CREATURE, REGION_OROTHE, 8, {
 		triggerEffects: [
 			{
@@ -4832,6 +4961,65 @@ export const cards = [
 			},
 		],
 	}),
+	new Card('Wence', TYPE_MAGI, REGION_NAROOM, null, {
+		startingEnergy: 10,
+		energize: 6,
+		startingCards: ['Arboll', 'Robe of Vines', 'Grow'],
+		powers: [{
+			name: "Wayfarer's Lore",
+			cost: 2,
+			text: 'Draw a card. If it is a Creature, you may reveal it to your opponent to draw an extra card during your Draw Step this turn.',
+			effects: [
+				effect({ effectType: EFFECT_TYPE_DRAW }),
+				effect({
+					effectType: EFFECT_TYPE_CONDITIONAL,
+					drawnCard: '$new_card',
+					conditions: [{
+						objectOne: 'drawnCard', propertyOne: PROPERTY_TYPE, comparator: '=',
+						objectTwo: TYPE_CREATURE, propertyTwo: null,
+					}],
+					thenEffects: [
+						prompt({
+							promptType: PROMPT_TYPE_ALTERNATIVE,
+							message: 'Reveal the drawn Creature for an extra card in your Draw Step?',
+							promptParams: { alternatives: [
+								{ name: 'Reveal', value: 'reveal' },
+								{ name: 'Keep hidden', value: 'hide' },
+							] },
+						}),
+						effect({
+							effectType: EFFECT_TYPE_CONDITIONAL,
+							choice: '$alternative',
+							conditions: [{
+								objectOne: 'choice', propertyOne: ACTION_PROPERTY, comparator: '=',
+								objectTwo: 'reveal', propertyTwo: null,
+							}],
+							thenEffects: [
+								select({ selector: SELECTOR_OPPONENT_ID, opponentOf: '$player', variable: 'opponent' }),
+								effect({ effectType: EFFECT_TYPE_REVEAL_CARDS, cards: '$new_card', viewer: '$opponent' }),
+								effect({
+									effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+									expiration: { type: EXPIRATION_THIS_TURN },
+									triggerEffects: [{
+										name: "Wayfarer's Lore",
+										text: 'Draw one additional card during this Draw Step.',
+										find: {
+											effectType: EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP,
+											conditions: [{
+												objectOne: 'player', propertyOne: ACTION_PROPERTY, comparator: '=',
+												objectTwo: 'self', propertyTwo: PROPERTY_CONTROLLER,
+											}],
+										},
+										effects: [effect({ effectType: EFFECT_TYPE_DRAW, stepEffect: true })],
+									}],
+								}),
+							],
+						}),
+					],
+				}),
+			],
+		}],
+	}),
 	new Card('Tryn', TYPE_MAGI, REGION_NAROOM, null, {
 		startingEnergy: 14,
 		energize: 5,
@@ -5106,7 +5294,7 @@ export const cards = [
 		effects: [
 			prompt({
 				promptType: PROMPT_TYPE_PLAYER,
-				message: 'Choose an opponent to control during their next turn.',
+				message: 'Choose an opponent whose attacks you will control next turn.',
 			}),
 			// Opponent's creatures cannot use powers for their next turn
 			effect({
@@ -5123,17 +5311,15 @@ export const cards = [
 					},
 				}],
 				triggerEffects: [],
-				expiration: {
-					type: EXPIRATION_OPPONENT_TURNS,
-					turns: 1,
-				},
+				expiration: { type: EXPIRATION_DURING_PLAYER_TURNS, turns: 1 },
+				turnPlayer: '$targetPlayer',
 			}),
-			// Caster controls the opponent's decisions during their next turn
 			effect({
 				effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
 				staticAbilities: [{
 					name: 'Will of Orothe',
-					text: 'Caster controls the opponent\'s decisions',
+					text: 'Caster controls attacks during the opponent’s Attack Step',
+					activeDuringSteps: ['attack'],
 					selector: SELECTOR_CREATURES_OF_PLAYER,
 					selectorParameter: '$targetPlayer',
 					property: PROPERTY_CONTROLLING_PLAYER,
@@ -5143,10 +5329,8 @@ export const cards = [
 					},
 				}],
 				triggerEffects: [],
-				expiration: {
-					type: EXPIRATION_OPPONENT_TURNS,
-					turns: 1,
-				},
+				expiration: { type: EXPIRATION_DURING_PLAYER_TURNS, turns: 1 },
+				turnPlayer: '$targetPlayer',
 			}),
 		],
 	}),
@@ -5209,6 +5393,36 @@ export const cards = [
 					}),
 				],
 			},
+		],
+	}),
+	new Card('Tap Roots', TYPE_SPELL, REGION_NAROOM, 3, {
+		text: 'Choose any two Creatures in play. Remove up to two energy from one of the chosen Creatures. Add up to two energy to the other chosen Creature.',
+		effects: [
+			prompt({
+				promptType: PROMPT_TYPE_SINGLE_CREATURE,
+				minimumCreaturesInPlay: 2,
+				message: 'Choose a Creature to remove energy from.',
+				variable: 'firstCreature',
+			}),
+			getPropertyValue({ property: PROPERTY_ID, target: '$firstCreature', variable: 'firstCreatureId' }),
+			prompt({
+				promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+				message: 'Choose a different Creature to add energy to.',
+				promptParams: { restrictions: [{ type: RESTRICTION_EXCEPT_SOURCE, value: '$firstCreatureId' }] },
+				variable: 'secondCreature',
+			}),
+			prompt({
+				promptType: PROMPT_TYPE_NUMBER,
+				message: 'Choose how much energy to remove.',
+				promptParams: { min: 0, max: 2 },
+			}),
+			effect({ effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, target: '$firstCreature', amount: '$number' }),
+			prompt({
+				promptType: PROMPT_TYPE_NUMBER,
+				message: 'Choose how much energy to add.',
+				promptParams: { min: 0, max: 2 },
+			}),
+			effect({ effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, target: '$secondCreature', amount: '$number' }),
 		],
 	}),
 	new Card('Vortex of Knowledge', TYPE_SPELL, REGION_NAROOM, 1, {

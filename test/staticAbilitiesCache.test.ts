@@ -6,10 +6,42 @@ import {
 	ACTION_EFFECT, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_START_TURN, EXPIRATION_ANY_TURNS,
 	PROPERTY_ENERGIZE, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DISCARD,
 	ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_MAGI_PILE,
+	CALCULATION_ADD, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, PROPERTY_COST,
+	SELECTOR_OWN_SPELLS_IN_HAND, TYPE_RELIC, TYPE_SPELL, REGION_CALD,
 } from '../src/const';
 import { PLAYER, OPPONENT, card, makeState } from './journalUtils';
 
 describe('Card static ability cache', () => {
+	it('applies different spell costs in the two PRS steps, including after rollback', () => {
+		const relic = new CardInGame(new Card('Step cost test', TYPE_RELIC, REGION_CALD, 0, {
+			staticAbilities: [
+				{
+					name: 'First PRS', text: '', activeDuringSteps: ['prs-first'],
+					selector: SELECTOR_OWN_SPELLS_IN_HAND, property: PROPERTY_COST,
+					modifier: { operator: CALCULATION_ADD, operandOne: 1 },
+				},
+				{
+					name: 'Second PRS', text: '', activeDuringSteps: ['prs-second'],
+					selector: SELECTOR_OWN_SPELLS_IN_HAND, property: PROPERTY_COST,
+					modifier: { operator: CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, operandOne: 1 },
+				},
+			],
+		}), PLAYER);
+		const state = makeState({ inPlay: [relic], magi: card('Grega', PLAYER) });
+		const spells = [1, 3].map(cost => new CardInGame(new Card('Spell', TYPE_SPELL, REGION_CALD, cost, {}), PLAYER));
+		state.getZone(ZONE_TYPE_HAND, PLAYER).add(spells);
+		const costs = () => spells.map(spell => state.calculateTotalCost(spell));
+		state.setStep(1);
+		expect(costs()).toEqual([2, 4]);
+		const frame = state.beginSearchFrame();
+		state.setStep(2);
+		expect(costs()).toEqual([1, 3]);
+		state.setStep(4);
+		expect(costs()).toEqual([1, 2]);
+		state.rollback(frame);
+		expect(costs()).toEqual([2, 4]);
+	});
+
 	it('invalidates continuous effect creation, expiration and both nested rollbacks', () => {
 		const magi = card('Grega', PLAYER);
 		const state = makeState({ magi });

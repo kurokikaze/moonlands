@@ -39,6 +39,8 @@ export const PROPERTY_ENERGY_LOSS_THRESHOLD = 'properties/energy_loss_threshold'
 export const PROPERTY_PROTECTION = 'properties/protection';
 export const PROPERTY_CONTROLLING_PLAYER = 'properties/controlling_player';
 export const PROPERTY_ABLE_TO_USE_POWERS = 'properties/able_to_use_powers';
+export const PROPERTY_ABLE_TO_PLAY_SPELLS = 'properties/able_to_play_spells';
+export const PROPERTY_MUST_ATTACK = 'properties/must_attack';
 // Maybe make statuses into separate category
 export const PROPERTY_STATUS_DEFEATED_CREATURE = 'properties/status/defeated_creature';
 export const PROPERTY_STATUS_WAS_ATTACKED = 'properties/status/was_attacked';
@@ -177,6 +179,7 @@ export const EFFECT_TYPE_CREATURE_ATTACKS = 'effects/creature_attacks';
 export const EFFECT_TYPE_CREATURE_IS_ATTACKED = 'effects/creature_is_attacked';
 export const EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP = 'effects/before_drawing_cards_in_draw_step';
 export const EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP = 'effects/draw_cards_in_draw_step';
+export const EFFECT_TYPE_REVEAL_CARDS = 'effects/reveal_cards';
 export const EFFECT_TYPE_START_OF_TURN = 'effects/start_of_turn';
 export const EFFECT_TYPE_END_OF_TURN = 'effects/end_of_turn';
 export const EFFECT_TYPE_MAGI_FLIPPED = 'effects/magi_flipped';
@@ -223,6 +226,7 @@ export const EXPIRATION_PLAYER_TURNS = 'expirations/players_turns';
 export const EXPIRATION_ANY_TURNS = 'expirations/any_turns';
 export const EXPIRATION_CREATURE_LEAVES_PLAY = 'expirations/creature_leaves_play';
 export const EXPIRATION_DURING_OPPONENT_TURNS = 'expirations/during_opponent_turns';
+export const EXPIRATION_DURING_PLAYER_TURNS = 'expirations/during_player_turns';
 export const EXPIRATION_THIS_TURN = 'expirations/this_turn';
 export const EXPIRATION_NEVER = 'expirations/never';
 
@@ -280,6 +284,7 @@ export const TYPE_SPELL = 'types/spell';
 
 export const COST_X = 'X';
 export const COST_X_PLUS_ONE = 'X_PLUS_ONE';
+export const COST_X_PLUS_FOUR = 'X_PLUS_FOUR';
 
 export const ZONE_TYPE_ACTIVE_MAGI = 'zones/active_magi';
 export const ZONE_TYPE_MAGI_PILE = 'zones/magi_pile';
@@ -288,6 +293,7 @@ export const ZONE_TYPE_DECK = 'zones/deck';
 export const ZONE_TYPE_IN_PLAY = 'zones/in_play';
 export const ZONE_TYPE_DISCARD = 'zones/discard';
 export const ZONE_TYPE_HAND = 'zones/hand';
+export const ZONE_TYPE_SET_ASIDE = 'zones/set_aside';
 
 export const LOG_ENTRY_PLAY = 'log_entry/play';
 export const LOG_ENTRY_DRAW = 'log_entry/draw';
