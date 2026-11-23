@@ -1,6 +1,7 @@
 import {
 	TYPE_CREATURE,
 	TYPE_MAGI,
+	RESTRICTION_CARD_NAME_NOT_IN,
 	RESTRICTION_CREATURE_NAME,
 	RESTRICTION_CREATURE_TYPE,
 	RESTRICTION_TYPE,
@@ -12,6 +13,7 @@ import {
 	RESTRICTION_ENERGY_LESS_THAN,
 	RESTRICTION_CREATURE_WAS_ATTACKED,
 	RESTRICTION_OWN_CREATURE,
+	RESTRICTION_EXCEPT_SOURCE,
 	RESTRICTION_OPPONENT_CREATURE,
 	RESTRICTION_STATUS,
 	RESTRICTION_ENERGY_EQUALS,
@@ -38,6 +40,8 @@ export class RestrictionEngine {
 
 	makeChecker(restriction: RestrictionType, restrictionValue: any): (card: CardInGame) => boolean {
 		switch (restriction) {
+			case RESTRICTION_CARD_NAME_NOT_IN:
+				return (card: CardInGame) => Array.isArray(restrictionValue) && !restrictionValue.includes(card.card.name);
 			case RESTRICTION_CREATURE_NAME:
 				return (card: CardInGame) => card.card.name === restrictionValue;
 			case RESTRICTION_CREATURE_TYPE:
@@ -73,6 +77,8 @@ export class RestrictionEngine {
 				return (card: CardInGame) => card.card.type === TYPE_CREATURE && card.data.wasAttacked === true;
 			case RESTRICTION_OWN_CREATURE:
 				return (card: CardInGame) => this.context.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) === restrictionValue;
+			case RESTRICTION_EXCEPT_SOURCE:
+				return (card: CardInGame) => card.id !== restrictionValue;
 			case RESTRICTION_OPPONENT_CREATURE:
 				return (card: CardInGame) => this.context.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) !== restrictionValue;
 			case RESTRICTION_STATUS:

@@ -1,4 +1,5 @@
 import { AnyEffectType, FindType, StaticAbilityType, TriggerEffectType } from './index.js';
+import type { ReplacementEffectType } from './index.js';
 import { ConditionType, ExpirationObjectType, GenericPromptType, PromptTypeType, ZoneType } from './common.js';
 import CardInGame from '../classes/CardInGame.js'
 
@@ -13,6 +14,7 @@ import {
 	EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP,
 	EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP,
 	EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI,
+	EFFECT_TYPE_REMEMBER_CARD_VALUE,
 	EFFECT_TYPE_ADD_DELAYED_TRIGGER,
 	EFFECT_TYPE_PLAY_RELIC,
 	EFFECT_TYPE_PLAY_SPELL,
@@ -53,6 +55,7 @@ import {
 	EFFECT_TYPE_DRAW_REST_OF_CARDS,
 	EFFECT_TYPE_MAGI_FLIPPED,
 	EFFECT_TYPE_FIND_STARTING_CARDS,
+	EFFECT_TYPE_SHUFFLE_DECK,
 	EFFECT_TYPE_RESHUFFLE_DISCARD,
 	EFFECT_TYPE_PAYING_ENERGY_FOR_RELIC,
 	EFFECT_TYPE_RELIC_ENTERS_PLAY,
@@ -117,6 +120,7 @@ export type EffectTypeType =
 	typeof EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP |
 	typeof EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP |
 	typeof EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI |
+	typeof EFFECT_TYPE_REMEMBER_CARD_VALUE |
 	typeof EFFECT_TYPE_ADD_DELAYED_TRIGGER |
 	typeof EFFECT_TYPE_PLAY_RELIC |
 	typeof EFFECT_TYPE_PLAY_SPELL |
@@ -223,6 +227,7 @@ type DrawRestOfCardsEffect = ActionEffect & {
 }
 
 export type MoveCardBetwenZonesEffect = ActionEffect & {
+	shuffleDestination?: boolean;
 	effectType: typeof EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES;
 	target: string | CardInGame;
 	bottom: boolean;
@@ -492,6 +497,7 @@ type EnergizeEffect = ActionEffect & {
 type RollDieEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_ROLL_DIE;
 	result?: number;
+	variable?: string;
 }
 
 export type ExecutePowerEffect = ActionEffect & {
@@ -508,6 +514,7 @@ export type ExecutePowerEffect = ActionEffect & {
 export type DieRolledEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_DIE_ROLLED;
 	result: number;
+	variable?: string;
 }
 
 type MoveEnergyEffect = ActionEffect & {
@@ -563,6 +570,8 @@ export type CreateContinuousEffect = ActionEffect & {
 	source?: CardInGame | string;
 	staticAbilities?: StaticAbilityType[];
 	triggerEffects?: TriggerEffectType[];
+	replacementEffects?: ReplacementEffectType[];
+	discardSourceOnExpiration?: boolean;
 	expiration: ExpirationObjectType;
 }
 
@@ -588,6 +597,7 @@ type DrawNCardsEffect = ActionEffect & {
 }
 
 export type DiscardCreatureFromPlayEffect = ActionEffect & {
+	shuffleIntoDeck?: boolean;
 	effectType: typeof EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY;
 	source: CardInGame;
 	target: CardInGame | string;
@@ -734,6 +744,7 @@ export type EffectType = MoveCardBetwenZonesEffect |
 	MagiFlippedEffect |
 	AddStartingEnergyToMagi |
 	FindStartingCardsEffect |
+	(ActionEffect & { effectType: typeof EFFECT_TYPE_SHUFFLE_DECK; player: number | string }) |
 	ReshuffleDiscardEffect |
 	AddEnergyToCreatureOrMagiEffect |
 	AddEnergyToCreatureEffect |
@@ -752,6 +763,7 @@ export type EffectType = MoveCardBetwenZonesEffect |
 	PlaySpellEffect |
 	PayingEnergyForSpellEffect |
 	ConditionalEffect |
+	(ActionEffect & { effectType: typeof EFFECT_TYPE_REMEMBER_CARD_VALUE; target: string | CardInGame; key: string; value: string }) |
 	AddDelayedTriggerEffect |
 	EnergizeEffect |
 	RollDieEffect |

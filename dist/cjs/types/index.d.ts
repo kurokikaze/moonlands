@@ -1,5 +1,5 @@
 import CardInGame, { ConvertedCard, HiddenConvertedCard } from '../classes/CardInGame.js';
-import { ACTION_CALCULATE, ACTION_PLAY, ACTION_POWER, ACTION_NONE, ACTION_PLAYER_WINS, ACTION_PASS, ACTION_CONCEDE, ACTION_TIME_NOTIFICATION, ACTION_EXIT_PROMPTS, CALCULATION_SET, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, CALCULATION_MULTIPLY, CALCULATION_HALVE_ROUND_DOWN, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_MAX, ACTION_GET_PROPERTY_VALUE, PROTECTION_FROM_EFFECTS, PROTECTION_FROM_POWERS, PROTECTION_FROM_SPELLS, PROTECTION_TYPE_DISCARDING_FROM_PLAY, PROTECTION_TYPE_ENERGY_GAIN, PROTECTION_TYPE_ENERGY_LOSS, PROTECTION_TYPE_GENERAL, COST_X, STATUS_BURROWED, TYPE_CREATURE, TYPE_RELIC, TYPE_SPELL } from '../const.js';
+import { ACTION_CALCULATE, ACTION_PLAY, ACTION_POWER, ACTION_NONE, ACTION_PLAYER_WINS, ACTION_PASS, ACTION_CONCEDE, ACTION_TIME_NOTIFICATION, ACTION_EXIT_PROMPTS, CALCULATION_SET, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, CALCULATION_MULTIPLY, CALCULATION_HALVE_ROUND_DOWN, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_MAX, ACTION_GET_PROPERTY_VALUE, PROTECTION_FROM_EFFECTS, PROTECTION_FROM_POWERS, PROTECTION_FROM_SPELLS, PROTECTION_FROM_ATTACKS, PROTECTION_TYPE_DISCARDING_FROM_PLAY, PROTECTION_TYPE_ENERGY_GAIN, PROTECTION_TYPE_ENERGY_LOSS, PROTECTION_TYPE_GENERAL, COST_X, STATUS_BURROWED, TYPE_CREATURE, TYPE_RELIC, TYPE_SPELL } from '../const.js';
 import { ResolvePromptType } from './resolvePrompt.js';
 import { SelectorTypeType, SelectType } from './select.js';
 import { EffectTypeType, EffectType } from './effect.js';
@@ -14,7 +14,7 @@ export { type SelectType, type SelectorTypeType, type SelectorParams, type Refin
 export { type EffectType, type MoveCardBetwenZonesEffect } from './effect.js';
 export { type PromptType, type PromptParams } from './prompt.js';
 export { type LogEntryType } from './log.js';
-type ProtectionFromType = typeof PROTECTION_FROM_SPELLS | typeof PROTECTION_FROM_EFFECTS | typeof PROTECTION_FROM_POWERS;
+type ProtectionFromType = typeof PROTECTION_FROM_SPELLS | typeof PROTECTION_FROM_EFFECTS | typeof PROTECTION_FROM_POWERS | typeof PROTECTION_FROM_ATTACKS;
 type ProtectionTypeType = typeof PROTECTION_TYPE_ENERGY_LOSS | typeof PROTECTION_TYPE_ENERGY_GAIN | typeof PROTECTION_TYPE_DISCARDING_FROM_PLAY | typeof PROTECTION_TYPE_GENERAL;
 export type ProtectionType = {
     from: ProtectionFromType[];
@@ -118,6 +118,7 @@ export type CalculateType = CalculateParams & EnrichedAction & {
     generatedBy?: string;
 };
 export type PropertyGetterParams = {
+    subProperty?: string;
     property: PropertyType;
     target: string;
     variable: string;
@@ -184,6 +185,8 @@ export type ExitPromptsAction = EnrichedAction & {
 export type ContinuousEffectType = {
     staticAbilities?: StaticAbilityType[];
     triggerEffects?: TriggerEffectType[];
+    replacementEffects?: ReplacementEffectType[];
+    discardSourceId?: string;
     /** Captured source incarnation; continuous triggers may outlive it. */
     self?: CardInGame;
     expiration: ExpirationObjectType;

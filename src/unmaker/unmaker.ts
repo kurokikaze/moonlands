@@ -1,8 +1,8 @@
 import CardInGame from '../classes/CardInGame.js';
 import { ACTION_PLAY, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_DRAW, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, EFFECT_TYPE_ATTACH_CARD_TO_CARD, EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE, EFFECT_TYPE_DISCARD_CARD_FROM_HAND, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, ACTION_ENTER_PROMPT } from '../const.js';
-import { ACTION_EFFECT, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_PROMPT_ENTERED, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_START_TURN, State, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_IN_PLAY, ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE, ACTION_PLAYER_WINS, ACTION_POWER, ACTION_RESOLVE_PROMPT, TYPE_MAGI, DEFAULT_PROMPT_VARIABLE } from '../index.js'
+import { EFFECT_TYPE_SHUFFLE_DECK, ACTION_EFFECT, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DIE_ROLLED, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_FIND_STARTING_CARDS, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_PROMPT_ENTERED, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, EFFECT_TYPE_RESHUFFLE_DISCARD, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_START_STEP, EFFECT_TYPE_START_TURN, State, TYPE_CREATURE, TYPE_RELIC, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_DECK, ZONE_TYPE_DISCARD, ZONE_TYPE_IN_PLAY, ACTION_CALCULATE, ACTION_SELECT, ACTION_GET_PROPERTY_VALUE, ACTION_PLAYER_WINS, ACTION_POWER, ACTION_RESOLVE_PROMPT, TYPE_MAGI, DEFAULT_PROMPT_VARIABLE } from '../index.js'
 import { AnyEffectType, MetaDataRecord, PromptTypeType, ZoneType } from '../types/index.js'
-import { CardFlagsSnapshot, UNMAKE_CALCULATION, UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI, UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE, UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, UNMAKE_EFFECT_TYPE_DIE_ROLLED, UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS, UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_ENERGY, UNMAKE_EFFECT_TYPE_PLAYER_WINS, UNMAKE_EFFECT_TYPE_PROMPT_ENTERED, UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD, UNMAKE_EFFECT_TYPE_START_OF_TURN, UNMAKE_EFFECT_TYPE_START_STEP, UNMAKE_EFFECT_TYPE_START_TURN, UNMAKE_LOG_ENTRY, UNMAKE_POWER_ACTIVATION, UNMAKE_POWER_USE, UNMAKE_PROMPT_LEAVE, UNMAKE_PROPERTY, UNMAKE_SELECT, UnAction, UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD, UNMAKE_PROMPT_ENTER } from './types.js';
+import { UNMAKE_EFFECT_TYPE_SHUFFLE_DECK, CardFlagsSnapshot, UNMAKE_CALCULATION, UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, UNMAKE_EFFECT_TYPE_ADD_ENERGY_TO_MAGI, UNMAKE_EFFECT_TYPE_BEFORE_DAMAGE, UNMAKE_EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, UNMAKE_EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, UNMAKE_EFFECT_TYPE_DIE_ROLLED, UNMAKE_EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS, UNMAKE_EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, UNMAKE_EFFECT_TYPE_MOVE_ENERGY, UNMAKE_EFFECT_TYPE_PLAYER_WINS, UNMAKE_EFFECT_TYPE_PROMPT_ENTERED, UNMAKE_EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE, UNMAKE_EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI, UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD, UNMAKE_EFFECT_TYPE_START_OF_TURN, UNMAKE_EFFECT_TYPE_START_STEP, UNMAKE_EFFECT_TYPE_START_TURN, UNMAKE_LOG_ENTRY, UNMAKE_POWER_ACTIVATION, UNMAKE_POWER_USE, UNMAKE_PROMPT_LEAVE, UNMAKE_PROPERTY, UNMAKE_SELECT, UnAction, UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD, UNMAKE_PROMPT_ENTER } from './types.js';
 
 const FLAG_WAS_ATTACKED = 1
 const FLAG_HAS_ATTACKED = 2
@@ -30,6 +30,7 @@ const actionNames = {
     21: 'UNMAKE_EFFECT_TYPE_PROMPT_ENTERED',
     22: 'UNMAKE_EFFECT_TYPE_FIND_STARTING_CARDS',
     23: 'UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD',
+    42: 'UNMAKE_EFFECT_TYPE_SHUFFLE_DECK',
     24: 'UNMAKE_EFFECT_TYPE_ADD_DELAYED_TRIGGER',
     25: 'UNMAKE_EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES',
     26: 'UNMAKE_EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES',
@@ -537,6 +538,8 @@ export class Unmaker {
                                 const attachedCards = sourceZoneCard.id in this.state.state.cardsAttached ? [...this.state.state.cardsAttached[sourceZoneCard.id]] : null
 
                                 this.saveObject(attachedCards, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/attachedCards')
+                                const attachedTo = this.state.state.attachedTo[sourceZoneCard.id];
+                                this.saveObject(attachedTo ?? null, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/attachedTo');
                                 this.saveObject(metaDataEntries, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/metaDataEntries')
                                 this.saveNumber(action.bottom ? 1 : 0, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/bottom')
                                 this.saveNumber(encodedPosition, 'EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/position')
@@ -553,6 +556,7 @@ export class Unmaker {
                                     destinationZone: destinationZoneType,
                                     position,
                                     bottom: action.bottom || false,
+                                    attachedTo,
                                     metaDataEntries,
                                 }
                             }
@@ -608,16 +612,20 @@ export class Unmaker {
                     case EFFECT_TYPE_DIE_ROLLED: {
                         if (action.generatedBy) {
                             const currentMeta = this.state.getSpellMetadata(action.generatedBy)
-                            const hasPreviousRollResult = typeof currentMeta?.roll_result === 'number'
-                            this.saveNumber(currentMeta?.roll_result as number, 'EFFECT_TYPE_DIE_ROLLED/rollResult')
+                            const variable = ('variable' in action ? action.variable : undefined) ?? 'roll_result'
+                            const previousRollResult = currentMeta?.[variable]
+                            const hasPreviousRollResult = typeof previousRollResult === 'number'
+                            this.saveNumber(previousRollResult as number, 'EFFECT_TYPE_DIE_ROLLED/rollResult')
 							this.saveNumber(hasPreviousRollResult ? 1 : 0, 'EFFECT_TYPE_DIE_ROLLED/hasRollResult')
                             this.saveString(action.generatedBy, 'EFFECT_TYPE_DIE_ROLLED/spellId')
+                            this.saveString(variable, 'EFFECT_TYPE_DIE_ROLLED/variable')
                             this.saveNumber(this.state.logEngine.shouldCreateLog(action).length, 'EFFECT_TYPE_DIE_ROLLED/logCount')
                             this.saveActionType(UNMAKE_EFFECT_TYPE_DIE_ROLLED, 'EFFECT_TYPE_DIE_ROLLED')
                             return {
                                 type: UNMAKE_EFFECT_TYPE_DIE_ROLLED,
                                 spellId: action.generatedBy,
-                                previousRollResult: currentMeta?.roll_result,
+                                variable,
+                                previousRollResult,
                             }
                         }
                         break;
@@ -949,6 +957,14 @@ export class Unmaker {
                             previousFoundCards: currentMeta?.foundCards as unknown as string[] | undefined,
                         }
                     }
+                    case EFFECT_TYPE_SHUFFLE_DECK: {
+                        const player = this.state.getMetaValue(action.player, action.generatedBy);
+                        const previousDeckCards = [...this.state.getZone(ZONE_TYPE_DECK, player).cards];
+                        this.saveObject(previousDeckCards, 'EFFECT_TYPE_SHUFFLE_DECK/deckCards');
+                        this.saveNumber(player, 'EFFECT_TYPE_SHUFFLE_DECK/player');
+                        this.saveActionType(UNMAKE_EFFECT_TYPE_SHUFFLE_DECK, 'EFFECT_TYPE_SHUFFLE_DECK');
+                        return { type: UNMAKE_EFFECT_TYPE_SHUFFLE_DECK, player, previousDeckCards };
+                    }
                     case EFFECT_TYPE_RESHUFFLE_DISCARD: {
                         const player = this.state.getMetaValue(action.player, action.generatedBy)
                         const deck = this.state.getZone(ZONE_TYPE_DECK, player)
@@ -1261,6 +1277,7 @@ export class Unmaker {
                 const position = encodedPosition - 1
                 const bottom = this.readNumber('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/bottom') == 1
                 const metaDataEntries = this.readObject<{ spellId: string, field: string, previousValue: any }[]>('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/metaDataEntries')
+                const attachedTo = this.readObject<string | null>('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/attachedTo')
                 const attachedCards = this.readObject<string[] | null>('EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES/attachedCards')
 
                 const destZone = state.getZone(destinationZoneType, destinationZoneType === ZONE_TYPE_IN_PLAY ? null : cardOwner)
@@ -1278,6 +1295,9 @@ export class Unmaker {
                 // Re-add original card only if it existed in the declared source zone.
                 if (position >= 0) {
                     sourceZone.cards.splice(position, 0, zoneChangingCard)
+                    if (attachedTo && !state.state.attachedTo[zoneChangingCard.id]) {
+                        state.attachCard(zoneChangingCard.id, attachedTo);
+                    }
                 }
 
                 if (attachedCards) {
@@ -1409,13 +1429,14 @@ export class Unmaker {
             // Log entries: 1
             case UNMAKE_EFFECT_TYPE_DIE_ROLLED: {
                 const logCount = this.readNumber('EFFECT_TYPE_DIE_ROLLED/logCount')
+                const variable = this.readString('EFFECT_TYPE_DIE_ROLLED/variable')
                 const generatedBy = this.readString('EFFECT_TYPE_DIE_ROLLED/spellId')
 				const hasPreviousRollResult = this.readNumber('EFFECT_TYPE_DIE_ROLLED/hasRollResult') === 1
                 const previousRollResult = this.readNumber('EFFECT_TYPE_DIE_ROLLED/rollResult')
 				if (!hasPreviousRollResult) {
-                    state.clearSpellMetaDataField('roll_result', generatedBy)
+                    state.clearSpellMetaDataField(variable, generatedBy)
                 } else {
-                    state.setSpellMetaDataField('roll_result', previousRollResult, generatedBy)
+                    state.setSpellMetaDataField(variable, previousRollResult, generatedBy)
                 }
                 state.state.log.length -= logCount
                 break;
@@ -1647,6 +1668,12 @@ export class Unmaker {
                 }
                 break;
             }
+            case UNMAKE_EFFECT_TYPE_SHUFFLE_DECK: {
+                const player = this.readNumber('EFFECT_TYPE_SHUFFLE_DECK/player');
+                const cards = this.readObject<CardInGame[]>('EFFECT_TYPE_SHUFFLE_DECK/deckCards');
+                state.setZoneCards(state.getZone(ZONE_TYPE_DECK, player), cards);
+                break;
+            }
             case UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD: {
                 const player = this.readNumber('EFFECT_TYPE_RESHUFFLE_DISCARD/player')
                 const discardCards = this.readObject<CardInGame[]>('EFFECT_TYPE_RESHUFFLE_DISCARD/discardCards')
@@ -1835,6 +1862,9 @@ export class Unmaker {
                 }
                 // Re-add original card at its original position in source zone
                 sourceZone.cards.splice(unaction.position, 0, unaction.card)
+                if (unaction.attachedTo && !state.state.attachedTo[unaction.card.id]) {
+                    state.attachCard(unaction.card.id, unaction.attachedTo);
+                }
 
                 // Restore spellMetaData fields to their previous values
                 for (const entry of unaction.metaDataEntries) {
@@ -1856,10 +1886,10 @@ export class Unmaker {
                 // const currentMeta = state.getSpellMetadata(unaction.spellId)
                 if (unaction.previousRollResult === undefined) {
                     // Field didn't exist before, remove it
-                    state.clearSpellMetaDataField('roll_result', unaction.spellId)
+                    state.clearSpellMetaDataField(unaction.variable ?? 'roll_result', unaction.spellId)
                 } else {
                     // Restore to previous value
-                    state.setSpellMetaDataField('roll_result', unaction.previousRollResult, unaction.spellId)
+                    state.setSpellMetaDataField(unaction.variable ?? 'roll_result', unaction.previousRollResult, unaction.spellId)
                 }
                 break
             }
@@ -2062,6 +2092,10 @@ export class Unmaker {
                     state.setSpellMetaDataField('foundCards', unaction.previousFoundCards, unaction.spellId)
                 }
                 break
+            }
+            case UNMAKE_EFFECT_TYPE_SHUFFLE_DECK: {
+                state.setZoneCards(state.getZone(ZONE_TYPE_DECK, unaction.player), [...unaction.previousDeckCards]);
+                break;
             }
             case UNMAKE_EFFECT_TYPE_RESHUFFLE_DISCARD: {
                 const deck = state.getZone(ZONE_TYPE_DECK, unaction.player)

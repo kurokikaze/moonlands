@@ -15,11 +15,12 @@ export const applyRollDieEffect: ActionTransformer<typeof EFFECT_TYPE_ROLL_DIE> 
     type: ACTION_EFFECT,
     effectType: EFFECT_TYPE_DIE_ROLLED,
     result,
+    ...(action.variable ? { variable: action.variable } : {}),
     player: action.player,
     generatedBy: action.generatedBy,
   });
 }
 
 export const applyDieRolledEffect: ActionTransformer<typeof EFFECT_TYPE_DIE_ROLLED> = function (action) {
-  this.setSpellMetaDataField('roll_result', action.result, action.generatedBy);
+  this.setSpellMetaDataField(action.variable ?? 'roll_result', action.result, action.generatedBy);
 }

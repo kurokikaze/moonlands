@@ -1,4 +1,4 @@
-import { TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, SELECTOR_CREATURES, SELECTOR_MAGI, SELECTOR_RELICS, SELECTOR_OWN_MAGI, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_OWN_SPELLS_IN_HAND, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, SELECTOR_CREATURES_OF_TYPE, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_ID, SELECTOR_CREATURES_OF_PLAYER, SELECTOR_SELF_AND_STATUS, SELECTOR_OWN_CREATURES_WITH_STATUS, SELECTOR_OPPONENT_ID, STATUS_BURROWED, PROPERTY_CONTROLLER, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, PROPERTY_POWER_COST, PROPERTY_ENERGY_LOSS_THRESHOLD, PROPERTY_STATUS, PROPERTY_ABLE_TO_ATTACK, PROPERTY_ABLE_TO_USE_POWERS, PROPERTY_PROTECTION, CALCULATION_SET, ZONE_TYPE_IN_PLAY, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_HAND, } from './const.js';
+import { EXPIRATION_DURING_OPPONENT_TURNS, TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, SELECTOR_CREATURES, SELECTOR_MAGI, SELECTOR_RELICS, SELECTOR_OWN_MAGI, SELECTOR_ENEMY_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_OWN_SPELLS_IN_HAND, SELECTOR_OWN_CARDS_WITH_ENERGIZE_RATE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CARDS_IN_PLAY, SELECTOR_CREATURES_OF_TYPE, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_ID, SELECTOR_CREATURES_OF_PLAYER, SELECTOR_SELF_AND_STATUS, SELECTOR_OWN_CREATURES_WITH_STATUS, SELECTOR_OPPONENT_ID, STATUS_BURROWED, PROPERTY_CONTROLLER, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ENERGIZE, PROPERTY_ATTACKS_PER_TURN, PROPERTY_CAN_ATTACK_MAGI_DIRECTLY, PROPERTY_POWER_COST, PROPERTY_ENERGY_LOSS_THRESHOLD, PROPERTY_STATUS, PROPERTY_ABLE_TO_ATTACK, PROPERTY_ABLE_TO_USE_POWERS, PROPERTY_PROTECTION, PROPERTY_CARD_MEMORY, CALCULATION_SET, ZONE_TYPE_IN_PLAY, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_HAND, } from './const.js';
 import { CostEngine } from './CostEngine.js';
 import { RestrictionEngine } from './RestrictionEngine.js';
 import { LayeredModificationEngine } from './LayeredModificationEngine.js';
@@ -42,15 +42,22 @@ export class SelectorEngine extends LayeredModificationEngine {
         this.clearModifiedCardDataCache();
     }
     invalidateStaticAbilitiesForContinuousEffectsChange(previous, effects) {
-        const previousSources = previous.filter(effect => effect.staticAbilities?.length);
-        const sources = effects.filter(effect => effect.staticAbilities?.length);
+        const previousSources = previous.filter(effect => this.hasActiveStaticAbilities(effect));
+        const sources = effects.filter(effect => this.hasActiveStaticAbilities(effect));
         if (previousSources.length !== sources.length || previousSources.some((effect, index) => effect.staticAbilities !== sources[index].staticAbilities || effect.player !== sources[index].player)) {
             this.clearContinuousStaticAbilitiesCache();
         }
     }
+    hasActiveStaticAbilities(effect) {
+        return !!effect.staticAbilities?.length &&
+            (effect.expiration.type !== EXPIRATION_DURING_OPPONENT_TURNS || effect.expiration.active === true);
+    }
     getContinuousStaticAbilities() {
         if (this.continuousStaticAbilitiesCache === null) {
-            this.continuousStaticAbilitiesCache = this.context.getContinuousEffects().flatMap(effect => (effect.staticAbilities ?? []).map(ability => ({ ...ability, player: effect.player })));
+            this.continuousStaticAbilitiesCache = this.context.getContinuousEffects()
+                .filter(effect => this.hasActiveStaticAbilities(effect) && (!effect.discardSourceId ||
+                this.context.getZone(ZONE_TYPE_IN_PLAY).containsId(effect.discardSourceId)))
+                .flatMap(effect => (effect.staticAbilities ?? []).map(ability => ({ ...ability, player: effect.player })));
         }
         return this.continuousStaticAbilitiesCache;
     }
@@ -58,6 +65,10 @@ export class SelectorEngine extends LayeredModificationEngine {
     invalidateStaticAbilitiesForZoneChange(zone, previousCards, cards) {
         if (zone.type !== ZONE_TYPE_IN_PLAY && zone.type !== ZONE_TYPE_ACTIVE_MAGI) {
             return;
+        }
+        if (zone.type === ZONE_TYPE_IN_PLAY && this.context.getContinuousEffects().some(effect => effect.discardSourceId &&
+            previousCards.some(card => card.id === effect.discardSourceId) !== cards.some(card => card.id === effect.discardSourceId))) {
+            this.clearContinuousStaticAbilitiesCache();
         }
         const previousSources = previousCards.filter(card => card.card.data.staticAbilities?.length);
         const sources = cards.filter(card => card.card.data.staticAbilities?.length);
@@ -238,6 +249,9 @@ export class SelectorEngine extends LayeredModificationEngine {
     modifyByStaticAbilities(target, property, subProperty = null) {
         if (!target) {
             return null;
+        }
+        if (property === PROPERTY_CARD_MEMORY) {
+            return this.getByPropertyAny(target, property, subProperty);
         }
         const cached = this.modifiedCardDataCache.get(target.id);
         if (cached) {

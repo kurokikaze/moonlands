@@ -1,7 +1,7 @@
 import Card from './classes/Card.js';
 import { 
 /* eslint-disable no-unused-vars */
-ACTION_EFFECT, ACTION_SELECT, ACTION_ENTER_PROMPT, ACTION_CALCULATE, ACTION_GET_PROPERTY_VALUE, ACTION_PLAY, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_SET, CALCULATION_MAX, CALCULATION_MULTIPLY, PROPERTY_ENERGY_COUNT, PROPERTY_CONTROLLER, PROPERTY_TYPE, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ID, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_POWER_COST, PROPERTY_CREATURE_TYPES, PROPERTY_STATUS_DEFEATED_CREATURE, PROPERTY_PROTECTION, PROPERTY_ABLE_TO_ATTACK, PROPERTY_MAGI_NAME, PROPERTY_CAN_BE_ATTACKED, ACTION_PROPERTY, CARD_COUNT, PROPERTY_CONTROLLING_PLAYER, PROPERTY_ABLE_TO_USE_POWERS, REGION_ARDERIAL, REGION_CALD, REGION_NAROOM, REGION_OROTHE, REGION_UNDERNEATH, REGION_BOGRATH, REGION_UNIVERSAL, TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, SELECTOR_OPPONENT_ID, SELECTOR_MAGI, SELECTOR_OWN_MAGI, SELECTOR_CREATURES, SELECTOR_ENEMY_MAGI, SELECTOR_RELICS, SELECTOR_CREATURES_AND_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_MAGI_OF_REGION, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_OWN_SPELLS_IN_HAND, SELECTOR_OTHER_CREATURES_OF_TYPE, SELECTOR_OWN_CREATURES_WITH_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_CREATURES_OF_PLAYER, SELECTOR_ID, SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY, SELECTOR_NTH_CARD_OF_ZONE, SELECTOR_SELF_AND_STATUS, SELECTOR_OWN_CARDS_IN_HAND, SELECTOR_CARDS_IN_HAND, SELECTOR_MAGI_OF_PLAYER, SELECTOR_RANDOM_CARD_IN_HAND, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_NONE, EFFECT_TYPE_DRAW, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY, EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_CONDITIONAL, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DISCARD_CARDS_FROM_HAND, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES, EFFECT_TYPE_ATTACK, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_DRAW_N_CARDS, EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL, EFFECT_TYPE_DEFENDER_DAMAGE_DEALT, EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, EFFECT_TYPE_DISTRIBUTE_CARDS_IN_ZONES, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_OWN_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_RELIC, PROMPT_TYPE_NUMBER, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_MAGI_WITHOUT_CREATURES, PROMPT_TYPE_PLAYER, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_ALTERNATIVE, PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES, PROTECTION_FROM_SPELLS, PROTECTION_TYPE_GENERAL, PROTECTION_TYPE_ENERGY_LOSS, PROTECTION_FROM_ATTACKS, RESTRICTION_OWN_CREATURE, RESTRICTION_OPPONENT_CREATURE, RESTRICTION_ENERGY_LESS_THAN_STARTING, RESTRICTION_REGION, RESTRICTION_TYPE, RESTRICTION_CREATURE_TYPE, RESTRICTION_PLAYABLE, RESTRICTION_ENERGY_LESS_THAN, RESTRICTION_CREATURE_WAS_ATTACKED, RESTRICTION_STATUS, RESTRICTION_REGION_IS_NOT, RESTRICTION_EXCEPT_SOURCE, RESTRICTION_CREATURE_NAME, COST_X, COST_X_PLUS_ONE, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_DECK, STATUS_BURROWED, EXPIRATION_ANY_TURNS, EXPIRATION_NEVER, EXPIRATION_OPPONENT_TURNS, PROPERTY_CREATURE_NAME, PROPERTY_STATUS, PROTECTION_TYPE_DISCARDING_FROM_PLAY, PROTECTION_FROM_EFFECTS, PROTECTION_FROM_POWERS,
+EFFECT_TYPE_REMEMBER_CARD_VALUE, PROPERTY_CARD_MEMORY, RESTRICTION_CARD_NAME_NOT_IN, EFFECT_TYPE_SHUFFLE_DECK, ACTION_EFFECT, ACTION_SELECT, ACTION_ENTER_PROMPT, ACTION_CALCULATE, ACTION_GET_PROPERTY_VALUE, ACTION_PLAY, CALCULATION_DOUBLE, CALCULATION_ADD, CALCULATION_SUBTRACT, CALCULATION_SUBTRACT_TO_MINIMUM_OF_ONE, CALCULATION_HALVE_ROUND_UP, CALCULATION_MIN, CALCULATION_SET, CALCULATION_MAX, CALCULATION_MULTIPLY, PROPERTY_ENERGY_COUNT, PROPERTY_CONTROLLER, PROPERTY_TYPE, PROPERTY_REGION, PROPERTY_COST, PROPERTY_ID, PROPERTY_ENERGIZE, PROPERTY_MAGI_STARTING_ENERGY, PROPERTY_ATTACKS_PER_TURN, PROPERTY_POWER_COST, PROPERTY_CREATURE_TYPES, PROPERTY_STATUS_DEFEATED_CREATURE, PROPERTY_PROTECTION, PROPERTY_ABLE_TO_ATTACK, PROPERTY_MAGI_NAME, PROPERTY_CAN_BE_ATTACKED, ACTION_PROPERTY, CARD_COUNT, PROPERTY_CONTROLLING_PLAYER, PROPERTY_ABLE_TO_USE_POWERS, REGION_ARDERIAL, REGION_CALD, REGION_NAROOM, REGION_OROTHE, REGION_UNDERNEATH, REGION_BOGRATH, REGION_UNIVERSAL, TYPE_CREATURE, TYPE_MAGI, TYPE_RELIC, TYPE_SPELL, SELECTOR_OPPONENT_ID, SELECTOR_MAGI, SELECTOR_OWN_MAGI, SELECTOR_CREATURES, SELECTOR_ENEMY_MAGI, SELECTOR_RELICS, SELECTOR_CREATURES_AND_MAGI, SELECTOR_CREATURES_OF_REGION, SELECTOR_CREATURES_NOT_OF_REGION, SELECTOR_CREATURES_NOT_OF_TYPE, SELECTOR_OWN_CREATURES, SELECTOR_ENEMY_CREATURES, SELECTOR_MAGI_OF_REGION, SELECTOR_MAGI_NOT_OF_REGION, SELECTOR_TOP_MAGI_OF_PILE, SELECTOR_CARDS_WITH_ENERGIZE_RATE, SELECTOR_OWN_CREATURES_OF_TYPE, SELECTOR_OWN_SPELLS_IN_HAND, SELECTOR_OTHER_CREATURES_OF_TYPE, SELECTOR_OWN_CREATURES_WITH_STATUS, SELECTOR_CREATURES_WITHOUT_STATUS, SELECTOR_CREATURES_OF_PLAYER, SELECTOR_ID, SELECTOR_OWN_CREATURE_WITH_LEAST_ENERGY, SELECTOR_NTH_CARD_OF_ZONE, SELECTOR_SELF_AND_STATUS, SELECTOR_OWN_CARDS_IN_HAND, SELECTOR_CARDS_IN_HAND, SELECTOR_MAGI_OF_PLAYER, SELECTOR_RANDOM_CARD_IN_HAND, EFFECT_TYPE_END_OF_TURN, EFFECT_TYPE_NONE, EFFECT_TYPE_DRAW, EFFECT_TYPE_ROLL_DIE, EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP, EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI, EFFECT_TYPE_ADD_DELAYED_TRIGGER, EFFECT_TYPE_PLAY_RELIC, EFFECT_TYPE_PLAY_SPELL, EFFECT_TYPE_MAGI_IS_DEFEATED, EFFECT_TYPE_DEFEAT_MAGI, EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY, EFFECT_TYPE_CREATURE_ENTERS_PLAY, EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY, EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY, EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI, EFFECT_TYPE_ADD_ENERGY_TO_CREATURE, EFFECT_TYPE_ADD_ENERGY_TO_MAGI, EFFECT_TYPE_ENERGIZE, EFFECT_TYPE_CONDITIONAL, EFFECT_TYPE_START_OF_TURN, EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES, EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE, EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY, EFFECT_TYPE_MOVE_ENERGY, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_DISCARD_CARDS_FROM_HAND, EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES, EFFECT_TYPE_ATTACK, EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT, EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES, EFFECT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, EFFECT_TYPE_DRAW_N_CARDS, EFFECT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL, EFFECT_TYPE_DEFENDER_DAMAGE_DEALT, EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE, EFFECT_TYPE_REARRANGE_CARDS_OF_ZONE, EFFECT_TYPE_BEFORE_DRAWING_CARDS_IN_DRAW_STEP, EFFECT_TYPE_EXECUTE_POWER_EFFECTS, EFFECT_TYPE_DISTRIBUTE_CARDS_IN_ZONES, PROMPT_TYPE_ANY_CREATURE_EXCEPT_SOURCE, PROMPT_TYPE_SINGLE_CREATURE_FILTERED, PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI, PROMPT_TYPE_SINGLE_CREATURE, PROMPT_TYPE_OWN_SINGLE_CREATURE, PROMPT_TYPE_SINGLE_MAGI, PROMPT_TYPE_RELIC, PROMPT_TYPE_NUMBER, PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE, PROMPT_TYPE_REARRANGE_ENERGY_ON_CREATURES, PROMPT_TYPE_DISTRIBUTE_ENERGY_ON_CREATURES, PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE, PROMPT_TYPE_DISTRIBUTE_DAMAGE_ON_CREATURES, PROMPT_TYPE_MAGI_WITHOUT_CREATURES, PROMPT_TYPE_PLAYER, PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE, PROMPT_TYPE_POWER_ON_MAGI, PROMPT_TYPE_ALTERNATIVE, PROMPT_TYPE_DISTRIBUTE_CARDS_IN_ZONES, PROTECTION_FROM_SPELLS, PROTECTION_TYPE_GENERAL, PROTECTION_TYPE_ENERGY_LOSS, PROTECTION_FROM_ATTACKS, RESTRICTION_OWN_CREATURE, RESTRICTION_OPPONENT_CREATURE, RESTRICTION_ENERGY_LESS_THAN_STARTING, RESTRICTION_REGION, RESTRICTION_TYPE, RESTRICTION_CREATURE_TYPE, RESTRICTION_PLAYABLE, RESTRICTION_ENERGY_LESS_THAN, RESTRICTION_CREATURE_WAS_ATTACKED, RESTRICTION_STATUS, RESTRICTION_REGION_IS_NOT, RESTRICTION_EXCEPT_SOURCE, RESTRICTION_CREATURE_NAME, COST_X, COST_X_PLUS_ONE, ZONE_TYPE_ACTIVE_MAGI, ZONE_TYPE_MAGI_PILE, ZONE_TYPE_HAND, ZONE_TYPE_IN_PLAY, ZONE_TYPE_DISCARD, ZONE_TYPE_DECK, STATUS_BURROWED, EXPIRATION_ANY_TURNS, EXPIRATION_DURING_OPPONENT_TURNS, EXPIRATION_THIS_TURN, EXPIRATION_NEVER, EXPIRATION_OPPONENT_TURNS, PROPERTY_CREATURE_NAME, PROPERTY_STATUS, PROTECTION_TYPE_DISCARDING_FROM_PLAY, PROTECTION_FROM_EFFECTS, PROTECTION_FROM_POWERS,
 /* eslint-enable no-unused-vars */
  } from './const.js';
 const effect = (data) => (Object.assign({ type: ACTION_EFFECT }, data));
@@ -285,6 +285,10 @@ export const cards = [
                         destinationZone: ZONE_TYPE_HAND,
                         target: '$chosenCards',
                     }),
+                    effect({
+                        effectType: EFFECT_TYPE_SHUFFLE_DECK,
+                        player: '$player',
+                    }),
                 ],
             }],
     }),
@@ -380,7 +384,7 @@ export const cards = [
         text: 'Choose any one Creature in play. Discard X Cald Creatures from your hand. Add X energy to the chosen Creature.',
         effects: [
             prompt({
-                promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+                promptType: PROMPT_TYPE_SINGLE_CREATURE,
             }),
             prompt({
                 promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
@@ -691,10 +695,6 @@ export const cards = [
                         promptType: PROMPT_TYPE_PLAYER,
                         message: 'Choose a player who will discard the cards',
                     }),
-                    effect({
-                        effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-                        target: '$source',
-                    }),
                     prompt({
                         promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
                         message: 'Choose up to one card to be discarded',
@@ -971,7 +971,7 @@ export const cards = [
                         variable: 'startingEnergy',
                     }),
                     effect({
-                        effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+                        effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
                         target: '$new_card',
                         amount: '$startingEnergy',
                     }),
@@ -998,23 +998,39 @@ export const cards = [
                         property: PROPERTY_CONTROLLER,
                         variable: 'relicController',
                     }),
-                    prompt({
-                        promptType: PROMPT_TYPE_ALTERNATIVE,
-                        // message: 'Do you want to discard 4 energy to avoid discarding ${target}?',
-                        promptParams: {
-                            alternatives: [
-                                {
-                                    name: 'Discard the relic',
-                                    value: 'discardRelic',
+                    select({
+                        selector: SELECTOR_MAGI_OF_PLAYER,
+                        owner: '$relicController',
+                        variable: 'relicMagi',
+                    }),
+                    getPropertyValue({
+                        target: '$relicMagi',
+                        property: PROPERTY_ENERGY_COUNT,
+                        variable: 'relicMagiEnergy',
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_CONDITIONAL,
+                        relicMagiEnergy: '$relicMagiEnergy',
+                        conditions: [{
+                                objectOne: 'relicMagiEnergy',
+                                propertyOne: ACTION_PROPERTY,
+                                comparator: '>=',
+                                objectTwo: 4,
+                                propertyTwo: null,
+                            }],
+                        thenEffects: [
+                            prompt({
+                                promptType: PROMPT_TYPE_ALTERNATIVE,
+                                promptParams: {
+                                    alternatives: [
+                                        { name: 'Discard the relic', value: 'discardRelic' },
+                                        { name: 'Discard 4 energy from Magi', value: 'discardEnergy' },
+                                    ],
                                 },
-                                {
-                                    name: 'Discard 4 energy from Magi',
-                                    value: 'discardEnergy'
-                                }
-                            ],
-                        },
-                        variable: 'choice',
-                        player: '$relicController',
+                                variable: 'choice',
+                                player: '$relicController',
+                            }),
+                        ],
                     }),
                     effect({
                         effectType: EFFECT_TYPE_CONDITIONAL,
@@ -1029,11 +1045,6 @@ export const cards = [
                             }
                         ],
                         thenEffects: [
-                            select({
-                                selector: SELECTOR_MAGI_OF_PLAYER,
-                                owner: '$relicController',
-                                variable: 'relicMagi',
-                            }),
                             effect({
                                 effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
                                 target: '$relicMagi',
@@ -1247,10 +1258,17 @@ export const cards = [
         text: 'Choose any one Creature in play. The chosen Creature cannot be attacked during your opponents\' next two turns. Place this card on the chosen Creature while Fog Bank is in effect.',
         effects: [
             prompt({
-                promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
+                promptType: PROMPT_TYPE_SINGLE_CREATURE,
+            }),
+            effect({
+                effectType: EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE,
+                target: '$source',
+                attachmentTarget: '$target',
             }),
             effect({
                 effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+                source: '$new_card',
+                discardSourceOnExpiration: true,
                 staticAbilities: [
                     {
                         name: 'Fog Bank',
@@ -1265,18 +1283,10 @@ export const cards = [
                     },
                 ],
                 expiration: {
-                    type: EXPIRATION_OPPONENT_TURNS,
+                    type: EXPIRATION_DURING_OPPONENT_TURNS,
                     turns: 2,
                 },
             }),
-            effect({
-                effectType: EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE,
-                target: '$source',
-                attachmentTarget: '$target',
-            }),
-            // effect({
-            // 	effectType: EFFECT_TYPE_ADD_DELAYED_TRIGGER,
-            // })
         ],
     }),
     new Card('Burrow', TYPE_SPELL, REGION_UNDERNEATH, COST_X_PLUS_ONE, {
@@ -1586,6 +1596,10 @@ export const cards = [
                         destinationZone: ZONE_TYPE_HAND,
                         target: '$targetCard',
                     }),
+                    effect({
+                        effectType: EFFECT_TYPE_SHUFFLE_DECK,
+                        player: '$controller',
+                    }),
                 ],
             },
         ],
@@ -1845,19 +1859,21 @@ export const cards = [
                     }),
                     effect({
                         effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+                        target: '$selected',
                     }),
                     select({
                         selector: SELECTOR_RELICS,
                     }),
                     effect({
                         effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
-                        target: '$target',
+                        target: '$selected',
                     }),
                     select({
                         selector: SELECTOR_MAGI,
                     }),
                     effect({
-                        effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
+                        effectType: EFFECT_TYPE_DEFEAT_MAGI,
+                        target: '$selected',
                     })
                 ]
             }],
@@ -1928,12 +1944,7 @@ export const cards = [
             effect({
                 effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
                 target: '$target',
-            }),
-            effect({
-                effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-                sourceZone: ZONE_TYPE_DISCARD,
-                destinationZone: ZONE_TYPE_DECK,
-                target: '$new_card',
+                shuffleIntoDeck: true,
             }),
         ],
     }),
@@ -3223,6 +3234,10 @@ export const cards = [
                         destinationZone: ZONE_TYPE_HAND,
                         target: '$targetCards',
                     }),
+                    effect({
+                        effectType: EFFECT_TYPE_SHUFFLE_DECK,
+                        player: '$player',
+                    }),
                 ],
             },
         ],
@@ -3362,7 +3377,7 @@ export const cards = [
         triggerEffects: [
             {
                 name: 'Charge',
-                text: 'When Quor Pup attacks, move up to two energy from it to your Magi',
+                text: 'When Quor Pup attacks, move up to two energy to it from your Magi.',
                 find: {
                     effectType: EFFECT_TYPE_CREATURE_ATTACKS,
                     conditions: [
@@ -3508,10 +3523,12 @@ export const cards = [
                     prompt({
                         promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
                         promptParams: {
-                            restriction: RESTRICTION_CREATURE_TYPE,
-                            restrictionValue: 'Pharan',
+                            restrictions: [
+                                { type: RESTRICTION_CREATURE_TYPE, value: 'Pharan' },
+                                { type: RESTRICTION_OWN_CREATURE, value: '' },
+                            ],
                         },
-                        message: 'Choose a Pharan',
+                        message: 'Choose a Pharan you control',
                         variable: 'chosenPharan',
                     }),
                     getPropertyValue({
@@ -3741,24 +3758,8 @@ export const cards = [
                         promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
                         message: 'Select your creature. Its energy will be moved onto your Magi and the creature will return to your hand.',
                     }),
-                    getPropertyValue({
-                        property: PROPERTY_ENERGY_COUNT,
-                        target: '$target',
-                        variable: 'creatureEnergy',
-                    }),
-                    select({
-                        selector: SELECTOR_OWN_MAGI,
-                    }),
                     effect({
-                        effectType: EFFECT_TYPE_MOVE_ENERGY,
-                        source: '$target',
-                        target: '$selected',
-                        amount: '$creatureEnergy',
-                    }),
-                    effect({
-                        effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-                        sourceZone: ZONE_TYPE_IN_PLAY,
-                        destinationZone: ZONE_TYPE_HAND,
+                        effectType: EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY,
                         target: '$target',
                     }),
                 ],
@@ -3845,7 +3846,7 @@ export const cards = [
                             }),
                             effect({
                                 effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
-                                target: '$target',
+                                target: '$targetMagi',
                                 amount: 4,
                             }),
                         ],
@@ -4608,12 +4609,19 @@ export const cards = [
                         target: '$source',
                         variable: 'spellController',
                     }),
+                    getPropertyValue({
+                        property: PROPERTY_CARD_MEMORY,
+                        subProperty: 'recall',
+                        target: '$source',
+                        variable: 'recalledNames',
+                    }),
                     prompt({
                         promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
                         promptParams: {
                             zone: ZONE_TYPE_DISCARD,
                             zoneOwner: '$spellController',
                             numberOfCards: 1,
+                            restrictions: [{ type: RESTRICTION_CARD_NAME_NOT_IN, value: '$recalledNames' }],
                         },
                         variable: 'selectedCard',
                     }),
@@ -4623,23 +4631,35 @@ export const cards = [
                         sourceZone: ZONE_TYPE_DISCARD,
                         destinationZone: ZONE_TYPE_HAND,
                     }),
+                    getPropertyValue({
+                        property: PROPERTY_CREATURE_NAME,
+                        target: '$new_cards',
+                        variable: 'recalledName',
+                    }),
                     effect({
-                        effectType: EFFECT_TYPE_ADD_DELAYED_TRIGGER, // Shouldn't this be a delayed replacement effect? static effect till end of turn?
-                        delayedTrigger: {
-                            find: {
-                                effectType: EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP,
-                                conditions: [
-                                    {
-                                        objectOne: '%player',
-                                        propertyOne: ACTION_PROPERTY,
-                                        comparator: '=',
-                                        objectTwo: '$source',
-                                        propertyTwo: PROPERTY_CONTROLLER,
-                                    },
-                                ],
-                            },
-                            effects: [],
-                        }
+                        effectType: EFFECT_TYPE_REMEMBER_CARD_VALUE,
+                        target: '$source',
+                        key: 'recall',
+                        value: '$recalledName',
+                    }),
+                    effect({
+                        effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+                        expiration: { type: EXPIRATION_THIS_TURN },
+                        replacementEffects: [{
+                                find: {
+                                    effectType: EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP,
+                                    conditions: [
+                                        {
+                                            objectOne: 'player',
+                                            propertyOne: ACTION_PROPERTY,
+                                            comparator: '=',
+                                            objectTwo: '$spellController',
+                                            propertyTwo: null,
+                                        },
+                                    ],
+                                },
+                                replaceWith: { effectType: EFFECT_TYPE_NONE },
+                            }],
                     })
                 ],
             },
@@ -4833,7 +4853,7 @@ export const cards = [
             effect({
                 effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
                 target: '$selected',
-                amount: 2,
+                amount: '$roll_result',
             }),
         ],
     }),
@@ -5784,10 +5804,16 @@ export const cards = [
         effects: [
             prompt({
                 promptType: PROMPT_TYPE_SINGLE_CREATURE,
+                variable: 'firstCreature',
             }),
             effect({
                 effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-                target: '$target',
+                target: '$firstCreature',
+            }),
+            getPropertyValue({
+                property: PROPERTY_ID,
+                target: '$firstCreature',
+                variable: 'firstCreatureId',
             }),
             select({
                 selector: SELECTOR_OWN_MAGI,
@@ -5811,16 +5837,39 @@ export const cards = [
                     }
                 ],
                 thenEffects: [
-                    effect({
-                        effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
-                        amount: 4,
-                    }),
                     prompt({
-                        promptType: PROMPT_TYPE_SINGLE_CREATURE,
+                        promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+                        message: 'Choose a second Creature to discard for 4 energy, or choose none.',
+                        promptParams: {
+                            zone: ZONE_TYPE_IN_PLAY,
+                            zoneOwner: '$player',
+                            numberOfCards: 1,
+                            restrictions: [
+                                { type: RESTRICTION_TYPE, value: TYPE_CREATURE },
+                                { type: RESTRICTION_EXCEPT_SOURCE, value: '$firstCreatureId' },
+                            ],
+                        },
+                        variable: 'secondCreature',
+                    }),
+                    getPropertyValue({
+                        property: CARD_COUNT,
+                        target: '$secondCreature',
+                        variable: 'secondCreatureCount',
                     }),
                     effect({
-                        effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-                        target: '$target',
+                        effectType: EFFECT_TYPE_CONDITIONAL,
+                        secondCreatureCount: '$secondCreatureCount',
+                        conditions: [{
+                                objectOne: 'secondCreatureCount',
+                                propertyOne: ACTION_PROPERTY,
+                                comparator: '=',
+                                objectTwo: 1,
+                                propertyTwo: null,
+                            }],
+                        thenEffects: [
+                            effect({ effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL, from: '$ownMagi', amount: 4 }),
+                            effect({ effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, target: '$secondCreature', spell: true }),
+                        ],
                     }),
                 ],
             }),
@@ -5842,6 +5891,7 @@ export const cards = [
                     operandOne: {
                         type: PROTECTION_TYPE_GENERAL,
                         from: [PROTECTION_FROM_SPELLS],
+                        restrictions: [{ type: RESTRICTION_OPPONENT_CREATURE, value: '$targetController' }],
                     },
                 },
             },
@@ -5856,6 +5906,7 @@ export const cards = [
                     operandOne: {
                         type: PROTECTION_TYPE_GENERAL,
                         from: [PROTECTION_FROM_SPELLS],
+                        restrictions: [{ type: RESTRICTION_OPPONENT_CREATURE, value: '$targetController' }],
                     },
                 },
             }

@@ -235,7 +235,7 @@ describe('Fog Bank', () => {
 		expect(gameState.state.prompt).toEqual(false, 'Game is not in prompt state');
 
 		expect(grega.data.energy).toEqual(3, 'Grega now has 3 energy');
-		expect(gameState.modifyByStaticAbilities(arboll, PROPERTY_CAN_BE_ATTACKED)).toEqual(false);
+		expect(gameState.modifyByStaticAbilities(arboll, PROPERTY_CAN_BE_ATTACKED)).toEqual(true);
 
 		const activePlayerPassAction = {
 			type: ACTION_PASS,

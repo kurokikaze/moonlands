@@ -3,6 +3,7 @@ import clone from '../clone.js';
 import Card from './Card.js';
 
 export type InGameData = {
+    memory?: Record<string, readonly string[]>;
     energy: number;
     controller: number;
     attacked: number;

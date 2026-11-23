@@ -31,6 +31,7 @@ import {
 
 	RESTRICTION_REGION,
 	RESTRICTION_ENERGY_LESS_THAN,
+	RESTRICTION_OPPONENT_CREATURE,
 
 	REGION_OROTHE,
 
@@ -2290,14 +2291,47 @@ describe('Orlon', () => {
 		expect(gameState.modifyByStaticAbilities(welliskPup, PROPERTY_PROTECTION)).toEqual({
 			type: PROTECTION_TYPE_GENERAL,
 			from: [PROTECTION_FROM_SPELLS],
+			restrictions: [{ type: RESTRICTION_OPPONENT_CREATURE, value: '$targetController' }],
 		});
 
 		expect(gameState.modifyByStaticAbilities(seaBarl, PROPERTY_PROTECTION)).toEqual({
 			type: PROTECTION_TYPE_GENERAL,
 			from: [PROTECTION_FROM_SPELLS],
+			restrictions: [{ type: RESTRICTION_OPPONENT_CREATURE, value: '$targetController' }],
 		});
 
 		expect(gameState.modifyByStaticAbilities(bwill, PROPERTY_PROTECTION)).toEqual(undefined);
+	});
+
+	it.each([
+		['Sea Barl', true, true, 4],
+		['Wellisk Pup', true, true, 4],
+		['Sea Barl', false, true, 2],
+		['Wellisk Pup', false, true, 2],
+		['Sea Barl', true, false, 2],
+		['Bwill', true, true, 2],
+	])('Anti-Magic against Fire Ball on %s (opposing caster: %s, Orlon controls target: %s)', (name, opposing, ownTarget, expectedEnergy) => {
+		const orlonPlayer = 422;
+		const opponent = 1310;
+		const player = opposing ? opponent : orlonPlayer;
+		const target = new CardInGame(byName(name), ownTarget ? orlonPlayer : opponent).addEnergy(4);
+		const orlon = new CardInGame(byName('Orlon'), orlonPlayer).addEnergy(10);
+		const grega = new CardInGame(byName('Grega'), opponent).addEnergy(10);
+		const fireBall = new CardInGame(byName('Fire Ball'), player);
+		const gameState = new State({
+			zones: createZones(orlonPlayer, opponent, [target], [orlon]),
+			step: STEP_PRS_FIRST,
+			activePlayer: player,
+		});
+		gameState.setPlayers(orlonPlayer, opponent);
+		gameState.getZone(ZONE_TYPE_ACTIVE_MAGI, opponent).add([grega]);
+		gameState.getZone(ZONE_TYPE_HAND, player).add([fireBall]);
+
+		gameState.update({ type: ACTION_PLAY, payload: { card: fireBall, player } });
+		expect(gameState.state.promptType).toBe(PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI);
+		gameState.update({ type: ACTION_RESOLVE_PROMPT, target, generatedBy: gameState.state.promptGeneratedBy });
+
+		expect(target.data.energy).toBe(expectedEnergy);
 	});
 });
 

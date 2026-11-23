@@ -2,6 +2,10 @@ import Card from './classes/Card.js';
 
 import {
 	/* eslint-disable no-unused-vars */
+	EFFECT_TYPE_REMEMBER_CARD_VALUE,
+	PROPERTY_CARD_MEMORY,
+	RESTRICTION_CARD_NAME_NOT_IN,
+	EFFECT_TYPE_SHUFFLE_DECK,
 	ACTION_EFFECT,
 	ACTION_SELECT,
 	ACTION_ENTER_PROMPT,
@@ -94,6 +98,7 @@ import {
 	EFFECT_TYPE_PLAY_RELIC,
 	EFFECT_TYPE_PLAY_SPELL,
 	EFFECT_TYPE_MAGI_IS_DEFEATED,
+	EFFECT_TYPE_DEFEAT_MAGI,
 	EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
 	EFFECT_TYPE_CREATURE_ENTERS_PLAY,
 	EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY,
@@ -186,6 +191,8 @@ import {
 	STATUS_BURROWED,
 
 	EXPIRATION_ANY_TURNS,
+	EXPIRATION_DURING_OPPONENT_TURNS,
+	EXPIRATION_THIS_TURN,
 	EXPIRATION_NEVER,
 	EXPIRATION_OPPONENT_TURNS,
 
@@ -585,6 +592,10 @@ export const cards = [
 					destinationZone: ZONE_TYPE_HAND,
 					target: '$chosenCards',
 				}),
+				effect({
+					effectType: EFFECT_TYPE_SHUFFLE_DECK,
+					player: '$player',
+				}),
 			],
 		}],
 	}),
@@ -680,7 +691,7 @@ export const cards = [
 		text: 'Choose any one Creature in play. Discard X Cald Creatures from your hand. Add X energy to the chosen Creature.',
 		effects: [
 			prompt({
-				promptType: PROMPT_TYPE_SINGLE_CREATURE_OR_MAGI,
+				promptType: PROMPT_TYPE_SINGLE_CREATURE,
 			}),
 			prompt({
 				promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
@@ -991,10 +1002,6 @@ export const cards = [
 					promptType: PROMPT_TYPE_PLAYER,
 					message: 'Choose a player who will discard the cards',
 				}),
-				effect({
-					effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-					target: '$source',
-				}),
 				prompt({
 					promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
 					message: 'Choose up to one card to be discarded',
@@ -1271,7 +1278,7 @@ export const cards = [
 						variable: 'startingEnergy',
 					}),
 					effect({
-						effectType: EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
+						effectType: EFFECT_TYPE_STARTING_ENERGY_ON_CREATURE,
 						target: '$new_card',
 						amount: '$startingEnergy',
 					}),
@@ -1299,23 +1306,39 @@ export const cards = [
 						property: PROPERTY_CONTROLLER,
 						variable: 'relicController',
 					}),
-					prompt({
-						promptType: PROMPT_TYPE_ALTERNATIVE,
-						// message: 'Do you want to discard 4 energy to avoid discarding ${target}?',
-						promptParams: {
-							alternatives: [
-								{
-									name: 'Discard the relic',
-									value: 'discardRelic',
+					select({
+						selector: SELECTOR_MAGI_OF_PLAYER,
+						owner: '$relicController',
+						variable: 'relicMagi',
+					}),
+					getPropertyValue({
+						target: '$relicMagi',
+						property: PROPERTY_ENERGY_COUNT,
+						variable: 'relicMagiEnergy',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_CONDITIONAL,
+						relicMagiEnergy: '$relicMagiEnergy',
+						conditions: [{
+							objectOne: 'relicMagiEnergy',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '>=',
+							objectTwo: 4,
+							propertyTwo: null,
+						}],
+						thenEffects: [
+							prompt({
+								promptType: PROMPT_TYPE_ALTERNATIVE,
+								promptParams: {
+									alternatives: [
+										{ name: 'Discard the relic', value: 'discardRelic' },
+										{ name: 'Discard 4 energy from Magi', value: 'discardEnergy' },
+									],
 								},
-								{
-									name: 'Discard 4 energy from Magi',
-									value: 'discardEnergy'
-								}
-							],
-						},
-						variable: 'choice',
-						player: '$relicController',
+								variable: 'choice',
+								player: '$relicController',
+							}),
+						],
 					}),
 					effect({
 						effectType: EFFECT_TYPE_CONDITIONAL,
@@ -1330,11 +1353,6 @@ export const cards = [
 							}
 						],
 						thenEffects: [
-							select({
-								selector: SELECTOR_MAGI_OF_PLAYER,
-								owner: '$relicController',
-								variable: 'relicMagi',
-							}),
 							effect({
 								effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
 								target: '$relicMagi',
@@ -1549,10 +1567,17 @@ export const cards = [
 		text: 'Choose any one Creature in play. The chosen Creature cannot be attacked during your opponents\' next two turns. Place this card on the chosen Creature while Fog Bank is in effect.',
 		effects: [
 			prompt({
-				promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
+				promptType: PROMPT_TYPE_SINGLE_CREATURE,
+			}),
+			effect({
+				effectType: EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE,
+				target: '$source',
+				attachmentTarget: '$target',
 			}),
 			effect({
 				effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+				source: '$new_card',
+				discardSourceOnExpiration: true,
 				staticAbilities: [
 					{
 						name: 'Fog Bank',
@@ -1567,18 +1592,10 @@ export const cards = [
 					},
 				],
 				expiration: {
-					type: EXPIRATION_OPPONENT_TURNS,
+					type: EXPIRATION_DURING_OPPONENT_TURNS,
 					turns: 2,
 				},
 			}),
-			effect({
-				effectType: EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE,
-				target: '$source',
-				attachmentTarget: '$target',
-			}),
-			// effect({
-			// 	effectType: EFFECT_TYPE_ADD_DELAYED_TRIGGER,
-			// })
 		],
 	}),
 	new Card('Burrow', TYPE_SPELL, REGION_UNDERNEATH, COST_X_PLUS_ONE, {
@@ -1888,6 +1905,10 @@ export const cards = [
 						destinationZone: ZONE_TYPE_HAND,
 						target: '$targetCard',
 					}),
+					effect({
+						effectType: EFFECT_TYPE_SHUFFLE_DECK,
+						player: '$controller',
+					}),
 				],
 			},
 		],
@@ -2147,19 +2168,21 @@ export const cards = [
 				}),
 				effect({
 					effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
+					target: '$selected',
 				}),
 				select({
 					selector: SELECTOR_RELICS,
 				}),
 				effect({
 					effectType: EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY,
-					target: '$target',
+					target: '$selected',
 				}),
 				select({
 					selector: SELECTOR_MAGI,
 				}),
 				effect({
-					effectType: EFFECT_TYPE_MAGI_IS_DEFEATED,
+					effectType: EFFECT_TYPE_DEFEAT_MAGI,
+					target: '$selected',
 				})
 			]
 		}],
@@ -2230,12 +2253,7 @@ export const cards = [
 			effect({
 				effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
 				target: '$target',
-			}),
-			effect({
-				effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-				sourceZone: ZONE_TYPE_DISCARD,
-				destinationZone: ZONE_TYPE_DECK,
-				target: '$new_card',
+				shuffleIntoDeck: true,
 			}),
 		],
 	}),
@@ -3525,6 +3543,10 @@ export const cards = [
 						destinationZone: ZONE_TYPE_HAND,
 						target: '$targetCards',
 					}),
+					effect({
+						effectType: EFFECT_TYPE_SHUFFLE_DECK,
+						player: '$player',
+					}),
 				],
 			},
 		],
@@ -3664,7 +3686,7 @@ export const cards = [
 		triggerEffects: [
 			{
 				name: 'Charge',
-				text: 'When Quor Pup attacks, move up to two energy from it to your Magi',
+				text: 'When Quor Pup attacks, move up to two energy to it from your Magi.',
 				find: {
 					effectType: EFFECT_TYPE_CREATURE_ATTACKS,
 					conditions: [
@@ -3810,10 +3832,12 @@ export const cards = [
 					prompt({
 						promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
 						promptParams: {
-							restriction: RESTRICTION_CREATURE_TYPE,
-							restrictionValue: 'Pharan',
+							restrictions: [
+								{ type: RESTRICTION_CREATURE_TYPE, value: 'Pharan' },
+								{ type: RESTRICTION_OWN_CREATURE, value: '' },
+							],
 						},
-						message: 'Choose a Pharan',
+						message: 'Choose a Pharan you control',
 						variable: 'chosenPharan',
 					}),
 					getPropertyValue({
@@ -4043,24 +4067,8 @@ export const cards = [
 						promptType: PROMPT_TYPE_OWN_SINGLE_CREATURE,
 						message: 'Select your creature. Its energy will be moved onto your Magi and the creature will return to your hand.',
 					}),
-					getPropertyValue({
-						property: PROPERTY_ENERGY_COUNT,
-						target: '$target',
-						variable: 'creatureEnergy',
-					}),
-					select({
-						selector: SELECTOR_OWN_MAGI,
-					}),
 					effect({
-						effectType: EFFECT_TYPE_MOVE_ENERGY,
-						source: '$target',
-						target: '$selected',
-						amount: '$creatureEnergy',
-					}),
-					effect({
-						effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-						sourceZone: ZONE_TYPE_IN_PLAY,
-						destinationZone: ZONE_TYPE_HAND,
+						effectType: EFFECT_TYPE_RETURN_CREATURE_RETURNING_ENERGY,
 						target: '$target',
 					}),
 				],
@@ -4147,7 +4155,7 @@ export const cards = [
 						}),
 						effect({
 							effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_MAGI,
-							target: '$target',
+							target: '$targetMagi',
 							amount: 4,
 						}),
 					],
@@ -4911,12 +4919,19 @@ export const cards = [
 						target: '$source',
 						variable: 'spellController',
 					}),
+					getPropertyValue({
+						property: PROPERTY_CARD_MEMORY,
+						subProperty: 'recall',
+						target: '$source',
+						variable: 'recalledNames',
+					}),
 					prompt({
 						promptType: PROMPT_TYPE_CHOOSE_N_CARDS_FROM_ZONE,
 						promptParams: {
 							zone: ZONE_TYPE_DISCARD,
 							zoneOwner: '$spellController',
 							numberOfCards: 1,
+							restrictions: [{ type: RESTRICTION_CARD_NAME_NOT_IN, value: '$recalledNames' }],
 						},
 						variable: 'selectedCard',
 					}),
@@ -4926,23 +4941,35 @@ export const cards = [
 						sourceZone: ZONE_TYPE_DISCARD,
 						destinationZone: ZONE_TYPE_HAND,
 					}),
+					getPropertyValue({
+						property: PROPERTY_CREATURE_NAME,
+						target: '$new_cards',
+						variable: 'recalledName',
+					}),
 					effect({
-						effectType: EFFECT_TYPE_ADD_DELAYED_TRIGGER, // Shouldn't this be a delayed replacement effect? static effect till end of turn?
-						delayedTrigger: {
+						effectType: EFFECT_TYPE_REMEMBER_CARD_VALUE,
+						target: '$source',
+						key: 'recall',
+						value: '$recalledName',
+					}),
+					effect({
+						effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
+						expiration: { type: EXPIRATION_THIS_TURN },
+						replacementEffects: [{
 							find: {
 								effectType: EFFECT_TYPE_DRAW_CARDS_IN_DRAW_STEP,
 								conditions: [
 									{
-										objectOne: '%player',
+										objectOne: 'player',
 										propertyOne: ACTION_PROPERTY,
 										comparator: '=',
-										objectTwo: '$source',
-										propertyTwo: PROPERTY_CONTROLLER,
+										objectTwo: '$spellController',
+										propertyTwo: null,
 									},
 								],
 							},
-							effects: [],
-						}
+							replaceWith: { effectType: EFFECT_TYPE_NONE },
+						}],
 					})
 				],
 			},
@@ -5136,7 +5163,7 @@ export const cards = [
 			effect({
 				effectType: EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES,
 				target: '$selected',
-				amount: 2,
+				amount: '$roll_result',
 			}),
 		],
 	}),
@@ -6087,10 +6114,16 @@ export const cards = [
 		effects: [
 			prompt({
 				promptType: PROMPT_TYPE_SINGLE_CREATURE,
+				variable: 'firstCreature',
 			}),
 			effect({
 				effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-				target: '$target',
+				target: '$firstCreature',
+			}),
+			getPropertyValue({
+				property: PROPERTY_ID,
+				target: '$firstCreature',
+				variable: 'firstCreatureId',
 			}),
 			select({
 				selector: SELECTOR_OWN_MAGI,
@@ -6114,16 +6147,39 @@ export const cards = [
 					}
 				],
 				thenEffects: [
-					effect({
-						effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL,
-						amount: 4,
-					}),
 					prompt({
-						promptType: PROMPT_TYPE_SINGLE_CREATURE,
+						promptType: PROMPT_TYPE_CHOOSE_UP_TO_N_CARDS_FROM_ZONE,
+						message: 'Choose a second Creature to discard for 4 energy, or choose none.',
+						promptParams: {
+							zone: ZONE_TYPE_IN_PLAY,
+							zoneOwner: '$player',
+							numberOfCards: 1,
+							restrictions: [
+								{ type: RESTRICTION_TYPE, value: TYPE_CREATURE },
+								{ type: RESTRICTION_EXCEPT_SOURCE, value: '$firstCreatureId' },
+							],
+						},
+						variable: 'secondCreature',
+					}),
+					getPropertyValue({
+						property: CARD_COUNT,
+						target: '$secondCreature',
+						variable: 'secondCreatureCount',
 					}),
 					effect({
-						effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
-						target: '$target',
+						effectType: EFFECT_TYPE_CONDITIONAL,
+						secondCreatureCount: '$secondCreatureCount',
+						conditions: [{
+							objectOne: 'secondCreatureCount',
+							propertyOne: ACTION_PROPERTY,
+							comparator: '=',
+							objectTwo: 1,
+							propertyTwo: null,
+						}],
+						thenEffects: [
+							effect({ effectType: EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL, from: '$ownMagi', amount: 4 }),
+							effect({ effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, target: '$secondCreature', spell: true }),
+						],
 					}),
 				],
 			}),
@@ -6145,6 +6201,7 @@ export const cards = [
 					operandOne: {
 						type: PROTECTION_TYPE_GENERAL,
 						from: [PROTECTION_FROM_SPELLS],
+						restrictions: [{ type: RESTRICTION_OPPONENT_CREATURE, value: '$targetController' }],
 					},
 				},
 			},
@@ -6159,6 +6216,7 @@ export const cards = [
 					operandOne: {
 						type: PROTECTION_TYPE_GENERAL,
 						from: [PROTECTION_FROM_SPELLS],
+						restrictions: [{ type: RESTRICTION_OPPONENT_CREATURE, value: '$targetController' }],
 					},
 				},
 			}

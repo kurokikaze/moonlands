@@ -25,6 +25,10 @@ export const applyDiscardCardEffect = function (action, transform) {
         });
     }
 };
+export const applyShuffleDeckEffect = function (action) {
+    const player = this.getMetaValue(action.player, action.generatedBy);
+    this.shuffleZone(this.getZone(ZONE_TYPE_DECK, player));
+};
 export const applyReshuffleDiscardEffect = function (action, transform, _state, seeded_nanoid) {
     const player = this.getMetaValue(action.player, action.generatedBy);
     const deck = this.getZone(ZONE_TYPE_DECK, player);

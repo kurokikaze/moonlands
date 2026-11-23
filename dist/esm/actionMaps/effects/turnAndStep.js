@@ -57,7 +57,31 @@ const steps = [
 ];
 export const applyStartTurnEffect = function (action, transform) {
     this.setTurn(this.turn === null ? 0 : this.turn + 1);
-    transform({
+    const effects = [];
+    const expirationActions = [];
+    const updateEffect = updateContinuousEffects(action.player);
+    const inPlay = this.getZone(ZONE_TYPE_IN_PLAY);
+    for (const effect of this.state.continuousEffects) {
+        const next = updateEffect(effect);
+        if (next) {
+            effects.push(next);
+        }
+        else if (effect.discardSourceId) {
+            const source = inPlay.byId(effect.discardSourceId);
+            if (source) {
+                expirationActions.push({
+                    type: ACTION_EFFECT,
+                    effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+                    target: source,
+                    sourceZone: ZONE_TYPE_IN_PLAY,
+                    destinationZone: ZONE_TYPE_DISCARD,
+                    bottom: false,
+                    generatedBy: action.generatedBy,
+                });
+            }
+        }
+    }
+    transform(...expirationActions, {
         type: ACTION_EFFECT,
         effectType: EFFECT_TYPE_START_STEP,
         player: action.player,
@@ -69,7 +93,7 @@ export const applyStartTurnEffect = function (action, transform) {
         player: action.player,
         generatedBy: action.generatedBy,
     });
-    this.setContinuousEffects(this.state.continuousEffects.map(updateContinuousEffects(action.player)).filter(Boolean));
+    this.setContinuousEffects(effects);
     this.setActivePlayer(action.player);
     this.setStep(0);
 };

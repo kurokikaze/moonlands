@@ -41,6 +41,7 @@ export declare const UNMAKE_EFFECT_TYPE_MOVE_CARDS_BETWEEN_ZONES = 38;
 export declare const UNMAKE_EFFECT_TYPE_ATTACH_CARD_TO_CARD = 39;
 export declare const UNMAKE_EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY = 40;
 export declare const UNMAKE_PROMPT_ENTER = 41;
+export declare const UNMAKE_EFFECT_TYPE_SHUFFLE_DECK = 42;
 export type UnActionDiscardEnergyFromCreature = {
     type: typeof UNMAKE_EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE;
     creatures: {
@@ -64,6 +65,7 @@ export type MetaDataEntry = {
     previousValue: any;
 };
 export type UnActionMoveCardBetweenZones = {
+    attachedTo?: string;
     type: typeof UNMAKE_EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES;
     card: CardInGame;
     sourceZone: ZoneType;
@@ -76,6 +78,7 @@ export type UnActionMoveCardBetweenZones = {
 export type UnActionDieRolled = {
     type: typeof UNMAKE_EFFECT_TYPE_DIE_ROLLED;
     spellId: string;
+    variable?: string;
     previousRollResult: any;
 };
 export type CardFlagsSnapshot = {
@@ -313,4 +316,9 @@ export type UnActionAttachCardToCard = {
 export type UnActionDiscardRelicFromPlay = {
     type: typeof UNMAKE_EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY;
 };
-export type UnAction = UnActionDiscardEnergyFromCreature | UnActionDiscardEnergyFromMagi | UnActionMoveCardBetweenZones | UnActionDieRolled | UnActionStartTurn | UnActionStartStep | UnActionRearrangeCardsOfZone | UnActionCreateContinuousEffect | UnActionAddEnergyToCreature | UnActionAddEnergyToMagi | UnActionStartOfTurn | UnActionBeforeDamage | UnActionCreatureDefeatsCreature | UnActionDiscardCreatureFromPlay | UnActionMoveEnergy | UnActionRemoveEnergyFromCreature | UnActionRemoveEnergyFromMagi | UnActionPromptEntered | UnActionFindStartingCards | UnActionReshuffleDiscard | UnActionAddDelayedTrigger | UnActionRearrangeEnergyOnCreatures | UnActionDistributeEnergyOnCreatures | UnActionForbidAttackToCreature | UnActionCalculate | UnActionSelect | UnActionProperty | UnActionPromptLeave | UnActionPromptEnter | UnActionPower | UnActionPlayerWins | UnActionExecutePowerEffects | UnActionLogEntry | UnActionMoveCardsBetweenZones | UnActionAttachCardToCard;
+export type UnActionShuffleDeck = {
+    type: typeof UNMAKE_EFFECT_TYPE_SHUFFLE_DECK;
+    player: number;
+    previousDeckCards: CardInGame[];
+};
+export type UnAction = UnActionShuffleDeck | UnActionDiscardEnergyFromCreature | UnActionDiscardEnergyFromMagi | UnActionMoveCardBetweenZones | UnActionDieRolled | UnActionStartTurn | UnActionStartStep | UnActionRearrangeCardsOfZone | UnActionCreateContinuousEffect | UnActionAddEnergyToCreature | UnActionAddEnergyToMagi | UnActionStartOfTurn | UnActionBeforeDamage | UnActionCreatureDefeatsCreature | UnActionDiscardCreatureFromPlay | UnActionMoveEnergy | UnActionRemoveEnergyFromCreature | UnActionRemoveEnergyFromMagi | UnActionPromptEntered | UnActionFindStartingCards | UnActionReshuffleDiscard | UnActionAddDelayedTrigger | UnActionRearrangeEnergyOnCreatures | UnActionDistributeEnergyOnCreatures | UnActionForbidAttackToCreature | UnActionCalculate | UnActionSelect | UnActionProperty | UnActionPromptLeave | UnActionPromptEnter | UnActionPower | UnActionPlayerWins | UnActionExecutePowerEffects | UnActionLogEntry | UnActionMoveCardsBetweenZones | UnActionAttachCardToCard;

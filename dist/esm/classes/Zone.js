@@ -44,19 +44,19 @@ export default class Zone {
     removeById(id) {
         this.cards = this.cards.filter(card => card.id != id);
     }
-    shuffle() {
-        this.cards = this._shuffle(this.cards);
+    shuffle(twister = this._twister) {
+        this.cards = this._shuffle(this.cards, twister);
     }
     getCardsByRestriction(restrictions, state) {
         return restrictions ? this.cards.filter(state.makeCardFilter(restrictions)) : this.cards;
     }
-    _shuffle(array) {
+    _shuffle(array, twister) {
         var currentIndex = array.length, temporaryValue, randomIndex;
         // While there remain elements to shuffle...
         while (0 !== currentIndex) {
             // Pick a remaining element...
             // @ts-ignore
-            const randomValue = this._twister ? this._twister.random() : Math.random();
+            const randomValue = twister ? twister.random() : Math.random();
             randomIndex = Math.floor(randomValue * currentIndex);
             currentIndex -= 1;
             // And swap it with the current element.

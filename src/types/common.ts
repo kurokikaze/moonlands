@@ -59,6 +59,8 @@ import {
     PROPERTY_TYPE,
     ACTION_PROPERTY,
     EXPIRATION_ANY_TURNS,
+    EXPIRATION_DURING_OPPONENT_TURNS,
+    EXPIRATION_THIS_TURN,
     EXPIRATION_NEVER,
     EXPIRATION_OPPONENT_TURNS,
     EXPIRATION_PLAYER_TURNS,
@@ -87,7 +89,9 @@ import {
     PROPERTY_ABLE_TO_USE_POWERS,
     PROMPT_TYPE_PLAYER,
     PROMPT_TYPE_REARRANGE_CARDS_OF_ZONE,
+    PROPERTY_CARD_MEMORY,
     PROPERTY_CREATURE_NAME,
+    RESTRICTION_CARD_NAME_NOT_IN,
     RESTRICTION_CREATURE_NAME,
     PROMPT_TYPE_POWER_ON_MAGI,
     PROMPT_TYPE_ALTERNATIVE,
@@ -120,6 +124,7 @@ export type PropertyType = typeof PROPERTY_MAGI_STARTING_ENERGY |
     typeof PROPERTY_CAN_ATTACK_MAGI_DIRECTLY |
     typeof PROPERTY_CONTROLLER |
     typeof PROPERTY_CREATURE_TYPES |
+    typeof PROPERTY_CARD_MEMORY |
     typeof PROPERTY_CREATURE_NAME |
     typeof PROPERTY_ENERGIZE |
     typeof PROPERTY_ENERGY_COUNT |
@@ -185,15 +190,18 @@ export type ConditionType = {
     propertyTwo: PropertyType | null;
 }
 
-export type ExpirationType = typeof EXPIRATION_OPPONENT_TURNS |
+export type ExpirationType = typeof EXPIRATION_DURING_OPPONENT_TURNS |
+    typeof EXPIRATION_THIS_TURN |
+    typeof EXPIRATION_OPPONENT_TURNS |
     typeof EXPIRATION_PLAYER_TURNS |
     typeof EXPIRATION_ANY_TURNS |
     typeof EXPIRATION_NEVER;
 
 export type ExpirationObjectType = {
-    type: ExpirationType;
+    type: Exclude<ExpirationType, typeof EXPIRATION_THIS_TURN | typeof EXPIRATION_DURING_OPPONENT_TURNS>;
     turns: number;
-}
+} | { type: typeof EXPIRATION_THIS_TURN; turns?: never }
+  | { type: typeof EXPIRATION_DURING_OPPONENT_TURNS; turns: number; active?: boolean };
 
 export type RestrictionType = typeof RESTRICTION_CREATURE_WAS_ATTACKED | 
     typeof RESTRICTION_OWN_CREATURE |
@@ -203,6 +211,7 @@ export type RestrictionType = typeof RESTRICTION_CREATURE_WAS_ATTACKED |
     typeof RESTRICTION_REGION_IS_NOT |
     typeof RESTRICTION_TYPE |
     typeof RESTRICTION_CREATURE_TYPE |
+    typeof RESTRICTION_CARD_NAME_NOT_IN |
     typeof RESTRICTION_CREATURE_NAME |
     typeof RESTRICTION_PLAYABLE |
     typeof RESTRICTION_ENERGY_LESS_THAN | 

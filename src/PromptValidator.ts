@@ -56,7 +56,7 @@ export class PromptValidator {
 				? (Array.isArray(multiTarget) ? multiTarget.length : 0)
 				: target && 'name' in target && 'effects' in target && property === PROPERTY_POWER_COST
 					? target.cost
-					: target ? modifyByStaticAbilities(target, property) : undefined;
+					: target ? modifyByStaticAbilities(target, property, action.subProperty) : undefined;
 			metaValues[`$${action.variable || 'result'}`] = result;
 		}
 

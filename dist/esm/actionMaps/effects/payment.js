@@ -15,7 +15,8 @@ export const applyPayingEnergyForRelicEffect = function (action, transform) {
     }
 };
 export const applyPayingEnergyForSpellEffect = function (action, transform) {
-    const payingTarget = this.getMetaValue(action.from, action.generatedBy);
+    const payingSource = this.getMetaValue(action.from, action.generatedBy);
+    const payingTarget = Array.isArray(payingSource) ? payingSource[0] : payingSource;
     const payingAmount = Number(this.getMetaValue(action.amount, action.generatedBy));
     if (payingAmount > 0) {
         transform({

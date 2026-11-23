@@ -66,15 +66,15 @@ export default class Zone {
 		this.cards = this.cards.filter(card => card.id != id);
 	}
 
-	shuffle() {
-		this.cards = this._shuffle(this.cards);
+	shuffle(twister = this._twister) {
+		this.cards = this._shuffle(this.cards, twister);
 	}
 
 	getCardsByRestriction(restrictions: RestrictionObjectType[], state: State): CardInGame[]  {
 		return restrictions ? this.cards.filter(state.makeCardFilter(restrictions)) : this.cards;
 	}
 
-	private _shuffle<T>(array: T[]): T[] {
+	private _shuffle<T>(array: T[], twister: MercenneFixed | null): T[] {
 		var currentIndex = array.length, temporaryValue, randomIndex;
 
 		// While there remain elements to shuffle...
@@ -82,7 +82,7 @@ export default class Zone {
 
 			// Pick a remaining element...
 			// @ts-ignore
-			const randomValue = this._twister ? this._twister.random() : Math.random()
+			const randomValue = twister ? twister.random() : Math.random()
 			randomIndex = Math.floor(randomValue * currentIndex);
 			currentIndex -= 1;
 

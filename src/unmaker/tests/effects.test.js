@@ -1076,7 +1076,7 @@ describe('Unmaking state action', () => {
 		expect(gameState.getSpellMetadata(spellId).roll_result).toBeUndefined()
 	})
 
-	it('Die rolled action (with existing roll_result)', () => {
+	it.each([undefined, 'diceOne'])('Die rolled action restores the previous value for %s', variable => {
 		const ACTIVE_PLAYER = 0;
 		const NON_ACTIVE_PLAYER = 2;
 
@@ -1113,8 +1113,8 @@ describe('Unmaking state action', () => {
 		const spellId = 'test-spell-id';
 
 		// Set an existing roll_result before the action
-		gameState.setSpellMetaDataField('roll_result', 2, spellId);
-		expect(gameState.getSpellMetadata(spellId).roll_result).toBe(2)
+		const key = variable ?? 'roll_result';
+		gameState.setSpellMetaDataField(key, 2, spellId);
 
 		const unmaker = new Unmaker(gameState)
 		unmaker.setCheckpoint()
@@ -1124,6 +1124,7 @@ describe('Unmaking state action', () => {
 			type: moonlands.ACTION_EFFECT,
 			effectType: moonlands.EFFECT_TYPE_ROLL_DIE,
 			result: 5, // Pre-set the result to make it deterministic
+			variable,
 			player: ACTIVE_PLAYER,
 			generatedBy: spellId,
 		}
@@ -1133,13 +1134,13 @@ describe('Unmaking state action', () => {
 		// Verify DIE_ROLLED action was captured with previous value
 
 		// Verify roll_result was updated
-		expect(gameState.getSpellMetadata(spellId).roll_result).toBe(5)
+		expect(gameState.getSpellMetadata(spellId)[key]).toBe(5)
 
 		// Apply un-action
 		unmaker.revertToCheckpoint()
 
 		// Verify roll_result was restored to previous value
-		expect(gameState.getSpellMetadata(spellId).roll_result).toBe(2)
+		expect(gameState.getSpellMetadata(spellId)[key]).toBe(2)
 	})
 
 	it('Start turn action', () => {

@@ -1,4 +1,5 @@
 import {
+  EFFECT_TYPE_REMEMBER_CARD_VALUE,
   EFFECT_TYPE_ADD_DELAYED_TRIGGER,
   EFFECT_TYPE_ADD_ENERGY_TO_CREATURE,
   EFFECT_TYPE_ADD_ENERGY_TO_CREATURE_OR_MAGI,
@@ -54,6 +55,7 @@ import {
   EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
   EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE,
   EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI,
+  EFFECT_TYPE_SHUFFLE_DECK,
   EFFECT_TYPE_RESHUFFLE_DISCARD,
   EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY,
   EFFECT_TYPE_RETURN_CREATURE_DISCARDING_ENERGY,
@@ -84,6 +86,7 @@ import {
   applyDiscardCardsEffect,
   applyDiscardCardEffect,
   applyReshuffleDiscardEffect,
+  applyShuffleDeckEffect,
 } from "./discard.js";
 
 // Draw effects
@@ -195,6 +198,7 @@ export const actionMap: Partial<ActionHandlerMap> = {
   // Discarding
   [EFFECT_TYPE_DISCARD_CARDS_FROM_HAND]: applyDiscardCardsEffect,
   [EFFECT_TYPE_DISCARD_CARD_FROM_HAND]: applyDiscardCardEffect,
+  [EFFECT_TYPE_SHUFFLE_DECK]: applyShuffleDeckEffect,
   [EFFECT_TYPE_RESHUFFLE_DISCARD]: applyReshuffleDiscardEffect,
 
   // Returning to hand
@@ -264,6 +268,11 @@ export const actionMap: Partial<ActionHandlerMap> = {
 
   // Delayed triggers, conditional and continuous effects
   [EFFECT_TYPE_FORBID_ATTACK_TO_CREATURE]: applyForbidAttackToCreatureEffect,
+  [EFFECT_TYPE_REMEMBER_CARD_VALUE]: function (action) {
+    const target = this.getMetaValue(action.target, action.generatedBy);
+    const value = this.getMetaValue(action.value, action.generatedBy);
+    if (target && typeof value === 'string') this.rememberCardValue(target, action.key, value);
+  },
   [EFFECT_TYPE_ADD_DELAYED_TRIGGER]: applyAddDelayedTriggerEffect,
   [EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT]: applyCreateContinuousEffect,
   [EFFECT_TYPE_CONDITIONAL]: applyConditionalEffect,

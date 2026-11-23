@@ -120,6 +120,7 @@ import {
 	EFFECT_TYPE_START_STEP,
 	EFFECT_TYPE_DRAW,
 	EFFECT_TYPE_ADD_STARTING_ENERGY_TO_MAGI,
+	EFFECT_TYPE_SHUFFLE_DECK,
 	EFFECT_TYPE_RESHUFFLE_DISCARD,
 	EFFECT_TYPE_ADD_DELAYED_TRIGGER,
 	EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES,
@@ -129,6 +130,7 @@ import {
 	EFFECT_TYPE_ROLL_DIE,
 	EFFECT_TYPE_PLAY_CREATURE,
 	EFFECT_TYPE_PLAY_RELIC,
+	EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE,
 	EFFECT_TYPE_PLAY_SPELL,
 	EFFECT_TYPE_CREATURE_ENTERS_PLAY,
 	EFFECT_TYPE_RELIC_ENTERS_PLAY,
@@ -1094,6 +1096,14 @@ export class State {
 		});
 	}
 
+	rememberCardValue(card: CardInGame, key: string, value: string): void {
+		const memory = card.data.memory ?? {};
+		const previous = Object.hasOwn(memory, key) ? memory[key] : [];
+		if (previous.includes(value)) return;
+		this.recordKey(card.data, 'memory');
+		card.data.memory = { ...memory, [key]: [...previous, value] };
+	}
+
 	private recordCardData(card: CardInGame): void {
 		this.journal?.record({
 			kind: 'cardData',
@@ -1237,7 +1247,7 @@ export class State {
 		const previousCards = [...zone.cards];
 		// Shuffle works in place, so we keep a copy
 		this.journal?.record({ kind: 'zoneCards', zone, previousCards });
-		zone.shuffle();
+		zone.shuffle(this.twister ?? undefined);
 	}
 
 	// Spell metadata
@@ -1538,7 +1548,7 @@ export class State {
 	}
 
 	isCardAffectedByEffect(card: CardInGame, effect: EnrichedAction & EffectType) {
-		const protection = this.modifyByStaticAbilities(card, PROPERTY_PROTECTION);
+		const protection: ProtectionType | undefined = this.modifyByStaticAbilities(card, PROPERTY_PROTECTION);
 
 		if (protection) {
 			// Is the `from` right?
@@ -1549,21 +1559,7 @@ export class State {
 			) {
 
 				if (
-					effect.effectType === EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE &&
-					protection.type === PROTECTION_TYPE_ENERGY_LOSS
-				) {
-					const source = effect.source;
-
-					if (protection.restrictions) {
-						const cardFilter = this.makeCardFilter(protection.restrictions);
-
-						return !cardFilter(source);
-					} else {
-						return false;
-					}
-				}
-
-				if (
+					(effect.effectType === EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE && protection.type === PROTECTION_TYPE_ENERGY_LOSS) ||
 					(effect.effectType === EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY && protection.type === PROTECTION_TYPE_DISCARDING_FROM_PLAY) ||
 					protection.type === PROTECTION_TYPE_GENERAL
 				) {
@@ -1571,24 +1567,14 @@ export class State {
 					if (!source) return false;
 
 					if (protection.restrictions) {
-						const cardFilter = this.makeCardFilter(protection.restrictions);
+						const restrictions = protection.restrictions.map(restriction =>
+							restriction.value === '$targetController'
+								? { ...restriction, value: this.modifyByStaticAbilities(card, PROPERTY_CONTROLLER) }
+								: restriction
+						);
+						const cardFilter = this.makeCardFilter(restrictions);
 
-						return !cardFilter(source);
-					} else {
-						return false;
-					}
-				}
-
-				if (
-					protection.type === PROTECTION_TYPE_GENERAL
-				) {
-					if (protection.restrictions) {
-						const source = effect.source;
-						if (!source) return false;
-
-						const cardFilter = this.makeCardFilter(protection.restrictions);
-
-						return !cardFilter(source);
+						if (cardFilter(source)) return false;
 					} else {
 						return false;
 					}
@@ -1662,8 +1648,10 @@ export class State {
 	}
 
 	replaceByReplacementEffect(action: AnyEffectType): AnyEffectType[] {
-		type ReplacementEffectEnhanced = ReplacementEffectType<FindType> & { self: CardInGame };
+		type ReplacementEffectEnhanced = ReplacementEffectType<FindType> & { self: CardInGame; continuousId?: string };
 		const zoneReplacements = this.replacementEffectRegistry.getCandidates();
+		const continuousReplacements = this.state.continuousEffects.flatMap(({ id, self, replacementEffects }) =>
+			self ? (replacementEffects ?? []).map(replacement => ({ ...replacement, self, continuousId: id })) : []);
 
 		let replacementFound: boolean = false;
 		let appliedReplacerId: string | null = null;
@@ -1671,12 +1659,12 @@ export class State {
 		let replaceWith: Omit<ReplacingEffectType | EffectType | PromptType | NoneType, 'generatedBy'>[] | null = null;
 		let foundReplacer: ReplacementEffectEnhanced | null = null;
 
-		for (let replacer of zoneReplacements) {
+		for (const replacer of [...zoneReplacements, ...continuousReplacements] as ReplacementEffectEnhanced[]) {
 			// Eligibility changes during a turn and when card data is rolled back.
 			if (replacer.oncePerTurn && replacer.self.wasActionUsed(replacer.name || 'unknown effect')) {
 				continue;
 			}
-			const replacerId = replacer.self.id; // Not really, but will work for now
+			const replacerId = replacer.continuousId ?? replacer.self.id;
 
 			if ('replacedBy' in action && action.replacedBy?.includes(replacerId)) {
 				break;
@@ -2060,7 +2048,7 @@ export class State {
 						if (target && 'name' in target && 'effects' in target && property === PROPERTY_POWER_COST) {
 							modifiedResult = target.cost;
 						} else {
-							modifiedResult = this.modifyByStaticAbilities(target, property);
+							modifiedResult = this.modifyByStaticAbilities(target, property, action.subProperty);
 						}
 
 						const variable = action.variable || 'result';
@@ -2965,6 +2953,8 @@ export class State {
 											generatedBy: cardItself.id,
 										});
 										const preparedEffects: AnyEffectType[] = baseCard.data?.effects?.map(enrichAction) || [];
+										const playsAttached = preparedEffects.some(effect => effect.type === ACTION_EFFECT &&
+											effect.effectType === EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE);
 
 										const testablePrompts = [
 											PROMPT_TYPE_SINGLE_CREATURE,
@@ -3061,7 +3051,7 @@ export class State {
 													generatedBy: cardItself.id,
 												},
 												...payEffects,
-												{
+												...(playsAttached ? [] : [{
 													type: ACTION_EFFECT,
 													effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
 													target: cardItself,
@@ -3070,7 +3060,7 @@ export class State {
 													destinationZone: ZONE_TYPE_DISCARD,
 													player: player,
 													generatedBy: cardItself.id,
-												},
+												} satisfies AnyEffectType]),
 												...preparedEffects,
 												{
 													type: ACTION_EFFECT,
@@ -3208,6 +3198,7 @@ export {
 	PROMPT_TYPE_CHOOSE_CARDS,
 
 	EFFECT_TYPE_DRAW,
+	EFFECT_TYPE_SHUFFLE_DECK,
 	EFFECT_TYPE_RESHUFFLE_DISCARD,
 	EFFECT_TYPE_ADD_DELAYED_TRIGGER,
 	EFFECT_TYPE_REARRANGE_ENERGY_ON_CREATURES,

@@ -27,6 +27,7 @@ export declare class SelectorEngine extends LayeredModificationEngine {
     clearStaticAbilitiesCache(): void;
     clearContinuousStaticAbilitiesCache(): void;
     invalidateStaticAbilitiesForContinuousEffectsChange(previous: ContinuousEffectType[], effects: ContinuousEffectType[]): void;
+    private hasActiveStaticAbilities;
     private getContinuousStaticAbilities;
     /** Only active zones contribute card static abilities. */
     invalidateStaticAbilitiesForZoneChange(zone: Zone, previousCards: CardInGame[], cards: CardInGame[]): void;

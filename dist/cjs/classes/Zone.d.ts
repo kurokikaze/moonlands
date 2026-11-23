@@ -20,7 +20,7 @@ export default class Zone {
     byId(id: string): CardInGame | undefined;
     containsId(id: string): boolean;
     removeById(id: string): void;
-    shuffle(): void;
+    shuffle(twister?: MercenneFixed | null): void;
     getCardsByRestriction(restrictions: RestrictionObjectType[], state: State): CardInGame[];
     private _shuffle;
     empty(): void;

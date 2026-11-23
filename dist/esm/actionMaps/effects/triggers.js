@@ -53,17 +53,16 @@ export const applyCreateContinuousEffect = function (action, _transform, _state,
                 operandOne,
             } });
     });
-    const continuousEffect = {
-        triggerEffects: action.triggerEffects || [],
-        staticAbilities,
-        expiration: action.expiration,
-        player: action.player || 0,
-        id,
-    };
+    const continuousEffect = Object.assign(Object.assign({ triggerEffects: action.triggerEffects || [] }, (action.replacementEffects && {
+        replacementEffects: action.replacementEffects.map(replacement => (Object.assign(Object.assign({}, replacement), { find: Object.assign(Object.assign({}, replacement.find), { conditions: replacement.find.conditions.map(condition => (Object.assign(Object.assign({}, condition), { objectOne: this.getMetaValue(condition.objectOne, action.generatedBy), objectTwo: this.getMetaValue(condition.objectTwo, action.generatedBy) }))) }) }))),
+    })), { staticAbilities, expiration: action.expiration, player: action.player || 0, id });
     const source = this.getMetaValue(action.source, action.generatedBy) ||
         action.triggerSource || this.getSpellMetadata(action.generatedBy || '').source;
-    if (source instanceof CardInGame)
+    if (source instanceof CardInGame) {
         continuousEffect.self = source;
+        if (action.discardSourceOnExpiration)
+            continuousEffect.discardSourceId = source.id;
+    }
     this.addContinuousEffect(continuousEffect);
 };
 //# sourceMappingURL=triggers.js.map

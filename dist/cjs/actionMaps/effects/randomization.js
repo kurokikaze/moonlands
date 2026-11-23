@@ -8,11 +8,12 @@ export const applyRollDieEffect = function (action, transform) {
         type: ACTION_EFFECT,
         effectType: EFFECT_TYPE_DIE_ROLLED,
         result,
+        ...(action.variable ? { variable: action.variable } : {}),
         player: action.player,
         generatedBy: action.generatedBy,
     });
 };
 export const applyDieRolledEffect = function (action) {
-    this.setSpellMetaDataField('roll_result', action.result, action.generatedBy);
+    this.setSpellMetaDataField(action.variable ?? 'roll_result', action.result, action.generatedBy);
 };
 //# sourceMappingURL=randomization.js.map

@@ -19,6 +19,7 @@ import {
 	PROPERTY_MAGI_NAME,
 	PROPERTY_CAN_BE_ATTACKED,
 	PROPERTY_PROTECTION,
+	PROPERTY_CARD_MEMORY,
 	PROPERTY_CREATURE_NAME,
 	PROPERTY_CONTROLLING_PLAYER,
 	PROPERTY_ABLE_TO_USE_POWERS,
@@ -92,6 +93,8 @@ export class LayeredModificationEngine {
 				return target.card.type;
 			case PROPERTY_CREATURE_TYPES:
 				return target.card.name.split(' ');
+			case PROPERTY_CARD_MEMORY:
+				return subProperty && Object.hasOwn(target.data.memory ?? {}, subProperty) ? target.data.memory?.[subProperty] ?? [] : [];
 			case PROPERTY_CREATURE_NAME:
 				return target.card.name;
 			case PROPERTY_MAGI_NAME:

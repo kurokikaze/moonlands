@@ -5831,6 +5831,7 @@ function validateEffects(effects, initialVariables, cardName) {
 		}
 		if (effect.type == ACTION_EFFECT &&
 			(
+				effect.effectType == EFFECT_TYPE_PLAY_ATTACHED_TO_CREATURE ||
 				effect.effectType == moonlands.EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES ||
 				effect.effectType == moonlands.EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY ||
 				effect.effectType == moonlands.EFFECT_TYPE_DISCARD_RELIC_FROM_PLAY

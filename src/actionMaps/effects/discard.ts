@@ -6,6 +6,7 @@ import {
   EFFECT_TYPE_DISCARD_RESHUFFLED,
   EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
   EFFECT_TYPE_RESHUFFLE_DISCARD,
+  EFFECT_TYPE_SHUFFLE_DECK,
   ZONE_TYPE_DECK,
   ZONE_TYPE_DISCARD,
   ZONE_TYPE_HAND,
@@ -40,6 +41,11 @@ export const applyDiscardCardEffect: ActionTransformer<typeof EFFECT_TYPE_DISCAR
       generatedBy: action.generatedBy,
     })
   }
+}
+
+export const applyShuffleDeckEffect: ActionTransformer<typeof EFFECT_TYPE_SHUFFLE_DECK> = function (action) {
+  const player = this.getMetaValue(action.player, action.generatedBy);
+  this.shuffleZone(this.getZone(ZONE_TYPE_DECK, player));
 }
 
 export const applyReshuffleDiscardEffect: ActionTransformer<typeof EFFECT_TYPE_RESHUFFLE_DISCARD> = function (action, transform, _state, seeded_nanoid) {

@@ -30,7 +30,8 @@ export const applyPayingEnergyForRelicEffect: ActionTransformer<typeof EFFECT_TY
 }
 
 export const applyPayingEnergyForSpellEffect: ActionTransformer<typeof EFFECT_TYPE_PAYING_ENERGY_FOR_SPELL> = function (action, transform) {
-  const payingTarget: CardInGame = this.getMetaValue(action.from, action.generatedBy);
+  const payingSource = this.getMetaValue<CardInGame | CardInGame[]>(action.from, action.generatedBy);
+  const payingTarget = Array.isArray(payingSource) ? payingSource[0] : payingSource;
   const payingAmount = Number(this.getMetaValue(action.amount, action.generatedBy));
 
   if (payingAmount > 0) {

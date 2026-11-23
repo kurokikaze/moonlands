@@ -4,6 +4,7 @@ import {
   ACTION_PLAYER_WINS,
   ACTION_SELECT,
   EFFECT_TYPE_CARD_MOVED_BETWEEN_ZONES,
+  EFFECT_TYPE_SHUFFLE_DECK,
   EFFECT_TYPE_DEFEAT_MAGI,
   EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
   EFFECT_TYPE_DISCARD_CREATURE_OR_RELIC,
@@ -17,6 +18,7 @@ import {
   TYPE_CREATURE,
   TYPE_RELIC,
   ZONE_TYPE_ACTIVE_MAGI,
+  ZONE_TYPE_DECK,
   ZONE_TYPE_DEFEATED_MAGI,
   ZONE_TYPE_DISCARD,
   ZONE_TYPE_IN_PLAY,
@@ -88,6 +90,7 @@ export const applyMoveCardBetweenZonesEffect: ActionTransformer<typeof EFFECT_TY
     const newObject = this.moveCard(zoneChangingCard, sourceZone, destinationZone, action.bottom);
     if (newObject) {
       if (sourceZoneType == ZONE_TYPE_IN_PLAY && destinationZoneType !== ZONE_TYPE_IN_PLAY) {
+        this.detachCard(zoneChangingCard.id);
         if (zoneChangingCard.id in this.state.cardsAttached) {
           // Queue the removal of the attached cards
           for (const attachmentId of this.state.cardsAttached[zoneChangingCard.id]) {
@@ -123,6 +126,9 @@ export const applyMoveCardBetweenZonesEffect: ActionTransformer<typeof EFFECT_TY
         destinationZone: destinationZoneType,
         generatedBy: action.generatedBy,
       });
+      if (action.shuffleDestination && destinationZoneType === ZONE_TYPE_DECK) {
+        transform({ type: ACTION_EFFECT, effectType: EFFECT_TYPE_SHUFFLE_DECK, player: zoneChangingCard.owner, generatedBy: action.generatedBy });
+      }
     }
   }
 }
@@ -231,7 +237,8 @@ export const applyDiscardCreatureFromPlayEffect: ActionTransformer<typeof EFFECT
         target: creature,
         attack: action.attack,
         sourceZone: ZONE_TYPE_IN_PLAY,
-        destinationZone: ZONE_TYPE_DISCARD,
+        destinationZone: action.shuffleIntoDeck ? ZONE_TYPE_DECK : ZONE_TYPE_DISCARD,
+        ...(action.shuffleIntoDeck && { shuffleDestination: true }),
         bottom: false,
         generatedBy: action.generatedBy,
       };

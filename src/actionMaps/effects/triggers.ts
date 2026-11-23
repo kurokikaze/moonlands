@@ -86,6 +86,19 @@ export const applyCreateContinuousEffect: ActionTransformer<typeof EFFECT_TYPE_C
 
   const continuousEffect: ContinuousEffectType = {
     triggerEffects: action.triggerEffects || [],
+    ...(action.replacementEffects && {
+      replacementEffects: action.replacementEffects.map(replacement => ({
+        ...replacement,
+        find: {
+          ...replacement.find,
+          conditions: replacement.find.conditions.map(condition => ({
+            ...condition,
+            objectOne: this.getMetaValue(condition.objectOne, action.generatedBy),
+            objectTwo: this.getMetaValue(condition.objectTwo, action.generatedBy),
+          })),
+        },
+      })),
+    }),
     staticAbilities,
     expiration: action.expiration,
     player: action.player || 0,
@@ -94,7 +107,10 @@ export const applyCreateContinuousEffect: ActionTransformer<typeof EFFECT_TYPE_C
 
   const source = this.getMetaValue(action.source, action.generatedBy) ||
     action.triggerSource || this.getSpellMetadata(action.generatedBy || '').source;
-  if (source instanceof CardInGame) continuousEffect.self = source;
+  if (source instanceof CardInGame) {
+    continuousEffect.self = source;
+    if (action.discardSourceOnExpiration) continuousEffect.discardSourceId = source.id;
+  }
 
   this.addContinuousEffect(continuousEffect);
 }

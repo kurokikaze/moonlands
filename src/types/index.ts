@@ -26,6 +26,7 @@ import {
     PROTECTION_FROM_EFFECTS,
     PROTECTION_FROM_POWERS,
     PROTECTION_FROM_SPELLS,
+    PROTECTION_FROM_ATTACKS,
 
     PROTECTION_TYPE_DISCARDING_FROM_PLAY,
     PROTECTION_TYPE_ENERGY_GAIN,
@@ -55,7 +56,7 @@ export { type EffectType, type MoveCardBetwenZonesEffect } from './effect.js';
 export { type PromptType, type PromptParams } from './prompt.js';
 export { type LogEntryType } from './log.js';
 
-type ProtectionFromType = typeof PROTECTION_FROM_SPELLS | typeof PROTECTION_FROM_EFFECTS | typeof PROTECTION_FROM_POWERS;
+type ProtectionFromType = typeof PROTECTION_FROM_SPELLS | typeof PROTECTION_FROM_EFFECTS | typeof PROTECTION_FROM_POWERS | typeof PROTECTION_FROM_ATTACKS;
 type ProtectionTypeType = typeof PROTECTION_TYPE_ENERGY_LOSS | typeof PROTECTION_TYPE_ENERGY_GAIN | typeof PROTECTION_TYPE_DISCARDING_FROM_PLAY | typeof PROTECTION_TYPE_GENERAL;
 
 export type ProtectionType = {
@@ -185,6 +186,7 @@ export type CalculateType = CalculateParams & EnrichedAction & {
 }
 
 export type PropertyGetterParams = {
+    subProperty?: string;
     property: PropertyType;
     target: string;
     variable: string;
@@ -263,6 +265,8 @@ export type ExitPromptsAction = EnrichedAction & {
 export type ContinuousEffectType = {
     staticAbilities?: StaticAbilityType[];
     triggerEffects?: TriggerEffectType[];
+    replacementEffects?: ReplacementEffectType[];
+    discardSourceId?: string;
     /** Captured source incarnation; continuous triggers may outlive it. */
     self?: CardInGame;
     expiration: ExpirationObjectType;

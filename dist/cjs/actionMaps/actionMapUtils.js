@@ -1,6 +1,15 @@
-import { EXPIRATION_ANY_TURNS, EXPIRATION_OPPONENT_TURNS, EXPIRATION_NEVER } from "../const.js";
+import { EXPIRATION_DURING_OPPONENT_TURNS, EXPIRATION_THIS_TURN, EXPIRATION_ANY_TURNS, EXPIRATION_OPPONENT_TURNS, EXPIRATION_NEVER } from "../const.js";
 export const updateContinuousEffects = (player) => (effect) => {
     switch (effect.expiration.type) {
+        case EXPIRATION_DURING_OPPONENT_TURNS: {
+            const turns = effect.expiration.turns - (effect.expiration.active ? 1 : 0);
+            return turns > 0 ? {
+                ...effect,
+                expiration: { ...effect.expiration, turns, active: player !== effect.player },
+            } : null;
+        }
+        case EXPIRATION_THIS_TURN:
+            return null;
         case EXPIRATION_ANY_TURNS: {
             const turnCount = effect.expiration.turns;
             if (turnCount > 1) {
