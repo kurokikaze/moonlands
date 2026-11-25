@@ -5159,7 +5159,7 @@ export const cards = [
                     prompt({
                         promptType: PROMPT_TYPE_NUMBER,
                         promptParams: {
-                            min: 1,
+                            min: 0,
                             max: '$max_tribute',
                         },
                     }),
