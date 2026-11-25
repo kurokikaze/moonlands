@@ -226,9 +226,7 @@ export const applyDiscardEnergyFromMagiEffect: ActionTransformer<typeof EFFECT_T
 }
 
 export const applyDiscardEnergyFromCreaturesEffect: ActionTransformer<typeof EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURES> = function (action, transform) {
-  // Right now multitarget EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE cannot be distinguished on target-by-target basis
-  // No cards use this effect now, but some may later
-  // Also, multitarget EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE was probably a bad idea from the start
+  // Expand the group into individual effects so protection and triggers apply per creature.
   const multiTarget: CardInGame | CardInGame[] = this.getMetaValue(action.target, action.generatedBy);
   var amount = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
 
@@ -289,6 +287,7 @@ export const applyDiscardEnergyFromCreatureEffect: ActionTransformer<typeof EFFE
             ...action,
             type: ACTION_EFFECT,
             effectType: EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE,
+            target,
             amount: energyLost,
           });
         }
@@ -301,34 +300,38 @@ export const applyDiscardEnergyFromCreatureEffect: ActionTransformer<typeof EFFE
 }
 
 export const applyRemoveEnergyFromCreatureEffect: ActionTransformer<typeof EFFECT_TYPE_REMOVE_ENERGY_FROM_CREATURE> = function (action, transform) {
-  const target: CardInGame = this.getMetaValue(action.target, action.generatedBy);
+  const targets = this.getMetaValue(action.target, action.generatedBy);
   const energyToLose = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
-  if (target && target.card.type === TYPE_CREATURE) {
-    this.changeEnergy(target, -energyToLose);
+  oneOrSeveral(targets, target => {
+    if (target && target.card.type === TYPE_CREATURE) {
+      this.changeEnergy(target, -energyToLose);
 
-    if (target.data.energy === 0) {
-      transform({
-        type: ACTION_EFFECT,
-        effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
-        target,
-        attack: false,
-        sourceZone: ZONE_TYPE_IN_PLAY,
-        destinationZone: ZONE_TYPE_DISCARD,
-        bottom: false,
-        generatedBy: action.generatedBy,
-      });
+      if (target.data.energy === 0) {
+        transform({
+          type: ACTION_EFFECT,
+          effectType: EFFECT_TYPE_MOVE_CARD_BETWEEN_ZONES,
+          target,
+          attack: false,
+          sourceZone: ZONE_TYPE_IN_PLAY,
+          destinationZone: ZONE_TYPE_DISCARD,
+          bottom: false,
+          generatedBy: action.generatedBy,
+        });
+      }
+    } else {
+      console.error('Wrong card type')
     }
-  } else {
-    console.error('Wrong card type')
-  }
+  });
 }
 
 export const applyRemoveEnergyFromMagiEffect: ActionTransformer<typeof EFFECT_TYPE_REMOVE_ENERGY_FROM_MAGI> = function (action) {
-  const target: CardInGame = this.getMetaValue(action.target, action.generatedBy);
+  const targets = this.getMetaValue(action.target, action.generatedBy);
   const energyToLose = parseInt(this.getMetaValue(action.amount, action.generatedBy), 10);
-  if (target && target.card.type === TYPE_MAGI) {
-    this.changeEnergy(target, -energyToLose);
-  }
+  oneOrSeveral(targets, target => {
+    if (target && target.card.type === TYPE_MAGI) {
+      this.changeEnergy(target, -energyToLose);
+    }
+  });
 }
 
 export const applyRestoreCreatureToStartingEnergyEffect: ActionTransformer<typeof EFFECT_TYPE_RESTORE_CREATURE_TO_STARTING_ENERGY> = function (action, transform) {

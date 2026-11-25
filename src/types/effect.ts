@@ -333,7 +333,7 @@ export type DiscardEnergyFromCreatureEffect = ActionEffect & {
 
 export type EnergyDiscardedFromCreatureEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_ENERGY_DISCARDED_FROM_CREATURE;
-	target: CardInGame | CardInGame[];
+	target: CardInGame;
 	source: CardInGame;
 	power?: boolean;
 	attack?: boolean;
@@ -356,7 +356,7 @@ type DiscardEnergyFromMagiEffect = ActionEffect & {
 
 type EnergyDiscardedFromMagiEffect = ActionEffect & {
 	effectType: typeof EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI;
-	target: CardInGame | CardInGame[];
+	target: CardInGame;
 	source: CardInGame;
 	attack?: boolean;
 	relic?: boolean;
