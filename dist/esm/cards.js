@@ -556,7 +556,7 @@ export const cards = [
             {
                 name: 'Pound Pound Pound',
                 text: 'Choose a Relic in play. Discard Relic Stalker from play. Discard the chosen Relic from play.',
-                cost: 1,
+                cost: 0,
                 effects: [
                     prompt({
                         promptType: PROMPT_TYPE_RELIC,
@@ -1390,9 +1390,9 @@ export const cards = [
     new Card('Parmalag', TYPE_CREATURE, REGION_UNDERNEATH, 3, {
         powers: [
             {
-                name: 'Withdraw',
+                name: 'Shield',
                 cost: 1,
-                text: 'Giant Parmalag cannot be attacked during your opponents\' next turn.',
+                text: 'Parmalag is prevented from losing any energy from attacks until the end of your turn.',
                 effects: [
                     effect({
                         effectType: EFFECT_TYPE_CREATE_CONTINUOUS_EFFECT,
@@ -2024,7 +2024,7 @@ export const cards = [
     new Card('Giant Parathin', TYPE_CREATURE, REGION_OROTHE, 10, {
         powers: [
             {
-                name: 'Intercharge',
+                name: 'Interchange',
                 text: 'Discard Giant Parathin from play. Place your active Magi on the bottom of your Magi pile face down. Bring in your next Magi with his or her starting energy. Do not search for their starting cards. You keep your Relics and Creatures.',
                 cost: 0,
                 effects: [
@@ -3029,7 +3029,7 @@ export const cards = [
     new Card('Eye of the Storm', TYPE_RELIC, REGION_ARDERIAL, 0, {
         powers: [
             {
-                name: 'Energy Boost',
+                name: 'Storm Seeker',
                 text: 'Roll one die. 1 = Discard your hand. 2, 3, 4 or 5 = Do nothing. 6 = Draw five cards, or choose any one opponent. The chosen opponent discards his or her hand.',
                 cost: 0,
                 effects: [
@@ -3733,7 +3733,7 @@ export const cards = [
             {
                 name: 'Hypnotize',
                 text: 'Choose any one player. The chosen player discards one card at random from his or her hand.',
-                cost: 3,
+                cost: 1,
                 effects: [
                     prompt({
                         promptType: PROMPT_TYPE_PLAYER,

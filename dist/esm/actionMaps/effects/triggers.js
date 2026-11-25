@@ -7,25 +7,23 @@ export const applyForbidAttackToCreatureEffect = function (action, _transform) {
     oneOrSeveral(targets, target => this.forbidAttacks(target));
 };
 export const applyConditionalEffect = function (action, transform) {
+    var _a, _b, _c, _d;
     const metaData = this.getSpellMetadata(action.generatedBy);
     // "new_card" fallback is for "defeated" triggers
     const self = action.triggerSource || metaData.source || metaData.new_card;
     //   checkCondition(action, self, condition)
     const results = action.conditions.map(condition => this.checkCondition(action, self, condition));
     const enrichAction = (effect) => { var _a; return (Object.assign(Object.assign({ source: self, player: (_a = action.player) !== null && _a !== void 0 ? _a : self === null || self === void 0 ? void 0 : self.data.controller }, effect), { generatedBy: action.generatedBy })); };
-    if (results.every(result => result === true)) {
-        if (action.thenEffects) {
-            const preparedEffects = action.thenEffects
-                .map(enrichAction);
-            transform(...preparedEffects);
-        }
-    }
-    else {
-        if (action.elseEffects) {
-            const preparedEffects = action.elseEffects
-                .map(enrichAction);
-            transform(...preparedEffects);
-        }
+    const effects = results.every(result => result === true) ? action.thenEffects : action.elseEffects;
+    if (!effects)
+        return;
+    const preparedEffects = effects.map(enrichAction);
+    const player = (_d = (_c = this.getMetaValue((_b = (_a = action.player) !== null && _a !== void 0 ? _a : self === null || self === void 0 ? void 0 : self.data.controller) !== null && _b !== void 0 ? _b : 0, action.generatedBy)) !== null && _c !== void 0 ? _c : self === null || self === void 0 ? void 0 : self.data.controller) !== null && _d !== void 0 ? _d : 0;
+    // Validate only the selected branch, after its condition (e.g. a die roll) is
+    // known. An impossible choice fizzles this branch, including dependent effects,
+    // without blocking the rest of the queue or reusing an older metadata target.
+    if (this.promptValidator.checkPrompts(self, preparedEffects, false, 0, player, action.generatedBy)) {
+        transform(...preparedEffects);
     }
 };
 export const applyCreateContinuousEffect = function (action, _transform, _state, seeded_nanoid) {

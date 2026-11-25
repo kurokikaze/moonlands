@@ -161,6 +161,7 @@ export const applyDiscardEnergyFromMagiEffect = function (action, transform) {
                 transform({
                     ...action,
                     effectType: EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
+                    target,
                     amount: energyToRemove,
                 });
             }

@@ -216,6 +216,7 @@ export const applyDiscardEnergyFromMagiEffect: ActionTransformer<typeof EFFECT_T
           transform({
             ...action,
             effectType: EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI,
+            target,
             amount: energyToRemove,
           });
         }

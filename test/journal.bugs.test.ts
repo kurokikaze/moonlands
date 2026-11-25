@@ -191,7 +191,7 @@ describe('Journal – POWER move_cards_between_zones + draw_n_cards (Cloud Scept
 });
 
 describe('Journal – POWER with move_cards_between_zones discard hand (Eye of the Storm roll=1)', () => {
-	it('rolls back state correctly after Energy Boost discards the hand', () => {
+	it('rolls back state correctly after Storm Seeker discards the hand', () => {
 		const eye = card('Eye of the Storm', PLAYER);
 		const hand = ['Lovian', 'Orish', 'Thunder Hyren'].map(name => card(name, PLAYER));
 		const state = makeState({ inPlay: [eye], hand, magi: card('Adis', PLAYER, 10), opponentMagi: card('Sinder', OPPONENT, 6) });
@@ -199,7 +199,7 @@ describe('Journal – POWER with move_cards_between_zones discard hand (Eye of t
 		const before = snapshot(state);
 
 		const frame = state.beginSearchFrame();
-		usePower(state, eye, 'Energy Boost');
+		usePower(state, eye, 'Storm Seeker');
 		expect(snapshot(state).json).not.toBe(before.json);
 		state.rollback(frame);
 

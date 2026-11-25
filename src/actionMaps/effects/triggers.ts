@@ -34,18 +34,16 @@ export const applyConditionalEffect: ActionTransformer<typeof EFFECT_TYPE_CONDIT
     generatedBy: action.generatedBy,
   });
 
-  if (results.every(result => result === true)) {
-    if (action.thenEffects) {
-      const preparedEffects = action.thenEffects
-        .map(enrichAction);
-      transform(...preparedEffects);
-    }
-  } else {
-    if (action.elseEffects) {
-      const preparedEffects = action.elseEffects
-        .map(enrichAction);
-      transform(...preparedEffects);
-    }
+  const effects = results.every(result => result === true) ? action.thenEffects : action.elseEffects;
+  if (!effects) return;
+  const preparedEffects = effects.map(enrichAction);
+  const player = this.getMetaValue<number>(action.player ?? self?.data.controller ?? 0, action.generatedBy)
+    ?? self?.data.controller ?? 0;
+  // Validate only the selected branch, after its condition (e.g. a die roll) is
+  // known. An impossible choice fizzles this branch, including dependent effects,
+  // without blocking the rest of the queue or reusing an older metadata target.
+  if (this.promptValidator.checkPrompts(self, preparedEffects, false, 0, player, action.generatedBy)) {
+    transform(...preparedEffects);
   }
 }
 

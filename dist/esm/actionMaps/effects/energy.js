@@ -147,7 +147,7 @@ export const applyDiscardEnergyFromMagiEffect = function (action, transform) {
             const energyToRemove = Math.min(this.getMetaValue(action.amount, action.generatedBy), target.data.energy);
             this.changeEnergy(target, -energyToRemove);
             if (energyToRemove > 0) {
-                transform(Object.assign(Object.assign({}, action), { effectType: EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI, amount: energyToRemove }));
+                transform(Object.assign(Object.assign({}, action), { effectType: EFFECT_TYPE_ENERGY_DISCARDED_FROM_MAGI, target, amount: energyToRemove }));
             }
         }
     });
