@@ -1,4 +1,4 @@
-import { ACTION_EFFECT, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_ATTACKER_DAMAGE_DEALT, EFFECT_TYPE_ATTACKER_DEALS_DAMAGE, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_CREATURE_IS_DEFEATED, EFFECT_TYPE_DAMAGE_STEP, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_DEFENDER_DAMAGE_DEALT, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, TYPE_CREATURE, } from "../../const.js";
+import { ACTION_EFFECT, EFFECT_TYPE_AFTER_DAMAGE, EFFECT_TYPE_ATTACKER_DAMAGE_DEALT, EFFECT_TYPE_ATTACKER_DEALS_DAMAGE, EFFECT_TYPE_BEFORE_DAMAGE, EFFECT_TYPE_CREATURE_ATTACKS, EFFECT_TYPE_CREATURE_DEFEATS_CREATURE, EFFECT_TYPE_CREATURE_IS_DEFEATED, EFFECT_TYPE_DAMAGE_STEP, EFFECT_TYPE_DEAL_DAMAGE, EFFECT_TYPE_DEFENDER_DAMAGE_DEALT, EFFECT_TYPE_DEFENDER_DEALS_DAMAGE, EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY, EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI, TYPE_CREATURE, ZONE_TYPE_IN_PLAY, } from "../../const.js";
 export const applyAttackEffect = function (action, transform) {
     const source = this.getMetaValue(action.source, action.generatedBy);
     const target = this.getMetaValue(action.target, action.generatedBy);
@@ -228,6 +228,10 @@ export const applyAfterDamageEffect = function (action, transform) {
 export const applyCreatureDefeatsCreatureEffect = function (action, transform) {
     if (action.target.data.energy === 0) {
         this.markDefeatedCreature(action.source);
+        // Karma and other combat effects may have already removed the loser.
+        // Keep the defeat bookkeeping, but do not queue a second discard.
+        if (!this.getZone(ZONE_TYPE_IN_PLAY).containsId(action.target.id))
+            return;
         transform({
             type: ACTION_EFFECT,
             effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,

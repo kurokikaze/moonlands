@@ -1344,7 +1344,18 @@ export class State {
         }
         this.addActions(initialAction);
         while (this.hasActions()) {
-            const rawAction = this.getNextAction();
+            let rawAction = this.getNextAction();
+            if (rawAction.type === ACTION_EFFECT && rawAction.effectType === EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY) {
+                // A queued discard may outlive its target. Reject it before replacement
+                // effects, the action stream and abilities such as Sphor's Scavenge see it.
+                const resolved = this.getMetaValue(rawAction.target, rawAction.generatedBy);
+                const targets = (Array.isArray(resolved) ? resolved : [resolved])
+                    .filter((card) => !!card && this.getZone(ZONE_TYPE_IN_PLAY).containsId(card.id));
+                if (!targets.length)
+                    continue;
+                if (Array.isArray(resolved))
+                    rawAction = { ...rawAction, target: targets };
+            }
             const replacedActions = this.replaceByReplacementEffect(rawAction);
             const action = replacedActions[0];
             if (replacedActions.length > 1) {

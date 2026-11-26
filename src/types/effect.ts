@@ -610,7 +610,7 @@ export type DiscardCreatureFromPlayEffect = ActionEffect & {
 	shuffleIntoDeck?: boolean;
 	effectType: typeof EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY;
 	source: CardInGame;
-	target: CardInGame | string;
+	target: CardInGame | CardInGame[] | string;
 	attack: boolean;
 	player: number;
 }

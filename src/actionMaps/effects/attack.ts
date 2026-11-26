@@ -16,6 +16,7 @@ import {
     EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
     EFFECT_TYPE_DISCARD_ENERGY_FROM_CREATURE_OR_MAGI,
     TYPE_CREATURE,
+    ZONE_TYPE_IN_PLAY,
 } from "../../const.js";
 import { AnyEffectType } from "../../types/index.js";
 import { ActionTransformer } from "../actionMapTypes.js";
@@ -269,6 +270,9 @@ export const applyAfterDamageEffect: ActionTransformer<typeof EFFECT_TYPE_AFTER_
 export const applyCreatureDefeatsCreatureEffect: ActionTransformer<typeof EFFECT_TYPE_CREATURE_DEFEATS_CREATURE> = function (action, transform) {
     if (action.target.data.energy === 0) {
         this.markDefeatedCreature(action.source);
+        // Karma and other combat effects may have already removed the loser.
+        // Keep the defeat bookkeeping, but do not queue a second discard.
+        if (!this.getZone(ZONE_TYPE_IN_PLAY).containsId(action.target.id)) return;
         transform({
             type: ACTION_EFFECT,
             effectType: EFFECT_TYPE_DISCARD_CREATURE_FROM_PLAY,
