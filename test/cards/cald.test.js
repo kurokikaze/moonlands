@@ -972,6 +972,7 @@ describe('Gar', () => {
 
 		expect(gameState.state.prompt).toEqual(true, 'Game is in the prompt state');
 		expect(gameState.state.promptPlayer).toEqual(ACTIVE_PLAYER, 'Game is in prompting the active player');
+		expect(gameState.state.promptMessage).toEqual('Choose one of your creatures with the least energy.');
 
 		const targetingAction = {
 			type: ACTION_RESOLVE_PROMPT,

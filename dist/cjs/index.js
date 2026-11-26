@@ -2119,6 +2119,7 @@ export class State {
                                     this.transformIntoActions({
                                         type: ACTION_ENTER_PROMPT,
                                         promptType: PROMPT_TYPE_SINGLE_CREATURE_FILTERED,
+                                        message: 'Choose one of your creatures with the least energy.',
                                         promptParams: {
                                             restrictions: [{
                                                     type: RESTRICTION_OWN_CREATURE,
