@@ -6439,7 +6439,7 @@ export const cards = [
 	new Card('Gar', TYPE_MAGI, REGION_CALD, null, {
 		energize: 5,
 		startingEnergy: 14,
-		startingCards: ['Lava Balamant', 'Fireball', 'Magma Armor'],
+		startingCards: ['Lava Balamant', 'Fire Ball', 'Magma Armor'],
 		triggerEffects: [
 			{
 				name: 'Strengthen',
