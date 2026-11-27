@@ -12,6 +12,11 @@ export const applyExecutePowerEffects = function (action) {
         const preparedActions = effects.map(enrichAction);
         const allPromptsAreDoable = this.checkPrompts(source, preparedActions, true);
         if (allPromptsAreDoable) {
+            // Native activations prepare this namespace in ACTION_POWER. A copied
+            // activation (Mirror Pendant) switches from the relic's namespace to
+            // the Magi's, so it needs its own fresh source/player metadata as well.
+            // Preserve native activation values such as an already chosen X cost.
+            this.setSpellMetadata(Object.assign(Object.assign({}, (action.generatedBy === source.id ? this.getSpellMetadata(source.id) : {})), { source, sourcePower: power, player: sourceController, sourceCreature: source }), source.id);
             const mustSetUsage = !('setUsage' in action) || action.setUsage == true;
             if (mustSetUsage && !source.wasActionUsed(power.name)) {
                 this.setActionUsed(source, power.name);
